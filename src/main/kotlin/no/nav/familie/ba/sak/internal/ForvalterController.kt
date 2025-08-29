@@ -547,26 +547,6 @@ class ForvalterController(
         )
     }
 
-    @PostMapping("/opprett-minside-task-for-fagsaker-uten-aktivering")
-    @Operation(
-        summary = "Oppretter task som aktiverer minside for fagsaker som ikke har fått det aktivert enda",
-    )
-    fun opprettMinsideAktiveringTaskForFagsakerUtenAktivering(
-        @RequestBody opprettMinsideAktiveringTaskDto: OpprettMinsideAktiveringTaskDto,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Aktiver",
-        )
-
-        forvalterService.finnFagsakSomSkalHaMinsideAktivertOgLagTask(
-            dryRun = opprettMinsideAktiveringTaskDto.dryRun,
-            antallFagsaker = opprettMinsideAktiveringTaskDto.antallFagsaker,
-        )
-
-        return ResponseEntity.ok("Kjørt OK")
-    }
-
     @GetMapping("/start-portefoljejustering-task")
     fun startPorteføljejusteringTask(
         @RequestParam("antallOppgaver") antallOppgaver: Long,
@@ -812,10 +792,5 @@ class ForvalterController(
 data class FinnOgPatchAndelerRequestDto(
     val fagsaker: Set<Long>,
     val korrigerAndelerFraOgMedDato: LocalDate = LocalDate.of(2025, 2, 1),
-    val dryRun: Boolean = true,
-)
-
-data class OpprettMinsideAktiveringTaskDto(
-    val antallFagsaker: Int,
     val dryRun: Boolean = true,
 )
