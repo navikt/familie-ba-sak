@@ -37,12 +37,12 @@ data class GrMatrikkeladresseBostedsadresse(
 
     override fun toSecureString(): String =
         """GrMatrikkeladresseBostedsadresse(matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,tilleggsnavn=$tilleggsnavn,
-|               postnummer=$postnummer,posted=$poststed,kommunenummer=$kommunenummer
+|               postnummer=$postnummer,poststed=$poststed,kommunenummer=$kommunenummer
         """.trimMargin()
 
     override fun toString(): String = "GrMatrikkeladresseBostedsadresse(detaljer skjult)"
 
-    override fun tilFrontendString() = """Matrikkel $matrikkelId, bruksenhet $bruksenhetsnummer, postnummer $postnummer, poststed $poststed""".trimMargin()
+    override fun tilFrontendString() = """Matrikkel $matrikkelId, bruksenhet $bruksenhetsnummer, postnummer $postnummer${poststed?.let { ", $it" } ?: ""}""".trimMargin()
 
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
