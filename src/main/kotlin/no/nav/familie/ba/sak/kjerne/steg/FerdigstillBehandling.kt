@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -29,6 +31,7 @@ class FerdigstillBehandling(
     private val loggService: LoggService,
     private val snikeIKøenService: SnikeIKøenService,
     private val taskService: TaskService,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) : BehandlingSteg<String> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -48,8 +51,10 @@ class FerdigstillBehandling(
 
         behandlingMetrikker.oppdaterBehandlingMetrikker(behandling)
 
-        val nyTaskV2 = PubliserVedtakV2Task.opprettTask(behandling.fagsak.aktør.aktivFødselsnummer(), behandling.id)
-        taskService.save(nyTaskV2)
+        if (unleashNextMedContextService.isEnabled(FeatureToggle.STONADSSTATISTIKK_FORTSATT_INNVILGET)) {
+            val nyTaskV2 = PubliserVedtakV2Task.opprettTask(behandling.fagsak.aktør.aktivFødselsnummer(), behandling.id)
+            taskService.save(nyTaskV2)
+        }
 
         if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK && behandling.resultat != Behandlingsresultat.AVSLÅTT) {
             oppdaterFagsakStatus(behandling = behandling)
