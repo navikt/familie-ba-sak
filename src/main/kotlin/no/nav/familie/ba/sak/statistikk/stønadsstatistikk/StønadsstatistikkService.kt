@@ -133,8 +133,6 @@ class StønadsstatistikkService(
 
         if (andelerMedEndringer.isEmpty()) return emptyList()
 
-        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || behandling.resultat == Behandlingsresultat.FORTSATT_OPPHØRT) return emptyList()
-
         val utbetalingsPerioder =
             andelerMedEndringer
                 .map { it.andel }
@@ -173,14 +171,18 @@ class StønadsstatistikkService(
         andelerForSegment: Iterable<AndelTilkjentYtelse>,
         behandling: Behandling,
         søkerOgBarn: List<Person>,
-    ): UtbetalingsperiodeDVHV2 =
-        UtbetalingsperiodeDVHV2(
+    ): UtbetalingsperiodeDVHV2 {
+        val erBehandlingBlittSendtTilOppdrag = behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || behandling.resultat == Behandlingsresultat.FORTSATT_OPPHØRT
+
+        return UtbetalingsperiodeDVHV2(
             hjemmel = "Ikke implementert",
             stønadFom = fom,
             stønadTom = tom,
             utbetaltPerMnd = andelerForSegment.sumOf { it.kalkulertUtbetalingsbeløp },
             utbetalingsDetaljer =
                 andelerForSegment.filter { it.erAndelSomSkalSendesTilOppdrag() }.map { andel ->
+                    val delytelseId = if (erBehandlingBlittSendtTilOppdrag) null else behandling.fagsak.id.toString() + andel.periodeOffset
+
                     val personForAndel =
                         søkerOgBarn.find { person -> andel.aktør == person.aktør }
                             ?: throw Feil("Fant ikke personopplysningsgrunnlag for andel")
@@ -200,10 +202,11 @@ class StønadsstatistikkService(
                                 YtelseType.SVALBARDTILLEGG -> SVALBARDTILLEGG
                             },
                         utbetaltPrMnd = andel.kalkulertUtbetalingsbeløp,
-                        delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset,
+                        delytelseId = delytelseId,
                     )
                 },
         )
+    }
 
     private fun lagPersonDVHV2(
         person: Person,
