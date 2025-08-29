@@ -7,8 +7,6 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -29,7 +27,6 @@ import no.nav.familie.eksterne.kontrakter.Kompetanse
 import no.nav.familie.eksterne.kontrakter.KompetanseAktivitet
 import no.nav.familie.eksterne.kontrakter.KompetanseResultat
 import no.nav.familie.eksterne.kontrakter.PersonDVHV2
-import no.nav.familie.eksterne.kontrakter.UnderkategoriV2
 import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVHV2
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
@@ -80,11 +77,7 @@ class StønadsstatistikkService(
             // TODO implementere støtte for dette
             ensligForsørger = utledEnsligForsørger(behandlingId),
             kategoriV2 = KategoriV2.valueOf(behandling.kategori.name),
-            underkategoriV2 =
-                when (behandling.underkategori) {
-                    BehandlingUnderkategori.ORDINÆR -> UnderkategoriV2.ORDINÆR
-                    BehandlingUnderkategori.UTVIDET -> UnderkategoriV2.UTVIDET
-                },
+            underkategoriV2 = null,
             behandlingTypeV2 = BehandlingTypeV2.valueOf(behandling.type.name),
             utbetalingsperioderV2 = hentUtbetalingsperioderTilDatavarehus(behandling, persongrunnlag),
             funksjonellId = UUID.randomUUID().toString(),
@@ -171,18 +164,14 @@ class StønadsstatistikkService(
         andelerForSegment: Iterable<AndelTilkjentYtelse>,
         behandling: Behandling,
         søkerOgBarn: List<Person>,
-    ): UtbetalingsperiodeDVHV2 {
-        val erBehandlingBlittSendtTilOppdrag = behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || behandling.resultat == Behandlingsresultat.FORTSATT_OPPHØRT
-
-        return UtbetalingsperiodeDVHV2(
+    ): UtbetalingsperiodeDVHV2 =
+        UtbetalingsperiodeDVHV2(
             hjemmel = "Ikke implementert",
             stønadFom = fom,
             stønadTom = tom,
             utbetaltPerMnd = andelerForSegment.sumOf { it.kalkulertUtbetalingsbeløp },
             utbetalingsDetaljer =
                 andelerForSegment.filter { it.erAndelSomSkalSendesTilOppdrag() }.map { andel ->
-                    val delytelseId = if (erBehandlingBlittSendtTilOppdrag) null else behandling.fagsak.id.toString() + andel.periodeOffset
-
                     val personForAndel =
                         søkerOgBarn.find { person -> andel.aktør == person.aktør }
                             ?: throw Feil("Fant ikke personopplysningsgrunnlag for andel")
@@ -202,11 +191,10 @@ class StønadsstatistikkService(
                                 YtelseType.SVALBARDTILLEGG -> SVALBARDTILLEGG
                             },
                         utbetaltPrMnd = andel.kalkulertUtbetalingsbeløp,
-                        delytelseId = delytelseId,
+                        delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset,
                     )
                 },
         )
-    }
 
     private fun lagPersonDVHV2(
         person: Person,
