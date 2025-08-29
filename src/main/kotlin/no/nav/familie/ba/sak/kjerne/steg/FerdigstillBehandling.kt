@@ -14,6 +14,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.task.PubliserVedtakV2Task
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -26,6 +28,7 @@ class FerdigstillBehandling(
     private val behandlingMetrikker: BehandlingMetrikker,
     private val loggService: LoggService,
     private val snikeIKøenService: SnikeIKøenService,
+    private val taskService: TaskService,
 ) : BehandlingSteg<String> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -44,6 +47,9 @@ class FerdigstillBehandling(
         }
 
         behandlingMetrikker.oppdaterBehandlingMetrikker(behandling)
+
+        val nyTaskV2 = PubliserVedtakV2Task.opprettTask(behandling.fagsak.aktør.aktivFødselsnummer(), behandling.id)
+        taskService.save(nyTaskV2)
 
         if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK && behandling.resultat != Behandlingsresultat.AVSLÅTT) {
             oppdaterFagsakStatus(behandling = behandling)

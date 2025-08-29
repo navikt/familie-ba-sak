@@ -47,13 +47,6 @@ class StatusFraOppdragTask(
         )
     }
 
-    override fun onCompletion(task: Task) {
-        val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
-
-        val nyTaskV2 = PubliserVedtakV2Task.opprettTask(statusFraOppdragDTO.personIdent, statusFraOppdragDTO.behandlingsId)
-        taskRepository.save(nyTaskV2)
-    }
-
     companion object {
         const val TASK_STEP_TYPE = "statusFraOppdrag"
 

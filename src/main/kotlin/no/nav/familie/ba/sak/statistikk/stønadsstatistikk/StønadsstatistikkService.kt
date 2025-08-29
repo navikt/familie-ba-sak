@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -73,6 +74,7 @@ class StønadsstatistikkService(
             fagsakId = behandling.fagsak.id.toString(),
             fagsakType = FagsakType.valueOf(behandling.fagsak.type.name),
             behandlingsId = behandlingId.toString(),
+            sisteIverksatteBehandlingId = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.id.toString(),
             tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
             personV2 = hentSøkerV2(persongrunnlag),
             // TODO implementere støtte for dette
@@ -130,6 +132,8 @@ class StønadsstatistikkService(
                 .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
         if (andelerMedEndringer.isEmpty()) return emptyList()
+
+        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || behandling.resultat == Behandlingsresultat.FORTSATT_OPPHØRT) return emptyList()
 
         val utbetalingsPerioder =
             andelerMedEndringer
