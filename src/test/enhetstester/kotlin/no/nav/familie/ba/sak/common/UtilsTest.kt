@@ -42,6 +42,7 @@ internal class UtilsTest {
                 adressenavn = "TEST",
                 husbokstav = null,
                 postnummer = "1234",
+                poststed = null,
             )
 
         assertEquals("Test 1, 1234", adresse.tilFrontendString())

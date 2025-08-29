@@ -209,6 +209,21 @@ class IntegrasjonClientMock {
                 val personIdenter = firstArg<List<String>>()
                 personIdenter.associateWith { false }
             }
+
+            every { mockIntegrasjonClient.hentPoststeder() } returns
+                KodeverkDto(
+                    betydninger =
+                        (0..9999).associate {
+                            it.toString().padStart(4, '0') to
+                                listOf(
+                                    BetydningDto(
+                                        gyldigFra = LocalDate.now().minusYears(1),
+                                        gyldigTil = LocalDate.now().plusYears(1),
+                                        beskrivelser = mapOf(KodeverkSpråk.BOKMÅL.kode to BeskrivelseDto("Oslo", "Oslo")),
+                                    ),
+                                )
+                        },
+                )
         }
 
         fun clearMockFamilieIntegrasjonerTilgangskontrollClient(mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient) {

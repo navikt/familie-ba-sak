@@ -22,6 +22,7 @@ class RestMappingTest {
                 kommunenummer = "1232",
                 tilleggsnavn = "noe",
                 postnummer = "4322",
+                poststed = "poststed",
             ).apply { periode = DatoIntervallEntitet(fom = fregManglendeFlytteDato) }
 
         val flyttedato = LocalDate.of(2000, 1, 1)
@@ -35,6 +36,7 @@ class RestMappingTest {
                 kommunenummer = "1232",
                 tilleggsnavn = "noe",
                 postnummer = "4322",
+                poststed = "poststed",
             ).apply { periode = DatoIntervallEntitet(fom = flyttedato) }
 
         assertEquals(null, adresseUtenFlyttedato.tilRestRegisteropplysning().fom)
