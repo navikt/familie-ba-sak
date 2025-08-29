@@ -3,12 +3,14 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -19,7 +21,7 @@ class EndretUtbetalingAndelGeneratorTest {
     private val behandling = lagBehandling()
     private val forrigeBehandling = lagBehandling()
     private val søker = lagPerson()
-    private val barn = lagPerson()
+    private val barn = lagPerson(type = PersonType.BARN)
     private val fomAndelTilkjentYtelse = YearMonth.of(2021, 1)
     private val tomAndelTilkjentYtelse = YearMonth.of(2024, 12)
 
@@ -39,6 +41,7 @@ class EndretUtbetalingAndelGeneratorTest {
                 nåværendeAndeler = nåværendeAndeler,
                 forrigeAndeler = forrigeAndeler,
                 personerPåBehandling = listOf(søker, barn),
+                nåværendeEndretUtbetalingAndeler = emptyList(),
             )
 
         // Assert
@@ -62,6 +65,7 @@ class EndretUtbetalingAndelGeneratorTest {
                 nåværendeAndeler = nåværendeAndeler,
                 forrigeAndeler = forrigeAndeler,
                 personerPåBehandling = listOf(søker, barn),
+                nåværendeEndretUtbetalingAndeler = emptyList(),
             )
 
         // Assert
@@ -119,6 +123,7 @@ class EndretUtbetalingAndelGeneratorTest {
                 nåværendeAndeler = nåværendeAndeler,
                 forrigeAndeler = forrigeAndeler,
                 personerPåBehandling = listOf(søker, barn, barn2),
+                nåværendeEndretUtbetalingAndeler = emptyList(),
             )
 
         // Assert
@@ -141,6 +146,85 @@ class EndretUtbetalingAndelGeneratorTest {
     }
 
     @Test
+    fun `Skal bare preutfylle endret utbetaling andeler med årsak ETTERBETALING_3MND for barn som ikke allerede har eksisterende endret utbetaling i periode`() {
+        // Arrange
+        val søknadMottattDato = LocalDate.of(2024, 10, 1)
+
+        val barn2 = lagPerson(type = PersonType.BARN)
+
+        val nåværendeEndretUtbetalingAndeler =
+            lagEndretUtbetalingAndel(
+                fom = fomAndelTilkjentYtelse.plusMonths(4),
+                tom = tomAndelTilkjentYtelse,
+                personer = setOf(barn),
+            )
+
+        val nåværendeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = fomAndelTilkjentYtelse,
+                    tom = tomAndelTilkjentYtelse,
+                    aktør = søker.aktør,
+                    behandling = behandling,
+                    kalkulertUtbetalingsbeløp = 2000,
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = fomAndelTilkjentYtelse,
+                    tom = tomAndelTilkjentYtelse,
+                    aktør = barn.aktør,
+                    behandling = behandling,
+                    kalkulertUtbetalingsbeløp = 2000,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = fomAndelTilkjentYtelse.plusMonths(4),
+                    tom = tomAndelTilkjentYtelse,
+                    aktør = barn2.aktør,
+                    behandling = behandling,
+                    kalkulertUtbetalingsbeløp = 2000,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                ),
+            )
+        val forrigeAndeler =
+            nåværendeAndeler.map {
+                it.copy(
+                    behandlingId = forrigeBehandling.id,
+                    kalkulertUtbetalingsbeløp = 1000,
+                )
+            }
+
+        // Act
+        val endretUtbetalingAndeler =
+            genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
+                behandling = behandling,
+                søknadMottattDato = søknadMottattDato,
+                nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = forrigeAndeler,
+                personerPåBehandling = listOf(søker, barn, barn2),
+                nåværendeEndretUtbetalingAndeler = listOf(nåværendeEndretUtbetalingAndeler),
+            )
+
+        // Assert
+        assertThat(endretUtbetalingAndeler).hasSize(2)
+
+        assertEndretUtbetalingAndel(
+            endretUtbetalingAndel = endretUtbetalingAndeler[0],
+            forventetSøknadMottattDato = søknadMottattDato,
+            forventedePersoner = setOf(søker),
+            forventetFom = fomAndelTilkjentYtelse,
+            forventetTom = fomAndelTilkjentYtelse.plusMonths(3),
+        )
+
+        assertEndretUtbetalingAndel(
+            endretUtbetalingAndel = endretUtbetalingAndeler[1],
+            forventetSøknadMottattDato = søknadMottattDato,
+            forventedePersoner = setOf(søker, barn2),
+            forventetFom = fomAndelTilkjentYtelse.plusMonths(4),
+        )
+    }
+
+    @Test
     fun `Skal ikke preutfylle endret utbetaling andeler når det ikke finnes perioder med ugyldig etterbetaling`() {
         // Arrange
         val søknadMottattDato = LocalDate.of(2024, 10, 1)
@@ -156,6 +240,7 @@ class EndretUtbetalingAndelGeneratorTest {
                 nåværendeAndeler = nåværendeAndeler,
                 forrigeAndeler = forrigeAndeler,
                 personerPåBehandling = listOf(søker, barn),
+                nåværendeEndretUtbetalingAndeler = emptyList(),
             )
 
         // Assert
@@ -177,6 +262,7 @@ class EndretUtbetalingAndelGeneratorTest {
                 nåværendeAndeler = nåværendeAndeler,
                 forrigeAndeler = emptyList(),
                 personerPåBehandling = listOf(søker, barn),
+                nåværendeEndretUtbetalingAndeler = emptyList(),
             )
 
         // Assert

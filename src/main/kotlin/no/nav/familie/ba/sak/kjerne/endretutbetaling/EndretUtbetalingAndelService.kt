@@ -161,6 +161,7 @@ class EndretUtbetalingAndelService(
         val forrigeAndeler = beregningService.hentAndelerFraForrigeIverksattebehandling(behandling)
         val personIdenter = (nåværendeAndeler + forrigeAndeler).map { it.aktør.aktivFødselsnummer() }.distinct()
         val personerPåBehandling = persongrunnlagService.hentPersonerPåBehandling(personIdenter, behandling)
+        val nåværendeEndretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
 
         val endretUtbetalingAndeler =
             genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
@@ -169,6 +170,7 @@ class EndretUtbetalingAndelService(
                 nåværendeAndeler = nåværendeAndeler,
                 forrigeAndeler = forrigeAndeler,
                 personerPåBehandling = personerPåBehandling,
+                nåværendeEndretUtbetalingAndeler = nåværendeEndretUtbetalingAndeler,
             )
 
         endretUtbetalingAndelRepository.saveAllAndFlush(endretUtbetalingAndeler)
