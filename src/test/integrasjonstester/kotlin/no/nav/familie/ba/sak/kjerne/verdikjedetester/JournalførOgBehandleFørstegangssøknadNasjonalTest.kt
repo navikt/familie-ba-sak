@@ -70,10 +70,9 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                 barna =
                     listOf(
                         RestScenarioPerson(
-                            fødselsdato = LocalDate.now().minusMonths(6).toString(),
+                            fødselsdato = LocalDate.now().minusMonths(2).toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
-                            bostedsadresser = emptyList(),
                         ),
                     ),
             ).also { stubScenario(it) }
@@ -125,7 +124,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
         // Godkjenner alle vilkår på førstegangsbehandling.
         restUtvidetBehandling.data!!.personResultater.forEach { restPersonResultat ->
-            restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
+            restPersonResultat.vilkårResultater.forEach {
                 familieBaSakKlient().putVilkår(
                     behandlingId = restUtvidetBehandling.data!!.behandlingId,
                     vilkårId = it.id,
