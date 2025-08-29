@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.B
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.tilAdresse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
+import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 
 data class PdlBostedsadresseDeltBostedOppholdsadressePerson(
     val bostedsadresse: List<Bostedsadresse> = emptyList(),

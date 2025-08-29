@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnNåværendeMedlemskap
@@ -72,6 +73,9 @@ data class Person(
     @Fetch(value = FetchMode.SUBSELECT)
     var bostedsadresser: MutableList<GrBostedsadresse> = mutableListOf(),
     @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+    @Fetch(value = FetchMode.SUBSELECT)
+    var oppholdsadresser: MutableList<GrOppholdsadresse> = mutableListOf(),
+    @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     // Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
     @Fetch(value = FetchMode.SUBSELECT)
     var statsborgerskap: MutableList<GrStatsborgerskap> = mutableListOf(),
@@ -95,6 +99,7 @@ data class Person(
             id = 0,
             personopplysningGrunnlag = nyttPersonopplysningGrunnlag,
             bostedsadresser = mutableListOf(),
+            oppholdsadresser = mutableListOf(),
             statsborgerskap = mutableListOf(),
             opphold = mutableListOf(),
             arbeidsforhold = mutableListOf(),
@@ -102,16 +107,17 @@ data class Person(
         ).also {
             it.bostedsadresser.addAll(
                 bostedsadresser.map { grBostedsadresse ->
-                    grBostedsadresse.tilKopiForNyPerson(
-                        it,
-                    )
+                    grBostedsadresse.tilKopiForNyPerson(it)
+                },
+            )
+            it.oppholdsadresser.addAll(
+                oppholdsadresser.map { grBostedsadresse ->
+                    grBostedsadresse.tilKopiForNyPerson(it)
                 },
             )
             it.statsborgerskap.addAll(
                 statsborgerskap.map { grStatsborgerskap ->
-                    grStatsborgerskap.tilKopiForNyPerson(
-                        it,
-                    )
+                    grStatsborgerskap.tilKopiForNyPerson(it)
                 },
             )
             it.opphold.addAll(opphold.map { grOpphold -> grOpphold.tilKopiForNyPerson(it) })

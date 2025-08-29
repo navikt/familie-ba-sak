@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.erSvalbard
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.oppholdsadresseErPåSvalbardPåDato
@@ -19,11 +20,11 @@ import kotlin.time.measureTimedValue
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = FinnFagsakerForPersonerSomBorPåSvalbardTask.TASK_STEP_TYPE,
-    beskrivelse = "Finn fagsaker for personer som bor på Svalbard",
+    taskStepType = FinnPersonerSomBorPåSvalbardIFagsakerTask.TASK_STEP_TYPE,
+    beskrivelse = "Finn personer som bor på Svalbard i fagsaker",
     maxAntallFeil = 1,
 )
-class FinnFagsakerForPersonerSomBorPåSvalbardTask(
+class FinnPersonerSomBorPåSvalbardIFagsakerTask(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
@@ -33,6 +34,10 @@ class FinnFagsakerForPersonerSomBorPåSvalbardTask(
     override fun doTask(task: Task) {
         val fagsakIder = task.payload.split(",").map { it.toLong() }
 
+        if (fagsakIder.size > 250) {
+            throw Feil("For mange fagsaker i tasken, maks 250 er tillatt, fikk ${fagsakIder.size}")
+        }
+
         val (fagsakerMedPersonerSomBorPåSvalbard, tid) =
             measureTimedValue {
                 val fagsakMedSøkerOgBarna =
@@ -40,19 +45,18 @@ class FinnFagsakerForPersonerSomBorPåSvalbardTask(
                         .mapNotNull { fagsakId ->
                             val sisteIverksatteBehandlingId =
                                 behandlingHentOgPersisterService
-                                    .hentSisteBehandlingSomErIverksatt(fagsakId)
-                                    ?.id
+                                    .hentIdForSisteBehandlingSomErIverksatt(fagsakId)
                                     ?: return@mapNotNull null
 
                             val søkerIdent = fagsakService.hentAktør(fagsakId).aktivFødselsnummer()
                             val barnMedLøpendeOrdinær =
                                 andelTilkjentYtelseRepository
-                                    .finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandlingId)
-                                    .filter { it.type == YtelseType.ORDINÆR_BARNETRYGD && it.erLøpende() }
-                                    .map { it.aktør.aktivFødselsnummer() }
-                                    .distinct()
+                                    .finnIdentForAktørerMedLøpendeAndelerTilkjentYtelseForBehandlingAvType(
+                                        behandlingId = sisteIverksatteBehandlingId,
+                                        type = YtelseType.ORDINÆR_BARNETRYGD.name,
+                                    )
 
-                            fagsakId to
+                            fagsakId.toString() to
                                 SøkerOgBarnIdenter(
                                     søkerIdent = søkerIdent,
                                     barnIdenter = barnMedLøpendeOrdinær,
@@ -86,32 +90,40 @@ class FinnFagsakerForPersonerSomBorPåSvalbardTask(
                 fagsakMedSøkerOgBarna
                     .mapNotNull { (fagsakId, søkerOgBarna) ->
                         val søkerBorPåSvalbard = søkerOgBarna.søkerIdent in personerSomBorPåSvalbard
-                        val minstEttBarnBorPåSvalbard = søkerOgBarna.barnIdenter.any { it in personerSomBorPåSvalbard }
+                        val søkerHarDNummer = Fødselsnummer(søkerOgBarna.søkerIdent).erDNummer
+                        val antallBarnSomBorPåSvalbard = søkerOgBarna.barnIdenter.count { it in personerSomBorPåSvalbard }
+                        val antallBarnSomHarDNummer = søkerOgBarna.barnIdenter.count { Fødselsnummer(it).erDNummer }
 
-                        val minstÉnPersonBorPåSvalbard = søkerBorPåSvalbard || minstEttBarnBorPåSvalbard
-                        val søkerOgMinstEttBarnBorPåSvalbard = søkerBorPåSvalbard && minstEttBarnBorPåSvalbard
+                        val personerSomBorPåSvalbard =
+                            when {
+                                søkerBorPåSvalbard && antallBarnSomBorPåSvalbard > 0 -> "Søker og $antallBarnSomBorPåSvalbard barn"
+                                søkerBorPåSvalbard -> "Søker"
+                                antallBarnSomBorPåSvalbard > 0 -> "$antallBarnSomBorPåSvalbard barn"
+                                else -> "Ingen"
+                            }
 
-                        if (minstÉnPersonBorPåSvalbard) {
-                            fagsakId to søkerOgMinstEttBarnBorPåSvalbard
-                        } else {
-                            null
-                        }
+                        val personerSomHarDNummer =
+                            when {
+                                søkerHarDNummer && antallBarnSomHarDNummer > 0 -> "Søker og $antallBarnSomHarDNummer barn"
+                                søkerHarDNummer -> "Søker"
+                                antallBarnSomHarDNummer > 0 -> "$antallBarnSomHarDNummer barn"
+                                else -> "Ingen"
+                            }
+
+                        fagsakId to "$personerSomBorPåSvalbard,$personerSomHarDNummer"
                     }.toMap()
             }
 
-        val fagsakerDerMinstÉnPersonBorPåSvalbard = fagsakerMedPersonerSomBorPåSvalbard.keys.joinToString(",") { it.toString() }
-        val fagsakerDerSøkerOgMinstEttBarnBorPåSvalbard = fagsakerMedPersonerSomBorPåSvalbard.filterValues { it }.keys.joinToString(",") { it.toString() }
+        fagsakerMedPersonerSomBorPåSvalbard.forEach { (fagsakId, personer) ->
+            logger.info("Fagsak $fagsakId har følgende personer som bor på Svalbard: $personer")
+            task.metadata[fagsakId] = personer
+        }
 
-        logger.info("Fagsaker der minst én person bor på Svalbard: $fagsakerDerMinstÉnPersonBorPåSvalbard")
-        logger.info("Fagsaker der søker og minst ett barn bor på Svalbard: $fagsakerDerSøkerOgMinstEttBarnBorPåSvalbard")
-
-        task.metadata["Fagsaker der minst én person bor på Svalbard"] = fagsakerDerMinstÉnPersonBorPåSvalbard
-        task.metadata["Fagsaker der søker og minst ett barn bor på Svalbard"] = fagsakerDerSøkerOgMinstEttBarnBorPåSvalbard
-        task.metadata["Kjøretid"] = "${tid.inWholeSeconds} sekunder"
+        task.metadata["Kjøretid"] = "${tid.inWholeMilliseconds} ms"
     }
 
     companion object {
-        const val TASK_STEP_TYPE = "finnFagsakerForPersonerSomBorPåSvalbardTask"
+        const val TASK_STEP_TYPE = "finnPersonerSomBorPåSvalbardIFagsakerTask"
 
         fun opprettTask(
             identer: List<Long>,

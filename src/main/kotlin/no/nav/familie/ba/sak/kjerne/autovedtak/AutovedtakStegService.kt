@@ -4,8 +4,8 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.FeatureToggle.KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødselshendelseService
@@ -86,7 +86,7 @@ class AutovedtakStegService(
     private val autovedtakSmåbarnstilleggService: AutovedtakSmåbarnstilleggService,
     private val autovedtakFinnmarkstilleggService: AutovedtakFinnmarkstilleggService,
     private val snikeIKøenService: SnikeIKøenService,
-    private val unleashNextMedContextService: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val antallAutovedtak: Map<Autovedtaktype, Counter> =
         Autovedtaktype.entries.associateWith {
@@ -136,7 +136,7 @@ class AutovedtakStegService(
         fagsakId: Long,
         førstegangKjørt: LocalDateTime = LocalDateTime.now(),
     ): String {
-        if (!unleashNextMedContextService.isEnabled(KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG)) {
+        if (!featureToggleService.isEnabled(KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG)) {
             return "Autovedtak for Finnmarkstillegg er deaktivert"
         }
         return kjørBehandling(

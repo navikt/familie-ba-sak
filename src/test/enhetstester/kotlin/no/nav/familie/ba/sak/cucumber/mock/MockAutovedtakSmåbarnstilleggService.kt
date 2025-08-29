@@ -42,7 +42,7 @@ fun mockAutovedtakSmåbarnstilleggService(
         autovedtakSmåbarnstilleggService = cucumberMock.autovedtakSmåbarnstilleggService,
         autovedtakFinnmarkstilleggService = mockk(),
         snikeIKøenService = mockk(),
-        unleashNextMedContextService = mockk(),
+        featureToggleService = mockk(),
     )
 }
 

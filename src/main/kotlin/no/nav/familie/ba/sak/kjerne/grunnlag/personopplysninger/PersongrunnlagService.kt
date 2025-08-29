@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -22,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.SKJERMET_BARN
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -31,7 +33,10 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.kodeverk.KodeverkSpråk
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
+import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -50,6 +55,7 @@ class PersongrunnlagService(
     private val loggService: LoggService,
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
+    private val integrasjonClient: IntegrasjonClient,
 ) {
     fun mapTilRestPersonMedStatsborgerskapLand(
         person: Person,
@@ -275,6 +281,19 @@ class PersongrunnlagService(
         }
     }
 
+    private fun Bostedsadresse.poststed(): String? = poststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
+
+    private fun Oppholdsadresse.poststed(): String? = poststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
+
+    private fun poststed(postnummer: String?): String? =
+        integrasjonClient
+            .hentPoststeder()
+            .betydninger[postnummer]
+            ?.firstOrNull()
+            ?.beskrivelser[KodeverkSpråk.BOKMÅL.kode]
+            ?.term
+            ?.storForbokstav()
+
     private fun hentPerson(
         aktør: Aktør,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
@@ -304,8 +323,22 @@ class PersongrunnlagService(
             person.bostedsadresser =
                 personinfo.bostedsadresser
                     .filtrerUtKunNorskeBostedsadresser()
-                    .map { GrBostedsadresse.fraBostedsadresse(it, person) }
-                    .toMutableList()
+                    .map {
+                        GrBostedsadresse.fraBostedsadresse(
+                            bostedsadresse = it,
+                            person = person,
+                            poststed = it.poststed(),
+                        )
+                    }.toMutableList()
+            person.oppholdsadresser =
+                personinfo.oppholdsadresser
+                    .map {
+                        GrOppholdsadresse.fraOppholdsadresse(
+                            oppholdsadresse = it,
+                            person = person,
+                            poststed = it.poststed(),
+                        )
+                    }.toMutableList()
             person.sivilstander = personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }.toMutableList()
             person.statsborgerskap =
                 personinfo.statsborgerskap

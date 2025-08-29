@@ -219,7 +219,6 @@ private fun håndterStatusFraOppdragSteg(
                 StatusFraOppdragDTO(
                     fagsystem = FAGSYSTEM,
                     personIdent = søkerFnr,
-                    aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktørId,
                     behandlingsId = behandlingEtterIverksetteVedtak.id,
                     vedtaksId = vedtak!!.id,
                 ),
@@ -459,7 +458,6 @@ fun kjørStegprosessForFGB(
                     StatusFraOppdragDTO(
                         fagsystem = FAGSYSTEM,
                         personIdent = søkerFnr,
-                        aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktivFødselsnummer(),
                         behandlingsId = behandlingEtterIverksetteVedtak.id,
                         vedtaksId = vedtak.id,
                     ),
@@ -597,7 +595,6 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                     StatusFraOppdragDTO(
                         fagsystem = FAGSYSTEM,
                         personIdent = søkerFnr,
-                        aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktørId,
                         behandlingsId = behandlingEtterIverksetteVedtak.id,
                         vedtaksId = vedtak.id,
                     ),

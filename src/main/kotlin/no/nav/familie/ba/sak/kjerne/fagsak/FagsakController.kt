@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakerForPerson
@@ -39,16 +37,13 @@ class FagsakController(
     private val personidentService: PersonidentService,
     private val tilgangService: TilgangService,
     private val tilbakekrevingService: TilbakekrevingService,
-    private val unleash: UnleashNextMedContextService,
 ) {
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentEllerOpprettFagsak(
         @RequestBody fagsakRequest: FagsakRequest,
     ): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter eller oppretter ny fagsak")
-        if (unleash.isEnabled(FeatureToggle.BRUK_NY_OPPRETT_FAGSAK_MODAL)) {
-            fagsakRequest.valider()
-        }
+        fagsakRequest.valider()
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(fagsakRequest.personIdent),
             event = AuditLoggerEvent.CREATE,

@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -50,7 +50,7 @@ class BeslutteVedtak(
     private val taskRepository: TaskRepositoryWrapper,
     private val loggService: LoggService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val unleashService: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val saksbehandlerContext: SaksbehandlerContext,
     private val automatiskBeslutningService: AutomatiskBeslutningService,
@@ -68,13 +68,13 @@ class BeslutteVedtak(
             throw FunksjonellFeil("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
         } else if (behandling.status == BehandlingStatus.AVSLUTTET) {
             throw FunksjonellFeil("Behandlingen er allerede avsluttet")
-        } else if (behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV && !unleashService.isEnabled(FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV, behandling.id)) {
+        } else if (behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV && !featureToggleService.isEnabled(FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV, behandling.id)) {
             throw FunksjonellFeil(
                 melding = "Årsak ${BehandlingÅrsak.KORREKSJON_VEDTAKSBREV.visningsnavn} og toggle ${FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV.navn} false",
                 frontendFeilmelding = "Du har ikke tilgang til å beslutte for denne behandlingen. Ta kontakt med teamet dersom dette ikke stemmer.",
             )
         } else if (behandling.erTekniskEndring() &&
-            !unleashService.isEnabled(
+            !featureToggleService.isEnabled(
                 FeatureToggle.TEKNISK_ENDRING,
                 behandling.id,
             )

@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresseBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.filtrerGjeldendeNå
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.vurderOmPersonerBorSammen
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -20,11 +20,12 @@ internal class BostedsadresseTest {
     @Test
     fun `Skal adresse med mest nylig fom-dato`() {
         val adresse =
-            GrMatrikkeladresse(
+            GrMatrikkeladresseBostedsadresse(
                 matrikkelId = null,
                 bruksenhetsnummer = "H301",
                 tilleggsnavn = "navn",
                 postnummer = "0202",
+                poststed = "Oslo",
                 kommunenummer = "2231",
             )
         val adresseMedNullFom = adresse.copy().apply { periode = DatoIntervallEntitet(fom = null) }
@@ -37,11 +38,12 @@ internal class BostedsadresseTest {
     @Test
     fun `Skal returnere adresse uten datoer når dette er eneste`() {
         val adresse =
-            GrMatrikkeladresse(
+            GrMatrikkeladresseBostedsadresse(
                 matrikkelId = null,
                 bruksenhetsnummer = "H301",
                 tilleggsnavn = "navn",
                 postnummer = "0202",
+                poststed = "Oslo",
                 kommunenummer = "2231",
             ).apply {
                 periode = DatoIntervallEntitet(fom = null)
@@ -52,21 +54,23 @@ internal class BostedsadresseTest {
     @Test
     fun `Skal kaste feil hvis det finnes flere adresser uten datoer`() {
         val adresse1 =
-            GrMatrikkeladresse(
+            GrMatrikkeladresseBostedsadresse(
                 matrikkelId = null,
                 bruksenhetsnummer = "H301",
                 tilleggsnavn = "navn",
                 postnummer = "0202",
+                poststed = "Oslo",
                 kommunenummer = "2231",
             ).apply {
                 periode = DatoIntervallEntitet(fom = null)
             } as GrBostedsadresse
         val adresse2 =
-            GrMatrikkeladresse(
+            GrMatrikkeladresseBostedsadresse(
                 matrikkelId = null,
                 bruksenhetsnummer = "H301",
                 tilleggsnavn = "navn",
                 postnummer = "0202",
+                poststed = "Oslo",
                 kommunenummer = "2231",
             ).apply {
                 periode = DatoIntervallEntitet(fom = null)

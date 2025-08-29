@@ -10,7 +10,7 @@ import mockAutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
@@ -25,7 +25,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockAutovedtakFinnmarkstilleggService
-import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
@@ -499,7 +499,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
 
         val faktiskeBegrunnelser: List<BegrunnelseMedData> =
             vedtaksperiodeMedBegrunnelser
-                .lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER, mockUnleashNextMedContextService().isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE))!!
+                .lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER, mockFeatureToggleService().isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE))!!
                 .begrunnelser
                 .filterIsInstance<BegrunnelseMedData>()
 
@@ -526,7 +526,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
 
         val faktiskeBrevperioder: List<BrevPeriode> =
             vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.mapNotNull {
-                it.lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER, mockUnleashNextMedContextService().isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE))
+                it.lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER, mockFeatureToggleService().isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE))
             }
 
         val forvendtedeBrevperioder = parseBrevPerioder(dataTable)
@@ -925,7 +925,7 @@ private object SanityBegrunnelseMock {
     // se https://familie-brev.sanity.studio/ba-brev/vision med query fra SanityQueries.kt.
     fun hentSanityBegrunnelserMock(): Map<Standardbegrunnelse, SanityBegrunnelse> {
         val restSanityBegrunnelserJson =
-            this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/gyldigeBegrunnelser/restSanityBegrunnelser")!!
+            this::class.java.getResource("/cucumber/gyldigeBegrunnelser/restSanityBegrunnelser")!!
 
         val restSanityBegrunnelser =
             objectMapper
@@ -948,7 +948,7 @@ private object SanityBegrunnelseMock {
 
     fun hentSanityEØSBegrunnelserMock(): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
         val restSanityEØSBegrunnelserJson =
-            this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/gyldigeBegrunnelser/restSanityEØSBegrunnelser")!!
+            this::class.java.getResource("/cucumber/gyldigeBegrunnelser/restSanityEØSBegrunnelser")!!
 
         val restSanityEØSBegrunnelser =
             objectMapper

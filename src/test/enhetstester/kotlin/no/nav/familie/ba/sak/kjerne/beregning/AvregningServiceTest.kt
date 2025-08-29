@@ -5,8 +5,8 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
@@ -49,7 +49,7 @@ class AvregningServiceTest {
 
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val unleashService = mockk<UnleashNextMedContextService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
     private val fagsakService = mockk<FagsakService>()
     private val beregningService = mockk<BeregningService>()
 
@@ -58,7 +58,7 @@ class AvregningServiceTest {
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(mar(2025)),
-            unleashService = unleashService,
+            featureToggleService = featureToggleService,
             fagsakService = fagsakService,
             beregningService = beregningService,
         )
@@ -67,7 +67,7 @@ class AvregningServiceTest {
     fun setup() {
         every { behandlingHentOgPersisterService.hent(any()) } returns inneværendeBehandling
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns sisteVedtatteBehandling
-        every { unleashService.isEnabled(FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING) } returns true
+        every { featureToggleService.isEnabled(FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING) } returns true
     }
 
     @Nested
@@ -546,7 +546,7 @@ class AvregningServiceTest {
 
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
-            every { unleashService.isEnabled(FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING) } returns false
+            every { featureToggleService.isEnabled(FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING) } returns false
 
             // Act
             val perioderMedEtterbetalingOgFeilutbetaling =

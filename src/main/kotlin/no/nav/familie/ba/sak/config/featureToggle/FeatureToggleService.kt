@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.config.featureToggle
 
-import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -10,7 +9,7 @@ import no.nav.familie.unleash.UnleashService
 import org.springframework.stereotype.Service
 
 @Service
-class UnleashNextMedContextService(
+class FeatureToggleService(
     private val unleashService: UnleashService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,

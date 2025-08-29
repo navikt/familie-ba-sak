@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.4</version>
+        <version>3.5.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -23,20 +23,20 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20250818131235_94bcc1a</prosessering.version>
+        <prosessering.version>2.20250825143618_c0302c9</prosessering.version>
         <felles.version>3.20250804101327_a0f5fad</felles.version>
-        <eksterne-kontrakter-bisys.version>2.0_20250819081736_d4884f9</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20250821101652_977e8e6</felles-kontrakter.version>
-        <familie.kontrakter.saksstatistikk>2.0_20250819081736_d4884f9</familie.kontrakter.saksstatistikk>
-        <familie.kontrakter.stønadsstatistikk>2.0_20250819081736_d4884f9</familie.kontrakter.stønadsstatistikk>
+        <eksterne-kontrakter-bisys.version>2.0_20250826113118_c8aa66d</eksterne-kontrakter-bisys.version>
+        <felles-kontrakter.version>3.0_20250827085324_488a77e</felles-kontrakter.version>
+        <familie.kontrakter.saksstatistikk>2.0_20250826113118_c8aa66d</familie.kontrakter.saksstatistikk>
+        <familie.kontrakter.stønadsstatistikk>2.0_20250826113118_c8aa66d</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250804104526_5648100</utbetalingsgenerator.version>
         <cucumber.version>7.23.0</cucumber.version>
         <mockk.version>1.14.5</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
         <token-validation-spring.version>5.0.34</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
-        <springdoc.version>2.8.10</springdoc.version>
-        <sentry.version>8.19.1</sentry.version>
+        <springdoc.version>2.8.11</springdoc.version>
+        <sentry.version>8.20.0</sentry.version>
         <kotlinx.version>1.10.2</kotlinx.version>
         <kotlinx-kover.version>0.9.1</kotlinx-kover.version>
 
@@ -69,7 +69,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.5.4</version>
+                <version>3.5.5</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -547,7 +547,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.3</version>
+                <version>3.5.2</version>
                 <configuration>
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->
