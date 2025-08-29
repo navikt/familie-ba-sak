@@ -26,7 +26,7 @@
         <prosessering.version>2.20250825143618_c0302c9</prosessering.version>
         <felles.version>3.20250804101327_a0f5fad</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20250826113118_c8aa66d</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20250827085324_488a77e</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20250828110046_0cd2211</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20250826113118_c8aa66d</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20250826113118_c8aa66d</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250804104526_5648100</utbetalingsgenerator.version>
@@ -59,7 +59,7 @@
         <sonar.sources>src/main</sonar.sources>
         <sonar.tests>src/test</sonar.tests>
         <sonar.projectKey>navikt_familie-ba-sak</sonar.projectKey>
-        <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
+        <sonar-maven-plugin.version>5.2.0.4988</sonar-maven-plugin.version>
 
         <kover.reportXml.path>${project.build.directory}/site/kover/report.xml</kover.reportXml.path>
     </properties>
