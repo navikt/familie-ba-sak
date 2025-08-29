@@ -22,6 +22,7 @@ fun lagGrVegadresse(
     kommunenummer = null,
     tilleggsnavn = null,
     postnummer = postnummer,
+    poststed = null,
 )
 
 fun lagEnkelBostedsadresse(fom: LocalDate = LocalDate.now().minusYears(1)) =

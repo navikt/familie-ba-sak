@@ -161,6 +161,7 @@ val mockNåværendeBosted =
         bruksenhetsnummer = "H301",
         tilleggsnavn = "navn",
         postnummer = "0202",
+        poststed = "Oslo",
         kommunenummer = "2231",
     ).apply {
         periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(1))
@@ -172,6 +173,7 @@ val mockAnnetNåværendeBosted =
         bruksenhetsnummer = "H501",
         tilleggsnavn = "navn",
         postnummer = "0202",
+        poststed = "Oslo",
         kommunenummer = "2231",
     ).apply {
         periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(1))
@@ -183,6 +185,7 @@ val mockTidligereBosted =
         bruksenhetsnummer = "H301",
         tilleggsnavn = "navn",
         postnummer = "0202",
+        poststed = "Oslo",
         kommunenummer = "2231",
     ).apply {
         periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(3), tom = LocalDate.now().minusYears(1))

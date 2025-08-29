@@ -280,7 +280,7 @@ class OppholdsadresseTest {
         @Test
         fun `GrVegadresse toSecureString skal returnere riktig format`() {
             // Arrange
-            val vegadresse = grVegadresse.copy().apply { oppholdAnnetSted = PAA_SVALBARD }
+            val vegadresse = grVegadresse.copy(poststed = "Oslo").apply { oppholdAnnetSted = PAA_SVALBARD }
 
             // Act
             val result = vegadresse.toSecureString()
@@ -289,14 +289,14 @@ class OppholdsadresseTest {
             assertThat(result).isEqualTo(
                 "GrVegadresseOppholdsadresse(husnummer=10, husbokstav=A, matrikkelId=12345, " +
                     "bruksenhetsnummer=H101, adressenavn=Testgata, kommunenummer=0301, " +
-                    "tilleggsnavn=Bak butikken, postnummer=0123, oppholdAnnetSted=Svalbard)",
+                    "tilleggsnavn=Bak butikken, postnummer=0123, poststed=Oslo, oppholdAnnetSted=Svalbard)",
             )
         }
 
         @Test
         fun `GrMatrikkeladresse toSecureString skal returnere riktig format`() {
             // Arrange
-            val matrikkeladresse = grMatrikkeladresse.copy().apply { oppholdAnnetSted = PAA_SVALBARD }
+            val matrikkeladresse = grMatrikkeladresse.copy(poststed = "Oslo").apply { oppholdAnnetSted = PAA_SVALBARD }
 
             // Act
             val result = matrikkeladresse.toSecureString()
@@ -304,7 +304,7 @@ class OppholdsadresseTest {
             // Assert
             assertThat(result).isEqualTo(
                 "GrMatrikkeladresseOppholdsadresse(matrikkelId=67890, bruksenhetsnummer=H202, " +
-                    "tilleggsnavn=Ved skogen, postnummer=1234, " +
+                    "tilleggsnavn=Ved skogen, postnummer=1234, poststed=Oslo, " +
                     "kommunenummer=0219, oppholdAnnetSted=Svalbard)",
             )
         }
@@ -607,6 +607,7 @@ class OppholdsadresseTest {
                     kommunenummer = null,
                     tilleggsnavn = null,
                     postnummer = null,
+                    poststed = null,
                 ).apply {
                     periode = null
                     person = person1
