@@ -1,11 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.familie.ba.sak.common.FinnmarkstilleggIngenEndringFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -23,14 +26,22 @@ class AutovedtakFinnmarkstilleggTask(
     override fun doTask(task: Task) {
         val fagsakId = task.payload.toLong()
         val aktør = fagsakService.hentAktør(fagsakId)
-        autovedtakStegService.kjørBehandlingFinnmarkstillegg(
-            mottakersAktør = aktør,
-            fagsakId = fagsakId,
-            førstegangKjørt = task.opprettetTid,
-        )
+        val resultat =
+            try {
+                autovedtakStegService.kjørBehandlingFinnmarkstillegg(
+                    mottakersAktør = aktør,
+                    fagsakId = fagsakId,
+                    førstegangKjørt = task.opprettetTid,
+                )
+            } catch (e: FinnmarkstilleggIngenEndringFeil) {
+                "Finnmarkstillegg: ${e.message}"
+            }
+
+        logger.info(resultat)
     }
 
     companion object {
         const val TASK_STEP_TYPE = "autovedtakFinnmarkstilleggTask"
+        private val logger: Logger = LoggerFactory.getLogger(AutovedtakFinnmarkstilleggTask::class.java)
     }
 }
