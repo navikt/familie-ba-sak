@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_GENERERE_SVALBARDTILLEGG
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndretUtbetalingGenerator.lagAndelerMedEndretUtbetalingAndeler
@@ -141,16 +140,12 @@ class TilkjentYtelseGenerator(
             }
 
         val svalbardtilleggAndeler =
-            if (featureToggleService.isEnabled(SKAL_GENERERE_SVALBARDTILLEGG)) {
-                SvalbardtilleggGenerator.lagSvalbardtilleggAndeler(
-                    behandling = behandling,
-                    vilkårsvurdering = vilkårsvurdering,
-                    barnasAndeler = andelerTilkjentYtelseBarnaMedAlleEndringer,
-                    tilkjentYtelse = tilkjentYtelse,
-                )
-            } else {
-                emptyList()
-            }
+            SvalbardtilleggGenerator.lagSvalbardtilleggAndeler(
+                behandling = behandling,
+                vilkårsvurdering = vilkårsvurdering,
+                barnasAndeler = andelerTilkjentYtelseBarnaMedAlleEndringer,
+                tilkjentYtelse = tilkjentYtelse,
+            )
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(
             andelerTilkjentYtelseBarnaMedAlleEndringer.map { it.andel } +

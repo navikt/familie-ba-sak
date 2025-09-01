@@ -142,7 +142,6 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.saveAllAndFlush(any<Collection<AndelTilkjentYtelse>>()) } answers { emptyList() }
         every { featureToggleService.isEnabled(FeatureToggle.SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER) } returns true
         every { featureToggleService.isEnabled(FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG) } returns true
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_GENERERE_SVALBARDTILLEGG) } returns true
     }
 
     @Test
