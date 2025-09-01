@@ -613,8 +613,6 @@ class CucumberMock(
             behandlingMetrikker = behandlingMetrikker,
             loggService = loggService,
             snikeIKøenService = snikeIKøenService,
-            taskService = taskService,
-            featureToggleService = featureToggleService,
         )
 
     val automatiskBeslutningService = AutomatiskBeslutningService(simuleringService)
