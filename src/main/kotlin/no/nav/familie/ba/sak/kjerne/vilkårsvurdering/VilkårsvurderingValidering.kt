@@ -107,8 +107,8 @@ fun validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig(
 
         if (finnmarkOgSvalbardSattISammePeriode) {
             throw FunksjonellFeil(
-                melding = "Barn født ${person?.fødselsdato} kan ikke bo i Finnmark og Svalbard samtidig.",
-                frontendFeilmelding = "Barn født ${person?.fødselsdato} kan ikke bo i Finnmark og Svalbard samtidig.",
+                melding = "Barn født ${person?.fødselsdato} kan ikke bo i Finnmark og på Svalbard samtidig.",
+                frontendFeilmelding = "Barn født ${person?.fødselsdato} kan ikke bo i Finnmark og på Svalbard samtidig.",
             )
         }
     }

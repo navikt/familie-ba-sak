@@ -247,7 +247,7 @@ class VilkårsvurderingValideringTest {
                     )
                 }.melding
 
-            assertThat(feilmelding).isEqualTo("Barn født 2025-01-01 kan ikke bo i Finnmark og Svalbard samtidig.")
+            assertThat(feilmelding).isEqualTo("Barn født 2025-01-01 kan ikke bo i Finnmark og på Svalbard samtidig.")
         }
     }
 
