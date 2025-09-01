@@ -691,6 +691,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "fortsattInnvilgetTilleggstekstUkFullUtbetaling"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
     },
+    FORTSATT_INNVILGET_TILLEGGSTEKST_SELVSTENDIG_RETT_SEKUNDÆR_FULL_UTBETALING {
+        override val sanityApiNavn = "fortsattInnvilgetTilleggstekstSelvstendigRettSekundaerFullUtbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
     FORTSATT_INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_STANDARD {
         override val sanityApiNavn = "fortsattInnvilgetSelvstendigRettPrimaerlandStandard"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
