@@ -224,10 +224,17 @@ object TilkjentYtelseValidering {
             }
         }
         if (barnMedUtbetalingsikkerhetFeil.isNotEmpty()) {
+            val sammenlignedeBehandlingerMedDeltBosted =
+                barnMedAndreRelevanteTilkjentYtelser
+                    .flatMap { it.second }
+                    .filter { it.andelerTilkjentYtelse.any { andel -> andel.erDeltBosted() } }
+                    .map { it.behandling.id }
+                    .distinct()
+
             throw UtbetalingsikkerhetFeil(
                 melding = "Vi finner utbetalinger som overstiger 100% på hvert av barna: ${
                     barnMedUtbetalingsikkerhetFeil.tilFeilmeldingTekst()
-                }",
+                }. ${if (sammenlignedeBehandlingerMedDeltBosted.isNotEmpty()) "Sammenligning gjort med behandling: ${sammenlignedeBehandlingerMedDeltBosted.joinToString(",") { it.toString() }} som omhandler delt bosted. Mulig det finnes behandlinger som ligger til godkjenning som vil korrigere feilen." else ""}",
                 frontendFeilmelding = "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${
                     barnMedUtbetalingsikkerhetFeil.tilFeilmeldingTekst()
                 }. Reduksjonsvedtak til annen person må være sendt til godkjenning før du kan gå videre.",

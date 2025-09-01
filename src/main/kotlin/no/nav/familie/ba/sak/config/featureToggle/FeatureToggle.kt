@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.config
+package no.nav.familie.ba.sak.config.featureToggle
 
 enum class FeatureToggle(
     val navn: String,
@@ -44,9 +44,6 @@ enum class FeatureToggle(
     // NAV-25256
     SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN("familie-ba-sak.skjermet-barn"),
 
-    // NAV-25329
-    BRUK_NY_OPPRETT_FAGSAK_MODAL("familie-ba-sak.bruk.ny.opprett.fagsak.modal"),
-
     // NAV-25472
     MINSIDE_AKTIVERING("familie-ba-sak.minside-aktivering"),
 
@@ -57,9 +54,6 @@ enum class FeatureToggle(
     // NAV-25543
     SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE("familie-ba-sak.skal-bruke-nytt-felt-i-eos-begrunnelse-data-med-kompetanse"),
 
-    // NAV-24639
-    MIN_SIDE_BARNETRYGD_ENDEPUNKT("familie-ba-sak.min-side-barnetrygd-endepunkt"),
-
     // NAV-
     SKAL_GENERERE_FINNMARKSTILLEGG("familie-ba-sak.andel-generering-finnmark-nord-troms"),
 
@@ -68,4 +62,7 @@ enum class FeatureToggle(
     AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG("familie-ba-sak.kjoering-autovedtak-finnmarkstillegg"),
 
     KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG("familie-ba-sak.kan-kjoere-autovedtak-finnmarkstillegg"),
+
+    // NAV-26038
+    BRUK_NY_LOGIKK_FOR_AA_FINNE_ENHET_FOR_OPPRETTING_AV_KLAGEBEHANDLING("familie-ba-sak.bruk-ny-logikk-for-aa-finne-enhet-for-oppretting-av-klagebehandling"),
 }

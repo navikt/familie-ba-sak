@@ -53,6 +53,7 @@ class PersongrunnlagServiceTest {
                 loggService = loggService,
                 arbeidsforholdService = mockk(),
                 vilkårsvurderingService = vilkårsvurderingService,
+                integrasjonClient = mockk(),
             ),
         )
 

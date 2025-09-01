@@ -58,6 +58,10 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
 
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f.id from Fagsak f WHERE f.status = 'LØPENDE'  AND f.arkivert = false")
+    fun finnIdPåLøpendeFagsaker(): List<Long>
+
+    @Lock(LockModeType.NONE)
+    @Query(value = "SELECT f.id from Fagsak f WHERE f.status = 'LØPENDE'  AND f.arkivert = false")
     fun finnLøpendeFagsaker(page: Pageable): Slice<Long>
 
     @Query(
@@ -216,24 +220,6 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         iverksatteLøpendeBehandlinger: List<Long>,
         stønadFom: YearMonth = YearMonth.now(),
     ): List<Long>
-
-    @Query(
-        value = """
-        SELECT * 
-        FROM fagsak f
-        WHERE f.status = 'LØPENDE'
-          AND f.type IN ('NORMAL', 'BARN_ENSLIG_MINDREÅRIG')
-          AND f.arkivert = false
-          AND NOT EXISTS (
-              SELECT 1 
-              FROM minside_aktivering m 
-              WHERE m.fk_aktor_id = f.fk_aktoer_id
-          )
-        ORDER BY f.id
-        """,
-        nativeQuery = true,
-    )
-    fun finnLøpendeFagsakSomIkkeHarFåttMinsideAktivert(pageable: Pageable): Slice<Fagsak>
 
     @Query(
         """

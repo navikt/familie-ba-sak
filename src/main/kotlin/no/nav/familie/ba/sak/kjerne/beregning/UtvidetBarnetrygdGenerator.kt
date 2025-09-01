@@ -56,7 +56,7 @@ data class UtvidetBarnetrygdGenerator(
 
         if (utvidetAndeler.isEmpty()) {
             throw FunksjonellFeil(
-                "Du har lagt til utvidet barnetrygd for en periode der det ikke er rett til barnetrygd for " +
+                "Du har lagt til utvidet barnetrygd for en periode der det ikke er rett til utvidet barnetrygd for " +
                     "noen av barna. Hvis du trenger hjelp, meld sak i Porten.",
             )
         }

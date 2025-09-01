@@ -1,0 +1,14 @@
+package no.nav.familie.ba.sak.cucumber.mock.komponentMocks
+
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+
+fun mockFeatureToggleService(): FeatureToggleService {
+    val featureToggleService = mockk<FeatureToggleService>()
+    every { featureToggleService.isEnabled(any<FeatureToggle>()) } returns true
+    every { featureToggleService.isEnabled(any<FeatureToggle>(), any<Long>()) } returns true
+    every { featureToggleService.isEnabled(any<FeatureToggle>(), any<Boolean>()) } returns true
+    return featureToggleService
+}

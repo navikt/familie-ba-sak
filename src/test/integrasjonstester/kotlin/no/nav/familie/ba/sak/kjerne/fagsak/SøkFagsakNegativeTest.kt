@@ -31,16 +31,16 @@ import org.springframework.test.context.ActiveProfiles
 @Tag("integration")
 class SøkFagsakNegativeTest {
     @Autowired
-    lateinit var fagsakService: FagsakService
+    lateinit var fagsakDeltagerService: FagsakDeltagerService
 
     @Autowired
-    lateinit var fagsakController: FagsakController
+    lateinit var fagsakDeltagerController: FagsakDeltagerController
 
     @Test
     fun `test å søke fagsak deltager med ugyldig fnr`() {
         val feilId = "41235678910"
         assertThrows<IntegrasjonException> {
-            fagsakService.hentFagsakDeltager(feilId)
+            fagsakDeltagerService.hentFagsakDeltager(feilId)
         }
     }
 
@@ -49,14 +49,14 @@ class SøkFagsakNegativeTest {
         val ukjentId = ClientMocks.ukjentId
         val feilId = "41235678910"
 
-        val resEntity1 = fagsakController.søkFagsak(RestSøkParam(ukjentId))
+        val resEntity1 = fagsakDeltagerController.søkFagsak(RestSøkParam(ukjentId))
         assertThat(HttpStatus.OK).isEqualTo(resEntity1.statusCode)
         val ress = resEntity1.body as Ressurs<List<RestFagsakDeltager>>
         assertThat(Ressurs.Status.SUKSESS).isEqualTo(ress.status)
         assertThat(ress.data).isEqualTo(emptyList<RestFagsakDeltager>())
 
         assertThrows<FunksjonellFeil> {
-            fagsakController.søkFagsak(RestSøkParam(feilId))
+            fagsakDeltagerController.søkFagsak(RestSøkParam(feilId))
         }
     }
 }

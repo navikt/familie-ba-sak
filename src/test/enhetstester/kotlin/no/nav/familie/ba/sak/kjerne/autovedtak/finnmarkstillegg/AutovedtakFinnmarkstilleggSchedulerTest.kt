@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.config.LeaderClientService
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -32,7 +32,7 @@ import java.time.LocalDate
 class AutovedtakFinnmarkstilleggSchedulerTest {
     private val leaderClientService = mockk<LeaderClientService>()
     private val fagsakRepository = mockk<FagsakRepository>()
-    private val unleashService = mockk<UnleashNextMedContextService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
     private val opprettTaskService = mockk<OpprettTaskService>()
     private val finnmarkstilleggKjøringRepository = mockk<FinnmarkstilleggKjøringRepository>()
     private val persongrunnlagService = mockk<PersongrunnlagService>()
@@ -43,7 +43,7 @@ class AutovedtakFinnmarkstilleggSchedulerTest {
         AutovedtakFinnmarkstilleggScheduler(
             leaderClientService = leaderClientService,
             fagsakRepository = fagsakRepository,
-            unleashService = unleashService,
+            featureToggleService = featureToggleService,
             opprettTaskService = opprettTaskService,
             finnmarkstilleggKjøringRepository = finnmarkstilleggKjøringRepository,
             persongrunnlagService = persongrunnlagService,
@@ -109,7 +109,7 @@ class AutovedtakFinnmarkstilleggSchedulerTest {
 
     @BeforeEach
     fun setup() {
-        every { unleashService.isEnabled(AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG) } returns true
+        every { featureToggleService.isEnabled(AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG) } returns true
         every { leaderClientService.isLeader() } returns true
 
         every { finnmarkstilleggKjøringRepository.findByFagsakId(any()) } returns null
@@ -127,7 +127,7 @@ class AutovedtakFinnmarkstilleggSchedulerTest {
     @Test
     fun `triggAutovedtakFinnmarkstillegg skal ikke kjøre når feature toggle er disabled`() {
         // Arrange
-        every { unleashService.isEnabled(AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG) } returns false
+        every { featureToggleService.isEnabled(AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG) } returns false
 
         // Act
         autovedtakFinnmarkstilleggScheduler.triggAutovedtakFinnmarkstillegg()

@@ -62,7 +62,6 @@ internal class PersonopplysningerServiceTest(
             val personIdenter = firstArg<List<String>>()
             personIdenter.associateWith { it == ID_MOR }
         }
-
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(ID_MOR))
 
         assert(LocalDate.of(1955, 9, 13) == personInfo.fødselsdato)
@@ -71,8 +70,8 @@ internal class PersonopplysningerServiceTest(
         assertThat(personInfo.forelderBarnRelasjonMaskert.size).isEqualTo(1)
         assertThat(personInfo.kontaktinformasjonForDoedsbo).isNull()
         assertThat(personInfo.dødsfall).isNull()
-        assertThat(personInfo.erEgenAnsatt).isEqualTo(true)
-        assertThat(personInfo.forelderBarnRelasjon.first().erEgenAnsatt).isEqualTo(false)
+        assertThat(personInfo.erEgenAnsatt).isTrue()
+        assertThat(personInfo.forelderBarnRelasjon.first().erEgenAnsatt).isFalse()
     }
 
     @Test

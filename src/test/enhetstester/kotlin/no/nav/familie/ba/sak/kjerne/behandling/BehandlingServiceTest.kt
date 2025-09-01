@@ -7,9 +7,9 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
@@ -54,7 +54,7 @@ class BehandlingServiceTest {
     private val vedtaksperiodeService: VedtaksperiodeService = mockk()
     private val taskRepository: TaskRepositoryWrapper = mockk()
     private val vilkårsvurderingService: VilkårsvurderingService = mockk()
-    private val unleashService: UnleashNextMedContextService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
     private val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
 
     private val behandlingService: BehandlingService =
@@ -74,7 +74,7 @@ class BehandlingServiceTest {
             vedtaksperiodeService = vedtaksperiodeService,
             taskRepository = taskRepository,
             vilkårsvurderingService = vilkårsvurderingService,
-            unleashService = unleashService,
+            featureToggleService = featureToggleService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
         )
 
@@ -123,8 +123,8 @@ class BehandlingServiceTest {
             every { vedtakRepository.save(any()) } returnsArgument 0
             every { loggService.opprettBehandlingLogg(any()) } just runs
             every { taskRepository.save(any()) } returnsArgument 0
-            every { unleashService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
-            every { unleashService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
+            every { featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR) } returns true
 
             // Act
             val opprettetBehandling = behandlingService.opprettBehandling(nyBehandling)
@@ -175,8 +175,8 @@ class BehandlingServiceTest {
             every { vedtakRepository.save(any()) } returnsArgument 0
             every { loggService.opprettBehandlingLogg(any()) } just runs
             every { taskRepository.save(any()) } returnsArgument 0
-            every { unleashService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
-            every { unleashService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
+            every { featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR) } returns true
 
             // Act
             val opprettetBehandling = behandlingService.opprettBehandling(nyBehandling)
