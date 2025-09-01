@@ -194,7 +194,11 @@ class VilkårsvurderingForNyBehandlingService(
         } else if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE &&
             featureToggleService.isEnabled(FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG)
         ) {
-            preutfyllVilkårService.preutfyllBosattIRiket(vilkårsvurdering = initiellVilkårsvurdering)
+            try {
+                preutfyllVilkårService.preutfyllBosattIRiket(vilkårsvurdering = initiellVilkårsvurdering)
+            } catch (exception: Exception) {
+                logger.info("Preutfylling av bosatt i riket feilet for autovedtak fødselshendelse med behandling id ${behandling.id}. Hopper over preutfylling.")
+            }
         }
 
         tellMetrikkerForFødselshendelse(
