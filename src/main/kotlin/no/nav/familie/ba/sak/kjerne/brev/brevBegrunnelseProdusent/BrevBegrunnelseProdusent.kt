@@ -343,6 +343,8 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     return when {
         this.erAvslagUregistrerteBarnBegrunnelse() -> uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
 
+        this.gjelderFinnmarkstillegg || this.gjelderSvalbardtillegg -> barnPåBegrunnelse.map { it.fødselsdato }
+
         gjelderSøker && !this.gjelderEtterEndretUtbetaling && !this.gjelderEndretutbetaling -> {
             when (this.periodeResultat) {
                 SanityPeriodeResultat.IKKE_INNVILGET -> {

@@ -513,6 +513,7 @@ class DokumentServiceIntegrationTest(
                 tilleggsnavn = "navn",
                 postnummer = "0202",
                 kommunenummer = "2231",
+                poststed = "Oslo",
             )
 
         barnAktør.mapIndexed { index, aktør ->

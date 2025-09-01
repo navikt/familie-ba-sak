@@ -82,10 +82,11 @@ abstract class GrOppholdsadresse(
         fun fraOppholdsadresse(
             oppholdsadresse: Oppholdsadresse,
             person: Person,
+            poststed: String? = null,
         ): GrOppholdsadresse =
             when {
-                oppholdsadresse.vegadresse != null -> fraVegadresse(oppholdsadresse.vegadresse!!)
-                oppholdsadresse.matrikkeladresse != null -> fraMatrikkeladresse(oppholdsadresse.matrikkeladresse!!)
+                oppholdsadresse.vegadresse != null -> fraVegadresse(oppholdsadresse.vegadresse!!, poststed)
+                oppholdsadresse.matrikkeladresse != null -> fraMatrikkeladresse(oppholdsadresse.matrikkeladresse!!, poststed)
                 oppholdsadresse.utenlandskAdresse != null -> fraUtenlandskAdresse(oppholdsadresse.utenlandskAdresse!!)
                 else -> GrUkjentAdresseOppholdsadresse()
             }.also {

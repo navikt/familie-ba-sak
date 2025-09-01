@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
-import no.nav.familie.ba.sak.config.FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.config.LeaderClientService
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.tilAdresser
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøring
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service
 class AutovedtakFinnmarkstilleggScheduler(
     private val leaderClientService: LeaderClientService,
     private val fagsakRepository: FagsakRepository,
-    private val unleashService: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
     private val opprettTaskService: OpprettTaskService,
     private val finnmarkstilleggKjøringRepository: FinnmarkstilleggKjøringRepository,
     private val persongrunnlagService: PersongrunnlagService,
@@ -34,7 +34,7 @@ class AutovedtakFinnmarkstilleggScheduler(
 
     @Scheduled(cron = CRON_HVERT_10_MIN_UKEDAG)
     fun triggAutovedtakFinnmarkstillegg() {
-        if (unleashService.isEnabled(AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG)) {
+        if (featureToggleService.isEnabled(AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG)) {
             opprettTaskerForAutovedtakFinnmarkstillegg(1000)
         }
     }

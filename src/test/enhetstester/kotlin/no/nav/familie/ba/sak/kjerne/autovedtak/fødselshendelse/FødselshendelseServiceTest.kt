@@ -5,7 +5,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -34,12 +33,9 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -63,14 +59,9 @@ class FødselshendelseServiceTest {
     val personopplysningerService = mockk<PersonopplysningerService>()
     val opprettTaskService = mockk<OpprettTaskService>()
     val oppgaveService = mockk<OppgaveService>()
-    val unleashService = mockk<UnleashNextMedContextService>()
     val autovedtakFødselshendelseBegrunnelseService = mockk<AutovedtakFødselshendelseBegrunnelseService>()
 
     val integrasjonClient = mockk<IntegrasjonClient>()
-    val statsborgerskapService =
-        StatsborgerskapService(
-            integrasjonClient = integrasjonClient,
-        )
 
     private val autovedtakFødselshendelseService =
         AutovedtakFødselshendelseService(

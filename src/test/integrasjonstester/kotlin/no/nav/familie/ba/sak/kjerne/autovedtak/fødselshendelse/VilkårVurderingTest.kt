@@ -146,6 +146,7 @@ class VilkårVurderingTest(
                 "1232",
                 "whatever",
                 "4322",
+                "Oslo",
             )
         val barnAddress =
             GrVegadresseBostedsadresse(
@@ -157,6 +158,7 @@ class VilkårVurderingTest(
                 "1232",
                 "whatever",
                 "4322",
+                "Oslo",
             )
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 1)
 
@@ -189,6 +191,7 @@ class VilkårVurderingTest(
                 "1232",
                 "whatever",
                 "4322",
+                "Oslo",
             ).apply {
                 periode = DatoIntervallEntitet(LocalDate.now().minusYears(10))
             }
@@ -203,6 +206,7 @@ class VilkårVurderingTest(
                 "1232",
                 "whatever",
                 "4322",
+                "Oslo",
             ).apply {
                 periode = DatoIntervallEntitet(LocalDate.now().minusMonths(1))
             }
@@ -242,6 +246,7 @@ class VilkårVurderingTest(
                 "1232",
                 "whatever",
                 "4322",
+                "Oslo",
             )
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 4)
@@ -332,6 +337,7 @@ class VilkårVurderingTest(
                             "1232",
                             "whatever",
                             "4322",
+                            "Oslo",
                         ).apply {
                             periode = DatoIntervallEntitet(LocalDate.now().minusDays(10))
                         },
@@ -357,6 +363,7 @@ class VilkårVurderingTest(
                 "1232",
                 "whatever",
                 "4322",
+                "Oslo",
             ).apply {
                 periode = DatoIntervallEntitet(TIDENES_MORGEN)
             }
@@ -379,6 +386,7 @@ class VilkårVurderingTest(
                 kommunenummer = "1232",
                 tilleggsnavn = "whatever",
                 postnummer = "4322",
+                poststed = "Oslo",
             ).apply {
                 periode = DatoIntervallEntitet(LocalDate.now().minusMonths(10))
             }
@@ -409,6 +417,7 @@ class VilkårVurderingTest(
                     kommunenummer = "1232",
                     tilleggsnavn = "whatever",
                     postnummer = "4322",
+                    poststed = "Oslo",
                 ).apply {
                     periode = it
                 }

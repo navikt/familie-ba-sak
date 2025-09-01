@@ -25,6 +25,7 @@ internal class BostedsadresseTest {
                 bruksenhetsnummer = "H301",
                 tilleggsnavn = "navn",
                 postnummer = "0202",
+                poststed = "Oslo",
                 kommunenummer = "2231",
             )
         val adresseMedNullFom = adresse.copy().apply { periode = DatoIntervallEntitet(fom = null) }
@@ -42,6 +43,7 @@ internal class BostedsadresseTest {
                 bruksenhetsnummer = "H301",
                 tilleggsnavn = "navn",
                 postnummer = "0202",
+                poststed = "Oslo",
                 kommunenummer = "2231",
             ).apply {
                 periode = DatoIntervallEntitet(fom = null)
@@ -57,6 +59,7 @@ internal class BostedsadresseTest {
                 bruksenhetsnummer = "H301",
                 tilleggsnavn = "navn",
                 postnummer = "0202",
+                poststed = "Oslo",
                 kommunenummer = "2231",
             ).apply {
                 periode = DatoIntervallEntitet(fom = null)
@@ -67,6 +70,7 @@ internal class BostedsadresseTest {
                 bruksenhetsnummer = "H301",
                 tilleggsnavn = "navn",
                 postnummer = "0202",
+                poststed = "Oslo",
                 kommunenummer = "2231",
             ).apply {
                 periode = DatoIntervallEntitet(fom = null)

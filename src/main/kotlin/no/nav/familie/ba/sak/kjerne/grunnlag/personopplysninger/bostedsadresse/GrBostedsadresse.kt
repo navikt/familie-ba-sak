@@ -96,11 +96,12 @@ abstract class GrBostedsadresse(
         fun fraBostedsadresse(
             bostedsadresse: Bostedsadresse,
             person: Person,
+            poststed: String? = null,
         ): GrBostedsadresse {
             val mappetAdresse =
                 when {
-                    bostedsadresse.vegadresse != null -> fraVegadresse(bostedsadresse.vegadresse!!)
-                    bostedsadresse.matrikkeladresse != null -> fraMatrikkeladresse(bostedsadresse.matrikkeladresse!!)
+                    bostedsadresse.vegadresse != null -> fraVegadresse(bostedsadresse.vegadresse!!, poststed)
+                    bostedsadresse.matrikkeladresse != null -> fraMatrikkeladresse(bostedsadresse.matrikkeladresse!!, poststed)
                     bostedsadresse.ukjentBosted != null -> fraUkjentBosted(bostedsadresse.ukjentBosted!!)
                     else -> throw Feil("Vegadresse, matrikkeladresse og ukjent bosted har verdi null ved mapping fra bostedadresse")
                 }

@@ -21,6 +21,8 @@ data class GrMatrikkeladresseOppholdsadresse(
     val tilleggsnavn: String?,
     @Column(name = "postnummer")
     val postnummer: String?,
+    @Column(name = "poststed")
+    val poststed: String?,
     @Column(name = "kommunenummer")
     val kommunenummer: String?,
 ) : GrOppholdsadresse() {
@@ -30,6 +32,7 @@ data class GrMatrikkeladresseOppholdsadresse(
             bruksenhetsnummer,
             tilleggsnavn,
             postnummer,
+            poststed,
             kommunenummer,
         )
 
@@ -39,6 +42,7 @@ data class GrMatrikkeladresseOppholdsadresse(
             "bruksenhetsnummer=$bruksenhetsnummer, " +
             "tilleggsnavn=$tilleggsnavn, " +
             "postnummer=$postnummer, " +
+            "poststed=$poststed, " +
             "kommunenummer=$kommunenummer, " +
             "oppholdAnnetSted=$oppholdAnnetSted" +
             ")"
@@ -47,8 +51,9 @@ data class GrMatrikkeladresseOppholdsadresse(
 
     override fun tilFrontendString(): String {
         val postnummer = postnummer?.let { "Postnummer $postnummer" }
+        val poststed = poststed?.let { ", $poststed" } ?: ""
         val oppholdAnnetSted = oppholdAnnetSted.takeIf { it == PAA_SVALBARD }?.let { ", $it" } ?: ""
-        return postnummer?.let { "$postnummer$oppholdAnnetSted" } ?: "Ukjent adresse$oppholdAnnetSted"
+        return postnummer?.let { "$postnummer$poststed$oppholdAnnetSted" } ?: "Ukjent adresse$oppholdAnnetSted"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -65,12 +70,16 @@ data class GrMatrikkeladresseOppholdsadresse(
     override fun hashCode(): Int = Objects.hash(matrikkelId)
 
     companion object {
-        fun fraMatrikkeladresse(matrikkeladresse: Matrikkeladresse): GrMatrikkeladresseOppholdsadresse =
+        fun fraMatrikkeladresse(
+            matrikkeladresse: Matrikkeladresse,
+            poststed: String?,
+        ): GrMatrikkeladresseOppholdsadresse =
             GrMatrikkeladresseOppholdsadresse(
                 matrikkelId = matrikkeladresse.matrikkelId,
                 bruksenhetsnummer = matrikkeladresse.bruksenhetsnummer.takeUnless { it.isNullOrBlank() },
                 tilleggsnavn = matrikkeladresse.tilleggsnavn.takeUnless { it.isNullOrBlank() },
                 postnummer = matrikkeladresse.postnummer.takeUnless { it.isNullOrBlank() },
+                poststed = poststed.takeUnless { it.isNullOrBlank() },
                 kommunenummer = matrikkeladresse.kommunenummer.takeUnless { it.isNullOrBlank() },
             )
     }

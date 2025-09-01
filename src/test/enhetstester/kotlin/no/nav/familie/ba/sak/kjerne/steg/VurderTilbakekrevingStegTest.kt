@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -21,10 +21,10 @@ import java.math.BigDecimal
 class VurderTilbakekrevingStegTest {
     private val tilbakekrevingService: TilbakekrevingService = mockk()
     private val simuleringService: SimuleringService = mockk()
-    private val unleashService: UnleashNextMedContextService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
 
     private val vurderTilbakekrevingSteg: VurderTilbakekrevingSteg =
-        VurderTilbakekrevingSteg(tilbakekrevingService = tilbakekrevingService, simuleringService = simuleringService, unleashService = unleashService)
+        VurderTilbakekrevingSteg(tilbakekrevingService = tilbakekrevingService, simuleringService = simuleringService)
 
     private val behandling: Behandling =
         lagBehandling(
@@ -45,7 +45,7 @@ class VurderTilbakekrevingStegTest {
         every { tilbakekrevingService.validerRestTilbakekreving(any(), any()) } returns Unit
         every { tilbakekrevingService.lagreTilbakekreving(any(), any()) } returns null
         every { simuleringService.hentEtterbetaling(any(classifier = Long::class)) } returns BigDecimal.ZERO
-        every { unleashService.isEnabled(toggle = any()) } returns true
+        every { featureToggleService.isEnabled(toggle = any()) } returns true
     }
 
     @Test

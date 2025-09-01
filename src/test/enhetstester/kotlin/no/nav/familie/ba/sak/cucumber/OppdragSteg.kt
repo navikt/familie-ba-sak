@@ -10,7 +10,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.toLocalDate
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.cucumber.ValideringUtil.assertSjekkBehandlingIder
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
@@ -22,7 +22,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseÅrMåned
-import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
 import no.nav.familie.ba.sak.cucumber.mock.mockAndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -68,7 +68,7 @@ class OppdragSteg {
     private var toggles = mutableMapOf<Long, Map<String, Boolean>>()
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    private val unleashNextMedContextService = mockUnleashNextMedContextService()
+    private val featureToggleService = mockFeatureToggleService()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val andelTilkjentYtelseRepository = mockAndelTilkjentYtelseRepository(tilkjenteYtelser, behandlinger)
     private val behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>()
@@ -90,7 +90,7 @@ class OppdragSteg {
             vedtaksperiodeService = mockk(),
             taskRepository = mockk(),
             vilkårsvurderingService = mockk(),
-            unleashService = unleashNextMedContextService,
+            featureToggleService = featureToggleService,
             eksternBehandlingRelasjonService = mockk(),
         )
 
@@ -195,7 +195,7 @@ class OppdragSteg {
             tilkjentYtelseRepository.findByFagsak(any())
         } returns tidligereTilkjenteYtelser.filter { it.behandling.fagsak.id == tilkjentYtelse.behandling.fagsak.id }.map { it.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[it.behandling.id]?.utbetalingsoppdrag)) }
         every {
-            unleashNextMedContextService.isEnabled(
+            featureToggleService.isEnabled(
                 any<FeatureToggle>(),
                 any<Long>(),
             )
