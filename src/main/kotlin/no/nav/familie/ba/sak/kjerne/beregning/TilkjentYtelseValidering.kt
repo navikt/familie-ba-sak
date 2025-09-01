@@ -325,7 +325,6 @@ object TilkjentYtelseValidering {
                         (sumProsentForPeriode ?: BigDecimal.ZERO) + (prosentForAndel ?: BigDecimal.ZERO)
                     }
                 }
-
         val erOver100ProsentTidslinje =
             totalProsentTidslinje.mapVerdi { sumProsentForPeriode ->
                 val erOver100Prosent = (sumProsentForPeriode ?: BigDecimal.ZERO) > BigDecimal.valueOf(100)
@@ -357,12 +356,19 @@ private fun validerAtBeløpForPartStemmerMedSatser(
     val antallSvalbardtillegg = andeler.count { it.type == YtelseType.SVALBARDTILLEGG }
     val antallUtvidet = andeler.count { it.type == YtelseType.UTVIDET_BARNETRYGD }
 
+    if (antallSvalbardtillegg > 0 && antallFinnmarkstillegg > 0) {
+        throw UtbetalingsikkerhetFeil(
+            melding = "Validering feilet for person med fødselsdato ${person.fødselsdato} - Barnet kan ikke ha både finnmarkstillegg og svalbardtillegg i samme periode.",
+            frontendFeilmelding = "Det har skjedd en systemfeil, og andelene stemmer ikke overens med det som er lov. $KONTAKT_TEAMET_SUFFIX",
+        )
+    }
+
     val maksAntallAndeler =
         when {
             fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG -> {
                 if (antallOrdinær > 1 || antallFinnmarkstillegg > 1 || antallUtvidet > 1 || antallSvalbardtillegg > 1) {
                     throw UtbetalingsikkerhetFeil(
-                        melding = "Validering feilet for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}): Barnet kan ha maks én ordinær, en utvidet og en finnmarkstillegg andel for en gitt periode.",
+                        melding = "Validering feilet for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}): Barnet kan ha maks én ordinær, en utvidet, en finnmarkstillegg/svalbardtillegg andel for en gitt periode.",
                         frontendFeilmelding = "Det har skjedd en systemfeil, og andelene stemmer ikke overens med det som er lov. $KONTAKT_TEAMET_SUFFIX",
                     )
                 }

@@ -10,6 +10,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTids
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -86,6 +88,28 @@ fun valider18ÅrsVilkårEksistererFraFødselsdato(
                     frontendFeilmelding = "Det må være en periode på 18-års vilkåret som starter på barnets fødselsdato",
                 )
             }
+        }
+    }
+}
+
+fun validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig(
+    søkerOgBarn: List<PersonEnkel>,
+    vilkårsvurdering: Vilkårsvurdering,
+) = vilkårsvurdering.personResultater.forEach { personResultat ->
+    val person = søkerOgBarn.find { it.aktør == personResultat.aktør }
+    val vilkårResultater = personResultat.vilkårResultater
+    val bosattIRiketVilkår = vilkårResultater.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+
+    bosattIRiketVilkår.forEach { vilkår ->
+        val finnmarkOgSvalbardSattISammePeriode =
+            UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD in vilkår.utdypendeVilkårsvurderinger &&
+                UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS in vilkår.utdypendeVilkårsvurderinger
+
+        if (finnmarkOgSvalbardSattISammePeriode) {
+            throw FunksjonellFeil(
+                melding = "Barn født ${person?.fødselsdato} kan ikke bo i Finnmark og på Svalbard samtidig.",
+                frontendFeilmelding = "Barn født ${person?.fødselsdato} kan ikke bo i Finnmark og på Svalbard samtidig.",
+            )
         }
     }
 }
