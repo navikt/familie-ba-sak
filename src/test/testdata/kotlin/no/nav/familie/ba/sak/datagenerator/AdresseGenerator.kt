@@ -1,8 +1,14 @@
 package no.nav.familie.ba.sak.datagenerator
 
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrMatrikkeladresseOppholdsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrUkjentAdresseOppholdsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrUtenlandskAdresseOppholdsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrVegadresseOppholdsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
+import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import java.time.LocalDate
 
@@ -69,3 +75,70 @@ fun lagMatrikkeladresse(
     postnummer = postnummer,
     kommunenummer = kommunenummer,
 )
+
+fun lagGrVegadresseOppholdsadresse(
+    matrikkelId: Long? = null,
+    husnummer: String? = null,
+    husbokstav: String? = null,
+    bruksenhetsnummer: String? = null,
+    adressenavn: String? = null,
+    kommunenummer: String? = null,
+    tilleggsnavn: String? = null,
+    postnummer: String? = null,
+    periode: DatoIntervallEntitet? = null,
+) = GrVegadresseOppholdsadresse(
+    matrikkelId = matrikkelId,
+    husnummer = husnummer,
+    husbokstav = husbokstav,
+    bruksenhetsnummer = bruksenhetsnummer,
+    adressenavn = adressenavn,
+    kommunenummer = kommunenummer,
+    tilleggsnavn = tilleggsnavn,
+    postnummer = postnummer,
+).also { it.periode = periode }
+
+fun lagGrMatrikkelOppholdsadresse(
+    matrikkelId: Long? = null,
+    bruksenhetsnummer: String? = null,
+    kommunenummer: String? = null,
+    tilleggsnavn: String? = null,
+    postnummer: String? = null,
+    periode: DatoIntervallEntitet? = null,
+) = GrMatrikkeladresseOppholdsadresse(
+    matrikkelId = matrikkelId,
+    bruksenhetsnummer = bruksenhetsnummer,
+    kommunenummer = kommunenummer,
+    tilleggsnavn = tilleggsnavn,
+    postnummer = postnummer,
+).also { it.periode = periode }
+
+fun lagGrUtenlandskOppholdsadresse(
+    adressenavnNummer: String? = null,
+    bygningEtasjeLeilighet: String? = null,
+    postboksNummerNavn: String? = null,
+    postkode: String? = null,
+    bySted: String? = null,
+    regionDistriktOmraade: String? = null,
+    landkode: String? = null,
+    periode: DatoIntervallEntitet? = null,
+    oppholdAnnetSted: OppholdAnnetSted? = null,
+) = GrUtenlandskAdresseOppholdsadresse(
+    adressenavnNummer = adressenavnNummer,
+    bygningEtasjeLeilighet = bygningEtasjeLeilighet,
+    postboksNummerNavn = postboksNummerNavn,
+    postkode = postkode,
+    bySted = bySted,
+    regionDistriktOmraade = regionDistriktOmraade,
+    landkode = landkode,
+).also {
+    it.periode = periode
+    it.oppholdAnnetSted = oppholdAnnetSted
+}
+
+fun lagGrUkjentAdresseOppholdsadresse(
+    periode: DatoIntervallEntitet? = null,
+    oppholdAnnetSted: OppholdAnnetSted? = null,
+) = GrUkjentAdresseOppholdsadresse().also {
+    it.periode = periode
+    it.oppholdAnnetSted = oppholdAnnetSted
+}
