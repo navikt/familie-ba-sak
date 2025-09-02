@@ -73,6 +73,8 @@ object Utils {
     inline fun <reified T : Enum<T>> konverterEnumsTilString(liste: List<T>) = liste.joinToString(separator = ";")
 
     inline fun <reified T : Enum<T>> konverterStringTilEnums(string: String?): List<T> = if (string.isNullOrBlank()) emptyList() else string.split(";").map { enumValueOf(it) }
+
+    fun <T, R> List<T>.tilEtterfølgendePar(transform: (a: T, b: T?) -> R): List<R> = this.windowed(size = 2, step = 1, partialWindows = true) { transform(it[0], it.getOrNull(1)) }
 }
 
 fun Any.convertDataClassToJson(): String = objectMapper.writeValueAsString(this)
