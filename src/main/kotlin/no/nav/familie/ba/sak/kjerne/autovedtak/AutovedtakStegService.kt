@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.prosessering.error.RekjørSenereException
 import no.nav.familie.util.VirkedagerProvider
+import no.nav.familie.util.VirkedagerProvider.nesteVirkedag
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -131,6 +132,7 @@ class AutovedtakStegService(
             førstegangKjørt = førstegangKjørt,
         )
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun kjørBehandlingFinnmarkstillegg(
         mottakersAktør: Aktør,
         fagsakId: Long,
@@ -241,6 +243,11 @@ class AutovedtakStegService(
                         årsak = autovedtaktype.tilMaskinellVentÅrsak(),
                     )
                     return false
+                } else if (autovedtaktype == Autovedtaktype.FINNMARKSTILLEGG) {
+                    throw RekjørSenereException(
+                        årsak = "Åpen behandling med status ${åpenBehandling.status} ble endret for under fire timer siden. Prøver igjen klokken 06.00 neste virkedag",
+                        triggerTid = nesteVirkedag(LocalDate.now()).atTime(6, 0),
+                    )
                 }
             }
 
