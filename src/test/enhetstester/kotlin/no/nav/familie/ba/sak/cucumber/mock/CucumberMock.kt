@@ -574,6 +574,7 @@ class CucumberMock(
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             personopplysningGrunnlagForNyBehandlingService = personopplysningGrunnlagForNyBehandlingService,
             eøsSkjemaerForNyBehandlingService = eøsSkjemaerForNyBehandlingService,
+            vilkårService = vilkårService,
         )
 
     val månedligValutajusteringService = MånedligValutajusteringService(ecbService = ecbService, valutakursService = valutakursService)
