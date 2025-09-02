@@ -192,7 +192,7 @@ class StønadsstatistikkService(
                                 YtelseType.SVALBARDTILLEGG -> SVALBARDTILLEGG
                             },
                         utbetaltPrMnd = andel.kalkulertUtbetalingsbeløp,
-                        delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset,
+                        delytelseId = if (andel.periodeOffset != null) behandling.fagsak.id.toString() + andel.periodeOffset else null,
                     )
                 },
         )
