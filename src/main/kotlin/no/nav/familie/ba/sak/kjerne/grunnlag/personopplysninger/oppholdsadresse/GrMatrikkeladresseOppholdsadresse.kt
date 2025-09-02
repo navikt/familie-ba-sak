@@ -5,9 +5,9 @@ import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.familie.kontrakter.ba.svalbardtillegg.erKommunePåSvalbard
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted.PAA_SVALBARD
+import no.nav.familie.kontrakter.felles.svalbard.erKommunePåSvalbard
 import java.util.Objects
 
 @EntityListeners(RollestyringMotDatabase::class)
