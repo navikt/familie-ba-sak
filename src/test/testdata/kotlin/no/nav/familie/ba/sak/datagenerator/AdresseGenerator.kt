@@ -86,6 +86,7 @@ fun lagGrVegadresseOppholdsadresse(
     tilleggsnavn: String? = null,
     postnummer: String? = null,
     periode: DatoIntervallEntitet? = null,
+    poststed: String? = null,
 ) = GrVegadresseOppholdsadresse(
     matrikkelId = matrikkelId,
     husnummer = husnummer,
@@ -95,6 +96,7 @@ fun lagGrVegadresseOppholdsadresse(
     kommunenummer = kommunenummer,
     tilleggsnavn = tilleggsnavn,
     postnummer = postnummer,
+    poststed = poststed,
 ).also { it.periode = periode }
 
 fun lagGrMatrikkelOppholdsadresse(
@@ -104,12 +106,14 @@ fun lagGrMatrikkelOppholdsadresse(
     tilleggsnavn: String? = null,
     postnummer: String? = null,
     periode: DatoIntervallEntitet? = null,
+    poststed: String? = null,
 ) = GrMatrikkeladresseOppholdsadresse(
     matrikkelId = matrikkelId,
     bruksenhetsnummer = bruksenhetsnummer,
     kommunenummer = kommunenummer,
     tilleggsnavn = tilleggsnavn,
     postnummer = postnummer,
+    poststed = poststed,
 ).also { it.periode = periode }
 
 fun lagGrUtenlandskOppholdsadresse(
