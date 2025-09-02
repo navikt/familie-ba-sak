@@ -47,7 +47,7 @@ jobs:
     name: Verdikjedetester toggle off
     permissions:
       contents: read
-      id-token: write
+      actions: write
     uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@pull-request # ratchet:exclude
     with:
       profile: 'verdikjedetest-toggle-off'
@@ -57,7 +57,7 @@ jobs:
     name: Verdikjedetester toggle on
     permissions:
       contents: read
-      id-token: write
+      actions: write
     uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@pull-request # ratchet:exclude
     with:
       profile: 'verdikjedetest-toggle-on'
