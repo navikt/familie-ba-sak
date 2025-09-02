@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -38,7 +38,7 @@ class EndretUtbetalingAndelService(
     private val endretUtbetalingAndelOppdatertAbonnementer: List<EndretUtbetalingAndelerOppdatertAbonnent> = emptyList(),
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
-    private val unleashService: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     @Transactional
     fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
@@ -77,7 +77,7 @@ class EndretUtbetalingAndelService(
                 andelTilkjentYtelser = andelTilkjentYtelser,
             )
 
-        val toggleErPå = unleashService.isEnabled(FeatureToggle.SKAL_SPLITTE_ENDRET_UTBETALING_ANDELER)
+        val toggleErPå = featureToggleService.isEnabled(FeatureToggle.SKAL_SPLITTE_ENDRET_UTBETALING_ANDELER)
         if (skalSplitteEndretUtbetalingAndel(toggleErPå, endretUtbetalingAndel, gyldigTomDatoPerAktør)) {
             splittValiderOgLagreEndretUtbetalingAndeler(
                 endretUtbetalingAndel = endretUtbetalingAndel,
@@ -161,6 +161,7 @@ class EndretUtbetalingAndelService(
         val forrigeAndeler = beregningService.hentAndelerFraForrigeIverksattebehandling(behandling)
         val personIdenter = (nåværendeAndeler + forrigeAndeler).map { it.aktør.aktivFødselsnummer() }.distinct()
         val personerPåBehandling = persongrunnlagService.hentPersonerPåBehandling(personIdenter, behandling)
+        val nåværendeEndretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
 
         val endretUtbetalingAndeler =
             genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
@@ -169,6 +170,7 @@ class EndretUtbetalingAndelService(
                 nåværendeAndeler = nåværendeAndeler,
                 forrigeAndeler = forrigeAndeler,
                 personerPåBehandling = personerPåBehandling,
+                nåværendeEndretUtbetalingAndeler = nåværendeEndretUtbetalingAndeler,
             )
 
         endretUtbetalingAndelRepository.saveAllAndFlush(endretUtbetalingAndeler)

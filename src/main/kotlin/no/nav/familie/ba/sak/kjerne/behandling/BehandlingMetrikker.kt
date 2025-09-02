@@ -47,7 +47,7 @@ class BehandlingMetrikker(
     private val behandlingÅrsak: Map<BehandlingÅrsak, Counter> = initBehandlingÅrsakMetrikker()
 
     private val antallBehandlingsresultat: Map<Behandlingsresultat, Counter> =
-        Behandlingsresultat.values().associateWith {
+        Behandlingsresultat.entries.associateWith {
             Metrics.counter(
                 "behandling.resultat",
                 "type",
@@ -67,7 +67,7 @@ class BehandlingMetrikker(
         }
 
         antallGangerBruktEØSBegrunnelse =
-            EØSStandardbegrunnelse.values().associateWith {
+            EØSStandardbegrunnelse.entries.associateWith {
                 val tittel = sanityEØSBegrunnelser[it]?.navnISystem ?: it.name
 
                 Metrics.counter(
@@ -86,7 +86,7 @@ class BehandlingMetrikker(
         }
 
         antallGangerBruktStandardbegrunnelse =
-            Standardbegrunnelse.values().associateWith {
+            Standardbegrunnelse.entries.associateWith {
                 val tittel = sanityBegrunnelser[it]?.navnISystem ?: it.name
 
                 Metrics.counter(
@@ -151,7 +151,7 @@ class BehandlingMetrikker(
     }
 
     private fun initBehandlingTypeMetrikker(type: String): Map<BehandlingType, Counter> =
-        BehandlingType.values().associateWith {
+        BehandlingType.entries.associateWith {
             Metrics.counter(
                 "behandling.opprettet",
                 "type",
@@ -164,7 +164,7 @@ class BehandlingMetrikker(
         }
 
     private fun initBehandlingÅrsakMetrikker(): Map<BehandlingÅrsak, Counter> =
-        BehandlingÅrsak.values().associateWith {
+        BehandlingÅrsak.entries.associateWith {
             Metrics.counter(
                 "behandling.aarsak",
                 "aarsak",

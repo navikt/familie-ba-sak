@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
@@ -87,7 +87,7 @@ class VedtakServiceTest(
     @Autowired
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
     @Autowired
-    private val unleashService: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
     @Autowired
     private val eksternBehandlingRelasjonService: EksternBehandlingRelasjonService,
 ) : AbstractSpringIntegrationTest() {
@@ -120,7 +120,7 @@ class VedtakServiceTest(
                 vedtaksperiodeService,
                 taskRepository,
                 vilkårsvurderingService,
-                unleashService,
+                featureToggleService,
                 eksternBehandlingRelasjonService,
             )
 

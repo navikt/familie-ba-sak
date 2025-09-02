@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinje
@@ -33,6 +34,7 @@ internal enum class Endringsresultat {
 
 object BehandlingsresultatEndringUtils {
     internal fun utledEndringsresultat(
+        behandling: Behandling,
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>,
         personerFremstiltKravFor: List<Aktør>,
@@ -96,13 +98,14 @@ object BehandlingsresultatEndringUtils {
                     }
 
                 val erEndringIVilkårsvurderingForPerson =
-                    erEndringIVilkårsvurderingForPerson(
-                        tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = tidligsteRelevanteFomDatoForPersonIVilkårsvurdering,
-                        nåværendePersonResultaterForPerson = nåværendePersonResultatForPerson,
-                        forrigePersonResultaterForPerson = forrigePersonResultatForPerson,
-                        personIBehandling = personIBehandling,
-                        personIForrigeBehandling = personIForrigeBehandling,
-                    )
+                    !behandling.erFinnmarkstillegg() &&
+                        erEndringIVilkårsvurderingForPerson(
+                            tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = tidligsteRelevanteFomDatoForPersonIVilkårsvurdering,
+                            nåværendePersonResultaterForPerson = nåværendePersonResultatForPerson,
+                            forrigePersonResultaterForPerson = forrigePersonResultatForPerson,
+                            personIBehandling = personIBehandling,
+                            personIForrigeBehandling = personIForrigeBehandling,
+                        )
 
                 val erEndringIKompetanseForPerson =
                     erEndringIKompetanseForPerson(

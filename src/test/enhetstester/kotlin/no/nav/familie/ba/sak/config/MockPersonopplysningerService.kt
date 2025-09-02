@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.config
 
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
@@ -43,10 +44,12 @@ class MockPersonopplysningerService(
     pdlRestClient: PdlRestClient,
     systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
     familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
+    integrasjonClient: IntegrasjonClient,
 ) : PersonopplysningerService(
         pdlRestClient,
         systemOnlyPdlRestClient,
         familieIntegrasjonerTilgangskontrollService,
+        integrasjonClient,
     ) {
     init {
         settPersoninfoMedRelasjonerForPredefinerteTestpersoner()
@@ -104,7 +107,7 @@ class MockPersonopplysningerService(
             personInfo[personIdent] = egendefinertMock ?: PersonInfo(
                 fødselsdato = LocalDate.parse(personIdent.substring(0, 6), ofPattern("ddMMyy")),
                 bostedsadresser = mutableListOf(bostedsadresse),
-                kjønn = Kjønn.values().random(),
+                kjønn = Kjønn.entries.random(),
                 navn = "$personIdent sitt navn",
             )
             return personIdent

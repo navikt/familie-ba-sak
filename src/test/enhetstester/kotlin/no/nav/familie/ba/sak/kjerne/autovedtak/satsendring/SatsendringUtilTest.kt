@@ -382,8 +382,8 @@ class SatsendringUtilTest {
 
     @Test
     fun `Hvis denne testen feiler så er det skjedd en endring på aktive satser og testene som sjekker om en sats har eller ikke har oppdatert sats må utvides`() {
-        assertThat(SatsService.finnAlleAktiveSisteSatser().map { it.type }).hasSize(3).containsOnly(SatsType.SMA, SatsType.UTVIDET_BARNETRYGD, SatsType.ORBA)
-        assertThat(SatsType.entries).hasSize(5).containsOnly(SatsType.SMA, SatsType.UTVIDET_BARNETRYGD, SatsType.ORBA, SatsType.TILLEGG_ORBA, SatsType.FINN_SVAL)
+        assertThat(SatsService.finnAlleAktiveSisteSatser().map { it.type }).hasSize(5).containsOnly(SatsType.SMA, SatsType.UTVIDET_BARNETRYGD, SatsType.ORBA, SatsType.FINNMARKSTILLEGG, SatsType.SVALBARDTILLEGG)
+        assertThat(SatsType.entries).hasSize(7).containsOnly(SatsType.SMA, SatsType.UTVIDET_BARNETRYGD, SatsType.ORBA, SatsType.TILLEGG_ORBA, SatsType.FINN_SVAL, SatsType.FINNMARKSTILLEGG, SatsType.SVALBARDTILLEGG)
     }
 
     private fun datoForSisteSatsendringForSatsType(satsType: SatsType) = SatsService.finnSisteSatsFor(satsType).gyldigFom.toYearMonth()

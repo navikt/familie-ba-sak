@@ -32,11 +32,12 @@ data class RestFagsakDeltager(
     val ident: String = "",
     val rolle: FagsakDeltagerRolle,
     val fagsakType: FagsakType? = null,
-    val kjønn: Kjønn? = Kjønn.UKJENT,
+    val kjønn: Kjønn = Kjønn.UKJENT,
     val fagsakId: Long? = null,
     val fagsakStatus: FagsakStatus? = null,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
     val harTilgang: Boolean = true,
+    val erEgenAnsatt: Boolean? = null,
 ) {
     override fun toString(): String = "RestFagsakDeltager(rolle=$rolle, kjønn=$kjønn, fagsakId=$fagsakId)"
 }

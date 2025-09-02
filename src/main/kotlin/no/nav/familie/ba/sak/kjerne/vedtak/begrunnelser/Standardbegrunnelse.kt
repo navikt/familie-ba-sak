@@ -493,6 +493,18 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetForlengetOppholdEtterEttaarigOppholdstillatelse"
     },
+    INNVILGET_FINNMARKSTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetFinnmarkstillegg"
+    },
+    INNVILGET_FINNMARKSTILLEGG_INSTITUSJON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetFinnmarkstilleggInstitusjon"
+    },
+    INNVILGET_SVALBARDTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetSvalbardtillegg"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
@@ -788,6 +800,22 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     REDUKSJON_BARN_BOR_I_INSTITUSJON {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBarnBorIInstitusjon"
+    },
+    REDUKSJON_FINNMARKSTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonFinnmarkstillegg"
+    },
+    REDUKSJON_FINNMARKSTILLEGG_BODDE_IKKE_I_TILLEGGSONE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonFinnmarkstilleggBoddeIkkeITilleggSone"
+    },
+    REDUKSJON_SVALBARDTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSvalbardtillegg"
+    },
+    REDUKSJON_SVALBARDTILLEGG_BODDE_IKKE_PÅ_SVALBARD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSvalbardtilleggBoddeIkkePaaSvalbard"
     },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
@@ -1472,6 +1500,14 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     FORTSATT_INNVILGET_SATSENDRING {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetSatsendring"
+    },
+    FORTSATT_INNVILGET_FINNMARKSTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetFinnmarkstillegg"
+    },
+    FORTSATT_INNVILGET_SVALBARDTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetSvalbardtillegg"
     },
     ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING

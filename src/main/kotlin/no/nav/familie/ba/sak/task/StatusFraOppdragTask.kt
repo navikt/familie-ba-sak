@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.task
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask.Companion.TASK_STEP_TYPE
@@ -13,6 +12,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
+import java.util.Properties
 
 /**
  * Task som kjører 100 ganger før den blir satt til feilet.
@@ -31,7 +31,6 @@ import org.springframework.stereotype.Service
 class StatusFraOppdragTask(
     private val stegService: StegService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val personidentService: PersonidentService,
     private val taskRepository: TaskRepositoryWrapper,
 ) : AsyncTaskStep {
     /**
@@ -50,13 +49,22 @@ class StatusFraOppdragTask(
 
     override fun onCompletion(task: Task) {
         val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
-        val personIdent = personidentService.hentAktør(statusFraOppdragDTO.aktørId).aktivFødselsnummer()
 
-        val nyTaskV2 = PubliserVedtakV2Task.opprettTask(personIdent, statusFraOppdragDTO.behandlingsId)
+        val nyTaskV2 = PubliserVedtakV2Task.opprettTask(statusFraOppdragDTO.personIdent, statusFraOppdragDTO.behandlingsId)
         taskRepository.save(nyTaskV2)
     }
 
     companion object {
         const val TASK_STEP_TYPE = "statusFraOppdrag"
+
+        fun opprettTask(
+            statusFraOppdragDTO: StatusFraOppdragDTO,
+            properties: Properties,
+        ): Task =
+            Task(
+                type = TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(statusFraOppdragDTO),
+                properties = properties,
+            )
     }
 }

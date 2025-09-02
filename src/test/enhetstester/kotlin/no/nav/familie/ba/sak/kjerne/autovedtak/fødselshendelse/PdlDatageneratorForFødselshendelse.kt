@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresseBostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
@@ -156,33 +156,36 @@ fun genererAutomatiskTestperson(
     )
 
 val mockNåværendeBosted =
-    GrMatrikkeladresse(
+    GrMatrikkeladresseBostedsadresse(
         matrikkelId = 123L,
         bruksenhetsnummer = "H301",
         tilleggsnavn = "navn",
         postnummer = "0202",
+        poststed = "Oslo",
         kommunenummer = "2231",
     ).apply {
         periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(1))
     }
 
 val mockAnnetNåværendeBosted =
-    GrMatrikkeladresse(
+    GrMatrikkeladresseBostedsadresse(
         matrikkelId = 123L,
         bruksenhetsnummer = "H501",
         tilleggsnavn = "navn",
         postnummer = "0202",
+        poststed = "Oslo",
         kommunenummer = "2231",
     ).apply {
         periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(1))
     }
 
 val mockTidligereBosted =
-    GrMatrikkeladresse(
+    GrMatrikkeladresseBostedsadresse(
         matrikkelId = 123L,
         bruksenhetsnummer = "H301",
         tilleggsnavn = "navn",
         postnummer = "0202",
+        poststed = "Oslo",
         kommunenummer = "2231",
     ).apply {
         periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(3), tom = LocalDate.now().minusYears(1))

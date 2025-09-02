@@ -8,9 +8,9 @@ import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagBrevmottakerDb
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
@@ -61,7 +61,7 @@ class BeslutteVedtakTest {
     private val beregningService: BeregningService = mockk()
     private val taskRepository: TaskRepositoryWrapper = mockk()
     private val vilkårsvurderingService: VilkårsvurderingService = mockk()
-    private val unleashService: UnleashNextMedContextService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService = mockk()
     private val automatiskBeslutningService: AutomatiskBeslutningService = mockk()
     private val saksbehandlerContext = mockk<SaksbehandlerContext>()
@@ -82,7 +82,7 @@ class BeslutteVedtakTest {
             taskRepository = taskRepository,
             loggService = loggService,
             vilkårsvurderingService = vilkårsvurderingService,
-            unleashService = unleashService,
+            featureToggleService = featureToggleService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             saksbehandlerContext = saksbehandlerContext,
             automatiskBeslutningService = automatiskBeslutningService,
@@ -294,7 +294,7 @@ class BeslutteVedtakTest {
         @Test
         fun `Skal kaste feil dersom toggle ikke er enabled og årsak er korreksjon vedtaksbrev`() {
             every {
-                unleashService.isEnabled(
+                featureToggleService.isEnabled(
                     FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV,
                     any<Long>(),
                 )
@@ -318,7 +318,7 @@ class BeslutteVedtakTest {
 
         @Test
         fun `Skal kaste feil dersom saksbehandler uten tilgang til teknisk endring prøve å godkjenne en behandling med årsak=teknisk endring`() {
-            every { unleashService.isEnabled(FeatureToggle.TEKNISK_ENDRING, any<Long>()) } returns false
+            every { featureToggleService.isEnabled(FeatureToggle.TEKNISK_ENDRING, any<Long>()) } returns false
 
             val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
             behandling.status = BehandlingStatus.FATTER_VEDTAK

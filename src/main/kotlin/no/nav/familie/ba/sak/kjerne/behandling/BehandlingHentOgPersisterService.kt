@@ -46,6 +46,8 @@ class BehandlingHentOgPersisterService(
      */
     fun hentSisteBehandlingSomErIverksatt(fagsakId: Long): Behandling? = behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
 
+    fun hentIdForSisteBehandlingSomErIverksatt(fagsakId: Long): Long? = behandlingRepository.finnIdForSisteIverksatteBehandling(fagsakId = fagsakId)
+
     /**
      * Henter siste iverksatte behandling FØR en gitt behandling.
      * Bør kun brukes i forbindelse med oppdrag mot økonomisystemet

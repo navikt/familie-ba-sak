@@ -39,7 +39,7 @@ class DistribuerDokumentPåJournalpostIdTask(
     private val dokumentDistribueringService: DokumentDistribueringService,
 ) : AsyncTaskStep {
     private val antallBrevIkkeDistribuertUkjentDødsboadresse: Map<Brevmal, Counter> =
-        mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
+        mutableListOf<Brevmal>().plus(Brevmal.entries).associateWith {
             Metrics.counter(
                 "brev.ikke.sendt.ukjent.dodsbo",
                 "brevtype",

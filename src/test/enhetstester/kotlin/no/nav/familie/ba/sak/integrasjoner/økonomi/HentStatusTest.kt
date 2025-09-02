@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
@@ -46,7 +46,7 @@ class HentStatusTest {
 
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator = mockk()
 
-    private val unleashService: UnleashNextMedContextService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
 
     @BeforeEach
     fun setUp() {
@@ -65,7 +65,7 @@ class HentStatusTest {
                 taskRepository = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() },
             )
 
-        every { unleashService.isEnabled(toggle = any()) } returns false
+        every { featureToggleService.isEnabled(toggle = any()) } returns false
     }
 
     @Test
@@ -156,7 +156,6 @@ class HentStatusTest {
             StatusFraOppdragDTO(
                 fagsystem = "BA",
                 personIdent = tilfeldigPerson.aktør.aktivFødselsnummer(),
-                aktørId = "Søker1",
                 behandlingsId = nyBehandling.id,
                 vedtaksId = 0L,
             ),

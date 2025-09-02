@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.klage
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
 import no.nav.familie.kontrakter.felles.klage.BehandlingStatus
@@ -13,11 +12,7 @@ class KlagebehandlingHenter(
     private val klageClient: KlageClient,
 ) {
     fun hentKlagebehandlingerPåFagsak(fagsakId: Long): List<KlagebehandlingDto> {
-        val klagebehandligerPerFagsak = klageClient.hentKlagebehandlinger(setOf(fagsakId))
-        val klagerPåFagsak = klagebehandligerPerFagsak[fagsakId]
-        if (klagerPåFagsak == null) {
-            throw Feil("Fikk ikke fagsakId=$fagsakId tilbake fra kallet til klage.")
-        }
+        val klagerPåFagsak = klageClient.hentKlagebehandlinger(fagsakId)
         return klagerPåFagsak.map { it.brukVedtaksdatoFraKlageinstansHvisOversendt() }
     }
 

@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import java.time.LocalDate
 import java.time.Month
@@ -20,6 +22,14 @@ data class RestScenarioPerson(
                 gyldigFraOgMed = LocalDate.parse(fødselsdato),
                 bekreftelsesdato = LocalDate.parse(fødselsdato),
                 gyldigTilOgMed = null,
+            ),
+        ),
+    val oppholdstillatelse: List<Opphold> =
+        listOf(
+            Opphold(
+                type = OPPHOLDSTILLATELSE.PERMANENT,
+                oppholdFra = LocalDate.now().minusYears(10),
+                oppholdTil = null,
             ),
         ),
     val bostedsadresser: List<Bostedsadresse> = defaultBostedsadresseHistorikk,

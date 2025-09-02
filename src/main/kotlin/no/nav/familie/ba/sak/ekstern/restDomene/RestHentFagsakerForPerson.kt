@@ -5,7 +5,7 @@ import no.nav.familie.kontrakter.felles.Fødselsnummer
 
 data class RestHentFagsakerForPerson(
     val personIdent: String,
-    val fagsakTyper: List<FagsakType> = FagsakType.values().toList(),
+    val fagsakTyper: List<FagsakType> = FagsakType.entries.toList(),
 ) {
     // Bruker init til å validere personidenten
     init {

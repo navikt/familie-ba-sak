@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.klage
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagKlagebehandlingDto
 import no.nav.familie.ba.sak.datagenerator.lagKlageinstansResultatDto
@@ -13,7 +12,6 @@ import no.nav.familie.kontrakter.felles.klage.HenlagtÅrsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDateTime
@@ -29,40 +27,13 @@ class KlagebehandlingHenterTest {
     @Nested
     inner class HentKlagebehandlingerPåFagsak {
         @Test
-        fun `skal kaste exception om fagsaken ikke finnes i resultatet fra kallet til klageklienten`() {
-            // Arrange
-            val fagsakId = 4L
-
-            every { klageClient.hentKlagebehandlinger(setOf(fagsakId)) } returns
-                mapOf(
-                    1L to listOf(lagKlagebehandlingDto(), lagKlagebehandlingDto()),
-                    2L to listOf(lagKlagebehandlingDto()),
-                    3L to listOf(lagKlagebehandlingDto(), lagKlagebehandlingDto()),
-                )
-
-            // Act & Assert
-            val exception =
-                assertThrows<Feil> {
-                    klagebehandlingHenter.hentKlagebehandlingerPåFagsak(fagsakId)
-                }
-            assertThat(exception.message).isEqualTo("Fikk ikke fagsakId=$fagsakId tilbake fra kallet til klage.")
-        }
-
-        @Test
         fun `skal hente klagebehandlinger på fagsak`() {
             // Arrange
             val fagsakId = 1L
 
             val klagebehandlingerForFagsak1 = listOf(lagKlagebehandlingDto(), lagKlagebehandlingDto())
-            val klagebehandlingerForFagsak2 = listOf(lagKlagebehandlingDto())
-            val klagebehandlingerForFagsak3 = listOf(lagKlagebehandlingDto(), lagKlagebehandlingDto())
 
-            every { klageClient.hentKlagebehandlinger(setOf(fagsakId)) } returns
-                mapOf(
-                    fagsakId to klagebehandlingerForFagsak1,
-                    2L to klagebehandlingerForFagsak2,
-                    3L to klagebehandlingerForFagsak3,
-                )
+            every { klageClient.hentKlagebehandlinger(fagsakId) } returns klagebehandlingerForFagsak1
 
             // Act
             val resultat = klagebehandlingHenter.hentKlagebehandlingerPåFagsak(fagsakId)
@@ -98,10 +69,7 @@ class KlagebehandlingHenterTest {
                     status = behandlingStatus,
                 )
 
-            every { klageClient.hentKlagebehandlinger(setOf(behandling.fagsak.id)) } returns
-                mapOf(
-                    behandling.fagsak.id to listOf(klagebehandlingDto),
-                )
+            every { klageClient.hentKlagebehandlinger(behandling.fagsak.id) } returns listOf(klagebehandlingDto)
 
             // Act
             val forrigeVedtatteKlagebehandling = klagebehandlingHenter.hentForrigeVedtatteKlagebehandling(behandling)
@@ -130,10 +98,7 @@ class KlagebehandlingHenterTest {
                     henlagtÅrsak = henlagtÅrsak,
                 )
 
-            every { klageClient.hentKlagebehandlinger(setOf(behandling.fagsak.id)) } returns
-                mapOf(
-                    behandling.fagsak.id to listOf(klagebehandlingDto),
-                )
+            every { klageClient.hentKlagebehandlinger(behandling.fagsak.id) } returns listOf(klagebehandlingDto)
 
             // Act
             val forrigeVedtatteKlagebehandling = klagebehandlingHenter.hentForrigeVedtatteKlagebehandling(behandling)
@@ -167,10 +132,7 @@ class KlagebehandlingHenterTest {
                     resultat = behandlingResultat,
                 )
 
-            every { klageClient.hentKlagebehandlinger(setOf(behandling.fagsak.id)) } returns
-                mapOf(
-                    behandling.fagsak.id to listOf(klagebehandlingDto),
-                )
+            every { klageClient.hentKlagebehandlinger(behandling.fagsak.id) } returns listOf(klagebehandlingDto)
 
             // Act
             val forrigeVedtatteKlagebehandling = klagebehandlingHenter.hentForrigeVedtatteKlagebehandling(behandling)
@@ -197,10 +159,7 @@ class KlagebehandlingHenterTest {
                     resultat = null,
                 )
 
-            every { klageClient.hentKlagebehandlinger(setOf(behandling.fagsak.id)) } returns
-                mapOf(
-                    behandling.fagsak.id to listOf(klagebehandlingDto),
-                )
+            every { klageClient.hentKlagebehandlinger(behandling.fagsak.id) } returns listOf(klagebehandlingDto)
 
             // Act
             val forrigeVedtatteKlagebehandling = klagebehandlingHenter.hentForrigeVedtatteKlagebehandling(behandling)
@@ -227,10 +186,7 @@ class KlagebehandlingHenterTest {
                     resultat = BehandlingResultat.MEDHOLD,
                 )
 
-            every { klageClient.hentKlagebehandlinger(setOf(behandling.fagsak.id)) } returns
-                mapOf(
-                    behandling.fagsak.id to listOf(klagebehandlingDto),
-                )
+            every { klageClient.hentKlagebehandlinger(behandling.fagsak.id) } returns listOf(klagebehandlingDto)
 
             // Act
             val forrigeVedtatteKlagebehandling = klagebehandlingHenter.hentForrigeVedtatteKlagebehandling(behandling)
@@ -285,10 +241,7 @@ class KlagebehandlingHenterTest {
                     resultat = BehandlingResultat.IKKE_MEDHOLD_FORMKRAV_AVVIST,
                 )
 
-            every { klageClient.hentKlagebehandlinger(setOf(behandling.fagsak.id)) } returns
-                mapOf(
-                    behandling.fagsak.id to listOf(klagebehandlingDto1, klagebehandlingDto2, klagebehandlingDto3),
-                )
+            every { klageClient.hentKlagebehandlinger(behandling.fagsak.id) } returns listOf(klagebehandlingDto1, klagebehandlingDto2, klagebehandlingDto3)
 
             val forventetForrigeVedtatteKlagebehandling = klagebehandlingDto2.copy(vedtaksdato = nåtidspunkt.minusSeconds(1))
 
@@ -329,10 +282,7 @@ class KlagebehandlingHenterTest {
                     resultat = BehandlingResultat.MEDHOLD,
                 )
 
-            every { klageClient.hentKlagebehandlinger(setOf(behandling.fagsak.id)) } returns
-                mapOf(
-                    behandling.fagsak.id to listOf(klagebehandlingDto1, klagebehandlingDto2),
-                )
+            every { klageClient.hentKlagebehandlinger(behandling.fagsak.id) } returns listOf(klagebehandlingDto1, klagebehandlingDto2)
 
             // Act
             val forrigeVedtatteKlagebehandling = klagebehandlingHenter.hentForrigeVedtatteKlagebehandling(behandling)

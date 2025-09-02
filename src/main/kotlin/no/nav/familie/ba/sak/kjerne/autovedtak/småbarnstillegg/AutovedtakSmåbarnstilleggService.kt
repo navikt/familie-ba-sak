@@ -68,7 +68,7 @@ class AutovedtakSmåbarnstilleggService(
     }
 
     val antallVedtakOmOvergangsstønadTilManuellBehandling: Map<TilManuellBehandlingÅrsak, Counter> =
-        TilManuellBehandlingÅrsak.values().associateWith {
+        TilManuellBehandlingÅrsak.entries.associateWith {
             Metrics.counter(
                 "behandling",
                 "saksbehandling",

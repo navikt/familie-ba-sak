@@ -1,18 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakerForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
@@ -43,16 +37,13 @@ class FagsakController(
     private val personidentService: PersonidentService,
     private val tilgangService: TilgangService,
     private val tilbakekrevingService: TilbakekrevingService,
-    private val unleash: UnleashNextMedContextService,
 ) {
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentEllerOpprettFagsak(
         @RequestBody fagsakRequest: FagsakRequest,
     ): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter eller oppretter ny fagsak")
-        if (unleash.isEnabled(FeatureToggle.BRUK_NY_OPPRETT_FAGSAK_MODAL)) {
-            fagsakRequest.valider()
-        }
+        fagsakRequest.valider()
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(fagsakRequest.personIdent),
             event = AuditLoggerEvent.CREATE,
@@ -128,17 +119,6 @@ class FagsakController(
             )
     }
 
-    @PostMapping(path = ["/sok"])
-    fun søkFagsak(
-        @RequestBody søkParam: RestSøkParam,
-    ): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
-        søkParam.valider()
-        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} søker fagsak")
-
-        val fagsakDeltagere = fagsakService.hentFagsakDeltager(søkParam.personIdent)
-        return ResponseEntity.ok().body(Ressurs.success(fagsakDeltagere))
-    }
-
     @PostMapping(path = ["/sok/fagsaker-hvor-person-er-deltaker"])
     fun søkFagsakerHvorPersonErSøkerEllerMottarOrdinærBarnetrygd(
         @RequestBody request: RestSøkFagsakRequest,
@@ -199,34 +179,6 @@ class FagsakController(
         val aktørId: String,
         val fagsakId: Long,
     )
-
-    @PostMapping(path = ["/sok/fagsakdeltagere"])
-    fun oppgiFagsakdeltagere(
-        @RequestBody restSøkParam: RestSøkParam,
-    ): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
-        restSøkParam.valider()
-        return Result
-            .runCatching {
-                val aktør = personidentService.hentAktør(restSøkParam.personIdent)
-                val barnsAktørId = personidentService.hentAktørIder(restSøkParam.barnasIdenter)
-
-                fagsakService.oppgiFagsakdeltagere(aktør, barnsAktørId)
-            }.fold(
-                onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
-                onFailure = {
-                    logger.info("Henting av fagsakdeltagere feilet.")
-                    secureLogger.info("Henting av fagsakdeltagere feilet: ${it.message}", it)
-                    ResponseEntity
-                        .status(if (it is Feil) it.httpStatus else HttpStatus.OK)
-                        .body(
-                            Ressurs.failure(
-                                error = it,
-                                errorMessage = "Henting av fagsakdeltagere feilet: ${it.message}",
-                            ),
-                        )
-                },
-            )
-    }
 
     @GetMapping(path = ["/{fagsakId}/har-apen-tilbakekreving"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun harÅpenTilbakekreving(

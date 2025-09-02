@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -21,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.util.ordinærSatsNesteMånedTilTester
 import no.nav.familie.kontrakter.felles.getDataOrThrow
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -171,6 +173,74 @@ class FødselshendelseFørstegangsbehandlingTest(
             gjeldendeUtbetalingsperiode,
             2,
             ordinærSatsNesteMånedTilTester().beløp * 2,
+        )
+    }
+
+    @Test
+    fun `Skal innvilge fødselshendelse på mor med 2 barn der barna er født i hver sin måned`() {
+        val scenario =
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato =
+                                LocalDate
+                                    .now()
+                                    .førsteDagIInneværendeMåned()
+                                    .minusDays(1)
+                                    .toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
+                        ),
+                        RestScenarioPerson(
+                            fødselsdato = LocalDate.now().førsteDagIInneværendeMåned().toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen 2",
+                        ),
+                    ),
+            ).also { stubScenario(it) }
+        val behandling =
+            behandleFødselshendelse(
+                nyBehandlingHendelse =
+                    NyBehandlingHendelse(
+                        morsIdent = scenario.søker.ident,
+                        barnasIdenter = scenario.barna.map { it.ident },
+                    ),
+                behandleFødselshendelseTask = behandleFødselshendelseTask,
+                fagsakService = fagsakService,
+                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+                personidentService = personidentService,
+                vedtakService = vedtakService,
+                stegService = stegService,
+                brevmalService = brevmalService,
+            )
+
+        val restFagsakEtterBehandlingAvsluttet =
+            familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id)
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterBehandlingAvsluttet,
+            fagsakStatus = FagsakStatus.LØPENDE,
+            behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
+        )
+
+        val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
+        assertEquals(Behandlingsresultat.INNVILGET, aktivBehandling.resultat)
+
+        val utbetalingsperioder = aktivBehandling.utbetalingsperioder
+
+        assertThat(utbetalingsperioder).hasSize(3)
+
+        val gjeldendeUtbetalingsperiode =
+            utbetalingsperioder.find {
+                it.periodeFom.toYearMonth() >= ordinærSatsNesteMånedTilTester().gyldigFom.toYearMonth() &&
+                    it.periodeFom.toYearMonth() <= ordinærSatsNesteMånedTilTester().gyldigTom.toYearMonth()
+            }!!
+
+        assertUtbetalingsperiode(
+            gjeldendeUtbetalingsperiode,
+            1,
+            ordinærSatsNesteMånedTilTester().beløp,
         )
     }
 }

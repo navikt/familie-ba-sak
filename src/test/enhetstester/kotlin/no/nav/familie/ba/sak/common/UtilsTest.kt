@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer.er11Siffer
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -33,7 +33,7 @@ internal class UtilsTest {
     @Test
     fun `Nullable verdier blir tom string`() {
         val adresse =
-            GrVegadresse(
+            GrVegadresseBostedsadresse(
                 matrikkelId = null,
                 bruksenhetsnummer = null,
                 husnummer = "1",
@@ -42,6 +42,7 @@ internal class UtilsTest {
                 adressenavn = "TEST",
                 husbokstav = null,
                 postnummer = "1234",
+                poststed = null,
             )
 
         assertEquals("Test 1, 1234", adresse.tilFrontendString())

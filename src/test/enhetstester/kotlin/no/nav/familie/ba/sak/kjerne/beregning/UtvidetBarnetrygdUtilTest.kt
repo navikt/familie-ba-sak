@@ -81,7 +81,7 @@ class UtvidetBarnetrygdUtilTest {
                     testBeregnUtvidet.med(UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_ANNEN_FORELDER)
                 }.melding
 
-        val forventetFeilmelding = "Du har lagt til utvidet barnetrygd for en periode der det ikke er rett til barnetrygd"
+        val forventetFeilmelding = "Du har lagt til utvidet barnetrygd for en periode der det ikke er rett til utvidet barnetrygd"
 
         assertTrue(forventetFeilmelding in feilmeldinger.first && forventetFeilmelding in feilmeldinger.second)
 

@@ -9,8 +9,10 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 @TaskStepBeskrivelse(
@@ -23,16 +25,19 @@ import java.time.LocalDate
 class SendAutobrevPgaAlderTask(
     private val autobrevOmregningPgaAlderService: AutobrevOmregningPgaAlderService,
 ) : AsyncTaskStep {
+    private val logger = LoggerFactory.getLogger(SendAutobrevPgaAlderTask::class.java)
+
     @WithSpan
     override fun doTask(task: Task) {
         val autobrevDTO = objectMapper.readValue(task.payload, AutobrevPgaAlderDTO::class.java)
 
-        if (!LocalDate.now().toYearMonth().equals(autobrevDTO.årMåned)) {
-            throw Feil("Task for autobrev må kjøres innenfor måneden det skal sjekkes mot.")
+        if (!YearMonth.now().equals(autobrevDTO.årMåned)) {
+            logger.info("Task for autobrev må kjøres innenfor måneden det skal sjekkes mot.")
+            task.metadata["resultat"] = "Ignorerer task, da den ikke kjøres i riktig måned"
+        } else {
+            task.metadata["resultat"] =
+                autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevDTO, task.opprettetTid).name
         }
-
-        task.metadata["resultat"] =
-            autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevDTO, task.opprettetTid).name
     }
 
     companion object {

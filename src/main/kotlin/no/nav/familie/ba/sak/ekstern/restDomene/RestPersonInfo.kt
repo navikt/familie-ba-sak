@@ -16,10 +16,11 @@ data class RestPersonInfo(
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
     var harTilgang: Boolean = true,
     val forelderBarnRelasjon: List<RestForelderBarnRelasjon> = emptyList(),
-    val forelderBarnRelasjonMaskert: List<RestForelderBarnRelasjonnMaskert> = emptyList(),
+    val forelderBarnRelasjonMaskert: List<RestForelderBarnRelasjonMaskert> = emptyList(),
     val kommunenummer: String = "ukjent",
     val dødsfallDato: String? = null,
     val bostedsadresse: RestBostedsadresse? = null,
+    val erEgenAnsatt: Boolean? = null,
 )
 
 data class RestForelderBarnRelasjon(
@@ -28,9 +29,10 @@ data class RestForelderBarnRelasjon(
     val navn: String,
     val fødselsdato: LocalDate?,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
+    val erEgenAnsatt: Boolean? = null,
 )
 
-data class RestForelderBarnRelasjonnMaskert(
+data class RestForelderBarnRelasjonMaskert(
     val relasjonRolle: FORELDERBARNRELASJONROLLE,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING,
 )
@@ -41,7 +43,7 @@ data class RestBostedsadresse(
 )
 
 private fun ForelderBarnRelasjonMaskert.tilRestForelderBarnRelasjonMaskert() =
-    RestForelderBarnRelasjonnMaskert(
+    RestForelderBarnRelasjonMaskert(
         relasjonRolle = this.relasjonsrolle,
         adressebeskyttelseGradering = this.adressebeskyttelseGradering,
     )
@@ -53,6 +55,7 @@ private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() =
         navn = this.navn ?: "",
         fødselsdato = this.fødselsdato,
         adressebeskyttelseGradering = this.adressebeskyttelseGradering,
+        erEgenAnsatt = this.erEgenAnsatt,
     )
 
 fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
@@ -79,6 +82,7 @@ fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
         forelderBarnRelasjonMaskert = this.forelderBarnRelasjonMaskert.map { it.tilRestForelderBarnRelasjonMaskert() },
         kommunenummer = kommunenummer,
         dødsfallDato = dødsfallDato,
+        erEgenAnsatt = this.erEgenAnsatt,
     )
 }
 

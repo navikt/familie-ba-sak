@@ -13,11 +13,16 @@ interface PersonRepository : JpaRepository<Person, Long> {
     fun findByAktør(aktør: Aktør): List<Person>
 
     @Query(
-        "SELECT distinct b.fagsak FROM Person p" +
-            " JOIN p.personopplysningGrunnlag pg" +
-            " JOIN Behandling b ON b.id = pg.behandlingId" +
-            " WHERE p.aktør = :aktør" +
-            " AND pg.aktiv = true",
+        """
+            SELECT DISTINCT f
+            FROM Person p
+                     JOIN PersonopplysningGrunnlag po ON po.id = p.personopplysningGrunnlag.id
+                     JOIN Behandling b ON b.id = po.behandlingId
+                     JOIN Fagsak f ON f.id = b.fagsak.id
+            WHERE p.aktør = :aktør
+              AND po.aktiv = true
+              AND f.arkivert = false
+        """,
     )
     fun findFagsakerByAktør(aktør: Aktør): List<Fagsak>
 }

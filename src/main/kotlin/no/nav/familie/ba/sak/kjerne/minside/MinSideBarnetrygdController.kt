@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.minside
 
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.sikkerhet.EksternBrukerUtils
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -27,18 +25,11 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class MinSideBarnetrygdController(
     private val minSideBarnetrygdService: MinSideBarnetrygdService,
-    private val unleash: UnleashNextMedContextService,
 ) {
     private val logger = LoggerFactory.getLogger(MinSideBarnetrygdController::class.java)
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMinSideBarnetrygd(): ResponseEntity<HentMinSideBarnetrygdDto> {
-        if (!unleash.isEnabled(FeatureToggle.MIN_SIDE_BARNETRYGD_ENDEPUNKT)) {
-            return ResponseEntity
-                .status(HttpStatus.NOT_IMPLEMENTED)
-                .body(HentMinSideBarnetrygdDto.Feil("Tjenesten er ikke implementert."))
-        }
-
         val fnrFraToken: String?
         try {
             fnrFraToken = EksternBrukerUtils.hentFnrFraToken()

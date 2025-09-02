@@ -47,7 +47,12 @@ fun beregnDifferanse(
 ): List<AndelTilkjentYtelse> {
     val utenlandskePeriodebeløpTidslinjer = utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
     val valutakursTidslinjer = valutakurser.tilSeparateTidslinjerForBarna()
-    val andelTilkjentYtelseTidslinjer = andelerTilkjentYtelse.tilSeparateTidslinjerForBarna()
+
+    val (barnasOrdinæreAndeler, barnasTilleggsandeler) =
+        andelerTilkjentYtelse
+            .filter { !it.erSøkersAndel() }
+            .partition { it.type == YtelseType.ORDINÆR_BARNETRYGD }
+    val barnasOrdinæreAndelerTidslinjer = barnasOrdinæreAndeler.tilSeparateTidslinjerForBarna()
 
     val barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer =
         utenlandskePeriodebeløpTidslinjer.outerJoin(valutakursTidslinjer) { upb, valutakurs ->
@@ -55,14 +60,14 @@ fun beregnDifferanse(
         }
 
     val barnasDifferanseberegneteAndelTilkjentYtelseTidslinjer =
-        andelTilkjentYtelseTidslinjer.outerJoin(barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer) { aty, beløp ->
+        barnasOrdinæreAndelerTidslinjer.outerJoin(barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer) { aty, beløp ->
             aty.oppdaterDifferanseberegning(beløp)
         }
 
     val barnasAndeler = barnasDifferanseberegneteAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
     val søkersAndeler = andelerTilkjentYtelse.filter { it.erSøkersAndel() }
 
-    return søkersAndeler + barnasAndeler
+    return søkersAndeler + barnasAndeler + barnasTilleggsandeler
 }
 
 /**
@@ -88,7 +93,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
             .tilTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
             .utenDifferanseberegning()
 
-    val barnasAndelerTidslinjer = this.tilSeparateTidslinjerForBarna()
+    val barnasAndelerTidslinjer = this.filter { it.type == YtelseType.ORDINÆR_BARNETRYGD }.tilSeparateTidslinjerForBarna()
 
     val perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerTidslinje()
 

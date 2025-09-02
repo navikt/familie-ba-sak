@@ -10,6 +10,10 @@ import java.time.LocalDateTime
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
+class FinnmarkstilleggIngenEndringFeil(
+    message: String,
+) : RuntimeException(message)
+
 open class Feil(
     message: String,
     open val frontendFeilmelding: String? = null,

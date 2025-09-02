@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.prosessering.error.RekjørSenereException
-import no.nav.familie.util.VirkedagerProvider
+import no.nav.familie.util.VirkedagerProvider.nesteVirkedag
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -144,7 +144,7 @@ class AutovedtakMånedligValutajusteringServiceTest {
         val fagsak = defaultFagsak().apply { status = FagsakStatus.LØPENDE }
         val behandling = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET)
         val åpenBehandling = lagBehandling(fagsak = fagsak, status = BehandlingStatus.FATTER_VEDTAK)
-        val klokkenSeksNesteVirkedag = VirkedagerProvider.nesteVirkedag(LocalDate.now()).atTime(6, 0)
+        val klokkenSeksNesteVirkedag = (1..3).fold(LocalDate.now()) { acc, _ -> nesteVirkedag(acc) }.atTime(6, 0)
 
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns behandling
         every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(any()) } returns åpenBehandling

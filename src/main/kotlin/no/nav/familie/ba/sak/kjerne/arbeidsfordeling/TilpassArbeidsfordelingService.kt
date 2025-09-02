@@ -71,18 +71,12 @@ class TilpassArbeidsfordelingService(
         val navIdentHarKunTilgangTilVikafossen = enheterNavIdentHarTilgangTil.map { it.enhetsnummer }.containsExactly(BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer)
         if (navIdentHarKunTilgangTilVikafossen) {
             // Skal kun være lovt til å sette Vikafossen når det er eneste valgmulighet
-            return Arbeidsfordelingsenhet(
-                BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-            )
+            return Arbeidsfordelingsenhet.opprettFra(BarnetrygdEnhet.VIKAFOSSEN)
         }
         val enheterNavIdentHarTilgangTilForutenVikafossen = enheterNavIdentHarTilgangTil.filter { it.enhetsnummer != BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer }
         // Velger bare det første enhetsnummeret i tilfeller hvor man har flere, avklart med fag
         val nyBehandlendeEnhet = enheterNavIdentHarTilgangTilForutenVikafossen.first()
-        return Arbeidsfordelingsenhet(
-            nyBehandlendeEnhet.enhetsnummer,
-            nyBehandlendeEnhet.enhetsnavn,
-        )
+        return Arbeidsfordelingsenhet.opprettFra(nyBehandlendeEnhet)
     }
 
     private fun håndterVikafossenEnhet2103(
@@ -92,10 +86,7 @@ class TilpassArbeidsfordelingService(
             logger.error("Kan ikke håndtere ${BarnetrygdEnhet.VIKAFOSSEN} om man mangler NAV-ident.")
             throw Feil("Kan ikke håndtere ${BarnetrygdEnhet.VIKAFOSSEN} om man mangler NAV-ident.")
         }
-        return Arbeidsfordelingsenhet(
-            BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-            BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-        )
+        return Arbeidsfordelingsenhet.opprettFra(BarnetrygdEnhet.VIKAFOSSEN)
     }
 
     private fun håndterAndreEnheter(
@@ -104,10 +95,7 @@ class TilpassArbeidsfordelingService(
     ): Arbeidsfordelingsenhet {
         if (navIdent == null || navIdent.erSystemIdent()) {
             // navIdent er null ved automatisk journalføring
-            return Arbeidsfordelingsenhet(
-                arbeidsfordelingsenhet.enhetId,
-                arbeidsfordelingsenhet.enhetNavn,
-            )
+            return arbeidsfordelingsenhet
         }
         val enheterNavIdentHarTilgangTil = integrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent)
         if (enheterNavIdentHarTilgangTil.isEmpty()) {
@@ -118,25 +106,16 @@ class TilpassArbeidsfordelingService(
         val navIdentHarKunTilgangTilVikafossen = enheterNavIdentHarTilgangTil.map { it.enhetsnummer }.containsExactly(BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer)
         if (navIdentHarKunTilgangTilVikafossen) {
             // Skal kun være lovt til å sette Vikafossen når det er eneste valgmulighet
-            return Arbeidsfordelingsenhet(
-                BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-            )
+            return Arbeidsfordelingsenhet.opprettFra(BarnetrygdEnhet.VIKAFOSSEN)
         }
         val enheterNavIdentHarTilgangTilForutenVikafossen = enheterNavIdentHarTilgangTil.filter { it.enhetsnummer != BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer }
         val harTilgangTilBehandledeEnhet = enheterNavIdentHarTilgangTilForutenVikafossen.any { it.enhetsnummer == arbeidsfordelingsenhet.enhetId }
         if (!harTilgangTilBehandledeEnhet) {
             // Velger bare det første enhetsnummeret i tilfeller hvor man har flere, avklart med fag
             val nyBehandlendeEnhet = enheterNavIdentHarTilgangTilForutenVikafossen.first()
-            return Arbeidsfordelingsenhet(
-                nyBehandlendeEnhet.enhetsnummer,
-                nyBehandlendeEnhet.enhetsnavn,
-            )
+            return Arbeidsfordelingsenhet.opprettFra(nyBehandlendeEnhet)
         }
-        return Arbeidsfordelingsenhet(
-            arbeidsfordelingsenhet.enhetId,
-            arbeidsfordelingsenhet.enhetNavn,
-        )
+        return arbeidsfordelingsenhet
     }
 
     private fun NavIdent.erSystemIdent(): Boolean = this.ident == SYSTEM_FORKORTELSE

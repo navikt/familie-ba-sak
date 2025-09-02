@@ -4,6 +4,8 @@ import io.mockk.every
 import io.mockk.isMockKMock
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -15,7 +17,6 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.TaskRepositoryTestConfig
-import no.nav.familie.unleash.UnleashService
 import no.nav.familie.valutakurs.ValutakursRestClient
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.MDC
@@ -51,7 +52,7 @@ abstract class AbstractMockkSpringRunner {
     private lateinit var mockØkonomiKlient: ØkonomiKlient
 
     @Autowired
-    private lateinit var mockUnleashService: UnleashService
+    private lateinit var mockFeatureToggleService: FeatureToggleService
 
     @Autowired
     private lateinit var mockTilbakekrevingKlient: TilbakekrevingKlient
@@ -92,12 +93,12 @@ abstract class AbstractMockkSpringRunner {
     }
 
     fun settToggleMock(
-        toggle: String,
+        toggle: FeatureToggle,
         value: Boolean,
     ) {
-        every { mockUnleashService.isEnabled(toggle) } returns value
-        every { mockUnleashService.isEnabled(toggle, defaultValue = any()) } returns value
-        every { mockUnleashService.isEnabled(toggle, properties = any()) } returns value
+        every { mockFeatureToggleService.isEnabled(toggle) } returns value
+        every { mockFeatureToggleService.isEnabled(toggle = toggle, behandlingId = any<Long>()) } returns value
+        every { mockFeatureToggleService.isEnabled(toggle = toggle, defaultValue = any<Boolean>()) } returns value
     }
 
     private fun clearMocks() {
@@ -114,8 +115,8 @@ abstract class AbstractMockkSpringRunner {
             mockFamilieIntegrasjonerTilgangskontrollClient,
         )
 
-        if (isMockKMock(mockUnleashService)) {
-            ClientMocks.clearUnleashServiceMocks(mockUnleashService)
+        if (isMockKMock(mockFeatureToggleService)) {
+            ClientMocks.clearFeatureToggleMocks(mockFeatureToggleService)
         }
 
         if (isMockKMock(mockEfSakRestClient)) {

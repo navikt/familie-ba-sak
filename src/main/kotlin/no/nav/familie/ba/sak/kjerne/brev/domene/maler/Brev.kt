@@ -159,6 +159,7 @@ enum class Brevmal(
     VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON(true, "opphorMedEndringInstitusjon", "Opphør med endring"),
     VEDTAK_AVSLAG_INSTITUSJON(true, "vedtakAvslagInstitusjon", "Avslag"),
     VEDTAK_FORTSATT_INNVILGET_INSTITUSJON(true, "vedtakFortsattInnvilgetInstitusjon", "Vedtak fortstatt innvilget"),
+    AUTOVEDTAK_FINNMARKSTILLEGG(true, "autovedtakFinnmarkstillegg", "Vedtak finnmarkstillegg innvilget"),
 
     AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG(
         true,
@@ -227,7 +228,8 @@ enum class Brevmal(
             AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
             AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
             AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
-            -> throw Feil("Ikke avgjort om $this skal generere forside")
+            AUTOVEDTAK_FINNMARKSTILLEGG,
+            -> throw Feil("$this støtter ikke generering av forside")
         }
 
     fun tilFamilieKontrakterDokumentType(): Dokumenttype =
@@ -285,61 +287,71 @@ enum class Brevmal(
             AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
             AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
             AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
+            AUTOVEDTAK_FINNMARKSTILLEGG,
             -> throw Feil("Ingen dokumenttype for $this")
         }
 
     val distribusjonstype: Distribusjonstype
         get() =
             when (this) {
-                INFORMASJONSBREV_DELT_BOSTED -> Distribusjonstype.VIKTIG
-                INNHENTE_OPPLYSNINGER, INNHENTE_OPPLYSNINGER_INSTITUSJON -> Distribusjonstype.VIKTIG
-                INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED -> Distribusjonstype.VIKTIG
-                INNHENTE_OPPLYSNINGER_OG_INFORMASJON_OM_AT_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_HAR_SØKT -> Distribusjonstype.VIKTIG
-                HENLEGGE_TRUKKET_SØKNAD -> Distribusjonstype.ANNET
-                HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON -> Distribusjonstype.ANNET
-                VARSEL_OM_REVURDERING -> Distribusjonstype.VIKTIG
-                VARSEL_OM_REVURDERING_INSTITUSJON -> Distribusjonstype.VIKTIG
-                VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 -> Distribusjonstype.VIKTIG
-                VARSEL_OM_REVURDERING_SAMBOER -> Distribusjonstype.ANNET
-                VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> Distribusjonstype.VIKTIG
-                VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS -> Distribusjonstype.VIKTIG
-                VARSEL_OM_ÅRLIG_REVURDERING_EØS -> Distribusjonstype.VIKTIG
-                VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER -> Distribusjonstype.VIKTIG
-                VARSEL_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_SØKT -> Distribusjonstype.VIKTIG
-                SVARTIDSBREV, SVARTIDSBREV_INSTITUSJON -> Distribusjonstype.ANNET
-                FORLENGET_SVARTIDSBREV, FORLENGET_SVARTIDSBREV_INSTITUSJON -> Distribusjonstype.ANNET
-                TILBAKEKREVINGSVEDTAK_MOTREGNING -> Distribusjonstype.ANNET
-                INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Distribusjonstype.ANNET
-                INFORMASJONSBREV_FØDSEL_VERGEMÅL -> Distribusjonstype.ANNET
-                INFORMASJONSBREV_KAN_SØKE -> Distribusjonstype.ANNET
-                INFORMASJONSBREV_KAN_SØKE_EØS -> Distribusjonstype.ANNET
-                INFORMASJONSBREV_FØDSEL_GENERELL -> Distribusjonstype.ANNET
-                INFORMASJONSBREV_TIL_FORELDER_MED_SELVSTENDIG_RETT_VI_HAR_FÅTT_F016_KAN_SØKE_OM_BARNETRYGD -> Distribusjonstype.VIKTIG
-                INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_FÅTT_EN_SØKNAD_FRA_ANNEN_FORELDER -> Distribusjonstype.VIKTIG
-                INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_GJORT_VEDTAK_TIL_ANNEN_FORELDER -> Distribusjonstype.VIKTIG
-                INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_VARSEL_OM_ÅRLIG_KONTROLL -> Distribusjonstype.VIKTIG
-                INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HENTER_IKKE_REGISTEROPPLYSNINGER -> Distribusjonstype.VIKTIG
-                INFORMASJONSBREV_KAN_HA_RETT_TIL_PENGESTØTTE_FRA_NAV -> Distribusjonstype.VIKTIG
-                INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE -> Distribusjonstype.VIKTIG
-                INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON -> Distribusjonstype.VIKTIG
-                UTBETALING_ETTER_KA_VEDTAK -> Distribusjonstype.VIKTIG
-                VEDTAK_FØRSTEGANGSVEDTAK -> Distribusjonstype.VEDTAK
-                VEDTAK_ENDRING -> Distribusjonstype.VEDTAK
-                VEDTAK_OPPHØRT -> Distribusjonstype.VEDTAK
-                VEDTAK_OPPHØR_MED_ENDRING -> Distribusjonstype.VEDTAK
-                VEDTAK_AVSLAG -> Distribusjonstype.VEDTAK
-                VEDTAK_FORTSATT_INNVILGET -> Distribusjonstype.VEDTAK
-                VEDTAK_KORREKSJON_VEDTAKSBREV -> Distribusjonstype.VEDTAK
-                VEDTAK_OPPHØR_DØDSFALL -> Distribusjonstype.VEDTAK
-                VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON -> Distribusjonstype.VEDTAK
-                VEDTAK_AVSLAG_INSTITUSJON -> Distribusjonstype.VEDTAK
-                VEDTAK_OPPHØRT_INSTITUSJON -> Distribusjonstype.VEDTAK
-                VEDTAK_ENDRING_INSTITUSJON -> Distribusjonstype.VEDTAK
-                VEDTAK_FORTSATT_INNVILGET_INSTITUSJON -> Distribusjonstype.VEDTAK
-                VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON -> Distribusjonstype.VEDTAK
-                AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG -> Distribusjonstype.VEDTAK
-                AUTOVEDTAK_NYFØDT_FØRSTE_BARN -> Distribusjonstype.VEDTAK
-                AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> Distribusjonstype.VEDTAK
+                INFORMASJONSBREV_DELT_BOSTED,
+                INNHENTE_OPPLYSNINGER,
+                INNHENTE_OPPLYSNINGER_INSTITUSJON,
+                INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
+                INNHENTE_OPPLYSNINGER_OG_INFORMASJON_OM_AT_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_HAR_SØKT,
+                VARSEL_OM_REVURDERING,
+                VARSEL_OM_REVURDERING_INSTITUSJON,
+                VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
+                VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
+                VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
+                VARSEL_OM_ÅRLIG_REVURDERING_EØS,
+                VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
+                VARSEL_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_SØKT,
+                INFORMASJONSBREV_TIL_FORELDER_MED_SELVSTENDIG_RETT_VI_HAR_FÅTT_F016_KAN_SØKE_OM_BARNETRYGD,
+                INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_FÅTT_EN_SØKNAD_FRA_ANNEN_FORELDER,
+                INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_GJORT_VEDTAK_TIL_ANNEN_FORELDER,
+                INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_VARSEL_OM_ÅRLIG_KONTROLL,
+                INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HENTER_IKKE_REGISTEROPPLYSNINGER,
+                INFORMASJONSBREV_KAN_HA_RETT_TIL_PENGESTØTTE_FRA_NAV,
+                INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE,
+                INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON,
+                UTBETALING_ETTER_KA_VEDTAK,
+                -> Distribusjonstype.VIKTIG
+
+                VEDTAK_FØRSTEGANGSVEDTAK,
+                VEDTAK_ENDRING,
+                VEDTAK_OPPHØRT,
+                VEDTAK_OPPHØR_MED_ENDRING,
+                VEDTAK_AVSLAG,
+                VEDTAK_FORTSATT_INNVILGET,
+                VEDTAK_KORREKSJON_VEDTAKSBREV,
+                VEDTAK_OPPHØR_DØDSFALL,
+                VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON,
+                VEDTAK_AVSLAG_INSTITUSJON,
+                VEDTAK_OPPHØRT_INSTITUSJON,
+                VEDTAK_ENDRING_INSTITUSJON,
+                VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
+                VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
+                AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
+                AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
+                AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
+                AUTOVEDTAK_FINNMARKSTILLEGG,
+                -> Distribusjonstype.VEDTAK
+
+                HENLEGGE_TRUKKET_SØKNAD,
+                HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON,
+                VARSEL_OM_REVURDERING_SAMBOER,
+                SVARTIDSBREV,
+                SVARTIDSBREV_INSTITUSJON,
+                FORLENGET_SVARTIDSBREV,
+                FORLENGET_SVARTIDSBREV_INSTITUSJON,
+                TILBAKEKREVINGSVEDTAK_MOTREGNING,
+                INFORMASJONSBREV_FØDSEL_MINDREÅRIG,
+                INFORMASJONSBREV_FØDSEL_VERGEMÅL,
+                INFORMASJONSBREV_KAN_SØKE,
+                INFORMASJONSBREV_KAN_SØKE_EØS,
+                INFORMASJONSBREV_FØDSEL_GENERELL,
+                -> Distribusjonstype.ANNET
             }
 
     fun førerTilOpplysningsplikt(): Boolean =

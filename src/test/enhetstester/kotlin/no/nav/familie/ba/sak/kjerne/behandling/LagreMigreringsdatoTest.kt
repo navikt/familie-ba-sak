@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -45,7 +45,7 @@ class LagreMigreringsdatoTest {
     private val taskRepository = mockk<TaskRepositoryWrapper>()
     private val behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>()
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
-    private val mockkUnleash = mockk<UnleashNextMedContextService>()
+    private val mockFeatureToggleService = mockk<FeatureToggleService>()
     private val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
 
     private val behandlingService =
@@ -65,7 +65,7 @@ class LagreMigreringsdatoTest {
             vedtaksperiodeService = vedtaksperiodeService,
             taskRepository = taskRepository,
             vilkårsvurderingService = vilkårsvurderingService,
-            unleashService = mockkUnleash,
+            featureToggleService = mockFeatureToggleService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
         )
 

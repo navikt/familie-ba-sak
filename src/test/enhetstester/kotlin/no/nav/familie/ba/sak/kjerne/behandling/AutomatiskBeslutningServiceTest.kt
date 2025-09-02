@@ -84,7 +84,7 @@ class AutomatiskBeslutningServiceTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         BehandlingType
-            .values()
+            .entries
             .filter {
                 !listOf(
                     BehandlingType.MIGRERING_FRA_INFOTRYGD,

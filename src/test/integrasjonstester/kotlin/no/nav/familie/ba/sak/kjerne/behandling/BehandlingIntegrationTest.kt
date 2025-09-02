@@ -43,9 +43,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresseBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBostedBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -616,7 +616,7 @@ class BehandlingIntegrationTest(
         )
 
         val søker = personRepository.findByAktør(søkerAktør).first()
-        val vegadresse = søker.bostedsadresser.sisteAdresse() as GrVegadresse
+        val vegadresse = søker.bostedsadresser.sisteAdresse() as GrVegadresseBostedsadresse
         assertEquals(søkerAdressnavn, vegadresse.adressenavn)
         assertEquals(matrikkelId, vegadresse.matrikkelId)
         assertEquals(søkerBruksenhetsnummer, vegadresse.bruksenhetsnummer)
@@ -631,7 +631,7 @@ class BehandlingIntegrationTest(
         søker.personopplysningGrunnlag.barna.forEach {
             when (it.aktør.aktivFødselsnummer()) {
                 barn1Fnr -> {
-                    val matrikkeladresse = it.bostedsadresser.sisteAdresse() as GrMatrikkeladresse
+                    val matrikkeladresse = it.bostedsadresser.sisteAdresse() as GrMatrikkeladresseBostedsadresse
                     assertEquals(barn1Bruksenhetsnummer, matrikkeladresse.bruksenhetsnummer)
                     assertEquals(barn1Kommunenummer, matrikkeladresse.kommunenummer)
                     assertEquals(barn1Postnummer, matrikkeladresse.postnummer)
@@ -639,7 +639,7 @@ class BehandlingIntegrationTest(
                 }
 
                 barn2Fnr -> {
-                    val ukjentBosted = it.bostedsadresser.sisteAdresse() as GrUkjentBosted
+                    val ukjentBosted = it.bostedsadresser.sisteAdresse() as GrUkjentBostedBostedsadresse
                     assertEquals(barn2BostedKommune, ukjentBosted.bostedskommune)
                 }
 

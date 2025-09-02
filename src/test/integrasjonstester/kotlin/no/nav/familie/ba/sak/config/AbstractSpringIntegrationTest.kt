@@ -28,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles
     "mock-localdate-service",
     "mock-sanity-client",
     "mock-unleash",
+    "mock-system-only-integrasjon-client",
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")

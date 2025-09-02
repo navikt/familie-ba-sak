@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
@@ -23,6 +25,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 class UtbetalingssikkerhetTest {
     @Test
@@ -66,6 +69,122 @@ class UtbetalingssikkerhetTest {
             }
 
         assertEquals("Feil med tidslinje. Overlapp på periode", feil.message)
+    }
+
+    @Test
+    fun `Skal kaste feil når et barn har både finnmarkstillegg andel og svalbardtillegg for en periode`() {
+        // Arrange
+        val person = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2025, 1, 1))
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse()
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2025, 10),
+                    tom = YearMonth.of(2025, 12),
+                    ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    beløp = 500,
+                    person = person,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2025, 10),
+                    tom = YearMonth.of(2025, 12),
+                    ytelseType = YtelseType.SVALBARDTILLEGG,
+                    beløp = 500,
+                    person = person,
+                ),
+            ),
+        )
+
+        // Act && Assert
+        val feilmelding =
+            assertThrows<UtbetalingsikkerhetFeil> {
+                TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+                    tilkjentYtelse,
+                    listOf(person.tilPersonEnkel()),
+                )
+            }.melding
+
+        assertEquals("Validering feilet for person med fødselsdato 2025-01-01 - Barnet kan ikke ha både finnmarkstillegg og svalbardtillegg i samme periode.", feilmelding)
+    }
+
+    @Test
+    fun `Skal ikke kaste feil når et barn har både finnmarkstillegg andel og ordinær for en periode`() {
+        // Arrange
+        val person = tilfeldigPerson(personType = PersonType.BARN)
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse()
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
+                    YtelseType.FINNMARKSTILLEGG,
+                    1054,
+                    person = person,
+                ),
+                lagAndelTilkjentYtelse(
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
+                    YtelseType.ORDINÆR_BARNETRYGD,
+                    660,
+                    person = person,
+                ),
+            ),
+        )
+
+        // Act && Assert
+        assertDoesNotThrow {
+            TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+                tilkjentYtelse,
+                listOf(person.tilPersonEnkel()),
+            )
+        }
+    }
+
+    @Test
+    fun `Skal ikke kaste feil når barn har både finnmarkstillegg, utvidet og ordinær andel for en periode i fagsak type barn enslig mindreårig`() {
+        // Arrange
+        val person = tilfeldigPerson(personType = PersonType.BARN)
+        val behandling = lagBehandling(fagsak = lagFagsak(type = FagsakType.BARN_ENSLIG_MINDREÅRIG))
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
+                    YtelseType.FINNMARKSTILLEGG,
+                    1054,
+                    person = person,
+                ),
+                lagAndelTilkjentYtelse(
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
+                    YtelseType.UTVIDET_BARNETRYGD,
+                    1054,
+                    person = person,
+                ),
+                lagAndelTilkjentYtelse(
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
+                    YtelseType.ORDINÆR_BARNETRYGD,
+                    660,
+                    person = person,
+                ),
+            ),
+        )
+
+        // Act && Assert
+        assertDoesNotThrow {
+            TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+                tilkjentYtelse,
+                listOf(person.tilPersonEnkel()),
+            )
+        }
     }
 
     @Test
@@ -375,23 +494,23 @@ class UtbetalingssikkerhetTest {
     fun `Korrekt maksbeløp gis for persontype`() {
         val utvidetBarnetrygd = SatsService.finnSisteSatsFor(SatsType.UTVIDET_BARNETRYGD).beløp
         val småbarnstillegg = SatsService.finnSisteSatsFor(SatsType.SMA).beløp
-        val tilleggOrdinærBarnetrygd = SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).beløp
         val ordinærBarnetrygd = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp
+        val finnmarkstillegg = SatsService.finnSisteSatsFor(SatsType.FINNMARKSTILLEGG).beløp
 
         assertEquals(
             utvidetBarnetrygd + småbarnstillegg,
             TilkjentYtelseValidering.maksBeløp(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL),
         )
         assertEquals(
-            ordinærBarnetrygd,
+            ordinærBarnetrygd + finnmarkstillegg,
             TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL),
         )
         assertEquals(
-            ordinærBarnetrygd,
+            ordinærBarnetrygd + finnmarkstillegg,
             TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.INSTITUSJON),
         )
         assertEquals(
-            ordinærBarnetrygd + utvidetBarnetrygd,
+            ordinærBarnetrygd + utvidetBarnetrygd + finnmarkstillegg,
             TilkjentYtelseValidering.maksBeløp(
                 personType = PersonType.BARN,
                 fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG,
@@ -412,8 +531,10 @@ class UtbetalingssikkerhetTest {
                 SatsType.FINN_SVAL,
                 SatsType.ORBA,
                 SatsType.UTVIDET_BARNETRYGD,
+                SatsType.FINNMARKSTILLEGG,
+                SatsType.SVALBARDTILLEGG,
             )
-        assertTrue(støttedeSatstyper.containsAll(SatsType.values().toSet()))
-        assertEquals(støttedeSatstyper.size, SatsType.values().size)
+        assertTrue(støttedeSatstyper.containsAll(SatsType.entries.toSet()))
+        assertEquals(støttedeSatstyper.size, SatsType.entries.size)
     }
 }

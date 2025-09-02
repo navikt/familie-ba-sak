@@ -48,6 +48,16 @@ sealed interface ISanityBegrunnelse {
         get() =
             this is SanityBegrunnelse &&
                 ØvrigTrigger.SATSENDRING in this.øvrigeTriggere
+
+    val gjelderFinnmarkstillegg
+        get() =
+            this is SanityBegrunnelse &&
+                VilkårTrigger.BOSATT_I_FINNMARK_NORD_TROMS in this.bosattIRiketTriggere
+
+    val gjelderSvalbardtillegg
+        get() =
+            this is SanityBegrunnelse &&
+                VilkårTrigger.BOSATT_PÅ_SVALBARD in this.bosattIRiketTriggere
 }
 
 data class SanityBegrunnelse(

@@ -1,0 +1,9 @@
+query($ident: ID!, $historikk: Boolean!) {
+    person: hentPerson(ident: $ident) {
+        opphold(historikk: $historikk) {
+            type
+            oppholdFra
+            oppholdTil
+        }
+    }
+}
