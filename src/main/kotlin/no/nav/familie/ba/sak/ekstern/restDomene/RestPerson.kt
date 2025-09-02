@@ -32,7 +32,7 @@ data class RestPerson(
     val erManueltLagtTilISøknad: Boolean? = null,
 )
 
-fun List<Person>?.tilManglendeSvalbardmerkingPerioder(personResultater: Set<PersonResultat>?): List<RestManglendeSvalbardmerking> {
+fun List<Person>?.tilManglendeSvalbardmerkingPerioder(personResultater: Set<PersonResultat>?): List<ManglendeSvalbardmerkingDto> {
     if (this == null || personResultater == null) return emptyList()
 
     val bosattIRiketVilkårTidslinjePerPerson: Map<String, Tidslinje<VilkårResultat>> = personResultater.associate { it.aktør.aktivFødselsnummer() to it.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET && vilkårResultat.periodeFom != null }.tilTidslinje() }
@@ -50,11 +50,11 @@ fun List<Person>?.tilManglendeSvalbardmerkingPerioder(personResultater: Set<Pers
                     grOppholdsadresse != null && bosattIRiketVilkår != null && !bosattIRiketVilkår.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
                 }.tilPerioderIkkeNull()
                 .filter { it.verdi }
-                .map { RestManglendeSvalbardmerkingPeriode(fom = it.fom, tom = it.tom) }
+                .map { ManglendeSvalbardmerkingPeriodeDto(fom = it.fom, tom = it.tom) }
 
         if (perioderMedManglendeSvalbardMerking.isEmpty()) return@mapNotNull null
 
-        RestManglendeSvalbardmerking(fnr, perioderMedManglendeSvalbardMerking)
+        ManglendeSvalbardmerkingDto(fnr, perioderMedManglendeSvalbardMerking)
     }
 }
 

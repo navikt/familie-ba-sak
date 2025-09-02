@@ -7,14 +7,14 @@ import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import java.time.LocalDate
 
-data class RestManglendeSvalbardmerkingPeriode(
+data class ManglendeSvalbardmerkingPeriodeDto(
     val fom: LocalDate?,
     val tom: LocalDate?,
 )
 
-data class RestManglendeSvalbardmerking(
+data class ManglendeSvalbardmerkingDto(
     val ident: String,
-    val manglendeSvalbardmerkingPerioder: List<RestManglendeSvalbardmerkingPeriode>,
+    val manglendeSvalbardmerkingPerioder: List<ManglendeSvalbardmerkingPeriodeDto>,
 )
 
 fun List<GrOppholdsadresse>.tilSvalbardOppholdTidslinje(): Tidslinje<GrOppholdsadresse> =
