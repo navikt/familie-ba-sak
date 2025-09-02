@@ -31,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.util.ordinærSatsNesteMånedTilTester
 import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -64,13 +65,14 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
     @Test
     fun `Skal journalføre og behandle ordinær nasjonal sak`() {
+        val fødselsdatoBarn = LocalDate.now().minusMonths(6)
         val scenario =
             RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1996-11-12", fornavn = "Mor", etternavn = "Søker"),
                 barna =
                     listOf(
                         RestScenarioPerson(
-                            fødselsdato = LocalDate.now().minusMonths(2).toString(),
+                            fødselsdato = fødselsdatoBarn.toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
                         ),
@@ -135,7 +137,8 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                                 listOf(
                                     it.copy(
                                         resultat = Resultat.OPPFYLT,
-                                        periodeFom = LocalDate.now().minusMonths(2),
+                                        periodeFom = if (it.vilkårType == Vilkår.UNDER_18_ÅR) fødselsdatoBarn else LocalDate.now().minusMonths(2),
+                                        periodeTom = if (it.vilkårType == Vilkår.UNDER_18_ÅR) fødselsdatoBarn.plusYears(18) else null,
                                     ),
                                 ),
                         ),
@@ -242,6 +245,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
     @Test
     fun `Skal journalføre og behandle utvidet nasjonal sak`() {
         System.setProperty(FeatureToggle.TEKNISK_ENDRING.navn, "true")
+        val fødselsdatoBarn = LocalDate.now().minusMonths(6)
 
         val scenario =
             RestScenario(
@@ -249,10 +253,9 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                 barna =
                     listOf(
                         RestScenarioPerson(
-                            fødselsdato = LocalDate.now().minusMonths(6).toString(),
+                            fødselsdato = fødselsdatoBarn.toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
-                            bostedsadresser = emptyList(),
                         ),
                     ),
             ).also { stubScenario(it) }
@@ -320,7 +323,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         )
 
         restUtvidetBehandling.data!!.personResultater.forEach { restPersonResultat ->
-            restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
+            restPersonResultat.vilkårResultater.forEach {
                 familieBaSakKlient().putVilkår(
                     behandlingId = restUtvidetBehandling.data!!.behandlingId,
                     vilkårId = it.id,
@@ -331,7 +334,8 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                                 listOf(
                                     it.copy(
                                         resultat = Resultat.OPPFYLT,
-                                        periodeFom = LocalDate.now().minusMonths(2),
+                                        periodeFom = if (it.vilkårType == Vilkår.UNDER_18_ÅR) fødselsdatoBarn else LocalDate.now().minusMonths(2),
+                                        periodeTom = if (it.vilkårType == Vilkår.UNDER_18_ÅR) fødselsdatoBarn.plusYears(18) else null,
                                     ),
                                 ),
                         ),
