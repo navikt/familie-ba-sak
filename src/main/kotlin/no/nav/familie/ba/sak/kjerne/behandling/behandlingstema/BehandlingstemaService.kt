@@ -7,12 +7,15 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori.EØS
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori.NASJONAL
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.EØS_FORORDNINGEN
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.NASJONALE_REGLER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.tidslinje.utvidelser.verdiPåTidspunkt
@@ -74,32 +77,37 @@ class BehandlingstemaService(
         val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
 
         if (aktivBehandling == null) {
-            return sisteVedtatteBehandling?.kategori ?: BehandlingKategori.NASJONAL
+            return sisteVedtatteBehandling?.kategori ?: NASJONAL
         }
 
         val tidslinjer = vilkårsvurderingTidslinjeService.hentTidslinjer(behandlingId = BehandlingId(aktivBehandling.id))
 
         if (tidslinjer == null) {
-            return sisteVedtatteBehandling?.kategori ?: BehandlingKategori.NASJONAL
+            return sisteVedtatteBehandling?.kategori ?: NASJONAL
         }
 
-        val alleBarnasRegelverkResultatForLøpendePeriode =
+        val nå = LocalDate.now(clockProvider.get())
+        val alleBarnasRegelverkResultatNesteMåned =
             tidslinjer
                 .barnasTidslinjer()
                 .values
-                .map { it.egetRegelverkResultatTidslinje.verdiPåTidspunkt(LocalDate.now(clockProvider.get())) }
+                .mapNotNull {
+                    it.egetRegelverkResultatTidslinje.verdiPåTidspunkt(nå.plusMonths(1))
+                }
 
-        val etBarnHarMinstEnLøpendeEØSPeriode = alleBarnasRegelverkResultatForLøpendePeriode.any { it?.regelverk == Regelverk.EØS_FORORDNINGEN }
-        if (etBarnHarMinstEnLøpendeEØSPeriode) {
-            return BehandlingKategori.EØS
+        val alleBarnasRegelverkResultatInneværendeMåned =
+            tidslinjer
+                .barnasTidslinjer()
+                .values
+                .mapNotNull { it.egetRegelverkResultatTidslinje.verdiPåTidspunkt(nå) }
+
+        return when {
+            alleBarnasRegelverkResultatNesteMåned.any { it.regelverk == EØS_FORORDNINGEN } -> EØS
+            alleBarnasRegelverkResultatNesteMåned.any { it.regelverk == NASJONALE_REGLER } -> NASJONAL
+            alleBarnasRegelverkResultatInneværendeMåned.any { it.regelverk == EØS_FORORDNINGEN } -> EØS
+            alleBarnasRegelverkResultatInneværendeMåned.any { it.regelverk == NASJONALE_REGLER } -> NASJONAL
+            else -> sisteVedtatteBehandling?.kategori ?: aktivBehandling.kategori
         }
-
-        val etBarnHarMinstEnLøpendeNasjonalPeriode = alleBarnasRegelverkResultatForLøpendePeriode.any { it?.regelverk == Regelverk.NASJONALE_REGLER }
-        if (etBarnHarMinstEnLøpendeNasjonalPeriode) {
-            return BehandlingKategori.NASJONAL
-        }
-
-        return sisteVedtatteBehandling?.kategori ?: aktivBehandling.kategori
     }
 
     fun finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsakId: Long): BehandlingUnderkategori? {
