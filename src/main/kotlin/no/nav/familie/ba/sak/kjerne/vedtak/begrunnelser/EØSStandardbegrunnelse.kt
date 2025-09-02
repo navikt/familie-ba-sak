@@ -342,6 +342,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
         override val sanityApiNavn = "innvilgetSelvstendigRettTilleggstekstSekundarInfoOmMuligRefusjon"
     },
+    INNVILGET_SELVSTENDIG_RETT_SEKUNDÆR_ANNEN_FORELDER_BOR_I_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetSelvstendigRettSekundaerAnnenForelderBorINorge"
+    },
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosStandard"
