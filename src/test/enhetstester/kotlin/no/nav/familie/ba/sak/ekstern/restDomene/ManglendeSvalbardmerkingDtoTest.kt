@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class ManglendeSvalbardmerkingPeriodeDtoTest {
+class ManglendeSvalbardmerkingDtoTest {
     @Nested
     inner class TilManglendeSvalbardmerkingPerioder {
         @Test
