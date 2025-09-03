@@ -15,6 +15,7 @@ enum class FeatureToggle(
     KAN_OPPRETTE_REVURDERING_MED_ÅRSAK_IVERKSETTE_KA_VEDTAK("familie-ba-sak.kan-opprette-revurdering-med-aarsak-iverksette-ka-vedtak"),
     PREUTFYLLING_VILKÅR("familie-ba-sak.preutfylling-vilkaar"),
     PREUTFYLLING_VILKÅR_LOVLIG_OPPHOLD("familie-ba-sak.preutfylling-lovlig-opphold"),
+    PREUTFYLLING_BOR_HOS_SØKER("familie-ba-sak.preutfylling-bor-hos-soker"),
 
     AUTOMAITSK_REGISTRER_SØKNAD("familie-ba-sak.automatisk-registrer-soknad"),
     PREUTFYLLING_ENDRET_UTBETALING_3ÅR_ELLER_3MND("familie-ba-sak.preutfylling-endret-utbetaling-3aar-eller-3mnd"),
@@ -56,8 +57,6 @@ enum class FeatureToggle(
 
     // NAV-
     SKAL_GENERERE_FINNMARKSTILLEGG("familie-ba-sak.andel-generering-finnmark-nord-troms"),
-
-    SKAL_GENERERE_SVALBARDTILLEGG("familie-ba-sak.andel-generering-svalbard"),
 
     AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG("familie-ba-sak.kjoering-autovedtak-finnmarkstillegg"),
 

@@ -554,6 +554,7 @@ class CucumberMock(
             preutfyllLovligOppholdService = mockk(),
             preutfyllBosattIRiketService = preutfyllBosattIRiketService,
             featureToggleService = featureToggleService,
+            preutfyllBorHosSøkerService = mockk(),
         )
 
     val vilkårsvurderingForNyBehandlingService =
