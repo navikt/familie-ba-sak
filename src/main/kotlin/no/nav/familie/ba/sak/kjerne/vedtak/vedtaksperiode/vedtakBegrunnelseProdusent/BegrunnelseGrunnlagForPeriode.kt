@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProd
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 sealed interface IBegrunnelseGrunnlagForPeriode {
     val dennePerioden: BegrunnelseGrunnlagForPersonIPeriode
@@ -10,9 +12,53 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
 
     fun erSmåbarnstilleggIForrigeBehandlingPeriode() = sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true
 
-    fun erFinnmarkstilleggIForrigeBehandlingPeriode() = sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.FINNMARKSTILLEGG } == true
+    fun harKravPåFinnmarkstilleggIForrigeBehandlingPeriode() =
+        sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.FINNMARKSTILLEGG } == true ||
+            sammePeriodeForrigeBehandling?.vilkårResultater?.any {
+                it.vilkårType == Vilkår.BOSATT_I_RIKET &&
+                    it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
+            } == true
 
-    fun erSvalbardtilleggIForrigeBehandlingPeriode() = sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true
+    fun harKravPåSvalbardtilleggIForrigeBehandlingPeriode() =
+        sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true ||
+            sammePeriodeForrigeBehandling?.vilkårResultater?.any {
+                it.vilkårType == Vilkår.BOSATT_I_RIKET &&
+                    it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
+            } == true
+
+    fun sjekkOmHarKravPåFinnmarkstilleggDennePeriode() =
+        dennePerioden.andeler.any { it.type == YtelseType.FINNMARKSTILLEGG } ||
+            dennePerioden.vilkårResultater
+                .any {
+                    it.vilkårType == Vilkår.BOSATT_I_RIKET &&
+                        it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
+                }
+
+    fun sjekkOmHarKravPåFinnmarkstilleggForrigePeriode() =
+        forrigePeriode?.andeler?.any { it.type == YtelseType.FINNMARKSTILLEGG } == true ||
+            forrigePeriode
+                ?.vilkårResultater
+                ?.any {
+                    it.vilkårType == Vilkår.BOSATT_I_RIKET &&
+                        it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
+                } == true
+
+    fun sjekkOmHarHravPåSvalbardtilleggForrigePeriode() =
+        forrigePeriode?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true ||
+            forrigePeriode
+                ?.vilkårResultater
+                ?.any {
+                    it.vilkårType == Vilkår.BOSATT_I_RIKET &&
+                        it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
+                } == true
+
+    fun sjekkOmHarKravPåSvalbardtilleggDennePeriode() =
+        dennePerioden.andeler.any { it.type == YtelseType.SVALBARDTILLEGG } ||
+            dennePerioden.vilkårResultater
+                .any {
+                    it.vilkårType == Vilkår.BOSATT_I_RIKET &&
+                        it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
+                }
 
     companion object {
         fun opprett(
