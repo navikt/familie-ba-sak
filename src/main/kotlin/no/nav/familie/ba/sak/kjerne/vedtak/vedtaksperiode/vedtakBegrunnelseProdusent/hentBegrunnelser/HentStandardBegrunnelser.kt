@@ -219,16 +219,16 @@ private fun ISanityBegrunnelse.sjekkOmBegrunnelseGjelderTaptSmåbarnstillegg(beg
 }
 
 private fun ISanityBegrunnelse.sjekkOmBegrunnelseGjelderTaptFinnmarkstillegg(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean {
-    val haddeFinnmarkstilleggForrigeBehandling = begrunnelseGrunnlag.erFinnmarkstilleggIForrigeBehandlingPeriode()
-    val harFinnmarksDennePerioden = begrunnelseGrunnlag.dennePerioden.andeler.any { it.type == YtelseType.FINNMARKSTILLEGG }
-    val begrunnelseGjelderTaptFinnmarkstillegg = VilkårTrigger.BOSATT_I_FINNMARK_NORD_TROMS in bosattIRiketTriggere && haddeFinnmarkstilleggForrigeBehandling && !harFinnmarksDennePerioden
+    val haddeKravPåFinnmarkstilleggForrigeBehandling = begrunnelseGrunnlag.sjekkOmharKravPåFinnmarkstilleggIForrigeBehandlingPeriode()
+    val harKravPåFinnmarkstilleggDennePerioden = begrunnelseGrunnlag.sjekkOmHarKravPåFinnmarkstilleggDennePeriode()
+    val begrunnelseGjelderTaptFinnmarkstillegg = VilkårTrigger.BOSATT_I_FINNMARK_NORD_TROMS in bosattIRiketTriggere && haddeKravPåFinnmarkstilleggForrigeBehandling && !harKravPåFinnmarkstilleggDennePerioden
     return begrunnelseGjelderTaptFinnmarkstillegg
 }
 
 private fun ISanityBegrunnelse.sjekkOmBegrunnelseGjelderTaptSvalbardtillegg(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean {
-    val haddeSvalbardtilleggForrigeBehandling = begrunnelseGrunnlag.erSvalbardtilleggIForrigeBehandlingPeriode()
-    val harSvalbardtilleggDennePerioden = begrunnelseGrunnlag.dennePerioden.andeler.any { it.type == YtelseType.SVALBARDTILLEGG }
-    val begrunnelseGjelderTaptSvalbardtillegg = VilkårTrigger.BOSATT_PÅ_SVALBARD in bosattIRiketTriggere && haddeSvalbardtilleggForrigeBehandling && !harSvalbardtilleggDennePerioden
+    val haddeKravPåSvalbardtilleggForrigeBehandling = begrunnelseGrunnlag.sjekkOmharKravPåSvalbardtilleggIForrigeBehandlingPeriode()
+    val harKravPåSvalbardtilleggDennePerioden = begrunnelseGrunnlag.sjekkOmHarKravPåSvalbardtilleggDennePeriode()
+    val begrunnelseGjelderTaptSvalbardtillegg = VilkårTrigger.BOSATT_PÅ_SVALBARD in bosattIRiketTriggere && haddeKravPåSvalbardtilleggForrigeBehandling && !harKravPåSvalbardtilleggDennePerioden
     return begrunnelseGjelderTaptSvalbardtillegg
 }
 
@@ -264,21 +264,20 @@ private fun SanityBegrunnelse.erGjeldendeForFinnmarkstillegg(
 ): Boolean {
     if (!this.gjelderFinnmarkstillegg) return false
 
-    val erFinnmarkstilleggForrigePeriode = begrunnelseGrunnlag.forrigePeriode?.andeler?.any { it.type == YtelseType.FINNMARKSTILLEGG } == true
-    val erFinnmarkstilleggDennePerioden = begrunnelseGrunnlag.dennePerioden.andeler.any { it.type == YtelseType.FINNMARKSTILLEGG }
-    val erFinnmarkstilleggIForrigeBehandlingPeriode = begrunnelseGrunnlag.erFinnmarkstilleggIForrigeBehandlingPeriode()
+    val harKravPåFinnmarkstilleggForrigePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåFinnmarkstilleggForrigePeriode()
+    val harKravPåFinnmarkstilleggDennePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåFinnmarkstilleggDennePeriode()
 
-    val erEndringIFinnmarkstilleggFraForrigeBehandling =
-        erFinnmarkstilleggIForrigeBehandlingPeriode != erFinnmarkstilleggDennePerioden
+    val erFinnmarkstilleggIForrigeBehandlingPeriode = begrunnelseGrunnlag.sjekkOmharKravPåFinnmarkstilleggIForrigeBehandlingPeriode()
+    val erEndringIFinnmarkstilleggFraForrigeBehandling = erFinnmarkstilleggIForrigeBehandlingPeriode != harKravPåFinnmarkstilleggDennePeriode
 
     val begrunnelseMatcherPeriodeResultat =
         this.matcherPerioderesultat(
-            erFinnmarkstilleggForrigePeriode,
-            erFinnmarkstilleggDennePerioden,
+            harKravPåFinnmarkstilleggForrigePeriode,
+            harKravPåFinnmarkstilleggDennePeriode,
             erFinnmarkstilleggIForrigeBehandlingPeriode,
         )
 
-    val erEndringIFinnmarkstillegg = erFinnmarkstilleggForrigePeriode != erFinnmarkstilleggDennePerioden
+    val erEndringIFinnmarkstillegg = harKravPåFinnmarkstilleggForrigePeriode != harKravPåFinnmarkstilleggDennePeriode
 
     return begrunnelseMatcherPeriodeResultat && (erEndringIFinnmarkstillegg || erEndringIFinnmarkstilleggFraForrigeBehandling)
 }
@@ -288,21 +287,20 @@ private fun SanityBegrunnelse.erGjeldendeForSvalbardtillegg(
 ): Boolean {
     if (!this.gjelderSvalbardtillegg) return false
 
-    val erSvalbardtilleggForrigePeriode = begrunnelseGrunnlag.forrigePeriode?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true
-    val erSvalbardtilleggDennePerioden = begrunnelseGrunnlag.dennePerioden.andeler.any { it.type == YtelseType.SVALBARDTILLEGG }
-    val erSvalbardtilleggIForrigeBehandlingPeriode = begrunnelseGrunnlag.erSvalbardtilleggIForrigeBehandlingPeriode()
+    val harKravPåSvalbardtilleggForrigePeriode = begrunnelseGrunnlag.sjekkOmHarHravPåSvalbardtilleggForrigePeriode()
+    val harKravPåSvalbardtilleggDennePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåSvalbardtilleggDennePeriode()
+    val erSvalbardtilleggIForrigeBehandlingPeriode = begrunnelseGrunnlag.sjekkOmharKravPåSvalbardtilleggIForrigeBehandlingPeriode()
 
-    val erEndringISvalbardtilleggFraForrigeBehandling =
-        erSvalbardtilleggIForrigeBehandlingPeriode != erSvalbardtilleggDennePerioden
+    val erEndringISvalbardtilleggFraForrigeBehandling = erSvalbardtilleggIForrigeBehandlingPeriode != harKravPåSvalbardtilleggDennePeriode
 
     val begrunnelseMatcherPeriodeResultat =
         this.matcherPerioderesultat(
-            erSvalbardtilleggForrigePeriode,
-            erSvalbardtilleggDennePerioden,
+            harKravPåSvalbardtilleggForrigePeriode,
+            harKravPåSvalbardtilleggDennePeriode,
             erSvalbardtilleggIForrigeBehandlingPeriode,
         )
 
-    val erEndringISvalbardtillegg = erSvalbardtilleggForrigePeriode != erSvalbardtilleggDennePerioden
+    val erEndringISvalbardtillegg = harKravPåSvalbardtilleggForrigePeriode != harKravPåSvalbardtilleggDennePeriode
 
     return begrunnelseMatcherPeriodeResultat && (erEndringISvalbardtillegg || erEndringISvalbardtilleggFraForrigeBehandling)
 }
