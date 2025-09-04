@@ -12,19 +12,11 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
 
     fun erSmåbarnstilleggIForrigeBehandlingPeriode() = sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true
 
-    fun harKravPåFinnmarkstilleggIForrigeBehandlingPeriode() =
+    fun sjekkOmharKravPåFinnmarkstilleggIForrigeBehandlingPeriode() =
         sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.FINNMARKSTILLEGG } == true ||
             sammePeriodeForrigeBehandling?.vilkårResultater?.any {
                 it.vilkårType == Vilkår.BOSATT_I_RIKET &&
                     it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
-            } == true &&
-            sammePeriodeForrigeBehandling?.erOrdinæreVilkårInnvilget() == true
-
-    fun harKravPåSvalbardtilleggIForrigeBehandlingPeriode() =
-        sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true ||
-            sammePeriodeForrigeBehandling?.vilkårResultater?.any {
-                it.vilkårType == Vilkår.BOSATT_I_RIKET &&
-                    it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
             } == true &&
             sammePeriodeForrigeBehandling?.erOrdinæreVilkårInnvilget() == true
 
@@ -45,6 +37,14 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
                         it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
                 } == true && forrigePeriode?.erOrdinæreVilkårInnvilget() == true
 
+    fun sjekkOmharKravPåSvalbardtilleggIForrigeBehandlingPeriode() =
+        sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true ||
+            sammePeriodeForrigeBehandling?.vilkårResultater?.any {
+                it.vilkårType == Vilkår.BOSATT_I_RIKET &&
+                    it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
+            } == true &&
+            sammePeriodeForrigeBehandling?.erOrdinæreVilkårInnvilget() == true
+
     fun sjekkOmHarKravPåSvalbardtilleggDennePeriode() =
         dennePerioden.andeler.any { it.type == YtelseType.SVALBARDTILLEGG } ||
             dennePerioden.vilkårResultater
@@ -60,7 +60,7 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
                 ?.any {
                     it.vilkårType == Vilkår.BOSATT_I_RIKET &&
                         it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
-                } == true && dennePerioden.erOrdinæreVilkårInnvilget()
+                } == true && forrigePeriode?.erOrdinæreVilkårInnvilget() == true
 
     companion object {
         fun opprett(

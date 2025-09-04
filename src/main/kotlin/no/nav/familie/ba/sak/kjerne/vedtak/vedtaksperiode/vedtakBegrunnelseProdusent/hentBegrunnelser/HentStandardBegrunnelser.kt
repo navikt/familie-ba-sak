@@ -219,14 +219,14 @@ private fun ISanityBegrunnelse.sjekkOmBegrunnelseGjelderTaptSmåbarnstillegg(beg
 }
 
 private fun ISanityBegrunnelse.sjekkOmBegrunnelseGjelderTaptFinnmarkstillegg(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean {
-    val haddeKravPåFinnmarkstilleggForrigeBehandling = begrunnelseGrunnlag.harKravPåFinnmarkstilleggIForrigeBehandlingPeriode()
+    val haddeKravPåFinnmarkstilleggForrigeBehandling = begrunnelseGrunnlag.sjekkOmharKravPåFinnmarkstilleggIForrigeBehandlingPeriode()
     val harKravPåFinnmarkstilleggDennePerioden = begrunnelseGrunnlag.sjekkOmHarKravPåFinnmarkstilleggDennePeriode()
     val begrunnelseGjelderTaptFinnmarkstillegg = VilkårTrigger.BOSATT_I_FINNMARK_NORD_TROMS in bosattIRiketTriggere && haddeKravPåFinnmarkstilleggForrigeBehandling && !harKravPåFinnmarkstilleggDennePerioden
     return begrunnelseGjelderTaptFinnmarkstillegg
 }
 
 private fun ISanityBegrunnelse.sjekkOmBegrunnelseGjelderTaptSvalbardtillegg(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean {
-    val haddeKravPåSvalbardtilleggForrigeBehandling = begrunnelseGrunnlag.harKravPåSvalbardtilleggIForrigeBehandlingPeriode()
+    val haddeKravPåSvalbardtilleggForrigeBehandling = begrunnelseGrunnlag.sjekkOmharKravPåSvalbardtilleggIForrigeBehandlingPeriode()
     val harKravPåSvalbardtilleggDennePerioden = begrunnelseGrunnlag.sjekkOmHarKravPåSvalbardtilleggDennePeriode()
     val begrunnelseGjelderTaptSvalbardtillegg = VilkårTrigger.BOSATT_PÅ_SVALBARD in bosattIRiketTriggere && haddeKravPåSvalbardtilleggForrigeBehandling && !harKravPåSvalbardtilleggDennePerioden
     return begrunnelseGjelderTaptSvalbardtillegg
@@ -267,7 +267,7 @@ private fun SanityBegrunnelse.erGjeldendeForFinnmarkstillegg(
     val harKravPåFinnmarkstilleggForrigePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåFinnmarkstilleggForrigePeriode()
     val harKravPåFinnmarkstilleggDennePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåFinnmarkstilleggDennePeriode()
 
-    val erFinnmarkstilleggIForrigeBehandlingPeriode = begrunnelseGrunnlag.harKravPåFinnmarkstilleggIForrigeBehandlingPeriode()
+    val erFinnmarkstilleggIForrigeBehandlingPeriode = begrunnelseGrunnlag.sjekkOmharKravPåFinnmarkstilleggIForrigeBehandlingPeriode()
     val erEndringIFinnmarkstilleggFraForrigeBehandling = erFinnmarkstilleggIForrigeBehandlingPeriode != harKravPåFinnmarkstilleggDennePeriode
 
     val begrunnelseMatcherPeriodeResultat =
@@ -289,7 +289,7 @@ private fun SanityBegrunnelse.erGjeldendeForSvalbardtillegg(
 
     val harKravPåSvalbardtilleggForrigePeriode = begrunnelseGrunnlag.sjekkOmHarHravPåSvalbardtilleggForrigePeriode()
     val harKravPåSvalbardtilleggDennePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåSvalbardtilleggDennePeriode()
-    val erSvalbardtilleggIForrigeBehandlingPeriode = begrunnelseGrunnlag.harKravPåSvalbardtilleggIForrigeBehandlingPeriode()
+    val erSvalbardtilleggIForrigeBehandlingPeriode = begrunnelseGrunnlag.sjekkOmharKravPåSvalbardtilleggIForrigeBehandlingPeriode()
 
     val erEndringISvalbardtilleggFraForrigeBehandling = erSvalbardtilleggIForrigeBehandlingPeriode != harKravPåSvalbardtilleggDennePeriode
 
