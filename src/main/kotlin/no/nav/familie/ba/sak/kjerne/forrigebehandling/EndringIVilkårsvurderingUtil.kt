@@ -76,9 +76,11 @@ object EndringIVilkårsvurderingUtil {
                 val erEndringerIUtdypendeVilkårsvurdering =
                     nåværende.relevanteUtdypendeVilkårsvurderinger() != forrige.relevanteUtdypendeVilkårsvurderinger()
                 val erEndringerIRegelverk = nåværende.vurderesEtter != forrige.vurderesEtter
+                val erVilkårSomErSplittetOpp = nåværende.periodeFom != forrige.periodeFom
 
                 (forrige.obligatoriskUtdypendeVilkårsvurderingErSatt() && erEndringerIUtdypendeVilkårsvurdering) ||
-                        erEndringerIRegelverk
+                    erEndringerIRegelverk ||
+                    erVilkårSomErSplittetOpp
             }
 
         return endringIVilkårResultat
@@ -95,13 +97,13 @@ object EndringIVilkårsvurderingUtil {
             when (this.vilkårType) {
                 Vilkår.BOSATT_I_RIKET,
                 Vilkår.BOR_MED_SØKER,
-                    -> true
+                -> true
 
                 Vilkår.UNDER_18_ÅR,
                 Vilkår.LOVLIG_OPPHOLD,
                 Vilkår.GIFT_PARTNERSKAP,
                 Vilkår.UTVIDET_BARNETRYGD,
-                    -> false
+                -> false
             }
         }
 }
