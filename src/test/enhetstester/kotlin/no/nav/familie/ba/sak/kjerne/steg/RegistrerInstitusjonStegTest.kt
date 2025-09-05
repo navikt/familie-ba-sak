@@ -9,6 +9,8 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -31,6 +33,8 @@ class RegistrerInstitusjonStegTest {
     private val behandlingHentOgPersisterServiceMock: BehandlingHentOgPersisterService = mockk()
     private val fagsakServiceMock: FagsakService = mockk(relaxed = true)
     private val institusjonRepositoryMock: InstitusjonRepository = mockk()
+    private val integrasjonClientMock: IntegrasjonClient = mockk()
+    private val kodeverkServiceMock: KodeverkService = mockk()
 
     private lateinit var institusjonService: InstitusjonService
     private lateinit var registrerInstitusjon: RegistrerInstitusjon
@@ -42,6 +46,8 @@ class RegistrerInstitusjonStegTest {
                 fagsakRepository = fagsakRepositoryMock,
                 samhandlerKlient = mockk(relaxed = true),
                 institusjonRepository = institusjonRepositoryMock,
+                integrasjonClient = integrasjonClientMock,
+                kodeverkService = kodeverkServiceMock,
             )
         registrerInstitusjon =
             RegistrerInstitusjon(
