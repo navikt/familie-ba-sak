@@ -28,7 +28,7 @@
         <eksterne-kontrakter-bisys.version>2.0_20250826113118_c8aa66d</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20250902143555_da31aa4</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20250826113118_c8aa66d</familie.kontrakter.saksstatistikk>
-        <familie.kontrakter.stønadsstatistikk>2.0_20250828091532_ea769a0</familie.kontrakter.stønadsstatistikk>
+        <familie.kontrakter.stønadsstatistikk>2.0_20250901073230_e199a51</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250804104526_5648100</utbetalingsgenerator.version>
         <cucumber.version>7.23.0</cucumber.version>
         <mockk.version>1.14.5</mockk.version>
