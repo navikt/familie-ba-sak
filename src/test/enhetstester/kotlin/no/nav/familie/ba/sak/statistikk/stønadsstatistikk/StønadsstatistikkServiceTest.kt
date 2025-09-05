@@ -73,6 +73,38 @@ internal class StønadsstatistikkServiceTest {
 
         val vedtak = lagVedtak(behandling)
 
+        val kompetanseperioder =
+            setOf(
+                no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse(
+                    fom = YearMonth.now(),
+                    tom = null,
+                    barnAktører = setOf(barn1.aktør),
+                    søkersAktivitet = KompetanseAktivitet.ARBEIDER,
+                    annenForeldersAktivitet = KompetanseAktivitet.I_ARBEID,
+                    annenForeldersAktivitetsland = "PL",
+                    barnetsBostedsland = "PL",
+                    resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                ),
+                no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse(
+                    fom = null,
+                    tom = null,
+                    barnAktører = emptySet(),
+                    søkersAktivitet = null,
+                    annenForeldersAktivitet = null,
+                    annenForeldersAktivitetsland = null,
+                    barnetsBostedsland = null,
+                    resultat = null,
+                ),
+            )
+
+        every { behandlingHentOgPersisterService.hent(any()) } returns behandling
+        every { kompetanseService.hentKompetanser(any()) } returns kompetanseperioder
+        every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
+        every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
+        every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any()) } returns "DK"
+    }
+
+    fun mockAndelTilkjentYtelse() {
         val andelTilkjentYtelseBarn1 =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 barn1.fødselsdato.nesteMåned(),
@@ -96,30 +128,6 @@ internal class StønadsstatistikkServiceTest {
                 periodeIdOffset = null,
             )
 
-        val kompetanseperioder =
-            setOf<no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse>(
-                no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse(
-                    fom = YearMonth.now(),
-                    tom = null,
-                    barnAktører = setOf(barn1.aktør),
-                    søkersAktivitet = KompetanseAktivitet.ARBEIDER,
-                    annenForeldersAktivitet = KompetanseAktivitet.I_ARBEID,
-                    annenForeldersAktivitetsland = "PL",
-                    barnetsBostedsland = "PL",
-                    resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-                ),
-                no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse(
-                    fom = null,
-                    tom = null,
-                    barnAktører = emptySet(),
-                    søkersAktivitet = null,
-                    annenForeldersAktivitet = null,
-                    annenForeldersAktivitetsland = null,
-                    barnetsBostedsland = null,
-                    resultat = null,
-                ),
-            )
-
         val andelTilkjentYtelseSøker =
             lagAndelTilkjentYtelseUtvidet(
                 barn2.fødselsdato.nesteMåned().toString(),
@@ -140,20 +148,65 @@ internal class StønadsstatistikkServiceTest {
                 AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelseSøker),
             )
 
-        every { behandlingHentOgPersisterService.hent(any()) } returns behandling
-        every { kompetanseService.hentKompetanser(any()) } returns kompetanseperioder
-        every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
-        every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any()) } returns "DK"
+        every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(any()) } returns
+            andelerTilkjentYtelse
+    }
+
+    fun mockAndelTilkjentYtelseUtenPeriodeIdOffset() {
+        val andelTilkjentYtelseBarn1 =
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                barn1.fødselsdato.nesteMåned(),
+                barn1.fødselsdato.plusYears(3).toYearMonth(),
+                YtelseType.ORDINÆR_BARNETRYGD,
+                behandling = behandling,
+                person = barn1,
+                aktør = barn1.aktør,
+            )
+        val andelTilkjentYtelseBarn2PeriodeMed0Beløp =
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                barn2.fødselsdato.nesteMåned(),
+                barn2.fødselsdato.plusYears(18).forrigeMåned(),
+                YtelseType.ORDINÆR_BARNETRYGD,
+                behandling = behandling,
+                person = barn2,
+                beløp = 0,
+                aktør = barn2.aktør,
+                prosent = BigDecimal(0),
+            )
+
+        val andelTilkjentYtelseSøker =
+            lagAndelTilkjentYtelseUtvidet(
+                barn2.fødselsdato.nesteMåned().toString(),
+                barn2.fødselsdato
+                    .plusYears(2)
+                    .toYearMonth()
+                    .toString(),
+                YtelseType.UTVIDET_BARNETRYGD,
+                behandling = behandling,
+                person = personopplysningGrunnlag.søker,
+            )
+
+        val andelerTilkjentYtelse =
+            listOf(
+                andelTilkjentYtelseBarn1,
+                andelTilkjentYtelseBarn2PeriodeMed0Beløp,
+                AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelseSøker),
+            )
+
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(any()) } returns
             andelerTilkjentYtelse
     }
 
     @Test
     fun hentVedtakV2() {
+        // Arrange
+        mockAndelTilkjentYtelse()
+
+        // Act
         val vedtak = stønadsstatistikkService.hentVedtakV2(1L)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(vedtak))
 
+        // Assert
         assertEquals(2, vedtak.utbetalingsperioderV2[0].utbetalingsDetaljer.size)
         assertEquals(
             1 * sats(YtelseType.ORDINÆR_BARNETRYGD) + sats(YtelseType.UTVIDET_BARNETRYGD),
@@ -315,5 +368,31 @@ internal class StønadsstatistikkServiceTest {
                     return@filter false
                 }
             }.map { it.name }
+    }
+
+    @Test
+    fun `hentUtbetalingsperioderTilDatavarehus() setter ikke DelytelseId hvis behandlingen ikke er sendt til oppdrag`() {
+        // Arrange
+        mockAndelTilkjentYtelseUtenPeriodeIdOffset()
+
+        // Act
+        val utbetalingsPerioder = stønadsstatistikkService.hentUtbetalingsperioderTilDatavarehus(behandling, personopplysningGrunnlag)
+
+        // Assert
+        val delytelseIder = utbetalingsPerioder.flatMap { it.utbetalingsDetaljer }.map { it.delytelseId }
+        assertThat(delytelseIder).containsOnlyNulls()
+    }
+
+    @Test
+    fun `hentUtbetalingsperioderTilDatavarehus() setter DelytelseId hvis behandlingen er sendt til oppdrag`() {
+        // Arrange
+        mockAndelTilkjentYtelse()
+
+        // Act
+        val utbetalingsPerioder = stønadsstatistikkService.hentUtbetalingsperioderTilDatavarehus(behandling, personopplysningGrunnlag)
+
+        // Assert
+        val delytelseIder = utbetalingsPerioder.flatMap { it.utbetalingsDetaljer }.map { it.delytelseId }
+        assertThat(delytelseIder).contains("11")
     }
 }

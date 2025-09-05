@@ -40,9 +40,6 @@ data class RestScenarioPerson(
     val aktørId: String
         get() = _ident + "99"
     val navn = "$fornavn $etternavn"
-
-    val fødselsdatoLocalDate: LocalDate
-        get() = LocalDate.parse(fødselsdato)
 }
 
 val defaultBostedsadresseHistorikk =
