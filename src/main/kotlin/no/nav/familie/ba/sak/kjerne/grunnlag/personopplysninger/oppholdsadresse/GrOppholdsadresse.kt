@@ -58,6 +58,8 @@ abstract class GrOppholdsadresse(
 
     abstract fun tilFrontendString(): String
 
+    abstract fun erPåSvalbard(): Boolean
+
     protected abstract fun tilKopiForNyPerson(): GrOppholdsadresse
 
     fun tilKopiForNyPerson(nyPerson: Person): GrOppholdsadresse =
