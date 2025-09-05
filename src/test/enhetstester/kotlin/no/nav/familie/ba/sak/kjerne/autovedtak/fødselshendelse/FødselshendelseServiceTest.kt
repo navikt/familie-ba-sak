@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingMedOverstyrendeResultater
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
@@ -66,9 +67,11 @@ class FødselshendelseServiceTest {
     val oppgaveService = mockk<OppgaveService>()
 
     val integrasjonClient = mockk<IntegrasjonClient>()
+    val kodeverkService: KodeverkService = mockk()
     val statsborgerskapService =
         StatsborgerskapService(
             integrasjonClient = integrasjonClient,
+            kodeverkService = kodeverkService,
         )
 
     private val autovedtakFødselshendelseService =

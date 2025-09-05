@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service
 class KodeverkService(
     private val integrasjonClient: IntegrasjonClient,
 ) {
+    fun hentLand(landkode: String): String = integrasjonClient.hentLand(landkode)
+
     fun hentPoststed(postnummer: String?): String? =
         integrasjonClient
             .hentPoststeder()
@@ -16,4 +18,8 @@ class KodeverkService(
             ?.beskrivelser[KodeverkSpråk.BOKMÅL.kode]
             ?.term
             ?.storForbokstav()
+
+    fun henteEøsMedlemskapsPerioderForValgtLand(land: String) = integrasjonClient.hentAlleEØSLand().betydninger[land] ?: emptyList()
+
+    fun hentLandkoderISO2() = integrasjonClient.hentLandkoderISO2()
 }

@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -84,7 +85,7 @@ class VedtaksperiodeService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val overgangsstønadService: OvergangsstønadService,
     private val refusjonEøsRepository: RefusjonEøsRepository,
-    private val integrasjonClient: IntegrasjonClient,
+    private val kodeverkService: KodeverkService,
     private val valutakursRepository: ValutakursRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
 ) {
@@ -611,7 +612,7 @@ class VedtaksperiodeService(
         avklart: Boolean,
     ): Set<String>? {
         val målform = persongrunnlagService.hentAktiv(behandlingId = behandling.id)?.søker?.målform
-        val landkoderISO2 = integrasjonClient.hentLandkoderISO2()
+        val landkoderISO2 = kodeverkService.hentLandkoderISO2()
 
         return refusjonEøsRepository
             .finnRefusjonEøsForBehandling(behandling.id)

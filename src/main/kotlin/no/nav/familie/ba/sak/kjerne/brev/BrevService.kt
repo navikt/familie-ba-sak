@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -92,7 +93,7 @@ class BrevService(
     private val korrigertVedtakService: KorrigertVedtakService,
     private val saksbehandlerContext: SaksbehandlerContext,
     private val brevmalService: BrevmalService,
-    private val integrasjonClient: IntegrasjonClient,
+    private val kodeverkService: KodeverkService,
     private val testVerktøyService: TestVerktøyService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
@@ -266,7 +267,7 @@ class BrevService(
 
         return utbetalingerPerMndEøs?.let {
             val endringstidspunkt = finnStarttidspunktForUtbetalingstabell(behandling = vedtak.behandling)
-            val landkoder = integrasjonClient.hentLandkoderISO2()
+            val landkoder = kodeverkService.hentLandkoderISO2()
             val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = behandlingId)
             return hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt.toYearMonth(), landkoder, kompetanser)
         }
@@ -456,7 +457,7 @@ class BrevService(
                 try {
                     vedtaksperiode.lagBrevPeriode(
                         grunnlagForBegrunnelse = grunnlagForBegrunnelser,
-                        landkoder = integrasjonClient.hentLandkoderISO2(),
+                        landkoder = kodeverkService.hentLandkoderISO2(),
                         skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse = featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE),
                     )
                 } catch (e: BrevBegrunnelseFeil) {

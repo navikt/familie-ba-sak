@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -56,6 +57,7 @@ class PersongrunnlagService(
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val integrasjonClient: IntegrasjonClient,
+    private val kodeverkService: KodeverkService,
 ) {
     fun mapTilRestPersonMedStatsborgerskapLand(
         person: Person,
@@ -285,14 +287,7 @@ class PersongrunnlagService(
 
     private fun Oppholdsadresse.poststed(): String? = poststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
 
-    private fun poststed(postnummer: String?): String? =
-        integrasjonClient
-            .hentPoststeder()
-            .betydninger[postnummer]
-            ?.firstOrNull()
-            ?.beskrivelser[KodeverkSpråk.BOKMÅL.kode]
-            ?.term
-            ?.storForbokstav()
+    private fun poststed(postnummer: String?): String? = kodeverkService.hentPoststed(postnummer)
 
     private fun hentPerson(
         aktør: Aktør,

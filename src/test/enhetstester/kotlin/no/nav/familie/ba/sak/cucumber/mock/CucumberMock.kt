@@ -258,7 +258,7 @@ class CucumberMock(
             vilkårsvurderingService = vilkårsvurderingService,
             overgangsstønadService = overgangsstønadService,
             refusjonEøsRepository = mockk(),
-            integrasjonClient = mockk(),
+            kodeverkService = mockk(),
             valutakursRepository = valutakursRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
         )
