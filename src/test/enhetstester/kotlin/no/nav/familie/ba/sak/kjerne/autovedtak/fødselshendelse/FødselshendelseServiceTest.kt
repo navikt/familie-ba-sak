@@ -33,12 +33,9 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -58,18 +55,13 @@ class FødselshendelseServiceTest {
     val persongrunnlagService = mockk<PersongrunnlagService>()
     val personidentService = mockk<PersonidentService>()
     val stegService = mockk<StegService>()
-    val vedtakService = mockk<VedtakService>()
-    val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     val autovedtakService = mockk<AutovedtakService>()
     val personopplysningerService = mockk<PersonopplysningerService>()
     val opprettTaskService = mockk<OpprettTaskService>()
     val oppgaveService = mockk<OppgaveService>()
+    val autovedtakFødselshendelseBegrunnelseService = mockk<AutovedtakFødselshendelseBegrunnelseService>()
 
     val integrasjonClient = mockk<IntegrasjonClient>()
-    val statsborgerskapService =
-        StatsborgerskapService(
-            integrasjonClient = integrasjonClient,
-        )
 
     private val autovedtakFødselshendelseService =
         AutovedtakFødselshendelseService(
@@ -81,11 +73,10 @@ class FødselshendelseServiceTest {
             persongrunnlagService,
             personidentService,
             stegService,
-            vedtakService,
-            vedtaksperiodeService,
             autovedtakService,
             personopplysningerService,
             oppgaveService,
+            autovedtakFødselshendelseBegrunnelseService,
         )
 
     @Test
