@@ -67,10 +67,12 @@ class StønadsstatistikkService(
         }
 
         val tidspunktVedtak = datoVedtak
+        val sisteIverksatteBehandlingId = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.id
         return VedtakDVHV2(
             fagsakId = behandling.fagsak.id.toString(),
             fagsakType = FagsakType.valueOf(behandling.fagsak.type.name),
             behandlingsId = behandlingId.toString(),
+            sisteIverksatteBehandlingId = if (sisteIverksatteBehandlingId == behandlingId) null else sisteIverksatteBehandlingId.toString(),
             tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
             personV2 = hentSøkerV2(persongrunnlag),
             // TODO implementere støtte for dette
@@ -190,7 +192,7 @@ class StønadsstatistikkService(
                                 YtelseType.SVALBARDTILLEGG -> SVALBARDTILLEGG
                             },
                         utbetaltPrMnd = andel.kalkulertUtbetalingsbeløp,
-                        delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset,
+                        delytelseId = if (andel.periodeOffset != null) behandling.fagsak.id.toString() + andel.periodeOffset else null,
                     )
                 },
         )

@@ -8,8 +8,10 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
@@ -35,6 +37,7 @@ import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.JournalførTilbakekrevingsvedtakMotregningBrevTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
+import no.nav.familie.ba.sak.task.PubliserVedtakV2Task
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.springframework.stereotype.Service
@@ -139,6 +142,15 @@ class BeslutteVedtak(
                 StegType.JOURNALFØR_VEDTAKSBREV -> {
                     if (!behandling.erBehandlingMedVedtaksbrevutsending()) {
                         throw Feil("Prøvde å opprette vedtaksbrev for behandling som ikke skal sende ut vedtaksbrev.")
+                    }
+
+                    if (featureToggleService.isEnabled(FeatureToggle.STONADSSTATISTIKK_FORTSATT_INNVILGET)) {
+                        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET &&
+                            behandling.kategori == BehandlingKategori.EØS
+                        ) {
+                            val nyTaskV2 = PubliserVedtakV2Task.opprettTask(behandling.fagsak.aktør.aktivFødselsnummer(), behandling.id)
+                            taskRepository.save(nyTaskV2)
+                        }
                     }
 
                     opprettJournalførVedtaksbrevTask(behandling, vedtak)

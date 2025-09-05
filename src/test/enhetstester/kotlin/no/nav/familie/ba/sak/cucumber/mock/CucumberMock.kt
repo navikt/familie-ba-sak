@@ -704,7 +704,7 @@ class CucumberMock(
         )
     val iverksettMotOppdragTask = IverksettMotOppdragTask(stegService, behandlingHentOgPersisterService, taskRepository)
     val ferdigstillBehandlingTask = FerdigstillBehandlingTask(stegService = stegService, behandlingHentOgPersisterService = behandlingHentOgPersisterService)
-    val statusFraOppdragTask = StatusFraOppdragTask(stegService, behandlingHentOgPersisterService, taskRepository)
+    val statusFraOppdragTask = StatusFraOppdragTask(stegService, behandlingHentOgPersisterService, taskRepository, featureToggleService)
 
     val taskservices = listOf(iverksettMotOppdragTask, ferdigstillBehandlingTask, statusFraOppdragTask)
 }

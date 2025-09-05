@@ -233,6 +233,7 @@ class BeslutteVedtakTest {
 
             every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
             every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+            every { featureToggleService.isEnabled(FeatureToggle.STONADSSTATISTIKK_FORTSATT_INNVILGET) } returns true
 
             mockkObject(JournalførVedtaksbrevTask.Companion)
             every {

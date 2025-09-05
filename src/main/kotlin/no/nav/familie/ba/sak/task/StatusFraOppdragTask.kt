@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -32,6 +33,7 @@ class StatusFraOppdragTask(
     private val stegService: StegService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val taskRepository: TaskRepositoryWrapper,
+    private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
     /**
      * Metoden prøver å hente kvittering i ét døgn.
