@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Visningsbehandling
+import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import org.springframework.stereotype.Service
@@ -64,7 +66,15 @@ class BehandlingHentOgPersisterService(
     }
 
     fun hentSisteBehandlingSomErSendtTilØkonomiPerFagsak(fagsakIder: Set<Long>): List<Behandling> {
-        val behandlingerPåFagsakene = behandlingRepository.finnBehandlinger(fagsakIder)
+        val behandlingerPåFagsakene =
+            behandlingRepository
+                .finnBehandlinger(fagsakIder)
+                .filter {
+                    it.behandlingStegTilstand.any { tilstand ->
+                        tilstand.behandlingSteg == StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI &&
+                            tilstand.behandlingStegStatus.navn == BehandlingStegStatus.UTFØRT.navn
+                    }
+                }
 
         return behandlingerPåFagsakene
             .groupBy { it.fagsak.id }
