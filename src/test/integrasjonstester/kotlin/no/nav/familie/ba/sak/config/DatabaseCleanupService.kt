@@ -60,18 +60,18 @@ class DatabaseCleanupService(
      */
     @Transactional
     fun truncate() {
-        logger.info("Truncating tables: $tableNames")
-        entityManager.flush()
-        if (environment.activeProfiles.contains("postgres")) {
-            tableNames?.forEach { tableName ->
-                entityManager.createNativeQuery("TRUNCATE TABLE $tableName CASCADE").executeUpdate()
-            }
-        } else {
-            entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TO FALSE").executeUpdate()
-            tableNames?.forEach { tableName ->
-                entityManager.createNativeQuery("TRUNCATE TABLE $tableName").executeUpdate()
-            }
-            entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TO TRUE").executeUpdate()
-        }
+//        logger.info("Truncating tables: $tableNames")
+//        entityManager.flush()
+//        if (environment.activeProfiles.contains("postgres")) {
+//            tableNames?.forEach { tableName ->
+//                entityManager.createNativeQuery("TRUNCATE TABLE $tableName CASCADE").executeUpdate()
+//            }
+//        } else {
+//            entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TO FALSE").executeUpdate()
+//            tableNames?.forEach { tableName ->
+//                entityManager.createNativeQuery("TRUNCATE TABLE $tableName").executeUpdate()
+//            }
+//            entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TO TRUE").executeUpdate()
+//        }
     }
 }
