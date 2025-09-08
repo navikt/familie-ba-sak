@@ -7,6 +7,7 @@ import jakarta.persistence.EntityListeners
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted.PAA_SVALBARD
+import no.nav.familie.kontrakter.felles.svalbard.erKommunePåSvalbard
 import java.util.Objects
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -55,6 +56,8 @@ data class GrMatrikkeladresseOppholdsadresse(
         val oppholdAnnetSted = oppholdAnnetSted.takeIf { it == PAA_SVALBARD }?.let { ", $it" } ?: ""
         return postnummer?.let { "$postnummer$poststed$oppholdAnnetSted" } ?: "Ukjent adresse$oppholdAnnetSted"
     }
+
+    override fun erPåSvalbard(): Boolean = (kommunenummer != null && erKommunePåSvalbard(kommunenummer)) || oppholdAnnetSted == PAA_SVALBARD
 
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
