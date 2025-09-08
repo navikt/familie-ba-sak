@@ -16,5 +16,7 @@ class GrUkjentAdresseOppholdsadresse : GrOppholdsadresse() {
 
     override fun tilFrontendString(): String = "Ukjent adresse${oppholdAnnetSted.takeIf { it == PAA_SVALBARD }?.let { ", $it" } ?: ""}"
 
+    override fun erPåSvalbard(): Boolean = oppholdAnnetSted == PAA_SVALBARD
+
     override fun tilKopiForNyPerson(): GrOppholdsadresse = GrUkjentAdresseOppholdsadresse()
 }

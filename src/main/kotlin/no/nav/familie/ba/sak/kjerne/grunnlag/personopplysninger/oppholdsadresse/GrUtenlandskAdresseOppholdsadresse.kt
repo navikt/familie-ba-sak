@@ -6,6 +6,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted.PAA_SVALBARD
 import no.nav.familie.kontrakter.felles.personopplysning.UtenlandskAdresse
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -62,6 +63,8 @@ data class GrUtenlandskAdresseOppholdsadresse(
             "$adressenavnNummer$bygningEtasjeLeilighet$postboks$postkode$bySted$regionDistriktOmraade$landkode"
         } ?: "Ukjent utenlandsk adresse$landkode"
     }
+
+    override fun erPåSvalbard(): Boolean = oppholdAnnetSted == PAA_SVALBARD
 
     override fun toString(): String = "GrUtenlandskAdresseOppholdsadresse(detaljer skjult)"
 

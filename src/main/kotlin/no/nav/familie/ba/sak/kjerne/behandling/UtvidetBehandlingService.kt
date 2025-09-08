@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilManglendeSvalbardmerkingPerioder
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFødselshendelsefiltreringResultat
@@ -177,6 +178,7 @@ class UtvidetBehandlingService(
             vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandling.id)?.vurderingsstrategiForValutakurser,
             søknadMottattDato = søknadMottattDato,
             tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregning?.tilRestTilbakekrevingsvedtakMotregning(),
+            manglendeSvalbardmerking = personer?.tilManglendeSvalbardmerkingPerioder(personResultater) ?: emptyList(),
         )
     }
 }
