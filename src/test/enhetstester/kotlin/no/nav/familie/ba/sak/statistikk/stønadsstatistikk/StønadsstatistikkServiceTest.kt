@@ -6,6 +6,8 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseUtvidet
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -49,6 +51,7 @@ internal class StønadsstatistikkServiceTest {
     private val kompetanseService = mockk<KompetanseService>()
     private val vedtakRepository = mockk<VedtakRepository>()
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val stønadsstatistikkService =
         StønadsstatistikkService(
@@ -59,6 +62,7 @@ internal class StønadsstatistikkServiceTest {
             vedtakRepository,
             kompetanseService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            featureToggleService,
         )
     private val behandling = lagBehandling()
     private val søkerFnr = "12345678910"
@@ -102,6 +106,7 @@ internal class StønadsstatistikkServiceTest {
         every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any()) } returns "DK"
+        every { featureToggleService.isEnabled(FeatureToggle.STONADSSTATISTIKK_FORTSATT_INNVILGET) } returns true
     }
 
     fun mockAndelTilkjentYtelse() {

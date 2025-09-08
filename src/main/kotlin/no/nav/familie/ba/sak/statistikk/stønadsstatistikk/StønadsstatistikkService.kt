@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -52,6 +54,7 @@ class StønadsstatistikkService(
     private val vedtakRepository: VedtakRepository,
     private val kompetanseService: KompetanseService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun hentVedtakV2(behandlingId: Long): VedtakDVHV2 {
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId)
@@ -67,12 +70,20 @@ class StønadsstatistikkService(
         }
 
         val tidspunktVedtak = datoVedtak
-        val sisteIverksatteBehandlingId = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.id
+        val sisteIverksatteBehandlingId =
+            if (featureToggleService.isEnabled(FeatureToggle.STONADSSTATISTIKK_FORTSATT_INNVILGET)) {
+                behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.id.run {
+                    if (this == behandlingId) null else this.toString()
+                }
+            } else {
+                null
+            }
+
         return VedtakDVHV2(
             fagsakId = behandling.fagsak.id.toString(),
             fagsakType = FagsakType.valueOf(behandling.fagsak.type.name),
             behandlingsId = behandlingId.toString(),
-            sisteIverksatteBehandlingId = if (sisteIverksatteBehandlingId == behandlingId) null else sisteIverksatteBehandlingId.toString(),
+            sisteIverksatteBehandlingId = sisteIverksatteBehandlingId,
             tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
             personV2 = hentSøkerV2(persongrunnlag),
             // TODO implementere støtte for dette
