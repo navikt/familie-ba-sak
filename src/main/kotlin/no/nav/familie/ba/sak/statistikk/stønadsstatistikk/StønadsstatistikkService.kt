@@ -72,7 +72,7 @@ class StønadsstatistikkService(
         val tidspunktVedtak = datoVedtak
         val sisteIverksatteBehandlingId =
             if (featureToggleService.isEnabled(FeatureToggle.STONADSSTATISTIKK_FORTSATT_INNVILGET)) {
-                behandlingHentOgPersisterService.hentSisteBehandlingSomErSendtTilØkonomiPerFagsak(setOf(behandling.fagsak.id)).singleOrNull()?.id.run {
+                behandlingHentOgPersisterService.hentIverksatteBehandlinger(behandling.fagsak.id).maxByOrNull { it.aktivertTidspunkt }?.id.run {
                     if (this == behandlingId) null else this.toString()
                 }
             } else {

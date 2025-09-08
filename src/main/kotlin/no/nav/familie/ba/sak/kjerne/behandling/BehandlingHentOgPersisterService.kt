@@ -67,14 +67,7 @@ class BehandlingHentOgPersisterService(
 
     fun hentSisteBehandlingSomErSendtTilØkonomiPerFagsak(fagsakIder: Set<Long>): List<Behandling> {
         val behandlingerPåFagsakene =
-            behandlingRepository
-                .finnBehandlinger(fagsakIder)
-                .filter {
-                    it.behandlingStegTilstand.any { tilstand ->
-                        tilstand.behandlingSteg == StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI &&
-                            tilstand.behandlingStegStatus.navn == BehandlingStegStatus.UTFØRT.navn
-                    }
-                }
+            behandlingRepository.finnBehandlinger(fagsakIder)
 
         return behandlingerPåFagsakene
             .groupBy { it.fagsak.id }
