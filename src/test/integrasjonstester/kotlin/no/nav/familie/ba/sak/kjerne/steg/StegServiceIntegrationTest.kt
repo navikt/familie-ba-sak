@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.steg
 import io.mockk.every
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
@@ -28,7 +27,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
@@ -60,11 +58,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import java.time.LocalDate
 
 class StegServiceIntegrationTest(
@@ -83,8 +79,6 @@ class StegServiceIntegrationTest(
     @Autowired
     private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired
     private val totrinnskontrollService: TotrinnskontrollService,
     @Autowired
     private val personidentService: PersonidentService,
@@ -97,33 +91,42 @@ class StegServiceIntegrationTest(
     @Autowired
     private val økonomiKlient: ØkonomiKlient,
 ) : AbstractSpringIntegrationTest() {
-    @MockBean
-    private lateinit var automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService
-
-    @BeforeEach
-    fun init() {
-        databaseCleanupService.truncate()
-    }
-
-    val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
-    val barnFnr1 = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
-    val barnFnr2 =
-        leggTilPersonInfo(
-            personIdent = randomBarnFnr(alder = 16),
-            egendefinertMock =
-                PersonInfo(
-                    fødselsdato = LocalDate.now().minusYears(16),
-                    sivilstander =
-                        listOf(
-                            Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
-                        ),
-                    kjønn = Kjønn.entries.random(),
-                    navn = "navn",
-                ),
-        )
+//    val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
+//    val barnFnr1 = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+//    val barnFnr2 =
+//        leggTilPersonInfo(
+//            personIdent = randomBarnFnr(alder = 16),
+//            egendefinertMock =
+//                PersonInfo(
+//                    fødselsdato = LocalDate.now().minusYears(16),
+//                    sivilstander =
+//                        listOf(
+//                            Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
+//                        ),
+//                    kjønn = Kjønn.entries.random(),
+//                    navn = "navn",
+//                ),
+//    )
 
     @Test
     fun `Skal sette default-verdier på gift-vilkår for barn`() {
+        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
+        val barnFnr1 = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val barnFnr2 =
+            leggTilPersonInfo(
+                personIdent = randomBarnFnr(alder = 16),
+                egendefinertMock =
+                    PersonInfo(
+                        fødselsdato = LocalDate.now().minusYears(16),
+                        sivilstander =
+                            listOf(
+                                Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
+                            ),
+                        kjønn = Kjønn.entries.random(),
+                        navn = "navn",
+                    ),
+            )
+
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.REGISTRERE_SØKNAD,
@@ -159,11 +162,13 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Skal kjøre gjennom alle steg med datageneratoren`() {
+        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
+        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.BEHANDLING_AVSLUTTET,
                 søkerFnr = søkerFnr,
-                barnasIdenter = listOf(barnFnr1),
+                barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
@@ -178,7 +183,7 @@ class StegServiceIntegrationTest(
         kjørStegprosessForRevurderingÅrligKontroll(
             tilSteg = StegType.SEND_TIL_BESLUTTER,
             søkerFnr = søkerFnr,
-            barnasIdenter = listOf(barnFnr1),
+            barnasIdenter = listOf(barnFnr),
             vedtakService = vedtakService,
             stegService = stegService,
             fagsakId = behandling.fagsak.id,
@@ -299,7 +304,10 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Henlegge før behandling er sendt til beslutter`() {
-        val vilkårsvurdertBehandling = kjørGjennomStegInkludertVurderTilbakekreving()
+        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
+        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+
+        val vilkårsvurdertBehandling = kjørGjennomStegInkludertVurderTilbakekreving(søkerFnr, listOf(barnFnr))
 
         val henlagtBehandling =
             stegService.håndterHenleggBehandling(
@@ -325,7 +333,10 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Teknisk henleggelse med begrunnelse Satsendring skal beholde behandleSak-oppgaven åpen`() {
-        val behandling = kjørGjennomStegInkludertVurderTilbakekreving()
+        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
+        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+
+        val behandling = kjørGjennomStegInkludertVurderTilbakekreving(søkerFnr, listOf(barnFnr))
         oppgaveRepository.saveAll(
             listOf(
                 DbOppgave(behandling = behandling, type = Oppgavetype.Journalføring, gsakId = "1"),
@@ -364,7 +375,10 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Henlegge etter behandling er sendt til beslutter`() {
-        val vilkårsvurdertBehandling = kjørGjennomStegInkludertVurderTilbakekreving()
+        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
+        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+
+        val vilkårsvurdertBehandling = kjørGjennomStegInkludertVurderTilbakekreving(søkerFnr, listOf(barnFnr))
         stegService.håndterSendTilBeslutter(vilkårsvurdertBehandling, "1234")
 
         val behandlingEtterSendTilBeslutter =
@@ -414,6 +428,10 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato og avvik i simulering innenfor beløpsgrenser`() {
+        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
+        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val barnasIdenter = listOf(barnFnr)
+
         val simulertPosteringMock =
             listOf(
                 SimulertPostering(
@@ -439,10 +457,6 @@ class StegServiceIntegrationTest(
             )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
-
-        val søkerFnr = randomFnr()
-        val barnFnr = barnFnr1
-        val barnasIdenter = listOf(barnFnr)
 
         kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
@@ -528,6 +542,10 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato og avvik i simulering utenefor beløpsgrenser`() {
+        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
+        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val barnasIdenter = listOf(barnFnr)
+
         val simulertPosteringMock =
             listOf(
                 SimulertPostering(
@@ -553,10 +571,6 @@ class StegServiceIntegrationTest(
             )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
-
-        val søkerFnr = randomFnr()
-        val barnFnr = barnFnr1
-        val barnasIdenter = listOf(barnFnr)
 
         kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
@@ -642,6 +656,10 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato og avvik i simulering utenfor beløpsgrenser`() {
+        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
+        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val barnasIdenter = listOf(barnFnr)
+
         val simulertPosteringMock =
             listOf(
                 SimulertPostering(
@@ -667,10 +685,6 @@ class StegServiceIntegrationTest(
             )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
-
-        val søkerFnr = randomFnr()
-        val barnFnr = barnFnr1
-        val barnasIdenter = listOf(barnFnr)
 
         kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
@@ -747,6 +761,10 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for helmanuell migrering med avvik i simulering innenfor beløpsgrenser`() {
+        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
+        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val barnasIdenter = listOf(barnFnr)
+
         val simulertPosteringMock =
             listOf(
                 SimulertPostering(
@@ -772,10 +790,6 @@ class StegServiceIntegrationTest(
             )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
-
-        val søkerFnr = randomFnr()
-        val barnFnr = barnFnr1
-        val barnasIdenter = listOf(barnFnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val migreringsdato = LocalDate.now().minusMonths(6)
@@ -858,6 +872,10 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for helmanuell migrering med avvik i simulering utenfor beløpsgrenser`() {
+        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
+        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val barnasIdenter = listOf(barnFnr)
+
         val simulertPosteringMock =
             listOf(
                 SimulertPostering(
@@ -883,10 +901,6 @@ class StegServiceIntegrationTest(
             )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
-
-        val søkerFnr = randomFnr()
-        val barnFnr = barnFnr1
-        val barnasIdenter = listOf(barnFnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val migreringsdato = LocalDate.now().minusMonths(6)
@@ -983,6 +997,9 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for helmanuell migrering med manuelle posteringer med avvik innenfor beløpsgrenser`() {
+        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
+        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val barnasIdenter = listOf(barnFnr)
         val simulertPosteringMock =
             listOf(
                 SimulertPostering(
@@ -1008,10 +1025,6 @@ class StegServiceIntegrationTest(
             )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
-
-        val søkerFnr = randomFnr()
-        val barnFnr = barnFnr1
-        val barnasIdenter = listOf(barnFnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val migreringsdato = LocalDate.now().minusMonths(6)
@@ -1109,6 +1122,10 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for endre migreringsdato behandling og automatisk godkjenne totrinnskontroll`() {
+        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
+        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val barnasIdenter = listOf(barnFnr)
+
         val simulertPosteringMock =
             listOf(
                 SimulertPostering(
@@ -1134,10 +1151,6 @@ class StegServiceIntegrationTest(
             )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
-
-        val søkerFnr = randomFnr()
-        val barnFnr = barnFnr1
-        val barnasIdenter = listOf(barnFnr)
 
         kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
@@ -1229,11 +1242,14 @@ class StegServiceIntegrationTest(
         assertEquals(SikkerhetContext.SYSTEM_FORKORTELSE, totrinnskontroll.beslutterId)
     }
 
-    private fun kjørGjennomStegInkludertVurderTilbakekreving(): Behandling =
+    private fun kjørGjennomStegInkludertVurderTilbakekreving(
+        søkerFnr: String,
+        barnasIdenter: List<String>,
+    ): Behandling =
         kjørStegprosessForFGB(
             tilSteg = StegType.VURDER_TILBAKEKREVING,
             søkerFnr = søkerFnr,
-            barnasIdenter = listOf(barnFnr1),
+            barnasIdenter = barnasIdenter,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             persongrunnlagService = persongrunnlagService,
