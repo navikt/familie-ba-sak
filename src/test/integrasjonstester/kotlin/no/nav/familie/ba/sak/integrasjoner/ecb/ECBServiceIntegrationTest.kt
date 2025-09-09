@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCacheRepository
 import no.nav.familie.valutakurs.Frequency
 import no.nav.familie.valutakurs.ValutakursRestClient
@@ -17,38 +16,21 @@ import no.nav.familie.valutakurs.domene.ECBExchangeRatesDataSet
 import no.nav.familie.valutakurs.domene.ECBExchangeRatesForCurrency
 import no.nav.familie.valutakurs.domene.toExchangeRates
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ECBIntegrationTest : AbstractSpringIntegrationTest() {
+class ECBServiceIntegrationTest(
+    @Autowired private val ecbValutakursCacheRepository: ECBValutakursCacheRepository,
+) : AbstractSpringIntegrationTest() {
     private val ecbClient = mockk<ValutakursRestClient>()
 
-    @Autowired
-    private lateinit var ecbService: ECBService
-
-    @Autowired
-    private lateinit var ecbValutakursCacheRepository: ECBValutakursCacheRepository
-
-    @Autowired
-    private lateinit var databaseCleanupService: DatabaseCleanupService
-
-    @BeforeEach
-    fun setUp() {
-        ecbService =
-            ECBService(
-                ecbClient = ecbClient,
-                ecbValutakursCacheRepository = ecbValutakursCacheRepository,
-            )
-        databaseCleanupService.truncate()
-    }
+    private val ecbService = ECBService(ecbClient = ecbClient, ecbValutakursCacheRepository = ecbValutakursCacheRepository)
 
     @Test
     fun `Skal teste at valutakurs hentes fra cache dersom valutakursen allerede er hentet fra ECB`() {
+        // Arrange
         val valutakursDato = LocalDate.of(2022, 7, 20)
         val ecbExchangeRatesData =
             createECBResponse(
@@ -64,8 +46,11 @@ class ECBIntegrationTest : AbstractSpringIntegrationTest() {
             )
         } returns ecbExchangeRatesData.toExchangeRates()
 
+        // Act
         ecbService.hentValutakurs("EUR", valutakursDato)
         val valutakurs = ecbValutakursCacheRepository.findByValutakodeAndValutakursdato("EUR", valutakursDato)?.firstOrNull()
+
+        // Assert
         assertEquals(valutakurs!!.kurs, BigDecimal.valueOf(9.4567))
         ecbService.hentValutakurs("EUR", valutakursDato)
         verify(exactly = 1) {
