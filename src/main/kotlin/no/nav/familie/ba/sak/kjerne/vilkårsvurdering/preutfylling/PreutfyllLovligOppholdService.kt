@@ -87,6 +87,7 @@ class PreutfyllLovligOppholdService(
                     begrunnelse = PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT + periode.verdi.begrunnelse,
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                     begrunnelseForManuellKontroll = periode.verdi.begrunnelseForManuellKontroll,
+                    erOpprinneligPreutfylt = true,
                 )
             }.toSet()
     }

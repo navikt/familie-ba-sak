@@ -103,6 +103,7 @@ class PreutfyllBosattIRiketService(
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                     begrunnelseForManuellKontroll = erBosattINorgePeriode.verdi.begrunnelseForManuellKontroll,
                     utdypendeVilkårsvurderinger = erBosattINorgePeriode.verdi.utdypendeVilkårsvurderinger,
+                    erOpprinneligPreutfylt = true,
                 )
             }.toSet()
     }

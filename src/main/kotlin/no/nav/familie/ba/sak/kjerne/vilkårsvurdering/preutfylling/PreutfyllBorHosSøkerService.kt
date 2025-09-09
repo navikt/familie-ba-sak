@@ -72,6 +72,7 @@ class PreutfyllBorHosSøkerService(
                     periodeTom = periode.tom,
                     begrunnelse = PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT + periode.verdi.begrunnelse,
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+                    erOpprinneligPreutfylt = true,
                 )
             }.toSet()
     }
