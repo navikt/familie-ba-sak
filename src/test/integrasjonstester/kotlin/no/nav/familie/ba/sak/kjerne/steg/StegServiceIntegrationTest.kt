@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
-import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
@@ -91,30 +90,13 @@ class StegServiceIntegrationTest(
     @Autowired
     private val økonomiKlient: ØkonomiKlient,
 ) : AbstractSpringIntegrationTest() {
-//    val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
-//    val barnFnr1 = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
-//    val barnFnr2 =
-//        leggTilPersonInfo(
-//            personIdent = randomBarnFnr(alder = 16),
-//            egendefinertMock =
-//                PersonInfo(
-//                    fødselsdato = LocalDate.now().minusYears(16),
-//                    sivilstander =
-//                        listOf(
-//                            Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
-//                        ),
-//                    kjønn = Kjønn.entries.random(),
-//                    navn = "navn",
-//                ),
-//    )
-
     @Test
     fun `Skal sette default-verdier på gift-vilkår for barn`() {
-        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
-        val barnFnr1 = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(35))
+        val barnFnr1 = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnFnr2 =
             leggTilPersonInfo(
-                personIdent = randomBarnFnr(alder = 16),
+                fødselsdato = LocalDate.now().minusYears(16),
                 egendefinertMock =
                     PersonInfo(
                         fødselsdato = LocalDate.now().minusYears(16),
@@ -162,8 +144,8 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Skal kjøre gjennom alle steg med datageneratoren`() {
-        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
-        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(35))
+        val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.BEHANDLING_AVSLUTTET,
@@ -304,8 +286,8 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Henlegge før behandling er sendt til beslutter`() {
-        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
-        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(35))
+        val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
 
         val vilkårsvurdertBehandling = kjørGjennomStegInkludertVurderTilbakekreving(søkerFnr, listOf(barnFnr))
 
@@ -333,8 +315,8 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Teknisk henleggelse med begrunnelse Satsendring skal beholde behandleSak-oppgaven åpen`() {
-        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
-        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(35))
+        val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
 
         val behandling = kjørGjennomStegInkludertVurderTilbakekreving(søkerFnr, listOf(barnFnr))
         oppgaveRepository.saveAll(
@@ -375,8 +357,8 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Henlegge etter behandling er sendt til beslutter`() {
-        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
-        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(35))
+        val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
 
         val vilkårsvurdertBehandling = kjørGjennomStegInkludertVurderTilbakekreving(søkerFnr, listOf(barnFnr))
         stegService.håndterSendTilBeslutter(vilkårsvurdertBehandling, "1234")
@@ -428,8 +410,9 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato og avvik i simulering innenfor beløpsgrenser`() {
-        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
-        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(30))
+        val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
+
         val barnasIdenter = listOf(barnFnr)
 
         val simulertPosteringMock =
@@ -542,8 +525,8 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato og avvik i simulering utenefor beløpsgrenser`() {
-        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
-        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(29))
+        val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnasIdenter = listOf(barnFnr)
 
         val simulertPosteringMock =
@@ -656,8 +639,8 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato og avvik i simulering utenfor beløpsgrenser`() {
-        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
-        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(18))
+        val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnasIdenter = listOf(barnFnr)
 
         val simulertPosteringMock =
@@ -761,8 +744,8 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for helmanuell migrering med avvik i simulering innenfor beløpsgrenser`() {
-        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
-        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(35))
+        val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnasIdenter = listOf(barnFnr)
 
         val simulertPosteringMock =
@@ -872,8 +855,8 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for helmanuell migrering med avvik i simulering utenfor beløpsgrenser`() {
-        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
-        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(35))
+        val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnasIdenter = listOf(barnFnr)
 
         val simulertPosteringMock =
@@ -997,8 +980,9 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for helmanuell migrering med manuelle posteringer med avvik innenfor beløpsgrenser`() {
-        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
-        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(35))
+        val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
+
         val barnasIdenter = listOf(barnFnr)
         val simulertPosteringMock =
             listOf(
@@ -1122,8 +1106,8 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for endre migreringsdato behandling og automatisk godkjenne totrinnskontroll`() {
-        val søkerFnr = leggTilPersonInfo(personIdent = randomFnr())
-        val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(37))
+        val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnasIdenter = listOf(barnFnr)
 
         val simulertPosteringMock =

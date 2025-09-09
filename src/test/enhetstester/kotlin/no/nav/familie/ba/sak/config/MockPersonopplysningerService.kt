@@ -100,12 +100,27 @@ class MockPersonopplysningerService(
                 mockBarnAutomatiskBehandlingSkalFeileFnr to mockBarnAutomatiskBehandlingSkalFeile,
             )
 
+        @Deprecated("Parsing av fødselsdato fra fnr er usikker pga. århundre. Bruk heller leggTilPersonInfo med fødselsdato")
         fun leggTilPersonInfo(
             personIdent: String,
             egendefinertMock: PersonInfo? = null,
         ): String {
             personInfo[personIdent] = egendefinertMock ?: PersonInfo(
                 fødselsdato = LocalDate.parse(personIdent.substring(0, 6), ofPattern("ddMMyy")),
+                bostedsadresser = mutableListOf(bostedsadresse),
+                kjønn = Kjønn.entries.random(),
+                navn = "$personIdent sitt navn",
+            )
+            return personIdent
+        }
+
+        fun leggTilPersonInfo(
+            fødselsdato: LocalDate,
+            egendefinertMock: PersonInfo? = null,
+        ): String {
+            val personIdent = randomFnr(fødselsdato)
+            personInfo[personIdent] = egendefinertMock ?: PersonInfo(
+                fødselsdato = fødselsdato,
                 bostedsadresser = mutableListOf(bostedsadresse),
                 kjønn = Kjønn.entries.random(),
                 navn = "$personIdent sitt navn",
