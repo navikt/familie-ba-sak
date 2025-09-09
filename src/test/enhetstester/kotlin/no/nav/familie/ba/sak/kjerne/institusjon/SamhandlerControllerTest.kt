@@ -26,12 +26,13 @@ internal class SamhandlerControllerTest {
     lateinit var samhandlerController: SamhandlerController
     private val samhandlerKlientMock: SamhandlerKlient = mockk()
     private val institusjonRepository: InstitusjonRepository = mockk()
+    private val institusjonsinfoRepository: InstitusjonsinfoRepository = mockk()
     private val integrasjonClient: IntegrasjonClient = mockk()
     private val kodeverkService: KodeverkService = mockk()
 
     @BeforeEach
     fun setUp() {
-        val institusjonService = InstitusjonService(mockk(), samhandlerKlientMock, institusjonRepository, integrasjonClient, kodeverkService)
+        val institusjonService = InstitusjonService(mockk(), samhandlerKlientMock, institusjonRepository, institusjonsinfoRepository, integrasjonClient, kodeverkService, mockk())
         samhandlerController = SamhandlerController(institusjonService = institusjonService)
         clearMocks(samhandlerKlientMock)
     }

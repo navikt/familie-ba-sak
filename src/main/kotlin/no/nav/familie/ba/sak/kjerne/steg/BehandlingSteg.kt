@@ -411,7 +411,14 @@ fun hentNesteSteg(
 
         else -> {
             when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                REGISTRERE_PERSONGRUNNLAG -> {
+                    if (behandling.fagsak.type == FagsakType.INSTITUSJON) {
+                        REGISTRERE_INSTITUSJON
+                    } else {
+                        VILKÅRSVURDERING
+                    }
+                }
+                REGISTRERE_INSTITUSJON -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER

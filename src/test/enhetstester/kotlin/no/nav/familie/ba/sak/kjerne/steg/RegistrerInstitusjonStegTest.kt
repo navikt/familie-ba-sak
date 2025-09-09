@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
+import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -19,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonRepository
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
+import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonsinfoRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
@@ -33,6 +35,7 @@ class RegistrerInstitusjonStegTest {
     private val behandlingHentOgPersisterServiceMock: BehandlingHentOgPersisterService = mockk()
     private val fagsakServiceMock: FagsakService = mockk(relaxed = true)
     private val institusjonRepositoryMock: InstitusjonRepository = mockk()
+    private val institusjonsinfoRepositoryMock: InstitusjonsinfoRepository = mockk()
     private val integrasjonClientMock: IntegrasjonClient = mockk()
     private val kodeverkServiceMock: KodeverkService = mockk()
 
@@ -46,8 +49,10 @@ class RegistrerInstitusjonStegTest {
                 fagsakRepository = fagsakRepositoryMock,
                 samhandlerKlient = mockk(relaxed = true),
                 institusjonRepository = institusjonRepositoryMock,
+                institusjonsinfoRepositoryMock,
                 integrasjonClient = integrasjonClientMock,
                 kodeverkService = kodeverkServiceMock,
+                mockk(relaxed = true),
             )
         registrerInstitusjon =
             RegistrerInstitusjon(
@@ -55,6 +60,9 @@ class RegistrerInstitusjonStegTest {
                 loggServiceMock,
                 behandlingHentOgPersisterServiceMock,
                 fagsakServiceMock,
+                mockk<OrganisasjonService>(relaxed = true),
+                mockk<InstitusjonsinfoRepository>(relaxed = true),
+                kodeverkServiceMock,
             )
     }
 
