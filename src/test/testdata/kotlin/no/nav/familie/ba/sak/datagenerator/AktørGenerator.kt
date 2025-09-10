@@ -26,6 +26,6 @@ fun randomAktør(fnr: String = randomFnr()): Aktør =
         )
     }
 
-fun randomBarnFødselsdato(alder: Int? = null): LocalDate = LocalDate.now().minusYears((alder ?: (1..18).random()).toLong()).minusDays((1..364).random().toLong())
+fun randomBarnFødselsdato(alder: Int? = null): LocalDate = LocalDate.now().minusYears((alder ?: (1..16).random()).toLong()).minusDays((1..364).random().toLong())
 
 fun randomSøkerFødselsdato(alder: Int? = null): LocalDate = LocalDate.now().minusYears((alder ?: (20..70).random()).toLong()).minusDays((1..364).random().toLong())
