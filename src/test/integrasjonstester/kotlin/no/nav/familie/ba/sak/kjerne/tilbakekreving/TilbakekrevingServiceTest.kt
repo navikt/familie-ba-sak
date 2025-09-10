@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.tilbakekreving
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
-import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
@@ -48,11 +48,12 @@ class TilbakekrevingServiceTest(
     @Test
     fun `tilbakekreving skal bli OPPRETT_TILBAKEKREVING_MED_VARSEL når man oppretter tilbakekreving med varsel`() {
         // Arrange
+        val søkerFnr = leggTilPersonInfo(fødselsdato = randomSøkerFødselsdato())
         val barnFnr = leggTilPersonInfo(fødselsdato = randomBarnFødselsdato())
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-                søkerFnr = randomFnr(),
+                søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
@@ -124,11 +125,13 @@ class TilbakekrevingServiceTest(
     @ArgumentsSource(TestProvider::class)
     fun `lagOpprettTilbakekrevingRequest sender brevmottakere i kall mot familie-tilbake`(arguments: Pair<MottakerType, Vergetype>) {
         // Arrange
+        val søkerFnr = leggTilPersonInfo(fødselsdato = randomSøkerFødselsdato())
         val barnFnr = leggTilPersonInfo(fødselsdato = randomBarnFødselsdato())
+
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-                søkerFnr = randomFnr(),
+                søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
