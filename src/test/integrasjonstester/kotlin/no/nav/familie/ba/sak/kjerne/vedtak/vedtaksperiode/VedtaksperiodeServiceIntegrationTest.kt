@@ -5,9 +5,9 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService
-import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
-import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -54,9 +54,9 @@ class VedtaksperiodeServiceIntegrationTest(
     private val brevmalService: BrevmalService,
 ) : AbstractSpringIntegrationTest() {
     private fun kjørFørstegangsbehandlingOgRevurderingÅrligKontroll(): Behandling {
-        val søkerFnr = MockPersonopplysningerService.leggTilPersonInfo(personIdent = randomFnr())
-        val barnFnr = MockPersonopplysningerService.leggTilPersonInfo(personIdent = randomBarnFnr(alder = 6))
-        val barn2Fnr = MockPersonopplysningerService.leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato(alder = 6))
+        val barn2Fnr = leggTilPersonInfo(randomBarnFødselsdato(alder = 2))
 
         val førstegangsbehandling =
             kjørStegprosessForFGB(
@@ -87,8 +87,8 @@ class VedtaksperiodeServiceIntegrationTest(
     @Test
     fun `Skal lage og populere avslagsperiode for uregistrert barn`() {
         // Arrange
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.REGISTRERE_SØKNAD,
@@ -144,8 +144,8 @@ class VedtaksperiodeServiceIntegrationTest(
     @Test
     fun `Skal lage og populere avslagsperiode for uregistrert barn med eøs begrunnelse dersom behandling sin kategori er EØS`() {
         // Arrange
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.REGISTRERE_SØKNAD,
@@ -202,11 +202,12 @@ class VedtaksperiodeServiceIntegrationTest(
     @Test
     fun `Skal kunne lagre flere vedtaksperioder av typen endret utbetaling med samme periode`() {
         // Arrange
-        val barnFnr = randomFnr()
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.REGISTRERE_SØKNAD,
-                søkerFnr = randomFnr(),
+                søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
