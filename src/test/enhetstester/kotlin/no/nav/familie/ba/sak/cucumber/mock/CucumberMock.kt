@@ -643,6 +643,7 @@ class CucumberMock(
         OpprettTaskService(
             taskRepository = taskRepository,
             satskjøringRepository = mockk(),
+            envService = mockk(),
         )
 
     val stegService =
