@@ -1,9 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
-import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -14,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -46,9 +46,11 @@ class SnikeIKøenServiceTest(
     @Autowired private val vedtakRepository: VedtakRepository,
     @Autowired private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     @Autowired private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
+    @Autowired private val behandlingService: BehandlingService,
 ) : AbstractSpringIntegrationTest() {
     private fun opprettLøpendeFagsak(): Fagsak {
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val søkerFnr = leggTilPersonInfo(fødselsdato = randomSøkerFødselsdato())
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         return fagsakService.lagre(fagsak.copy(status = FagsakStatus.LØPENDE))
     }
 
@@ -138,12 +140,10 @@ class SnikeIKøenServiceTest(
     @Test
     fun `reaktivering skal tilbakestille behandling på vent`() {
         val fagsak = opprettLøpendeFagsak()
-        val behandling1 =
-            opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false, fagsak = fagsak).let {
-                leggTilSteg(it, StegType.VILKÅRSVURDERING, BehandlingStegStatus.UTFØRT)
-                leggTilSteg(it, StegType.VURDER_TILBAKEKREVING)
-                behandlingRepository.saveAndFlush(it)
-            }
+        val behandling1 = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false, fagsak = fagsak)
+
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling1.id, StegType.VILKÅRSVURDERING)
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling1.id, StegType.VURDER_TILBAKEKREVING)
 
         val vedtak = vedtakRepository.saveAndFlush(lagVedtak(id = 0, behandling = behandling1))
         vedtaksperiodeHentOgPersisterService.lagre(
@@ -164,10 +164,10 @@ class SnikeIKøenServiceTest(
     fun `reaktivering skal tilbakestille til vilkårsvurdering kun dersom steget er lagt til på behandlingen`() {
         val fagsak = opprettLøpendeFagsak()
         val behandling1 = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false, fagsak = fagsak)
-        val initielStegTilstand = StegType.REGISTRERE_SØKNAD
+        lagreArbeidsfordeling(behandling1)
 
-        leggTilSteg(behandling1, initielStegTilstand)
-        behandlingRepository.saveAndFlush(behandling1)
+        val initielStegTilstand = StegType.REGISTRERE_SØKNAD
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling1.id, initielStegTilstand)
 
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true, fagsak = fagsak)
         lagUtbetalingsoppdragOgAvslutt(behandling2)
@@ -175,12 +175,14 @@ class SnikeIKøenServiceTest(
         snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling2)
 
         val oppdatertBehandling = behandlingRepository.finnBehandling(behandling1.id)
-
         assertThat(oppdatertBehandling.steg).isEqualTo(initielStegTilstand)
 
-        leggTilSteg(oppdatertBehandling, StegType.VILKÅRSVURDERING, BehandlingStegStatus.UTFØRT)
-        leggTilSteg(oppdatertBehandling, StegType.BEHANDLINGSRESULTAT)
-        settBehandlingTilPåMaskinellVent(oppdatertBehandling)
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(oppdatertBehandling.id, StegType.VILKÅRSVURDERING)
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(oppdatertBehandling.id, StegType.BEHANDLINGSRESULTAT)
+
+        val oppdatertBehandlingEtterNyeSteg = behandlingRepository.finnBehandling(behandling1.id)
+
+        settBehandlingTilPåMaskinellVent(oppdatertBehandlingEtterNyeSteg)
 
         snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling2)
 
@@ -303,25 +305,11 @@ class SnikeIKøenServiceTest(
     private fun lagUtbetalingsoppdragOgAvslutt(behandling: Behandling) {
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling, utbetalingsoppdrag = "utbetalingsoppdrag")
         tilkjentYtelseRepository.saveAndFlush(tilkjentYtelse)
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.BEHANDLING_AVSLUTTET)
         behandlingRepository.finnBehandling(behandling.id).let { behandlingFraDb ->
-            leggTilSteg(behandlingFraDb, StegType.BEHANDLING_AVSLUTTET)
             behandlingFraDb.status = BehandlingStatus.AVSLUTTET
             behandlingRepository.saveAndFlush(behandlingFraDb)
         }
-    }
-
-    private fun leggTilSteg(
-        behandling: Behandling,
-        stegType: StegType,
-        behandlingStegStatus: BehandlingStegStatus = BehandlingStegStatus.IKKE_UTFØRT,
-    ) {
-        val stegTilstand =
-            BehandlingStegTilstand(
-                behandling = behandling,
-                behandlingSteg = stegType,
-                behandlingStegStatus = behandlingStegStatus,
-            )
-        behandling.behandlingStegTilstand.add(stegTilstand)
     }
 
     private fun opprettBehandling(
