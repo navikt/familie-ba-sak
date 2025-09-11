@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.settPersonInfoStatsborgerskap
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
@@ -27,7 +26,6 @@ class VelgFagsystemIntegrasjonTest(
     @Autowired val velgFagSystemService: VelgFagSystemService,
     @Autowired val infotrygdService: InfotrygdService,
     @Autowired val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-    @Autowired val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
     val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
 

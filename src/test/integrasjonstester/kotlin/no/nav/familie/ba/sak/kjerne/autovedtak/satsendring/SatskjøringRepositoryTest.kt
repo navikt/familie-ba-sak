@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -10,23 +9,16 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRe
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
 import java.time.YearMonth
 
 class SatskjøringRepositoryTest(
-    @Autowired private val databaseCleanupService: DatabaseCleanupService,
     @Autowired private val satskjøringRepository: SatskjøringRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val aktørIdRepository: AktørIdRepository,
 ) : AbstractSpringIntegrationTest() {
-    @BeforeEach
-    fun setUp() {
-        databaseCleanupService.truncate()
-    }
-
     @Test
     fun `findBySatsTidspunktAndFerdigTidspunktIsNullAndFeiltypeIsNotNull henter satskjøring med riktig tidspunkt og som har feiltype`() {
         val aktør = tilAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }

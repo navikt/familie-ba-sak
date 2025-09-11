@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -18,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired
 class BehandlingStateTest(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingRepository: BehandlingRepository,
-    @Autowired private val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
     @Nested
     inner class AktivBehandling {

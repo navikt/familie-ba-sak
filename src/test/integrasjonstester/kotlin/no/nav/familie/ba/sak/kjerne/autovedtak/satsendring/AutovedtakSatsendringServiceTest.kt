@@ -7,7 +7,6 @@ import io.mockk.runs
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -50,7 +49,6 @@ import java.time.YearMonth
 class AutovedtakSatsendringServiceTest(
     @Autowired private val jdbcTemplate: JdbcTemplate,
     @Autowired private val mockLocalDateService: LocalDateService,
-    @Autowired private val databaseCleanupService: DatabaseCleanupService,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingService: BehandlingService,
     @Autowired private val behandlingRepository: BehandlingRepository,
@@ -66,8 +64,6 @@ class AutovedtakSatsendringServiceTest(
 
     @BeforeEach
     fun setUp() {
-        databaseCleanupService.truncate()
-
         // Vilkårsvurdering og andeler tilkjent ytelse blir ikke generert i disse testene. Validering av andeler ved satsendring vil derfor kaste feil. For at testene for sett på vent skal fungere skrur vi her av denne valideringen.
         mockkObject(TilkjentYtelseValidering)
         every {
