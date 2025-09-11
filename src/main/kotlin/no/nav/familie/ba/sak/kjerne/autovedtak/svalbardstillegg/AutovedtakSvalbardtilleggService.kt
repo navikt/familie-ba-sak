@@ -52,18 +52,19 @@ class AutovedtakSvalbardtilleggService(
                 (type in FAGSAKTYPER_DER_SVALBARDTILLEGG_KAN_AUTOVEDTAS) to (status == LØPENDE)
             }
 
+        if (!(fagsaktypeKanBehandles && harLøpendeBarnetrygd)) return false
+
         val sisteIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandlingsdata.fagsakId)
                 ?: return false
 
-        val sisteIverksatteBehandlingHarSvalbardtilleggAndeler by lazy {
+        val sisteIverksatteBehandlingHarSvalbardtilleggAndeler =
             beregningService
                 .hentTilkjentYtelseForBehandling(sisteIverksatteBehandling.id)
                 .andelerTilkjentYtelse
                 .any { it.type == YtelseType.SVALBARDTILLEGG }
-        }
 
-        val minstÈnAktørHarAdresseSomErRelevantForSvalbardtillegg by lazy {
+        val minstÈnAktørHarAdresseSomErRelevantForSvalbardtillegg =
             persongrunnlagService
                 .hentAktivThrows(sisteIverksatteBehandling.id)
                 .personer
@@ -74,9 +75,8 @@ class AutovedtakSvalbardtilleggService(
                         .mapValues { it.value.tilAdresser() }
                         .any { it.value.harOppholdsadresseSomErRelevantForSvalbardtillegg() } // TODO Implmenter harOppholdsadresseSomErRelevantForSvalbardtillegg()
                 }
-        }
 
-        return fagsaktypeKanBehandles && harLøpendeBarnetrygd && (sisteIverksatteBehandlingHarSvalbardtilleggAndeler || minstÈnAktørHarAdresseSomErRelevantForSvalbardtillegg)
+        return sisteIverksatteBehandlingHarSvalbardtilleggAndeler || minstÈnAktørHarAdresseSomErRelevantForSvalbardtillegg
     }
 
     @Transactional
