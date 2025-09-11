@@ -140,7 +140,7 @@ class AutovedtakFødselshendelseService(
         behandling: Behandling,
         barnaSomVurderes: List<String>,
     ): String {
-        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
+        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling = behandling, barnSomSkalVurderes = barnaSomVurderes)
 
         return if (behandlingEtterVilkårsvurdering.resultat == Behandlingsresultat.INNVILGET) {
             autovedtakFødselshendelseBegrunnelseService.begrunnVedtaksperioderForBarnVurdertIFødselshendelse(behandling, barnaSomVurderes)

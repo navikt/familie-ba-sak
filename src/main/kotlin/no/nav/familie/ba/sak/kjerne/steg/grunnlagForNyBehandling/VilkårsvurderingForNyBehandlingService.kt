@@ -20,7 +20,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService
-import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -168,6 +167,7 @@ class VilkårsvurderingForNyBehandlingService(
         behandling: Behandling,
         bekreftEndringerViaFrontend: Boolean,
         forrigeBehandlingSomErVedtatt: Behandling?,
+        barnSomSkalVurderes: List<String>? = null,
     ): Vilkårsvurdering {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
 
@@ -195,7 +195,10 @@ class VilkårsvurderingForNyBehandlingService(
             featureToggleService.isEnabled(FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG)
         ) {
             try {
-                preutfyllVilkårService.preutfyllBosattIRiket(vilkårsvurdering = initiellVilkårsvurdering)
+                preutfyllVilkårService.preutfyllBosattIRiket(
+                    vilkårsvurdering = initiellVilkårsvurdering,
+                    barnSomVilkårSkalPreutfyllesFor = barnSomSkalVurderes,
+                )
             } catch (exception: Exception) {
                 logger.info("Preutfylling av bosatt i riket feilet for autovedtak fødselshendelse med behandling id ${behandling.id}. Hopper over preutfylling.")
             }

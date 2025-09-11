@@ -39,7 +39,7 @@ class VilkårsvurderingSteg(
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val featureToggleService: FeatureToggleService,
-) : BehandlingSteg<String> {
+) : BehandlingSteg<List<String>?> {
     override fun preValiderSteg(
         behandling: Behandling,
         stegService: StegService?,
@@ -72,7 +72,7 @@ class VilkårsvurderingSteg(
     @Transactional
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: String,
+        data: List<String>?,
     ): StegType {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
 
@@ -84,6 +84,7 @@ class VilkårsvurderingSteg(
                     behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
                         behandling,
                     ),
+                barnSomSkalVurderes = data,
             )
         }
 

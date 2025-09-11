@@ -34,8 +34,24 @@ class PreutfyllBosattIRiketService(
     private val søknadService: SøknadService,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
-    fun preutfyllBosattIRiket(vilkårsvurdering: Vilkårsvurdering) {
-        val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
+    fun preutfyllBosattIRiket(
+        vilkårsvurdering: Vilkårsvurdering,
+        barnSomVilkårSkalPreutfyllesFor: List<String>? = null,
+    ) {
+        val søkerIdent =
+            vilkårsvurdering.personResultater
+                .first { it.erSøkersResultater() }
+                .aktør
+                .aktivFødselsnummer()
+
+        val barnaIdenter =
+            vilkårsvurdering
+                .personResultater
+                .filterNot { it.erSøkersResultater() }
+                .map { it.aktør.aktivFødselsnummer() }
+
+        val identer = barnaIdenter.filter { barnSomVilkårSkalPreutfyllesFor?.contains(it) ?: true } + søkerIdent
+
         val bostedsadresser = pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer)
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
