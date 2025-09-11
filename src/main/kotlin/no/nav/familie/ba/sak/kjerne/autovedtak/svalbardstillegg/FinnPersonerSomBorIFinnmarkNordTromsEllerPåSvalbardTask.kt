@@ -1,13 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.erSvalbard
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.oppholdsadresseErPåSvalbardPåDato
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.tilAdresser
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.erIFinnmarkEllerNordTroms
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.hentForDato
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -39,25 +40,25 @@ class FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask(
                     .flatMap { identer ->
                         systemOnlyPdlRestClient
                             .hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(identer)
-                            .mapNotNull { (ident, adresser) ->
+                            .mapNotNull { (ident, pdlAdresser) ->
                                 val dato = LocalDate.now()
 
                                 val harBostedsadresseIFinnmarkEllerNordTroms =
-                                    adresser
-                                        .tilAdresser()
+                                    Adresser
+                                        .opprettFra(pdlAdresser)
                                         .bostedsadresser
                                         .hentForDato(dato)
                                         ?.erIFinnmarkEllerNordTroms() ?: false
 
                                 val harDeltBostedIFinnmarkEllerNordTroms =
-                                    adresser
-                                        .tilAdresser()
+                                    Adresser
+                                        .opprettFra(pdlAdresser)
                                         .delteBosteder
                                         .hentForDato(dato)
                                         ?.erIFinnmarkEllerNordTroms() ?: false
 
                                 val harOppholdsadressePåSvalbard =
-                                    adresser
+                                    pdlAdresser
                                         .oppholdsadresse
                                         .oppholdsadresseErPåSvalbardPåDato(dato)
 
@@ -144,3 +145,11 @@ class FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask(
         val fagsakIder: List<Long>,
     )
 }
+
+private fun List<Adresse>.hentForDato(dato: LocalDate): Adresse? =
+    filter { it.gyldigFraOgMed != null }
+        .sortedBy { it.gyldigFraOgMed }
+        .lastOrNull {
+            it.gyldigFraOgMed!!.isSameOrBefore(dato) &&
+                (it.gyldigTilOgMed == null || it.gyldigTilOgMed.isSameOrAfter(dato))
+        }
