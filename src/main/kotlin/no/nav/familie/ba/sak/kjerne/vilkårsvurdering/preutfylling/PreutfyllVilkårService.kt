@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class PreutfyllVilkårService(
@@ -23,6 +25,7 @@ class PreutfyllVilkårService(
         }
     }
 
+    @Transactional(propagation = Propagation.NESTED)
     fun preutfyllBosattIRiket(
         vilkårsvurdering: Vilkårsvurdering,
         barnSomVilkårSkalPreutfyllesFor: List<String>? = null,

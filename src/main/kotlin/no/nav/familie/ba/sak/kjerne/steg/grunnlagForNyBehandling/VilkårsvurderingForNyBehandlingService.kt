@@ -2,13 +2,14 @@ package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -79,7 +80,7 @@ class VilkårsvurderingForNyBehandlingService(
                 )
             }
 
-            !in listOf(BehandlingÅrsak.SØKNAD, BehandlingÅrsak.FØDSELSHENDELSE) -> {
+            !in listOf(BehandlingÅrsak.SØKNAD, FØDSELSHENDELSE) -> {
                 initierVilkårsvurderingForBehandling(
                     behandling = behandling,
                     bekreftEndringerViaFrontend = true,
@@ -191,16 +192,14 @@ class VilkårsvurderingForNyBehandlingService(
             preutfyllVilkårService.preutfyllVilkår(
                 vilkårsvurdering = initiellVilkårsvurdering,
             )
-        } else if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE &&
-            featureToggleService.isEnabled(FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG)
-        ) {
+        } else if (behandling.opprettetÅrsak == FØDSELSHENDELSE && featureToggleService.isEnabled(SKAL_GENERERE_FINNMARKSTILLEGG)) {
             try {
                 preutfyllVilkårService.preutfyllBosattIRiket(
                     vilkårsvurdering = initiellVilkårsvurdering,
                     barnSomVilkårSkalPreutfyllesFor = barnSomSkalVurderes,
                 )
-            } catch (exception: Exception) {
-                logger.info("Preutfylling av bosatt i riket feilet for autovedtak fødselshendelse med behandling id ${behandling.id}. Hopper over preutfylling.")
+            } catch (_: Exception) {
+                logger.warn("Preutfylling av bosatt i riket feilet for autovedtak fødselshendelse med behandling id ${behandling.id}. Hopper over preutfylling.")
             }
         }
 
@@ -277,7 +276,7 @@ class VilkårsvurderingForNyBehandlingService(
         behandling: Behandling,
         initiellVilkårsvurdering: Vilkårsvurdering,
     ) {
-        if (førstegangskjøringAvVilkårsvurdering(aktivVilkårsvurdering) && behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+        if (førstegangskjøringAvVilkårsvurdering(aktivVilkårsvurdering) && behandling.opprettetÅrsak == FØDSELSHENDELSE) {
             vilkårsvurderingMetrics.tellMetrikker(initiellVilkårsvurdering)
         }
     }
