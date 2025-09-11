@@ -49,23 +49,22 @@ class StønadsstatistikkServiceIntegrasjonsTest(
         val barn = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling1 = behandlingRepository.save(lagBehandlingUtenId(fagsak))
-        val personopplysningGrunnlag =
-            persongrunnlagRepository.save(
-                lagTestPersonopplysningGrunnlag(
-                    behandlingId = behandling1.id,
-                    lagPerson(aktør = søker, personIdent = PersonIdent(søker.aktivFødselsnummer())),
-                    lagPerson(aktør = barn, personIdent = PersonIdent(barn.aktivFødselsnummer()), type = PersonType.BARN, navn = PersonType.BARN.name),
-                ),
-            )
-        val vedtak = vedtakRepository.saveAndFlush(lagVedtak(behandling = behandling1, vedtaksdato = now()))
+        persongrunnlagRepository.save(
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling1.id,
+                lagPerson(aktør = søker, personIdent = PersonIdent(søker.aktivFødselsnummer())),
+                lagPerson(aktør = barn, personIdent = PersonIdent(barn.aktivFødselsnummer()), type = PersonType.BARN, navn = PersonType.BARN.name),
+            ),
+        )
+        vedtakRepository.saveAndFlush(lagVedtak(behandling = behandling1, vedtaksdato = now()))
         val behandling = behandling1
-        val tilkjentYtelse = tilkjentYtelseRepository.save(lagTilkjentYtelse(behandling = behandling, utbetalingsoppdrag = "Ikke-tom streng"))
+        tilkjentYtelseRepository.save(lagTilkjentYtelse(behandling = behandling, utbetalingsoppdrag = "Ikke-tom streng"))
 
         // Act
         val vedtakDVHV2 = stønadsstatistikkService.hentVedtakV2(behandlingId = behandling.id)
 
         // Assert
-        assertThat(vedtakDVHV2.sisteIverksatteBehandlingId).isEqualTo("null")
+        assertThat(vedtakDVHV2.sisteIverksatteBehandlingId).isNull()
     }
 
     @Test
@@ -77,15 +76,14 @@ class StønadsstatistikkServiceIntegrasjonsTest(
         val behandlingAvsluttet = behandlingRepository.save(lagBehandlingUtenId(fagsak, status = BehandlingStatus.AVSLUTTET, aktiv = false))
         val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak, status = BehandlingStatus.IVERKSETTER_VEDTAK))
 
-        val personopplysningGrunnlag =
-            persongrunnlagRepository.save(
-                lagTestPersonopplysningGrunnlag(
-                    behandlingId = behandling.id,
-                    lagPerson(aktør = søker, personIdent = PersonIdent(søker.aktivFødselsnummer())),
-                    lagPerson(aktør = barn, personIdent = PersonIdent(barn.aktivFødselsnummer()), type = PersonType.BARN, navn = PersonType.BARN.name),
-                ),
-            )
-        val vedtak = vedtakRepository.saveAndFlush(lagVedtak(behandling = behandling, vedtaksdato = now()))
+        persongrunnlagRepository.save(
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                lagPerson(aktør = søker, personIdent = PersonIdent(søker.aktivFødselsnummer())),
+                lagPerson(aktør = barn, personIdent = PersonIdent(barn.aktivFødselsnummer()), type = PersonType.BARN, navn = PersonType.BARN.name),
+            ),
+        )
+        vedtakRepository.saveAndFlush(lagVedtak(behandling = behandling, vedtaksdato = now()))
 
         tilkjentYtelseRepository.save(lagTilkjentYtelse(behandling = behandlingAvsluttet, utbetalingsoppdrag = "Ikke-tom streng"))
         tilkjentYtelseRepository.save(lagTilkjentYtelse(behandling = behandling, utbetalingsoppdrag = null))

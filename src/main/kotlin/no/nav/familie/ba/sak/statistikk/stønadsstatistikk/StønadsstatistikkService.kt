@@ -78,7 +78,7 @@ class StønadsstatistikkService(
                 if (behandlingHarUtbetalingsoppdrag) {
                     null
                 } else {
-                    behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.id
+                    behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.id.toString()
                 }
             } else {
                 null
@@ -88,7 +88,7 @@ class StønadsstatistikkService(
             fagsakId = behandling.fagsak.id.toString(),
             fagsakType = FagsakType.valueOf(behandling.fagsak.type.name),
             behandlingsId = behandlingId.toString(),
-            sisteIverksatteBehandlingId = sisteIverksatteBehandlingId.toString(),
+            sisteIverksatteBehandlingId = sisteIverksatteBehandlingId,
             tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
             personV2 = hentSøkerV2(persongrunnlag),
             // TODO implementere støtte for dette
