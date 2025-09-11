@@ -29,7 +29,7 @@ import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
-import no.nav.familie.ba.sak.datagenerator.lagVedtak
+import no.nav.familie.ba.sak.datagenerator.lagVedtakMedId
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
@@ -122,7 +122,7 @@ fun lagVedtak(
         dataTable
             .groupByBehandlingId()
             .map {
-                lagVedtak(behandlinger[it.key] ?: throw Feil("Finner ikke behandling"))
+                lagVedtakMedId(behandlinger[it.key] ?: throw Feil("Finner ikke behandling"))
             },
     )
 }
