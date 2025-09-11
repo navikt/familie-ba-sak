@@ -353,6 +353,7 @@ enum class BehandlingÅrsak(
     OPPDATER_UTVIDET_KLASSEKODE("Ny klassekode for utvidet barnetrygd"),
     IVERKSETTE_KA_VEDTAK("Iverksette KA-vedtak"),
     FINNMARKSTILLEGG("Finnmarkstillegg"),
+    SVALBARDTILLEGG("Svalbardtillegg"),
     ;
 
     fun erOmregningsårsak(): Boolean = this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG

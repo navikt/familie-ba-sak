@@ -156,6 +156,7 @@ enum class SettPåMaskinellVentÅrsak(
     MÅNEDLIG_VALUTAJUSTERING("Månedlig valutajustering"),
     OPPDATER_UTVIDET_KLASSEKODE("Ny klassekode for utvidet barnetrygd"),
     FINNMARKSTILLEGG("Finnmarkstillegg"),
+    SVALBARDTILLEGG("Svalbardtillegg"),
 }
 
 class BehandlingErIkkeAvsluttetException(
