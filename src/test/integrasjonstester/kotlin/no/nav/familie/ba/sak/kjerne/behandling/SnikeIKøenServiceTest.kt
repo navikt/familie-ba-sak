@@ -151,7 +151,7 @@ class SnikeIKøenServiceTest(
                 behandlingRepository.saveAndFlush(it)
             }
 
-        val vedtak = vedtakRepository.saveAndFlush(lagVedtak(id = 0, behandling = behandling1))
+        val vedtak = vedtakRepository.saveAndFlush(lagVedtak(behandling = behandling1))
         vedtaksperiodeHentOgPersisterService.lagre(
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
