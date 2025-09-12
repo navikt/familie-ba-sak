@@ -1,11 +1,8 @@
 package no.nav.familie.ba.sak.config
 
-import io.mockk.every
 import io.mockk.isMockKMock
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.LocalDateService
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
@@ -13,7 +10,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClientMock
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.mock.EfSakRestClientMock
@@ -33,12 +29,6 @@ import org.springframework.cache.CacheManager
 import java.util.UUID
 
 abstract class AbstractMockkSpringRunner {
-    /**
-     * Tjenester vi mocker ved bruk av every
-     */
-    @Autowired
-    private lateinit var mockPersonopplysningerService: PersonopplysningerService
-
     @Autowired
     private lateinit var pdlIdentRestClient: PdlIdentRestClient
 
@@ -56,9 +46,6 @@ abstract class AbstractMockkSpringRunner {
 
     @Autowired
     private lateinit var mockØkonomiKlient: ØkonomiKlient
-
-    @Autowired
-    private lateinit var mockFeatureToggleService: FeatureToggleService
 
     @Autowired
     private lateinit var mockTilbakekrevingKlient: TilbakekrevingKlient
@@ -95,15 +82,6 @@ abstract class AbstractMockkSpringRunner {
         clearMocks()
     }
 
-    fun settToggleMock(
-        toggle: FeatureToggle,
-        value: Boolean,
-    ) {
-        every { mockFeatureToggleService.isEnabled(toggle) } returns value
-        every { mockFeatureToggleService.isEnabled(toggle = toggle, behandlingId = any<Long>()) } returns value
-        every { mockFeatureToggleService.isEnabled(toggle = toggle, defaultValue = any<Boolean>()) } returns value
-    }
-
     private fun clearMocks() {
         unmockkAll()
 
@@ -117,10 +95,6 @@ abstract class AbstractMockkSpringRunner {
         IntegrasjonClientMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(
             mockFamilieIntegrasjonerTilgangskontrollClient,
         )
-
-        if (isMockKMock(mockFeatureToggleService)) {
-            ClientMocks.clearFeatureToggleMocks(mockFeatureToggleService)
-        }
 
         if (isMockKMock(mockEfSakRestClient)) {
             EfSakRestClientMock.clearEfSakRestMocks(mockEfSakRestClient)
