@@ -4,15 +4,14 @@ import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.tilAdresser
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringScheduler.Companion.CRON_HVERT_10_MIN_UKEDAG
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
 import no.nav.familie.ba.sak.task.OpprettTaskService
-import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ContextClosedEvent
 import org.springframework.data.domain.Pageable
@@ -71,8 +70,8 @@ class AutovedtakFinnmarkstilleggScheduler(
                         .flatMap { personer ->
                             pdlRestClient
                                 .hentBostedsadresseOgDeltBostedForPersoner(personer)
-                                .mapValues { it.value.tilAdresser() }
-                                .filterValues { it.harBostedsadresseEllerDeltBostedSomErRelevantForFinnmarkstillegg() }
+                                .mapValues { Adresser.opprettFra(it.value) }
+                                .filterValues { it.harAdresserSomErRelevantForFinnmarkstillegg() }
                                 .keys
                         }
 
@@ -89,10 +88,6 @@ class AutovedtakFinnmarkstilleggScheduler(
                 if (++startSide >= page.totalPages) break
             }
         }
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(AutovedtakFinnmarkstilleggScheduler::class.java)
     }
 
     override fun onApplicationEvent(event: ContextClosedEvent) {

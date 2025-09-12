@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.datagenerator.lagEnkelBostedsadresse
+import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -326,19 +326,13 @@ class ArbeidsfordelingIntegrationTest(
         fnr: String,
         enhet: BarnetrygdEnhet,
     ) {
-        every { integrasjonClient.hentBehandlendeEnhet(eq(fnr)) } returns
-            listOf(
-                Arbeidsfordelingsenhet(
-                    enhetId = enhet.enhetsnummer,
-                    enhetNavn = enhet.name,
-                ),
-            )
+        every { integrasjonClient.hentBehandlendeEnhet(eq(fnr)) } returns listOf(Arbeidsfordelingsenhet.opprettFra(enhet))
     }
 
     companion object {
         val MANUELT_OVERSTYRT_ENHET = BarnetrygdEnhet.OSLO
         val IKKE_FORTROLIG_ENHET = BarnetrygdEnhet.DRAMMEN
         val FORTROLIG_ENHET = BarnetrygdEnhet.VIKAFOSSEN
-        val søkerBostedsadresse = lagEnkelBostedsadresse()
+        val søkerBostedsadresse = listOf(lagBostedsadresse())
     }
 }
