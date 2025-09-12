@@ -35,51 +35,35 @@ class InstitusjonService(
         )
 
     @Cacheable("samhandler", cacheManager = "shortCache")
-    fun hentSamhandler(orgNummer: String): SamhandlerInfo {
+    fun hentSamhandlerFraTssOgEreg(orgNummer: String): SamhandlerInfo {
         val samhandlerinfoFraTss = samhandlerKlient.hentSamhandler(orgNummer)
         val organisasjonsinfoFraEreg = integrasjonClient.hentOrganisasjon(orgNummer)
-        return if (organisasjonsinfoFraEreg.adresse == null) {
-            return samhandlerinfoFraTss
-        } else {
-            val adresse = organisasjonsinfoFraEreg.adresse!!
 
-            val postnummer = adresse.postnummer
-            val poststed = kodeverkService.hentPoststed(postnummer) ?: ""
-
+        return organisasjonsinfoFraEreg.adresse?.let { adresse ->
+            val poststed = kodeverkService.hentPoststed(adresse.postnummer) ?: ""
             val samhandlerAdresse =
                 SamhandlerAdresse(
-                    adresselinjer = listOfNotNull(organisasjonsinfoFraEreg.adresse?.adresselinje1, organisasjonsinfoFraEreg.adresse?.adresselinje2, organisasjonsinfoFraEreg.adresse?.adresselinje3),
-                    postNr = postnummer,
+                    adresselinjer = listOfNotNull(adresse.adresselinje1, adresse.adresselinje2, adresse.adresselinje3),
+                    postNr = adresse.postnummer,
                     postSted = poststed,
                     adresseType = adresse.type,
                     kommunenummer = adresse.kommunenummer,
                     gyldighetsperiode = adresse.gyldighetsperiode?.let { Gyldighetsperiode(it.fom, it.tom) },
                 )
-
-            samhandlerinfoFraTss.copy(
-                navn = organisasjonsinfoFraEreg.navn,
-                adresser = listOf(samhandlerAdresse),
-            )
-        }
+            samhandlerinfoFraTss.copy(navn = organisasjonsinfoFraEreg.navn, adresser = listOf(samhandlerAdresse))
+        } ?: samhandlerinfoFraTss
     }
 
     @Cacheable("samhandlerBehandling", cacheManager = "shortCache")
-    fun hentSamhandlerForBehandling(behandlingId: BehandlingId): SamhandlerInfo {
-        val institusjonsadresse = institusjonsinfoRepository.findByBehandlingId(behandlingId.id)
-
-        return institusjonsadresse?.tilSamhandlerInfo() ?: hentSamhandlerInfo(behandlingId)
-    }
+    fun hentSamhandlerForBehandling(behandlingId: BehandlingId): SamhandlerInfo =
+        institusjonsinfoRepository.findByBehandlingId(behandlingId.id)?.tilSamhandlerInfo()
+            ?: hentSamhandlerInfo(behandlingId)
 
     private fun hentSamhandlerInfo(behandlingId: BehandlingId): SamhandlerInfo {
         val institusjon =
-            behandlingHentOgPersisterService
-                .hent(behandlingId.id)
-                .fagsak.institusjon
-
-        if (institusjon == null) {
-            throw FunksjonellFeil("Behandlingen hører ikke til en institusjon")
-        }
-        return hentSamhandler(institusjon.orgNummer)
+            behandlingHentOgPersisterService.hent(behandlingId.id).fagsak.institusjon
+                ?: throw FunksjonellFeil("Behandlingen hører ikke til en institusjon")
+        return hentSamhandlerFraTssOgEreg(institusjon.orgNummer)
     }
 
     fun søkSamhandlere(

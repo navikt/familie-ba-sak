@@ -1,14 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.institusjon
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.ba.tss.SamhandlerInfo
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
-import org.springframework.validation.Errors
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -26,11 +24,11 @@ class SamhandlerController(
     private val institusjonService: InstitusjonService,
 ) {
     @GetMapping(path = ["/orgnr/{orgnr}"])
-    fun hentSamhandlerDataForOrganisasjon(
+    fun hentSamhandlerDataForOrganisasjonFraTssOgEreg(
         @PathVariable("orgnr") orgNummer: String,
     ): Ressurs<SamhandlerInfo> =
         try {
-            Ressurs.success(institusjonService.hentSamhandler(orgNummer).copy(orgNummer = orgNummer))
+            Ressurs.success(institusjonService.hentSamhandlerFraTssOgEreg(orgNummer).copy(orgNummer = orgNummer))
         } catch (e: Exception) {
             if (e.erNotFound()) {
                 throw FunksjonellFeil(
@@ -51,7 +49,8 @@ class SamhandlerController(
         } catch (e: Exception) {
             if (e.erNotFound()) {
                 throw FunksjonellFeil(
-                    "Finner ikke institusjon. Kontakt NØS for å opprette TSS-ident.",
+                    melding = "Finner ikke institusjon for behandlingId=$behandlingId",
+                    frontendFeilmelding = "Finner ikke institusjon for behandling",
                     httpStatus = HttpStatus.NOT_FOUND,
                     throwable = e,
                 )
