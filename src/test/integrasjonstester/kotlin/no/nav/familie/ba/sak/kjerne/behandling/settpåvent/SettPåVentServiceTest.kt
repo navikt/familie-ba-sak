@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
+import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
@@ -33,8 +33,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -44,12 +42,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
 
-@Tag("integration")
 class SettPåVentServiceTest(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingService: BehandlingService,
     @Autowired private val behandlingRepository: BehandlingRepository,
-    @Autowired private val databaseCleanupService: DatabaseCleanupService,
     @Autowired private val stegService: StegService,
     @Autowired private val settPåVentService: SettPåVentService,
     @Autowired private val vedtakService: VedtakService,
@@ -62,13 +58,7 @@ class SettPåVentServiceTest(
     @Autowired private val snikeIKøenService: SnikeIKøenService,
     @Autowired private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
 ) : AbstractSpringIntegrationTest() {
-    private val barnFnr = leggTilPersonInfo(randomBarnFnr())
     private val frist = LocalDate.now().plusDays(DAGER_FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING)
-
-    @BeforeAll
-    fun init() {
-        databaseCleanupService.truncate()
-    }
 
     @ParameterizedTest
     @EnumSource(value = SettPåVentÅrsak::class)
@@ -128,8 +118,12 @@ class SettPåVentServiceTest(
     @ParameterizedTest
     @EnumSource(value = SettPåVentÅrsak::class)
     fun `Kan ikke endre på behandling etter at den er satt på vent`(årsak: SettPåVentÅrsak) {
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
+                søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr),
                 tilSteg = StegType.VILKÅRSVURDERING,
                 fagsakService = fagsakService,
@@ -156,8 +150,11 @@ class SettPåVentServiceTest(
     @ParameterizedTest
     @EnumSource(value = SettPåVentÅrsak::class)
     fun `Kan endre på behandling etter venting er deaktivert`(årsak: SettPåVentÅrsak) {
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
+                søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr),
                 tilSteg = StegType.VILKÅRSVURDERING,
                 fagsakService = fagsakService,
@@ -196,8 +193,11 @@ class SettPåVentServiceTest(
     @ParameterizedTest
     @EnumSource(value = SettPåVentÅrsak::class)
     fun `Kan ikke sette ventefrist til før dagens dato`(årsak: SettPåVentÅrsak) {
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
+                søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr),
                 tilSteg = StegType.VILKÅRSVURDERING,
                 fagsakService = fagsakService,
@@ -221,8 +221,12 @@ class SettPåVentServiceTest(
     @ParameterizedTest
     @EnumSource(value = SettPåVentÅrsak::class)
     fun `Kan oppdatere sett på vent på behandling`(årsak: SettPåVentÅrsak) {
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
+                søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr),
                 tilSteg = StegType.VILKÅRSVURDERING,
                 fagsakService = fagsakService,
@@ -258,8 +262,12 @@ class SettPåVentServiceTest(
     @ParameterizedTest
     @EnumSource(value = SettPåVentÅrsak::class)
     fun `Skal gjennopta behandlinger etter ventefristen`(årsak: SettPåVentÅrsak) {
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+
         val behandling1 =
             kjørStegprosessForFGB(
+                søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr),
                 tilSteg = StegType.VILKÅRSVURDERING,
                 fagsakService = fagsakService,
@@ -271,8 +279,10 @@ class SettPåVentServiceTest(
                 brevmalService = brevmalService,
             )
 
+        val søker2Fnr = leggTilPersonInfo(randomSøkerFødselsdato())
         val behandling2 =
             kjørStegprosessForFGB(
+                søkerFnr = søker2Fnr,
                 barnasIdenter = listOf(barnFnr),
                 tilSteg = StegType.VILKÅRSVURDERING,
                 fagsakService = fagsakService,

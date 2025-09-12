@@ -1,10 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
-import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -15,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForRevurderingÅrligKontroll
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -31,21 +29,14 @@ class RestFagsakTest(
     @Autowired
     private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired
     private val brevmalService: BrevmalService,
 ) : AbstractSpringIntegrationTest() {
-    @BeforeAll
-    fun init() {
-        databaseCleanupService.truncate()
-    }
-
     @Test
     fun `Skal sjekke at gjeldende utbetalingsperioder kommer med i restfagsak`() {
-        val søkerFnr = randomFnr()
-        val barnFnr = leggTilPersonInfo(randomBarnFnr(10))
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato(10))
 
         val førstegangsbehandling =
             kjørStegprosessForFGB(

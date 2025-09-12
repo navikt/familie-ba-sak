@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.FakePdlIdentRestClient
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.tilAktør
@@ -28,7 +27,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROL
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -47,19 +45,12 @@ class FagsakDeltagerServiceIntegrationTest(
     @Autowired
     private val stegService: StegService,
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     @Autowired
     private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
     @Autowired
     private val fakePdlIdentRestClient: FakePdlIdentRestClient,
 ) : AbstractSpringIntegrationTest() {
-    @BeforeEach
-    fun init() {
-        databaseCleanupService.truncate()
-    }
-
     /*
         This is a complicated test against following family relationship:
         søker3-----------

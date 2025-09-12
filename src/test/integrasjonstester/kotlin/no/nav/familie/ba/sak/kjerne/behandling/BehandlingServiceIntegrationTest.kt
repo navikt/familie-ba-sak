@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
@@ -19,10 +18,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Tag
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,7 +26,6 @@ import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@Tag("integration")
 class BehandlingServiceIntegrationTest(
     @Autowired
     private val fagsakService: FagsakService,
@@ -47,71 +42,62 @@ class BehandlingServiceIntegrationTest(
     @Autowired
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired
     private val behandlingRepository: BehandlingRepository,
     @Autowired
     private val stegService: StegService,
 ) : AbstractSpringIntegrationTest() {
-    @BeforeAll
-    fun init() {
-        databaseCleanupService.truncate()
-    }
-
     @Test
     fun `Skal rulle tilbake behandling om noe feiler etter opprettelse`() {
-        databaseCleanupService.truncate()
+        // Arrange
+        val søkerFnr = "00000000000" // Ugyldig fnr for å trigge feil
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
 
-        val forventetFeilmelding = "404 Fant ikke forespurte data på person."
-
-        val fnr = "00000000000"
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        // Act & Assert
         val error =
             assertThrows<HttpClientErrorException> {
                 stegService.håndterNyBehandlingOgSendInfotrygdFeed(
                     nyOrdinærBehandling(
-                        søkersIdent = fnr,
+                        søkersIdent = søkerFnr,
                         fagsakId = fagsak.id,
                     ),
                 )
             }
-
-        assertEquals(forventetFeilmelding, error.message)
+        assertThat(error.message).isEqualTo("404 Fant ikke forespurte data på person.")
 
         val behandlinger = behandlingRepository.finnBehandlinger(fagsakId = fagsak.id)
-        assertEquals(0, behandlinger.size)
+        assertThat(behandlinger).isEmpty()
     }
 
     @Test
     fun `Skal svare med behandling som er opprettet før X tid`() {
-        databaseCleanupService.truncate()
-
+        // Arrange
         val fnr = randomFnr()
-
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+
+        // Act
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
+
+        // Assert
         val behandlingerSomErOpprettetFørIMorgen =
             behandlingRepository.finnÅpneBehandlinger(LocalDateTime.now().plusDays(1))
-
-        assertEquals(1, behandlingerSomErOpprettetFørIMorgen.size)
-        assertEquals(behandling.id, behandlingerSomErOpprettetFørIMorgen.single().id)
+        assertThat(behandlingerSomErOpprettetFørIMorgen.map { it.id }).contains(behandling.id)
     }
 
     @Test
     fun `Skal hente forrige behandling`() {
+        // Arrange
         val fnr = randomFnr()
-
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
+        val førstegangsbehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
         tilkjentYtelseRepository.save(
-            lagInitiellTilkjentYtelse(behandling).also {
+            lagInitiellTilkjentYtelse(førstegangsbehandling).also {
                 it.utbetalingsoppdrag = "Utbetalingsoppdrag()"
             },
         )
-        ferdigstillBehandling(behandling)
+        ferdigstillBehandling(førstegangsbehandling)
 
+        // Act
         val revurderingInnvilgetBehandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
                 lagBehandlingUtenId(
@@ -120,14 +106,16 @@ class BehandlingServiceIntegrationTest(
                 ),
             )
 
+        // Arrange
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling = revurderingInnvilgetBehandling)
-        Assertions.assertNotNull(forrigeBehandling)
-        assertEquals(behandling.id, forrigeBehandling?.id)
+        assertThat(forrigeBehandling).isNotNull
+        assertThat(forrigeBehandling?.id).isEqualTo(førstegangsbehandling.id)
     }
 
     @Test
     fun `Skal bare hente barn med tilkjentytelse for den aktuelle behandlingen`() {
+        // Arrange
         val søker = randomFnr()
         val barn = randomFnr()
 
@@ -154,10 +142,8 @@ class BehandlingServiceIntegrationTest(
             )
         personopplysningGrunnlagRepository.save(testPersonopplysningsGrunnlag)
 
-        assertEquals(
-            0,
-            beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = behandling.id).size,
-        )
+        // Act & Assert
+        assertThat(beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = behandling.id)).hasSize(0)
     }
 
     private fun ferdigstillBehandling(behandling: Behandling) {

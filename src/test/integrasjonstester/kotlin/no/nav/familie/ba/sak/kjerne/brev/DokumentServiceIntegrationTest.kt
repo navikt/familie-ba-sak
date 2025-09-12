@@ -3,15 +3,15 @@ package no.nav.familie.ba.sak.kjerne.brev
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
-import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
+import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -46,7 +46,6 @@ import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -86,19 +85,12 @@ class DokumentServiceIntegrationTest(
     @Autowired
     private val dokumentGenereringService: DokumentGenereringService,
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired
     private val brevmalService: BrevmalService,
 ) : AbstractSpringIntegrationTest() {
-    val barnFnr = leggTilPersonInfo(randomBarnFnr())
-
-    @BeforeEach
-    fun setup() {
-        databaseCleanupService.truncate()
-    }
-
     @Test
     fun `Hent vedtaksbrev`() {
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
@@ -135,6 +127,8 @@ class DokumentServiceIntegrationTest(
 
     @Test
     fun `Skal generere vedtaksbrev`() {
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
@@ -175,10 +169,13 @@ class DokumentServiceIntegrationTest(
         val mockBeslutter = "Mock Beslutter"
         val mockBeslutterId = "mock.beslutter@nav.no"
 
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
-                søkerFnr = randomFnr(),
+                søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
@@ -235,6 +232,8 @@ class DokumentServiceIntegrationTest(
 
     @Test
     fun `Skal verifisere at man ikke får generert brev etter at behandlingen er sendt fra beslutter`() {
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+
         val behandlingEtterVedtakBesluttet =
             kjørStegprosessForFGB(
                 tilSteg = StegType.BESLUTTE_VEDTAK,

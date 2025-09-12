@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
@@ -31,9 +30,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
-    @Autowired
-    lateinit var databaseCleanupService: DatabaseCleanupService
-
     @Autowired
     lateinit var fagsakRepository: FagsakRepository
 

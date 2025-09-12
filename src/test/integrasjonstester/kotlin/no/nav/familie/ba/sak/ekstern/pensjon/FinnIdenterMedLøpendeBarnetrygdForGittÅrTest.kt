@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.pensjon
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
@@ -23,9 +22,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest : AbstractSpringIntegrationTest() {
-    @Autowired
-    lateinit var databaseCleanupService: DatabaseCleanupService
-
     @Autowired
     lateinit var fagsakRepository: FagsakRepository
 
