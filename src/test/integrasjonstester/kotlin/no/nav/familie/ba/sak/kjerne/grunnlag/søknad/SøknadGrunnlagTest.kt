@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
-import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.FakeIntegrasjonClient
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Søknadsinfo
@@ -74,7 +73,7 @@ class SøknadGrunnlagTest(
     @Autowired
     private val brevmalService: BrevmalService,
     @Autowired
-    private val integrasjonClient: IntegrasjonClient,
+    private val fakeIntegrasjonClient: FakeIntegrasjonClient,
     @Autowired
     private val personopplysningerService: PersonopplysningerService,
 ) : AbstractSpringIntegrationTest() {
@@ -357,7 +356,8 @@ class SøknadGrunnlagTest(
 
         val journalpostIdSøknad = "123456789"
 
-        every { integrasjonClient.hentVersjonertBarnetrygdSøknad(journalpostIdSøknad) } returns
+        fakeIntegrasjonClient.leggTilVersjonertBarnetrygdSøknad(
+            journalpostIdSøknad,
             VersjonertBarnetrygdSøknadV9(
                 barnetrygdSøknad =
                     lagBarnetrygdSøknadV9(
@@ -366,7 +366,19 @@ class SøknadGrunnlagTest(
                         søknadstype = Søknadstype.UTVIDET,
                         originalspråk = "nn",
                     ),
-            )
+            ),
+        )
+
+//        every { fakeIntegrasjonClient.hentVersjonertBarnetrygdSøknad(journalpostIdSøknad) } returns
+//            VersjonertBarnetrygdSøknadV9(
+//                barnetrygdSøknad =
+//                    lagBarnetrygdSøknadV9(
+//                        søkerFnr = søker.aktivFødselsnummer(),
+//                        barnFnr = listOf(barnUtenRelasjon, barnMedRelasjonUtenAdressebeskyttelse),
+//                        søknadstype = Søknadstype.UTVIDET,
+//                        originalspråk = "nn",
+//                    ),
+//            )
 
         // Act
         val behandling =

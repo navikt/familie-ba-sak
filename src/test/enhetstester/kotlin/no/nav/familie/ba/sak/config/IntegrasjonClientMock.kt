@@ -46,15 +46,15 @@ import java.util.UUID
 @TestConfiguration
 @Profile("dev", "postgres")
 class IntegrasjonClientMock {
-    @Bean
-    @Primary
-    fun mockIntegrasjonClient(): IntegrasjonClient {
-        val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
-
-        clearIntegrasjonMocks(mockIntegrasjonClient)
-
-        return mockIntegrasjonClient
-    }
+//    @Bean
+//    @Primary
+//    fun mockIntegrasjonClient(): IntegrasjonClient {
+//        val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
+//
+//        clearIntegrasjonMocks(mockIntegrasjonClient)
+//
+//        return mockIntegrasjonClient
+//    }
 
     @Bean
     @Primary
