@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
@@ -70,7 +70,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
                 LocalDate.parse("1998-10-10"),
                 setOf(
                     ForelderBarnRelasjon(
-                        tilAktør(barnFnr),
+                        lagAktør(barnFnr),
                         FORELDERBARNRELASJONROLLE.BARN,
                     ),
                 ),
@@ -97,7 +97,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
                 LocalDate.parse("1998-10-10"),
                 setOf(
                     ForelderBarnRelasjon(
-                        tilAktør(barnFnr),
+                        lagAktør(barnFnr),
                         FORELDERBARNRELASJONROLLE.BARN,
                     ),
                 ),

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.fake
 
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -133,7 +133,7 @@ class MockPersonopplysningerService(
                     forelderBarnRelasjon =
                         personInfo[personIdent]!!.forelderBarnRelasjon +
                             ForelderBarnRelasjon(
-                                aktør = tilAktør(relatertPersonsIdent),
+                                aktør = lagAktør(relatertPersonsIdent),
                                 relasjonsrolle = relatertPersonsRelasjonsrolle,
                                 navn = personInfo.getValue(relatertPersonsIdent).navn,
                                 fødselsdato = personInfo.getValue(relatertPersonsIdent).fødselsdato,

@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.familie.ba.sak.common.clearAllCaches
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.fake.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
@@ -43,7 +43,7 @@ class InfotrygdControllerTest {
     fun `hentInfotrygdsakerForSøker skal returnere ok dersom saksbehandler har tilgang`() {
         val fnr = "12345678910"
 
-        every { personidentService.hentAktør(fnr) } returns tilAktør(fnr)
+        every { personidentService.hentAktør(fnr) } returns lagAktør(fnr)
         familieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
         every {
             infotrygdBarnetrygdClient.hentSaker(
@@ -68,7 +68,7 @@ class InfotrygdControllerTest {
     fun `hentInfotrygdsakerForSøker skal returnere ok, men ha gradering satt, dersom saksbehandler ikke har tilgang`() {
         val fnr = "12345678910"
 
-        every { personidentService.hentAktør(fnr) } returns tilAktør(fnr)
+        every { personidentService.hentAktør(fnr) } returns lagAktør(fnr)
         familieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(false)
         every { systemOnlyPdlRestClient.hentAdressebeskyttelse(any()) } returns
             listOf(Adressebeskyttelse(ADRESSEBESKYTTELSEGRADERING.FORTROLIG))

@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -63,12 +63,12 @@ internal class HåndterNyIdentServiceTest {
 
         val gammelFødselsdato = LocalDate.now().minusYears(1)
         val gammeltFnr = randomFnr(gammelFødselsdato)
-        val gammelAktør = tilAktør(gammeltFnr)
+        val gammelAktør = lagAktør(gammeltFnr)
         val gammelPerson = lagPerson(aktør = gammelAktør, fødselsdato = gammelFødselsdato)
 
         val nyFødselsdato = LocalDate.now().minusYears(1).minusMonths(3)
         val nyttFnr = randomFnr(nyFødselsdato)
-        val nyAktør = tilAktør(nyttFnr)
+        val nyAktør = lagAktør(nyttFnr)
 
         var gammelBehandling = lagBehandling()
 
@@ -239,7 +239,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
         private val taskRepositoryMock = mockk<TaskRepositoryWrapper>(relaxed = true)
 
         private val personidentAktiv = randomFnr()
-        private val aktørIdAktiv = tilAktør(personidentAktiv)
+        private val aktørIdAktiv = lagAktør(personidentAktiv)
         private val personidentHistorisk = randomFnr()
 
         private val personIdentSlot = slot<Personident>()
@@ -300,8 +300,8 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
             val personIdentSomFinnes = randomFnr()
             val personIdentSomSkalLeggesTil = randomFnr()
             val historiskIdent = randomFnr()
-            val historiskAktør = tilAktør(historiskIdent)
-            val aktørIdSomFinnes = tilAktør(personIdentSomFinnes)
+            val historiskAktør = lagAktør(historiskIdent)
+            val aktørIdSomFinnes = lagAktør(personIdentSomFinnes)
             val fødselsdato = LocalDate.now().minusYears(4)
 
             every {
@@ -378,8 +378,8 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
             val personIdentSomFinnes = randomFnr()
             val personIdentSomSkalLeggesTil = randomFnr()
             val historiskIdent = randomFnr()
-            val historiskAktør = tilAktør(historiskIdent)
-            val aktørIdSomFinnes = tilAktør(personIdentSomFinnes)
+            val historiskAktør = lagAktør(historiskIdent)
+            val aktørIdSomFinnes = lagAktør(personIdentSomFinnes)
             val fødselsdato = LocalDate.now().minusYears(4)
 
             every {
@@ -459,8 +459,8 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
             val personIdentSomFinnes = randomFnr()
             val personIdentSomSkalLeggesTil = randomFnr()
             val historiskIdent = randomFnr()
-            val historiskAktør = tilAktør(historiskIdent)
-            val aktørIdSomFinnes = tilAktør(personIdentSomFinnes)
+            val historiskAktør = lagAktør(historiskIdent)
+            val aktørIdSomFinnes = lagAktør(personIdentSomFinnes)
             val fødselsdato = LocalDate.now().minusYears(4)
 
             every {
@@ -510,7 +510,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
         @Test
         fun `Skal ikke legge til ny ident på aktør som allerede har denne identen registert i systemet`() {
             val personIdentSomFinnes = randomFnr()
-            val aktørIdSomFinnes = tilAktør(personIdentSomFinnes)
+            val aktørIdSomFinnes = lagAktør(personIdentSomFinnes)
 
             every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, true) } answers {
                 listOf(
@@ -521,7 +521,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
 
             every { aktørIdRepository.findByAktørIdOrNull(aktørIdSomFinnes.aktørId) }.answers { aktørIdSomFinnes }
             every { personidentRepository.findByFødselsnummerOrNull(personIdentSomFinnes) }.answers {
-                tilAktør(
+                lagAktør(
                     personIdentSomFinnes,
                 ).personidenter.first()
             }
@@ -538,9 +538,9 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
         @Test
         fun `Hendelse på en ident hvor gammel ident1 er merget med ny ident2 skal ikke kaste feil når bruker har alt bruker ny ident`() {
             val fnrIdent1 = randomFnr()
-            val aktørIdent1 = tilAktør(fnrIdent1)
+            val aktørIdent1 = lagAktør(fnrIdent1)
             val aktivFnrIdent2 = randomFnr()
-            val aktivAktørIdent2 = tilAktør(aktivFnrIdent2)
+            val aktivAktørIdent2 = lagAktør(aktivFnrIdent2)
 
             secureLogger.info("gammelIdent=$fnrIdent1,${aktørIdent1.aktørId}   nyIdent=$aktivFnrIdent2,${aktivAktørIdent2.aktørId}")
 

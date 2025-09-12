@@ -4,7 +4,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.TEST_PDF
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
@@ -493,7 +493,7 @@ class DokumentServiceIntegrationTest(
         barnasFødselsdatoer: List<LocalDate> = barnasIdenter.map { LocalDate.of(2019, 1, 1) },
         barnAktør: List<Aktør> =
             barnasIdenter.map { fødselsnummer ->
-                tilAktør(fødselsnummer).also {
+                lagAktør(fødselsnummer).also {
                     it.personidenter.add(
                         Personident(
                             fødselsnummer = fødselsnummer,

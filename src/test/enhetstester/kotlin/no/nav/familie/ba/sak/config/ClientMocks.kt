@@ -13,8 +13,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
@@ -156,13 +154,6 @@ class ClientMocks {
             )
         val ukjentId = randomFnr()
     }
-}
-
-fun tilAktør(
-    fnr: String,
-    toSisteSiffrer: String = "00",
-) = Aktør(fnr + toSisteSiffrer).also {
-    it.personidenter.add(Personident(fnr, aktør = it))
 }
 
 val TEST_PDF = ClientMocks::class.java.getResource("/dokument/mockvedtak.pdf").readBytes()

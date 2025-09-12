@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.ekstern.bisys
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseUtvidet
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
@@ -47,7 +47,7 @@ internal class BisysServiceTest {
     @Test
     fun `Skal returnere tom liste siden person ikke har finens i infotrygd og barnetrygd`() {
         val fnr = randomFnr()
-        val aktør = tilAktør(fnr)
+        val aktør = lagAktør(fnr)
 
         every { mockPersonidentService.hentAktør(any()) } answers { aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(aktør.aktivFødselsnummer()) }
@@ -76,7 +76,7 @@ internal class BisysServiceTest {
     @Test
     fun `Skal returnere periode kun fra infotrygd`() {
         val fnr = randomFnr()
-        val aktør = tilAktør(fnr)
+        val aktør = lagAktør(fnr)
 
         every { mockPersonidentService.hentAktør(any()) } answers { aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(aktør.aktivFødselsnummer()) }
