@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.fake
 
 import io.mockk.mockk
 import io.mockk.spyk
-import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.testfiler.Testfil.TEST_PDF
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary

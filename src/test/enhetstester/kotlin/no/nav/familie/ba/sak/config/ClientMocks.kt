@@ -155,5 +155,3 @@ class ClientMocks {
         val ukjentId = randomFnr()
     }
 }
-
-val TEST_PDF = ClientMocks::class.java.getResource("/dokument/mockvedtak.pdf").readBytes()
