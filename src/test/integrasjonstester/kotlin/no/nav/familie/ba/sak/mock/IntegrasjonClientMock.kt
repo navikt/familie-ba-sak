@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.fake
+package no.nav.familie.ba.sak.mock
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.clearMocks
@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
 import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
 import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyAktivBrukerIModiaContext
+import no.nav.familie.ba.sak.fake.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet

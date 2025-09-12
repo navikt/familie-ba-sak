@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.fake
+package no.nav.familie.ba.sak.mock
 
 import io.mockk.clearMocks
 import io.mockk.every

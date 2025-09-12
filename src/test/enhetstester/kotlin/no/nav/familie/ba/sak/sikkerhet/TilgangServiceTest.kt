@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
-import no.nav.familie.ba.sak.fake.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -24,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
+import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.log.mdc.MDCConstants
