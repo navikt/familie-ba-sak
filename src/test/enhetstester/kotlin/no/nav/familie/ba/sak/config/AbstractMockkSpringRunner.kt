@@ -23,7 +23,6 @@ import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.CacheManager
-import org.springframework.context.ConfigurableApplicationContext
 import java.util.UUID
 
 abstract class AbstractMockkSpringRunner {
@@ -100,9 +99,6 @@ abstract class AbstractMockkSpringRunner {
 
     private fun clearMocks() {
         unmockkAll()
-        if (isMockKMock(mockPersonopplysningerService)) {
-            ClientMocks.clearPdlMocks(mockPersonopplysningerService)
-        }
 
         val fakePdlIdentRestClient = pdlIdentRestClient as? FakePdlIdentRestClient
         fakePdlIdentRestClient?.reset()
