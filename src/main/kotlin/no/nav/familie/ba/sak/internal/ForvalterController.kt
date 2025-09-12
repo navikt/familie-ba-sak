@@ -583,6 +583,28 @@ class ForvalterController(
         return ResponseEntity.ok("Tasker for autovedtak av Finnmarkstillegg opprettet")
     }
 
+    @PostMapping("/opprett-tasker-for-autovedtak-svalbartillegg")
+    @Operation(
+        summary = "Oppretter tasker for autovedtak av Svalbartillegg",
+    )
+    fun opprettTaskerForAutovedtakSvalbardtillegg(
+        @RequestBody fagsakIder: List<Long>,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett task for autovedtak av Svalbardtillegg",
+        )
+
+        if (!featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOVEDTAK_SVALBARDTILLEGG)) {
+            throw Feil("Toggle for å opprette tasker for autovedtak av Svalbardtillegg er skrudd av")
+        }
+
+        fagsakIder.forEach {
+            opprettTaskService.opprettAutovedtakSvalbardtilleggTask(it)
+        }
+        return ResponseEntity.ok("Tasker for autovedtak av Svalbardtillegg opprettet")
+    }
+
     @PostMapping("/aktiver-minside-for-ident")
     @Operation(
         summary = "Sender Kafka-melding om å aktivere MinSide for en ident",
