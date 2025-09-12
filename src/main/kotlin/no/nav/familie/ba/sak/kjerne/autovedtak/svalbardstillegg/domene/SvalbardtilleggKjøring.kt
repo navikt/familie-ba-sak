@@ -9,14 +9,14 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import org.hibernate.Hibernate
 
-@Entity(name = "SvalbardstilleggKjøring")
-@Table(name = "svalbardstillegg_kjoering")
-data class SvalbardstilleggKjøring(
+@Entity(name = "SvalbardtilleggKjøring")
+@Table(name = "svalbardtillegg_kjoering")
+data class SvalbardtilleggKjøring(
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "svalbardstillegg_kjoering_seq_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "svalbardtillegg_kjoering_seq_generator")
     @SequenceGenerator(
-        name = "svalbardstillegg_kjoering_seq_generator",
-        sequenceName = "svalbardstillegg_kjoering_seq",
+        name = "svalbardtillegg_kjoering_seq_generator",
+        sequenceName = "svalbardtillegg_kjoering_seq",
         allocationSize = 50,
     )
     val id: Long = 0,
@@ -26,7 +26,7 @@ data class SvalbardstilleggKjøring(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
-        other as SvalbardstilleggKjøring
+        other as SvalbardtilleggKjøring
 
         return id == other.id
     }
