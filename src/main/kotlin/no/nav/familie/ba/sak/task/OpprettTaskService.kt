@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.AutovedtakSvalbardtilleggTask
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.dto.AutobrevOpphørSmåbarnstilleggDTO
@@ -165,6 +166,28 @@ class OpprettTaskService(
             taskRepository.save(
                 Task(
                     type = AutovedtakFinnmarkstilleggTask.TASK_STEP_TYPE,
+                    payload = fagsakId.toString(),
+                    properties =
+                        Properties().apply {
+                            this["fagsakId"] = fagsakId.toString()
+                        },
+                ).apply {
+                    if (envService.erProd()) {
+                        medTriggerTid(LocalDateTime.now().plusHours(1))
+                    }
+                },
+            )
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun opprettAutovedtakSvalbardtilleggTask(
+        fagsakId: Long,
+    ) {
+        overstyrTaskMedNyCallId(IdUtils.generateId()) {
+            taskRepository.save(
+                Task(
+                    type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE,
                     payload = fagsakId.toString(),
                     properties =
                         Properties().apply {
