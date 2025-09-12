@@ -47,10 +47,9 @@ class AutovedtakSvalbardtilleggService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun skalAutovedtakBehandles(behandlingsdata: SvalbardtilleggData): Boolean {
-        val (fagsaktypeKanBehandles, harLøpendeBarnetrygd) =
-            fagsakService.hentPåFagsakId(behandlingsdata.fagsakId).run {
-                (type in FAGSAKTYPER_DER_SVALBARDTILLEGG_KAN_AUTOVEDTAS) to (status == LØPENDE)
-            }
+        val fagsak = fagsakService.hentPåFagsakId(behandlingsdata.fagsakId)
+        val fagsaktypeKanBehandles = fagsak.type in FAGSAKTYPER_DER_SVALBARDTILLEGG_KAN_AUTOVEDTAS
+        val harLøpendeBarnetrygd = fagsak.status == LØPENDE
 
         if (!(fagsaktypeKanBehandles && harLøpendeBarnetrygd)) return false
 

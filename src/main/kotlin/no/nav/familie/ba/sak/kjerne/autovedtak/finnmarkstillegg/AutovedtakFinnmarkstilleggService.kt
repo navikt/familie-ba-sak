@@ -48,23 +48,23 @@ class AutovedtakFinnmarkstilleggService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun skalAutovedtakBehandles(behandlingsdata: FinnmarkstilleggData): Boolean {
-        val (fagsaktypeKanBehandles, harLøpendeBarnetrygd) =
-            fagsakService.hentPåFagsakId(behandlingsdata.fagsakId).run {
-                (type in FAGSAKTYPER_DER_FINNMARKSTILLEG_KAN_AUTOVEDTAS) to (status == LØPENDE)
-            }
+        val fagsak = fagsakService.hentPåFagsakId(behandlingsdata.fagsakId)
+        val fagsaktypeKanBehandles = fagsak.type in FAGSAKTYPER_DER_FINNMARKSTILLEG_KAN_AUTOVEDTAS
+        val harLøpendeBarnetrygd = fagsak.status == LØPENDE
+
+        if (!(fagsaktypeKanBehandles && harLøpendeBarnetrygd)) return false
 
         val sisteIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandlingsdata.fagsakId)
                 ?: return false
 
-        val sisteIverksatteBehandlingHarFinnmarkstilleggAndeler by lazy {
+        val sisteIverksatteBehandlingHarFinnmarkstilleggAndeler =
             beregningService
                 .hentTilkjentYtelseForBehandling(sisteIverksatteBehandling.id)
                 .andelerTilkjentYtelse
                 .any { it.type == YtelseType.FINNMARKSTILLEGG }
-        }
 
-        val minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg by lazy {
+        val minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg =
             persongrunnlagService
                 .hentAktivThrows(sisteIverksatteBehandling.id)
                 .personer
@@ -75,11 +75,8 @@ class AutovedtakFinnmarkstilleggService(
                         .mapValues { Adresser.opprettFra(it.value) }
                         .any { it.value.harAdresserSomErRelevantForFinnmarkstillegg() }
                 }
-        }
 
-        return fagsaktypeKanBehandles &&
-            harLøpendeBarnetrygd &&
-            (sisteIverksatteBehandlingHarFinnmarkstilleggAndeler || minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg)
+        return sisteIverksatteBehandlingHarFinnmarkstilleggAndeler || minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg
     }
 
     @Transactional
