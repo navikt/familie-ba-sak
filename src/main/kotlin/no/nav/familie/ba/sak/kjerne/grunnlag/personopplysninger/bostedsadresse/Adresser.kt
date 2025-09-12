@@ -12,12 +12,12 @@ data class Adresser(
     val oppholdsadresse: List<Adresse>,
 ) {
     fun harAdresserSomErRelevantForFinnmarkstillegg(): Boolean {
-        val harBostedsadresserRelevantForFinnmarkstillegg = finnAdresserGyldigPåDato(bostedsadresser, FØRSTE_RELEVANTE_ADRESSEDATO_FOR_FINNMARKSTILLEGG).any { it.erIFinnmarkEllerNordTroms() }
-        val harDeltBostederRelevantForFinnmarkstillegg = finnAdresserGyldigPåDato(delteBosteder, FØRSTE_RELEVANTE_ADRESSEDATO_FOR_FINNMARKSTILLEGG).any { it.erIFinnmarkEllerNordTroms() }
+        val harBostedsadresserRelevantForFinnmarkstillegg = finnAdressehistorikkFraOgMedDato(bostedsadresser, FØRSTE_RELEVANTE_ADRESSEDATO_FOR_FINNMARKSTILLEGG).any { it.erIFinnmarkEllerNordTroms() }
+        val harDeltBostederRelevantForFinnmarkstillegg = finnAdressehistorikkFraOgMedDato(delteBosteder, FØRSTE_RELEVANTE_ADRESSEDATO_FOR_FINNMARKSTILLEGG).any { it.erIFinnmarkEllerNordTroms() }
         return harBostedsadresserRelevantForFinnmarkstillegg || harDeltBostederRelevantForFinnmarkstillegg
     }
 
-    fun harAdresserSomErRelevantForSvalbardstillegg(): Boolean = finnAdresserGyldigPåDato(oppholdsadresse, FØRSTE_RELEVANTE_ADRESSEDATO_FOR_SVALBARDSTILLEGG).any { it.erPåSvalbard() }
+    fun harAdresserSomErRelevantForSvalbardstillegg(): Boolean = finnAdressehistorikkFraOgMedDato(oppholdsadresse, FØRSTE_RELEVANTE_ADRESSEDATO_FOR_SVALBARDSTILLEGG).any { it.erPåSvalbard() }
 
     companion object {
         fun opprettFra(pdlAdresser: PdlBostedsadresseDeltBostedOppholdsadressePerson?): Adresser =
@@ -27,13 +27,4 @@ data class Adresser(
                 oppholdsadresse = pdlAdresser?.oppholdsadresse?.map { Adresse.opprettFra(it) } ?: emptyList(),
             )
     }
-}
-
-private fun finnAdresserGyldigPåDato(
-    adresseer: List<Adresse>,
-    dato: LocalDate,
-): List<Adresse> {
-    val sorterteAdresser = adresseer.filter { it.gyldigFraOgMed != null }.sortedBy { it.gyldigFraOgMed }
-    val sisteGyldigeAdressePåDato = sorterteAdresser.lastOrNull { it.erGyldigPåDato(dato) }
-    return sorterteAdresser.dropWhile { it != sisteGyldigeAdressePåDato }
 }

@@ -21,7 +21,7 @@ data class Adresse(
     val ukjentBosted: UkjentBosted? = null,
     val oppholdAnnetSted: OppholdAnnetSted? = null,
 ) {
-    fun erGyldigPåDato(dato: LocalDate): Boolean {
+    fun overlapperMedDato(dato: LocalDate): Boolean {
         val harGyldigFraOgMed = gyldigFraOgMed == null || gyldigFraOgMed.isSameOrBefore(dato)
         val harGyldigTilOgMed = gyldigTilOgMed == null || gyldigTilOgMed.isSameOrAfter(dato)
         return harGyldigFraOgMed && harGyldigTilOgMed
@@ -75,4 +75,15 @@ data class Adresse(
                 oppholdAnnetSted = OppholdAnnetSted.parse(oppholdsadresse.oppholdAnnetSted),
             )
     }
+}
+
+fun List<Adresse>.hentForDato(dato: LocalDate): Adresse? = finnAdressehistorikkFraOgMedDato(this, dato).firstOrNull()
+
+fun finnAdressehistorikkFraOgMedDato(
+    adresser: List<Adresse>,
+    dato: LocalDate,
+): List<Adresse> {
+    val sorterteAdresser = adresser.filter { it.gyldigFraOgMed != null }.sortedBy { it.gyldigFraOgMed }
+    val sisteAdresseSomOverlapperDato = sorterteAdresser.lastOrNull { it.overlapperMedDato(dato) }
+    return sorterteAdresser.dropWhile { it != sisteAdresseSomOverlapperDato }
 }

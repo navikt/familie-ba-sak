@@ -17,7 +17,7 @@ import java.time.LocalDate
 
 class AdresseTest {
     @Nested
-    inner class ErGyldigPåDato {
+    inner class OverlapperMedDato {
         @Test
         fun `skal returnere true hvis adresse hverken har en fra og med dato eller en til og med dato`() {
             // Arrange
@@ -30,10 +30,10 @@ class AdresseTest {
                 )
 
             // Act
-            val erGyldigPåDato = adresse.erGyldigPåDato(dagensDato)
+            val overlapperMedDato = adresse.overlapperMedDato(dagensDato)
 
             // Assert
-            assertThat(erGyldigPåDato).isTrue()
+            assertThat(overlapperMedDato).isTrue()
         }
 
         @Test
@@ -48,10 +48,10 @@ class AdresseTest {
                 )
 
             // Act
-            val erGyldigPåDato = adresse.erGyldigPåDato(dagensDato)
+            val overlapperMedDato = adresse.overlapperMedDato(dagensDato)
 
             // Assert
-            assertThat(erGyldigPåDato).isTrue()
+            assertThat(overlapperMedDato).isTrue()
         }
 
         @Test
@@ -66,10 +66,10 @@ class AdresseTest {
                 )
 
             // Act
-            val erGyldigPåDato = adresse.erGyldigPåDato(dagensDato)
+            val overlapperMedDato = adresse.overlapperMedDato(dagensDato)
 
             // Assert
-            assertThat(erGyldigPåDato).isTrue()
+            assertThat(overlapperMedDato).isTrue()
         }
 
         @Test
@@ -84,10 +84,10 @@ class AdresseTest {
                 )
 
             // Act
-            val erGyldigPåDato = adresse.erGyldigPåDato(dagensDato)
+            val overlapperMedDato = adresse.overlapperMedDato(dagensDato)
 
             // Assert
-            assertThat(erGyldigPåDato).isTrue()
+            assertThat(overlapperMedDato).isTrue()
         }
 
         @Test
@@ -102,10 +102,10 @@ class AdresseTest {
                 )
 
             // Act
-            val erGyldigPåDato = adresse.erGyldigPåDato(dagensDato)
+            val overlapperMedDato = adresse.overlapperMedDato(dagensDato)
 
             // Assert
-            assertThat(erGyldigPåDato).isTrue()
+            assertThat(overlapperMedDato).isTrue()
         }
 
         @Test
@@ -120,10 +120,10 @@ class AdresseTest {
                 )
 
             // Act
-            val erGyldigPåDato = adresse.erGyldigPåDato(dagensDato)
+            val overlapperMedDato = adresse.overlapperMedDato(dagensDato)
 
             // Assert
-            assertThat(erGyldigPåDato).isTrue()
+            assertThat(overlapperMedDato).isTrue()
         }
 
         @Test
@@ -138,10 +138,10 @@ class AdresseTest {
                 )
 
             // Act
-            val erGyldigPåDato = adresse.erGyldigPåDato(dagensDato)
+            val overlapperMedDato = adresse.overlapperMedDato(dagensDato)
 
             // Assert
-            assertThat(erGyldigPåDato).isTrue()
+            assertThat(overlapperMedDato).isTrue()
         }
 
         @Test
@@ -156,10 +156,10 @@ class AdresseTest {
                 )
 
             // Act
-            val erGyldigPåDato = adresse.erGyldigPåDato(dagensDato)
+            val overlapperMedDato = adresse.overlapperMedDato(dagensDato)
 
             // Assert
-            assertThat(erGyldigPåDato).isFalse()
+            assertThat(overlapperMedDato).isFalse()
         }
 
         @Test
@@ -174,10 +174,10 @@ class AdresseTest {
                 )
 
             // Act
-            val erGyldigPåDato = adresse.erGyldigPåDato(dagensDato)
+            val overlapperMedDato = adresse.overlapperMedDato(dagensDato)
 
             // Assert
-            assertThat(erGyldigPåDato).isFalse()
+            assertThat(overlapperMedDato).isFalse()
         }
     }
 
