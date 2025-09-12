@@ -69,9 +69,6 @@ abstract class AbstractMockkSpringRunner {
     @Autowired
     private lateinit var mockOpprettTaskService: OpprettTaskService
 
-    @Autowired
-    private lateinit var applicationContext: ConfigurableApplicationContext
-
     /**
      * Cachemanagere
      */
