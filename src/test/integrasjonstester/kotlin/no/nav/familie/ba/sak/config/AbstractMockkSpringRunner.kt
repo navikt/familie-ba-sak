@@ -6,6 +6,13 @@ import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.fake.EfSakRestClientMock
+import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
+import no.nav.familie.ba.sak.fake.IntegrasjonClientMock
+import no.nav.familie.ba.sak.fake.LocalDateServiceTestConfig
+import no.nav.familie.ba.sak.fake.TilbakekrevingKlientTestConfig
+import no.nav.familie.ba.sak.fake.ValutakursRestClientMock
+import no.nav.familie.ba.sak.fake.ØkonomiTestConfig
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient

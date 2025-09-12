@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.FOM_1990
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.FOM_2004
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.TOM_2010
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.fake.IntegrasjonClientMock
+import no.nav.familie.ba.sak.fake.IntegrasjonClientMock.Companion.FOM_1990
+import no.nav.familie.ba.sak.fake.IntegrasjonClientMock.Companion.FOM_2004
+import no.nav.familie.ba.sak.fake.IntegrasjonClientMock.Companion.TOM_2010
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService

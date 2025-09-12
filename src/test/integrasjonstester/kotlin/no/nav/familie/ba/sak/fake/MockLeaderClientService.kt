@@ -1,5 +1,6 @@
-package no.nav.familie.ba.sak.config
+package no.nav.familie.ba.sak.fake
 
+import no.nav.familie.ba.sak.config.LeaderClientService
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service

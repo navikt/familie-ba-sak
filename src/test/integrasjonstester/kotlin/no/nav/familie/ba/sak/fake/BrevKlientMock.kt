@@ -1,7 +1,8 @@
-package no.nav.familie.ba.sak.config
+package no.nav.familie.ba.sak.fake
 
 import io.mockk.mockk
 import io.mockk.spyk
+import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData

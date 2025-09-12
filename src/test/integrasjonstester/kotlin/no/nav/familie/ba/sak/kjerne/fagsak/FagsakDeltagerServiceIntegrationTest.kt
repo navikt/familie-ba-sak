@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.FakePdlIdentRestClient
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
+import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon

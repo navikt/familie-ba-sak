@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.brev
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
@@ -13,6 +12,7 @@ import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
+import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat

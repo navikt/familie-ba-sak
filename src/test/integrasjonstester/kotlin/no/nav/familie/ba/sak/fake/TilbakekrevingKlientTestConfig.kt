@@ -1,8 +1,9 @@
-package no.nav.familie.ba.sak.config
+package no.nav.familie.ba.sak.fake
 
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean

@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.fake.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient

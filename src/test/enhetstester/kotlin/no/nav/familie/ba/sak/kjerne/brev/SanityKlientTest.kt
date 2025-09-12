@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
-import no.nav.familie.ba.sak.config.testSanityKlient
+import no.nav.familie.ba.sak.fake.testSanityKlient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

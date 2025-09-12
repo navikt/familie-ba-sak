@@ -6,13 +6,13 @@ import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.EfSakRestClientMock
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.fake.EfSakRestClientMock
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat

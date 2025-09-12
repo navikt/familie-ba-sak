@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.clearAllCaches
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.mockSjekkTilgang
+import no.nav.familie.ba.sak.fake.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.util.BrukerContextUtil.testWithBrukerContext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach

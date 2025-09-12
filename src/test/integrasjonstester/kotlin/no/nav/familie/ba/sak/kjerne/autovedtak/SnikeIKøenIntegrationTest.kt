@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.autovedtak
 
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService.Companion.BEHANDLING_FERDIG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository

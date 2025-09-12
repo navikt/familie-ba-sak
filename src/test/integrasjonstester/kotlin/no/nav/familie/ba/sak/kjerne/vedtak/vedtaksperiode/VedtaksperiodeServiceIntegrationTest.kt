@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
@@ -13,6 +12,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat

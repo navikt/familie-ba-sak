@@ -4,8 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.familie.ba.sak.common.clearAllCaches
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.fake.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient

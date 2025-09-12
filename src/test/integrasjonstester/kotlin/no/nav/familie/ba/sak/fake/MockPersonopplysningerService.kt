@@ -1,5 +1,6 @@
-package no.nav.familie.ba.sak.config
+package no.nav.familie.ba.sak.fake
 
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
