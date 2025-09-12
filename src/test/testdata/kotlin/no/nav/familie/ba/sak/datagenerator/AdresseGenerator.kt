@@ -35,7 +35,7 @@ fun lagAdresse(
     vegadresse: Vegadresse? = null,
     matrikkeladresse: Matrikkeladresse? = null,
     ukjentBosted: UkjentBosted? = null,
-    oppholdAnnetSted: String? = null,
+    oppholdAnnetSted: OppholdAnnetSted? = null,
 ): Adresse =
     Adresse(
         gyldigFraOgMed = gyldigFraOgMed,

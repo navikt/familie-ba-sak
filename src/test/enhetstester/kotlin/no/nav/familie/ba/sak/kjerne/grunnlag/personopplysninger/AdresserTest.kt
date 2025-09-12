@@ -496,17 +496,17 @@ class AdresserTest {
                             lagAdresse(
                                 gyldigFraOgMed = null,
                                 gyldigTilOgMed = null,
-                                oppholdAnnetSted = OppholdAnnetSted.MILITAER.name,
+                                oppholdAnnetSted = OppholdAnnetSted.MILITAER,
                             ),
                             lagAdresse(
                                 gyldigFraOgMed = svalbardCutoffDato.minusYears(1),
                                 gyldigTilOgMed = svalbardCutoffDato.plusYears(2),
-                                oppholdAnnetSted = OppholdAnnetSted.PAA_SVALBARD.name,
+                                oppholdAnnetSted = OppholdAnnetSted.PAA_SVALBARD,
                             ),
                             lagAdresse(
                                 gyldigFraOgMed = svalbardCutoffDato.plusYears(2),
                                 gyldigTilOgMed = svalbardCutoffDato.plusYears(3),
-                                oppholdAnnetSted = OppholdAnnetSted.UTENRIKS.name,
+                                oppholdAnnetSted = OppholdAnnetSted.UTENRIKS,
                             ),
                         ),
                 )
@@ -624,17 +624,17 @@ class AdresserTest {
                             lagAdresse(
                                 gyldigFraOgMed = null,
                                 gyldigTilOgMed = null,
-                                oppholdAnnetSted = OppholdAnnetSted.MILITAER.name,
+                                oppholdAnnetSted = OppholdAnnetSted.MILITAER,
                             ),
                             lagAdresse(
                                 gyldigFraOgMed = svalbardCutoffDato.minusYears(1),
                                 gyldigTilOgMed = svalbardCutoffDato.plusYears(2),
-                                oppholdAnnetSted = OppholdAnnetSted.PENDLER.name,
+                                oppholdAnnetSted = OppholdAnnetSted.PENDLER,
                             ),
                             lagAdresse(
                                 gyldigFraOgMed = svalbardCutoffDato.plusYears(2),
                                 gyldigTilOgMed = svalbardCutoffDato.plusYears(3),
-                                oppholdAnnetSted = OppholdAnnetSted.UTENRIKS.name,
+                                oppholdAnnetSted = OppholdAnnetSted.UTENRIKS,
                             ),
                         ),
                 )

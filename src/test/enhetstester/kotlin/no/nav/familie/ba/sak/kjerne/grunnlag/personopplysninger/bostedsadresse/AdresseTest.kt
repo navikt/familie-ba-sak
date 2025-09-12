@@ -353,7 +353,7 @@ class AdresseTest {
             // Arrange
             val adresse =
                 lagAdresse(
-                    oppholdAnnetSted = OppholdAnnetSted.PAA_SVALBARD.name,
+                    oppholdAnnetSted = OppholdAnnetSted.PAA_SVALBARD,
                 )
 
             // Act
@@ -422,7 +422,7 @@ class AdresseTest {
             // Arrange
             val adresse =
                 lagAdresse(
-                    oppholdAnnetSted = OppholdAnnetSted.MILITAER.name,
+                    oppholdAnnetSted = OppholdAnnetSted.MILITAER,
                 )
 
             // Act
@@ -727,7 +727,7 @@ class AdresseTest {
                     lagOppholdsadresse(
                         gyldigFraOgMed = gyldigFraOgMed,
                         gyldigTilOgMed = gyldigTilOgMed,
-                        oppholdAnnetSted = "PAA_SVALBARD",
+                        oppholdAnnetSted = OppholdAnnetSted.PAA_SVALBARD.name,
                     )
 
                 // Act
@@ -739,7 +739,7 @@ class AdresseTest {
                 assertThat(adresse.vegadresse).isNull()
                 assertThat(adresse.matrikkeladresse).isNull()
                 assertThat(adresse.ukjentBosted).isNull()
-                assertThat(adresse.oppholdAnnetSted).isEqualTo("PAA_SVALBARD")
+                assertThat(adresse.oppholdAnnetSted).isEqualTo(OppholdAnnetSted.PAA_SVALBARD)
             }
 
             @Test
@@ -753,7 +753,7 @@ class AdresseTest {
                     lagOppholdsadresse(
                         gyldigFraOgMed = gyldigFraOgMed,
                         gyldigTilOgMed = gyldigTilOgMed,
-                        oppholdAnnetSted = "paaSvalbard",
+                        oppholdAnnetSted = OppholdAnnetSted.PAA_SVALBARD.kode,
                     )
 
                 // Act
@@ -765,7 +765,7 @@ class AdresseTest {
                 assertThat(adresse.vegadresse).isNull()
                 assertThat(adresse.matrikkeladresse).isNull()
                 assertThat(adresse.ukjentBosted).isNull()
-                assertThat(adresse.oppholdAnnetSted).isEqualTo("paaSvalbard")
+                assertThat(adresse.oppholdAnnetSted).isEqualTo(OppholdAnnetSted.PAA_SVALBARD)
             }
         }
     }

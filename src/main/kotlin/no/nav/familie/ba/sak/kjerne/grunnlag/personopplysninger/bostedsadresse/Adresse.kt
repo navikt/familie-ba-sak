@@ -13,15 +13,13 @@ import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.familie.kontrakter.felles.svalbard.erKommunePåSvalbard
 import java.time.LocalDate
 
-private val SVALBARDVERDIER_FOR_OPPHOLD_ANNET_STED = setOf("PAA_SVALBARD", "paaSvalbard", OppholdAnnetSted.PAA_SVALBARD.name)
-
 data class Adresse(
     val gyldigFraOgMed: LocalDate? = null,
     val gyldigTilOgMed: LocalDate? = null,
     val vegadresse: Vegadresse? = null,
     val matrikkeladresse: Matrikkeladresse? = null,
     val ukjentBosted: UkjentBosted? = null,
-    val oppholdAnnetSted: String? = null,
+    val oppholdAnnetSted: OppholdAnnetSted? = null,
 ) {
     fun erGyldigPåDato(dato: LocalDate): Boolean {
         val harGyldigFraOgMed = gyldigFraOgMed == null || gyldigFraOgMed.isSameOrBefore(dato)
@@ -43,7 +41,7 @@ data class Adresse(
         val erVegadressePåSvalbard = vegadresse?.kommunenummer?.let { erKommunePåSvalbard(it) } == true
         val erMatrikkeladressePåSvalbard = matrikkeladresse?.kommunenummer?.let { erKommunePåSvalbard(it) } == true
         val erUkjentBostedPåSvalbard = ukjentBosted?.bostedskommune?.let { erKommunePåSvalbard(it) } == true
-        val erOppholdAnnetStedPåSvalbard = SVALBARDVERDIER_FOR_OPPHOLD_ANNET_STED.contains(oppholdAnnetSted)
+        val erOppholdAnnetStedPåSvalbard = oppholdAnnetSted === OppholdAnnetSted.PAA_SVALBARD
         return erVegadressePåSvalbard || erMatrikkeladressePåSvalbard || erUkjentBostedPåSvalbard || erOppholdAnnetStedPåSvalbard
     }
 
@@ -68,13 +66,13 @@ data class Adresse(
                 ukjentBosted = deltBosted.ukjentBosted,
             )
 
-        fun opprettFra(oppholdsadresse: Oppholdsadresse) =
+        fun opprettFra(oppholdsadresse: Oppholdsadresse): Adresse =
             Adresse(
                 gyldigFraOgMed = oppholdsadresse.gyldigFraOgMed,
                 gyldigTilOgMed = oppholdsadresse.gyldigTilOgMed,
                 vegadresse = oppholdsadresse.vegadresse,
                 matrikkeladresse = oppholdsadresse.matrikkeladresse,
-                oppholdAnnetSted = oppholdsadresse.oppholdAnnetSted,
+                oppholdAnnetSted = OppholdAnnetSted.parse(oppholdsadresse.oppholdAnnetSted),
             )
     }
 }
