@@ -285,14 +285,7 @@ fun hentNesteSteg(
 
         BehandlingÅrsak.SØKNAD -> {
             when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> {
-                    if (behandling.fagsak.type == FagsakType.INSTITUSJON) {
-                        REGISTRERE_INSTITUSJON
-                    } else {
-                        REGISTRERE_SØKNAD
-                    }
-                }
-
+                REGISTRERE_PERSONGRUNNLAG -> hentNesteStegBasertPåOmDetErInstitusjonEllerIkke(behandling)
                 REGISTRERE_INSTITUSJON -> REGISTRERE_SØKNAD
                 REGISTRERE_SØKNAD -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
@@ -411,13 +404,7 @@ fun hentNesteSteg(
 
         else -> {
             when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> {
-                    if (behandling.fagsak.type == FagsakType.INSTITUSJON) {
-                        REGISTRERE_INSTITUSJON
-                    } else {
-                        VILKÅRSVURDERING
-                    }
-                }
+                REGISTRERE_PERSONGRUNNLAG -> hentNesteStegBasertPåOmDetErInstitusjonEllerIkke(behandling)
                 REGISTRERE_INSTITUSJON -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
@@ -436,6 +423,17 @@ fun hentNesteSteg(
         }
     }
 }
+
+private fun hentNesteStegBasertPåOmDetErInstitusjonEllerIkke(
+    behandling: Behandling,
+): StegType =
+    if (behandling.fagsak.type == FagsakType.INSTITUSJON) {
+        REGISTRERE_INSTITUSJON
+    } else if (behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD) {
+        REGISTRERE_SØKNAD
+    } else {
+        VILKÅRSVURDERING
+    }
 
 private fun hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg): StegType =
     when (endringerIUtbetaling) {
