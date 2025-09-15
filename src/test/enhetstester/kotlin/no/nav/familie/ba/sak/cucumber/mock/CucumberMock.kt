@@ -243,7 +243,6 @@ class CucumberMock(
 
     val vedtaksperiodeService =
         VedtaksperiodeService(
-            personidentService = personidentService,
             persongrunnlagService = persongrunnlagService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
