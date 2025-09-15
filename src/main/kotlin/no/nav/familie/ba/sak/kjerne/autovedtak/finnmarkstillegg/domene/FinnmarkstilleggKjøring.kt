@@ -8,6 +8,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import org.hibernate.Hibernate
+import java.util.Objects
 
 @Entity(name = "FinnmarkstilleggKjøring")
 @Table(name = "finnmarkstillegg_kjoering")
@@ -31,7 +32,7 @@ data class FinnmarkstilleggKjøring(
         return id == other.id
     }
 
-    override fun hashCode(): Int = javaClass.hashCode()
+    override fun hashCode(): Int = Objects.hash(id)
 
     @Override
     override fun toString(): String = this::class.simpleName + "(id = $id, fagsakId = $fagsakId)"
