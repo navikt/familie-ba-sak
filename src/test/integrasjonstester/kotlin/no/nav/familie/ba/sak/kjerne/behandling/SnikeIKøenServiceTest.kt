@@ -145,7 +145,7 @@ class SnikeIKøenServiceTest(
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling1.id, StegType.VILKÅRSVURDERING)
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling1.id, StegType.VURDER_TILBAKEKREVING)
 
-        val vedtak = vedtakRepository.saveAndFlush(lagVedtak(id = 0, behandling = behandling1))
+        val vedtak = vedtakRepository.saveAndFlush(lagVedtak(behandling = behandling1))
         vedtaksperiodeHentOgPersisterService.lagre(
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,

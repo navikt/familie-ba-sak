@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -55,6 +56,7 @@ class StønadsstatistikkService(
     private val kompetanseService: KompetanseService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val featureToggleService: FeatureToggleService,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
     fun hentVedtakV2(behandlingId: Long): VedtakDVHV2 {
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId)
@@ -72,8 +74,11 @@ class StønadsstatistikkService(
         val tidspunktVedtak = datoVedtak
         val sisteIverksatteBehandlingId =
             if (featureToggleService.isEnabled(FeatureToggle.STONADSSTATISTIKK_FORTSATT_INNVILGET)) {
-                behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.id.run {
-                    if (this == behandlingId) null else this.toString()
+                val behandlingHarUtbetalingsoppdrag = tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) != null
+                if (behandlingHarUtbetalingsoppdrag) {
+                    null
+                } else {
+                    behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.id.toString()
                 }
             } else {
                 null

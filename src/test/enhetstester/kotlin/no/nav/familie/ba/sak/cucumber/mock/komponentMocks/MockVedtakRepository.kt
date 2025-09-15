@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
+import no.nav.familie.ba.sak.datagenerator.lagVedtakMedId
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 
@@ -49,7 +50,7 @@ private fun opprettEllerHentVedtak(
 ): Vedtak {
     val vedtakForBehandling =
         dataFraCucumber.vedtaksliste.find { it.behandling.id == behandlingId }
-            ?: lagVedtak(dataFraCucumber.behandlinger[behandlingId]!!)
+            ?: lagVedtakMedId(dataFraCucumber.behandlinger[behandlingId]!!)
 
     if (vedtakForBehandling !in dataFraCucumber.vedtaksliste) {
         dataFraCucumber.vedtaksliste.add(vedtakForBehandling)
