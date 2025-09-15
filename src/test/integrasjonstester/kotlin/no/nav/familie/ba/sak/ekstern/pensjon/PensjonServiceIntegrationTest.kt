@@ -4,13 +4,13 @@ import io.mockk.every
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.datagenerator.årMnd
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -31,9 +31,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
-    @Autowired
-    lateinit var databaseCleanupService: DatabaseCleanupService
-
     @Autowired
     lateinit var fagsakRepository: FagsakRepository
 
@@ -168,7 +165,7 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
     ) {
         with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))) {
             val behandling = this
-            with(lagInitiellTilkjentYtelse(behandling, "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(behandling, lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id))) {
                 val andel =
                     lagAndelTilkjentYtelse(
                         fom,

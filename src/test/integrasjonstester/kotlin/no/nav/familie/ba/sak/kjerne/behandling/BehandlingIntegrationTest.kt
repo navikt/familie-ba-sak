@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
@@ -95,8 +94,6 @@ class BehandlingIntegrationTest(
     @Autowired
     private val fagsakService: FagsakService,
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     @Autowired
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
@@ -105,11 +102,6 @@ class BehandlingIntegrationTest(
     @Autowired
     private val taskRepository: TaskRepositoryWrapper,
 ) : AbstractSpringIntegrationTest() {
-    @BeforeEach
-    fun truncate() {
-        databaseCleanupService.truncate()
-    }
-
     @BeforeEach
     fun førHverTest() {
         mockkObject(SatsTidspunkt)
@@ -672,6 +664,7 @@ class BehandlingIntegrationTest(
                 .finnMeldingerKlarForSending()
                 .filter { it.type == SaksstatistikkMellomlagringType.BEHANDLING }
                 .map { it.jsonToBehandlingDVH() }
+                .filter { it.behandlingId == behandling.id.toString() }
 
         assertEquals(2, behandlingDvhMeldinger.size)
         assertThat(behandlingDvhMeldinger.last().resultat).isEqualTo("AVSLÅTT")

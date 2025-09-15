@@ -32,6 +32,10 @@ class RegistrerInstitusjon(
             behandling,
         )
 
+        if (!behandling.status.erLåstForVidereRedigering()) {
+            institusjonService.lagreInstitusjonsinfo(behandling.id)
+        }
+
         return hentNesteStegForNormalFlyt(behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id))
     }
 

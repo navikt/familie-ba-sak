@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.config
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.clearMocks
 import io.mockk.every
-import io.mockk.isMockKMock
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
@@ -31,7 +30,9 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.organisasjon.Gyldighetsperiode
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
+import no.nav.familie.kontrakter.felles.organisasjon.OrganisasjonAdresse
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -71,16 +72,7 @@ class IntegrasjonClientMock {
         private val søkerFnr = "12345678910"
 
         fun clearIntegrasjonMocks(mockIntegrasjonClient: IntegrasjonClient) {
-            /**
-             * Mulig årsak til at appen må bruke dirties i testene.
-             * Denne bønna blir initialisert av mockk, men etter noen av testene
-             * er det ikke lenger en mockk bønne!
-             */
-            if (isMockKMock(mockIntegrasjonClient)) {
-                clearMocks(mockIntegrasjonClient)
-            } else {
-                return
-            }
+            clearMocks(mockIntegrasjonClient)
 
             every { mockIntegrasjonClient.hentVersjonertBarnetrygdSøknad(any()) } returns VersjonertBarnetrygdSøknadV9(lagBarnetrygdSøknadV9())
 
@@ -183,6 +175,16 @@ class IntegrasjonClientMock {
                 Organisasjon(
                     "998765432",
                     "Testinstitusjon",
+                    adresse =
+                        OrganisasjonAdresse(
+                            type = "Forretningsadresse",
+                            adresselinje1 = "Fyrstikkalleen 1",
+                            adresselinje2 = null,
+                            adresselinje3 = "Avd BAKS",
+                            postnummer = "0661",
+                            kommunenummer = "0301",
+                            gyldighetsperiode = Gyldighetsperiode(LocalDate.of(2020, 1, 1), null),
+                        ),
                 )
             }
 

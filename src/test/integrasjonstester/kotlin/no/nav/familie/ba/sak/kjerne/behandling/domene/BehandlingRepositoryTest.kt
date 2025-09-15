@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.IVERKSETTER_VEDTAK
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -21,13 +21,7 @@ class BehandlingRepositoryTest(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val tilkjentRepository: TilkjentYtelseRepository,
-    @Autowired private val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
-    @BeforeEach
-    fun cleanUp() {
-        databaseCleanupService.truncate()
-    }
-
     @Nested
     inner class FinnSisteIverksatteBehandling {
         val tilfeldigPerson = tilfeldigPerson()
@@ -120,7 +114,12 @@ class BehandlingRepositoryTest(
             val tilkjentYtelse =
                 lagInitiellTilkjentYtelse(
                     behandling = it,
-                    utbetalingsoppdrag = if (medUtbetalingsoppdrag) "~" else null,
+                    utbetalingsoppdrag =
+                        if (medUtbetalingsoppdrag) {
+                            lagMinimalUtbetalingsoppdragString(behandlingId = it.id)
+                        } else {
+                            null
+                        },
                 )
             tilkjentRepository.saveAndFlush(tilkjentYtelse)
         }

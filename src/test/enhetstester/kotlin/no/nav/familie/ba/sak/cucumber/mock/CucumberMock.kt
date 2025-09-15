@@ -258,7 +258,7 @@ class CucumberMock(
             vilkårsvurderingService = vilkårsvurderingService,
             overgangsstønadService = overgangsstønadService,
             refusjonEøsRepository = mockk(),
-            integrasjonClient = mockk(),
+            kodeverkService = mockk(),
             valutakursRepository = valutakursRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             featureToggleService = featureToggleService,
@@ -644,6 +644,7 @@ class CucumberMock(
         OpprettTaskService(
             taskRepository = taskRepository,
             satskjøringRepository = mockk(),
+            envService = mockk(),
         )
 
     val stegService =

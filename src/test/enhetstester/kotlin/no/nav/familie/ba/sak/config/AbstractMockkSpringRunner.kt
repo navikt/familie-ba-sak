@@ -110,7 +110,10 @@ abstract class AbstractMockkSpringRunner {
         val fakePdlIdentRestClient = pdlIdentRestClient as? FakePdlIdentRestClient
         fakePdlIdentRestClient?.reset()
 
-        IntegrasjonClientMock.clearIntegrasjonMocks(mockIntegrasjonClient)
+        if (isMockKMock(mockIntegrasjonClient)) {
+            IntegrasjonClientMock.clearIntegrasjonMocks(mockIntegrasjonClient)
+        }
+
         IntegrasjonClientMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(
             mockFamilieIntegrasjonerTilgangskontrollClient,
         )

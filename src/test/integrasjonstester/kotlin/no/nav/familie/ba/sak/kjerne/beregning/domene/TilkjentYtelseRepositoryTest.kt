@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.YtelsetypeBA
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagUtbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -41,7 +42,7 @@ class TilkjentYtelseRepositoryTest(
             tilkjentYtelseRepository.save(
                 lagTilkjentYtelse(
                     behandling = behandling,
-                    utbetalingsoppdrag = "\"klassifisering\":\"BAUTV-OP\"",
+                    utbetalingsoppdrag = lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id, ytelseTypeBa = YtelsetypeBA.UTVIDET_BARNETRYGD),
                 ),
             )
 
@@ -63,7 +64,7 @@ class TilkjentYtelseRepositoryTest(
             tilkjentYtelseRepository.save(
                 lagTilkjentYtelse(
                     behandling = behandling,
-                    utbetalingsoppdrag = "\"klassifisering\":\"BATR\"",
+                    utbetalingsoppdrag = lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id),
                 ),
             )
 
