@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene
+package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.domene
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -10,14 +10,14 @@ import jakarta.persistence.Table
 import org.hibernate.Hibernate
 import java.util.Objects
 
-@Entity(name = "FinnmarkstilleggKjøring")
-@Table(name = "finnmarkstillegg_kjoering")
-data class FinnmarkstilleggKjøring(
+@Entity(name = "SvalbardtilleggKjøring")
+@Table(name = "svalbardtillegg_kjoering")
+data class SvalbardtilleggKjøring(
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "finnmarkstillegg_kjoering_seq_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "svalbardtillegg_kjoering_seq_generator")
     @SequenceGenerator(
-        name = "finnmarkstillegg_kjoering_seq_generator",
-        sequenceName = "finnmarkstillegg_kjoering_seq",
+        name = "svalbardtillegg_kjoering_seq_generator",
+        sequenceName = "svalbardtillegg_kjoering_seq",
         allocationSize = 50,
     )
     val id: Long = 0,
@@ -27,7 +27,7 @@ data class FinnmarkstilleggKjøring(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
-        other as FinnmarkstilleggKjøring
+        other as SvalbardtilleggKjøring
 
         return id == other.id
     }
