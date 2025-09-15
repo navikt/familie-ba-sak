@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOve
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
@@ -45,7 +45,7 @@ class VedtaksperiodeMedBegrunnelserController(
     private val brevKlient: BrevKlient,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
-    private val integrasjonClient: IntegrasjonClient,
+    private val kodeverkService: KodeverkService,
     private val testVerktøyService: TestVerktøyService,
     private val featureToggleService: FeatureToggleService,
 ) {
@@ -160,7 +160,7 @@ class VedtaksperiodeMedBegrunnelserController(
                 vedtaksperiode.hentBegrunnelser(
                     grunnlagForBegrunnelse = grunnlagForBegrunnelser,
                     begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
-                    landkoder = integrasjonClient.hentLandkoderISO2(),
+                    landkoder = kodeverkService.hentLandkoderISO2(),
                     skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse = featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE),
                 )
             } catch (e: BrevBegrunnelseFeil) {

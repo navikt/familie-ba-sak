@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
+import no.nav.familie.ba.sak.integrasjoner.økonomi.lagUtbetalingsperiode
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.Opphør
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode
+import no.nav.familie.kontrakter.felles.objectMapper
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -17,6 +19,25 @@ fun lagBeregnetUtbetalingsoppdragLongId(
     BeregnetUtbetalingsoppdragLongId(
         lagUtbetalingsoppdrag(utbetalingsperioder),
         andeler = andeler,
+    )
+
+fun lagMinimalUtbetalingsoppdragString(
+    behandlingId: Long,
+    ytelseTypeBa: YtelsetypeBA? = YtelsetypeBA.ORDINÆR_BARNETRYGD,
+): String =
+    objectMapper.writeValueAsString(
+        Utbetalingsoppdrag(
+            kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
+            fagSystem = "BA",
+            saksnummer = "",
+            aktoer = UUID.randomUUID().toString(),
+            saksbehandlerId = "",
+            avstemmingTidspunkt = LocalDateTime.now(),
+            utbetalingsperiode =
+                listOf(
+                    lagUtbetalingsperiode(behandlingId = behandlingId, periodeId = 0, forrigePeriodeId = null, ytelseTypeBa = ytelseTypeBa ?: YtelsetypeBA.ORDINÆR_BARNETRYGD),
+                ),
+        ),
     )
 
 fun lagUtbetalingsoppdrag(utbetalingsperioder: List<Utbetalingsperiode>): Utbetalingsoppdrag =
