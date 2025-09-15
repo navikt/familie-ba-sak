@@ -21,5 +21,5 @@ CREATE TABLE institusjon_info
     endret_av         VARCHAR,
     endret_tid        TIMESTAMP(3),
     CONSTRAINT fk_institusjon FOREIGN KEY (fk_institusjon_id) REFERENCES institusjon (id),
-    CONSTRAINT fk_behandling FOREIGN KEY (fk_behandling_id) REFERENCES behandling (id)
+    CONSTRAINT fk_behandling FOREIGN KEY (fk_behandling_id) REFERENCES behandling (id) ON DELETE CASCADE
 );
