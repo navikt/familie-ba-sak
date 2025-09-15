@@ -45,22 +45,19 @@ private fun skalSlåsSammen(
     vilkårResultaterDennePerioden: List<VilkårResultat>,
     vilkårResultaterForrigePeriode: List<VilkårResultat>,
 ): Boolean {
-    val aktørTilHarUtdypendeVilkårForrigePeriode = hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(vilkårResultaterForrigePeriode)
-    val aktørTilHarUtdypendeVilkårDennePerioden = hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(vilkårResultaterDennePerioden)
-
     val bosattIRiketVilkårForrigePeriode =
-        vilkårResultatListeTilErBosattIRiketVilkårListe(vilkårResultaterForrigePeriode)
-    val bosattIRiketVilkårDennePerioden = vilkårResultatListeTilErBosattIRiketVilkårListe(vilkårResultaterDennePerioden)
+        vilkårResultaterForrigePeriode.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET }
+    val bosattIRiketVilkårDennePerioden = vilkårResultaterDennePerioden.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET }
+
+    val aktørTilHarUtdypendeVilkårForrigePeriode = hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(bosattIRiketVilkårForrigePeriode)
+    val aktørTilHarUtdypendeVilkårDennePerioden = hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(bosattIRiketVilkårDennePerioden)
 
     val erAndreEndringerIVilkårResultat =
         endringIAndreTingIVilkårResultater(bosattIRiketVilkårForrigePeriode, bosattIRiketVilkårDennePerioden)
 
     val erTilleggInnvilgetForBarnOgSøker = aktørTilHarUtdypendeVilkårDennePerioden.all { it.value } == true
 
-    val erAntallVilkårOgAktørerUlike =
-        aktørTilHarUtdypendeVilkårDennePerioden.size != aktørTilHarUtdypendeVilkårForrigePeriode.size
-
-    if (erAndreEndringerIVilkårResultat || erTilleggInnvilgetForBarnOgSøker || erAntallVilkårOgAktørerUlike) {
+    if (erAndreEndringerIVilkårResultat || erTilleggInnvilgetForBarnOgSøker) {
         return false
     }
 
@@ -72,13 +69,9 @@ private fun skalSlåsSammen(
     }
 }
 
-private fun vilkårResultatListeTilErBosattIRiketVilkårListe(vilkårResultater: List<VilkårResultat>?): List<VilkårResultat>? = vilkårResultater?.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET }
-
 private fun hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(vilkårResultater: List<VilkårResultat>): Map<Aktør, Boolean> {
-    val bosattIRiketVilkår =
-        vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET }
     val aktørTilVilkårsResultatListe =
-        bosattIRiketVilkår.groupBy { it.personResultat?.aktør ?: throw Feil("VilkårResultat uten personResultat") }
+        vilkårResultater.groupBy { it.personResultat?.aktør ?: throw Feil("VilkårResultat ${it.id} har ikke personResultat") }
     val aktørTilHarUtdypendeVilkårSomGirTilleggIPeriode =
         aktørTilVilkårsResultatListe.mapValues { (_, value) ->
             value
