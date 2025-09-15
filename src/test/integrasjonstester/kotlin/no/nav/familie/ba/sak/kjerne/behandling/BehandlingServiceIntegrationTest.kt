@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -91,9 +92,10 @@ class BehandlingServiceIntegrationTest(
         val førstegangsbehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
         tilkjentYtelseRepository.save(
-            lagInitiellTilkjentYtelse(førstegangsbehandling).also {
-                it.utbetalingsoppdrag = "Utbetalingsoppdrag()"
-            },
+            lagInitiellTilkjentYtelse(
+                behandling = førstegangsbehandling,
+                utbetalingsoppdrag = lagMinimalUtbetalingsoppdragString(behandlingId = førstegangsbehandling.id),
+            ),
         )
         ferdigstillBehandling(førstegangsbehandling)
 
