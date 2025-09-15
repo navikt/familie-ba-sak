@@ -261,6 +261,7 @@ class CucumberMock(
             integrasjonClient = mockk(),
             valutakursRepository = valutakursRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+            featureToggleService = featureToggleService,
         )
 
     val behandlingService =

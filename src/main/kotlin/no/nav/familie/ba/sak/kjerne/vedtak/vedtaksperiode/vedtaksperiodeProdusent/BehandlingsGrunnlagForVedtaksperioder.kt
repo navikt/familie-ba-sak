@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProduse
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -97,6 +99,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
 
     fun utledGrunnlagTidslinjePerPerson(
         skalSplittePåValutakursendringer: Boolean = true,
+        featureToggleService: FeatureToggleService,
     ): Map<AktørOgRolleBegrunnelseGrunnlag, GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag> {
         val søker = persongrunnlag.søker
         val ordinæreVilkårForSøkerForskjøvetTidslinje =
@@ -135,7 +138,13 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                             fagsakType = behandling.fagsak.type,
                             vilkårRolle = vilkårRolle,
                             bareSøkerOgUregistrertBarn = bareSøkerOgUregistrertBarn,
-                        ).slåSammenSplitterPåUtdypendeVilkår()
+                        ).run {
+                            if (featureToggleService.isEnabled(FeatureToggle.SLÅ_SAMMEN_FINNMARK_ELLER_SVALBARD)) {
+                                this.slåSammenSplitterPåUtdypendeVilkår()
+                            } else {
+                                this
+                            }
+                        }
 
                 AktørOgRolleBegrunnelseGrunnlag(aktør, vilkårRolle) to
                     GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag(

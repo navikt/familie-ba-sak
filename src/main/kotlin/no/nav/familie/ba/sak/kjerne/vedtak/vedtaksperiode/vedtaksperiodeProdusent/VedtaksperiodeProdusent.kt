@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -44,6 +45,7 @@ fun genererVedtaksperioder(
     grunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
     vedtak: Vedtak,
     nåDato: LocalDate,
+    featureToggleService: FeatureToggleService,
 ): List<VedtaksperiodeMedBegrunnelser> {
     if (vedtak.behandling.opprettetÅrsak.erOmregningsårsak()) {
         return lagPeriodeForOmregningsbehandling(
@@ -59,10 +61,10 @@ fun genererVedtaksperioder(
 
     val grunnlagTidslinjePerPersonForrigeBehandling =
         grunnlagForVedtaksperioderForrigeBehandling
-            ?.let { grunnlagForVedtaksperioderForrigeBehandling.utledGrunnlagTidslinjePerPerson(skalSplittePåValutakursendringer = false) }
+            ?.let { grunnlagForVedtaksperioderForrigeBehandling.utledGrunnlagTidslinjePerPerson(skalSplittePåValutakursendringer = false, featureToggleService = featureToggleService) }
             ?: emptyMap()
 
-    val grunnlagTidslinjePerPerson = grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson(skalSplittePåValutakursendringer = false)
+    val grunnlagTidslinjePerPerson = grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson(skalSplittePåValutakursendringer = false, featureToggleService = featureToggleService)
 
     val perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling =
         finnPerioderSomSkalBegrunnes(
@@ -72,6 +74,7 @@ fun genererVedtaksperioder(
                 vedtak.behandling.overstyrtEndringstidspunkt ?: utledEndringstidspunkt(
                     behandlingsGrunnlagForVedtaksperioder = grunnlagForVedtaksperioder,
                     behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtaksperioderForrigeBehandling,
+                    featureToggleService = featureToggleService,
                 ),
             personerFremstiltKravFor = grunnlagForVedtaksperioder.personerFremstiltKravFor,
         )
