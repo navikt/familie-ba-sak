@@ -68,6 +68,8 @@ class AutovedtakFødselshendelseBegrunnelseService(
                     throw Feil("Finner ikke vedtaksperiode å begrunne for barn fra hendelse")
                 }
 
+            val harFinnmarkstilleggNesteMåned = andelerIBehandling.any { it.erFinnmarkstillegg() && it.stønadFom == månedenEtterFødsel }
+
             val begrunnelser =
                 mutableListOf(
                     Vedtaksbegrunnelse(
@@ -75,6 +77,14 @@ class AutovedtakFødselshendelseBegrunnelseService(
                         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                     ),
                 )
+
+            if (harFinnmarkstilleggNesteMåned) {
+                begrunnelser +=
+                    Vedtaksbegrunnelse(
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_AUTOVEDTAK_FØDSEL_FINNMARKSTILLEGG,
+                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    )
+            }
 
             vedtaksperiodeMedBegrunnelser.settBegrunnelser(begrunnelser)
             vedtaksperiodeHentOgPersisterService.lagre(vedtaksperiodeMedBegrunnelser)
