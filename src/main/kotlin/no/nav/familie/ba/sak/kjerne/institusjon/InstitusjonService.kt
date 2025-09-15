@@ -112,9 +112,9 @@ class InstitusjonService(
         val institusjon = behandling.fagsak.institusjon ?: throw Feil("Fagsaken mangler institusjon")
 
         organisasjonService.hentOrganisasjon(institusjon.orgNummer).apply {
-            val institusjonsadresse = institusjonsinfoRepository.findByBehandlingId(behandlingId)
-            if (institusjonsadresse != null) {
-                institusjonsinfoRepository.delete(institusjonsadresse)
+            val institusjonsinfo = institusjonsinfoRepository.findByBehandlingId(behandlingId)
+            if (institusjonsinfo != null) {
+                institusjonsinfoRepository.delete(institusjonsinfo)
             }
 
             val organisasjonAdresse = this.adresse ?: throw FunksjonellFeil("Fant ikke adresse for institusjonen ${this.organisasjonsnummer}.")

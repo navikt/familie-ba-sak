@@ -282,11 +282,9 @@ class PersongrunnlagService(
         }
     }
 
-    private fun Bostedsadresse.poststed(): String? = poststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
+    private fun Bostedsadresse.poststed(): String? = kodeverkService.hentPoststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
 
-    private fun Oppholdsadresse.poststed(): String? = poststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
-
-    private fun poststed(postnummer: String?): String? = kodeverkService.hentPoststed(postnummer)
+    private fun Oppholdsadresse.poststed(): String? = kodeverkService.hentPoststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
 
     private fun hentPerson(
         aktør: Aktør,

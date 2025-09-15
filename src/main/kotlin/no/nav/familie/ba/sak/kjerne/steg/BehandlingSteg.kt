@@ -285,7 +285,7 @@ fun hentNesteSteg(
 
         BehandlingÅrsak.SØKNAD -> {
             when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> hentNesteStegBasertPåOmDetErInstitusjonEllerIkke(behandling)
+                REGISTRERE_PERSONGRUNNLAG -> hentNesteStegForSøknadBasertPåOmDetErInstitusjonEllerIkke(behandling)
                 REGISTRERE_INSTITUSJON -> REGISTRERE_SØKNAD
                 REGISTRERE_SØKNAD -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
@@ -429,10 +429,17 @@ private fun hentNesteStegBasertPåOmDetErInstitusjonEllerIkke(
 ): StegType =
     if (behandling.fagsak.type == FagsakType.INSTITUSJON) {
         REGISTRERE_INSTITUSJON
-    } else if (behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD) {
-        REGISTRERE_SØKNAD
     } else {
         VILKÅRSVURDERING
+    }
+
+private fun hentNesteStegForSøknadBasertPåOmDetErInstitusjonEllerIkke(
+    behandling: Behandling,
+): StegType =
+    if (behandling.fagsak.type == FagsakType.INSTITUSJON) {
+        REGISTRERE_INSTITUSJON
+    } else {
+        REGISTRERE_SØKNAD
     }
 
 private fun hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg): StegType =
