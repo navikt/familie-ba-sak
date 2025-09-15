@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg
+package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
