@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.samhandlereInfoMock
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
+import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.samhandler.SamhandlerKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.kontrakter.ba.tss.SamhandlerAdresse
@@ -32,14 +32,14 @@ internal class SamhandlerControllerTest {
     private val samhandlerKlientMock: SamhandlerKlient = mockk()
     private val institusjonRepository: InstitusjonRepository = mockk()
     private val institusjonsinfoRepository: InstitusjonsinfoRepository = mockk()
-    private val integrasjonClient: IntegrasjonClient = mockk()
+    private val organisasjonService: OrganisasjonService = mockk()
     private val kodeverkService: KodeverkService = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private lateinit var institusjonService: InstitusjonService
 
     @BeforeEach
     fun setUp() {
-        institusjonService = InstitusjonService(mockk(), samhandlerKlientMock, institusjonRepository, institusjonsinfoRepository, integrasjonClient, kodeverkService, behandlingHentOgPersisterService)
+        institusjonService = InstitusjonService(mockk(), samhandlerKlientMock, institusjonRepository, institusjonsinfoRepository, organisasjonService, kodeverkService, behandlingHentOgPersisterService)
         samhandlerController = SamhandlerController(institusjonService = institusjonService)
         clearMocks(samhandlerKlientMock)
     }
@@ -49,7 +49,7 @@ internal class SamhandlerControllerTest {
         @Test
         fun `Skal hente samhandlerinformasjon med adresse fra TSS, hvis det ikke finnes adresse i ereg `() {
             every { samhandlerKlientMock.hentSamhandler(any()) } returns samhandlereInfoMock.first()
-            every { integrasjonClient.hentOrganisasjon(any()) } returns Organisasjon(samhandlereInfoMock.first().orgNummer!!, "Testinstitusjon")
+            every { organisasjonService.hentOrganisasjon(any()) } returns Organisasjon(samhandlereInfoMock.first().orgNummer!!, "Testinstitusjon")
 
             val samhandlerInfo = samhandlerController.hentSamhandlerDataForOrganisasjonFraTssOgEreg(samhandlereInfoMock.first().orgNummer!!)
             assertThat(samhandlerInfo.data).isNotNull()
@@ -60,7 +60,7 @@ internal class SamhandlerControllerTest {
         fun `Skal hente tss ekstern id fra samhandlerinformasjon til TSS, men bruke navn og adresse fra ereg `() {
             every { samhandlerKlientMock.hentSamhandler(any()) } returns samhandlereInfoMock.first()
             every { kodeverkService.hentPoststed(any()) } returns "Oslo"
-            every { integrasjonClient.hentOrganisasjon(any()) } returns
+            every { organisasjonService.hentOrganisasjon(any()) } returns
                 Organisasjon(
                     organisasjonsnummer = samhandlereInfoMock.first().orgNummer!!,
                     navn = "Et annet navn",
@@ -187,7 +187,7 @@ internal class SamhandlerControllerTest {
             every { behandlingHentOgPersisterService.hent(42) } returns
                 lagBehandling(lagFagsak(institusjon = Institusjon(orgNummer = "123456789", tssEksternId = "tssIdFraFagsak")))
             every { samhandlerKlientMock.hentSamhandler(any()) } returns samhandlereInfoMock.first()
-            every { integrasjonClient.hentOrganisasjon(any()) } returns Organisasjon(samhandlereInfoMock.first().orgNummer!!, "Testinstitusjon")
+            every { organisasjonService.hentOrganisasjon(any()) } returns Organisasjon(samhandlereInfoMock.first().orgNummer!!, "Testinstitusjon")
 
             val samhandlerInfo = samhandlerController.hentSamhandlerDataForBehandling(42L)
         }
