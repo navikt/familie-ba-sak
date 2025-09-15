@@ -141,93 +141,21 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                         ).slåSammenFinnmarkstillegg()
 
                 AktørOgRolleBegrunnelseGrunnlag(aktør, vilkårRolle) to
-                        GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag(
-                            overlappendeGenerelleAvslagVedtaksperiodeGrunnlagForPerson =
-                                overlappendeGenerelleAvslag.generelleAvslagTilGrunnlagForPersonTidslinje(
-                                    person,
-                                ),
-                            vedtaksperiodeGrunnlagForPerson =
-                                forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinje(
-                                    person = person,
-                                    vilkårRolle = vilkårRolle,
-                                    skalSplittePåValutakursendringer = skalSplittePåValutakursendringer,
-                                ),
-                        )
+                    GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag(
+                        overlappendeGenerelleAvslagVedtaksperiodeGrunnlagForPerson =
+                            overlappendeGenerelleAvslag.generelleAvslagTilGrunnlagForPersonTidslinje(
+                                person,
+                            ),
+                        vedtaksperiodeGrunnlagForPerson =
+                            forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinje(
+                                person = person,
+                                vilkårRolle = vilkårRolle,
+                                skalSplittePåValutakursendringer = skalSplittePåValutakursendringer,
+                            ),
+                    )
             }
 
         return grunnlagForPersonTidslinjer
-    }
-
-    private fun Tidslinje<List<VilkårResultat>>.slåSammenFinnmarkstillegg(): Tidslinje<List<VilkårResultat>> {
-        val perioder =
-            this.tilPerioder().map { periode ->
-                periode.copy(verdi = periode.verdi.orEmpty()) as Periode<List<VilkårResultat>>
-            }
-
-        val sortertePerioder = perioder.sortedWith(compareBy({ it.fom }, { it.tom }))
-
-        return sortertePerioder
-            .fold(emptyList()) { acc: List<Periode<List<VilkårResultat>>>, dennePerioden ->
-                val forrigePeriode = acc.lastOrNull()
-
-                if (forrigePeriode != null && skalSlåSammenFinnmarkstillegg(dennePerioden.verdi, forrigePeriode.verdi)) {
-                    slåSammenMedForrigePeriode(acc, forrigePeriode, dennePerioden)
-                } else {
-                    acc + dennePerioden
-                }
-            }.tilTidslinje()
-    }
-
-    private fun slåSammenMedForrigePeriode(
-        acc: List<Periode<List<VilkårResultat>>>,
-        forrigePeriode: Periode<List<VilkårResultat>>,
-        dennePerioden: Periode<List<VilkårResultat>>,
-    ): List<Periode<List<VilkårResultat>>> = acc.dropLast(1) + forrigePeriode.copy(tom = dennePerioden.tom)
-
-    private fun skalSlåSammenFinnmarkstillegg(
-        vilkårResultaterDennePerioden: List<VilkårResultat>,
-        vilkårResultaterForrigePeriode: List<VilkårResultat>,
-    ): Boolean {
-        val aktørTilErBosattPåSvalbardForrigePeriode = hentAktørTilErBosattIFinnmarkIPeriode(vilkårResultaterForrigePeriode)
-        val aktørTilErBosattPåSvalbardDennePerioden = hentAktørTilErBosattIFinnmarkIPeriode(vilkårResultaterDennePerioden)
-
-        val bosattIRiketVilkårForrigePeriode = vilkårResultatListeTilErBosattIRiketVilkårListe(vilkårResultaterForrigePeriode)
-        val bosattIRiketVilkårDennePerioden = vilkårResultatListeTilErBosattIRiketVilkårListe(vilkårResultaterDennePerioden)
-
-        val endringIAndreUtdypendeVilkår = endringIAnnetEnnFinnmark(bosattIRiketVilkårForrigePeriode, bosattIRiketVilkårDennePerioden)
-        val erBarnOgSøkerBosattIFinnmark = aktørTilErBosattPåSvalbardDennePerioden.all { it.value } == true
-        val erAntallVilkårOgAktørerUlike = aktørTilErBosattPåSvalbardDennePerioden.size != aktørTilErBosattPåSvalbardForrigePeriode.size
-
-        if (endringIAndreUtdypendeVilkår || erBarnOgSøkerBosattIFinnmark || erAntallVilkårOgAktørerUlike) {
-            return false
-        }
-
-        return aktørTilErBosattPåSvalbardForrigePeriode.any { (aktørForrigePeriode, erBosattIFinnmarkForrigePeriode) ->
-            val erEndringIBosattIFinnmarkForAktør = aktørTilErBosattPåSvalbardDennePerioden[aktørForrigePeriode] != erBosattIFinnmarkForrigePeriode
-
-            erEndringIBosattIFinnmarkForAktør
-        }
-    }
-
-    private fun vilkårResultatListeTilErBosattIRiketVilkårListe(vilkårResultater: List<VilkårResultat>?): List<VilkårResultat>? = vilkårResultater?.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET }
-
-    private fun hentAktørTilErBosattIFinnmarkIPeriode(vilkårResultater: List<VilkårResultat>): Map<Aktør, Boolean> {
-        val bosattIRiketVilkår = vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET }
-        val aktørTilVilkårsrResultatListe = bosattIRiketVilkår.groupBy { it.personResultat?.aktør ?: throw Feil("VilkårResultat uten personResultat") }
-        val aktørTilErBosattPåSvalbardIPeriode =
-            aktørTilVilkårsrResultatListe.mapValues { (_, value) ->
-                value.flatMap { it.utdypendeVilkårsvurderinger }.any { it == UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD || it == UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS }
-            }
-        return aktørTilErBosattPåSvalbardIPeriode
-    }
-
-    private fun endringIAnnetEnnFinnmark(
-        bosattIRiketVilkårForrigePeriode: List<VilkårResultat>?,
-        bosattIRiketVilkårDennePerioden: List<VilkårResultat>?,
-    ): Boolean {
-        val vilkårResultatForrigePeriode = bosattIRiketVilkårForrigePeriode?.flatMap { vilkårResultat -> vilkårResultat.utdypendeVilkårsvurderinger.filterNot { it -> it == UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS || it == UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD } }
-        val vilkårResultatDennePerioden = bosattIRiketVilkårDennePerioden?.flatMap { vilkårResultat -> vilkårResultat.utdypendeVilkårsvurderinger.filterNot { it -> it == UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS || it == UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD } }
-        return vilkårResultatDennePerioden != vilkårResultatForrigePeriode
     }
 
     private fun PersonResultat.splittOppVilkårForBarnOgSøkerRolle(): List<Pair<PersonType, PersonResultat>> {
