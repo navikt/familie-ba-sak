@@ -7,6 +7,7 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
@@ -40,6 +41,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
     private val endretUtbetalingAndelService = mockk<EndretUtbetalingAndelService>()
     private val vilkårsvurderingMetrics = mockk<VilkårsvurderingMetrics>()
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private lateinit var vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService
 
@@ -55,6 +57,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                 vilkårsvurderingMetrics = vilkårsvurderingMetrics,
                 andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
                 preutfyllVilkårService = mockk(),
+                featureToggleService = featureToggleService,
             )
     }
 

@@ -127,7 +127,7 @@ class VilkårsvurderingStegTest {
         vikårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
         every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vikårsvurdering
 
-        assertDoesNotThrow { vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, "") }
+        assertDoesNotThrow { vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, null) }
     }
 
     @Test

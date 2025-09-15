@@ -142,7 +142,7 @@ class FødselshendelseServiceTest {
                 nyBehandlingHendelse,
             )
         } returns nyBehandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
-        every { stegService.håndterVilkårsvurdering(nyBehandling) } returns
+        every { stegService.håndterVilkårsvurdering(nyBehandling, any()) } returns
             nyBehandling
                 .copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
                 .leggTilBehandlingStegTilstand(StegType.IVERKSETT_MOT_OPPDRAG)

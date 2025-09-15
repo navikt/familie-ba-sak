@@ -569,6 +569,7 @@ class CucumberMock(
             vilkårsvurderingMetrics = mockk(),
             andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             preutfyllVilkårService = preutfyllVilkårService,
+            featureToggleService = featureToggleService,
         )
 
     val registrerPersongrunnlag =

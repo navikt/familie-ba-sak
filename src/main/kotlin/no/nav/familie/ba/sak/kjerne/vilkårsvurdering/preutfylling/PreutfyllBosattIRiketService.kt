@@ -33,26 +33,37 @@ class PreutfyllBosattIRiketService(
     private val søknadService: SøknadService,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
-    fun preutfyllBosattIRiket(vilkårsvurdering: Vilkårsvurdering) {
-        val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
+    fun preutfyllBosattIRiket(
+        vilkårsvurdering: Vilkårsvurdering,
+        identerVilkårSkalPreutfyllesFor: List<String>? = null,
+    ) {
+        val identer =
+            vilkårsvurdering
+                .personResultater
+                .map { it.aktør.aktivFødselsnummer() }
+                .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
+
         val bostedsadresser = pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer)
 
-        vilkårsvurdering.personResultater.forEach { personResultat ->
-            val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
-            val bostedsadresserForPerson = Adresser.opprettFra(bostedsadresser[personResultat.aktør.aktivFødselsnummer()])
+        vilkårsvurdering
+            .personResultater
+            .filter { it.aktør.aktivFødselsnummer() in identer }
+            .forEach { personResultat ->
+                val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
+                val bostedsadresserForPerson = Adresser.opprettFra(bostedsadresser[personResultat.aktør.aktivFødselsnummer()])
 
-            val bosattIRiketVilkårResultat =
-                genererBosattIRiketVilkårResultat(
-                    personResultat = personResultat,
-                    fødselsdatoForBeskjæring = fødselsdatoForBeskjæring,
-                    adresserForPerson = bostedsadresserForPerson,
-                )
+                val bosattIRiketVilkårResultat =
+                    genererBosattIRiketVilkårResultat(
+                        personResultat = personResultat,
+                        fødselsdatoForBeskjæring = fødselsdatoForBeskjæring,
+                        adresserForPerson = bostedsadresserForPerson,
+                    )
 
-            if (bosattIRiketVilkårResultat.isNotEmpty()) {
-                personResultat.vilkårResultater.removeIf { it.vilkårType == BOSATT_I_RIKET }
-                personResultat.vilkårResultater.addAll(bosattIRiketVilkårResultat)
+                if (bosattIRiketVilkårResultat.isNotEmpty()) {
+                    personResultat.vilkårResultater.removeIf { it.vilkårType == BOSATT_I_RIKET }
+                    personResultat.vilkårResultater.addAll(bosattIRiketVilkårResultat)
+                }
             }
-        }
     }
 
     fun genererBosattIRiketVilkårResultat(

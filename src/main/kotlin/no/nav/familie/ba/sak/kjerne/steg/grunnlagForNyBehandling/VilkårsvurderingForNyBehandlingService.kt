@@ -2,9 +2,12 @@ package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -32,6 +35,7 @@ class VilkårsvurderingForNyBehandlingService(
     private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
     private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val preutfyllVilkårService: PreutfyllVilkårService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun opprettVilkårsvurderingUtenomHovedflyt(
         behandling: Behandling,
@@ -164,6 +168,7 @@ class VilkårsvurderingForNyBehandlingService(
         behandling: Behandling,
         bekreftEndringerViaFrontend: Boolean,
         forrigeBehandlingSomErVedtatt: Behandling?,
+        barnSomSkalVurderesIFødselshendelse: List<String>? = null,
     ): Vilkårsvurdering {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
 
@@ -184,9 +189,23 @@ class VilkårsvurderingForNyBehandlingService(
             )
 
         if (!behandling.skalBehandlesAutomatisk) {
-            preutfyllVilkårService.preutfyllVilkår(
-                vilkårsvurdering = initiellVilkårsvurdering,
-            )
+            preutfyllVilkårService.preutfyllVilkår(vilkårsvurdering = initiellVilkårsvurdering)
+        } else if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE && featureToggleService.isEnabled(SKAL_GENERERE_FINNMARKSTILLEGG)) {
+            val identerVilkårSkalPreutfyllesFor =
+                barnSomSkalVurderesIFødselshendelse?.let {
+                    when (behandling.type) {
+                        BehandlingType.FØRSTEGANGSBEHANDLING -> it + behandling.fagsak.aktør.aktivFødselsnummer()
+                        else -> it
+                    }
+                }
+            try {
+                preutfyllVilkårService.preutfyllBosattIRiket(
+                    vilkårsvurdering = initiellVilkårsvurdering,
+                    identerVilkårSkalPreutfyllesFor = identerVilkårSkalPreutfyllesFor,
+                )
+            } catch (e: Exception) {
+                logger.warn("Feil ved preutfylling av 'Bosatt i riket'-vilkåret i fødselshendelsebehandling ${behandling.id}", e)
+            }
         }
 
         tellMetrikkerForFødselshendelse(
