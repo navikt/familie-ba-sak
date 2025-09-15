@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.institusjon
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.ba.tss.SamhandlerInfo
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -23,15 +24,33 @@ class SamhandlerController(
     private val institusjonService: InstitusjonService,
 ) {
     @GetMapping(path = ["/orgnr/{orgnr}"])
-    fun hentSamhandlerDataForOrganisasjon(
+    fun hentSamhandlerDataForOrganisasjonFraTssOgEreg(
         @PathVariable("orgnr") orgNummer: String,
     ): Ressurs<SamhandlerInfo> =
         try {
-            Ressurs.success(institusjonService.hentSamhandler(orgNummer).copy(orgNummer = orgNummer))
+            Ressurs.success(institusjonService.hentSamhandlerFraTssOgEreg(orgNummer).copy(orgNummer = orgNummer))
         } catch (e: Exception) {
             if (e.erNotFound()) {
                 throw FunksjonellFeil(
                     "Finner ikke institusjon. Kontakt NØS for å opprette TSS-ident.",
+                    httpStatus = HttpStatus.NOT_FOUND,
+                    throwable = e,
+                )
+            }
+            throw e
+        }
+
+    @GetMapping(path = ["/behandling/{behandlingId}"])
+    fun hentSamhandlerDataForBehandling(
+        @PathVariable("behandlingId") behandlingId: Long,
+    ): Ressurs<SamhandlerInfo> =
+        try {
+            Ressurs.success(institusjonService.hentSamhandlerForBehandling(BehandlingId(behandlingId)))
+        } catch (e: Exception) {
+            if (e.erNotFound()) {
+                throw FunksjonellFeil(
+                    melding = "Finner ikke institusjon for behandlingId=$behandlingId",
+                    frontendFeilmelding = "Finner ikke institusjon for behandling",
                     httpStatus = HttpStatus.NOT_FOUND,
                     throwable = e,
                 )
