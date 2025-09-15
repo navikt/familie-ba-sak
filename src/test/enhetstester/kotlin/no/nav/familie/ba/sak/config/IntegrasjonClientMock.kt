@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.config
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.isMockKMock
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
@@ -70,7 +71,16 @@ class IntegrasjonClientMock {
         private val søkerFnr = "12345678910"
 
         fun clearIntegrasjonMocks(mockIntegrasjonClient: IntegrasjonClient) {
-            clearMocks(mockIntegrasjonClient)
+            /**
+             * Mulig årsak til at appen må bruke dirties i testene.
+             * Denne bønna blir initialisert av mockk, men etter noen av testene
+             * er det ikke lenger en mockk bønne!
+             */
+            if (isMockKMock(mockIntegrasjonClient)) {
+                clearMocks(mockIntegrasjonClient)
+            } else {
+                return
+            }
 
             every { mockIntegrasjonClient.hentVersjonertBarnetrygdSøknad(any()) } returns VersjonertBarnetrygdSøknadV9(lagBarnetrygdSøknadV9())
 

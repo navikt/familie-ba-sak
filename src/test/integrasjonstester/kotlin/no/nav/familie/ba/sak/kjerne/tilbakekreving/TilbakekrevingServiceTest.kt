@@ -1,9 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
-import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
+import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
@@ -22,6 +23,8 @@ import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.params.ParameterizedTest
@@ -42,18 +45,24 @@ class TilbakekrevingServiceTest(
     @Autowired private val tilbakekrevingService: TilbakekrevingService,
     @Autowired private val tilbakekrevingRepository: TilbakekrevingRepository,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
+    @Autowired private val databaseCleanupService: DatabaseCleanupService,
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val brevmottakerRepository: BrevmottakerRepository,
 ) : AbstractSpringIntegrationTest() {
+    val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr())
+
+    @BeforeEach
+    fun init() {
+        databaseCleanupService.truncate()
+    }
+
     @Test
+    @Tag("integration")
     fun `tilbakekreving skal bli OPPRETT_TILBAKEKREVING_MED_VARSEL når man oppretter tilbakekreving med varsel`() {
-        // Arrange
-        val søkerFnr = leggTilPersonInfo(fødselsdato = randomSøkerFødselsdato())
-        val barnFnr = leggTilPersonInfo(fødselsdato = randomBarnFødselsdato())
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-                søkerFnr = søkerFnr,
+                søkerFnr = randomFnr(),
                 barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
@@ -73,20 +82,18 @@ class TilbakekrevingServiceTest(
         tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id)
         tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id)
 
-        // Act
         stegService.håndterIverksettMotFamilieTilbake(behandling, Properties())
 
-        // Assert
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
+
         assertEquals(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL, tilbakekreving?.valg)
         assertEquals("id1", tilbakekreving?.tilbakekrevingsbehandlingId)
         assertEquals("Varsel", tilbakekreving?.varsel)
     }
 
     @Test
+    @Tag("integration")
     fun `tilbakekreving skal bli OPPRETT_TILBAKEKREVING_MED_VARSEL når man oppretter tilbakekreving med varsel for institusjon`() {
-        // Arrange
-        val barnFnr = leggTilPersonInfo(fødselsdato = randomBarnFødselsdato())
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
@@ -111,27 +118,24 @@ class TilbakekrevingServiceTest(
         tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id)
         tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id)
 
-        // Act
         stegService.håndterIverksettMotFamilieTilbake(behandling, Properties())
 
-        // Assert
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
+
         assertEquals(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL, tilbakekreving?.valg)
         assertEquals("id1", tilbakekreving?.tilbakekrevingsbehandlingId)
         assertEquals("Varsel", tilbakekreving?.varsel)
     }
 
+    @Tag("integration")
     @ParameterizedTest
     @ArgumentsSource(TestProvider::class)
+    @Suppress("SENSELESS_COMPARISON")
     fun `lagOpprettTilbakekrevingRequest sender brevmottakere i kall mot familie-tilbake`(arguments: Pair<MottakerType, Vergetype>) {
-        // Arrange
-        val søkerFnr = leggTilPersonInfo(fødselsdato = randomSøkerFødselsdato())
-        val barnFnr = leggTilPersonInfo(fødselsdato = randomBarnFødselsdato())
-
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-                søkerFnr = søkerFnr,
+                søkerFnr = randomFnr(),
                 barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
@@ -154,10 +158,7 @@ class TilbakekrevingServiceTest(
             )
         brevmottakerRepository.saveAndFlush(brevmottaker)
 
-        // Act
         val opprettTilbakekrevingRequest = tilbakekrevingService.lagOpprettTilbakekrevingRequest(behandling)
-
-        // Assert
         assertEquals(1, opprettTilbakekrevingRequest.manuelleBrevmottakere.size)
         val actualBrevmottaker = opprettTilbakekrevingRequest.manuelleBrevmottakere.first()
 

@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -49,10 +51,17 @@ class VilkårVurderingTest(
     @Autowired
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     @Autowired
+    private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired
     private val personidentService: PersonidentService,
     @Autowired
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
 ) : AbstractSpringIntegrationTest() {
+    @BeforeAll
+    fun init() {
+        databaseCleanupService.truncate()
+    }
+
     @Test
     fun `Henting og evaluering av oppfylte vilkår gir rett antall samlede resultater`() {
         val fnr = randomFnr()

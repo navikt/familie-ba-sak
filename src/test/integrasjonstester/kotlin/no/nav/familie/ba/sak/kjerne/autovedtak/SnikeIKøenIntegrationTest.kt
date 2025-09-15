@@ -2,8 +2,11 @@ package no.nav.familie.ba.sak.kjerne.autovedtak
 
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService.Companion.BEHANDLING_FERDIG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -32,6 +35,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -54,6 +58,8 @@ class SnikeIKøenIntegrationTest(
     @Autowired
     private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired
+    private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired
     private val brevmalService: BrevmalService,
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
@@ -70,9 +76,19 @@ class SnikeIKøenIntegrationTest(
     @Autowired
     private val loggRepository: LoggRepository,
 ) : AbstractSpringIntegrationTest() {
+    val søkerFnr = randomFnr()
+    val barn18år = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = LocalDate.now().minusYears(18).withDayOfMonth(10)))
+    val barn2år = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = LocalDate.now().minusYears(6).withDayOfMonth(10)))
+
+    @BeforeEach
+    fun init() {
+        databaseCleanupService.truncate()
+    }
+
     @Test
     fun `automatisk behandling sniker foran åpen behandling før besluttersteget og setter den tilbake til vilkårsvurderingssteget`() {
-        val åpenBehandling = fullførFørstegangsbehandlingOgKjørRevurderingTilSteg(StegType.BEHANDLINGSRESULTAT)
+        val fagsak = kjørFørstegangsbehandling().fagsak
+        val åpenBehandling = kjørRevurderingTilSteg(StegType.BEHANDLINGSRESULTAT, fagsak.id)
 
         SnikeIKøenServiceTestConfig.endringstidspunktMock = LocalDateTime.now().minusHours(4)
 
@@ -110,7 +126,8 @@ class SnikeIKøenIntegrationTest(
 
     @Test
     fun `automatisk behandling forsøker å rekjøre og avbrytes med manuell oppgave etter 7 dager med åpen behandling på besluttersteget`() {
-        val åpenBehandling = fullførFørstegangsbehandlingOgKjørRevurderingTilSteg(StegType.SEND_TIL_BESLUTTER)
+        val fagsak = kjørFørstegangsbehandling().fagsak
+        val åpenBehandling = kjørRevurderingTilSteg(StegType.SEND_TIL_BESLUTTER, fagsak.id)
 
         val tid6DagerSiden = LocalDateTime.now().minusDays(6)
 
@@ -154,16 +171,6 @@ class SnikeIKøenIntegrationTest(
         )
     }
 
-    private fun fullførFørstegangsbehandlingOgKjørRevurderingTilSteg(stegType: StegType): Behandling {
-        val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(30))
-        val barn18år = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(18).withDayOfMonth(10))
-        val barn2år = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(6).withDayOfMonth(10))
-        val barnasIdenter = listOf(barn18år, barn2år)
-
-        val fagsak = kjørFørstegangsbehandling(søkerFnr = søkerFnr, barnasIdenter = barnasIdenter).fagsak
-        return kjørRevurderingTilSteg(stegType, fagsak.id, søkerFnr, barnasIdenter)
-    }
-
     private fun fullførTasks() {
         val opprettedeTasks = mutableListOf<Task>()
 
@@ -188,14 +195,11 @@ class SnikeIKøenIntegrationTest(
         }
     }
 
-    private fun kjørFørstegangsbehandling(
-        søkerFnr: String,
-        barnasIdenter: List<String>,
-    ): Behandling =
+    private fun kjørFørstegangsbehandling(): Behandling =
         kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
             søkerFnr = søkerFnr,
-            barnasIdenter = barnasIdenter,
+            barnasIdenter = listOf(barn18år, barn2år),
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             persongrunnlagService = persongrunnlagService,
@@ -209,13 +213,11 @@ class SnikeIKøenIntegrationTest(
     private fun kjørRevurderingTilSteg(
         steg: StegType,
         fagsakId: Long,
-        søkerFnr: String,
-        barnasIdenter: List<String>,
     ): Behandling =
         kjørStegprosessForRevurderingÅrligKontroll(
             tilSteg = steg,
             søkerFnr = søkerFnr,
-            barnasIdenter = barnasIdenter,
+            barnasIdenter = listOf(barn18år, barn2år),
             vedtakService = vedtakService,
             stegService = stegService,
             fagsakId = fagsakId,

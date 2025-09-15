@@ -35,6 +35,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter.ofPattern
 
 @Service
 @Profile("mock-pdl")
@@ -99,22 +100,12 @@ class MockPersonopplysningerService(
                 mockBarnAutomatiskBehandlingSkalFeileFnr to mockBarnAutomatiskBehandlingSkalFeile,
             )
 
-        @Deprecated("Parsing av fødselsdato fra fnr er usikker pga. århundre. Bruk heller leggTilPersonInfo med fødselsdato")
         fun leggTilPersonInfo(
             personIdent: String,
-            egendefinertMock: PersonInfo,
-        ): String {
-            personInfo[personIdent] = egendefinertMock
-            return personIdent
-        }
-
-        fun leggTilPersonInfo(
-            fødselsdato: LocalDate,
             egendefinertMock: PersonInfo? = null,
         ): String {
-            val personIdent = randomFnr(fødselsdato)
             personInfo[personIdent] = egendefinertMock ?: PersonInfo(
-                fødselsdato = fødselsdato,
+                fødselsdato = LocalDate.parse(personIdent.substring(0, 6), ofPattern("ddMMyy")),
                 bostedsadresser = mutableListOf(bostedsadresse),
                 kjønn = Kjønn.entries.random(),
                 navn = "$personIdent sitt navn",

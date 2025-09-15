@@ -2,9 +2,10 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.settPersonInfoStatsborgerskap
-import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -15,6 +16,7 @@ import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -26,8 +28,14 @@ class VelgFagsystemIntegrasjonTest(
     @Autowired val velgFagSystemService: VelgFagSystemService,
     @Autowired val infotrygdService: InfotrygdService,
     @Autowired val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    @Autowired val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
-    val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+    val søkerFnr = leggTilPersonInfo(randomFnr())
+
+    @BeforeEach
+    fun init() {
+        databaseCleanupService.truncate()
+    }
 
     @Test
     fun `sjekk om mor har løpende utbetalinger i infotrygd`() {

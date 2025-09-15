@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
@@ -13,13 +14,18 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.minside.MinsideAktivering
+import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøkerRepository
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -30,7 +36,15 @@ class FagsakRepositoryTest(
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    @Autowired private val skjermetBarnSøkerRepository: SkjermetBarnSøkerRepository,
+    @Autowired private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired private val minsideAktiveringRepository: MinsideAktiveringRepository,
 ) : AbstractSpringIntegrationTest() {
+    @BeforeEach
+    fun beforeEach() {
+        databaseCleanupService.truncate()
+    }
+
     @Nested
     inner class FinnFagsakerSomSkalAvsluttes {
         @Test
@@ -81,7 +95,8 @@ class FagsakRepositoryTest(
             val fagsakerSomSkalAvsluttes = fagsakRepository.finnFagsakerSomSkalAvsluttes()
 
             // Assert
-            assertThat(fagsakerSomSkalAvsluttes).contains(fagsak.id)
+            assertThat(fagsakerSomSkalAvsluttes).hasSize(1)
+            assertThat(fagsakerSomSkalAvsluttes.first()).isEqualTo(fagsak.id)
         }
 
         @ParameterizedTest
@@ -140,7 +155,7 @@ class FagsakRepositoryTest(
             val fagsakerSomSkalAvsluttes = fagsakRepository.finnFagsakerSomSkalAvsluttes()
 
             // Assert
-            assertThat(fagsakerSomSkalAvsluttes).doesNotContain(fagsak.id)
+            assertThat(fagsakerSomSkalAvsluttes).hasSize(0)
         }
     }
 
@@ -182,7 +197,8 @@ class FagsakRepositoryTest(
         val fagsakerSomSkalAvsluttes = fagsakRepository.finnFagsakerSomSkalAvsluttes()
 
         // Assert
-        assertThat(fagsakerSomSkalAvsluttes).contains(fagsak.id)
+        assertThat(fagsakerSomSkalAvsluttes).hasSize(1)
+        assertThat(fagsakerSomSkalAvsluttes.first()).isEqualTo(fagsak.id)
     }
 
     @Test
@@ -223,6 +239,6 @@ class FagsakRepositoryTest(
         val fagsakerSomSkalAvsluttes = fagsakRepository.finnFagsakerSomSkalAvsluttes()
 
         // Assert
-        assertThat(fagsakerSomSkalAvsluttes).doesNotContain(fagsak.id)
+        assertThat(fagsakerSomSkalAvsluttes).hasSize(0)
     }
 }

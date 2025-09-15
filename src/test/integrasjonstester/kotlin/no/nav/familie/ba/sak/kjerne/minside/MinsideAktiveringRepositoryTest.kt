@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.minside
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNotNull
@@ -16,7 +18,13 @@ import org.springframework.dao.DataIntegrityViolationException
 class MinsideAktiveringRepositoryTest(
     @Autowired private val aktørIdRepository: AktørIdRepository,
     @Autowired private val minsideAktiveringRepository: MinsideAktiveringRepository,
+    @Autowired private val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
+    @BeforeEach
+    fun setup() {
+        databaseCleanupService.truncate()
+    }
+
     @Nested
     inner class FindByAktør {
         @ParameterizedTest

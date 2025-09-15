@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -31,11 +32,14 @@ class FagsakDeltagerControllerTest(
     private val persongrunnlagService: PersongrunnlagService,
     @Autowired
     private val mockPersonidentService: PersonidentService,
+    @Autowired
+    private val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
     @BeforeEach
     fun init() {
         MDC.put(MDCConstants.MDC_CALL_ID, "00001111")
         BrukerContextUtil.mockBrukerContext(SikkerhetContext.SYSTEM_FORKORTELSE)
+        databaseCleanupService.truncate()
     }
 
     @AfterEach

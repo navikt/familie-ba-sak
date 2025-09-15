@@ -1,60 +1,97 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
+import io.mockk.called
+import io.mockk.spyk
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.prosessering.domene.Status
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 
-class KonsistensavstemmingSchedulerTest(
-    @Autowired private val batchService: BatchService,
-    @Autowired private val fagsakService: FagsakService,
-    @Autowired private val taskRepository: TaskRepositoryWrapper,
-    @Autowired private val konsistensavstemmingScheduler: KonsistensavstemmingScheduler,
-) : AbstractSpringIntegrationTest() {
+@SpringBootTest
+@ExtendWith(SpringExtension::class)
+@ActiveProfiles("postgres", "mock-brev-klient", "integrasjonstest", "testcontainers")
+@Tag("integration")
+class KonsistensavstemmingSchedulerTest : AbstractMockkSpringRunner() {
+    @Autowired
+    lateinit var taskRepository: TaskRepositoryWrapper
+
+    @Autowired
+    lateinit var batchService: BatchService
+
+    @Autowired
+    lateinit var behandlingService: BehandlingService
+
+    @Autowired
+    lateinit var fagsakService: FagsakService
+
+    @Autowired
+    lateinit var konsistensavstemmingScheduler: KonsistensavstemmingScheduler
+
+    @Autowired
+    private lateinit var databaseCleanupService: DatabaseCleanupService
+
+    @BeforeEach
+    fun setUp() {
+        databaseCleanupService.truncate()
+        konsistensavstemmingScheduler =
+            KonsistensavstemmingScheduler(
+                batchService,
+                behandlingService,
+                fagsakService,
+                taskRepository,
+            )
+        taskRepository = spyk(taskRepository)
+    }
+
     @Test
     fun `Skal ikke trigge avstemming når det ikke er noen ledige batchkjøringer for dato`() {
-        // Arrange
         val dagensDato = LocalDate.now()
         val nyBatch = Batch(kjøreDato = dagensDato, status = KjøreStatus.TATT)
         batchService.lagreNyStatus(nyBatch, KjøreStatus.TATT)
 
-        // Act
         konsistensavstemmingScheduler.utførKonsistensavstemming()
 
-        // Assert
-        verify(exactly = 0) { taskRepository.save(any()) }
+        verify { taskRepository wasNot called }
     }
 
     @Test
     fun `Skal ikke trigge avstemming når det ikke finnes batchkjøringer for dato`() {
-        // Arrange
         val imorgen = LocalDate.now().plusDays(1)
         val nyBatch = Batch(kjøreDato = imorgen)
         batchService.lagreNyStatus(nyBatch, KjøreStatus.LEDIG)
 
-        // Act
         konsistensavstemmingScheduler.utførKonsistensavstemming()
 
-        // Assert
-        verify(exactly = 0) { taskRepository.save(any()) }
+        verify { taskRepository wasNot called }
     }
 
     @Test
     fun `Skal trigge en avstemming når det er ledig batchkjøring for dato`() {
-        // Arrange
         val dagensDato = LocalDate.now()
         val nyBatch = Batch(kjøreDato = dagensDato)
         batchService.lagreNyStatus(nyBatch, KjøreStatus.LEDIG)
         fagsakService.hentLøpendeFagsaker().forEach { fagsakService.oppdaterStatus(it, FagsakStatus.AVSLUTTET) }
 
-        // Act
         konsistensavstemmingScheduler.utførKonsistensavstemming()
 
-        // Assert
-        verify(exactly = 1) { taskRepository.save(any()) }
+        val tasks = taskRepository.findByStatus(Status.UBEHANDLET)
+        Assertions.assertEquals(1, tasks.size)
+
+        // Setter task til Ferdig for å unngå at den kjøres fra andre tester.
+        taskRepository.save(tasks[0].copy(status = Status.FERDIG))
     }
 }

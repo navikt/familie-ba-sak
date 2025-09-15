@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagBarnVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
@@ -40,6 +41,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.gjelderAlltidFraBarnetsFødselsdato
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -64,12 +66,19 @@ class VilkårsvurderingForNyBehandlingServiceTest(
     @Autowired
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
     @Autowired
+    private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     @Autowired
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     @Autowired
     private val personRepository: PersonRepository,
 ) : AbstractSpringIntegrationTest() {
+    @BeforeAll
+    fun init() {
+        databaseCleanupService.truncate()
+    }
+
     @Test
     fun `skal lage vilkårsvurderingsperiode for migrering ved flyttesak`() {
         val fnr = randomFnr()

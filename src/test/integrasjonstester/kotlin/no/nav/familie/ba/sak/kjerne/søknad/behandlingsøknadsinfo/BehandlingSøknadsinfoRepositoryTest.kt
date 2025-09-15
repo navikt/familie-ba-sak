@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.søknad.behandlingsøknadsinfo
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -10,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -17,9 +19,15 @@ import java.time.LocalDate
 class BehandlingSøknadsinfoRepositoryTest(
     @Autowired private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
+    @Autowired private val databaseCleanupService: DatabaseCleanupService,
     @Autowired private val aktørIdRepository: AktørIdRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
 ) : AbstractSpringIntegrationTest() {
+    @BeforeEach
+    fun setup() {
+        databaseCleanupService.truncate()
+    }
+
     @Test
     fun `save lagrer BehandlingSøknadsinfo`() {
         // Arrange

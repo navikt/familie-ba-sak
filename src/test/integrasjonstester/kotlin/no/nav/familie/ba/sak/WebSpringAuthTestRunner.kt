@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.BehandlerRolle
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
@@ -35,6 +36,9 @@ import org.springframework.web.client.RestTemplate
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
+    @Autowired
+    lateinit var databaseCleanupService: DatabaseCleanupService
+
     @Autowired
     lateinit var restTemplate: RestTemplate
 
