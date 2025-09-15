@@ -133,7 +133,7 @@ Egenskap: Behandling med finnmarkstillegg skal ikke splitte for behandlingsresul
 
     Og når behandlingsresultatet er utledet for behandling 2
 
-    Så forvent at behandlingsresultatet er ENDRET_UTEN_UTBETALING på behandling 2
+    Så forvent at behandlingsresultatet er ENDRET_UTBETALING på behandling 2
 
   Scenario: Søker og barn flytter til Finnmark skal gi behandlingsresultat ENDRET
     Og dagens dato er 15.09.2025

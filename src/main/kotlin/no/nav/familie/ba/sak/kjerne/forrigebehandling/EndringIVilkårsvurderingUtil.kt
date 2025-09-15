@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.hentUtdypendeVilkårSomIkkeSkalSplitteVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -73,14 +74,17 @@ object EndringIVilkårsvurderingUtil {
         val endringIVilkårResultat =
             nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->
 
+                val erEndringIFinnmarkstillegg = nåværende.endringIFinnmarksTillegg() != forrige.endringIFinnmarksTillegg()
+
                 val erEndringerIUtdypendeVilkårsvurdering =
                     nåværende.relevanteUtdypendeVilkårsvurderinger() != forrige.relevanteUtdypendeVilkårsvurderinger()
                 val erEndringerIRegelverk = nåværende.vurderesEtter != forrige.vurderesEtter
-                val erVilkårSomErSplittetOpp = nåværende.periodeFom != forrige.periodeFom
 
+                val erKunEndringIFinnmarkstillegg = erEndringIFinnmarkstillegg && !erEndringerIUtdypendeVilkårsvurdering && !erEndringerIRegelverk
+                val erVilkårSomErSplittetOpp = nåværende.periodeFom != forrige.periodeFom
                 (forrige.obligatoriskUtdypendeVilkårsvurderingErSatt() && erEndringerIUtdypendeVilkårsvurdering) ||
-                    erEndringerIRegelverk ||
-                    erVilkårSomErSplittetOpp
+                        erEndringerIRegelverk ||
+                        (erVilkårSomErSplittetOpp && !erKunEndringIFinnmarkstillegg)
             }
 
         return endringIVilkårResultat
@@ -90,6 +94,8 @@ object EndringIVilkårsvurderingUtil {
 
     private fun VilkårResultat.relevanteUtdypendeVilkårsvurderinger(): Set<UtdypendeVilkårsvurdering> = utdypendeVilkårsvurderinger.filterNot { it in setOf(BOSATT_I_FINNMARK_NORD_TROMS, BOSATT_PÅ_SVALBARD) }.toSet()
 
+    private fun VilkårResultat.endringIFinnmarksTillegg(): Set<UtdypendeVilkårsvurdering> = utdypendeVilkårsvurderinger.filter { it in setOf(BOSATT_I_FINNMARK_NORD_TROMS, BOSATT_PÅ_SVALBARD) }.toSet()
+
     private fun VilkårResultat.utdypendeVilkårsvurderingErObligatorisk(): Boolean =
         if (this.vurderesEtter == Regelverk.NASJONALE_REGLER) {
             false
@@ -97,13 +103,13 @@ object EndringIVilkårsvurderingUtil {
             when (this.vilkårType) {
                 Vilkår.BOSATT_I_RIKET,
                 Vilkår.BOR_MED_SØKER,
-                -> true
+                    -> true
 
                 Vilkår.UNDER_18_ÅR,
                 Vilkår.LOVLIG_OPPHOLD,
                 Vilkår.GIFT_PARTNERSKAP,
                 Vilkår.UTVIDET_BARNETRYGD,
-                -> false
+                    -> false
             }
         }
 }
