@@ -141,18 +141,18 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                         ).slåSammenFinnmarkstillegg()
 
                 AktørOgRolleBegrunnelseGrunnlag(aktør, vilkårRolle) to
-                    GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag(
-                        overlappendeGenerelleAvslagVedtaksperiodeGrunnlagForPerson =
-                            overlappendeGenerelleAvslag.generelleAvslagTilGrunnlagForPersonTidslinje(
-                                person,
-                            ),
-                        vedtaksperiodeGrunnlagForPerson =
-                            forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinje(
-                                person = person,
-                                vilkårRolle = vilkårRolle,
-                                skalSplittePåValutakursendringer = skalSplittePåValutakursendringer,
-                            ),
-                    )
+                        GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag(
+                            overlappendeGenerelleAvslagVedtaksperiodeGrunnlagForPerson =
+                                overlappendeGenerelleAvslag.generelleAvslagTilGrunnlagForPersonTidslinje(
+                                    person,
+                                ),
+                            vedtaksperiodeGrunnlagForPerson =
+                                forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinje(
+                                    person = person,
+                                    vilkårRolle = vilkårRolle,
+                                    skalSplittePåValutakursendringer = skalSplittePåValutakursendringer,
+                                ),
+                        )
             }
 
         return grunnlagForPersonTidslinjer
@@ -209,7 +209,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
         }
     }
 
-    private fun vilkårResultatListeTilErBosattIRiketVilkårListe(vilkårResultaterNå: List<VilkårResultat>?): List<VilkårResultat>? = vilkårResultaterNå?.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET }
+    private fun vilkårResultatListeTilErBosattIRiketVilkårListe(vilkårResultater: List<VilkårResultat>?): List<VilkårResultat>? = vilkårResultater?.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET }
 
     private fun hentAktørTilErBosattIFinnmarkIPeriode(vilkårResultater: List<VilkårResultat>): Map<Aktør, Boolean> {
         val bosattIRiketVilkår = vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET }
@@ -222,11 +222,11 @@ data class BehandlingsGrunnlagForVedtaksperioder(
     }
 
     private fun endringIAnnetEnnFinnmark(
-        listDa: List<VilkårResultat>?,
-        listNå: List<VilkårResultat>?,
+        bosattIRiketVilkårForrigePeriode: List<VilkårResultat>?,
+        bosattIRiketVilkårDennePerioden: List<VilkårResultat>?,
     ): Boolean {
-        val vilkårResultatForrigePeriode = listDa?.flatMap { vilkårResultat -> vilkårResultat.utdypendeVilkårsvurderinger.filterNot { it -> it == UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS || it == UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD } }
-        val vilkårResultatDennePerioden = listNå?.flatMap { vilkårResultat -> vilkårResultat.utdypendeVilkårsvurderinger.filterNot { it -> it == UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS || it == UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD } }
+        val vilkårResultatForrigePeriode = bosattIRiketVilkårForrigePeriode?.flatMap { vilkårResultat -> vilkårResultat.utdypendeVilkårsvurderinger.filterNot { it -> it == UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS || it == UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD } }
+        val vilkårResultatDennePerioden = bosattIRiketVilkårDennePerioden?.flatMap { vilkårResultat -> vilkårResultat.utdypendeVilkårsvurderinger.filterNot { it -> it == UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS || it == UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD } }
         return vilkårResultatDennePerioden != vilkårResultatForrigePeriode
     }
 
