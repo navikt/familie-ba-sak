@@ -37,7 +37,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilTidslinjeForSplittForPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.tidslinje.Periode
@@ -49,9 +48,7 @@ import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.slåSammenLikePerioder
-import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
-import kotlin.collections.sortedWith
 
 typealias AktørId = String
 
@@ -138,7 +135,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                             fagsakType = behandling.fagsak.type,
                             vilkårRolle = vilkårRolle,
                             bareSøkerOgUregistrertBarn = bareSøkerOgUregistrertBarn,
-                        ).slåSammenFinnmarkstillegg()
+                        ).slåSammenSplitterPåUtdypendeVilkår()
 
                 AktørOgRolleBegrunnelseGrunnlag(aktør, vilkårRolle) to
                     GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag(
@@ -377,7 +374,7 @@ private fun List<VilkårResultat>.hentForskjøvedeVilkårResultaterForPersonsAnd
     vilkårRolle: PersonType,
     bareSøkerOgUregistrertBarn: Boolean,
 ): Tidslinje<List<VilkårResultat>> {
-    val forskjøvedeVilkårResultaterForPerson = this.tilForskjøvedeVilkårTidslinjer(person.fødselsdato).kombiner { vilkårResultater -> vilkårResultater }
+    val forskjøvedeVilkårResultaterForPerson = this.tilForskjøvedeVilkårTidslinjer(person.fødselsdato).kombiner()
 
     return when (vilkårRolle) {
         PersonType.SØKER ->
