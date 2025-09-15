@@ -52,13 +52,15 @@ private fun skalSlåsSammen(
         vilkårResultatListeTilErBosattIRiketVilkårListe(vilkårResultaterForrigePeriode)
     val bosattIRiketVilkårDennePerioden = vilkårResultatListeTilErBosattIRiketVilkårListe(vilkårResultaterDennePerioden)
 
-    val endringIAndreUtdypendeVilkår =
-        endringIAnnetEnnUtdypendeVilkårSomGirTillegg(bosattIRiketVilkårForrigePeriode, bosattIRiketVilkårDennePerioden)
+    val erAndreEndringerIVilkårResultat =
+        endringIAndreTingIVilkårResultater(bosattIRiketVilkårForrigePeriode, bosattIRiketVilkårDennePerioden)
+
     val erTilleggInnvilgetForBarnOgSøker = aktørTilHarUtdypendeVilkårDennePerioden.all { it.value } == true
+
     val erAntallVilkårOgAktørerUlike =
         aktørTilHarUtdypendeVilkårDennePerioden.size != aktørTilHarUtdypendeVilkårForrigePeriode.size
 
-    if (endringIAndreUtdypendeVilkår || erTilleggInnvilgetForBarnOgSøker || erAntallVilkårOgAktørerUlike) {
+    if (erAndreEndringerIVilkårResultat || erTilleggInnvilgetForBarnOgSøker || erAntallVilkårOgAktørerUlike) {
         return false
     }
 
@@ -86,20 +88,30 @@ private fun hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(vilkårResulta
     return aktørTilHarUtdypendeVilkårSomGirTilleggIPeriode
 }
 
-private fun endringIAnnetEnnUtdypendeVilkårSomGirTillegg(
+private fun endringIAndreTingIVilkårResultater(
     bosattIRiketVilkårForrigePeriode: List<VilkårResultat>?,
     bosattIRiketVilkårDennePerioden: List<VilkårResultat>?,
 ): Boolean {
     val vilkårResultatForrigePeriode =
-        bosattIRiketVilkårForrigePeriode?.flatMap { vilkårResultat ->
-            vilkårResultat.utdypendeVilkårsvurderinger
-                .filterNot { it -> it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG }
+        bosattIRiketVilkårForrigePeriode?.map { vilkårResultat ->
+            vilkårResultat.copy(
+                utdypendeVilkårsvurderinger =
+                    vilkårResultat.utdypendeVilkårsvurderinger
+                        .filterNot { it -> it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG },
+                periodeFom = null,
+                periodeTom = null,
+            )
         }
 
     val vilkårResultatDennePerioden =
-        bosattIRiketVilkårDennePerioden?.flatMap { vilkårResultat ->
-            vilkårResultat.utdypendeVilkårsvurderinger
-                .filterNot { it -> it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG }
+        bosattIRiketVilkårDennePerioden?.map { vilkårResultat ->
+            vilkårResultat.copy(
+                utdypendeVilkårsvurderinger =
+                    vilkårResultat.utdypendeVilkårsvurderinger
+                        .filterNot { it -> it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG },
+                periodeFom = null,
+                periodeTom = null,
+            )
         }
 
     return vilkårResultatDennePerioden != vilkårResultatForrigePeriode
