@@ -1,15 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
 import io.mockk.every
-import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilRelasjonIPersonInfo
+import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
-import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -22,366 +21,318 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
-import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE.MOR
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
-import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate.now
 
 class ArbeidsfordelingIntegrationTest(
-    @Autowired
-    private val fagsakService: FagsakService,
-    @Autowired
-    private val stegService: StegService,
-    @Autowired
-    private val arbeidsfordelingService: ArbeidsfordelingService,
-    @Autowired
-    private val integrasjonClient: IntegrasjonClient,
-    @Autowired
-    private val oppgaveService: OppgaveService,
-    @Autowired
-    private val personidentService: PersonidentService,
-    @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired private val fagsakService: FagsakService,
+    @Autowired private val stegService: StegService,
+    @Autowired private val arbeidsfordelingService: ArbeidsfordelingService,
+    @Autowired private val integrasjonClient: IntegrasjonClient,
+    @Autowired private val oppgaveService: OppgaveService,
 ) : AbstractSpringIntegrationTest() {
-    @BeforeEach
-    fun init() {
-        databaseCleanupService.truncate()
-
-        val now = now()
-
-        leggTilPersonInfo(
-            SØKER_FNR,
-            PersonInfo(
-                fødselsdato = now.minusYears(20),
-                navn = "Mor Søker",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse),
-            ),
-        )
-
-        leggTilPersonInfo(
-            BARN_UTEN_DISKRESJONSKODE,
-            PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
-                navn = "Gutt Barn",
-                kjønn = Kjønn.MANN,
-                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse),
-            ),
-        )
-        leggTilRelasjonIPersonInfo(BARN_UTEN_DISKRESJONSKODE, SØKER_FNR, MOR)
-
-        leggTilPersonInfo(
-            BARN_MED_DISKRESJONSKODE,
-            PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
-                navn = "Gutt Barn fortrolig",
-                kjønn = Kjønn.MANN,
-                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
-                bostedsadresser = mutableListOf(søkerBostedsadresse),
-            ),
-        )
-        leggTilRelasjonIPersonInfo(BARN_MED_DISKRESJONSKODE, SØKER_FNR, MOR)
-
-        every { integrasjonClient.hentBehandlendeEnhet(eq(SØKER_FNR)) } returns
-            listOf(
-                Arbeidsfordelingsenhet(
-                    enhetId = IKKE_FORTROLIG_ENHET,
-                    enhetNavn = "vanlig enhet",
-                ),
-            )
-
-        every { integrasjonClient.hentBehandlendeEnhet(eq(BARN_MED_DISKRESJONSKODE)) } returns
-            listOf(
-                Arbeidsfordelingsenhet(
-                    enhetId = FORTROLIG_ENHET,
-                    enhetNavn = "Diskresjonsenhet",
-                ),
-            )
-        val hentEnhetSlot = slot<String>()
-        every { integrasjonClient.hentEnhet(capture(hentEnhetSlot)) } answers {
-            NavKontorEnhet(
-                enhetId = hentEnhetSlot.captured.toInt(),
-                navn = "${hentEnhetSlot.captured}, NAV Familie- og pensjonsytelser Oslo 1",
-                enhetNr = "4848",
-                status = "aktiv",
-            )
-        }
-    }
-
     @Test
     fun `Skal fastsette behandlende enhet ved opprettelse av behandling`() {
-        val søkerAktør = personidentService.hentAktør(SØKER_FNR)
-        val fagsak =
-            fagsakService.hentEllerOpprettFagsak(
-                søkerAktør.aktivFødselsnummer(),
-            )
+        // Arrange
+        val søkerFnr = mockSøker()
+        mockBehandlendeEnhetForPerson(søkerFnr, IKKE_FORTROLIG_ENHET)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerFnr)
+
+        // Act
         val behandling =
             stegService.håndterNyBehandling(
-                lagNyBehandling(fagsak.id),
+                lagNyBehandling(fagsak.id, søkerFnr),
             )
 
-        val arbeidsfordelingPåBehandling =
-            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
-
-        assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
+        // Assert
+        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        assertEquals(IKKE_FORTROLIG_ENHET.enhetsnummer, arbeidsfordelingPåBehandling.behandlendeEnhetId)
     }
 
     @Test
     fun `Skal ikke fastsette ny behandlende enhet ved registrering av søknad`() {
-        val søkerAktør = personidentService.hentAktør(SØKER_FNR)
+        // Arrange
+        val søkerFnr = mockSøker()
+        val ikkeFortreligBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.UGRADERT)
+        mockBehandlendeEnhetForPerson(søkerFnr, IKKE_FORTROLIG_ENHET)
+        mockBehandlendeEnhetForPerson(ikkeFortreligBarnFnr, IKKE_FORTROLIG_ENHET)
+
         val fagsak =
             fagsakService.hentEllerOpprettFagsak(
-                søkerAktør.aktivFødselsnummer(),
+                søkerFnr,
             )
         val behandling =
             stegService.håndterNyBehandling(
-                lagNyBehandling(fagsak.id),
+                lagNyBehandling(fagsak.id, søkerFnr),
             )
 
-        val arbeidsfordelingPåBehandling =
-            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
-        assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
+        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        assertEquals(IKKE_FORTROLIG_ENHET.enhetsnummer, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
+        // Act
         stegService.håndterSøknad(
             behandling,
             RestRegistrerSøknad(
                 søknad =
                     lagSøknadDTO(
-                        SØKER_FNR,
-                        listOf(BARN_UTEN_DISKRESJONSKODE),
+                        søkerFnr,
+                        listOf(ikkeFortreligBarnFnr),
                     ),
                 bekreftEndringerViaFrontend = false,
             ),
         )
 
-        val arbeidsfordelingPåBehandlingEtterSøknadsregistrering =
-            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
-        assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandlingEtterSøknadsregistrering.behandlendeEnhetId)
+        // Assert
+        val arbeidsfordelingPåBehandlingEtterSøknadsregistrering = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        assertEquals(IKKE_FORTROLIG_ENHET.enhetsnummer, arbeidsfordelingPåBehandlingEtterSøknadsregistrering.behandlendeEnhetId)
     }
 
     @Test
     fun `Skal fastsette ny behandlende enhet ved registrering av søknad`() {
-        val søkerAktør = personidentService.hentAktør(SØKER_FNR)
-        val fagsak =
-            fagsakService.hentEllerOpprettFagsak(
-                søkerAktør.aktivFødselsnummer(),
-            )
+        // Arrange
+        val søkerFnr = mockSøker()
+        val fortroligBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.FORTROLIG)
+        mockBehandlendeEnhetForPerson(søkerFnr, IKKE_FORTROLIG_ENHET)
+        mockBehandlendeEnhetForPerson(fortroligBarnFnr, FORTROLIG_ENHET)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerFnr)
         val behandling =
             stegService.håndterNyBehandling(
-                lagNyBehandling(fagsak.id),
+                lagNyBehandling(fagsak.id, søkerFnr),
             )
 
-        val arbeidsfordelingPåBehandling =
-            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
-        assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
+        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        assertEquals(IKKE_FORTROLIG_ENHET.enhetsnummer, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
+        // Act
         stegService.håndterSøknad(
             behandling,
             RestRegistrerSøknad(
                 søknad =
                     lagSøknadDTO(
-                        SØKER_FNR,
-                        listOf(BARN_MED_DISKRESJONSKODE),
+                        søkerFnr,
+                        listOf(fortroligBarnFnr),
                     ),
                 bekreftEndringerViaFrontend = false,
             ),
         )
 
-        val arbeidsfordelingPåBehandlingEtterSøknadsregistrering =
-            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
-        assertEquals(FORTROLIG_ENHET, arbeidsfordelingPåBehandlingEtterSøknadsregistrering.behandlendeEnhetId)
+        // Assert
+        val arbeidsfordelingPåBehandlingEtterSøknadsregistrering = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        assertEquals(FORTROLIG_ENHET.enhetsnummer, arbeidsfordelingPåBehandlingEtterSøknadsregistrering.behandlendeEnhetId)
     }
 
     @Test
     fun `Skal fastsette ny behandlende enhet når man legger til nytt barn ved endring på søknadsgrunnlag`() {
-        val søkerAktør = personidentService.hentAktør(SØKER_FNR)
-        val fagsak =
-            fagsakService.hentEllerOpprettFagsak(
-                søkerAktør.aktivFødselsnummer(),
-            )
+        // Assert
+        val søkerFnr = mockSøker()
+        val ugradertBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.UGRADERT)
+        val fortroligBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.FORTROLIG)
+        mockBehandlendeEnhetForPerson(søkerFnr, IKKE_FORTROLIG_ENHET)
+        mockBehandlendeEnhetForPerson(ugradertBarnFnr, IKKE_FORTROLIG_ENHET)
+        mockBehandlendeEnhetForPerson(fortroligBarnFnr, FORTROLIG_ENHET)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerFnr)
         val behandling =
             stegService.håndterNyBehandling(
-                lagNyBehandling(fagsak.id),
+                lagNyBehandling(fagsak.id, søkerFnr),
             )
 
-        val arbeidsfordelingPåBehandling =
-            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
-        assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
+        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        assertEquals(IKKE_FORTROLIG_ENHET.enhetsnummer, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         stegService.håndterSøknad(
             behandling,
             RestRegistrerSøknad(
                 søknad =
                     lagSøknadDTO(
-                        SØKER_FNR,
-                        listOf(BARN_UTEN_DISKRESJONSKODE),
+                        søkerFnr,
+                        listOf(ugradertBarnFnr),
                     ),
                 bekreftEndringerViaFrontend = false,
             ),
         )
 
-        val arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode =
-            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(
-            IKKE_FORTROLIG_ENHET,
+            IKKE_FORTROLIG_ENHET.enhetsnummer,
             arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode.behandlendeEnhetId,
         )
 
+        // Act
         stegService.håndterSøknad(
             behandling,
             RestRegistrerSøknad(
                 søknad =
                     lagSøknadDTO(
-                        SØKER_FNR,
+                        søkerFnr,
                         listOf(
-                            BARN_UTEN_DISKRESJONSKODE,
-                            BARN_MED_DISKRESJONSKODE,
+                            ugradertBarnFnr,
+                            fortroligBarnFnr,
                         ),
                     ),
                 bekreftEndringerViaFrontend = false,
             ),
         )
 
-        val arbeidsfordelingPåBehandlingEtterSøknadsregistreringMedDiskresjonskode =
-            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        // Assert
+        val arbeidsfordelingPåBehandlingEtterSøknadsregistreringMedDiskresjonskode = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(
-            FORTROLIG_ENHET,
+            FORTROLIG_ENHET.enhetsnummer,
             arbeidsfordelingPåBehandlingEtterSøknadsregistreringMedDiskresjonskode.behandlendeEnhetId,
         )
     }
 
     @Test
     fun `Skal ikke fastsette ny behandlende enhet ved registrering av søknad når enhet er manuelt satt`() {
-        val søkerAktør = personidentService.hentAktør(SØKER_FNR)
-        val fagsak =
-            fagsakService.hentEllerOpprettFagsak(
-                søkerAktør.aktivFødselsnummer(),
-            )
+        // Arrange
+        val søkerFnr = mockSøker()
+        val ugradertBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.UGRADERT)
+        mockBehandlendeEnhetForPerson(søkerFnr, IKKE_FORTROLIG_ENHET)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerFnr)
         val behandling =
             stegService.håndterNyBehandling(
-                lagNyBehandling(fagsak.id),
+                lagNyBehandling(fagsak.id, søkerFnr),
             )
 
-        val arbeidsfordelingPåBehandling =
-            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
-        assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
+        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        assertEquals(IKKE_FORTROLIG_ENHET.enhetsnummer, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         arbeidsfordelingService.manueltOppdaterBehandlendeEnhet(
             behandling,
             RestEndreBehandlendeEnhet(
-                enhetId = MANUELT_OVERSTYRT_ENHET,
+                enhetId = MANUELT_OVERSTYRT_ENHET.enhetsnummer,
                 begrunnelse = "",
             ),
         )
 
+        // Act
         stegService.håndterSøknad(
             behandling,
             RestRegistrerSøknad(
                 søknad =
                     lagSøknadDTO(
-                        SØKER_FNR,
-                        listOf(BARN_UTEN_DISKRESJONSKODE),
+                        søkerFnr,
+                        listOf(ugradertBarnFnr),
                     ),
                 bekreftEndringerViaFrontend = false,
             ),
         )
 
-        val arbeidsfordelingPåBehandlingEtterSøknadsregistrering =
-            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
-        assertEquals(MANUELT_OVERSTYRT_ENHET, arbeidsfordelingPåBehandlingEtterSøknadsregistrering.behandlendeEnhetId)
+        // Assert
+        val arbeidsfordelingPåBehandlingEtterSøknadsregistrering = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        assertEquals(MANUELT_OVERSTYRT_ENHET.enhetsnummer, arbeidsfordelingPåBehandlingEtterSøknadsregistrering.behandlendeEnhetId)
     }
 
     @Test
     fun `Skal fastsette ny behandlende enhet og oppdatere eksisterende oppgave ved registrering av søknad`() {
-        val søkerAktør = personidentService.hentAktør(SØKER_FNR)
-        val fagsak =
-            fagsakService.hentEllerOpprettFagsak(
-                søkerAktør.aktivFødselsnummer(),
-            )
+        // Arrange
+        val søkerFnr = mockSøker()
+        val fortroligBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.FORTROLIG)
+        mockBehandlendeEnhetForPerson(søkerFnr, IKKE_FORTROLIG_ENHET)
+        mockBehandlendeEnhetForPerson(fortroligBarnFnr, FORTROLIG_ENHET)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerFnr)
         val behandling =
             stegService.håndterNyBehandling(
-                lagNyBehandling(fagsak.id),
+                lagNyBehandling(fagsak.id, søkerFnr),
             )
 
-        val arbeidsfordelingPåBehandling =
-            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
-        assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
+        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        assertEquals(IKKE_FORTROLIG_ENHET.enhetsnummer, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
-        val oppgaveId = oppgaveService.opprettOppgave(behandling.id, Oppgavetype.BehandleSak, now())
+        oppgaveService.opprettOppgave(behandling.id, Oppgavetype.BehandleSak, now())
 
+        // Act
         stegService.håndterSøknad(
             behandling,
             RestRegistrerSøknad(
                 søknad =
                     lagSøknadDTO(
-                        SØKER_FNR,
-                        listOf(BARN_MED_DISKRESJONSKODE),
+                        søkerFnr,
+                        listOf(fortroligBarnFnr),
                     ),
                 bekreftEndringerViaFrontend = false,
             ),
         )
 
+        // Assert
         verify(exactly = 1) {
-            integrasjonClient.tilordneEnhetOgRessursForOppgave(any(), any())
+            integrasjonClient.tilordneEnhetOgRessursForOppgave(any(), FORTROLIG_ENHET.enhetsnummer)
         }
-
-        val arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode =
-            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(
-            FORTROLIG_ENHET,
+            FORTROLIG_ENHET.enhetsnummer,
             arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode.behandlendeEnhetId,
         )
     }
 
-    private fun lagNyBehandling(fagsakId: Long) =
-        NyBehandling(
-            kategori = BehandlingKategori.NASJONAL,
-            underkategori = BehandlingUnderkategori.ORDINÆR,
-            søkersIdent = SØKER_FNR,
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            søknadMottattDato = now(),
-            fagsakId = fagsakId,
+    private fun lagNyBehandling(
+        fagsakId: Long,
+        søkerFnr: String,
+    ) = NyBehandling(
+        kategori = BehandlingKategori.NASJONAL,
+        underkategori = BehandlingUnderkategori.ORDINÆR,
+        søkersIdent = søkerFnr,
+        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        søknadMottattDato = now(),
+        fagsakId = fagsakId,
+    )
+
+    private fun mockSøker(): String =
+        leggTilPersonInfo(
+            randomFnr(),
+            PersonInfo(
+                fødselsdato = now().minusYears(20),
+                navn = "Søker Mockesen",
+                kjønn = Kjønn.KVINNE,
+                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UGIFT)),
+                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+                bostedsadresser = søkerBostedsadresse,
+            ),
         )
 
-    val søkerAktør = randomAktør()
+    private fun mockBarnMedRelasjonOgGradering(
+        relasjonFnr: String,
+        adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING,
+    ): String {
+        val barnFnr =
+            leggTilPersonInfo(
+                randomBarnFnr(),
+                PersonInfo(
+                    fødselsdato = now().førsteDagIInneværendeMåned(),
+                    navn = "Barn Mockesen",
+                    kjønn = Kjønn.MANN,
+                    sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UGIFT)),
+                    adressebeskyttelseGradering = adressebeskyttelseGradering,
+                    bostedsadresser = søkerBostedsadresse,
+                ),
+            )
+        leggTilRelasjonIPersonInfo(barnFnr, relasjonFnr, FORELDERBARNRELASJONROLLE.MOR)
+        return barnFnr
+    }
+
+    private fun mockBehandlendeEnhetForPerson(
+        fnr: String,
+        enhet: BarnetrygdEnhet,
+    ) {
+        every { integrasjonClient.hentBehandlendeEnhet(eq(fnr)) } returns listOf(Arbeidsfordelingsenhet.opprettFra(enhet))
+    }
 
     companion object {
-        val MANUELT_OVERSTYRT_ENHET = BarnetrygdEnhet.OSLO.enhetsnummer
-        val IKKE_FORTROLIG_ENHET = BarnetrygdEnhet.DRAMMEN.enhetsnummer
-        val FORTROLIG_ENHET = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer
-        val SØKER_FNR = randomFnr()
-        val BARN_UTEN_DISKRESJONSKODE = randomFnr()
-        val BARN_MED_DISKRESJONSKODE = randomFnr()
-
-        val søkerBostedsadresse =
-            Bostedsadresse(
-                vegadresse =
-                    Vegadresse(
-                        matrikkelId = 1111,
-                        husnummer = null,
-                        husbokstav = null,
-                        bruksenhetsnummer = null,
-                        adressenavn = null,
-                        kommunenummer = null,
-                        tilleggsnavn = null,
-                        postnummer = "2222",
-                    ),
-            )
+        val MANUELT_OVERSTYRT_ENHET = BarnetrygdEnhet.OSLO
+        val IKKE_FORTROLIG_ENHET = BarnetrygdEnhet.DRAMMEN
+        val FORTROLIG_ENHET = BarnetrygdEnhet.VIKAFOSSEN
+        val søkerBostedsadresse = listOf(lagBostedsadresse())
     }
 }

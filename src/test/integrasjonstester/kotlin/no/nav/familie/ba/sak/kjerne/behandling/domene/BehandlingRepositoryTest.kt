@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
@@ -21,13 +20,7 @@ class BehandlingRepositoryTest(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val tilkjentRepository: TilkjentYtelseRepository,
-    @Autowired private val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
-    @BeforeEach
-    fun cleanUp() {
-        databaseCleanupService.truncate()
-    }
-
     @Nested
     inner class FinnSisteIverksatteBehandling {
         val tilfeldigPerson = tilfeldigPerson()

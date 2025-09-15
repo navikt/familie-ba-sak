@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -23,13 +24,15 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.Properties
 
 @Service
 class OpprettTaskService(
-    val taskRepository: TaskRepositoryWrapper,
-    val satskjøringRepository: SatskjøringRepository,
+    private val taskRepository: TaskRepositoryWrapper,
+    private val satskjøringRepository: SatskjøringRepository,
+    private val envService: EnvService,
 ) {
     fun opprettOppgaveTask(
         behandlingId: Long,
@@ -167,7 +170,11 @@ class OpprettTaskService(
                         Properties().apply {
                             this["fagsakId"] = fagsakId.toString()
                         },
-                ),
+                ).apply {
+                    if (envService.erProd()) {
+                        medTriggerTid(LocalDateTime.now().plusHours(1))
+                    }
+                },
             )
         }
     }

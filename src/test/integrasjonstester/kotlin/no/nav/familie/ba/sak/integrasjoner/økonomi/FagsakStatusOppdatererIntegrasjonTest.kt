@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -19,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
@@ -40,14 +38,6 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     private lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
-
-    @Autowired
-    private lateinit var databaseCleanupService: DatabaseCleanupService
-
-    @BeforeEach
-    fun cleanUp() {
-        databaseCleanupService.truncate()
-    }
 
     @Test
     fun `ikke oppdater status på fagsaker som er løpende og har løpende utbetalinger`() {

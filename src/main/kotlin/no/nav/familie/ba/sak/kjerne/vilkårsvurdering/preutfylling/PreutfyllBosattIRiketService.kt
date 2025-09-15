@@ -2,11 +2,9 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.tilAdresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.BostedsadresserOgDelteBosteder
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.erIFinnmarkEllerNordTroms
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -40,7 +38,7 @@ class PreutfyllBosattIRiketService(
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
             val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
-            val bostedsadresserForPerson = bostedsadresser[personResultat.aktør.aktivFødselsnummer()].tilAdresser()
+            val bostedsadresserForPerson = Adresser.opprettFra(bostedsadresser[personResultat.aktør.aktivFødselsnummer()])
 
             val bosattIRiketVilkårResultat =
                 genererBosattIRiketVilkårResultat(
@@ -59,7 +57,7 @@ class PreutfyllBosattIRiketService(
     fun genererBosattIRiketVilkårResultat(
         personResultat: PersonResultat,
         fødselsdatoForBeskjæring: LocalDate = LocalDate.MIN,
-        adresserForPerson: BostedsadresserOgDelteBosteder,
+        adresserForPerson: Adresser,
     ): Set<VilkårResultat> {
         val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(adresserForPerson)
         val erBosattIFinnmarkEllerNordTromsTidslinje = lagErBosattIFinnmarkEllerNordTromsTidslinje(adresserForPerson)
@@ -181,11 +179,9 @@ class PreutfyllBosattIRiketService(
         return erBosattINorgePeriode.omfatter(fødselsdato)
     }
 
-    private fun Adresse.erINorge(): Boolean = vegadresse != null || matrikkeladresse != null || ukjentBosted != null
+    private fun lagErBosattINorgeTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser) { it.erINorge() }
 
-    private fun lagErBosattINorgeTidslinje(adresser: BostedsadresserOgDelteBosteder): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser) { it.erINorge() }
-
-    private fun lagErBosattIFinnmarkEllerNordTromsTidslinje(adresser: BostedsadresserOgDelteBosteder): Tidslinje<Boolean> {
+    private fun lagErBosattIFinnmarkEllerNordTromsTidslinje(adresser: Adresser): Tidslinje<Boolean> {
         val bostedsadresserIFinnmarkEllerNordTromsTidslinje = lagTidslinjeForAdresser(adresser.bostedsadresser) { it.erIFinnmarkEllerNordTroms() }
         val delteBostederIFinnmarkEllerNordTromsTidslinje = lagTidslinjeForAdresser(adresser.delteBosteder) { it.erIFinnmarkEllerNordTroms() }
 
