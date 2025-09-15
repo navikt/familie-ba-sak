@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -49,7 +50,8 @@ class StønadsstatistikkServiceIntegrasjonsTest(
         )
         vedtakRepository.saveAndFlush(lagVedtak(behandling = behandling1, vedtaksdato = now()))
         val behandling = behandling1
-        tilkjentYtelseRepository.save(lagTilkjentYtelse(behandling = behandling, utbetalingsoppdrag = "Ikke-tom streng"))
+
+        tilkjentYtelseRepository.save(lagTilkjentYtelse(behandling = behandling, utbetalingsoppdrag = lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id)))
 
         // Act
         val vedtakDVHV2 = stønadsstatistikkService.hentVedtakV2(behandlingId = behandling.id)
@@ -76,7 +78,7 @@ class StønadsstatistikkServiceIntegrasjonsTest(
         )
         vedtakRepository.saveAndFlush(lagVedtak(behandling = behandling, vedtaksdato = now()))
 
-        tilkjentYtelseRepository.save(lagTilkjentYtelse(behandling = behandlingAvsluttet, utbetalingsoppdrag = "Ikke-tom streng"))
+        tilkjentYtelseRepository.save(lagTilkjentYtelse(behandling = behandlingAvsluttet, utbetalingsoppdrag = lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id)))
         tilkjentYtelseRepository.save(lagTilkjentYtelse(behandling = behandling, utbetalingsoppdrag = null))
 
         // Act

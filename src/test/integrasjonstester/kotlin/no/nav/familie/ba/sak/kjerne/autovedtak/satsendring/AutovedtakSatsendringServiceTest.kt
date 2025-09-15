@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -220,7 +221,7 @@ class AutovedtakSatsendringServiceTest(
                 behandlingSteg = StegType.BEHANDLING_AVSLUTTET,
             )
         behandling.behandlingStegTilstand.add(avsluttetSteg)
-        with(lagInitiellTilkjentYtelse(behandling, "utbetalingsoppdrag")) {
+        with(lagInitiellTilkjentYtelse(behandling, lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id))) {
             val andel =
                 lagAndelTilkjentYtelse(
                     // Tidspunkt før siste satsendring

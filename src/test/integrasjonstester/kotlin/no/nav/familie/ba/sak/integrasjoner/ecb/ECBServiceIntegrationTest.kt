@@ -40,9 +40,9 @@ class ECBServiceIntegrationTest(
             )
         every {
             ecbClient.hentValutakurs(
-                any(),
-                any(),
-                any(),
+                Frequency.Daily,
+                listOf("NOK", "EUR"),
+                valutakursDato,
             )
         } returns ecbExchangeRatesData.toExchangeRates()
 
@@ -52,6 +52,7 @@ class ECBServiceIntegrationTest(
 
         // Assert
         assertEquals(valutakurs!!.kurs, BigDecimal.valueOf(9.4567))
+
         ecbService.hentValutakurs("EUR", valutakursDato)
         verify(exactly = 1) {
             ecbClient.hentValutakurs(

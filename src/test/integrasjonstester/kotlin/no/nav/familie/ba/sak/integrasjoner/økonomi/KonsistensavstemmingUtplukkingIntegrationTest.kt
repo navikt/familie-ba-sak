@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.nyRevurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -275,7 +276,12 @@ class KonsistensavstemmingUtplukkingIntegrationTest(
         behandling = behandling,
         opprettetDato = LocalDate.now(),
         endretDato = LocalDate.now(),
-        utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null,
+        utbetalingsoppdrag =
+            if (erIverksatt) {
+                lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id)
+            } else {
+                null
+            },
     )
 
     // Kun offset og kobling til behandling/tilkjent ytelse som er relevant når man skal plukke ut til konsistensavstemming
