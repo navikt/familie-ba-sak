@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.ClockProvider
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils.skalUtledeSøknadsresultatForBehandling
@@ -26,6 +27,7 @@ class BehandlingsresultatService(
     private val kompetanseService: KompetanseService,
     private val clockProvider: ClockProvider,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     internal fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
@@ -94,6 +96,7 @@ class BehandlingsresultatService(
                     personerIBehandling = personerIBehandling,
                     personerIForrigeBehandling = personerIForrigeBehandling,
                     nåMåned = YearMonth.now(clockProvider.get()),
+                    featureToggleService = featureToggleService,
                 )
             } else {
                 Endringsresultat.INGEN_ENDRING

@@ -404,6 +404,7 @@ class CucumberMock(
             kompetanseService = kompetanseService,
             clockProvider = clockProvider,
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
+            featureToggleService = mockFeatureToggleService(),
         )
 
     val småbarnstilleggService = SmåbarnstilleggService(beregningService)

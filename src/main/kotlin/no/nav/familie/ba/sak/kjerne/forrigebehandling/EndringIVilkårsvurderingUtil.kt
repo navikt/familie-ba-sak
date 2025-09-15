@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
@@ -24,6 +26,7 @@ object EndringIVilkårsvurderingUtil {
         personIBehandling: Person?,
         personIForrigeBehandling: Person?,
         tidligsteRelevanteFomDatoForPersonIVilkårsvurdering: YearMonth,
+        featureToggleService: FeatureToggleService,
     ): Tidslinje<Boolean> {
         val tidslinjePerVilkår =
             Vilkår.entries.map { vilkår ->
@@ -40,6 +43,7 @@ object EndringIVilkårsvurderingUtil {
                         vilkår = vilkår,
                         personIBehandling = personIBehandling,
                         personIForrigeBehandling = personIForrigeBehandling,
+                        featureToggleService = featureToggleService,
                     )
                 vilkårTidslinje.beskjærFraOgMed(fraOgMed = tidligsteRelevanteFomDatoForPersonIVilkårsvurdering.førsteDagIInneværendeMåned())
             }
@@ -61,6 +65,7 @@ object EndringIVilkårsvurderingUtil {
         vilkår: Vilkår,
         personIBehandling: Person?,
         personIForrigeBehandling: Person?,
+        featureToggleService: FeatureToggleService,
     ): Tidslinje<Boolean> {
         val nåværendeVilkårResultatTidslinje =
             nåværendeOppfylteVilkårResultaterForPerson
@@ -83,7 +88,11 @@ object EndringIVilkårsvurderingUtil {
 
                 (forrige.obligatoriskUtdypendeVilkårsvurderingErSatt() && erEndringerIUtdypendeVilkårsvurdering) ||
                     erEndringerIRegelverk ||
-                    (erVilkårSomErSplittetOpp && !erKunEndringIFinnmarkstillegg)
+                    if (featureToggleService.isEnabled(FeatureToggle.SLÅ_SAMMEN_FINNMARK_ELLER_SVALBARD)) {
+                        (erVilkårSomErSplittetOpp && !erKunEndringIFinnmarkstillegg)
+                    } else {
+                        erVilkårSomErSplittetOpp
+                    }
             }
 
         return endringIVilkårResultat
