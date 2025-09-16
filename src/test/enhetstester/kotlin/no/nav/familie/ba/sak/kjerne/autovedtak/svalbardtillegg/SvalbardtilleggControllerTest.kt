@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -45,7 +45,7 @@ class SvalbardtilleggControllerTest {
 
     private val ident = randomFnr()
     private val personIdent = PersonIdent(ident)
-    private val aktør = tilAktør(ident)
+    private val aktør = lagAktør(ident)
 
     @BeforeEach
     fun setUp() {
