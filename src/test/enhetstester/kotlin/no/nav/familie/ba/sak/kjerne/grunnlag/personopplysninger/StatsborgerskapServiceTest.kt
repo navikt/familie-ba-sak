@@ -4,6 +4,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnNåværendeMedlemskap
@@ -21,12 +22,13 @@ import java.time.LocalDate
 
 internal class StatsborgerskapServiceTest {
     private val integrasjonClient = mockk<IntegrasjonClient>()
+    private val kodeverkService = KodeverkService(integrasjonClient)
 
     private lateinit var statsborgerskapService: StatsborgerskapService
 
     @BeforeEach
     fun setUp() {
-        statsborgerskapService = StatsborgerskapService(integrasjonClient)
+        statsborgerskapService = StatsborgerskapService(integrasjonClient, kodeverkService)
         IntegrasjonClientMock.initEuKodeverk(integrasjonClient)
     }
 

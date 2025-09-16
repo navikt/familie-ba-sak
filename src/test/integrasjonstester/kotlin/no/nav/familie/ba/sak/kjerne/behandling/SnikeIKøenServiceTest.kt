@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import java.time.LocalDate
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -34,7 +36,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.LocalDate
 
 class SnikeIKøenServiceTest(
     @Autowired private val fagsakService: FagsakService,
@@ -145,7 +146,7 @@ class SnikeIKøenServiceTest(
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling1.id, StegType.VILKÅRSVURDERING)
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling1.id, StegType.VURDER_TILBAKEKREVING)
 
-        val vedtak = vedtakRepository.saveAndFlush(lagVedtak(id = 0, behandling = behandling1))
+        val vedtak = vedtakRepository.saveAndFlush(lagVedtak(behandling = behandling1))
         vedtaksperiodeHentOgPersisterService.lagre(
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
@@ -303,7 +304,7 @@ class SnikeIKøenServiceTest(
     }
 
     private fun lagUtbetalingsoppdragOgAvslutt(behandling: Behandling) {
-        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling, utbetalingsoppdrag = "utbetalingsoppdrag")
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling, utbetalingsoppdrag = lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id))
         tilkjentYtelseRepository.saveAndFlush(tilkjentYtelse)
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.BEHANDLING_AVSLUTTET)
         behandlingRepository.finnBehandling(behandling.id).let { behandlingFraDb ->

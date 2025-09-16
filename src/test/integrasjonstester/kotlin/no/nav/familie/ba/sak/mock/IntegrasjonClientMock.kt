@@ -31,7 +31,9 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.organisasjon.Gyldighetsperiode
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
+import no.nav.familie.kontrakter.felles.organisasjon.OrganisasjonAdresse
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -177,6 +179,16 @@ class IntegrasjonClientMock {
                 Organisasjon(
                     "998765432",
                     "Testinstitusjon",
+                    adresse =
+                        OrganisasjonAdresse(
+                            type = "Forretningsadresse",
+                            adresselinje1 = "Fyrstikkalleen 1",
+                            adresselinje2 = null,
+                            adresselinje3 = "Avd BAKS",
+                            postnummer = "0661",
+                            kommunenummer = "0301",
+                            gyldighetsperiode = Gyldighetsperiode(LocalDate.of(2020, 1, 1), null),
+                        ),
                 )
             }
 

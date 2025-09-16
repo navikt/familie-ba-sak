@@ -29,7 +29,7 @@ class VedtaksperiodeRepositoryTest(
             val søker = aktørIdRepository.save(randomAktør())
             val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
             val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak))
-            val vedtak = vedtakRepository.save(lagVedtak(behandling = behandling, id = 0))
+            val vedtak = vedtakRepository.save(lagVedtak(behandling = behandling))
             val lagVedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
             lagVedtaksperiodeMedBegrunnelser.begrunnelser.clear()
             val vedtaksperiode = vedtaksperiodeRepository.save(lagVedtaksperiodeMedBegrunnelser)
