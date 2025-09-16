@@ -83,7 +83,7 @@ object EndringIVilkårsvurderingUtil {
                 val erEndringerIRegelverk = nåværende.vurderesEtter != forrige.vurderesEtter
                 val erVilkårSomErSplittetOpp = nåværende.periodeFom != forrige.periodeFom
 
-                val erEndringIFinnmarkstillegg = nåværende.finnmarkEllerSvalbardVilkår() != forrige.finnmarkEllerSvalbardVilkår()
+                val erEndringIFinnmarkstillegg = nåværende.finnmarkOgSvalbardUtdypendeVilkårsvurdering() != forrige.finnmarkOgSvalbardUtdypendeVilkårsvurdering()
                 val erKunEndringIFinnmarkstillegg = erEndringIFinnmarkstillegg && !erEndringerIUtdypendeVilkårsvurdering && !erEndringerIRegelverk
 
                 (forrige.obligatoriskUtdypendeVilkårsvurderingErSatt() && erEndringerIUtdypendeVilkårsvurdering) ||
@@ -102,7 +102,7 @@ object EndringIVilkårsvurderingUtil {
 
     private fun VilkårResultat.relevanteUtdypendeVilkårsvurderinger(): Set<UtdypendeVilkårsvurdering> = utdypendeVilkårsvurderinger.filterNot { it in setOf(BOSATT_I_FINNMARK_NORD_TROMS, BOSATT_PÅ_SVALBARD) }.toSet()
 
-    private fun VilkårResultat.finnmarkEllerSvalbardVilkår(): Set<UtdypendeVilkårsvurdering> = utdypendeVilkårsvurderinger.filter { it in setOf(BOSATT_I_FINNMARK_NORD_TROMS, BOSATT_PÅ_SVALBARD) }.toSet()
+    private fun VilkårResultat.finnmarkOgSvalbardUtdypendeVilkårsvurdering(): Set<UtdypendeVilkårsvurdering> = utdypendeVilkårsvurderinger.filter { it in setOf(BOSATT_I_FINNMARK_NORD_TROMS, BOSATT_PÅ_SVALBARD) }.toSet()
 
     private fun VilkårResultat.utdypendeVilkårsvurderingErObligatorisk(): Boolean =
         if (this.vurderesEtter == Regelverk.NASJONALE_REGLER) {

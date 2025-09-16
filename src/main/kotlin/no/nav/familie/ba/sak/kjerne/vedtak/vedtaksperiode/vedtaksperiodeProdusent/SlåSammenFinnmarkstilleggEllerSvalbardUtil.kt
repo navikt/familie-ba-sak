@@ -49,21 +49,21 @@ private fun skalSlåsSammen(
         vilkårResultaterForrigePeriode.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET }
     val bosattIRiketVilkårDennePerioden = vilkårResultaterDennePerioden.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET }
 
-    val aktørTilHarUtdypendeVilkårForrigePeriode = hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(bosattIRiketVilkårForrigePeriode)
-    val aktørTilHarUtdypendeVilkårDennePerioden = hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(bosattIRiketVilkårDennePerioden)
+    val aktørTilHarUtdypendeVilkårSomGirTilleggForrigePeriode = hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(bosattIRiketVilkårForrigePeriode)
+    val aktørTilHarUtdypendeVilkårSomGirTilleggDennePerioden = hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(bosattIRiketVilkårDennePerioden)
 
     val erAndreEndringerIVilkårResultat =
-        endringIAndreTingIVilkårResultater(bosattIRiketVilkårForrigePeriode, bosattIRiketVilkårDennePerioden)
+        bosattIRiketVilkårDennePerioden.erLikUtenomFinnmarksOgSvalbardTillegg(bosattIRiketVilkårForrigePeriode)
 
-    val erTilleggInnvilgetForBarnOgSøker = aktørTilHarUtdypendeVilkårDennePerioden.all { it.value } == true
+    val erTilleggInnvilgetForBarnOgSøker = aktørTilHarUtdypendeVilkårSomGirTilleggDennePerioden.all { it.value }
 
     if (erAndreEndringerIVilkårResultat || erTilleggInnvilgetForBarnOgSøker) {
         return false
     }
 
-    return aktørTilHarUtdypendeVilkårForrigePeriode.any { (aktørForrigePeriode, erUtdypendeVilkårInnvilgetForrigePeriode) ->
+    return aktørTilHarUtdypendeVilkårSomGirTilleggForrigePeriode.any { (aktør, erUtdypendeVilkårInnvilgetForrigePeriode) ->
         val erEndringIUtdypendeVilkårSomGirTilleggForAktør =
-            aktørTilHarUtdypendeVilkårDennePerioden[aktørForrigePeriode] != erUtdypendeVilkårInnvilgetForrigePeriode
+            aktørTilHarUtdypendeVilkårSomGirTilleggDennePerioden[aktør] != erUtdypendeVilkårInnvilgetForrigePeriode
 
         erEndringIUtdypendeVilkårSomGirTilleggForAktør
     }
@@ -73,20 +73,19 @@ private fun hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(vilkårResulta
     val aktørTilVilkårsResultatListe =
         vilkårResultater.groupBy { it.personResultat?.aktør ?: throw Feil("VilkårResultat ${it.id} har ikke personResultat") }
     val aktørTilHarUtdypendeVilkårSomGirTilleggIPeriode =
-        aktørTilVilkårsResultatListe.mapValues { (_, value) ->
-            value
+        aktørTilVilkårsResultatListe.mapValues { (_, vilkårResultater) ->
+            vilkårResultater
                 .flatMap { it.utdypendeVilkårsvurderinger }
                 .any { it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG }
         }
     return aktørTilHarUtdypendeVilkårSomGirTilleggIPeriode
 }
 
-private fun endringIAndreTingIVilkårResultater(
-    bosattIRiketVilkårForrigePeriode: List<VilkårResultat>?,
-    bosattIRiketVilkårDennePerioden: List<VilkårResultat>?,
+private fun List<VilkårResultat>.erLikUtenomFinnmarksOgSvalbardTillegg(
+    bosattIRiketVilkårForrigePeriode: List<VilkårResultat>,
 ): Boolean {
     val vilkårResultatForrigePeriode =
-        bosattIRiketVilkårForrigePeriode?.map { vilkårResultat ->
+        bosattIRiketVilkårForrigePeriode.map { vilkårResultat ->
             vilkårResultat.copy(
                 utdypendeVilkårsvurderinger =
                     vilkårResultat.utdypendeVilkårsvurderinger
@@ -97,7 +96,7 @@ private fun endringIAndreTingIVilkårResultater(
         }
 
     val vilkårResultatDennePerioden =
-        bosattIRiketVilkårDennePerioden?.map { vilkårResultat ->
+        this.map { vilkårResultat ->
             vilkårResultat.copy(
                 utdypendeVilkårsvurderinger =
                     vilkårResultat.utdypendeVilkårsvurderinger
