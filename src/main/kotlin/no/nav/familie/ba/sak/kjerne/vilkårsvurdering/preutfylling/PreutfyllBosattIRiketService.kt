@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -73,13 +74,24 @@ class PreutfyllBosattIRiketService(
     ): Set<VilkårResultat> {
         val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(adresserForPerson)
         val erBosattIFinnmarkEllerNordTromsTidslinje = lagErBosattIFinnmarkEllerNordTromsTidslinje(adresserForPerson)
+        val erOppholdsadressePåSvalbardTidslinje = lagErBosattPåSvalbardTidslinje(adresserForPerson)
         val erNordiskStatsborgerTidslinje = pdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat)
 
+        val erNordiskStatsborgerOgBosattINorgeTidslinje =
+            erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeTidslinje) { erNordiskStatsborger, erBosattINorge ->
+                erNordiskStatsborger == true && erBosattINorge == true
+            }
         val erBosattOgHarNordiskStatsborgerskapTidslinje =
-            erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeTidslinje, erBosattIFinnmarkEllerNordTromsTidslinje) { erNordisk, erBosattINorge, erBosattIFinnmarkEllerNordTroms ->
-                val nordiskOgBosatt = erNordisk == true && erBosattINorge == true
-                val utdypendeVilkårsvurderinger = if (erBosattIFinnmarkEllerNordTroms == true) listOf(BOSATT_I_FINNMARK_NORD_TROMS) else emptyList()
-                if (nordiskOgBosatt) {
+            erNordiskStatsborgerOgBosattINorgeTidslinje.kombinerMed(erBosattIFinnmarkEllerNordTromsTidslinje, erOppholdsadressePåSvalbardTidslinje) { erNordiskStatsborgerOgBosattINorge, erBosattIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
+                val utdypendeVilkårsvurderinger =
+                    if (erOppholdsadressePåSvalbard == true) {
+                        listOf(BOSATT_PÅ_SVALBARD)
+                    } else if (erBosattIFinnmarkEllerNordTroms == true) {
+                        listOf(BOSATT_I_FINNMARK_NORD_TROMS)
+                    } else {
+                        emptyList()
+                    }
+                if (erNordiskStatsborgerOgBosattINorge == true) {
                     OppfyltDelvilkår(begrunnelse = "- Norsk/nordisk statsborgerskap", utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger)
                 } else {
                     IkkeOppfyltDelvilkår
@@ -202,6 +214,10 @@ class PreutfyllBosattIRiketService(
             .kombinerMed(delteBostederIFinnmarkEllerNordTromsTidslinje) { bostedsadresseIFinnmarkEllerNordTroms, deltBostedIFinnmarkEllerNordTroms ->
                 bostedsadresseIFinnmarkEllerNordTroms == true || deltBostedIFinnmarkEllerNordTroms == true
             }
+    }
+
+    private fun lagErBosattPåSvalbardTidslinje(adresser: Adresser): Tidslinje<Boolean> {
+        return lagTidslinjeForAdresser(adresser.oppholdsadresse) { it.erPåSvalbard() }
     }
 
     private fun lagTidslinjeForAdresser(
