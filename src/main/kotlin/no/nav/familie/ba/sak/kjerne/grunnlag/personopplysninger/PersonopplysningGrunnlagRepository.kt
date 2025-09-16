@@ -7,6 +7,9 @@ interface PersonopplysningGrunnlagRepository : JpaRepository<PersonopplysningGru
     @Query("SELECT gr FROM PersonopplysningGrunnlag gr WHERE gr.behandlingId = :behandlingId AND gr.aktiv = true")
     fun findByBehandlingAndAktiv(behandlingId: Long): PersonopplysningGrunnlag?
 
+    @Query("SELECT gr FROM PersonopplysningGrunnlag gr WHERE gr.behandlingId in :behandlingIder AND gr.aktiv = true")
+    fun hentAktivForBehandlinger(behandlingIder: Collection<Long>): List<PersonopplysningGrunnlag>
+
     @Query(
         """
         SELECT new no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel(p.type, a, p.fødselsdato, d.dødsfallDato, p.målform)
