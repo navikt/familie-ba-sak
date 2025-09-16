@@ -396,7 +396,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endringsresultat =
             utledEndringsresultat(
-                behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD),
+                behandling = lagBehandling(årsak = BehandlingÅrsak.FINNMARKSTILLEGG),
                 nåværendeAndeler = emptyList(),
                 forrigeAndeler = emptyList(),
                 personerFremstiltKravFor = emptyList(),
@@ -414,7 +414,7 @@ class BehandlingsresultatEndringUtilsTest {
                 featureToggleService = mockFeatureToggleService(),
             )
 
-        assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
+        assertThat(endringsresultat, Is(Endringsresultat.INGEN_ENDRING))
     }
 
     @Test
