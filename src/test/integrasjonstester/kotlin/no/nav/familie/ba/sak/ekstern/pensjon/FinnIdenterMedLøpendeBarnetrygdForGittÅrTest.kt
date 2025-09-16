@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.datagenerator.årMnd
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -53,7 +54,7 @@ class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest : AbstractSpringIntegration
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktør.aktivFødselsnummer())
         with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))) {
             val behandling = this
-            with(lagInitiellTilkjentYtelse(behandling, "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(behandling, lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id))) {
                 val andel =
                     lagAndelTilkjentYtelse(
                         årMnd("2019-04"),
@@ -85,7 +86,7 @@ class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest : AbstractSpringIntegration
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktør.aktivFødselsnummer())
         with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))) {
             val behandling = this
-            with(lagInitiellTilkjentYtelse(behandling, "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(behandling, lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id))) {
                 val andel =
                     lagAndelTilkjentYtelse(
                         årMnd("2019-04"),

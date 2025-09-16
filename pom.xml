@@ -25,10 +25,10 @@
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20250915083819_745c62b</prosessering.version>
         <felles.version>3.20250915092837_153983f</felles.version>
-        <eksterne-kontrakter-bisys.version>2.0_20250915094028_a196955</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20250915100834_2f2f765</felles-kontrakter.version>
-        <familie.kontrakter.saksstatistikk>2.0_20250915094028_a196955</familie.kontrakter.saksstatistikk>
-        <familie.kontrakter.stønadsstatistikk>2.0_20250915094028_a196955</familie.kontrakter.stønadsstatistikk>
+        <eksterne-kontrakter-bisys.version>2.0_20250915155846_3e7ecd7</eksterne-kontrakter-bisys.version>
+        <felles-kontrakter.version>3.0_20250915121657_48d7e</felles-kontrakter.version>
+        <familie.kontrakter.saksstatistikk>2.0_20250915155846_3e7ecd7</familie.kontrakter.saksstatistikk>
+        <familie.kontrakter.stønadsstatistikk>2.0_20250915155846_3e7ecd7</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250804104526_5648100</utbetalingsgenerator.version>
         <cucumber.version>7.23.0</cucumber.version>
         <mockk.version>1.14.5</mockk.version>

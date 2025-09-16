@@ -54,6 +54,7 @@ class PersongrunnlagServiceTest {
                 arbeidsforholdService = mockk(),
                 vilkårsvurderingService = vilkårsvurderingService,
                 integrasjonClient = mockk(),
+                kodeverkService = mockk(),
             ),
         )
 

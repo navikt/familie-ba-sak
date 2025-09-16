@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.legg
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -145,7 +146,7 @@ class SnikeIKøenServiceTest(
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling1.id, StegType.VILKÅRSVURDERING)
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling1.id, StegType.VURDER_TILBAKEKREVING)
 
-        val vedtak = vedtakRepository.saveAndFlush(lagVedtak(id = 0, behandling = behandling1))
+        val vedtak = vedtakRepository.saveAndFlush(lagVedtak(behandling = behandling1))
         vedtaksperiodeHentOgPersisterService.lagre(
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
@@ -303,7 +304,7 @@ class SnikeIKøenServiceTest(
     }
 
     private fun lagUtbetalingsoppdragOgAvslutt(behandling: Behandling) {
-        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling, utbetalingsoppdrag = "utbetalingsoppdrag")
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling, utbetalingsoppdrag = lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id))
         tilkjentYtelseRepository.saveAndFlush(tilkjentYtelse)
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.BEHANDLING_AVSLUTTET)
         behandlingRepository.finnBehandling(behandling.id).let { behandlingFraDb ->
