@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
@@ -1228,7 +1228,7 @@ internal class UtvidetBarnetrygdTest {
         val fom: LocalDate,
         val tom: LocalDate,
         val ident: String = randomFnr(),
-        val aktør: Aktør = tilAktør(ident),
+        val aktør: Aktør = lagAktør(ident),
         val rolle: PersonType = PersonType.SØKER,
         val erUtvidet: Boolean = false,
         val erDeltBosted: Boolean = false,
@@ -1278,7 +1278,7 @@ internal class UtvidetBarnetrygdTest {
     ): List<Person> =
         this.map {
             Person(
-                aktør = tilAktør(it.ident),
+                aktør = lagAktør(it.ident),
                 type = it.rolle,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fødselsdato = fødselsdato,

@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.task
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
+import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat

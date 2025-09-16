@@ -261,6 +261,7 @@ class CucumberMock(
             kodeverkService = mockk(),
             valutakursRepository = valutakursRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+            featureToggleService = featureToggleService,
         )
 
     val behandlingService =
@@ -403,6 +404,7 @@ class CucumberMock(
             kompetanseService = kompetanseService,
             clockProvider = clockProvider,
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
+            featureToggleService = mockFeatureToggleService(),
         )
 
     val småbarnstilleggService = SmåbarnstilleggService(beregningService)

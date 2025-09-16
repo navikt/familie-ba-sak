@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.common.validerBehandlingIkkeErAvsluttet
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
@@ -87,6 +88,7 @@ class VedtaksperiodeService(
     private val kodeverkService: KodeverkService,
     private val valutakursRepository: ValutakursRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -120,6 +122,7 @@ class VedtaksperiodeService(
         return utledEndringstidspunkt(
             behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
             behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
+            featureToggleService = featureToggleService,
         )
     }
 
@@ -317,6 +320,7 @@ class VedtaksperiodeService(
             grunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
             vedtak = vedtak,
             nåDato = LocalDate.now(),
+            featureToggleService = featureToggleService,
         )
     }
 

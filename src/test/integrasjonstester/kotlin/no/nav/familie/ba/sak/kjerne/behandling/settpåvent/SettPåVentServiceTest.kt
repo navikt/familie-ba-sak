@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
+import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService

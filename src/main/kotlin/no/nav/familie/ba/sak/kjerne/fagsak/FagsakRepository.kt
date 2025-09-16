@@ -111,6 +111,25 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
 
     @Query(
         value = """
+            SELECT f.id
+            FROM   Fagsak f
+            WHERE  NOT EXISTS (
+                SELECT 1
+                FROM   svalbardtillegg_kjoering
+                WHERE  fk_fagsak_id = f.id
+            )
+            AND f.status = 'LØPENDE'
+            AND f.arkivert = false
+            AND f.type IN ('NORMAL', 'BARN_ENSLIG_MINDREÅRIG')
+            """,
+        nativeQuery = true,
+    )
+    fun finnLøpendeFagsakerForSvalbardtilleggKjøring(
+        page: Pageable,
+    ): Page<Long>
+
+    @Query(
+        value = """
             WITH sisteiverksatte AS (
                 SELECT DISTINCT ON (b.fk_fagsak_id) b.id, b.fk_fagsak_id, stonad_tom
                  FROM behandling b

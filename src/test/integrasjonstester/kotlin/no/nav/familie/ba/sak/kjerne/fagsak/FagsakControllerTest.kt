@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
@@ -67,7 +67,7 @@ class FagsakControllerTest(
         val fnr = randomFnr()
 
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
-        val fagsak = fagsakService.hentNormalFagsak(tilAktør(fnr))
+        val fagsak = fagsakService.hentNormalFagsak(lagAktør(fnr))
         assertEquals(fnr, fagsak?.aktør?.aktivFødselsnummer())
         assertEquals(FagsakType.NORMAL, fagsak?.type)
         assertNull(fagsak?.institusjon)
@@ -83,7 +83,7 @@ class FagsakControllerTest(
 
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr, fagsakType = FagsakType.SKJERMET_BARN, skjermetBarnSøker = skjermetBarnSøker))
 
-        val fagsak = fagsakService.hentFagsakPåPerson(tilAktør(fnr), FagsakType.SKJERMET_BARN)
+        val fagsak = fagsakService.hentFagsakPåPerson(lagAktør(fnr), FagsakType.SKJERMET_BARN)
 
         assertThat(fnr).isEqualTo(fagsak?.aktør?.aktivFødselsnummer())
         assertThat(fagsak?.type).isEqualTo(FagsakType.SKJERMET_BARN)
@@ -109,7 +109,7 @@ class FagsakControllerTest(
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
-        assertEquals(fnr, fagsakService.hentNormalFagsak(tilAktør(fnr))?.aktør?.aktivFødselsnummer())
+        assertEquals(fnr, fagsakService.hentNormalFagsak(lagAktør(fnr))?.aktør?.aktivFødselsnummer())
 
         val eksisterendeRestFagsak =
             fagsakController.hentEllerOpprettFagsak(
@@ -182,7 +182,7 @@ class FagsakControllerTest(
                     ),
                 )
             }
-        val fagsaker = fagsakService.hentMinimalFagsakerForPerson(tilAktør(fnr))
+        val fagsaker = fagsakService.hentMinimalFagsakerForPerson(lagAktør(fnr))
         assertThat(fagsaker.data!!).isEmpty()
         assertThat(exception.message).isEqualTo("Institusjon mangler for fagsaktype institusjon.")
     }
@@ -200,7 +200,7 @@ class FagsakControllerTest(
                 institusjon = RestInstitusjon(orgNrNav, "tss-id"),
             ),
         )
-        val fagsakerRessurs = fagsakService.hentMinimalFagsakerForPerson(tilAktør(fnr))
+        val fagsakerRessurs = fagsakService.hentMinimalFagsakerForPerson(lagAktør(fnr))
         assert(fagsakerRessurs.status == Ressurs.Status.SUKSESS)
         val fagsaker = fagsakerRessurs.data!!
         assert(fagsaker.isNotEmpty()) { "Fagsak skulle ha blitt opprettet" }

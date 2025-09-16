@@ -1,20 +1,23 @@
 package no.nav.familie.ba.sak.config
 
-import io.mockk.every
 import io.mockk.isMockKMock
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.LocalDateService
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClientMock
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
+import no.nav.familie.ba.sak.mock.EfSakRestClientMock
+import no.nav.familie.ba.sak.mock.IntegrasjonClientMock
+import no.nav.familie.ba.sak.mock.LocalDateServiceTestConfig
+import no.nav.familie.ba.sak.mock.TilbakekrevingKlientTestConfig
+import no.nav.familie.ba.sak.mock.ValutakursRestClientMock
+import no.nav.familie.ba.sak.mock.ØkonomiTestConfig
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.TaskRepositoryTestConfig
 import no.nav.familie.valutakurs.ValutakursRestClient
@@ -23,16 +26,9 @@ import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.CacheManager
-import org.springframework.context.ConfigurableApplicationContext
 import java.util.UUID
 
 abstract class AbstractMockkSpringRunner {
-    /**
-     * Tjenester vi mocker ved bruk av every
-     */
-    @Autowired
-    private lateinit var mockPersonopplysningerService: PersonopplysningerService
-
     @Autowired
     private lateinit var pdlIdentRestClient: PdlIdentRestClient
 
@@ -52,9 +48,6 @@ abstract class AbstractMockkSpringRunner {
     private lateinit var mockØkonomiKlient: ØkonomiKlient
 
     @Autowired
-    private lateinit var mockFeatureToggleService: FeatureToggleService
-
-    @Autowired
     private lateinit var mockTilbakekrevingKlient: TilbakekrevingKlient
 
     @Autowired
@@ -68,9 +61,6 @@ abstract class AbstractMockkSpringRunner {
 
     @Autowired
     private lateinit var mockOpprettTaskService: OpprettTaskService
-
-    @Autowired
-    private lateinit var applicationContext: ConfigurableApplicationContext
 
     /**
      * Cachemanagere
@@ -92,20 +82,8 @@ abstract class AbstractMockkSpringRunner {
         clearMocks()
     }
 
-    fun settToggleMock(
-        toggle: FeatureToggle,
-        value: Boolean,
-    ) {
-        every { mockFeatureToggleService.isEnabled(toggle) } returns value
-        every { mockFeatureToggleService.isEnabled(toggle = toggle, behandlingId = any<Long>()) } returns value
-        every { mockFeatureToggleService.isEnabled(toggle = toggle, defaultValue = any<Boolean>()) } returns value
-    }
-
     private fun clearMocks() {
         unmockkAll()
-        if (isMockKMock(mockPersonopplysningerService)) {
-            ClientMocks.clearPdlMocks(mockPersonopplysningerService)
-        }
 
         val fakePdlIdentRestClient = pdlIdentRestClient as? FakePdlIdentRestClient
         fakePdlIdentRestClient?.reset()
@@ -117,10 +95,6 @@ abstract class AbstractMockkSpringRunner {
         IntegrasjonClientMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(
             mockFamilieIntegrasjonerTilgangskontrollClient,
         )
-
-        if (isMockKMock(mockFeatureToggleService)) {
-            ClientMocks.clearFeatureToggleMocks(mockFeatureToggleService)
-        }
 
         if (isMockKMock(mockEfSakRestClient)) {
             EfSakRestClientMock.clearEfSakRestMocks(mockEfSakRestClient)

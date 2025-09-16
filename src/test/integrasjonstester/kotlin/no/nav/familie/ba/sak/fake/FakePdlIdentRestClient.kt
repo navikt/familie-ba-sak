@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.config
+package no.nav.familie.ba.sak.fake
 
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient

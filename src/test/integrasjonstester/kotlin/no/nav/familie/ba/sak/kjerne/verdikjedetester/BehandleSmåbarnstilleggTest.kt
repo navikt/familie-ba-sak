@@ -6,7 +6,6 @@ import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.EfSakRestClientMock
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -38,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
+import no.nav.familie.ba.sak.mock.EfSakRestClientMock
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.ba.sak.util.ordinærSatsNesteMånedTilTester

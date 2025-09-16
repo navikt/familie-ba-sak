@@ -28,6 +28,45 @@ class BehandlingHentOgPersisterServiceTest {
         )
 
     @Nested
+    inner class HentSisteBehandlingSomErIverksattForFagsaker {
+        @Test
+        fun `skal hente siste behandling som er iverksatt per fagsak`() {
+            // Arrange
+            val fagsak1 = lagFagsak(id = 1)
+            val fagsak2 = lagFagsak(id = 2)
+            val fagsaker = setOf(fagsak1.id, fagsak2.id)
+
+            val behandling1 = lagBehandling(fagsak = fagsak1)
+            val behandling2 = lagBehandling(fagsak = fagsak2)
+
+            every { behandlingRepository.finnSisteIverksatteBehandlingForFagsaker(fagsaker) } returns listOf(behandling1, behandling2)
+
+            // Act
+            val iverksattBehandlingPerFagsak = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsaker)
+
+            // Assert
+            assertThat(iverksattBehandlingPerFagsak).hasSize(2)
+            assertThat(iverksattBehandlingPerFagsak).containsKeys(fagsak1.id, fagsak2.id)
+            assertThat(iverksattBehandlingPerFagsak[fagsak1.id]).isEqualTo(behandling1)
+            assertThat(iverksattBehandlingPerFagsak[fagsak2.id]).isEqualTo(behandling2)
+        }
+
+        @Test
+        fun `skal returnere et tomt map hvis en tom collection av fagsakIder blir sendt inn`() {
+            // Arrange
+            val fagsaker = emptySet<Long>()
+
+            every { behandlingRepository.finnSisteIverksatteBehandlingForFagsaker(fagsaker) } returns emptyList()
+
+            // Act
+            val iverksattBehandlingPerFagsak = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsaker)
+
+            // Assert
+            assertThat(iverksattBehandlingPerFagsak).isEmpty()
+        }
+    }
+
+    @Nested
     inner class HentVisningsbehandlinger {
         @Test
         fun `skal hente visningsbehandlinger`() {
