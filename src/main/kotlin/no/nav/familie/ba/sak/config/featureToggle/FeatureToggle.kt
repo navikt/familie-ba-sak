@@ -12,6 +12,7 @@ enum class FeatureToggle(
     KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER("familie-ba-sak.kan-opprette-og-endre-sammensatte-kontrollsaker"),
     SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA("familie-ba-sak.infotrygd-replika-sak-aktiv"),
     STONADSSTATISTIKK_FORTSATT_INNVILGET("familie-ba-sak.stonadsstatistikk-fortsatt-innvilget"),
+    SLÅ_SAMMEN_FINNMARK_ELLER_SVALBARD("familie-ba-sak.sla-sammen-finnmark-eller-svalbard"),
 
     KAN_OPPRETTE_REVURDERING_MED_ÅRSAK_IVERKSETTE_KA_VEDTAK("familie-ba-sak.kan-opprette-revurdering-med-aarsak-iverksette-ka-vedtak"),
     PREUTFYLLING_VILKÅR("familie-ba-sak.preutfylling-vilkaar"),

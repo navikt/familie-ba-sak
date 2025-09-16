@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProduse
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -97,6 +99,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
 
     fun utledGrunnlagTidslinjePerPerson(
         skalSplittePåValutakursendringer: Boolean = true,
+        featureToggleService: FeatureToggleService,
     ): Map<AktørOgRolleBegrunnelseGrunnlag, GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag> {
         val søker = persongrunnlag.søker
         val ordinæreVilkårForSøkerForskjøvetTidslinje =
@@ -109,8 +112,8 @@ data class BehandlingsGrunnlagForVedtaksperioder(
             if (behandling.fagsak.type.erBarnSøker()) {
                 personResultater.single().splittOppVilkårForBarnOgSøkerRolle()
             } else {
-                personResultater.map {
-                    Pair(persongrunnlag.personer.single { person -> it.aktør == person.aktør }.type, it)
+                personResultater.map { personResultat ->
+                    Pair(persongrunnlag.personer.single { person -> personResultat.aktør == person.aktør }.type, personResultat)
                 }
             }
 
@@ -127,14 +130,21 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                     )
 
                 val forskjøvedeVilkårResultaterForPersonsAndeler: Tidslinje<List<VilkårResultat>> =
-                    vilkårResultaterUtenGenerelleAvslag.hentForskjøvedeVilkårResultaterForPersonsAndelerTidslinje(
-                        person = person,
-                        erMinstEttBarnMedUtbetalingTidslinje = erMinstEttBarnMedUtbetalingTidslinje,
-                        ordinæreVilkårForSøkerTidslinje = ordinæreVilkårForSøkerForskjøvetTidslinje,
-                        fagsakType = behandling.fagsak.type,
-                        vilkårRolle = vilkårRolle,
-                        bareSøkerOgUregistrertBarn = bareSøkerOgUregistrertBarn,
-                    )
+                    vilkårResultaterUtenGenerelleAvslag
+                        .hentForskjøvedeVilkårResultaterForPersonsAndelerTidslinje(
+                            person = person,
+                            erMinstEttBarnMedUtbetalingTidslinje = erMinstEttBarnMedUtbetalingTidslinje,
+                            ordinæreVilkårForSøkerTidslinje = ordinæreVilkårForSøkerForskjøvetTidslinje,
+                            fagsakType = behandling.fagsak.type,
+                            vilkårRolle = vilkårRolle,
+                            bareSøkerOgUregistrertBarn = bareSøkerOgUregistrertBarn,
+                        ).run {
+                            if (featureToggleService.isEnabled(FeatureToggle.SLÅ_SAMMEN_FINNMARK_ELLER_SVALBARD)) {
+                                this.slåSammenSplitterPåUtdypendeVilkår()
+                            } else {
+                                this
+                            }
+                        }
 
                 AktørOgRolleBegrunnelseGrunnlag(aktør, vilkårRolle) to
                     GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag(

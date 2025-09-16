@@ -66,6 +66,7 @@ class VedtaksperiodeServiceTest {
                 kodeverkService = KodeverkService(integrasjonClient = integrasjonClient),
                 valutakursRepository = mockk(),
                 utenlandskPeriodebeløpRepository = mockk(),
+                featureToggleService = mockk(),
             ),
         )
 

@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.logger
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AktørOgRolleBegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksobjekt
@@ -22,19 +23,20 @@ import java.time.LocalDate
 fun utledEndringstidspunkt(
     behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
     behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
+    featureToggleService: FeatureToggleService,
 ): LocalDate {
     val grunnlagTidslinjePerPerson =
         behandlingsGrunnlagForVedtaksperioder
             .copy(
                 personResultater = behandlingsGrunnlagForVedtaksperioder.personResultater.beholdKunOppfylteVilkårResultater(),
-            ).utledGrunnlagTidslinjePerPerson()
+            ).utledGrunnlagTidslinjePerPerson(featureToggleService = featureToggleService)
             .mapValues { it.value.vedtaksperiodeGrunnlagForPerson }
 
     val grunnlagTidslinjePerPersonForrigeBehandling =
         behandlingsGrunnlagForVedtaksperioderForrigeBehandling
             ?.copy(
                 personResultater = behandlingsGrunnlagForVedtaksperioderForrigeBehandling.personResultater.beholdKunOppfylteVilkårResultater(),
-            )?.utledGrunnlagTidslinjePerPerson()
+            )?.utledGrunnlagTidslinjePerPerson(featureToggleService = featureToggleService)
             ?.mapValues { it.value.vedtaksperiodeGrunnlagForPerson } ?: emptyMap()
 
     val erPeriodeLikSammePeriodeIForrigeBehandlingTidslinjer =
