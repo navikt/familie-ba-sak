@@ -1,9 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent
 
+import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.tidslinje.tilPeriodeVerdi
+import org.springframework.cglib.core.Local
+import java.time.LocalDate
 
 sealed interface IBegrunnelseGrunnlagForPeriode {
     val dennePerioden: BegrunnelseGrunnlagForPersonIPeriode
@@ -28,14 +34,27 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
                         it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
                 } && dennePerioden.erOrdinæreVilkårInnvilget()
 
-    fun sjekkOmHarKravPåFinnmarkstilleggForrigePeriode() =
-        forrigePeriode?.andeler?.any { it.type == YtelseType.FINNMARKSTILLEGG } == true ||
+    fun sjekkOmHarKravPåFinnmarkstilleggForrigePeriode(): Boolean {
+        val startdatoForFinnmarkstillegg =
+            SatsService
+                .hentAllesatser()
+                .filter { it.type == SatsType.FINNMARKSTILLEGG }
+                .minBy { it.gyldigFom }
+                .gyldigFom
+        val periodeFom = forrigePeriode?.vilkårResultater?.minOfOrNull { it.fom ?: LocalDate.MIN } ?: LocalDate.MIN
+
+        if (periodeFom < startdatoForFinnmarkstillegg) {
+            return false
+        }
+
+        return forrigePeriode?.andeler?.any { it.type == YtelseType.FINNMARKSTILLEGG } == true ||
             forrigePeriode
                 ?.vilkårResultater
                 ?.any {
                     it.vilkårType == Vilkår.BOSATT_I_RIKET &&
                         it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
                 } == true && forrigePeriode?.erOrdinæreVilkårInnvilget() == true
+    }
 
     fun sjekkOmharKravPåSvalbardtilleggIForrigeBehandlingPeriode() =
         sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true ||
