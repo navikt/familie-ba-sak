@@ -9,8 +9,6 @@ import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
-import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
-import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
@@ -62,11 +60,8 @@ class VilkårServiceTest(
 
     @BeforeEach
     fun setUp() {
-        søkerFnr = randomFnr()
-        barnFnr = randomBarnFnr()
-
-        leggTilPersonInfo(søkerFnr)
-        leggTilPersonInfo(barnFnr)
+        søkerFnr = leggTilPersonInfo(LocalDate.now().minusYears(30))
+        barnFnr = leggTilPersonInfo(LocalDate.now().minusYears(1))
 
         søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true)
         barnAktør = personidentService.hentOgLagreAktør(barnFnr, true)
@@ -112,11 +107,8 @@ class VilkårServiceTest(
 
         @Test
         fun `skal returnere null når vilkårsvurdering ikke finnes`() {
-            // Arrange
-            val ikkeEksisterendeBehandlingId = 999999L
-
             // Act
-            val vilkårsvurdering = vilkårService.hentVilkårsvurdering(ikkeEksisterendeBehandlingId)
+            val vilkårsvurdering = vilkårService.hentVilkårsvurdering(behandling.id)
 
             // Assert
             assertThat(vilkårsvurdering).isNull()
