@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.config
+package no.nav.familie.ba.sak.mock
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.clearMocks
@@ -6,11 +6,11 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import no.nav.familie.ba.sak.config.ClientMocks.Companion.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
 import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
 import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyAktivBrukerIModiaContext
+import no.nav.familie.ba.sak.fake.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
+import no.nav.familie.ba.sak.testfiler.Testfil.TEST_PDF
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
@@ -74,7 +75,10 @@ class IntegrasjonClientMock {
         fun clearIntegrasjonMocks(mockIntegrasjonClient: IntegrasjonClient) {
             clearMocks(mockIntegrasjonClient)
 
-            every { mockIntegrasjonClient.hentVersjonertBarnetrygdSøknad(any()) } returns VersjonertBarnetrygdSøknadV9(lagBarnetrygdSøknadV9())
+            every { mockIntegrasjonClient.hentVersjonertBarnetrygdSøknad(any()) } returns
+                VersjonertBarnetrygdSøknadV9(
+                    lagBarnetrygdSøknadV9(),
+                )
 
             every { mockIntegrasjonClient.hentJournalpost(any()) } returns
                 lagTestJournalpost(

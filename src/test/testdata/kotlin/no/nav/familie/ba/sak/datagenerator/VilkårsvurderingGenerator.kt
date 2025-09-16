@@ -503,7 +503,7 @@ fun lagVilkårsvurderingFraRestScenario(
     scenario: RestScenario,
     overstyrendeVilkårResultater: Map<AktørId, List<VilkårResultat>>,
 ): Vilkårsvurdering {
-    fun RestScenarioPerson.tilAktør() =
+    fun RestScenarioPerson.lagAktør() =
         Aktør(
             this.aktørId,
             mutableSetOf(Personident(this.ident, mockk(relaxed = true))),
@@ -511,14 +511,14 @@ fun lagVilkårsvurderingFraRestScenario(
 
     val søker =
         lagPerson(
-            aktør = scenario.søker.tilAktør(),
+            aktør = scenario.søker.lagAktør(),
             fødselsdato = LocalDate.parse(scenario.søker.fødselsdato),
             type = PersonType.SØKER,
         )
     val barna =
         scenario.barna.map {
             lagPerson(
-                aktør = it.tilAktør(),
+                aktør = it.lagAktør(),
                 fødselsdato = LocalDate.parse(it.fødselsdato),
                 type = PersonType.BARN,
             )

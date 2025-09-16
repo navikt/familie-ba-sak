@@ -110,6 +110,8 @@ class PersongrunnlagService(
 
     fun hentAktiv(behandlingId: Long): PersonopplysningGrunnlag? = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
 
+    fun hentAktivForBehandlinger(behandlingIder: Collection<Long>): Map<Long, PersonopplysningGrunnlag> = personopplysningGrunnlagRepository.hentAktivForBehandlinger(behandlingIder).associate { it.behandlingId to it }
+
     fun hentAktivThrows(behandlingId: Long): PersonopplysningGrunnlag =
         hentAktiv(behandlingId = behandlingId)
             ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling $behandlingId")

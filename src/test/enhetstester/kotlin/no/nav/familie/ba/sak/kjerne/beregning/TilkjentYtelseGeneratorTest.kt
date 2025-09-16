@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -1246,8 +1246,8 @@ class TilkjentYtelseGeneratorTest {
     ): Pair<Vilkårsvurdering, PersonopplysningGrunnlag> {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
-        val søkerAktørId = tilAktør(søkerFnr)
-        val barnAktørId = tilAktør(barnFnr)
+        val søkerAktørId = lagAktør(søkerFnr)
+        val barnAktørId = lagAktør(barnFnr)
 
         val behandling = lagBehandling()
 
@@ -1322,7 +1322,7 @@ class TilkjentYtelseGeneratorTest {
 
         val barn =
             Person(
-                aktør = tilAktør(barnFnr),
+                aktør = lagAktør(barnFnr),
                 type = PersonType.BARN,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fødselsdato = barnFødselsdato,
@@ -1334,7 +1334,7 @@ class TilkjentYtelseGeneratorTest {
             }
         val søker =
             Person(
-                aktør = tilAktør(søkerFnr),
+                aktør = lagAktør(søkerFnr),
                 type = PersonType.SØKER,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fødselsdato = barnFødselsdato.minusYears(20),

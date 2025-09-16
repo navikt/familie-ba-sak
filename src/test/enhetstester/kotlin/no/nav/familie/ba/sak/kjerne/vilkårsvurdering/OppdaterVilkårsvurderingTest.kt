@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
@@ -124,8 +124,8 @@ class OppdaterVilkårsvurderingTest {
     fun `Skal lage advarsel tekst`() {
         val fnr1 = randomFnr()
         val fnr2 = randomFnr()
-        val aktørId1 = tilAktør(fnr1)
-        val aktørId2 = tilAktør(fnr2)
+        val aktørId1 = lagAktør(fnr1)
+        val aktørId2 = lagAktør(fnr2)
         val behandling = lagBehandling()
         val resultat1 =
             lagVilkårsvurdering(

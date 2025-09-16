@@ -4,6 +4,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
@@ -70,6 +71,7 @@ class BehandlingsresultatEndringUtilsTest {
                 nåMåned = YearMonth.now(),
                 nåværendeUtenlandskPeriodebeløp = emptyList(),
                 forrigeUtenlandskPeriodebeløp = emptyList(),
+                featureToggleService = mockFeatureToggleService(),
             )
 
         assertThat(endringsresultat, Is(Endringsresultat.INGEN_ENDRING))
@@ -104,6 +106,7 @@ class BehandlingsresultatEndringUtilsTest {
                 nåMåned = YearMonth.now(),
                 nåværendeUtenlandskPeriodebeløp = emptyList(),
                 forrigeUtenlandskPeriodebeløp = emptyList(),
+                featureToggleService = mockFeatureToggleService(),
             )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
@@ -200,6 +203,7 @@ class BehandlingsresultatEndringUtilsTest {
                 nåMåned = YearMonth.now(),
                 nåværendeUtenlandskPeriodebeløp = emptyList(),
                 forrigeUtenlandskPeriodebeløp = emptyList(),
+                featureToggleService = mockFeatureToggleService(),
             )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
@@ -248,6 +252,7 @@ class BehandlingsresultatEndringUtilsTest {
                 nåMåned = YearMonth.now(),
                 nåværendeUtenlandskPeriodebeløp = emptyList(),
                 forrigeUtenlandskPeriodebeløp = emptyList(),
+                featureToggleService = mockFeatureToggleService(),
             )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
@@ -283,6 +288,7 @@ class BehandlingsresultatEndringUtilsTest {
                 nåMåned = YearMonth.now(),
                 nåværendeUtenlandskPeriodebeløp = emptyList(),
                 forrigeUtenlandskPeriodebeløp = emptyList(),
+                featureToggleService = mockFeatureToggleService(),
             )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
@@ -323,6 +329,7 @@ class BehandlingsresultatEndringUtilsTest {
                 nåMåned = YearMonth.now(),
                 nåværendeUtenlandskPeriodebeløp = listOf(forrigeUtenlandskPeriodebeløp.copy(valutakode = "SEK").apply { behandlingId = nåværendeBehandling.id }),
                 forrigeUtenlandskPeriodebeløp = listOf(forrigeUtenlandskPeriodebeløp),
+                featureToggleService = mockFeatureToggleService(),
             )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
@@ -389,7 +396,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endringsresultat =
             utledEndringsresultat(
-                behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD),
+                behandling = lagBehandling(årsak = BehandlingÅrsak.FINNMARKSTILLEGG),
                 nåværendeAndeler = emptyList(),
                 forrigeAndeler = emptyList(),
                 personerFremstiltKravFor = emptyList(),
@@ -404,9 +411,10 @@ class BehandlingsresultatEndringUtilsTest {
                 nåMåned = YearMonth.now(),
                 nåværendeUtenlandskPeriodebeløp = emptyList(),
                 forrigeUtenlandskPeriodebeløp = emptyList(),
+                featureToggleService = mockFeatureToggleService(),
             )
 
-        assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
+        assertThat(endringsresultat, Is(Endringsresultat.INGEN_ENDRING))
     }
 
     @Test
@@ -1444,6 +1452,7 @@ class BehandlingsresultatEndringUtilsTest {
                 personIBehandling = barn,
                 personIForrigeBehandling = barn,
                 tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
+                featureToggleService = mockFeatureToggleService(),
             )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(false))
@@ -1500,6 +1509,7 @@ class BehandlingsresultatEndringUtilsTest {
                 personIBehandling = barn,
                 personIForrigeBehandling = barn,
                 tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
+                featureToggleService = mockFeatureToggleService(),
             )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1555,6 +1565,7 @@ class BehandlingsresultatEndringUtilsTest {
                 personIBehandling = barn,
                 personIForrigeBehandling = barn,
                 tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
+                featureToggleService = mockFeatureToggleService(),
             )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1614,6 +1625,7 @@ class BehandlingsresultatEndringUtilsTest {
                 personIBehandling = barn,
                 personIForrigeBehandling = barn,
                 tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
+                featureToggleService = mockFeatureToggleService(),
             )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1670,6 +1682,7 @@ class BehandlingsresultatEndringUtilsTest {
                 personIBehandling = barn,
                 personIForrigeBehandling = barn,
                 tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
+                featureToggleService = mockFeatureToggleService(),
             )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(false))

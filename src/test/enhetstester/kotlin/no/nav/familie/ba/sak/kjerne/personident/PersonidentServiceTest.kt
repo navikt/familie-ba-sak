@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
@@ -23,9 +23,9 @@ import org.junit.jupiter.api.TestInstance
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class PersonidentServiceTest {
     private val personidentAleredePersistert = randomFnr()
-    private val aktørIdAleredePersistert = tilAktør(personidentAleredePersistert)
+    private val aktørIdAleredePersistert = lagAktør(personidentAleredePersistert)
     private val personidentAktiv = randomFnr()
-    private val aktørIdAktiv = tilAktør(personidentAktiv)
+    private val aktørIdAktiv = lagAktør(personidentAktiv)
     private val personidentHistorisk = randomFnr()
 
     private val pdlIdentRestClient: PdlIdentRestClient = mockk(relaxed = true)
@@ -176,7 +176,7 @@ internal class PersonidentServiceTest {
         fun `Skal opprette task for håndtering av ny ident ved ny fnr men samme aktør`() {
             val personIdentSomFinnes = randomFnr()
             val personIdentSomSkalLeggesTil = randomFnr()
-            val aktørIdSomFinnes = tilAktør(personIdentSomFinnes)
+            val aktørIdSomFinnes = lagAktør(personIdentSomFinnes)
             aktørIdSomFinnes.personidenter.add(
                 Personident(
                     fødselsnummer = personIdentSomFinnes,
@@ -216,8 +216,8 @@ internal class PersonidentServiceTest {
         fun `Skal opprette task for håndtering av ny ident ved ny fnr og ny aktør`() {
             val personIdentSomFinnes = randomFnr()
             val personIdentSomSkalLeggesTil = randomFnr()
-            val aktørIdGammel = tilAktør(personIdentSomFinnes)
-            val aktørIdNy = tilAktør(personIdentSomSkalLeggesTil)
+            val aktørIdGammel = lagAktør(personIdentSomFinnes)
+            val aktørIdNy = lagAktør(personIdentSomSkalLeggesTil)
             aktørIdGammel.personidenter.add(
                 Personident(
                     fødselsnummer = personIdentSomFinnes,
@@ -260,8 +260,8 @@ internal class PersonidentServiceTest {
         fun `Skal ikke opprette task for håndtering av ny ident når ident ikke er tilknyttet noen aktører i systemet`() {
             val personIdentSomFinnes = randomFnr()
             val personIdentSomSkalLeggesTil = randomFnr()
-            val aktørIdIkkeIBaSak = tilAktør(personIdentSomSkalLeggesTil)
-            val aktørIdSomFinnes = tilAktør(personIdentSomFinnes)
+            val aktørIdIkkeIBaSak = lagAktør(personIdentSomSkalLeggesTil)
+            val aktørIdSomFinnes = lagAktør(personIdentSomFinnes)
             aktørIdSomFinnes.personidenter.add(
                 Personident(
                     fødselsnummer = personIdentSomFinnes,
