@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.sikkerhet
 
+import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
@@ -22,6 +23,7 @@ internal class AuditLoggerTest {
 
     private lateinit var logger: Logger
     private lateinit var listAppender: ListAppender<ILoggingEvent>
+    private var originalLogLevel: Level? = null
 
     @BeforeEach
     internal fun setUp() {
@@ -29,6 +31,8 @@ internal class AuditLoggerTest {
         val servletRequest = MockHttpServletRequest(method, requestUri)
         BrukerContextUtil.mockBrukerContext(preferredUsername = navIdent, servletRequest = servletRequest)
         logger = LoggerFactory.getLogger("auditLogger") as Logger
+        originalLogLevel = logger.level
+        logger.level = Level.INFO
         listAppender = ListAppender<ILoggingEvent>()
         listAppender.start()
         logger.addAppender(listAppender)
@@ -38,6 +42,7 @@ internal class AuditLoggerTest {
     internal fun tearDown() {
         BrukerContextUtil.clearBrukerContext()
         MDC.remove(MDCConstants.MDC_CALL_ID)
+        logger.level = originalLogLevel
     }
 
     @Test
