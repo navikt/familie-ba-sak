@@ -5,8 +5,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
@@ -166,8 +166,8 @@ class FødselshendelseServiceTest {
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon =
                     setOf(
-                        ForelderBarnRelasjon(aktør = tilAktør(barn1), relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN),
-                        ForelderBarnRelasjon(aktør = tilAktør(barn2), relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN),
+                        ForelderBarnRelasjon(aktør = lagAktør(barn1), relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN),
+                        ForelderBarnRelasjon(aktør = lagAktør(barn2), relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN),
                     ),
             )
         every { persongrunnlagService.hentBarna(forrigeBehandling) } returns

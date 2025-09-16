@@ -38,10 +38,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.LANDKODER
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.RestSanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -55,9 +51,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregning
@@ -70,12 +64,12 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdu
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.genererVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.ba.sak.sanity.SanityData
 import org.assertj.core.api.Assertions.assertThat
 import java.time.LocalDate
 
-val sanityBegrunnelserMock = SanityBegrunnelseMock.hentSanityBegrunnelserMock()
-val sanityEØSBegrunnelserMock = SanityBegrunnelseMock.hentSanityEØSBegrunnelserMock()
+val sanityBegrunnelserMock = SanityData.hentSanityBegrunnelserMap()
+val sanityEØSBegrunnelserMock = SanityData.hentSanityEØSBegrunnelserMap()
 
 @Suppress("ktlint:standard:function-naming")
 class VedtaksperioderOgBegrunnelserStepDefinition {
@@ -919,55 +913,3 @@ data class SammenlignbarBegrunnelse(
     val inkluderteStandardBegrunnelser: Set<IVedtakBegrunnelse>,
     val ekskluderteStandardBegrunnelser: Set<IVedtakBegrunnelse> = emptySet<IVedtakBegrunnelse>(),
 )
-
-private object SanityBegrunnelseMock {
-    // For å laste ned begrunnelsene kjør scriptet "src/test/resources/oppdater-sanity-mock.sh" eller
-    // se https://familie-brev.sanity.studio/ba-brev/vision med query fra SanityQueries.kt.
-    fun hentSanityBegrunnelserMock(): Map<Standardbegrunnelse, SanityBegrunnelse> {
-        val restSanityBegrunnelserJson =
-            this::class.java.getResource("/cucumber/gyldigeBegrunnelser/restSanityBegrunnelser")!!
-
-        val restSanityBegrunnelser =
-            objectMapper
-                .readValue(restSanityBegrunnelserJson, Array<RestSanityBegrunnelse>::class.java)
-                .toList()
-
-        val enumPåApiNavn = Standardbegrunnelse.entries.associateBy { it.sanityApiNavn }
-        val sanityBegrunnelser = restSanityBegrunnelser.mapNotNull { it.tilSanityBegrunnelse() }
-
-        return sanityBegrunnelser
-            .mapNotNull {
-                val begrunnelseEnum = enumPåApiNavn[it.apiNavn]
-                if (begrunnelseEnum == null) {
-                    null
-                } else {
-                    begrunnelseEnum to it
-                }
-            }.toMap()
-    }
-
-    fun hentSanityEØSBegrunnelserMock(): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
-        val restSanityEØSBegrunnelserJson =
-            this::class.java.getResource("/cucumber/gyldigeBegrunnelser/restSanityEØSBegrunnelser")!!
-
-        val restSanityEØSBegrunnelser =
-            objectMapper
-                .readValue(
-                    restSanityEØSBegrunnelserJson,
-                    Array<RestSanityEØSBegrunnelse>::class.java,
-                ).toList()
-
-        val enumPåApiNavn = EØSStandardbegrunnelse.entries.associateBy { it.sanityApiNavn }
-        val sanityEØSBegrunnelser = restSanityEØSBegrunnelser.mapNotNull { it.tilSanityEØSBegrunnelse() }
-
-        return sanityEØSBegrunnelser
-            .mapNotNull {
-                val begrunnelseEnum = enumPåApiNavn[it.apiNavn]
-                if (begrunnelseEnum == null) {
-                    null
-                } else {
-                    begrunnelseEnum to it
-                }
-            }.toMap()
-    }
-}

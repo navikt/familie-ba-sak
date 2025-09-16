@@ -8,6 +8,13 @@ import kotlin.random.Random
 
 private val fødselsnummerGenerator = FoedselsnummerGenerator()
 
+fun lagAktør(
+    fnr: String = randomFnr(),
+    toSisteSiffrer: String = "00",
+) = Aktør(fnr + toSisteSiffrer).also {
+    it.personidenter.add(Personident(fnr, aktør = it))
+}
+
 fun randomFnr(foedselsdato: LocalDate? = null): String =
     fødselsnummerGenerator
         .foedselsnummer(

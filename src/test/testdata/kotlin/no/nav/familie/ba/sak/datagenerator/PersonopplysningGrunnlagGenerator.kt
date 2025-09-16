@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.datagenerator
 
-import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -33,7 +32,7 @@ fun lagTestPersonopplysningGrunnlag(
     barnasFødselsdatoer: List<LocalDate> = barnasIdenter.map { LocalDate.of(2019, 1, 1) },
     søkerFødselsdato: LocalDate = LocalDate.of(1987, 1, 1),
     søkerAktør: Aktør =
-        tilAktør(søkerPersonIdent).also {
+        lagAktør(søkerPersonIdent).also {
             it.personidenter.add(
                 Personident(
                     fødselsnummer = søkerPersonIdent,
@@ -44,7 +43,7 @@ fun lagTestPersonopplysningGrunnlag(
         },
     barnAktør: List<Aktør> =
         barnasIdenter.map { fødselsnummer ->
-            tilAktør(fødselsnummer).also {
+            lagAktør(fødselsnummer).also {
                 it.personidenter.add(
                     Personident(
                         fødselsnummer = fødselsnummer,

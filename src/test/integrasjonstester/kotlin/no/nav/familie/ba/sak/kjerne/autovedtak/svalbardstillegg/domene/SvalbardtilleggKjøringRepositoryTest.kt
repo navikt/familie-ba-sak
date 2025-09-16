@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.domene
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -27,7 +27,7 @@ class SvalbardtilleggKjøringRepositoryTest(
         @Test
         fun `skal kunne lagre SvalbardtilleggKjøring`() {
             // Arrange
-            val aktør = tilAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
+            val aktør = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
             val fagsak = lagFagsakUtenId(aktør = aktør).also { fagsakRepository.saveAndFlush(it) }
             val svalbardtilleggKjøring = SvalbardtilleggKjøring(fagsakId = fagsak.id)
 
@@ -46,7 +46,7 @@ class SvalbardtilleggKjøringRepositoryTest(
         @Test
         fun `skal returnere SvalbardtilleggKjøring når den finnes`() {
             // Arrange
-            val aktør = tilAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
+            val aktør = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
             val fagsak = lagFagsakUtenId(aktør = aktør).also { fagsakRepository.saveAndFlush(it) }
             val svalbardtilleggKjøring = SvalbardtilleggKjøring(fagsakId = fagsak.id)
             svalbardtilleggKjøringRepository.saveAndFlush(svalbardtilleggKjøring)
@@ -74,15 +74,15 @@ class SvalbardtilleggKjøringRepositoryTest(
         @Test
         fun `skal returnere alle SvalbardtilleggKjøring som er knyttet til de innsendte fagsak IDene`() {
             // Arrange
-            val aktør1 = tilAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
+            val aktør1 = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
             val fagsak1 = lagFagsakUtenId(aktør = aktør1).also { fagsakRepository.saveAndFlush(it) }
             svalbardtilleggKjøringRepository.saveAndFlush(SvalbardtilleggKjøring(fagsakId = fagsak1.id))
 
-            val aktør2 = tilAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
+            val aktør2 = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
             val fagsak2 = lagFagsakUtenId(aktør = aktør2).also { fagsakRepository.saveAndFlush(it) }
             svalbardtilleggKjøringRepository.saveAndFlush(SvalbardtilleggKjøring(fagsakId = fagsak2.id))
 
-            val aktør3 = tilAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
+            val aktør3 = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
             val fagsak3 = lagFagsakUtenId(aktør = aktør3).also { fagsakRepository.saveAndFlush(it) }
 
             val fagsakIder = setOf(fagsak1.id, fagsak2.id, fagsak3.id)

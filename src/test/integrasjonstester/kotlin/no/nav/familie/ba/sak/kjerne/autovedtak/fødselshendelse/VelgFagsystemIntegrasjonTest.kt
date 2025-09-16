@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.settPersonInfoStatsborgerskap
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
+import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.settPersonInfoStatsborgerskap
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse

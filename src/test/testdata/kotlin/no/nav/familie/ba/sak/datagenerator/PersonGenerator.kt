@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.datagenerator
 
-import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Dødsfall
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -54,7 +53,7 @@ fun tilfeldigSøker(
 
 fun lagPerson(
     personIdent: PersonIdent = PersonIdent(randomFnr()),
-    aktør: Aktør = tilAktør(personIdent.ident),
+    aktør: Aktør = lagAktør(personIdent.ident),
     type: PersonType = PersonType.SØKER,
     navn: String = PersonType.SØKER.name,
     personopplysningGrunnlag: PersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),

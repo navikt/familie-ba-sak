@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
@@ -99,7 +99,7 @@ val mockBarnAutomatiskBehandlingSkalFeile =
     )
 
 val mockSøkerAutomatiskBehandlingFnr = "04136226623"
-val mockSøkerAutomatiskBehandlingAktør = tilAktør(mockSøkerAutomatiskBehandlingFnr)
+val mockSøkerAutomatiskBehandlingAktør = lagAktør(mockSøkerAutomatiskBehandlingFnr)
 
 val mockSøkerAutomatiskBehandling =
     PersonInfo(
@@ -109,7 +109,7 @@ val mockSøkerAutomatiskBehandling =
         forelderBarnRelasjon =
             setOf(
                 ForelderBarnRelasjon(
-                    aktør = tilAktør(mockBarnAutomatiskBehandlingFnr),
+                    aktør = lagAktør(mockBarnAutomatiskBehandlingFnr),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     navn = null,
                     fødselsdato = null,
@@ -139,7 +139,7 @@ fun genererAutomatiskTestperson(
                 .map {
                     ForelderBarnRelasjon(
                         aktør =
-                            tilAktør(
+                            lagAktør(
                                 it.aktør.personidenter
                                     .first()
                                     .fødselsnummer,
