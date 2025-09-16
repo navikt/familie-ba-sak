@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
-import java.time.LocalDate
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
@@ -36,6 +35,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 class SnikeIKøenServiceTest(
     @Autowired private val fagsakService: FagsakService,
