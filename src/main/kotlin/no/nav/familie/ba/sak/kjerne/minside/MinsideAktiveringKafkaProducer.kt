@@ -5,15 +5,29 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.tms.microfrontend.MicrofrontendMessageBuilder
 import no.nav.tms.microfrontend.Sensitivitet
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.context.annotation.Primary
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import java.util.concurrent.TimeUnit
 
+interface MinsideAktiveringKafkaProducer {
+    fun aktiver(aktør: Aktør)
+
+    fun deaktiver(aktør: Aktør)
+}
+
 @Service
-class MinsideAktiveringKafkaProducer(
+@ConditionalOnProperty(
+    value = ["funksjonsbrytere.kafka.producer.enabled"],
+    havingValue = "true",
+    matchIfMissing = false,
+)
+@Primary
+class DefaultMinsideAktiveringKafkaProducer(
     private val kafkaTemplate: KafkaTemplate<String, String>,
-) {
-    fun aktiver(aktør: Aktør) {
+) : MinsideAktiveringKafkaProducer {
+    override fun aktiver(aktør: Aktør) {
         val personIdent = aktør.aktivFødselsnummer()
         val aktiveringsmelding =
             MicrofrontendMessageBuilder
@@ -27,7 +41,7 @@ class MinsideAktiveringKafkaProducer(
         sendMinsideMelding(message = aktiveringsmelding, key = aktør.aktørId)
     }
 
-    fun deaktiver(aktør: Aktør) {
+    override fun deaktiver(aktør: Aktør) {
         val personIdent = aktør.aktivFødselsnummer()
         val deaktiveringsmelding =
             MicrofrontendMessageBuilder
@@ -54,10 +68,23 @@ class MinsideAktiveringKafkaProducer(
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(MinsideAktiveringKafkaProducer::class.java)
+        private val logger = LoggerFactory.getLogger(DefaultMinsideAktiveringKafkaProducer::class.java)
         private const val MICROFRONTEND_ID = "familie-ba-minside-mikrofrontend"
         private const val INITIATED_BY = "teamfamilie"
         private const val TOPIC = "min-side.aapen-microfrontend-v1"
         private const val SEND_TIMEOUT_SECONDS = 5L
+    }
+}
+
+@Service
+class MockMinsideAktiveringKafkaProducer : MinsideAktiveringKafkaProducer {
+    private val logger = LoggerFactory.getLogger(DefaultMinsideAktiveringKafkaProducer::class.java)
+
+    override fun aktiver(aktør: Aktør) {
+        logger.info("Sender aktiver til minside for aktør ${aktør.aktørId}")
+    }
+
+    override fun deaktiver(aktør: Aktør) {
+        logger.info("Sender deaktiver til minside for aktør ${aktør.aktørId}")
     }
 }

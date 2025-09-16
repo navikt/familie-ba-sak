@@ -13,7 +13,7 @@ import org.junit.jupiter.params.provider.ValueSource
 
 class MinsideAktiveringServiceTest {
     private val minsideAktiveringRepository: MinsideAktiveringRepository = mockk()
-    private val minsideAktiveringKafkaProducer: MinsideAktiveringKafkaProducer = mockk()
+    private val minsideAktiveringKafkaProducer: DefaultMinsideAktiveringKafkaProducer = mockk()
     private val minsideAktiveringService =
         MinsideAktiveringService(
             minsideAktiveringRepository = minsideAktiveringRepository,

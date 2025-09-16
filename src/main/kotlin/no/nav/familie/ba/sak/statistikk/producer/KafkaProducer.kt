@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
@@ -53,7 +52,6 @@ interface KafkaProducer {
     matchIfMissing = false,
 )
 @Primary
-@Profile("!preprod-gcp & !prod-gcp")
 class DefaultKafkaProducer(
     val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 ) : KafkaProducer {
