@@ -39,8 +39,8 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
             SatsService
                 .hentAllesatser()
                 .filter { it.type == SatsType.FINNMARKSTILLEGG }
-                .minBy { it.gyldigFom }
-                .gyldigFom
+                .minOfOrNull { it.gyldigFom } ?: LocalDate.MAX
+
         val periodeFom = forrigePeriode?.vilkårResultater?.minOfOrNull { it.fom ?: LocalDate.MIN } ?: LocalDate.MIN
 
         if (periodeFom < startdatoForFinnmarkstillegg) {
