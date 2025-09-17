@@ -20,6 +20,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -53,144 +54,147 @@ class SvalbardtilleggControllerTest {
         every { personidentService.hentAktør(ident) } returns aktør
     }
 
-    @Test
-    fun `vurderSvalbardtillegg skal validere tilgang til person`() {
-        // Arrange
-        every {
-            tilgangService.validerTilgangTilPersoner(
-                personIdenter = listOf(ident),
-                event = AuditLoggerEvent.UPDATE,
-            )
-        } throws RolleTilgangskontrollFeil("Ikke tilgang")
+    @Nested
+    inner class VurderSvalbardtillegg {
+        @Test
+        fun `vurderSvalbardtillegg skal validere tilgang til person`() {
+            // Arrange
+            every {
+                tilgangService.validerTilgangTilPersoner(
+                    personIdenter = listOf(ident),
+                    event = AuditLoggerEvent.UPDATE,
+                )
+            } throws RolleTilgangskontrollFeil("Ikke tilgang")
 
-        // Act
-        val feilmelding =
-            assertThrows<RuntimeException> {
-                svalbardtilleggController.vurderSvalbardtillegg(personIdent)
-            }
+            // Act
+            val feilmelding =
+                assertThrows<RuntimeException> {
+                    svalbardtilleggController.vurderSvalbardtillegg(personIdent)
+                }
 
-        // Assert
-        assertThat(feilmelding.message).isEqualTo("Ikke tilgang")
-    }
+            // Assert
+            assertThat(feilmelding.message).isEqualTo("Ikke tilgang")
+        }
 
-    @Test
-    fun `vurderSvalbardtillegg skal kaste exception for ugyldig fødselsnummer`() {
-        // Arrange
-        val ugyldigPersonIdent = PersonIdent("123456789")
+        @Test
+        fun `vurderSvalbardtillegg skal kaste exception for ugyldig fødselsnummer`() {
+            // Arrange
+            val ugyldigPersonIdent = PersonIdent("123456789")
 
-        // Act & Assert
-        val feilmelding =
-            assertThrows<IllegalStateException> {
-                svalbardtilleggController.vurderSvalbardtillegg(ugyldigPersonIdent)
-            }
+            // Act & Assert
+            val feilmelding =
+                assertThrows<IllegalStateException> {
+                    svalbardtilleggController.vurderSvalbardtillegg(ugyldigPersonIdent)
+                }
 
-        assertThat(feilmelding.message).isEqualTo(ugyldigPersonIdent.ident)
-    }
+            assertThat(feilmelding.message).isEqualTo(ugyldigPersonIdent.ident)
+        }
 
-    @Test
-    fun `vurderSvalbardtillegg skal opprette task for fagsaker med riktig type når ingen eksiterende task finnes`() {
-        // Arrange
-        val fagsak = lagFagsak(id = 1L, aktør = aktør, type = FagsakType.NORMAL)
+        @Test
+        fun `vurderSvalbardtillegg skal opprette task for fagsaker med riktig type når ingen eksiterende task finnes`() {
+            // Arrange
+            val fagsak = lagFagsak(id = 1L, aktør = aktør, type = FagsakType.NORMAL)
 
-        every { fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør) } returns listOf(fagsak)
-        every { taskService.finnAlleTaskerMedPayloadOgType(fagsak.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns emptyList()
+            every { fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør) } returns listOf(fagsak)
+            every { taskService.finnAlleTaskerMedPayloadOgType(fagsak.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns emptyList()
 
-        justRun { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(any()) }
+            justRun { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(any()) }
 
-        // Act
-        svalbardtilleggController.vurderSvalbardtillegg(personIdent)
+            // Act
+            svalbardtilleggController.vurderSvalbardtillegg(personIdent)
 
-        // Assert
-        verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(fagsak.id) }
-    }
+            // Assert
+            verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(fagsak.id) }
+        }
 
-    @ParameterizedTest
-    @EnumSource(Status::class, names = ["UBEHANDLET", "KLAR_TIL_PLUKK"], mode = INCLUDE)
-    fun `vurderSvalbardtillegg skal ikke opprette task når det eksisterende task ikke har kjørt`(
-        taskStatus: Status,
-    ) {
-        // Arrange
-        val fagsak = lagFagsak(id = 1L, aktør = aktør, type = FagsakType.NORMAL)
-        val eksisterendeTask = Task(type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE, payload = fagsak.id.toString(), status = taskStatus)
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["UBEHANDLET", "KLAR_TIL_PLUKK"], mode = INCLUDE)
+        fun `vurderSvalbardtillegg skal ikke opprette task når det eksisterende task ikke har kjørt`(
+            taskStatus: Status,
+        ) {
+            // Arrange
+            val fagsak = lagFagsak(id = 1L, aktør = aktør, type = FagsakType.NORMAL)
+            val eksisterendeTask = Task(type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE, payload = fagsak.id.toString(), status = taskStatus)
 
-        every { fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør) } returns listOf(fagsak)
-        every { taskService.finnAlleTaskerMedPayloadOgType(fagsak.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns listOf(eksisterendeTask)
+            every { fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør) } returns listOf(fagsak)
+            every { taskService.finnAlleTaskerMedPayloadOgType(fagsak.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns listOf(eksisterendeTask)
 
-        // Act
-        svalbardtilleggController.vurderSvalbardtillegg(personIdent)
+            // Act
+            svalbardtilleggController.vurderSvalbardtillegg(personIdent)
 
-        // Assert
-        verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(any()) }
-    }
+            // Assert
+            verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(any()) }
+        }
 
-    @ParameterizedTest
-    @EnumSource(Status::class, names = ["UBEHANDLET", "KLAR_TIL_PLUKK"], mode = EXCLUDE)
-    fun `vurderSvalbardtillegg skal opprette task når eksisterende task har kjørt`(
-        taskStatus: Status,
-    ) {
-        // Arrange
-        val fagsak = lagFagsak(id = 1L, aktør = aktør, type = FagsakType.NORMAL)
-        val eksisterendeTask = Task(type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE, payload = fagsak.id.toString(), status = taskStatus)
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["UBEHANDLET", "KLAR_TIL_PLUKK"], mode = EXCLUDE)
+        fun `vurderSvalbardtillegg skal opprette task når eksisterende task har kjørt`(
+            taskStatus: Status,
+        ) {
+            // Arrange
+            val fagsak = lagFagsak(id = 1L, aktør = aktør, type = FagsakType.NORMAL)
+            val eksisterendeTask = Task(type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE, payload = fagsak.id.toString(), status = taskStatus)
 
-        every { fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør) } returns listOf(fagsak)
-        every { taskService.finnAlleTaskerMedPayloadOgType(fagsak.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns listOf(eksisterendeTask)
-        justRun { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(any()) }
+            every { fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør) } returns listOf(fagsak)
+            every { taskService.finnAlleTaskerMedPayloadOgType(fagsak.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns listOf(eksisterendeTask)
+            justRun { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(any()) }
 
-        // Act
-        svalbardtilleggController.vurderSvalbardtillegg(personIdent)
+            // Act
+            svalbardtilleggController.vurderSvalbardtillegg(personIdent)
 
-        // Assert
-        verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(fagsak.id) }
-    }
+            // Assert
+            verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(fagsak.id) }
+        }
 
-    @Test
-    fun `vurderSvalbardtillegg skal ikke gjøre noe når person ikke har fagsaker`() {
-        // Arrange
-        every { fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør) } returns emptyList()
+        @Test
+        fun `vurderSvalbardtillegg skal ikke gjøre noe når person ikke har fagsaker`() {
+            // Arrange
+            every { fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør) } returns emptyList()
 
-        // Act
-        svalbardtilleggController.vurderSvalbardtillegg(personIdent)
+            // Act
+            svalbardtilleggController.vurderSvalbardtillegg(personIdent)
 
-        // Assert
-        verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(any()) }
-        verify(exactly = 0) { taskService.finnAlleTaskerMedPayloadOgType(any(), any()) }
-    }
+            // Assert
+            verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(any()) }
+            verify(exactly = 0) { taskService.finnAlleTaskerMedPayloadOgType(any(), any()) }
+        }
 
-    @Test
-    fun `vurderSvaldbardtillegg skal håndtere flere fagsaker med ulike typer og task-statuser`() {
-        // Arrange
-        val normalFagsak1 = lagFagsak(id = 1L, aktør = aktør, type = FagsakType.NORMAL)
-        val normalFagsak2 = lagFagsak(id = 2L, aktør = aktør, type = FagsakType.NORMAL)
-        val barnEnsligFagsak = lagFagsak(id = 3L, aktør = aktør, type = FagsakType.BARN_ENSLIG_MINDREÅRIG)
-        val institusjonFagsak = lagFagsak(id = 4L, aktør = aktør, type = FagsakType.INSTITUSJON)
-        val skjermetBarnFagsak = lagFagsak(id = 5L, aktør = aktør, type = FagsakType.SKJERMET_BARN)
+        @Test
+        fun `vurderSvaldbardtillegg skal håndtere flere fagsaker med ulike typer og task-statuser`() {
+            // Arrange
+            val normalFagsak1 = lagFagsak(id = 1L, aktør = aktør, type = FagsakType.NORMAL)
+            val normalFagsak2 = lagFagsak(id = 2L, aktør = aktør, type = FagsakType.NORMAL)
+            val barnEnsligFagsak = lagFagsak(id = 3L, aktør = aktør, type = FagsakType.BARN_ENSLIG_MINDREÅRIG)
+            val institusjonFagsak = lagFagsak(id = 4L, aktør = aktør, type = FagsakType.INSTITUSJON)
+            val skjermetBarnFagsak = lagFagsak(id = 5L, aktør = aktør, type = FagsakType.SKJERMET_BARN)
 
-        val eksisterendeTask =
-            Task(
-                type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE,
-                payload = normalFagsak1.id.toString(),
-                status = Status.UBEHANDLET,
-            )
+            val eksisterendeTask =
+                Task(
+                    type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE,
+                    payload = normalFagsak1.id.toString(),
+                    status = Status.UBEHANDLET,
+                )
 
-        every { fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør) } returns
-            listOf(normalFagsak1, normalFagsak2, barnEnsligFagsak, institusjonFagsak)
+            every { fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør) } returns
+                listOf(normalFagsak1, normalFagsak2, barnEnsligFagsak, institusjonFagsak)
 
-        every { taskService.finnAlleTaskerMedPayloadOgType(normalFagsak1.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns listOf(eksisterendeTask)
-        every { taskService.finnAlleTaskerMedPayloadOgType(normalFagsak2.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns emptyList()
-        every { taskService.finnAlleTaskerMedPayloadOgType(barnEnsligFagsak.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns emptyList()
-        every { taskService.finnAlleTaskerMedPayloadOgType(institusjonFagsak.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns emptyList()
-        every { taskService.finnAlleTaskerMedPayloadOgType(skjermetBarnFagsak.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns emptyList()
+            every { taskService.finnAlleTaskerMedPayloadOgType(normalFagsak1.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns listOf(eksisterendeTask)
+            every { taskService.finnAlleTaskerMedPayloadOgType(normalFagsak2.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns emptyList()
+            every { taskService.finnAlleTaskerMedPayloadOgType(barnEnsligFagsak.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns emptyList()
+            every { taskService.finnAlleTaskerMedPayloadOgType(institusjonFagsak.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns emptyList()
+            every { taskService.finnAlleTaskerMedPayloadOgType(skjermetBarnFagsak.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns emptyList()
 
-        justRun { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(any()) }
+            justRun { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(any()) }
 
-        // Act
-        svalbardtilleggController.vurderSvalbardtillegg(personIdent)
+            // Act
+            svalbardtilleggController.vurderSvalbardtillegg(personIdent)
 
-        // Assert
-        verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(normalFagsak1.id) } // Har allerede UBEHANDLET task
-        verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(normalFagsak2.id) } // NORMAL type, ingen task
-        verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(barnEnsligFagsak.id) } // BARN_ENSLIG_MINDREÅRIG type, ingen task
-        verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(institusjonFagsak.id) } // INSTITUSJON type filtreres bort
-        verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(skjermetBarnFagsak.id) } // SKJERMET_BARN type filtreres bort
+            // Assert
+            verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(normalFagsak1.id) } // Har allerede UBEHANDLET task
+            verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(normalFagsak2.id) } // NORMAL type, ingen task
+            verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(barnEnsligFagsak.id) } // BARN_ENSLIG_MINDREÅRIG type, ingen task
+            verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(institusjonFagsak.id) } // INSTITUSJON type filtreres bort
+            verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(skjermetBarnFagsak.id) } // SKJERMET_BARN type filtreres bort
+        }
     }
 }

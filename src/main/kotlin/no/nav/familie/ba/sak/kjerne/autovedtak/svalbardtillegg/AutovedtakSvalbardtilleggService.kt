@@ -51,7 +51,7 @@ class AutovedtakSvalbardtilleggService(
         val fagsaktypeKanBehandles = fagsak.type in FAGSAKTYPER_DER_SVALBARDTILLEGG_KAN_AUTOVEDTAS
         val harLøpendeBarnetrygd = fagsak.status == LØPENDE
 
-        if (!(fagsaktypeKanBehandles && harLøpendeBarnetrygd)) return false
+        if (!fagsaktypeKanBehandles || !harLøpendeBarnetrygd) return false
 
         val sisteIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandlingsdata.fagsakId)
@@ -70,7 +70,7 @@ class AutovedtakSvalbardtilleggService(
                 .map { it.aktør.aktivFødselsnummer() }
                 .let { identer ->
                     pdlRestClient
-                        .hentBostedsadresseOgDeltBostedForPersoner(identer)
+                        .hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(identer)
                         .mapValues { Adresser.opprettFra(it.value) }
                         .any { it.value.harAdresserSomErRelevantForSvalbardstillegg() }
                 }

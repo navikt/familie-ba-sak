@@ -95,10 +95,10 @@ class AutovedtakSvalbardtilleggServiceTest {
             every { fagsakService.hentPåFagsakId(fagsak.id) } returns lagFagsak(status = fagsakStatus)
 
             // Act
-            val skalAutovedtakBEhandles = autovedtakSvalbardtilleggService.skalAutovedtakBehandles(SvalbardtilleggData(fagsakId = fagsak.id))
+            val skalAutovedtakBehandles = autovedtakSvalbardtilleggService.skalAutovedtakBehandles(SvalbardtilleggData(fagsakId = fagsak.id))
 
             // Assert
-            assertThat(skalAutovedtakBEhandles).isFalse()
+            assertThat(skalAutovedtakBehandles).isFalse()
         }
 
         @ParameterizedTest
@@ -142,7 +142,7 @@ class AutovedtakSvalbardtilleggServiceTest {
                     )
                 }
 
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
+            every { pdlRestClient.hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
                     søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
                     barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
@@ -158,7 +158,7 @@ class AutovedtakSvalbardtilleggServiceTest {
         @Test
         fun `skal returnere false når ingen av personene har oppholdsadresse på Svalbard`() {
             // Arrange
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
+            every { pdlRestClient.hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
                     søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
                     barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
@@ -174,7 +174,7 @@ class AutovedtakSvalbardtilleggServiceTest {
         @Test
         fun `skal returnere true når minst èn person har oppholdsadresse på Svalbard`() {
             // Arrange
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
+            every { pdlRestClient.hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
                     søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholsadressePåSvalbard), deltBosted = emptyList()),
                     barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),

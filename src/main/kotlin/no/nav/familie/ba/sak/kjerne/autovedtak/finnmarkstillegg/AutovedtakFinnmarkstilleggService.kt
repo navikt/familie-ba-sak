@@ -52,7 +52,7 @@ class AutovedtakFinnmarkstilleggService(
         val fagsaktypeKanBehandles = fagsak.type in FAGSAKTYPER_DER_FINNMARKSTILLEG_KAN_AUTOVEDTAS
         val harLøpendeBarnetrygd = fagsak.status == LØPENDE
 
-        if (!(fagsaktypeKanBehandles && harLøpendeBarnetrygd)) return false
+        if (!fagsaktypeKanBehandles || !harLøpendeBarnetrygd) return false
 
         val sisteIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandlingsdata.fagsakId)

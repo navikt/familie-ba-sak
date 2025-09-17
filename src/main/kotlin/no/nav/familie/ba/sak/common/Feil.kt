@@ -14,6 +14,10 @@ class FinnmarkstilleggIngenEndringFeil(
     message: String,
 ) : RuntimeException(message)
 
+class SvalbardtilleggIngenEndringFeil(
+    message: String,
+) : RuntimeException(message)
+
 open class Feil(
     message: String,
     open val frontendFeilmelding: String? = null,
