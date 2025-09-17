@@ -427,7 +427,7 @@ class PreutfyllLovligOppholdServiceTest {
 
             assertThat(lovligOppholdResultater.resultat).isEqualTo(Resultat.OPPFYLT)
             assertThat(lovligOppholdResultater.begrunnelse)
-                .isEqualTo("$PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT\n- EØS-borger og har arbeidsforhold i Norge.")
+                .isEqualTo("$PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT- EØS-borger og har arbeidsforhold i Norge.")
         }
 
         @Test
