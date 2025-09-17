@@ -99,7 +99,7 @@ object RessursUtils {
         val className =
             if (funksjonellFeil.throwable != null) "[${funksjonellFeil.throwable!!::class.java.name}] " else ""
 
-        logger.info("$className En funksjonell feil har oppstått(${funksjonellFeil.httpStatus}): ${funksjonellFeil.message} ")
+        logger.info("$className En funksjonell feil har oppstått(${funksjonellFeil.httpStatus}): ${funksjonellFeil.message}. Se securelogs for detaljer.")
         secureLogger.info("$className En funksjonell feil har oppstått(${funksjonellFeil.httpStatus}): ${funksjonellFeil.message} ", funksjonellFeil)
 
         return ResponseEntity.status(funksjonellFeil.httpStatus).body(
