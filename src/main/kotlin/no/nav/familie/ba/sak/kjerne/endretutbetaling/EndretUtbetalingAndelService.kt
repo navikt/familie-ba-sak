@@ -119,7 +119,7 @@ class EndretUtbetalingAndelService(
         val endretUtbetalingAndelerSomSkalSlettes =
             endretUtbetalingAndelRepository
                 .findByBehandlingId(behandling.id)
-                .filter { it.årsak in setOf(ETTERBETALING_3ÅR, ETTERBETALING_3MND) && it.behandlingId == behandling.id }
+                .filter { it.manglerObligatoriskFelt() || it.årsak in setOf(ETTERBETALING_3ÅR, ETTERBETALING_3MND) }
                 .map { it.id }
 
         fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(behandling, endretUtbetalingAndelerSomSkalSlettes)
