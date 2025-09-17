@@ -22,8 +22,8 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
-import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask
-import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.FinnPersonerSomBorPåSvalbardIFagsakerTask
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.FinnPersonerSomBorPåSvalbardIFagsakerTask
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
