@@ -119,6 +119,15 @@ class MockPersonopplysningerService(
                 bostedsadresser = mutableListOf(bostedsadresse),
                 kjønn = Kjønn.entries.random(),
                 navn = "$personIdent sitt navn",
+                statsborgerskap =
+                    listOf(
+                        Statsborgerskap(
+                            land = "NOR",
+                            bekreftelsesdato = fødselsdato,
+                            gyldigFraOgMed = fødselsdato,
+                            gyldigTilOgMed = null,
+                        ),
+                    ),
             )
             return personIdent
         }
@@ -155,6 +164,15 @@ class MockPersonopplysningerService(
                                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
                             ),
                 )
+        }
+
+        fun leggTilBostedsadresserIPersonInfo(
+            personIdenter: List<String>,
+            bostedsadresser: List<Bostedsadresse>,
+        ) {
+            personIdenter.forEach {
+                personInfo[it] = personInfo[it]!!.copy(bostedsadresser = bostedsadresser)
+            }
         }
 
         fun settPersonInfoStatsborgerskap(

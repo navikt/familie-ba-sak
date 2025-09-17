@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.fake
 import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.VergemaalEllerFremtidsfullmakt
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -31,15 +32,16 @@ class MockPdlRestClient(
         identer.associateWith {
             PdlBostedsadresseDeltBostedOppholdsadressePerson(
                 bostedsadresse =
-                    listOf(
-                        Bostedsadresse(
-                            gyldigFraOgMed = LocalDate.now().minusYears(1),
-                            gyldigTilOgMed = null,
-                            vegadresse = null,
-                            matrikkeladresse = lagMatrikkeladresse(1234L),
-                            ukjentBosted = null,
+                    bostedsadresser[it]
+                        ?: listOf(
+                            Bostedsadresse(
+                                gyldigFraOgMed = LocalDate.now().minusYears(1),
+                                gyldigTilOgMed = null,
+                                vegadresse = null,
+                                matrikkeladresse = lagMatrikkeladresse(1234L),
+                                ukjentBosted = null,
+                            ),
                         ),
-                    ),
                 deltBosted = emptyList(),
             )
         }
@@ -68,4 +70,19 @@ class MockPdlRestClient(
                 type = OPPHOLDSTILLATELSE.PERMANENT,
             ),
         )
+
+    override fun hentVergemaalEllerFremtidsfullmakt(aktør: Aktør): List<VergemaalEllerFremtidsfullmakt> = emptyList()
+
+    companion object {
+        private val bostedsadresser = mutableMapOf<String, List<Bostedsadresse>>()
+
+        fun leggTilBostedsadresseIPDL(
+            personIdenter: List<String>,
+            bostedsadresse: Bostedsadresse,
+        ) {
+            personIdenter.forEach { personIdent ->
+                bostedsadresser[personIdent] = listOf(bostedsadresse)
+            }
+        }
+    }
 }

@@ -90,7 +90,6 @@ class BehandleSmåbarnstilleggTest(
                         fødselsdato = barnFødselsdato.toString(),
                         fornavn = "Barn",
                         etternavn = "Barnesen",
-                        bostedsadresser = emptyList(),
                     ),
                 ),
         )

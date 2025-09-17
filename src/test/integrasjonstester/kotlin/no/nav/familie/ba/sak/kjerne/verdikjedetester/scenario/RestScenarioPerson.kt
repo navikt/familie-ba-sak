@@ -7,7 +7,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import java.time.LocalDate
-import java.time.Month
 
 data class RestScenarioPerson(
     private var _ident: String? = null,
@@ -32,7 +31,7 @@ data class RestScenarioPerson(
                 oppholdTil = null,
             ),
         ),
-    val bostedsadresser: List<Bostedsadresse> = defaultBostedsadresseHistorikk,
+    val bostedsadresser: List<Bostedsadresse> = defaultBostedsadresseHistorikk(LocalDate.parse(fødselsdato)),
 ) {
     val ident: String
         get() = _ident ?: randomFnr(LocalDate.parse(fødselsdato)).also { _ident = it }
@@ -42,23 +41,12 @@ data class RestScenarioPerson(
     val navn = "$fornavn $etternavn"
 }
 
-val defaultBostedsadresseHistorikk =
+fun defaultBostedsadresseHistorikk(fødselsdato: LocalDate) =
     mutableListOf(
         Bostedsadresse(
-            angittFlyttedato = LocalDate.now().minusDays(15),
+            angittFlyttedato = fødselsdato,
+            gyldigFraOgMed = fødselsdato,
             gyldigTilOgMed = null,
-            matrikkeladresse =
-                Matrikkeladresse(
-                    matrikkelId = 123L,
-                    bruksenhetsnummer = "H301",
-                    tilleggsnavn = "navn",
-                    postnummer = "0202",
-                    kommunenummer = "2231",
-                ),
-        ),
-        Bostedsadresse(
-            angittFlyttedato = LocalDate.of(2018, Month.JANUARY, 1),
-            gyldigTilOgMed = LocalDate.now().minusDays(16),
             matrikkeladresse =
                 Matrikkeladresse(
                     matrikkelId = 123L,
