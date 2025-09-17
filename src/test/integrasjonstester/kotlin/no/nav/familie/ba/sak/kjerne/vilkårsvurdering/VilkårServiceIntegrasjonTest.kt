@@ -419,6 +419,7 @@ class VilkårServiceIntegrasjonTest(
                                     resultatBegrunnelse = ResultatBegrunnelse.IKKE_AKTUELT,
                                     vurderesEtter = Regelverk.EØS_FORORDNINGEN,
                                     periodeFom = LocalDate.of(2019, 5, 8),
+                                    begrunnelse = "Ikke aktuelt",
                                 ),
                             ),
                     ),
@@ -470,6 +471,7 @@ class VilkårServiceIntegrasjonTest(
                                         resultatBegrunnelse = if (it.vilkårType === Vilkår.LOVLIG_OPPHOLD) ResultatBegrunnelse.IKKE_AKTUELT else null,
                                         vurderesEtter = Regelverk.EØS_FORORDNINGEN,
                                         periodeFom = LocalDate.of(2019, 5, 8),
+                                        begrunnelse = "Ikke aktuelt",
                                     ),
                                 ),
                         ),
@@ -805,7 +807,7 @@ class VilkårServiceIntegrasjonTest(
             }
         assertEquals(
             "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for behandling " +
-                "${behandling.id} med behandlingType ${behandling.type.visningsnavn}",
+                "${behandling.id} med behandlingsårsak ${behandling.opprettetÅrsak.visningsnavn}",
             exception.message,
         )
     }

@@ -6,4 +6,4 @@ fun String.saner(): String = Regex("[^$ALFANUMERISKE_TEGN]*").replace(this, "")
 
 fun String.erAlfanummerisk(): Boolean = Regex("[$ALFANUMERISKE_TEGN]*").matches(this)
 
-fun String.erAlfanummeriskPlussKolon(): Boolean = Regex("[$ALFANUMERISKE_TEGN:]*").matches(this)
+fun String.erAlfanummeriskPlussKolonMellomromOgUnderstrek(): Boolean = Regex("[$ALFANUMERISKE_TEGN:_ ]*").matches(this)

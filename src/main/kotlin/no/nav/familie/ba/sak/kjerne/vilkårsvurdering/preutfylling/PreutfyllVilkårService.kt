@@ -32,4 +32,8 @@ class PreutfyllVilkårService(
             preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
         }
     }
+
+    companion object {
+        const val PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT = "Fylt ut automatisk fra registerdata i PDL\n"
+    }
 }

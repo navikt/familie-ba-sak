@@ -2,10 +2,12 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
-import no.nav.familie.ba.sak.ekstern.restDomene.fjernAutomatiskBegrunnelse
+import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -21,7 +23,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.mut
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonVilkårResultaterPut
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -34,6 +38,7 @@ class VilkårService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val personidentService: PersonidentService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? =
         vilkårsvurderingService.hentAktivForBehandling(
@@ -52,18 +57,41 @@ class VilkårService(
         vilkårId: Long,
         restPersonResultat: RestPersonResultat,
     ): List<RestPersonResultat> {
-        val restPersonResultatUtenBegrunnelse = restPersonResultat.fjernAutomatiskBegrunnelse()
-
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
         val restVilkårResultat =
-            restPersonResultatUtenBegrunnelse.vilkårResultater.singleOrNull { it.id == vilkårId }
+            restPersonResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
                 ?: throw Feil("Fant ikke vilkårResultat med id $vilkårId ved oppdatering av vilkår")
 
         validerResultatBegrunnelse(restVilkårResultat)
 
         val personResultat =
-            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restPersonResultatUtenBegrunnelse.personIdent)
+            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restPersonResultat.personIdent)
+
+        if (featureToggleService.isEnabled(VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR)) {
+            val eksisterendeVilkårResultat =
+                personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
+                    ?: throw Feil("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
+
+            if (eksisterendeVilkårResultat.erOpprinneligPreutfylt) {
+                val erEndringIBegrunnelse = eksisterendeVilkårResultat.begrunnelse != restVilkårResultat.begrunnelse
+                val erEndringIAnnetFeltEnnBegrunnelse = erEndringIVilkår(eksisterendeVilkårResultat, restVilkårResultat)
+
+                if (!erEndringIBegrunnelse && !erEndringIAnnetFeltEnnBegrunnelse) {
+                    return vilkårsvurdering.personResultater.map { it.tilRestPersonResultat() }
+                }
+
+                val begrunnelseErTomEllerAutomatiskUtfylt =
+                    restVilkårResultat.begrunnelse.run { isBlank() || startsWith(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT) }
+
+                if (erEndringIAnnetFeltEnnBegrunnelse && begrunnelseErTomEllerAutomatiskUtfylt) {
+                    throw FunksjonellFeil(
+                        melding = "Begrunnelse må være fylt inn ved oppdatering av preutfylt vilkår",
+                        frontendFeilmelding = "Du har endret vilkåret, og må derfor fylle inn en begrunnelse.",
+                    )
+                }
+            }
+        }
 
         muterPersonVilkårResultaterPut(personResultat, restVilkårResultat)
 
@@ -85,6 +113,19 @@ class VilkårService(
 
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }
+
+    private fun erEndringIVilkår(
+        vilkårResultat: VilkårResultat,
+        restVilkårResultat: RestVilkårResultat,
+    ): Boolean =
+        vilkårResultat.periodeFom != restVilkårResultat.periodeFom ||
+            vilkårResultat.periodeTom != restVilkårResultat.periodeTom ||
+            vilkårResultat.resultat != restVilkårResultat.resultat ||
+            vilkårResultat.resultatBegrunnelse != restVilkårResultat.resultatBegrunnelse ||
+            vilkårResultat.erEksplisittAvslagPåSøknad != restVilkårResultat.erEksplisittAvslagPåSøknad ||
+            vilkårResultat.vurderesEtter != restVilkårResultat.vurderesEtter ||
+            vilkårResultat.utdypendeVilkårsvurderinger.toSet() != restVilkårResultat.utdypendeVilkårsvurderinger.toSet() ||
+            vilkårResultat.standardbegrunnelser.toSet() != restVilkårResultat.avslagBegrunnelser.orEmpty().toSet()
 
     @Transactional
     fun deleteVilkårsperiode(
@@ -174,10 +215,10 @@ class VilkårService(
             throw FunksjonellFeil(
                 melding =
                     "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til for behandling ${behandling.id} " +
-                        "med behandlingType ${behandling.type.visningsnavn}",
+                        "med behandlingsårsak ${behandling.opprettetÅrsak.visningsnavn}",
                 frontendFeilmelding =
                     "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til " +
-                        "for behandling ${behandling.id} med behandlingType ${behandling.type.visningsnavn}",
+                        "for behandling ${behandling.id} med behandlingsårsak ${behandling.opprettetÅrsak.visningsnavn}",
             )
         }
 
