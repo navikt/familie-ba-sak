@@ -100,7 +100,7 @@ object BehandlingsresultatEndringUtils {
                     }
 
                 val erEndringIVilkårsvurderingForPerson =
-                    !behandling.erFinnmarkstillegg() &&
+                    !behandling.erFinnmarksTilleggEllerSvalbardtillegg() &&
                         erEndringIVilkårsvurderingForPerson(
                             tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = tidligsteRelevanteFomDatoForPersonIVilkårsvurdering,
                             nåværendePersonResultaterForPerson = nåværendePersonResultatForPerson,
