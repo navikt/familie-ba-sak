@@ -214,12 +214,16 @@ class VilkårServiceTest(
                     )
 
             // Assert
-            assertThat(restPersonResultaterMedEndringer).isEqualTo(restPersonResultaterMedEndringer)
+            assertThat(restPersonResultaterMedEndringer)
+                .usingRecursiveComparison()
+                .ignoringCollectionOrder()
+                .ignoringFieldsMatchingRegexes(".*opprettetTidspunkt", ".*endretTidspunkt")
+                .isEqualTo(restPersonResultater)
         }
 
         @ParameterizedTest
         @ValueSource(strings = ["", PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT])
-        fun `skal kaste Feil når preutfylt vilkår er endret og har tom eller automatisk utfylt begrunneslse`(
+        fun `skal kaste Feil når preutfylt vilkår er endret og har tom eller automatisk utfylt begrunnelse`(
             begrunnelseFraFrontend: String,
         ) {
             // Arrange
