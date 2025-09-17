@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
@@ -307,7 +308,7 @@ class PreutfyllLovligOppholdServiceTest {
                     .single { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
 
             assertThat(lovligOppholdResultater.begrunnelse)
-                .isEqualTo("Fylt ut automatisk fra registerdata i PDL\n- Norsk/nordisk statsborgerskap.")
+                .isEqualTo("$PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT- Norsk/nordisk statsborgerskap.")
         }
 
         @Test
@@ -426,7 +427,7 @@ class PreutfyllLovligOppholdServiceTest {
 
             assertThat(lovligOppholdResultater.resultat).isEqualTo(Resultat.OPPFYLT)
             assertThat(lovligOppholdResultater.begrunnelse)
-                .isEqualTo("Fylt ut automatisk fra registerdata i PDL\n- EØS-borger og har arbeidsforhold i Norge.")
+                .isEqualTo("$PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT\n- EØS-borger og har arbeidsforhold i Norge.")
         }
 
         @Test
