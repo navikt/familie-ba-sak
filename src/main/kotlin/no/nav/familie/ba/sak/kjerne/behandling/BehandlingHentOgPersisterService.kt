@@ -6,8 +6,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Visningsbehandling
-import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
-import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import org.springframework.stereotype.Service
@@ -47,6 +45,8 @@ class BehandlingHentOgPersisterService(
      * Henter siste iverksatte behandling på fagsak
      */
     fun hentSisteBehandlingSomErIverksatt(fagsakId: Long): Behandling? = behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
+
+    fun hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder: Collection<Long>): Map<Long, Behandling> = behandlingRepository.finnSisteIverksatteBehandlingForFagsaker(fagsakIder = fagsakIder).associate { it.fagsak.id to it }
 
     fun hentIdForSisteBehandlingSomErIverksatt(fagsakId: Long): Long? = behandlingRepository.finnIdForSisteIverksatteBehandling(fagsakId = fagsakId)
 
