@@ -1,0 +1,1 @@
+ALTER TABLE vilkar_resultat ADD COLUMN er_opprinnelig_preutfylt BOOLEAN NOT NULL DEFAULT FALSE;

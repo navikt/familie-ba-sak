@@ -203,6 +203,21 @@ class OpprettTaskService(
     }
 
     @Transactional
+    fun opprettAutovedtakSvalbardtilleggTask(
+        fagsakId: Long,
+    ) {
+        opprettAutovedtakSvalbardtilleggTasker(setOf(fagsakId))
+    }
+
+    @Transactional
+    fun opprettAutovedtakSvalbardtilleggTasker(
+        fagsakIder: Collection<Long>,
+    ) {
+        // TODO : Implementer oppretting av tasker, venter på NAV-26044
+        throw UnsupportedOperationException("Oppretting av tasker for Svalbardtillegg er ikke implementert.")
+    }
+
+    @Transactional
     fun opprettHenleggBehandlingTask(
         behandlingId: Long,
         årsak: HenleggÅrsak,

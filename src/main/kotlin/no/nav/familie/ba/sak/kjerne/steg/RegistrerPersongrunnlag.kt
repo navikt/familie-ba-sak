@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FinnmarkstilleggIngenEndringFeil
+import no.nav.familie.ba.sak.common.IngenEndringIBosattIRiketVilkårFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -66,37 +66,25 @@ class RegistrerPersongrunnlag(
     }
 
     override fun postValiderSteg(behandling: Behandling) {
-        if (behandling.erFinnmarkstillegg()) {
-            val forrigeVedtatteBehandling =
-                behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-                    ?: throw Feil("Vi kan ikke kjøre behandling med årsak ${behandling.opprettetÅrsak} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}")
-
-            validerAtVilkårsvurderingErEndret(
-                vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id),
-                forrigeVilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(forrigeVedtatteBehandling.id),
-            )
+        if (!behandling.erFinnmarksTilleggEllerSvalbardtillegg()) {
+            return
         }
+        val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+        if (forrigeVedtatteBehandling == null) {
+            throw Feil("Vi kan ikke kjøre behandling med årsak ${behandling.opprettetÅrsak} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}")
+        }
+        validerAtVilkårsvurderingErEndret(
+            vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id),
+            forrigeVilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(forrigeVedtatteBehandling.id),
+        )
     }
 
     private fun validerAtVilkårsvurderingErEndret(
         vilkårsvurdering: Vilkårsvurdering,
         forrigeVilkårsvurdering: Vilkårsvurdering,
     ) {
-        fun lagBosattIRiketVilkårTidslinjePerAktør(vilkårsvurdering: Vilkårsvurdering) =
-            vilkårsvurdering
-                .personResultater
-                .associate { personResultat ->
-                    personResultat.aktør.aktørId to
-                        personResultat.vilkårResultater
-                            .filter { it.vilkårType == BOSATT_I_RIKET }
-                            .tilTidslinje()
-                }
-
-        val bosattIRiketVilkårPerAktør =
-            lagBosattIRiketVilkårTidslinjePerAktør(vilkårsvurdering)
-
-        val forrigeBosattIRiketVilkårPerAktør =
-            lagBosattIRiketVilkårTidslinjePerAktør(forrigeVilkårsvurdering)
+        val bosattIRiketVilkårPerAktør = lagBosattIRiketVilkårTidslinjePerAktør(vilkårsvurdering)
+        val forrigeBosattIRiketVilkårPerAktør = lagBosattIRiketVilkårTidslinjePerAktør(forrigeVilkårsvurdering)
 
         val ingenEndringIBosattIRiketVilkår =
             bosattIRiketVilkårPerAktør
@@ -111,9 +99,19 @@ class RegistrerPersongrunnlag(
                 .all { it.verdi == false }
 
         if (ingenEndringIBosattIRiketVilkår) {
-            throw FinnmarkstilleggIngenEndringFeil("Ruller tilbake behandling pga ingen endring i 'Bosatt i riket'-vilkåret")
+            throw IngenEndringIBosattIRiketVilkårFeil("Ruller tilbake behandling pga ingen endring i 'Bosatt i riket'-vilkåret")
         }
     }
+
+    private fun lagBosattIRiketVilkårTidslinjePerAktør(vilkårsvurdering: Vilkårsvurdering) =
+        vilkårsvurdering
+            .personResultater
+            .associate { personResultat ->
+                personResultat.aktør.aktørId to
+                    personResultat.vilkårResultater
+                        .filter { it.vilkårType == BOSATT_I_RIKET }
+                        .tilTidslinje()
+            }
 
     override fun stegType(): StegType = StegType.REGISTRERE_PERSONGRUNNLAG
 }

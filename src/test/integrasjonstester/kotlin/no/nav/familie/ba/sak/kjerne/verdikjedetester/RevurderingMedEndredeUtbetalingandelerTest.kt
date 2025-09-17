@@ -180,6 +180,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                                             listOfNotNull(
                                                 if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
                                             ),
+                                        begrunnelse = "Delt bosted",
                                     ),
                                 ),
                         ),

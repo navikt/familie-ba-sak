@@ -62,10 +62,14 @@ enum class FeatureToggle(
 
     AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG("familie-ba-sak.kjoering-autovedtak-finnmarkstillegg"),
 
+    AUTOMATISK_KJØRING_AV_AUTOVEDTAK_SVALBARDSTILLEGG("familie-ba-sak.kjoering-autovedtak-svalbardtillegg"),
+
     KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG("familie-ba-sak.kan-kjoere-autovedtak-finnmarkstillegg"),
 
     KAN_KJØRE_AUTOVEDTAK_SVALBARDTILLEGG("familie-ba-sak.kan-kjoere-autovedtak-svalbardtillegg"),
 
     // NAV-26038
     BRUK_NY_LOGIKK_FOR_AA_FINNE_ENHET_FOR_OPPRETTING_AV_KLAGEBEHANDLING("familie-ba-sak.bruk-ny-logikk-for-aa-finne-enhet-for-oppretting-av-klagebehandling"),
+
+    VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR("familie-ba-sak.valider-endring-av-preutfylte-vilkaar"),
 }
