@@ -130,7 +130,7 @@ credential:
   password: "not-a-real-password"
 
 logging:
-  config: "classpath:logback-test.xml"
+  config: "classpath:logback-devlauncher.xml"
 sentry.environment: local
 sentry.logging.enabled: false
 
