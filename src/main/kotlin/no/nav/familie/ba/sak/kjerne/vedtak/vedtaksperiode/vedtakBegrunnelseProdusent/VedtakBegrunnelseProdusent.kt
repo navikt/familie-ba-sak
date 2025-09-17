@@ -8,9 +8,9 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
@@ -36,8 +36,10 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdu
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentBegrunnelser.hentStandardBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.tidslinje.Periode
@@ -111,9 +113,16 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
             ?.sumOf { it.kalkulertUtbetalingsbeløp }
             ?.let { it > 0 } ?: false
 
+    val erReduksjonIFinnmarkstilleggIPeriode = hentErReduksjonIFinnmarkstilleggIPeriode(grunnlag.behandlingsGrunnlagForVedtaksperioder.andelerTilkjentYtelse, this.fom)
+
     return begrunnelseGrunnlagPerPerson.mapValues { (person, begrunnelseGrunnlag) ->
         val relevantePeriodeResultater =
-            hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode, erUtbetalingPåSøkerIPeriode)
+            hentResultaterForPeriode(
+                begrunnelseGrunnlagForPeriode = begrunnelseGrunnlag.dennePerioden,
+                begrunnelseGrunnlagForrigePeriode = begrunnelseGrunnlag.forrigePeriode,
+                erUtbetalingPåSøkerIPeriode = erUtbetalingPåSøkerIPeriode,
+                erReduksjonIFinnmarkstillegg = erReduksjonIFinnmarkstilleggIPeriode,
+            )
 
         val temaSomPeriodeErVurdertEtter = hentTemaSomPeriodeErVurdertEtter(begrunnelseGrunnlag)
 
@@ -152,6 +161,25 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
 
         (standardOgEøsBegrunnelser + avslagsbegrunnelser).toSet()
     }
+}
+
+private fun hentErReduksjonIFinnmarkstilleggIPeriode(
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    periodeFom: LocalDate?,
+): Boolean {
+    if (periodeFom == null) return false
+
+    val erFinnmarksAndelDennePerioden =
+        andelerTilkjentYtelse
+            .filter { it.stønadFom == periodeFom.toYearMonth() }
+            .any { it.type == YtelseType.FINNMARKSTILLEGG }
+
+    val finnmarksAndelForrigePeriode =
+        andelerTilkjentYtelse
+            .filter { it.stønadTom == periodeFom.toYearMonth().minusMonths(1) }
+            .any { it.type == YtelseType.FINNMARKSTILLEGG }
+
+    return !erFinnmarksAndelDennePerioden && finnmarksAndelForrigePeriode
 }
 
 fun erUtbetalingEllerDeltBostedIPeriode(begrunnelseGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
@@ -421,6 +449,7 @@ private fun hentResultaterForPeriode(
     begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode,
     begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
     erUtbetalingPåSøkerIPeriode: Boolean,
+    erReduksjonIFinnmarkstillegg: Boolean,
 ): List<SanityPeriodeResultat> {
     val erAndelerPåPersonHvisBarn =
         begrunnelseGrunnlagForPeriode.person.type != PersonType.BARN ||
@@ -431,11 +460,18 @@ private fun hentResultaterForPeriode(
     val erInnvilgetEtterVilkårOgEndretUtbetaling =
         begrunnelseGrunnlagForPeriode.erOrdinæreVilkårInnvilget() && begrunnelseGrunnlagForPeriode.erInnvilgetEtterEndretUtbetaling()
 
+    val erReduksjonIFinnmarkPgaPerson =
+        hentErReduksjonIFinnmarkPgaPerson(
+            begrunnelseGrunnlagForPeriode.vilkårResultater,
+            begrunnelseGrunnlagForrigePeriode?.vilkårResultater,
+            erReduksjonIFinnmarkstillegg,
+        )
+
     val erReduksjonIAndel =
         erReduksjonIAndelMellomPerioder(
             begrunnelseGrunnlagForPeriode,
             begrunnelseGrunnlagForrigePeriode,
-        )
+        ) || erReduksjonIFinnmarkPgaPerson
 
     val erEøs = begrunnelseGrunnlagForPeriode.kompetanse != null
 
@@ -471,6 +507,23 @@ private fun hentResultaterForPeriode(
             SanityPeriodeResultat.IKKE_INNVILGET,
         )
     }
+}
+
+private fun hentErReduksjonIFinnmarkPgaPerson(
+    vilkårResultaterDennePerioden: Iterable<VilkårResultatForVedtaksperiode>,
+    vilkårResultaterForrigePeriode: Iterable<VilkårResultatForVedtaksperiode>?,
+    erReduksjonIFinnmarkstillegg: Boolean,
+): Boolean {
+    val erBosattIFinnmarkForrigePeriode =
+        vilkårResultaterForrigePeriode
+            ?.flatMap { it.utdypendeVilkårsvurderinger }
+            ?.any { it == UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS } ?: false
+    val erBosattIFinnmarkDennePeriode =
+        vilkårResultaterDennePerioden
+            .flatMap { it.utdypendeVilkårsvurderinger }
+            .any { it == UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS }
+
+    return erBosattIFinnmarkForrigePeriode && !erBosattIFinnmarkDennePeriode && erReduksjonIFinnmarkstillegg
 }
 
 private fun erKunReduksjonAvSats(
