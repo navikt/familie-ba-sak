@@ -122,7 +122,7 @@ data class Behandling(
             erManuellMigrering() -> false
             erMigrering() -> false
             erIverksetteKAVedtak() -> false
-            erFinnmarkstillegg() && resultat in setOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT) -> false
+            erFinnmarksTilleggEllerSvalbardtillegg() && resultat in setOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT) -> false
             else -> true
         }
 
@@ -166,7 +166,7 @@ data class Behandling(
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
             skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID && this.resultat == FORTSATT_INNVILGET -> true
             skalBehandlesAutomatisk && erMånedligValutajustering() -> true
-            skalBehandlesAutomatisk && erFinnmarkstillegg() -> true
+            skalBehandlesAutomatisk && erFinnmarksTilleggEllerSvalbardtillegg() -> true
             else -> false
         }
 
@@ -227,11 +227,15 @@ data class Behandling(
 
     fun erFinnmarkstillegg() = this.opprettetÅrsak == BehandlingÅrsak.FINNMARKSTILLEGG
 
+    fun erSvalbardtillegg() = this.opprettetÅrsak == BehandlingÅrsak.SVALBARDTILLEGG
+
+    fun erFinnmarksTilleggEllerSvalbardtillegg() = erFinnmarkstillegg() || erSvalbardtillegg()
+
     fun erSatsendringEllerMånedligValutajustering() = erSatsendring() || erMånedligValutajustering()
 
     fun erOppdaterUtvidetKlassekode() = this.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE
 
-    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsendringEllerMånedligValutajustering() || erSmåbarnstillegg() || erOmregning() || erFinnmarkstillegg()
+    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsendringEllerMånedligValutajustering() || erSmåbarnstillegg() || erOmregning() || erFinnmarksTilleggEllerSvalbardtillegg()
 
     fun erManuellMigreringForEndreMigreringsdato() =
         erMigrering() &&
@@ -353,6 +357,7 @@ enum class BehandlingÅrsak(
     OPPDATER_UTVIDET_KLASSEKODE("Ny klassekode for utvidet barnetrygd"),
     IVERKSETTE_KA_VEDTAK("Iverksette KA-vedtak"),
     FINNMARKSTILLEGG("Finnmarkstillegg"),
+    SVALBARDTILLEGG("Svalbardtillegg"),
     ;
 
     fun erOmregningsårsak(): Boolean = this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG

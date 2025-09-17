@@ -77,6 +77,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -349,6 +351,18 @@ class BehandlingsresultatStegTest {
 
     @Nested
     inner class PreValiderStegTest {
+        @ParameterizedTest
+        @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG"])
+        fun `skal ikke valideres om behandlingen ikke har riktig årsak for behandling som skal automatisk behandles`(
+            behandlingÅrsak: BehandlingÅrsak,
+        ) {
+            // Arrange
+            val behandling = lagBehandling(skalBehandlesAutomatisk = true, årsak = behandlingÅrsak)
+
+            // Act & assert
+            assertDoesNotThrow { behandlingsresultatSteg.preValiderSteg(behandling) }
+        }
+
         @Test
         fun `Skal kaste feil dersom det finnes kompetanser der Norge er sekundærland men aktivitetsland og bosted er satt til Norge`() {
             // Arrange

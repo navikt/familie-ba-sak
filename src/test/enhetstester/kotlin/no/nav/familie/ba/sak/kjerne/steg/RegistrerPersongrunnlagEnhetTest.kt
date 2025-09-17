@@ -25,6 +25,9 @@ import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 
 class RegistrerPersongrunnlagEnhetTest {
@@ -123,6 +126,33 @@ class RegistrerPersongrunnlagEnhetTest {
 
     @Nested
     inner class PostValiderSteg {
+        @ParameterizedTest
+        @EnumSource(BehandlingÅrsak::class, names = ["FINNMARKSTILLEGG", "SVALBARDTILLEGG"], mode = EnumSource.Mode.EXCLUDE)
+        fun `skal ikke validere om behandlingen har en annen årsak enn FINNMARKSTILLEGG eller SVALBARDTILLEGG`(
+            behandlingÅrsak: BehandlingÅrsak,
+        ) {
+            // Arrange
+            val behandling = lagBehandling(årsak = behandlingÅrsak)
+
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
+
+            // Act & Assert
+            assertDoesNotThrow { registrerPersongrunnlagSteg.postValiderSteg(behandling) }
+        }
+
+        @Test
+        fun `Skal kaste feil i finnmarkstillegg-behandlinger om forrige vedtatte behandling ikke finnes`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.FINNMARKSTILLEGG)
+
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
+
+            // Act & Assert
+            assertThatThrownBy { registrerPersongrunnlagSteg.postValiderSteg(behandling) }.hasMessage(
+                "Vi kan ikke kjøre behandling med årsak ${behandling.opprettetÅrsak} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}",
+            )
+        }
+
         @Test
         fun `Skal kaste feil i finnmarkstillegg-behandlinger hvis det ikke er endringer i 'Bosatt i riket'-vilkåret`() {
             // Arrange
@@ -235,6 +265,144 @@ class RegistrerPersongrunnlagEnhetTest {
                             perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 2, 1) to null),
                             vilkårsvurdering = it,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
+                        ),
+                    )
+                }
+
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns forrigeBehandling
+            every { vilkårService.hentVilkårsvurderingThrows(forrigeBehandling.id) } returns forrigeVilkårsvurdering
+            every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vilkårsvurdering
+
+            // Act & Assert
+            assertThatCode { registrerPersongrunnlagSteg.postValiderSteg(behandling) }.doesNotThrowAnyException()
+        }
+
+        @Test
+        fun `Skal kaste feil i svalbardtillegg-behandlinger om forrige vedtatte behandling ikke finnes`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.SVALBARDTILLEGG)
+
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
+
+            // Act & Assert
+            assertThatThrownBy { registrerPersongrunnlagSteg.postValiderSteg(behandling) }.hasMessage(
+                "Vi kan ikke kjøre behandling med årsak ${behandling.opprettetÅrsak} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}",
+            )
+        }
+
+        @Test
+        fun `Skal kaste feil i svalbardtillegg-behandlinger hvis det ikke er endringer i 'Bosatt i riket'-vilkåret`() {
+            // Arrange
+            val person = lagPerson()
+
+            val forrigeBehandling = lagBehandling()
+            val forrigeVilkårsvurdering =
+                lagVilkårsvurdering(behandling = forrigeBehandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = forrigeBehandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
+                        ),
+                    )
+                }
+
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.SVALBARDTILLEGG)
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = behandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
+                        ),
+                    )
+                }
+
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns forrigeBehandling
+            every { vilkårService.hentVilkårsvurderingThrows(forrigeBehandling.id) } returns forrigeVilkårsvurdering
+            every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vilkårsvurdering
+
+            // Act & Assert
+            assertThatThrownBy { registrerPersongrunnlagSteg.postValiderSteg(behandling) }.hasMessage(
+                "Ruller tilbake behandling pga ingen endring i 'Bosatt i riket'-vilkåret",
+            )
+        }
+
+        @Test
+        fun `Skal ikke kaste feil i svalbardtillegg-behandlinger hvis utdypende vilkårsvurdering i 'Bosatt i riket'-vilkåret er endret`() {
+            // Arrange
+            val person = lagPerson()
+
+            val forrigeBehandling = lagBehandling()
+            val forrigeVilkårsvurdering =
+                lagVilkårsvurdering(behandling = forrigeBehandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = forrigeBehandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
+                        ),
+                    )
+                }
+
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.SVALBARDTILLEGG)
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = behandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(),
+                        ),
+                    )
+                }
+
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns forrigeBehandling
+            every { vilkårService.hentVilkårsvurderingThrows(forrigeBehandling.id) } returns forrigeVilkårsvurdering
+            every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vilkårsvurdering
+
+            // Act & Assert
+            assertThatCode { registrerPersongrunnlagSteg.postValiderSteg(behandling) }.doesNotThrowAnyException()
+        }
+
+        @Test
+        fun `Skal ikke kaste feil i svalbardtillegg-behandlinger hvis periode i 'Bosatt i riket'-vilkåret er endret`() {
+            // Arrange
+            val person = lagPerson()
+
+            val forrigeBehandling = lagBehandling()
+            val forrigeVilkårsvurdering =
+                lagVilkårsvurdering(behandling = forrigeBehandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = forrigeBehandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
+                        ),
+                    )
+                }
+
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.SVALBARDTILLEGG)
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = behandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 2, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                         ),
                     )
                 }
