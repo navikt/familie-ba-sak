@@ -368,6 +368,7 @@ fun lagVilkårResultat(
     erEksplisittAvslagPåSøknad: Boolean = false,
     standardbegrunnelser: List<IVedtakBegrunnelse> = emptyList(),
     vurderesEtter: Regelverk? = null,
+    erPreutfylt: Boolean = false,
 ) = VilkårResultat(
     id = id,
     personResultat = personResultat,
@@ -381,6 +382,7 @@ fun lagVilkårResultat(
     erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
     standardbegrunnelser = standardbegrunnelser,
     vurderesEtter = vurderesEtter,
+    erOpprinneligPreutfylt = erPreutfylt,
 )
 
 fun oppfyltVilkår(

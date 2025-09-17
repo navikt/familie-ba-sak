@@ -626,7 +626,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
 
         assertThat(faktiskeVilkårResultaterPerAktør)
             .usingRecursiveComparison()
-            .ignoringFieldsMatchingRegexes("id", ".*opprettetTidspunkt", ".*endretTidspunkt", ".*begrunnelse", ".*erAutomatiskVurdert")
+            .ignoringFieldsMatchingRegexes("id", ".*opprettetTidspunkt", ".*endretTidspunkt", ".*begrunnelse", ".*erAutomatiskVurdert", ".*erOpprinneligPreutfylt")
             .ignoringCollectionOrder()
             .isEqualTo(forventedeVilkårResultaterPerAktør)
     }

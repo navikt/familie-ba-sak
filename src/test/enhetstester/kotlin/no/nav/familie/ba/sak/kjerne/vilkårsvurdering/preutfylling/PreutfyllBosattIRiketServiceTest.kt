@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 import org.assertj.core.api.Assertions.assertThat
@@ -578,7 +579,7 @@ class PreutfyllBosattIRiketServiceTest {
         val begrunnelse = vilkårResultat.firstOrNull { it.resultat == Resultat.OPPFYLT }?.begrunnelse
         assertThat(vilkårResultat).hasSize(3)
         assertThat(begrunnelse).isEqualTo(
-            "Fylt ut automatisk fra registerdata i PDL\n" +
+            PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT +
                 "- Norsk bostedsadresse i minst 12 måneder.",
         )
         assertThat(vilkårResultat).allSatisfy {
@@ -620,7 +621,7 @@ class PreutfyllBosattIRiketServiceTest {
         // Assert
         val begrunnelse = vilkårResultat.firstOrNull { it.resultat == Resultat.OPPFYLT }?.begrunnelse
         assertThat(begrunnelse).isEqualTo(
-            "Fylt ut automatisk fra registerdata i PDL\n" +
+            PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT +
                 "- Bosatt i Norge siden fødsel.",
         )
         assertThat(vilkårResultat).allSatisfy {

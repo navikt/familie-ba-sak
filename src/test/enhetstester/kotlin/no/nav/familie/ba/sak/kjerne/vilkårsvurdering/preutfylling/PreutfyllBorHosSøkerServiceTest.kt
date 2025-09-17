@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -328,6 +329,6 @@ class PreutfyllBorHosSøkerServiceTest {
                 }
 
         assertThat(borFastHosSøkerVilkår.begrunnelse)
-            .isEqualTo("Fylt ut automatisk fra registerdata i PDL\n- Har samme bostedsadresse som søker.")
+            .isEqualTo("$PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT- Har samme bostedsadresse som søker.")
     }
 }

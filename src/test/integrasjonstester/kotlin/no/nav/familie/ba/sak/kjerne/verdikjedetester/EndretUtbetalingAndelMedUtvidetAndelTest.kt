@@ -86,6 +86,7 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
                                             listOfNotNull(
                                                 if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
                                             ),
+                                        begrunnelse = "Oppfylt",
                                     ),
                                 ),
                         ),
