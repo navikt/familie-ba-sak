@@ -117,21 +117,15 @@ class VilkårService(
     private fun erEndringIVilkår(
         vilkårResultat: VilkårResultat,
         restVilkårResultat: RestVilkårResultat,
-    ): Boolean {
-        fun <T> collectionsErUlike(
-            a: Collection<T>,
-            b: Collection<T>,
-        ) = !(a.containsAll(b) && b.containsAll(a))
-
-        return vilkårResultat.periodeFom != restVilkårResultat.periodeFom ||
+    ): Boolean =
+        vilkårResultat.periodeFom != restVilkårResultat.periodeFom ||
             vilkårResultat.periodeTom != restVilkårResultat.periodeTom ||
             vilkårResultat.resultat != restVilkårResultat.resultat ||
             vilkårResultat.resultatBegrunnelse != restVilkårResultat.resultatBegrunnelse ||
             vilkårResultat.erEksplisittAvslagPåSøknad != restVilkårResultat.erEksplisittAvslagPåSøknad ||
             vilkårResultat.vurderesEtter != restVilkårResultat.vurderesEtter ||
-            collectionsErUlike(vilkårResultat.utdypendeVilkårsvurderinger, restVilkårResultat.utdypendeVilkårsvurderinger) ||
-            collectionsErUlike(vilkårResultat.standardbegrunnelser, restVilkårResultat.avslagBegrunnelser ?: emptyList())
-    }
+            vilkårResultat.utdypendeVilkårsvurderinger.toSet() != restVilkårResultat.utdypendeVilkårsvurderinger.toSet() ||
+            vilkårResultat.standardbegrunnelser.toSet() != restVilkårResultat.avslagBegrunnelser.orEmpty().toSet()
 
     @Transactional
     fun deleteVilkårsperiode(
