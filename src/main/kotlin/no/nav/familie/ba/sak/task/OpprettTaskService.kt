@@ -158,7 +158,7 @@ class OpprettTaskService(
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     fun opprettAutovedtakFinnmarkstilleggTask(
         fagsakId: Long,
     ) {
@@ -180,25 +180,27 @@ class OpprettTaskService(
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun opprettAutovedtakSvalbardtilleggTask(
-        fagsakId: Long,
+    @Transactional
+    fun opprettAutovedtakSvalbardtilleggTasker(
+        fagsakIder: Collection<Long>,
     ) {
-        overstyrTaskMedNyCallId(IdUtils.generateId()) {
-            taskRepository.save(
-                Task(
-                    type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE,
-                    payload = fagsakId.toString(),
-                    properties =
-                        Properties().apply {
-                            this["fagsakId"] = fagsakId.toString()
-                        },
-                ).apply {
-                    if (envService.erProd()) {
-                        medTriggerTid(LocalDateTime.now().plusHours(1))
-                    }
-                },
-            )
+        fagsakIder.forEach { fagsakId ->
+            overstyrTaskMedNyCallId(IdUtils.generateId()) {
+                taskRepository.save(
+                    Task(
+                        type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE,
+                        payload = fagsakId.toString(),
+                        properties =
+                            Properties().apply {
+                                this["fagsakId"] = fagsakId.toString()
+                            },
+                    ).apply {
+                        if (envService.erProd()) {
+                            medTriggerTid(LocalDateTime.now().plusHours(1))
+                        }
+                    },
+                )
+            }
         }
     }
 

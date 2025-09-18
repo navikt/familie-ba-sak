@@ -98,13 +98,13 @@ class SvalbardtilleggControllerTest {
             every { fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør) } returns listOf(fagsak)
             every { taskService.finnAlleTaskerMedPayloadOgType(fagsak.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns emptyList()
 
-            justRun { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(any()) }
+            justRun { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(any()) }
 
             // Act
             svalbardtilleggController.vurderSvalbardtillegg(personIdent)
 
             // Assert
-            verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(fagsak.id) }
+            verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(listOf(fagsak.id)) }
         }
 
         @ParameterizedTest
@@ -123,7 +123,7 @@ class SvalbardtilleggControllerTest {
             svalbardtilleggController.vurderSvalbardtillegg(personIdent)
 
             // Assert
-            verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(any()) }
+            verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(any()) }
         }
 
         @ParameterizedTest
@@ -137,13 +137,13 @@ class SvalbardtilleggControllerTest {
 
             every { fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør) } returns listOf(fagsak)
             every { taskService.finnAlleTaskerMedPayloadOgType(fagsak.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns listOf(eksisterendeTask)
-            justRun { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(any()) }
+            justRun { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(any()) }
 
             // Act
             svalbardtilleggController.vurderSvalbardtillegg(personIdent)
 
             // Assert
-            verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(fagsak.id) }
+            verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(listOf(fagsak.id)) }
         }
 
         @Test
@@ -155,7 +155,7 @@ class SvalbardtilleggControllerTest {
             svalbardtilleggController.vurderSvalbardtillegg(personIdent)
 
             // Assert
-            verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(any()) }
+            verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(any()) }
             verify(exactly = 0) { taskService.finnAlleTaskerMedPayloadOgType(any(), any()) }
         }
 
@@ -184,17 +184,17 @@ class SvalbardtilleggControllerTest {
             every { taskService.finnAlleTaskerMedPayloadOgType(institusjonFagsak.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns emptyList()
             every { taskService.finnAlleTaskerMedPayloadOgType(skjermetBarnFagsak.id.toString(), AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE) } returns emptyList()
 
-            justRun { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(any()) }
+            justRun { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(any()) }
 
             // Act
             svalbardtilleggController.vurderSvalbardtillegg(personIdent)
 
             // Assert
-            verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(normalFagsak1.id) } // Har allerede UBEHANDLET task
-            verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(normalFagsak2.id) } // NORMAL type, ingen task
-            verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(barnEnsligFagsak.id) } // BARN_ENSLIG_MINDREÅRIG type, ingen task
-            verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(institusjonFagsak.id) } // INSTITUSJON type filtreres bort
-            verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTask(skjermetBarnFagsak.id) } // SKJERMET_BARN type filtreres bort
+            verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(listOf(normalFagsak1.id)) } // Har allerede UBEHANDLET task
+            verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(listOf(normalFagsak2.id)) } // NORMAL type, ingen task
+            verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(listOf(barnEnsligFagsak.id)) } // BARN_ENSLIG_MINDREÅRIG type, ingen task
+            verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(listOf(institusjonFagsak.id)) } // INSTITUSJON type filtreres bort
+            verify(exactly = 0) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(listOf(skjermetBarnFagsak.id)) } // SKJERMET_BARN type filtreres bort
         }
     }
 }

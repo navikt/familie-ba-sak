@@ -52,7 +52,7 @@ class SvalbardtilleggController(
                         .any { it.status in setOf(UBEHANDLET, KLAR_TIL_PLUKK) }
 
                 if (!finnesUkjørtSvalbardtilleggTaskForFagsak) {
-                    opprettTaskService.opprettAutovedtakSvalbardtilleggTask(fagsak.id)
+                    opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(listOf(fagsak.id))
                 }
             }
 
