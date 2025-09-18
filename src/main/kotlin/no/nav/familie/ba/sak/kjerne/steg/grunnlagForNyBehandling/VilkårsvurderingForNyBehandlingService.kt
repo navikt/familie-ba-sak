@@ -9,7 +9,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaSe
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.HELMANUELL_MIGRERING
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SATSENDRING
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SØKNAD
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -43,7 +49,7 @@ class VilkårsvurderingForNyBehandlingService(
         nyMigreringsdato: LocalDate? = null,
     ) {
         when (behandling.opprettetÅrsak) {
-            BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> {
+            ENDRE_MIGRERINGSDATO -> {
                 genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
                     behandling = behandling,
                     forrigeBehandlingSomErVedtatt =
@@ -57,7 +63,7 @@ class VilkårsvurderingForNyBehandlingService(
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
             }
 
-            BehandlingÅrsak.HELMANUELL_MIGRERING -> {
+            HELMANUELL_MIGRERING -> {
                 genererVilkårsvurderingForHelmanuellMigrering(
                     behandling = behandling,
                     nyMigreringsdato =
@@ -68,9 +74,9 @@ class VilkårsvurderingForNyBehandlingService(
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
             }
 
-            BehandlingÅrsak.SATSENDRING,
-            BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING,
-            BehandlingÅrsak.FINNMARKSTILLEGG,
+            SATSENDRING,
+            MÅNEDLIG_VALUTAJUSTERING,
+            FINNMARKSTILLEGG,
             -> {
                 genererVilkårsvurderingForSatsendringMånedligvalutaJusteringOgFinnmarkstillegg(
                     forrigeBehandlingSomErVedtatt =
@@ -80,7 +86,7 @@ class VilkårsvurderingForNyBehandlingService(
                 )
             }
 
-            !in listOf(BehandlingÅrsak.SØKNAD, BehandlingÅrsak.FØDSELSHENDELSE) -> {
+            !in listOf(SØKNAD, FØDSELSHENDELSE) -> {
                 initierVilkårsvurderingForBehandling(
                     behandling = behandling,
                     bekreftEndringerViaFrontend = true,
@@ -154,7 +160,7 @@ class VilkårsvurderingForNyBehandlingService(
                 .tilKopiForNyBehandling(
                     nyBehandling = inneværendeBehandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                ).also { if (inneværendeBehandling.opprettetÅrsak == BehandlingÅrsak.FINNMARKSTILLEGG) preutfyllVilkårService.preutfyllBosattIRiket(it) }
+                ).also { if (inneværendeBehandling.opprettetÅrsak == FINNMARKSTILLEGG) preutfyllVilkårService.preutfyllBosattIRiket(it) }
 
         endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
             behandling = inneværendeBehandling,
@@ -190,7 +196,7 @@ class VilkårsvurderingForNyBehandlingService(
 
         if (!behandling.skalBehandlesAutomatisk) {
             preutfyllVilkårService.preutfyllVilkår(vilkårsvurdering = initiellVilkårsvurdering)
-        } else if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE && featureToggleService.isEnabled(SKAL_GENERERE_FINNMARKSTILLEGG)) {
+        } else if (behandling.opprettetÅrsak == FØDSELSHENDELSE && featureToggleService.isEnabled(SKAL_GENERERE_FINNMARKSTILLEGG)) {
             val identerVilkårSkalPreutfyllesFor =
                 barnSomSkalVurderesIFødselshendelse?.let {
                     if (behandling.type == FØRSTEGANGSBEHANDLING) {
@@ -224,7 +230,7 @@ class VilkårsvurderingForNyBehandlingService(
         return if (førsteVilkårsvurderingPåBehandlingOgFinnesTidligereVedtattBehandling) {
             genererVilkårsvurderingFraForrigeVedtatteBehandling(
                 initiellVilkårsvurdering = initiellVilkårsvurdering,
-                forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt!!,
+                forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 løpendeUnderkategori = løpendeUnderkategori,
@@ -232,7 +238,7 @@ class VilkårsvurderingForNyBehandlingService(
         } else if (finnesVilkårsvurderingPåInneværendeBehandling) {
             genererNyVilkårsvurderingForBehandling(
                 initiellVilkårsvurdering = initiellVilkårsvurdering,
-                aktivVilkårsvurdering = aktivVilkårsvurdering!!,
+                aktivVilkårsvurdering = aktivVilkårsvurdering,
                 løpendeUnderkategori = løpendeUnderkategori,
                 forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
                 bekreftEndringerViaFrontend = bekreftEndringerViaFrontend,
@@ -282,7 +288,7 @@ class VilkårsvurderingForNyBehandlingService(
         behandling: Behandling,
         initiellVilkårsvurdering: Vilkårsvurdering,
     ) {
-        if (førstegangskjøringAvVilkårsvurdering(aktivVilkårsvurdering) && behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+        if (førstegangskjøringAvVilkårsvurdering(aktivVilkårsvurdering) && behandling.opprettetÅrsak == FØDSELSHENDELSE) {
             vilkårsvurderingMetrics.tellMetrikker(initiellVilkårsvurdering)
         }
     }

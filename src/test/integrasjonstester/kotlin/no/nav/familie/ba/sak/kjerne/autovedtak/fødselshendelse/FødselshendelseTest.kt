@@ -48,7 +48,7 @@ class FødselshendelseTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AbstractSpringIntegrationTest() {
     @Test
-    fun `Skal innvilge finnmarkstillegg i fødselshendelse førstegangsbehandling hvis mor og barn bor i finnmark`() {
+    fun `Skal innvilge finnmarkstillegg i fødselshendelse førstegangsbehandling hvis mor og barn bor i Finnmark`() {
         // Arrange
         val barnFødselsdato = LocalDate.of(2025, 9, 15)
         val barnFnr = leggTilPersonInfo(barnFødselsdato)
@@ -117,7 +117,7 @@ class FødselshendelseTest(
     }
 
     @Test
-    fun `Skal innvilge finnmarkstillegg i fødselshendelse revurdering hvis mor og barn bor i finnmark`() {
+    fun `Skal innvilge finnmarkstillegg i fødselshendelse revurdering hvis mor og barn bor i Finnmark`() {
         // Arrange
         val eldsteBarnFødselsdato = LocalDate.of(2020, 1, 1)
         val yngsteBarnFødselsdato = LocalDate.of(2025, 9, 15)
