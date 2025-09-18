@@ -76,7 +76,7 @@ fun beregnDifferanse(
                     finnmarkstilleggAty.differanseberegnetPeriodebeløp
                         ?.let { maxOf(-it, 0) }
                         ?.takeIf { it > 0 }
-                        ?.toBigDecimal() ?: BigDecimal.ZERO
+                        ?.toBigDecimal()
                 } else {
                     beløp
                 }
