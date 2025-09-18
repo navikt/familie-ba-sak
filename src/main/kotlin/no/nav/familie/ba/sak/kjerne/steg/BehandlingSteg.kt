@@ -357,7 +357,9 @@ fun hentNesteSteg(
             }
         }
 
-        BehandlingÅrsak.FINNMARKSTILLEGG -> {
+        BehandlingÅrsak.FINNMARKSTILLEGG,
+        BehandlingÅrsak.SVALBARDTILLEGG,
+        -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
