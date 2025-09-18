@@ -5,7 +5,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Ansettelsesperiode
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsgiver
@@ -42,7 +41,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.hentGraphqlQuery
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
@@ -185,16 +183,7 @@ private fun stubHentBostedsadresserOgDeltBostedForPerson(restScenario: RestScena
                                     code = "ok",
                                     person =
                                         PdlBostedsadresseDeltBostedOppholdsadressePerson(
-                                            bostedsadresse =
-                                                listOf(
-                                                    Bostedsadresse(
-                                                        gyldigFraOgMed = LocalDate.parse(person.fødselsdato),
-                                                        gyldigTilOgMed = null,
-                                                        vegadresse = null,
-                                                        matrikkeladresse = lagMatrikkeladresse(1234L),
-                                                        ukjentBosted = null,
-                                                    ),
-                                                ),
+                                            bostedsadresse = person.bostedsadresser,
                                             deltBosted = emptyList(),
                                         ),
                                 )

@@ -27,8 +27,6 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -49,11 +47,10 @@ class AutovedtakFødselshendelseService(
     private val persongrunnlagService: PersongrunnlagService,
     private val personidentService: PersonidentService,
     private val stegService: StegService,
-    private val vedtakService: VedtakService,
-    private val vedtaksperiodeService: VedtaksperiodeService,
     private val autovedtakService: AutovedtakService,
     private val personopplysningerService: PersonopplysningerService,
     private val oppgaveService: OppgaveService,
+    private val autovedtakFødselshendelseBegrunnelseService: AutovedtakFødselshendelseBegrunnelseService,
 ) : AutovedtakBehandlingService<FødselshendelseData> {
     val stansetIAutomatiskFiltreringCounter =
         Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
@@ -143,11 +140,10 @@ class AutovedtakFødselshendelseService(
         behandling: Behandling,
         barnaSomVurderes: List<String>,
     ): String {
-        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
+        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling = behandling, barnSomSkalVurderesIFødselshendelse = barnaSomVurderes)
 
         return if (behandlingEtterVilkårsvurdering.resultat == Behandlingsresultat.INNVILGET) {
-            val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
-            vedtaksperiodeService.oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak, barnaSomVurderes)
+            autovedtakFødselshendelseBegrunnelseService.begrunnVedtaksperioderForBarnVurdertIFødselshendelse(behandling, barnaSomVurderes)
 
             val vedtakEtterToTrinn =
                 autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling = behandlingEtterVilkårsvurdering)

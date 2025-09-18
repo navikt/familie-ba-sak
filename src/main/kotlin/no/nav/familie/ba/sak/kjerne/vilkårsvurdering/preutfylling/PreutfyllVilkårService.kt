@@ -27,9 +27,12 @@ class PreutfyllVilkårService(
         }
     }
 
-    fun preutfyllBosattIRiket(vilkårsvurdering: Vilkårsvurdering) {
+    fun preutfyllBosattIRiket(
+        vilkårsvurdering: Vilkårsvurdering,
+        identerVilkårSkalPreutfyllesFor: List<String>? = null,
+    ) {
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR)) {
-            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, identerVilkårSkalPreutfyllesFor)
         }
     }
 

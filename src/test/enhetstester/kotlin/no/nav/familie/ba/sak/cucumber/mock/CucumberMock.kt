@@ -243,7 +243,6 @@ class CucumberMock(
 
     val vedtaksperiodeService =
         VedtaksperiodeService(
-            personidentService = personidentService,
             persongrunnlagService = persongrunnlagService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
@@ -569,6 +568,7 @@ class CucumberMock(
             vilkårsvurderingMetrics = mockk(),
             andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             preutfyllVilkårService = preutfyllVilkårService,
+            featureToggleService = featureToggleService,
         )
 
     val registrerPersongrunnlag =

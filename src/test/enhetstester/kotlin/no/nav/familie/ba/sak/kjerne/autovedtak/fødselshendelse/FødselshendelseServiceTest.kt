@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingMedOverstyrendeResultater
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
@@ -34,12 +33,9 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -59,20 +55,12 @@ class FødselshendelseServiceTest {
     val persongrunnlagService = mockk<PersongrunnlagService>()
     val personidentService = mockk<PersonidentService>()
     val stegService = mockk<StegService>()
-    val vedtakService = mockk<VedtakService>()
-    val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     val autovedtakService = mockk<AutovedtakService>()
     val personopplysningerService = mockk<PersonopplysningerService>()
     val opprettTaskService = mockk<OpprettTaskService>()
     val oppgaveService = mockk<OppgaveService>()
-
+    val autovedtakFødselshendelseBegrunnelseService = mockk<AutovedtakFødselshendelseBegrunnelseService>()
     val integrasjonClient = mockk<IntegrasjonClient>()
-    val kodeverkService: KodeverkService = mockk()
-    val statsborgerskapService =
-        StatsborgerskapService(
-            integrasjonClient = integrasjonClient,
-            kodeverkService = kodeverkService,
-        )
 
     private val autovedtakFødselshendelseService =
         AutovedtakFødselshendelseService(
@@ -84,11 +72,10 @@ class FødselshendelseServiceTest {
             persongrunnlagService,
             personidentService,
             stegService,
-            vedtakService,
-            vedtaksperiodeService,
             autovedtakService,
             personopplysningerService,
             oppgaveService,
+            autovedtakFødselshendelseBegrunnelseService,
         )
 
     @Test
@@ -142,7 +129,7 @@ class FødselshendelseServiceTest {
                 nyBehandlingHendelse,
             )
         } returns nyBehandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
-        every { stegService.håndterVilkårsvurdering(nyBehandling) } returns
+        every { stegService.håndterVilkårsvurdering(nyBehandling, any()) } returns
             nyBehandling
                 .copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
                 .leggTilBehandlingStegTilstand(StegType.IVERKSETT_MOT_OPPDRAG)

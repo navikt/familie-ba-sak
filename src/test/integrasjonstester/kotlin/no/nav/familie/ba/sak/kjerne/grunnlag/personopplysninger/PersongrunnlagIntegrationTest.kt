@@ -21,8 +21,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.defaultBostedsadresseHistorikk
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
-import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -56,12 +54,6 @@ class PersongrunnlagIntegrationTest(
             søkerAktør.aktivFødselsnummer(),
             PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Mor",
-                kjønn = Kjønn.KVINNE,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UOPPGITT)),
                 dødsfall = DødsfallData(erDød = true, dødsdato = dødsdato),
                 kontaktinformasjonForDoedsbo =
                     PdlKontaktinformasjonForDødsbo(
@@ -77,17 +69,7 @@ class PersongrunnlagIntegrationTest(
 
         leggTilPersonInfo(
             barn1Aktør.aktivFødselsnummer(),
-            PersonInfo(
-                fødselsdato = LocalDate.of(2009, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Gutt",
-                kjønn = Kjønn.MANN,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UOPPGITT)),
-                dødsfall = null,
-                kontaktinformasjonForDoedsbo = null,
-            ),
+            PersonInfo(fødselsdato = LocalDate.of(2009, 1, 1)),
         )
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
@@ -127,12 +109,6 @@ class PersongrunnlagIntegrationTest(
             morAktør.aktivFødselsnummer(),
             PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Mor",
-                kjønn = Kjønn.KVINNE,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UOPPGITT)),
                 statsborgerskap =
                     listOf(
                         Statsborgerskap(
@@ -142,24 +118,12 @@ class PersongrunnlagIntegrationTest(
                             bekreftelsesdato = null,
                         ),
                     ),
-                dødsfall = null,
-                kontaktinformasjonForDoedsbo = null,
             ),
         )
 
         leggTilPersonInfo(
             barn1Aktør.aktivFødselsnummer(),
-            PersonInfo(
-                fødselsdato = LocalDate.of(2009, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Gutt",
-                kjønn = Kjønn.MANN,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UOPPGITT)),
-                dødsfall = null,
-                kontaktinformasjonForDoedsbo = null,
-            ),
+            PersonInfo(fødselsdato = LocalDate.of(2009, 1, 1)),
         )
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morAktør.aktivFødselsnummer()))
         val behandling =
@@ -197,12 +161,6 @@ class PersongrunnlagIntegrationTest(
             morAktør.aktivFødselsnummer(),
             PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Mor",
-                kjønn = Kjønn.KVINNE,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UOPPGITT)),
                 statsborgerskap =
                     listOf(
                         Statsborgerskap(
@@ -212,24 +170,12 @@ class PersongrunnlagIntegrationTest(
                             bekreftelsesdato = null,
                         ),
                     ),
-                dødsfall = null,
-                kontaktinformasjonForDoedsbo = null,
             ),
         )
 
         leggTilPersonInfo(
             barn1Aktør.aktivFødselsnummer(),
-            PersonInfo(
-                fødselsdato = LocalDate.of(2009, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Gutt",
-                kjønn = Kjønn.MANN,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UOPPGITT)),
-                dødsfall = null,
-                kontaktinformasjonForDoedsbo = null,
-            ),
+            PersonInfo(fødselsdato = LocalDate.of(2009, 1, 1)),
         )
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morAktør.aktivFødselsnummer()))
         val behandling =
@@ -260,29 +206,21 @@ class PersongrunnlagIntegrationTest(
         val søkerAktør = personidentService.hentOgLagreAktør(randomFnr(), true)
         val barn1Aktør = personidentService.hentOgLagreAktør(randomFnr(), true)
 
+        val fødselsdatoSøker = LocalDate.of(1990, 1, 1)
         leggTilPersonInfo(
             søkerAktør.aktivFødselsnummer(),
             PersonInfo(
-                fødselsdato = LocalDate.of(1990, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Mor",
-                kjønn = Kjønn.KVINNE,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UOPPGITT)),
+                fødselsdato = fødselsdatoSøker,
+                bostedsadresser = listOf(Bostedsadresse()) + defaultBostedsadresseHistorikk(fødselsdatoSøker),
             ),
         )
 
+        val fødselsdatoBarn = LocalDate.of(2009, 1, 1)
         leggTilPersonInfo(
             barn1Aktør.aktivFødselsnummer(),
             PersonInfo(
-                fødselsdato = LocalDate.of(2009, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Gutt",
-                kjønn = Kjønn.MANN,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UOPPGITT)),
+                fødselsdato = fødselsdatoBarn,
+                bostedsadresser = listOf(Bostedsadresse()) + defaultBostedsadresseHistorikk(fødselsdatoBarn),
             ),
         )
 
@@ -304,7 +242,7 @@ class PersongrunnlagIntegrationTest(
             )
 
         personopplysningGrunnlag.personer.forEach {
-            assertEquals(defaultBostedsadresseHistorikk.size, it.bostedsadresser.size)
+            assertEquals(defaultBostedsadresseHistorikk(it.fødselsdato).size, it.bostedsadresser.size)
         }
     }
 }

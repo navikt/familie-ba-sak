@@ -465,6 +465,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetOppholdPaaSvalbard"
     },
+    INNVILGET_ARBEID_PÅ_SVALBARD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetArbeidPaaSvalbard"
+    },
     INNVILGET_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetUtenlandsoppholdOverTreMaaneder"
@@ -501,9 +505,13 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetSvalbardtillegg"
     },
-    INNVILGET_ARBEID_PÅ_SVALBARD {
+    INNVILGET_AUTOVEDTAK_FØDSEL_FINNMARKSTILLEGG {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
-        override val sanityApiNavn = "innvilgetArbeidPaaSvalbard"
+        override val sanityApiNavn = "innvilgetAutovedtakFoedselFinnmarkstillegg"
+    },
+    INNVILGET_AUTOVEDTAK_FØDSEL_SVALBARDTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetAutovedtakFoedselSvalbard"
     },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON

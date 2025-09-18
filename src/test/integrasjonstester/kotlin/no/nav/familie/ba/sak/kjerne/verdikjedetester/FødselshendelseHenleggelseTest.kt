@@ -26,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.defaultBostedsadresseHistorikk
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -137,45 +136,44 @@ class FødselshendelseHenleggelseTest(
                         fornavn = "Mor",
                         etternavn = "Søker",
                         bostedsadresser =
-                            defaultBostedsadresseHistorikk +
-                                listOf(
-                                    Bostedsadresse(
-                                        angittFlyttedato = null,
-                                        gyldigTilOgMed = null,
-                                        matrikkeladresse =
-                                            Matrikkeladresse(
-                                                matrikkelId = 123L,
-                                                bruksenhetsnummer = "H301",
-                                                tilleggsnavn = "navn",
-                                                postnummer = "0202",
-                                                kommunenummer = "2231",
-                                            ),
-                                    ),
-                                    Bostedsadresse(
-                                        angittFlyttedato = null,
-                                        gyldigTilOgMed = null,
-                                        matrikkeladresse =
-                                            Matrikkeladresse(
-                                                matrikkelId = 123L,
-                                                bruksenhetsnummer = "H301",
-                                                tilleggsnavn = "navn",
-                                                postnummer = "0202",
-                                                kommunenummer = "2231",
-                                            ),
-                                    ),
-                                    Bostedsadresse(
-                                        angittFlyttedato = now(),
-                                        gyldigTilOgMed = null,
-                                        matrikkeladresse =
-                                            Matrikkeladresse(
-                                                matrikkelId = 123L,
-                                                bruksenhetsnummer = "H301",
-                                                tilleggsnavn = "navn",
-                                                postnummer = "0202",
-                                                kommunenummer = "2231",
-                                            ),
-                                    ),
+                            listOf(
+                                Bostedsadresse(
+                                    angittFlyttedato = null,
+                                    gyldigTilOgMed = null,
+                                    matrikkeladresse =
+                                        Matrikkeladresse(
+                                            matrikkelId = 123L,
+                                            bruksenhetsnummer = "H301",
+                                            tilleggsnavn = "navn",
+                                            postnummer = "0202",
+                                            kommunenummer = "2231",
+                                        ),
                                 ),
+                                Bostedsadresse(
+                                    angittFlyttedato = null,
+                                    gyldigTilOgMed = null,
+                                    matrikkeladresse =
+                                        Matrikkeladresse(
+                                            matrikkelId = 123L,
+                                            bruksenhetsnummer = "H301",
+                                            tilleggsnavn = "navn",
+                                            postnummer = "0202",
+                                            kommunenummer = "2231",
+                                        ),
+                                ),
+                                Bostedsadresse(
+                                    angittFlyttedato = now(),
+                                    gyldigTilOgMed = null,
+                                    matrikkeladresse =
+                                        Matrikkeladresse(
+                                            matrikkelId = 123L,
+                                            bruksenhetsnummer = "H301",
+                                            tilleggsnavn = "navn",
+                                            postnummer = "0202",
+                                            kommunenummer = "2231",
+                                        ),
+                                ),
+                            ),
                     ),
                 barna =
                     listOf(

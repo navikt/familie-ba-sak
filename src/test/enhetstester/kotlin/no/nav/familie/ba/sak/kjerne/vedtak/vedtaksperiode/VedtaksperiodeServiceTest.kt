@@ -48,7 +48,6 @@ class VedtaksperiodeServiceTest {
     private val vedtaksperiodeService =
         spyk(
             VedtaksperiodeService(
-                personidentService = mockk(),
                 persongrunnlagService = persongrunnlagService,
                 andelTilkjentYtelseRepository = mockk(),
                 vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
