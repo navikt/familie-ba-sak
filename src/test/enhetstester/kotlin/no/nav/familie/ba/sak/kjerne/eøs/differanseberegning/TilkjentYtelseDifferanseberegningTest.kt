@@ -1,15 +1,21 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.util.DeltBostedBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.TilkjentYtelseBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.ValutakursBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.oppdaterTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.byggTilkjentYtelse
@@ -19,8 +25,12 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RI
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.GIFT_PARTNERSKAP
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.LOVLIG_OPPHOLD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.YearMonth
 
 /**
  * Merk at operasjoner som tilsynelatende lager en ny instans av TilkjentYtelse, faktisk returner samme.
@@ -207,5 +217,137 @@ class TilkjentYtelseDifferanseberegningTest {
             forventetTilkjentYtelseMedDiff.andelerTilkjentYtelse,
             andelerMedDiffIgjen,
         )
+    }
+
+    @Test
+    fun `Skal trekke fra finnmarkstillegg andel og ikke ordinær andel ved differanseberegning hvis det er nok med finnmarkstillegget`() {
+        // Arrange
+        val barnsFødselsdato = 13.jan(2020)
+        val barn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato)
+
+        val andelerForBarn =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2025, 10),
+                    tom = YearMonth.of(2025, 12),
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    beløp = 1000,
+                    person = barn,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2025, 10),
+                    tom = YearMonth.of(2025, 12),
+                    ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    beløp = 500,
+                    person = barn,
+                ),
+            )
+
+        val utenlandskPeriodeBeløpIPeriode =
+            listOf(
+                UtenlandskPeriodebeløp(
+                    fom = YearMonth.of(2025, 10),
+                    tom = YearMonth.of(2025, 12),
+                    barnAktører = setOf(barn.aktør),
+                    beløp = BigDecimal(200),
+                    valutakode = "SEK",
+                    intervall = Intervall.MÅNEDLIG,
+                    utbetalingsland = "NOR",
+                    kalkulertMånedligBeløp = BigDecimal.valueOf(200),
+                ),
+            )
+
+        val valutakursIPeriode =
+            listOf(
+                Valutakurs(
+                    fom = YearMonth.of(2025, 10),
+                    tom = YearMonth.of(2025, 12),
+                    barnAktører = setOf(barn.aktør),
+                    valutakode = "SEK",
+                    vurderingsform = Vurderingsform.AUTOMATISK,
+                    kurs = BigDecimal(1),
+                ),
+            )
+
+        // Act
+        val andelerEtterDifferanseBeregning =
+            beregnDifferanse(
+                andelerForBarn,
+                utenlandskePeriodebeløp = utenlandskPeriodeBeløpIPeriode,
+                valutakurser = valutakursIPeriode,
+            )
+
+        // Assert
+        val ordinærAndel = andelerEtterDifferanseBeregning.single { it.type == YtelseType.ORDINÆR_BARNETRYGD }
+        val finnmarkstilleggAndel = andelerEtterDifferanseBeregning.single { it.type == YtelseType.FINNMARKSTILLEGG }
+
+        assertThat(finnmarkstilleggAndel.kalkulertUtbetalingsbeløp).isEqualTo(300)
+        assertThat(ordinærAndel.kalkulertUtbetalingsbeløp).isEqualTo(1000)
+    }
+
+    @Test
+    fun `Skal trekke videre fra ordinær andel ved differanseberegning hvis det ikke er nok med finnmarkstillegget`() {
+        // Arrange
+        val barnsFødselsdato = 13.jan(2020)
+        val barn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato)
+
+        val andelerForBarn =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2025, 10),
+                    tom = YearMonth.of(2025, 12),
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    beløp = 1000,
+                    person = barn,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2025, 10),
+                    tom = YearMonth.of(2025, 12),
+                    ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    beløp = 500,
+                    person = barn,
+                ),
+            )
+
+        val utenlandskPeriodeBeløpIPeriode =
+            listOf(
+                UtenlandskPeriodebeløp(
+                    fom = YearMonth.of(2025, 10),
+                    tom = YearMonth.of(2025, 12),
+                    barnAktører = setOf(barn.aktør),
+                    beløp = BigDecimal(700),
+                    valutakode = "SEK",
+                    intervall = Intervall.MÅNEDLIG,
+                    utbetalingsland = "NOR",
+                    kalkulertMånedligBeløp = BigDecimal.valueOf(700),
+                ),
+            )
+
+        val valutakursIPeriode =
+            listOf(
+                Valutakurs(
+                    fom = YearMonth.of(2025, 10),
+                    tom = YearMonth.of(2025, 12),
+                    barnAktører = setOf(barn.aktør),
+                    valutakode = "SEK",
+                    vurderingsform = Vurderingsform.AUTOMATISK,
+                    kurs = BigDecimal(1),
+                ),
+            )
+
+        // Act
+        val andelerEtterDifferanseBeregning =
+            beregnDifferanse(
+                andelerForBarn,
+                utenlandskePeriodebeløp = utenlandskPeriodeBeløpIPeriode,
+                valutakurser = valutakursIPeriode,
+            )
+
+        // Assert
+        val ordinærAndel = andelerEtterDifferanseBeregning.single { it.type == YtelseType.ORDINÆR_BARNETRYGD }
+        val finnmarkstilleggAndel = andelerEtterDifferanseBeregning.single { it.type == YtelseType.FINNMARKSTILLEGG }
+
+        assertThat(finnmarkstilleggAndel.kalkulertUtbetalingsbeløp).isEqualTo(0)
+        assertThat(ordinærAndel.kalkulertUtbetalingsbeløp).isEqualTo(800)
     }
 }
