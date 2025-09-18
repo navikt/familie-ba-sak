@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg
+package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg
 
 import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle

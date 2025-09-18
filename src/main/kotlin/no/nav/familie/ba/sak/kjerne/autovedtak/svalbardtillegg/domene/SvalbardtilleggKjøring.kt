@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.domene
+package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

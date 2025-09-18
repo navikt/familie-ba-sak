@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg
+package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
