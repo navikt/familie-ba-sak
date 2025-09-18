@@ -21,7 +21,7 @@ import java.time.LocalDate
 
 data class ManglendeFinnmarkSvalbardMerkingDto(
     val ident: String,
-    val manglendeSvalbardmerkingPerioder: List<ManglendeFinnmarkSvalbardMerkingPeriodeDto>,
+    val manglendeFinnmarkSvalbardMerkingPerioder: List<ManglendeFinnmarkSvalbardMerkingPeriodeDto>,
 )
 
 data class ManglendeFinnmarkSvalbardMerkingPeriodeDto(

@@ -131,8 +131,8 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
 
             // Assert
             assertThat(manglendeSvalbardmerking).hasSize(4)
-            assertThat(manglendeSvalbardmerking.all { it.manglendeSvalbardmerkingPerioder.size == 1 }).isTrue
-            val manglendePerioder = manglendeSvalbardmerking.flatMap { it.manglendeSvalbardmerkingPerioder }
+            assertThat(manglendeSvalbardmerking.all { it.manglendeFinnmarkSvalbardMerkingPerioder.size == 1 }).isTrue
+            val manglendePerioder = manglendeSvalbardmerking.flatMap { it.manglendeFinnmarkSvalbardMerkingPerioder }
             assertThat(manglendePerioder.all { manglendePeriode -> manglendePeriode.fom == bosattPåSvalbardPeriode.fom && manglendePeriode.tom == bosattPåSvalbardPeriode.tom }).isTrue
         }
 
@@ -302,8 +302,8 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
 
             // Assert
             assertThat(manglendeFinnmarkmerking).isNotNull
-            assertThat(manglendeFinnmarkmerking?.manglendeSvalbardmerkingPerioder).hasSize(1)
-            val manglendePeriode = manglendeFinnmarkmerking?.manglendeSvalbardmerkingPerioder?.single()
+            assertThat(manglendeFinnmarkmerking?.manglendeFinnmarkSvalbardMerkingPerioder).hasSize(1)
+            val manglendePeriode = manglendeFinnmarkmerking?.manglendeFinnmarkSvalbardMerkingPerioder?.single()
             assertThat(manglendePeriode?.fom).isEqualTo(LocalDate.of(2024, 8, 15))
             assertThat(manglendePeriode?.tom).isNull()
         }
