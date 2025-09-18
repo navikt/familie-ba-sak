@@ -72,7 +72,7 @@ class AutovedtakSvalbardtilleggService(
                     pdlRestClient
                         .hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(identer)
                         .mapValues { Adresser.opprettFra(it.value) }
-                        .any { it.value.harAdresserSomErRelevantForSvalbardstillegg() }
+                        .any { it.value.harAdresserSomErRelevantForSvalbardtillegg() }
                 }
 
         return sisteIverksatteBehandlingHarSvalbardtilleggAndeler || minstÈnAktørHarAdresseSomErRelevantForSvalbardtillegg
@@ -127,7 +127,7 @@ class AutovedtakSvalbardtilleggService(
                     )
                 }
 
-                else -> throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} for behandlinsårska $SVALBARDTILLEGG for fagsak=${behandlingsdata.fagsakId}")
+                else -> throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} for behandlingsårsak $SVALBARDTILLEGG for fagsak=${behandlingsdata.fagsakId}")
             }
 
         taskService.save(task)

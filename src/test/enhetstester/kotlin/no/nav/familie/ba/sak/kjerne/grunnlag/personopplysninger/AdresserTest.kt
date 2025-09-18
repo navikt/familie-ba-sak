@@ -387,7 +387,7 @@ class AdresserTest {
     }
 
     @Nested
-    inner class HarAdresserSomErRelevantForSvalbardstillegg {
+    inner class HarAdresserSomErRelevantForSvalbardtillegg {
         private val svalbardCutoffDato = LocalDate.of(2025, 9, 30)
 
         @Test
@@ -416,7 +416,7 @@ class AdresserTest {
                 )
 
             // Act
-            val harAdresserSomErRelevantForSvalbardstillegg = adresser.harAdresserSomErRelevantForSvalbardstillegg()
+            val harAdresserSomErRelevantForSvalbardstillegg = adresser.harAdresserSomErRelevantForSvalbardtillegg()
 
             // Assert
             assertThat(harAdresserSomErRelevantForSvalbardstillegg).isTrue()
@@ -448,7 +448,7 @@ class AdresserTest {
                 )
 
             // Act
-            val harAdresserSomErRelevantForSvalbardstillegg = adresser.harAdresserSomErRelevantForSvalbardstillegg()
+            val harAdresserSomErRelevantForSvalbardstillegg = adresser.harAdresserSomErRelevantForSvalbardtillegg()
 
             // Assert
             assertThat(harAdresserSomErRelevantForSvalbardstillegg).isTrue()
@@ -480,7 +480,7 @@ class AdresserTest {
                 )
 
             // Act
-            val harAdresserSomErRelevantForSvalbardstillegg = adresser.harAdresserSomErRelevantForSvalbardstillegg()
+            val harAdresserSomErRelevantForSvalbardstillegg = adresser.harAdresserSomErRelevantForSvalbardtillegg()
 
             // Assert
             assertThat(harAdresserSomErRelevantForSvalbardstillegg).isTrue()
@@ -512,7 +512,7 @@ class AdresserTest {
                 )
 
             // Act
-            val harAdresserSomErRelevantForSvalbardstillegg = adresser.harAdresserSomErRelevantForSvalbardstillegg()
+            val harAdresserSomErRelevantForSvalbardstillegg = adresser.harAdresserSomErRelevantForSvalbardtillegg()
 
             // Assert
             assertThat(harAdresserSomErRelevantForSvalbardstillegg).isTrue()
@@ -544,7 +544,7 @@ class AdresserTest {
                 )
 
             // Act
-            val harAdresserSomErRelevantForSvalbardstillegg = adresser.harAdresserSomErRelevantForSvalbardstillegg()
+            val harAdresserSomErRelevantForSvalbardstillegg = adresser.harAdresserSomErRelevantForSvalbardtillegg()
 
             // Assert
             assertThat(harAdresserSomErRelevantForSvalbardstillegg).isFalse()
@@ -576,7 +576,7 @@ class AdresserTest {
                 )
 
             // Act
-            val harAdresserSomErRelevantForSvalbardstillegg = adresser.harAdresserSomErRelevantForSvalbardstillegg()
+            val harAdresserSomErRelevantForSvalbardstillegg = adresser.harAdresserSomErRelevantForSvalbardtillegg()
 
             // Assert
             assertThat(harAdresserSomErRelevantForSvalbardstillegg).isFalse()
@@ -608,7 +608,7 @@ class AdresserTest {
                 )
 
             // Act
-            val harAdresserSomErRelevantForSvalbardstillegg = adresser.harAdresserSomErRelevantForSvalbardstillegg()
+            val harAdresserSomErRelevantForSvalbardstillegg = adresser.harAdresserSomErRelevantForSvalbardtillegg()
 
             // Assert
             assertThat(harAdresserSomErRelevantForSvalbardstillegg).isFalse()
@@ -640,7 +640,7 @@ class AdresserTest {
                 )
 
             // Act
-            val harAdresserSomErRelevantForSvalbardstillegg = adresser.harAdresserSomErRelevantForSvalbardstillegg()
+            val harAdresserSomErRelevantForSvalbardstillegg = adresser.harAdresserSomErRelevantForSvalbardtillegg()
 
             // Assert
             assertThat(harAdresserSomErRelevantForSvalbardstillegg).isFalse()

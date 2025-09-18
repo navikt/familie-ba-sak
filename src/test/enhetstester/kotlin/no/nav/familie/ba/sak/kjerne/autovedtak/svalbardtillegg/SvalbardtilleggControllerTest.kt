@@ -91,7 +91,7 @@ class SvalbardtilleggControllerTest {
         }
 
         @Test
-        fun `vurderSvalbardtillegg skal opprette task for fagsaker med riktig type når ingen eksiterende task finnes`() {
+        fun `vurderSvalbardtillegg skal opprette task for fagsaker med riktig type når ingen eksisterende task finnes`() {
             // Arrange
             val fagsak = lagFagsak(id = 1L, aktør = aktør, type = FagsakType.NORMAL)
 
@@ -109,7 +109,7 @@ class SvalbardtilleggControllerTest {
 
         @ParameterizedTest
         @EnumSource(Status::class, names = ["UBEHANDLET", "KLAR_TIL_PLUKK"], mode = INCLUDE)
-        fun `vurderSvalbardtillegg skal ikke opprette task når det eksisterende task ikke har kjørt`(
+        fun `vurderSvalbardtillegg skal ikke opprette task når eksisterende task ikke har kjørt`(
             taskStatus: Status,
         ) {
             // Arrange

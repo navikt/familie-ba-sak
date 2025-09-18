@@ -583,9 +583,9 @@ class ForvalterController(
         return ResponseEntity.ok("Tasker for autovedtak av Finnmarkstillegg opprettet")
     }
 
-    @PostMapping("/opprett-tasker-for-autovedtak-svalbartillegg")
+    @PostMapping("/opprett-tasker-for-autovedtak-svalbardtillegg")
     @Operation(
-        summary = "Oppretter tasker for autovedtak av Svalbartillegg",
+        summary = "Oppretter tasker for autovedtak av Svalbardtillegg",
     )
     fun opprettTaskerForAutovedtakSvalbardtillegg(
         @RequestBody fagsakIder: List<Long>,

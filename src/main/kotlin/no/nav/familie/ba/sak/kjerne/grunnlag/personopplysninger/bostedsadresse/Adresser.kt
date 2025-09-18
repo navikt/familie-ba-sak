@@ -17,7 +17,7 @@ data class Adresser(
         return harBostedsadresserRelevantForFinnmarkstillegg || harDeltBostederRelevantForFinnmarkstillegg
     }
 
-    fun harAdresserSomErRelevantForSvalbardstillegg(): Boolean = finnAdressehistorikkFraOgMedDato(oppholdsadresse, FØRSTE_RELEVANTE_ADRESSEDATO_FOR_SVALBARDSTILLEGG).any { it.erPåSvalbard() }
+    fun harAdresserSomErRelevantForSvalbardtillegg(): Boolean = finnAdressehistorikkFraOgMedDato(oppholdsadresse, FØRSTE_RELEVANTE_ADRESSEDATO_FOR_SVALBARDSTILLEGG).any { it.erPåSvalbard() }
 
     companion object {
         fun opprettFra(pdlAdresser: PdlBostedsadresseDeltBostedOppholdsadressePerson?): Adresser =
