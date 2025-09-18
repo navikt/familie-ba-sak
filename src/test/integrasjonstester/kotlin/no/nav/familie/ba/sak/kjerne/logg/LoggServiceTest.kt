@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.fake.MockPersonopplysningerService
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -357,7 +357,7 @@ class LoggServiceTest(
         søkerFnr: String,
         barnFnr: String,
     ) {
-        MockPersonopplysningerService.leggTilPersonInfo(
+        FakePersonopplysningerService.leggTilPersonInfo(
             personIdent = barnFnr,
             egendefinertMock =
                 PersonInfo(
@@ -367,7 +367,7 @@ class LoggServiceTest(
                     sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
                 ),
         )
-        MockPersonopplysningerService.leggTilPersonInfo(
+        FakePersonopplysningerService.leggTilPersonInfo(
             personIdent = søkerFnr,
             egendefinertMock =
                 PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen"),

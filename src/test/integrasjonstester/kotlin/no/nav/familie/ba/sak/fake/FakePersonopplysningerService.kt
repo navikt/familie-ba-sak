@@ -40,7 +40,7 @@ import java.time.LocalDate
 @Service
 @Profile("mock-pdl")
 @Primary
-class MockPersonopplysningerService(
+class FakePersonopplysningerService(
     pdlRestClient: PdlRestClient,
     systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
     familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
