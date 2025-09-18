@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -193,9 +193,10 @@ class VilkårsvurderingForNyBehandlingService(
         } else if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE && featureToggleService.isEnabled(SKAL_GENERERE_FINNMARKSTILLEGG)) {
             val identerVilkårSkalPreutfyllesFor =
                 barnSomSkalVurderesIFødselshendelse?.let {
-                    when (behandling.type) {
-                        BehandlingType.FØRSTEGANGSBEHANDLING -> it + behandling.fagsak.aktør.aktivFødselsnummer()
-                        else -> it
+                    if (behandling.type == FØRSTEGANGSBEHANDLING) {
+                        it + behandling.fagsak.aktør.aktivFødselsnummer()
+                    } else {
+                        it
                     }
                 }
             try {
