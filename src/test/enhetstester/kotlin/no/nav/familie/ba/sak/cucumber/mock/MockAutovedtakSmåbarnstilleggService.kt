@@ -41,6 +41,7 @@ fun mockAutovedtakSmåbarnstilleggService(
         autovedtakBrevService = mockk(),
         autovedtakSmåbarnstilleggService = cucumberMock.autovedtakSmåbarnstilleggService,
         autovedtakFinnmarkstilleggService = mockk(),
+        autovedtakSvalbardtilleggService = mockk(),
         snikeIKøenService = mockk(),
         featureToggleService = mockk(),
     )

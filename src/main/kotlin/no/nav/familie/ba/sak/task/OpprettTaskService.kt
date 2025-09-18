@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggTask
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.dto.AutobrevOpphørSmåbarnstilleggDTO
@@ -157,7 +158,7 @@ class OpprettTaskService(
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     fun opprettAutovedtakFinnmarkstilleggTask(
         fagsakId: Long,
     ) {
@@ -180,18 +181,27 @@ class OpprettTaskService(
     }
 
     @Transactional
-    fun opprettAutovedtakSvalbardtilleggTask(
-        fagsakId: Long,
-    ) {
-        opprettAutovedtakSvalbardtilleggTasker(setOf(fagsakId))
-    }
-
-    @Transactional
     fun opprettAutovedtakSvalbardtilleggTasker(
         fagsakIder: Collection<Long>,
     ) {
-        // TODO : Implementer oppretting av tasker, venter på NAV-26044
-        throw UnsupportedOperationException("Oppretting av tasker for Svalbardtillegg er ikke implementert.")
+        fagsakIder.forEach { fagsakId ->
+            overstyrTaskMedNyCallId(IdUtils.generateId()) {
+                taskRepository.save(
+                    Task(
+                        type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE,
+                        payload = fagsakId.toString(),
+                        properties =
+                            Properties().apply {
+                                this["fagsakId"] = fagsakId.toString()
+                            },
+                    ).apply {
+                        if (envService.erProd()) {
+                            medTriggerTid(LocalDateTime.now().plusHours(1))
+                        }
+                    },
+                )
+            }
+        }
     }
 
     @Transactional

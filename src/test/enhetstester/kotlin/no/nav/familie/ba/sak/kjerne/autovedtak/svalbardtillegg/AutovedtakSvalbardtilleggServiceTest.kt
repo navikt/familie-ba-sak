@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
+package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg
 
 import io.mockk.every
 import io.mockk.mockk
@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
-import no.nav.familie.ba.sak.kjerne.autovedtak.FinnmarkstilleggData
+import no.nav.familie.ba.sak.kjerne.autovedtak.SvalbardtilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -35,24 +35,22 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-class AutovedtakFinnmarkstilleggServiceTest {
+class AutovedtakSvalbardtilleggServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val beregningService = mockk<BeregningService>()
     private val fagsakService = mockk<FagsakService>()
     private val pdlRestClient = mockk<SystemOnlyPdlRestClient>()
     private val simuleringService = mockk<SimuleringService>()
-    private val autovedtakFinnmarkstilleggBegrunnelseService = mockk<AutovedtakFinnmarkstilleggBegrunnelseService>()
 
-    private val autovedtakFinnmarkstilleggService =
-        AutovedtakFinnmarkstilleggService(
+    private val autovedtakSvalbardtilleggService =
+        AutovedtakSvalbardtilleggService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             persongrunnlagService = persongrunnlagService,
             beregningService = beregningService,
             fagsakService = fagsakService,
             pdlRestClient = pdlRestClient,
             simuleringService = simuleringService,
-            autovedtakFinnmarkstilleggBegrunnelseService = autovedtakFinnmarkstilleggBegrunnelseService,
             autovedtakService = mockk(),
             behandlingService = mockk(),
             taskService = mockk(),
@@ -70,11 +68,11 @@ class AutovedtakFinnmarkstilleggServiceTest {
         )
 
     private val adresse = Vegadresse(null, null, null, null, null, null, null, null)
-    private val bostedsadresseUtenforFinnmark =
-        Bostedsadresse(gyldigFraOgMed = LocalDate.now(), vegadresse = adresse.copy(kommunenummer = "0301"))
+    private val oppholdsadresseUtenforSvalbard =
+        Oppholdsadresse(gyldigFraOgMed = LocalDate.now(), vegadresse = adresse.copy(kommunenummer = "0301"))
 
-    private val bostedsadresseIFinnmark =
-        Bostedsadresse(gyldigFraOgMed = LocalDate.now(), vegadresse = adresse.copy(kommunenummer = "5601"))
+    private val oppholsadressePåSvalbard =
+        Oppholdsadresse(gyldigFraOgMed = LocalDate.now(), vegadresse = adresse.copy(kommunenummer = "2100"))
 
     @BeforeEach
     fun setUp() {
@@ -97,7 +95,7 @@ class AutovedtakFinnmarkstilleggServiceTest {
             every { fagsakService.hentPåFagsakId(fagsak.id) } returns lagFagsak(status = fagsakStatus)
 
             // Act
-            val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
+            val skalAutovedtakBehandles = autovedtakSvalbardtilleggService.skalAutovedtakBehandles(SvalbardtilleggData(fagsakId = fagsak.id))
 
             // Assert
             assertThat(skalAutovedtakBehandles).isFalse()
@@ -112,7 +110,7 @@ class AutovedtakFinnmarkstilleggServiceTest {
             every { fagsakService.hentPåFagsakId(fagsak.id) } returns lagFagsak(status = LØPENDE, type = fagsakType)
 
             // Act
-            val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
+            val skalAutovedtakBehandles = autovedtakSvalbardtilleggService.skalAutovedtakBehandles(SvalbardtilleggData(fagsakId = fagsak.id))
 
             // Assert
             assertThat(skalAutovedtakBehandles).isFalse()
@@ -124,14 +122,14 @@ class AutovedtakFinnmarkstilleggServiceTest {
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id) } returns null
 
             // Act
-            val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
+            val skalAutovedtakBehandles = autovedtakSvalbardtilleggService.skalAutovedtakBehandles(SvalbardtilleggData(fagsakId = fagsak.id))
 
             // Assert
             assertThat(skalAutovedtakBehandles).isFalse()
         }
 
         @Test
-        fun `skal returnere true når forrige behandling hadde andeler med ytelsetype FINNMARKSTILLEGG`() {
+        fun `skal returnere true når forrige behandling hadde andeler med ytelsetype SVALBARDTILLEGG`() {
             // Arrange
             every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns
                 lagTilkjentYtelse {
@@ -139,51 +137,51 @@ class AutovedtakFinnmarkstilleggServiceTest {
                         lagAndelTilkjentYtelse(
                             fom = YearMonth.of(2025, 10),
                             tom = YearMonth.of(2025, 10),
-                            ytelseType = YtelseType.FINNMARKSTILLEGG,
+                            ytelseType = YtelseType.SVALBARDTILLEGG,
                         ),
                     )
                 }
 
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
+            every { pdlRestClient.hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
-                    søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
-                    barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                    søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
+                    barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
                 )
 
             // Act
-            val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
+            val skalAutovedtakBehandles = autovedtakSvalbardtilleggService.skalAutovedtakBehandles(SvalbardtilleggData(fagsakId = fagsak.id))
 
             // Assert
             assertThat(skalAutovedtakBehandles).isTrue()
         }
 
         @Test
-        fun `skal returnere false når ingen av personene bor i tilleggssone`() {
+        fun `skal returnere false når ingen av personene har oppholdsadresse på Svalbard`() {
             // Arrange
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
+            every { pdlRestClient.hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
-                    søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
-                    barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                    søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
+                    barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
                 )
 
             // Act
-            val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
+            val skalAutovedtakBehandles = autovedtakSvalbardtilleggService.skalAutovedtakBehandles(SvalbardtilleggData(fagsakId = fagsak.id))
 
             // Assert
             assertThat(skalAutovedtakBehandles).isFalse()
         }
 
         @Test
-        fun `skal returnere true når minst en person bor i tilleggssone`() {
+        fun `skal returnere true når minst èn person har oppholdsadresse på Svalbard`() {
             // Arrange
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
+            every { pdlRestClient.hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
-                    søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(bostedsadresse = listOf(bostedsadresseIFinnmark), deltBosted = emptyList()),
-                    barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                    søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholsadressePåSvalbard), deltBosted = emptyList()),
+                    barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
                 )
 
             // Act
-            val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
+            val skalAutovedtakBehandles = autovedtakSvalbardtilleggService.skalAutovedtakBehandles(SvalbardtilleggData(fagsakId = fagsak.id))
 
             // Assert
             assertThat(skalAutovedtakBehandles).isTrue()
