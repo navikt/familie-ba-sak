@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.mock
+package no.nav.familie.ba.sak.fake
 
 import no.nav.familie.ba.sak.common.EnvService
 import org.springframework.boot.test.context.TestConfiguration
