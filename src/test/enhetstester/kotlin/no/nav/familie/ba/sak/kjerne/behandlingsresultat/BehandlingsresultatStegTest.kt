@@ -767,7 +767,7 @@ class BehandlingsresultatStegTest {
             )
 
             assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
-                .hasMessageContaining("Det er oppdaget forskjell i utbetaling utenom finnmarkstillegg andeler. Dette kan ikke skje i en behandling der årsak er FINNMARKSTILLEGG, og den automatiske kjøring stoppes derfor.")
+                .hasMessageContaining("Det er oppdaget forskjell i utbetaling utenom FINNMARKSTILLEGG andeler. Dette kan ikke skje i en behandling der årsak er FINNMARKSTILLEGG, og den automatiske kjøring stoppes derfor.")
         }
 
         @Test
@@ -831,7 +831,7 @@ class BehandlingsresultatStegTest {
             )
 
             assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
-                .hasMessageContaining("Det eksisterer finnmarkstillegg andeler som først blir innvilget mer enn 1 måned fram i tid. Det er ikke mulig å innvilge disse enda, og behandlingen stoppes derfor.")
+                .hasMessageContaining("Det eksisterer FINNMARKSTILLEGG andeler som først blir innvilget mer enn 1 måned fram i tid. Det er ikke mulig å innvilge disse enda, og behandlingen stoppes derfor.")
         }
 
         @Test
@@ -943,6 +943,198 @@ class BehandlingsresultatStegTest {
 
             assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
                 .hasMessageContaining("Det finnes perioder der søker bor i finnmark samtidig som et barn med delt bosted ikke bor i finnmark. Disse sakene støtter vi ikke automatisk, og vi stanser derfor denne behandlingen.")
+        }
+
+        @Test
+        fun `Skal ikke kaste feil dersom eneste endringer i andeler har vært i svalbardtillegg andeler i behandlinger med årsak svalbardtillegg`() {
+            val søker = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val forrigeBehandling =
+                lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
+
+            val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = forrigeBehandling)
+            forrigeTilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        tilkjentYtelse = forrigeTilkjentYtelse,
+                        beløp = 1000,
+                        person = barn,
+                    ),
+                ),
+            )
+
+            val behandling =
+                lagBehandling(
+                    fagsak = forrigeBehandling.fagsak,
+                    behandlingType = BehandlingType.REVURDERING,
+                    årsak = BehandlingÅrsak.SVALBARDTILLEGG,
+                )
+            val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+
+            tilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 1000,
+                        person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 500,
+                        person = barn,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
+                    ),
+                ),
+            )
+
+            lagMocksForPreValiderSteg(
+                behandling = behandling,
+                tilkjentYtelse = tilkjentYtelse,
+                forrigeBehandling = forrigeBehandling,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                søker = søker,
+                barn = listOf(barn),
+            )
+
+            behandlingsresultatSteg.preValiderSteg(behandling)
+            assertThatCode { behandlingsresultatSteg.preValiderSteg(behandling) }.doesNotThrowAnyException()
+        }
+
+        @Test
+        fun `Skal kaste feil dersom det har vært endringer i andeler annet enn svalbardtillegg i behandlinger med årsak svalbardtillegg`() {
+            val søker = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val forrigeBehandling =
+                lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
+
+            val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = forrigeBehandling)
+            forrigeTilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        tilkjentYtelse = forrigeTilkjentYtelse,
+                        beløp = 999,
+                        person = barn,
+                    ),
+                ),
+            )
+
+            val behandling =
+                lagBehandling(
+                    fagsak = forrigeBehandling.fagsak,
+                    behandlingType = BehandlingType.REVURDERING,
+                    årsak = BehandlingÅrsak.SVALBARDTILLEGG,
+                )
+            val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+
+            tilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 1000,
+                        person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 500,
+                        person = barn,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
+                    ),
+                ),
+            )
+
+            lagMocksForPreValiderSteg(
+                behandling = behandling,
+                tilkjentYtelse = tilkjentYtelse,
+                forrigeBehandling = forrigeBehandling,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                søker = søker,
+                barn = listOf(barn),
+            )
+
+            assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
+                .hasMessageContaining("Det er oppdaget forskjell i utbetaling utenom SVALBARDTILLEGG andeler. Dette kan ikke skje i en behandling der årsak er SVALBARDTILLEGG, og den automatiske kjøring stoppes derfor.")
+        }
+
+        @Test
+        fun `Skal kaste feil dersom tidspunktet for førstegang innvilgelse av svalbardtillegget ligger mer enn 1 måned fram i tid`() {
+            val søker = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val forrigeBehandling =
+                lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
+
+            val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = forrigeBehandling)
+            forrigeTilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        tilkjentYtelse = forrigeTilkjentYtelse,
+                        beløp = 999,
+                        person = barn,
+                    ),
+                ),
+            )
+
+            val behandling =
+                lagBehandling(
+                    fagsak = forrigeBehandling.fagsak,
+                    behandlingType = BehandlingType.REVURDERING,
+                    årsak = BehandlingÅrsak.SVALBARDTILLEGG,
+                )
+            val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+
+            tilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        tilkjentYtelse = forrigeTilkjentYtelse,
+                        beløp = 999,
+                        person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.now(clockProvider.get()).plusMonths(2),
+                        tom = YearMonth.now().plusMonths(122),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 500,
+                        person = barn,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
+                    ),
+                ),
+            )
+
+            lagMocksForPreValiderSteg(
+                behandling = behandling,
+                tilkjentYtelse = tilkjentYtelse,
+                forrigeBehandling = forrigeBehandling,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                søker = søker,
+                barn = listOf(barn),
+            )
+
+            assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
+                .hasMessageContaining("Det eksisterer SVALBARDTILLEGG andeler som først blir innvilget mer enn 1 måned fram i tid. Det er ikke mulig å innvilge disse enda, og behandlingen stoppes derfor.")
         }
     }
 
