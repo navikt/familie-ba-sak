@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.ekstern.pensjon
 
 import io.mockk.every
 import io.mockk.slot
-import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
@@ -24,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.mock.EnvServiceMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -54,9 +54,6 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     lateinit var infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
-
-    @Autowired
-    lateinit var envService: EnvService
 
     @Test
     fun `skal finne en relaterte fagsaker per barn`() {
@@ -195,7 +192,7 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         stønadFom: YearMonth = YearMonth.now(),
         stønadTom: YearMonth = YearMonth.now(),
     ) {
-        every { envService.erPreprod() } returns false
+        EnvServiceMock.setErPreprod(false)
         val identFraRequest = slot<String>()
         every { infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(capture(identFraRequest), any()) } answers {
             BarnetrygdTilPensjonResponse(

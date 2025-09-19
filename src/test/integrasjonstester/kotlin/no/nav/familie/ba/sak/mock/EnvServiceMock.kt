@@ -1,37 +1,36 @@
 package no.nav.familie.ba.sak.mock
 
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.familie.ba.sak.common.EnvService
 import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
+import org.springframework.core.env.Environment
 
 @TestConfiguration
-class EnvServiceMock {
-    @Bean
-    @Primary
-    fun mockEnvService(): EnvService {
-        val mockEnvService = mockk<EnvService>(relaxed = true)
+@Primary
+class EnvServiceMock(
+    environment: Environment,
+) : EnvService(environment) {
+    override fun erDev(): Boolean = dev
 
-        every {
-            mockEnvService.erProd()
-        } answers {
-            true
+    override fun erPreprod(): Boolean = preprod
+
+    override fun erProd(): Boolean = prod
+
+    companion object {
+        private var dev: Boolean = true
+        private var preprod: Boolean = true
+        private var prod: Boolean = true
+
+        fun setErDev(erDev: Boolean) {
+            dev = erDev
         }
 
-        every {
-            mockEnvService.erPreprod()
-        } answers {
-            true
+        fun setErPreprod(erPreprod: Boolean) {
+            preprod = erPreprod
         }
 
-        every {
-            mockEnvService.erDev()
-        } answers {
-            true
+        fun setErProd(erProd: Boolean) {
+            prod = erProd
         }
-
-        return mockEnvService
     }
 }
