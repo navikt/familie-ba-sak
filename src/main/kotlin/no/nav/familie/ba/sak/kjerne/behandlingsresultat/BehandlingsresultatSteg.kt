@@ -101,8 +101,12 @@ class BehandlingsresultatSteg(
             validerSatsendring(tilkjentYtelse)
         }
 
-        if (behandling.opprettetÅrsak == BehandlingÅrsak.FINNMARKSTILLEGG) {
+        if (behandling.erFinnmarkstillegg()) {
             validerFinnmarkstilleggBehandling(tilkjentYtelse)
+        }
+
+        if (behandling.erSvalbardtillegg()) {
+            validerSvalbardtilleggBehandling(tilkjentYtelse)
         }
 
         validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
@@ -275,9 +279,40 @@ class BehandlingsresultatSteg(
         val andelerNåværendeBehandling = tilkjentYtelse.andelerTilkjentYtelse.toList()
         val andelerFraForrigeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
 
-        validerAtDetIkkeHarVærtEndringIUtbetalingUtenomFinnmarkstillegg(andelerNåværendeBehandling, andelerFraForrigeBehandling)
-        validerAtIngenFinnmarksandelErInnvilgetFramITid(andelerNåværendeBehandling)
+        validerAtDetIkkeHarVærtEndringIUtbetalingUtenomYtelseType(
+            andelerNåværendeBehandling = andelerNåværendeBehandling,
+            andelerForrigeBehandling = andelerFraForrigeBehandling,
+            ytelseType = YtelseType.FINNMARKSTILLEGG,
+            behandlingÅrsak = BehandlingÅrsak.FINNMARKSTILLEGG,
+        )
+
+        validerAtIngenAndelerMedYtelseTypeErInnvilgetFramITid(
+            andeler = andelerNåværendeBehandling,
+            ytelseType = YtelseType.FINNMARKSTILLEGG,
+        )
+
         validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering)
+    }
+
+    private fun validerSvalbardtilleggBehandling(tilkjentYtelse: TilkjentYtelse) {
+        val forrigeBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(tilkjentYtelse.behandling)
+                ?: throw Feil("Kan ikke kjøre finnmarkstillegg behandling dersom det ikke finnes en tidligere iverksatt behandling")
+
+        val andelerNåværendeBehandling = tilkjentYtelse.andelerTilkjentYtelse.toList()
+        val andelerFraForrigeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
+
+        validerAtDetIkkeHarVærtEndringIUtbetalingUtenomYtelseType(
+            andelerNåværendeBehandling = andelerNåværendeBehandling,
+            andelerForrigeBehandling = andelerFraForrigeBehandling,
+            ytelseType = YtelseType.SVALBARDTILLEGG,
+            behandlingÅrsak = BehandlingÅrsak.SVALBARDTILLEGG,
+        )
+
+        validerAtIngenAndelerMedYtelseTypeErInnvilgetFramITid(
+            andeler = andelerNåværendeBehandling,
+            ytelseType = YtelseType.SVALBARDTILLEGG,
+        )
     }
 
     private fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering: Vilkårsvurdering) {
@@ -313,41 +348,44 @@ class BehandlingsresultatSteg(
             }
     }
 
-    private fun validerAtDetIkkeHarVærtEndringIUtbetalingUtenomFinnmarkstillegg(
+    private fun validerAtDetIkkeHarVærtEndringIUtbetalingUtenomYtelseType(
         andelerNåværendeBehandling: List<AndelTilkjentYtelse>,
         andelerForrigeBehandling: List<AndelTilkjentYtelse>,
+        ytelseType: YtelseType,
+        behandlingÅrsak: BehandlingÅrsak,
     ) {
-        val andelerUtenomFinnmarkstilleggDenneBehandling = andelerNåværendeBehandling.filterNot { it.type == YtelseType.FINNMARKSTILLEGG }
-        val andelerUtenomFinnmarkstilleggForrigeBehandling = andelerForrigeBehandling.filterNot { it.type == YtelseType.FINNMARKSTILLEGG }
+        val andelerUtenomYtelseTypeDenneBehandling = andelerNåværendeBehandling.filterNot { it.type == ytelseType }
+        val andelerUtenomYtelseTypeForrigeBehandling = andelerForrigeBehandling.filterNot { it.type == ytelseType }
 
         val erEndringIUtbetaling =
             EndringIUtbetalingUtil
                 .lagEndringIUtbetalingTidslinje(
-                    nåværendeAndeler = andelerUtenomFinnmarkstilleggDenneBehandling,
-                    forrigeAndeler = andelerUtenomFinnmarkstilleggForrigeBehandling,
+                    nåværendeAndeler = andelerUtenomYtelseTypeDenneBehandling,
+                    forrigeAndeler = andelerUtenomYtelseTypeForrigeBehandling,
                 ).tilPerioder()
                 .any { it.verdi == true }
 
         if (erEndringIUtbetaling) {
-            throw Feil("Det er oppdaget forskjell i utbetaling utenom finnmarkstillegg andeler. Dette kan ikke skje i en behandling der årsak er ${BehandlingÅrsak.FINNMARKSTILLEGG}, og den automatiske kjøring stoppes derfor.")
+            throw Feil("Det er oppdaget forskjell i utbetaling utenom $ytelseType andeler. Dette kan ikke skje i en behandling der årsak er $behandlingÅrsak, og den automatiske kjøring stoppes derfor.")
         }
     }
 
-    private fun validerAtIngenFinnmarksandelErInnvilgetFramITid(
-        andelerNåværendeBehandling: List<AndelTilkjentYtelse>,
+    private fun validerAtIngenAndelerMedYtelseTypeErInnvilgetFramITid(
+        andeler: List<AndelTilkjentYtelse>,
+        ytelseType: YtelseType,
     ) {
-        val finnmarksandelerINåværendeBehandling = andelerNåværendeBehandling.filter { it.type == YtelseType.FINNMARKSTILLEGG }
+        val andelerMedYtelseType = andeler.filter { it.type == ytelseType }
         val dagensDato = YearMonth.now(clockProvider.get())
         val enMånedFramITid = dagensDato.plusMonths(1)
 
-        finnmarksandelerINåværendeBehandling
+        andelerMedYtelseType
             .groupBy { it.aktør }
             .forEach { (_, andel) ->
-                val tidligsteFinnmarkstilleggAndelForAktør = andel.minOfOrNull { it.stønadFom } ?: return@forEach
+                val tidligsteAndelMedYtelseTypeForAktør = andel.minOfOrNull { it.stønadFom } ?: return@forEach
 
                 // TODO: Fiks valideringen når vi går live i oktober
-                if ((tidligsteFinnmarkstilleggAndelForAktør > enMånedFramITid) && dagensDato >= YearMonth.of(2025, 10)) {
-                    throw Feil("Det eksisterer finnmarkstillegg andeler som først blir innvilget mer enn 1 måned fram i tid. Det er ikke mulig å innvilge disse enda, og behandlingen stoppes derfor.")
+                if ((tidligsteAndelMedYtelseTypeForAktør > enMånedFramITid) && dagensDato >= YearMonth.of(2025, 10)) {
+                    throw Feil("Det eksisterer $ytelseType andeler som først blir innvilget mer enn 1 måned fram i tid. Det er ikke mulig å innvilge disse enda, og behandlingen stoppes derfor.")
                 }
             }
     }
