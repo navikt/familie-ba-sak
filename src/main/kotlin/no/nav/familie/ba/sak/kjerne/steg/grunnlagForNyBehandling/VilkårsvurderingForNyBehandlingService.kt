@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FØDSELSH
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.HELMANUELL_MIGRERING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SATSENDRING
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SVALBARDTILLEGG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SØKNAD
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
@@ -77,11 +78,13 @@ class VilkårsvurderingForNyBehandlingService(
             SATSENDRING,
             MÅNEDLIG_VALUTAJUSTERING,
             FINNMARKSTILLEGG,
+            SVALBARDTILLEGG,
             -> {
-                genererVilkårsvurderingForSatsendringMånedligvalutaJusteringOgFinnmarkstillegg(
-                    forrigeBehandlingSomErVedtatt =
-                        forrigeBehandlingSomErVedtatt
-                            ?: throw Feil("Kan ikke opprette behandling med årsak ${behandling.opprettetÅrsak} hvis det ikke finnes en tidligere behandling"),
+                if (forrigeBehandlingSomErVedtatt == null) {
+                    throw Feil("Kan ikke opprette behandling med årsak ${behandling.opprettetÅrsak} hvis det ikke finnes en tidligere behandling")
+                }
+                genererVilkårsvurderingForSatsendringMånedligvalutaJusteringFinnmarkstilleggOgSvalbardtillegg(
+                    forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
                     inneværendeBehandling = behandling,
                 )
             }
@@ -147,7 +150,7 @@ class VilkårsvurderingForNyBehandlingService(
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
     }
 
-    private fun genererVilkårsvurderingForSatsendringMånedligvalutaJusteringOgFinnmarkstillegg(
+    private fun genererVilkårsvurderingForSatsendringMånedligvalutaJusteringFinnmarkstilleggOgSvalbardtillegg(
         forrigeBehandlingSomErVedtatt: Behandling,
         inneværendeBehandling: Behandling,
     ): Vilkårsvurdering {
@@ -160,7 +163,11 @@ class VilkårsvurderingForNyBehandlingService(
                 .tilKopiForNyBehandling(
                     nyBehandling = inneværendeBehandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                ).also { if (inneværendeBehandling.opprettetÅrsak == FINNMARKSTILLEGG) preutfyllVilkårService.preutfyllBosattIRiket(it) }
+                ).also {
+                    if (inneværendeBehandling.erFinnmarksTilleggEllerSvalbardtillegg()) {
+                        preutfyllVilkårService.preutfyllBosattIRiket(it)
+                    }
+                }
 
         endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
             behandling = inneværendeBehandling,
