@@ -7,7 +7,7 @@ import org.springframework.core.env.Environment
 
 @TestConfiguration
 @Primary
-class EnvServiceMock(
+class FakeEnvService(
     environment: Environment,
 ) : EnvService(environment) {
     override fun erDev(): Boolean = dev

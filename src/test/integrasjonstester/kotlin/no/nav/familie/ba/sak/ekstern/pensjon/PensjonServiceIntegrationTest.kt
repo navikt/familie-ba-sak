@@ -23,7 +23,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.mock.EnvServiceMock
+import no.nav.familie.ba.sak.mock.FakeEnvService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -192,7 +192,7 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         stønadFom: YearMonth = YearMonth.now(),
         stønadTom: YearMonth = YearMonth.now(),
     ) {
-        EnvServiceMock.setErPreprod(false)
+        FakeEnvService.setErPreprod(false)
         val identFraRequest = slot<String>()
         every { infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(capture(identFraRequest), any()) } answers {
             BarnetrygdTilPensjonResponse(
