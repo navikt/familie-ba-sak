@@ -50,12 +50,12 @@ class BehandlingServiceIntegrationTest(
     @Test
     fun `Skal rulle tilbake behandling om noe feiler etter opprettelse`() {
         // Arrange
-        val søkerFnr = "00000000000" // Ugyldig fnr for å trigge feil
+        val søkerFnr = "12345678901" // Ugyldig fnr for å trigge feil
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
 
         // Act & Assert
         val error =
-            assertThrows<HttpClientErrorException> {
+            assertThrows<IllegalStateException> {
                 stegService.håndterNyBehandlingOgSendInfotrygdFeed(
                     nyOrdinærBehandling(
                         søkersIdent = søkerFnr,
@@ -63,7 +63,7 @@ class BehandlingServiceIntegrationTest(
                     ),
                 )
             }
-        assertThat(error.message).isEqualTo("404 Fant ikke forespurte data på person.")
+        assertThat(error.message).isEqualTo("12345678901")
 
         val behandlinger = behandlingRepository.finnBehandlinger(fagsakId = fagsak.id)
         assertThat(behandlinger).isEmpty()

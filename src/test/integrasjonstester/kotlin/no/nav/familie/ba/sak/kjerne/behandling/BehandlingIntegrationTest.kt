@@ -15,9 +15,11 @@ import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
+import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
-import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -517,10 +519,6 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Hent en persons bostedsadresse fra PDL og lagre den i database`() {
-        val søkerFnr = randomFnr()
-        val barn1Fnr = randomFnr()
-        val barn2Fnr = randomFnr()
-
         val matrikkelId = 123456L
         val søkerHusnummer = "12"
         val søkerHusbokstav = "A"
@@ -536,56 +534,59 @@ class BehandlingIntegrationTest(
         val barn1Kommunenummer = "3233"
         val barn2BostedKommune = "Oslo"
 
-        leggTilPersonInfo(
-            søkerFnr,
-            PersonInfo(
-                fødselsdato = LocalDate.of(1990, 1, 1),
-                bostedsadresser =
-                    mutableListOf(
-                        Bostedsadresse(
-                            vegadresse =
-                                Vegadresse(
-                                    matrikkelId,
-                                    søkerHusnummer,
-                                    søkerHusbokstav,
-                                    søkerBruksenhetsnummer,
-                                    søkerAdressnavn,
-                                    søkerKommunenummer,
-                                    søkerTilleggsnavn,
-                                    søkerPostnummer,
-                                ),
+        val søkerFnr =
+            leggTilPersonInfo(
+                randomSøkerFødselsdato(),
+                PersonInfo(
+                    fødselsdato = LocalDate.of(1990, 1, 1),
+                    bostedsadresser =
+                        mutableListOf(
+                            Bostedsadresse(
+                                vegadresse =
+                                    Vegadresse(
+                                        matrikkelId,
+                                        søkerHusnummer,
+                                        søkerHusbokstav,
+                                        søkerBruksenhetsnummer,
+                                        søkerAdressnavn,
+                                        søkerKommunenummer,
+                                        søkerTilleggsnavn,
+                                        søkerPostnummer,
+                                    ),
+                            ),
                         ),
-                    ),
-            ),
-        )
+                ),
+            )
 
-        leggTilPersonInfo(
-            barn1Fnr,
-            PersonInfo(
-                fødselsdato = LocalDate.of(2009, 1, 1),
-                bostedsadresser =
-                    mutableListOf(
-                        Bostedsadresse(
-                            matrikkeladresse =
-                                Matrikkeladresse(
-                                    matrikkelId,
-                                    barn1Bruksenhetsnummer,
-                                    barn1Tilleggsnavn,
-                                    barn1Postnummer,
-                                    barn1Kommunenummer,
-                                ),
+        val barn1Fnr =
+            leggTilPersonInfo(
+                randomBarnFødselsdato(),
+                PersonInfo(
+                    fødselsdato = LocalDate.of(2009, 1, 1),
+                    bostedsadresser =
+                        mutableListOf(
+                            Bostedsadresse(
+                                matrikkeladresse =
+                                    Matrikkeladresse(
+                                        matrikkelId,
+                                        barn1Bruksenhetsnummer,
+                                        barn1Tilleggsnavn,
+                                        barn1Postnummer,
+                                        barn1Kommunenummer,
+                                    ),
+                            ),
                         ),
-                    ),
-            ),
-        )
+                ),
+            )
 
-        leggTilPersonInfo(
-            barn2Fnr,
-            PersonInfo(
-                fødselsdato = LocalDate.of(1990, 1, 1),
-                bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune))),
-            ),
-        )
+        val barn2Fnr =
+            leggTilPersonInfo(
+                randomBarnFødselsdato(),
+                PersonInfo(
+                    fødselsdato = LocalDate.of(1990, 1, 1),
+                    bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune))),
+                ),
+            )
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling =

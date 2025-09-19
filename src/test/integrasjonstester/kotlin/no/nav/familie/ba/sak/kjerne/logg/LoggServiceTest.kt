@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.logg
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.fake.MockPersonopplysningerService
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import java.time.LocalDate.now
 import java.time.LocalDateTime
 
 class LoggServiceTest(
@@ -90,10 +91,24 @@ class LoggServiceTest(
 
     @Test
     fun `Skal lage logginnslag ved stegflyt for automatisk behandling`() {
-        val morsIdent = randomFnr()
-        val barnetsIdent = "29422059278"
+        val barnsFødselsdato = LocalDate.of(2020, 2, 29)
+        val barnetsIdent =
+            FakePersonopplysningerService.leggTilPersonInfo(
+                fødselsdato = barnsFødselsdato,
+                egendefinertMock =
+                    PersonInfo(
+                        fødselsdato = LocalDate.of(2018, 5, 1),
+                        kjønn = Kjønn.KVINNE,
+                        navn = "Barn Barnesen",
+                        sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = now().minusMonths(8))),
+                    ),
+            )
 
-        mockHentPersoninfoForIdenter(morsIdent, barnetsIdent)
+        val morsIdent =
+            FakePersonopplysningerService.leggTilPersonInfo(
+                fødselsdato = randomSøkerFødselsdato(),
+                egendefinertMock = PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen"),
+            )
 
         val behandling =
             stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(
@@ -351,26 +366,5 @@ class LoggServiceTest(
         ).also {
             it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
         }.also { behandlingRepository.save(it) }
-    }
-
-    private fun mockHentPersoninfoForIdenter(
-        søkerFnr: String,
-        barnFnr: String,
-    ) {
-        MockPersonopplysningerService.leggTilPersonInfo(
-            personIdent = barnFnr,
-            egendefinertMock =
-                PersonInfo(
-                    fødselsdato = LocalDate.of(2018, 5, 1),
-                    kjønn = Kjønn.KVINNE,
-                    navn = "Barn Barnesen",
-                    sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
-                ),
-        )
-        MockPersonopplysningerService.leggTilPersonInfo(
-            personIdent = søkerFnr,
-            egendefinertMock =
-                PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen"),
-        )
     }
 }
