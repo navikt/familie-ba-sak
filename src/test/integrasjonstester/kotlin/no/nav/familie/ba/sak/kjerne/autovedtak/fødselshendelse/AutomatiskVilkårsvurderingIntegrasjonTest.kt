@@ -2,11 +2,14 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAktør
+import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.eøs.util.søker
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -28,12 +31,10 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Ikke bosatt i riket, skal ikke passere vilkår`() {
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
         val mockSøkerUtenHjem = genererAutomatiskTestperson(bostedsadresser = emptyList())
 
-        leggTilPersonInfo(søkerFnr, mockSøkerUtenHjem)
-        leggTilPersonInfo(barnFnr, mockBarnAutomatiskBehandling)
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato(), mockSøkerUtenHjem)
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato(), mockBarnAutomatiskBehandling)
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår =
@@ -45,12 +46,10 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
 
     @Test
     fun `Barnet er gift, skal ikke passere vilkår`() {
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
         val mockBarnGift = genererAutomatiskTestperson(sivilstander = listOf(Sivilstand(SIVILSTANDTYPE.GIFT)))
 
-        leggTilPersonInfo(søkerFnr, mockSøkerAutomatiskBehandling)
-        leggTilPersonInfo(barnFnr, mockBarnGift)
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato(), mockSøkerAutomatiskBehandling)
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato(), mockBarnGift)
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår =
@@ -62,22 +61,24 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
 
     @Test
     fun `Skal ikke passere vilkårsvurdering dersom barn er over 18`() {
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
-        val barn = genererAutomatiskTestperson(LocalDate.parse("1999-10-10"), emptySet(), emptyList())
+        val barnFødselsdato = LocalDate.parse("1999-10-10")
+        val barn = genererAutomatiskTestperson(barnFødselsdato, emptySet(), emptyList())
+
+        val søkerFødselsdato = LocalDate.parse("1998-10-10")
         val søker =
             genererAutomatiskTestperson(
-                LocalDate.parse("1998-10-10"),
+                søkerFødselsdato,
                 setOf(
                     ForelderBarnRelasjon(
-                        lagAktør(barnFnr),
+                        lagAktør(randomFnr(randomBarnFødselsdato())),
                         FORELDERBARNRELASJONROLLE.BARN,
                     ),
                 ),
                 emptyList(),
             )
-        leggTilPersonInfo(barnFnr, barn)
-        leggTilPersonInfo(søkerFnr, søker)
+
+        val søkerFnr = leggTilPersonInfo(søkerFødselsdato, barn)
+        val barnFnr = leggTilPersonInfo(barnFødselsdato, søker)
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår =
@@ -89,12 +90,14 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
 
     @Test
     fun `Skal ikke passere vilkårsvurdering dersom barn ikke bor med mor`() {
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
-        val barn = genererAutomatiskTestperson(LocalDate.now(), emptySet(), emptyList())
+        val barnFødselsdato = LocalDate.now()
+        val barn = genererAutomatiskTestperson(barnFødselsdato, emptySet(), emptyList())
+        val barnFnr = leggTilPersonInfo(barnFødselsdato, barn)
+
+        val søkerFødselsdato = LocalDate.parse("1998-10-10")
         val søker =
             genererAutomatiskTestperson(
-                LocalDate.parse("1998-10-10"),
+                søkerFødselsdato,
                 setOf(
                     ForelderBarnRelasjon(
                         lagAktør(barnFnr),
@@ -124,8 +127,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
                     ),
             )
 
-        leggTilPersonInfo(barnFnr, barn)
-        leggTilPersonInfo(søkerFnr, søker)
+        val søkerFnr = leggTilPersonInfo(søkerFødselsdato, søker)
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår =

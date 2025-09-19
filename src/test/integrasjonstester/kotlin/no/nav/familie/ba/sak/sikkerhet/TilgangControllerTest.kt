@@ -22,10 +22,11 @@ class TilgangControllerTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun testHarTilgangTilKode6Person() {
+        val fødselsdato = LocalDate.now()
         val fnr =
             leggTilPersonInfo(
-                FnrGenerator.generer(),
-                PersonInfo(fødselsdato = LocalDate.now(), adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG),
+                fødselsdato,
+                PersonInfo(fødselsdato = fødselsdato, adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG),
             )
         every {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(fnr))

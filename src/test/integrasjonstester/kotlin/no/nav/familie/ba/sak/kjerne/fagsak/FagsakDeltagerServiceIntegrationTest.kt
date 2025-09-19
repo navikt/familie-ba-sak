@@ -4,6 +4,7 @@ import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
@@ -72,63 +73,66 @@ class FagsakDeltagerServiceIntegrationTest(
      */
     @Test
     fun `test å søke fagsak med fnr`() {
-        val søker1Fnr = randomFnr()
-        val søker2Fnr = randomFnr()
-        val søker3Fnr = randomFnr()
-        val barn1Fnr = randomFnr()
-        val barn2Fnr = randomFnr()
-        val barn3Fnr = randomFnr()
-
+        val søker1Fødselsdato = LocalDate.of(1990, 2, 19)
+        val søker1Fnr =
+            leggTilPersonInfo(
+                søker1Fødselsdato,
+                PersonInfo(fødselsdato = søker1Fødselsdato, kjønn = Kjønn.KVINNE, navn = "søker1"),
+            )
         val søker1Aktør = personidentService.hentAktør(søker1Fnr)
+
+        val søker2Fødselsdato = LocalDate.of(1991, 2, 20)
+        val søker2Fnr =
+            leggTilPersonInfo(
+                søker2Fødselsdato,
+                PersonInfo(fødselsdato = søker2Fødselsdato, kjønn = Kjønn.MANN, navn = "søker2"),
+            )
+
+        val søker3Fødselsdato = LocalDate.of(1990, 1, 10)
+        val søker3Fnr =
+            leggTilPersonInfo(
+                søker3Fødselsdato,
+                PersonInfo(fødselsdato = søker3Fødselsdato, kjønn = Kjønn.KVINNE, navn = "søker3"),
+            )
         val søker3Aktør = personidentService.hentAktør(søker3Fnr)
 
-        leggTilPersonInfo(
-            barn1Fnr,
-            PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "barn1"),
-        )
+        val barn1Fødselsdato = LocalDate.of(2018, 5, 1)
+        val barn1Fnr =
+            leggTilPersonInfo(
+                barn1Fødselsdato,
+                PersonInfo(fødselsdato = barn1Fødselsdato, kjønn = Kjønn.KVINNE, navn = "barn1"),
+            )
 
-        leggTilPersonInfo(
-            barn2Fnr,
-            PersonInfo(
-                fødselsdato = LocalDate.of(2019, 5, 1),
-                kjønn = Kjønn.MANN,
-                navn = "barn2",
-                forelderBarnRelasjon =
-                    setOf(
-                        ForelderBarnRelasjon(
-                            søker1Aktør,
-                            FORELDERBARNRELASJONROLLE.MEDMOR,
-                            "søker1",
-                            LocalDate.of(1990, 2, 19),
+        val barn2Fødselsdato = LocalDate.of(2019, 5, 1)
+        val barn2Fnr =
+            leggTilPersonInfo(
+                barn2Fødselsdato,
+                PersonInfo(
+                    fødselsdato = barn2Fødselsdato,
+                    kjønn = Kjønn.MANN,
+                    navn = "barn2",
+                    forelderBarnRelasjon =
+                        setOf(
+                            ForelderBarnRelasjon(
+                                søker1Aktør,
+                                FORELDERBARNRELASJONROLLE.MEDMOR,
+                                "søker1",
+                                søker1Fødselsdato,
+                            ),
+                            ForelderBarnRelasjon(
+                                søker3Aktør,
+                                FORELDERBARNRELASJONROLLE.MEDMOR,
+                                "søker3",
+                                søker2Fødselsdato,
+                            ),
                         ),
-                        ForelderBarnRelasjon(
-                            søker3Aktør,
-                            FORELDERBARNRELASJONROLLE.MEDMOR,
-                            "søker3",
-                            LocalDate.of(1990, 1, 10),
-                        ),
-                    ),
-            ),
-        )
+                ),
+            )
 
+        val barn3fødselsdato = LocalDate.of(2017, 3, 1)
         leggTilPersonInfo(
-            søker1Fnr,
-            PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1"),
-        )
-
-        leggTilPersonInfo(
-            søker2Fnr,
-            PersonInfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "søker2"),
-        )
-
-        leggTilPersonInfo(
-            barn3Fnr,
-            PersonInfo(fødselsdato = LocalDate.of(2017, 3, 1), kjønn = Kjønn.KVINNE, navn = "barn3"),
-        )
-
-        leggTilPersonInfo(
-            søker3Fnr,
-            PersonInfo(fødselsdato = LocalDate.of(1990, 1, 10), kjønn = Kjønn.KVINNE, navn = "søker3"),
+            barn3fødselsdato,
+            PersonInfo(fødselsdato = barn3fødselsdato, kjønn = Kjønn.KVINNE, navn = "barn3"),
         )
 
         val fagsak0 =
@@ -243,13 +247,12 @@ class FagsakDeltagerServiceIntegrationTest(
 
     @Test
     fun `Skal teste at arkiverte fagsaker med behandling ikke blir funnet ved søk`() {
-        val søker1Fnr = randomFnr()
+        val søker1Fnr =
+            leggTilPersonInfo(
+                randomSøkerFødselsdato(),
+                PersonInfo(fødselsdato = LocalDate.of(1991, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1"),
+            )
         val søker1Aktør = lagAktør(søker1Fnr)
-
-        leggTilPersonInfo(
-            søker1Fnr,
-            PersonInfo(fødselsdato = LocalDate.of(1991, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1"),
-        )
 
         val fagsak =
             fagsakService.hentEllerOpprettFagsak(
@@ -281,13 +284,12 @@ class FagsakDeltagerServiceIntegrationTest(
 
     @Test
     fun `Skal teste at arkiverte fagsaker uten behandling ikke blir funnet ved søk`() {
-        val søker1Fnr = randomFnr()
+        val søker1Fnr =
+            leggTilPersonInfo(
+                randomSøkerFødselsdato(),
+                PersonInfo(fødselsdato = LocalDate.of(1992, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1"),
+            )
         val søker1Aktør = lagAktør(søker1Fnr)
-
-        leggTilPersonInfo(
-            søker1Fnr,
-            PersonInfo(fødselsdato = LocalDate.of(1992, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1"),
-        )
 
         fagsakService.hentEllerOpprettFagsak(
             FagsakRequest(
