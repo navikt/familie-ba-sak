@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SvalbardtilleggData
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.AutovedtakSvalbardtilleggBegrunnelseService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -43,6 +44,7 @@ class AutovedtakSvalbardtilleggService(
     private val simuleringService: SimuleringService,
     private val behandlingService: BehandlingService,
     private val taskService: TaskService,
+    private val autovedtakSvalbardtilleggBegrunnelseService: AutovedtakSvalbardtilleggBegrunnelseService,
 ) : AutovedtakBehandlingService<SvalbardtilleggData> {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -101,7 +103,9 @@ class AutovedtakSvalbardtilleggService(
         }
 
         if (behandlingEtterBehandlingsresultat.steg == StegType.IVERKSETT_MOT_OPPDRAG) {
-            // TODO: Implementer AutovedtakSvalbardtilleggBegrunnelseService
+            autovedtakSvalbardtilleggBegrunnelseService.begrunnAutovedtakForSvalbardtillegg(
+                behandlingEtterBehandlingsresultat,
+            )
         }
 
         val opprettVedtak = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandlingEtterBehandlingsresultat)

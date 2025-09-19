@@ -48,12 +48,12 @@ internal fun leggTilBegrunnelseIVedtaksperiode(
     val vedtaksperiode =
         vedtaksperioder.find {
             (it.type == Vedtaksperiodetype.UTBETALING || it.type == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING) &&
-                    it.fom?.toYearMonth() == vedtaksperiodeStartDato
+                it.fom?.toYearMonth() == vedtaksperiodeStartDato
         } ?: run {
             secureLogger.info(
                 "Finner ikke aktuell periode å begrunne ved autovedtak svalbardtillegg. " +
-                        "Periode: $vedtaksperiodeStartDato. " +
-                        "Perioder: ${vedtaksperioder.map { "Periode(type=${it.type}, fom=${it.fom}, tom=${it.tom})" }}",
+                    "Periode: $vedtaksperiodeStartDato. " +
+                    "Perioder: ${vedtaksperioder.map { "Periode(type=${it.type}, fom=${it.fom}, tom=${it.tom})" }}",
             )
             throw Feil(
                 "Finner ikke aktuell periode å begrunne ved autovedtak svalbardtillegg. Se securelogger for detaljer.",
@@ -62,11 +62,11 @@ internal fun leggTilBegrunnelseIVedtaksperiode(
 
     vedtaksperiode.settBegrunnelser(
         (
-                vedtaksperiode.begrunnelser +
-                        Vedtaksbegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = vedtaksperiode,
-                            standardbegrunnelse = standardbegrunnelse,
-                        )
-                ).toList(),
+            vedtaksperiode.begrunnelser +
+                Vedtaksbegrunnelse(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiode,
+                    standardbegrunnelse = standardbegrunnelse,
+                )
+        ).toList(),
     )
 }

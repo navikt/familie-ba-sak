@@ -22,9 +22,10 @@ class AutovedtakSvalbardtilleggBegrunnelseService(
     fun begrunnAutovedtakForSvalbardtillegg(
         behandlingEtterBehandlingsresultat: Behandling,
     ) {
-        val sistIverksatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandlingEtterBehandlingsresultat.fagsak.id) ?: throw Feil(
-            "Finner ikke siste iverksatte behandling"
-        )
+        val sistIverksatteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandlingEtterBehandlingsresultat.fagsak.id) ?: throw Feil(
+                "Finner ikke siste iverksatte behandling",
+            )
         val forrigeAndeler = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = sistIverksatteBehandling.id)
         val nåværendeAndeler = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = behandlingEtterBehandlingsresultat.id)
 

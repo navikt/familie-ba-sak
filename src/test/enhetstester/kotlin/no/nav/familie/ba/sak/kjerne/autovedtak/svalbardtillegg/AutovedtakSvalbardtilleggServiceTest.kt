@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.SvalbardtilleggData
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.AutovedtakSvalbardtilleggBegrunnelseService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -42,6 +43,7 @@ class AutovedtakSvalbardtilleggServiceTest {
     private val fagsakService = mockk<FagsakService>()
     private val pdlRestClient = mockk<SystemOnlyPdlRestClient>()
     private val simuleringService = mockk<SimuleringService>()
+    private val autovedtakSvalbardtilleggBegrunnelseService = mockk<AutovedtakSvalbardtilleggBegrunnelseService>()
 
     private val autovedtakSvalbardtilleggService =
         AutovedtakSvalbardtilleggService(
@@ -51,6 +53,7 @@ class AutovedtakSvalbardtilleggServiceTest {
             fagsakService = fagsakService,
             pdlRestClient = pdlRestClient,
             simuleringService = simuleringService,
+            autovedtakSvalbardtilleggBegrunnelseService = autovedtakSvalbardtilleggBegrunnelseService,
             autovedtakService = mockk(),
             behandlingService = mockk(),
             taskService = mockk(),

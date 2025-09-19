@@ -25,7 +25,7 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.YearMonth
 
-class AutovedtakSvalbardstilleggBegrunnelseServiceTest {
+class AutovedtakSvalbardtilleggBegrunnelseServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val beregningService = mockk<BeregningService>()
     private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
