@@ -90,7 +90,7 @@ class FakePersonopplysningerService(
                 null,
             )
 
-    override fun hentLandkodeAlpha2UtenlandskBostedsadresse(aktør: Aktør): String = "NO"
+    override fun hentLandkodeAlpha2UtenlandskBostedsadresse(aktør: Aktør): String = personerMedLandkode[aktør.aktivFødselsnummer()] ?: "NO"
 
     companion object {
         val personInfo: MutableMap<String, PersonInfo> =
@@ -100,6 +100,15 @@ class FakePersonopplysningerService(
                 mockSøkerAutomatiskBehandlingFnr to mockSøkerAutomatiskBehandling,
                 mockBarnAutomatiskBehandlingSkalFeileFnr to mockBarnAutomatiskBehandlingSkalFeile,
             )
+
+        val personerMedLandkode: MutableMap<String, String> = mutableMapOf()
+
+        fun leggTilLandkodeForPerson(
+            personIdent: String,
+            Landkode: String,
+        ) {
+            personerMedLandkode.put(personIdent, Landkode)
+        }
 
         fun leggTilPersonInfo(
             fødselsdato: LocalDate,
