@@ -42,6 +42,7 @@ class AutovedtakSvalbardtilleggServiceTest {
     private val fagsakService = mockk<FagsakService>()
     private val pdlRestClient = mockk<SystemOnlyPdlRestClient>()
     private val simuleringService = mockk<SimuleringService>()
+    private val autovedtakSvalbardtilleggBegrunnelseService = mockk<AutovedtakSvalbardtilleggBegrunnelseService>()
 
     private val autovedtakSvalbardtilleggService =
         AutovedtakSvalbardtilleggService(
@@ -51,6 +52,7 @@ class AutovedtakSvalbardtilleggServiceTest {
             fagsakService = fagsakService,
             pdlRestClient = pdlRestClient,
             simuleringService = simuleringService,
+            autovedtakSvalbardtilleggBegrunnelseService = autovedtakSvalbardtilleggBegrunnelseService,
             autovedtakService = mockk(),
             behandlingService = mockk(),
             taskService = mockk(),

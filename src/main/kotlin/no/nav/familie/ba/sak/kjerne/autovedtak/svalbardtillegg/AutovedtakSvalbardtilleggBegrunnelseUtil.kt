@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
+package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
@@ -14,30 +14,30 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import java.time.YearMonth
 
-fun finnInnvilgedeOgReduserteFinnmarkstilleggPerioder(
+fun finnInnvilgedeOgReduserteSvalbardtilleggPerioder(
     forrigeAndeler: List<AndelTilkjentYtelse>,
     nåværendeAndeler: List<AndelTilkjentYtelse>,
 ): Pair<Set<YearMonth>, Set<YearMonth>> {
-    val forrigeFinnmarkstilleggAndeler = forrigeAndeler.filter { it.erFinnmarkstillegg() }
-    val nåværendeFinnmarkstilleggAndeler = nåværendeAndeler.filter { it.erFinnmarkstillegg() }
+    val forrigeSvalbardtilleggAndeler = forrigeAndeler.filter { it.erSvalbardtillegg() }
+    val nåværendeSvalbardtilleggAndeler = nåværendeAndeler.filter { it.erSvalbardtillegg() }
 
     val relevanteBarn =
-        (forrigeFinnmarkstilleggAndeler + nåværendeFinnmarkstilleggAndeler)
+        (forrigeSvalbardtilleggAndeler + nåværendeSvalbardtilleggAndeler)
             .map { it.aktør }
             .toSet()
 
-    val innvilgedeOgReduserteFinnmarkstilleggPerioder =
+    val innvilgedeOgReduserteSvalbardtilleggPerioder =
         relevanteBarn.fold<Aktør, Pair<Set<YearMonth>, Set<YearMonth>>>(emptySet<YearMonth>() to emptySet()) { (nyePerioder, reduksjonsPerioder), barn ->
-            val forrigeFinnmarkstilleggAndelerTidslinje = forrigeFinnmarkstilleggAndeler.filter { it.aktør == barn }.tilTidslinje()
-            val nåværendeFinnmarkstilleggAndelerTidslinje = nåværendeFinnmarkstilleggAndeler.filter { it.aktør == barn }.tilTidslinje()
+            val forrigeSvalbardtilleggAndelerTidslinje = forrigeSvalbardtilleggAndeler.filter { it.aktør == barn }.tilTidslinje()
+            val nåværendeSvalbardtilleggAndelerTidslinje = nåværendeSvalbardtilleggAndeler.filter { it.aktør == barn }.tilTidslinje()
 
-            val nyeAndeler = forrigeFinnmarkstilleggAndelerTidslinje.kombinerMed(nåværendeFinnmarkstilleggAndelerTidslinje) { gammel, ny -> ny.takeIf { gammel == null } }
-            val fjernetAndeler = forrigeFinnmarkstilleggAndelerTidslinje.kombinerMed(nåværendeFinnmarkstilleggAndelerTidslinje) { gammel, ny -> gammel.takeIf { ny == null } }
+            val nyeAndeler = forrigeSvalbardtilleggAndelerTidslinje.kombinerMed(nåværendeSvalbardtilleggAndelerTidslinje) { gammel, ny -> ny.takeIf { gammel == null } }
+            val fjernetAndeler = forrigeSvalbardtilleggAndelerTidslinje.kombinerMed(nåværendeSvalbardtilleggAndelerTidslinje) { gammel, ny -> gammel.takeIf { ny == null } }
 
             (nyePerioder + nyeAndeler.tilAndelTilkjentYtelse().map { it.stønadFom } to reduksjonsPerioder + fjernetAndeler.tilAndelTilkjentYtelse().map { it.stønadFom })
         }
 
-    return innvilgedeOgReduserteFinnmarkstilleggPerioder
+    return innvilgedeOgReduserteSvalbardtilleggPerioder
 }
 
 internal fun leggTilBegrunnelseIVedtaksperiode(
@@ -51,12 +51,12 @@ internal fun leggTilBegrunnelseIVedtaksperiode(
                 it.fom?.toYearMonth() == vedtaksperiodeStartDato
         } ?: run {
             secureLogger.info(
-                "Finner ikke aktuell periode å begrunne ved autovedtak finnmarkstillegg. " +
+                "Finner ikke aktuell periode å begrunne ved autovedtak svalbardtillegg. " +
                     "Periode: $vedtaksperiodeStartDato. " +
                     "Perioder: ${vedtaksperioder.map { "Periode(type=${it.type}, fom=${it.fom}, tom=${it.tom})" }}",
             )
             throw Feil(
-                "Finner ikke aktuell periode å begrunne ved autovedtak finnmarkstillegg. Se securelogger for detaljer.",
+                "Finner ikke aktuell periode å begrunne ved autovedtak svalbardtillegg. Se securelogger for detaljer.",
             )
         }
 
