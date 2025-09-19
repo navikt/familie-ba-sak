@@ -28,11 +28,11 @@ fun finnInnvilgedeOgReduserteSvalbardtilleggPerioder(
 
     val innvilgedeOgReduserteSvalbardtilleggPerioder =
         relevanteBarn.fold<Aktør, Pair<Set<YearMonth>, Set<YearMonth>>>(emptySet<YearMonth>() to emptySet()) { (nyePerioder, reduksjonsPerioder), barn ->
-            val forrigeSvalbardtilleggsAndelerTidslinje = forrigeSvalbardtilleggAndeler.filter { it.aktør == barn }.tilTidslinje()
+            val forrigeSvalbardtilleggAndelerTidslinje = forrigeSvalbardtilleggAndeler.filter { it.aktør == barn }.tilTidslinje()
             val nåværendeSvalbardtilleggAndelerTidslinje = nåværendeSvalbardtilleggAndeler.filter { it.aktør == barn }.tilTidslinje()
 
-            val nyeAndeler = forrigeSvalbardtilleggsAndelerTidslinje.kombinerMed(nåværendeSvalbardtilleggAndelerTidslinje) { gammel, ny -> ny.takeIf { gammel == null } }
-            val fjernetAndeler = forrigeSvalbardtilleggsAndelerTidslinje.kombinerMed(nåværendeSvalbardtilleggAndelerTidslinje) { gammel, ny -> gammel.takeIf { ny == null } }
+            val nyeAndeler = forrigeSvalbardtilleggAndelerTidslinje.kombinerMed(nåværendeSvalbardtilleggAndelerTidslinje) { gammel, ny -> ny.takeIf { gammel == null } }
+            val fjernetAndeler = forrigeSvalbardtilleggAndelerTidslinje.kombinerMed(nåværendeSvalbardtilleggAndelerTidslinje) { gammel, ny -> gammel.takeIf { ny == null } }
 
             (nyePerioder + nyeAndeler.tilAndelTilkjentYtelse().map { it.stønadFom } to reduksjonsPerioder + fjernetAndeler.tilAndelTilkjentYtelse().map { it.stønadFom })
         }

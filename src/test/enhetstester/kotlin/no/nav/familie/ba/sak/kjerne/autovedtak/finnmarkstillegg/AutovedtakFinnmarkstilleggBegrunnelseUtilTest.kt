@@ -95,7 +95,7 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
         }
 
         @Test
-        fun `Ved flere barn som har lik innvilgeses tidspunkt returneres bare 1 periode`() {
+        fun `Ved flere barn som har likt innvilgelsestidspunkt returneres bare 1 periode`() {
             val barn = lagPerson(type = PersonType.BARN)
             val barn2 = lagPerson(type = PersonType.BARN)
             val behandling = lagBehandling()
@@ -185,7 +185,7 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
         }
 
         @Test
-        fun `Ikke returner noe innvilgesesPerioder dersom andelene allerede fantes i forrige behandling`() {
+        fun `Ikke returner noe innvilgelsesperioder dersom andelene allerede fantes i forrige behandling`() {
             val barn = lagPerson(type = PersonType.BARN)
             val barn2 = lagPerson(type = PersonType.BARN)
             val behandling = lagBehandling()

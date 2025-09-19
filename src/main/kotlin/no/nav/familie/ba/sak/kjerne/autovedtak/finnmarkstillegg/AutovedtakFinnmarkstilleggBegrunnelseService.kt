@@ -48,9 +48,9 @@ class AutovedtakFinnmarkstilleggBegrunnelseService(
             )
         }
 
-        val alleFinnmarksandelerHarForsvunnet = redusertMånedTidspunkt.size == 1 && nåværendeAndeler.none { it.erFinnmarkstillegg() }
+        val alleFinnmarkstilleggAndelerHarForsvunnet = redusertMånedTidspunkt.size == 1 && nåværendeAndeler.none { it.erFinnmarkstillegg() }
 
-        if (alleFinnmarksandelerHarForsvunnet) {
+        if (alleFinnmarkstilleggAndelerHarForsvunnet) {
             leggTilBegrunnelseIVedtaksperiode(
                 vedtaksperiodeStartDato = redusertMånedTidspunkt.single(),
                 standardbegrunnelse = Standardbegrunnelse.REDUKSJON_FINNMARKSTILLEGG_BODDE_IKKE_I_TILLEGGSONE,

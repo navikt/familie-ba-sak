@@ -53,9 +53,9 @@ class AutovedtakSvalbardtilleggBegrunnelseService(
             )
         }
 
-        val alleSvalbardandelerHarForsvunnet = redusertMånedTidspunkt.size == 1 && nåværendeAndeler.none { it.erSvalbardtillegg() }
+        val alleSvalbardtilleggAndelerHarForsvunnet = redusertMånedTidspunkt.size == 1 && nåværendeAndeler.none { it.erSvalbardtillegg() }
 
-        if (alleSvalbardandelerHarForsvunnet) {
+        if (alleSvalbardtilleggAndelerHarForsvunnet) {
             leggTilBegrunnelseIVedtaksperiode(
                 vedtaksperiodeStartDato = redusertMånedTidspunkt.single(),
                 standardbegrunnelse = Standardbegrunnelse.REDUKSJON_SVALBARDTILLEGG_BODDE_IKKE_PÅ_SVALBARD,

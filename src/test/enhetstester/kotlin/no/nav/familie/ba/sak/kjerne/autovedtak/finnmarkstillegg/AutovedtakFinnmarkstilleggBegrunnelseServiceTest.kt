@@ -90,7 +90,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
     }
 
     @Test
-    fun `Skal lagre vedtaksperiode med innvilgesebegrunnelse dersom det finnes perioder med innvilgelse`() {
+    fun `Skal lagre vedtaksperiode med innvilgelsebegrunnelse dersom det finnes perioder med innvilgelse`() {
         // Arrange
         val nåværendeAndeler =
             listOf(
