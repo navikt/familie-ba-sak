@@ -1,0 +1,256 @@
+package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
+
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøring
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøringRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.kontrakter.ba.finnmarkstillegg.KommunerIFinnmarkOgNordTroms
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
+import java.time.LocalDate
+
+class AutovedtakFinnmarkstilleggTaskOppretterTest {
+    private val fagsakRepository = mockk<FagsakRepository>()
+    private val opprettTaskService = mockk<OpprettTaskService>()
+    private val finnmarkstilleggKjøringRepository = mockk<FinnmarkstilleggKjøringRepository>()
+    private val persongrunnlagService = mockk<PersongrunnlagService>()
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val pdlRestClient = mockk<SystemOnlyPdlRestClient>()
+
+    private val autovedtakFinnmarkstilleggTaskOppretter =
+        AutovedtakFinnmarkstilleggTaskOppretter(
+            fagsakRepository = fagsakRepository,
+            opprettTaskService = opprettTaskService,
+            finnmarkstilleggKjøringRepository = finnmarkstilleggKjøringRepository,
+            persongrunnlagService = persongrunnlagService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            pdlRestClient = pdlRestClient,
+        )
+
+    private val søker1 = lagPerson()
+    private val søker2 = lagPerson()
+
+    private val behandling1 = lagBehandling(id = 1, fagsak = lagFagsak(id = 1))
+    private val behandling2 = lagBehandling(id = 2, fagsak = lagFagsak(id = 2))
+
+    private val persongrunnlag1 =
+        lagPersonopplysningGrunnlag(
+            behandlingId = behandling1.id,
+            lagPersoner = { setOf(søker1) },
+        )
+
+    private val persongrunnlag2 =
+        lagPersonopplysningGrunnlag(
+            behandlingId = behandling2.id,
+            lagPersoner = { setOf(søker2) },
+        )
+
+    private val bostedsadresseIFinnmark =
+        PdlBostedsadresseDeltBostedOppholdsadressePerson(
+            bostedsadresse =
+                listOf(
+                    Bostedsadresse(
+                        gyldigFraOgMed = LocalDate.of(2025, 1, 1),
+                        vegadresse =
+                            Vegadresse(
+                                matrikkelId = null,
+                                husnummer = null,
+                                husbokstav = null,
+                                bruksenhetsnummer = null,
+                                adressenavn = null,
+                                kommunenummer = KommunerIFinnmarkOgNordTroms.ALTA.kommunenummer,
+                                tilleggsnavn = null,
+                                postnummer = null,
+                            ),
+                    ),
+                ),
+            deltBosted = emptyList(),
+        )
+
+    private val bostedsadresseIOslo =
+        PdlBostedsadresseDeltBostedOppholdsadressePerson(
+            bostedsadresse =
+                listOf(
+                    Bostedsadresse(
+                        gyldigFraOgMed = LocalDate.of(2025, 1, 1),
+                        vegadresse =
+                            Vegadresse(
+                                matrikkelId = null,
+                                husnummer = null,
+                                husbokstav = null,
+                                bruksenhetsnummer = null,
+                                adressenavn = null,
+                                kommunenummer = "0301",
+                                tilleggsnavn = null,
+                                postnummer = null,
+                            ),
+                    ),
+                ),
+            deltBosted = emptyList(),
+        )
+
+    @BeforeEach
+    fun setup() {
+        every { finnmarkstilleggKjøringRepository.saveAll(any<List<FinnmarkstilleggKjøring>>()) } returnsArgument 0
+        every { opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(any()) } returns mockk()
+    }
+
+    @Nested
+    inner class OpprettTasker {
+        @Test
+        fun `skal opprette tasks for fagsaker med personer i Finnmark eller Nord-Troms`() {
+            // Arrange
+            every {
+                fagsakRepository.finnLøpendeFagsakerForFinnmarkstilleggKjøring(any())
+            } returns PageImpl(listOf(behandling1.fagsak.id, behandling2.fagsak.id), Pageable.ofSize(1000), 2)
+
+            every {
+                behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(
+                    setOf(
+                        behandling1.fagsak.id,
+                        behandling2.fagsak.id,
+                    ),
+                )
+            } returns
+                mapOf(
+                    behandling1.fagsak.id to behandling1,
+                    behandling2.fagsak.id to behandling2,
+                )
+
+            every {
+                persongrunnlagService.hentAktivForBehandlinger(
+                    listOf(
+                        behandling1.id,
+                        behandling2.id,
+                    ),
+                )
+            } returns
+                mapOf(
+                    behandling1.id to persongrunnlag1,
+                    behandling2.id to persongrunnlag2,
+                )
+
+            every {
+                pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(
+                    listOf(
+                        søker1.aktør.aktivFødselsnummer(),
+                        søker2.aktør.aktivFødselsnummer(),
+                    ),
+                )
+            } returns
+                mapOf(
+                    søker1.aktør.aktivFødselsnummer() to bostedsadresseIFinnmark,
+                    søker2.aktør.aktivFødselsnummer() to bostedsadresseIOslo,
+                )
+
+            // Act
+            autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(1000)
+
+            // Assert
+            verify(exactly = 1) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(setOf(behandling1.fagsak.id)) }
+            verify(exactly = 1) { finnmarkstilleggKjøringRepository.saveAll(listOf(FinnmarkstilleggKjøring(fagsakId = behandling1.fagsak.id), FinnmarkstilleggKjøring(fagsakId = behandling2.fagsak.id))) }
+        }
+
+        @Test
+        fun `skal håndtere fagsaker uten iverksatt behandling`() {
+            // Arrange
+            every {
+                fagsakRepository.finnLøpendeFagsakerForFinnmarkstilleggKjøring(any())
+            } returns PageImpl(listOf(behandling1.fagsak.id), Pageable.ofSize(1000), 1)
+
+            every {
+                behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(setOf(behandling1.fagsak.id))
+            } returns emptyMap()
+
+            every {
+                persongrunnlagService.hentAktivForBehandlinger(emptyList())
+            } returns emptyMap()
+
+            // Act
+            autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(1000)
+
+            // Assert
+            verify(exactly = 0) { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) }
+            verify(exactly = 1) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(emptySet()) }
+        }
+
+        @Test
+        fun `skal håndtere behandling uten persongrunnlag`() {
+            // Arrange
+            every {
+                fagsakRepository.finnLøpendeFagsakerForFinnmarkstilleggKjøring(any())
+            } returns PageImpl(listOf(behandling1.fagsak.id), Pageable.ofSize(1000), 1)
+
+            every {
+                behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(setOf(behandling1.fagsak.id))
+            } returns mapOf(behandling1.fagsak.id to behandling1)
+
+            every {
+                persongrunnlagService.hentAktivForBehandlinger(listOf(behandling1.id))
+            } returns emptyMap()
+
+            // Act & assert
+            val exception =
+                assertThrows<Feil> {
+                    autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(1000)
+                }
+            assertThat(exception).hasMessageContaining("Forventet personopplysningsgrunnlag for behandling ${behandling1.id} ikke funnet.")
+        }
+
+        @Test
+        fun `skal sende spørringer til PDL på maks 1000 personer`() {
+            // Arrange
+            val fagsakIder = (0L until 1000).toSet()
+
+            every {
+                fagsakRepository.finnLøpendeFagsakerForFinnmarkstilleggKjøring(any())
+            } returns PageImpl(fagsakIder.toList(), Pageable.ofSize(1000), fagsakIder.size.toLong())
+
+            val behandlinger = fagsakIder.map { lagBehandling(id = it, fagsak = lagFagsak(id = it)) }
+
+            val grunnlag =
+                behandlinger.map {
+                    val personer = List(5) { lagPerson() }.toTypedArray().toSet()
+                    lagPersonopplysningGrunnlag(behandlingId = it.id, lagPersoner = { personer })
+                }
+
+            every {
+                behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder)
+            } returns behandlinger.associate { it.fagsak.id to it }
+
+            every {
+                persongrunnlagService.hentAktivForBehandlinger(behandlinger.map { it.id })
+            } returns grunnlag.associate { it.behandlingId to it }
+
+            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+                assertThat(firstArg<List<String>>()).hasSize(1000)
+                emptyMap()
+            }
+
+            // Act
+            autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(1000)
+
+            // Assert
+            verify(exactly = 5) { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) }
+        }
+    }
+}
