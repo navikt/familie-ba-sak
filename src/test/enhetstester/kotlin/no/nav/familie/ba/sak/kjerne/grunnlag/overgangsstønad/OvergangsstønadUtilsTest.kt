@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -36,7 +36,7 @@ class OvergangsstønadUtilsTest {
     @Test
     fun `Skal svare true om at nye perioder med full OS påvirker behandling`() {
         val personIdent = randomFnr()
-        val barnAktør = tilAktør(randomFnr())
+        val barnAktør = lagAktør(randomFnr())
 
         val påvirkerFagsak =
             vedtakOmOvergangsstønadPåvirkerFagsak(
@@ -64,13 +64,13 @@ class OvergangsstønadUtilsTest {
                             fom = YearMonth.now().minusMonths(10),
                             tom = YearMonth.now().plusMonths(6),
                             ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                            person = tilfeldigPerson(aktør = tilAktør(personIdent)),
+                            person = tilfeldigPerson(aktør = lagAktør(personIdent)),
                         ),
                         lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                             fom = YearMonth.now().minusMonths(10),
                             tom = YearMonth.now().plusMonths(6),
                             ytelseType = YtelseType.SMÅBARNSTILLEGG,
-                            person = tilfeldigPerson(aktør = tilAktør(personIdent)),
+                            person = tilfeldigPerson(aktør = lagAktør(personIdent)),
                         ),
                     ),
                 barnasAktørerOgFødselsdatoer = listOf(Pair(barnAktør, LocalDate.now().minusYears(2))),

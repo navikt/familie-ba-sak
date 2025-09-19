@@ -278,7 +278,6 @@ class RestartAvSmåbarnstilleggTest(
                         fødselsdato = barnFødselsdato.toString(),
                         fornavn = "Barn",
                         etternavn = "Barnesen",
-                        bostedsadresser = emptyList(),
                     ),
                 ),
         ).also { stubScenario(it) }

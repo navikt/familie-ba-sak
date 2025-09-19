@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -24,7 +24,7 @@ class FinnmarkstilleggKjøringRepositoryTest(
     @Test
     fun `skal kunne lagre FinnmarkstilleggKjøring`() {
         // Arrange
-        val aktør = tilAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
+        val aktør = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
         val fagsak = lagFagsakUtenId(aktør = aktør).also { fagsakRepository.saveAndFlush(it) }
 
         // Act
@@ -39,7 +39,7 @@ class FinnmarkstilleggKjøringRepositoryTest(
     @Test
     fun `findByFagsakId skal returnere FinnmarkstilleggKjøring når den finnes`() {
         // Arrange
-        val aktør = tilAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
+        val aktør = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
         val fagsak = lagFagsakUtenId(aktør = aktør).also { fagsakRepository.saveAndFlush(it) }
 
         FinnmarkstilleggKjøring(fagsakId = fagsak.id).also { finnmarkstilleggKjøringRepository.saveAndFlush(it) }

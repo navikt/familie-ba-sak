@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
@@ -28,7 +28,7 @@ class DokumentGenereringService(
     private val persongrunnlagService: PersongrunnlagService,
     private val brevService: BrevService,
     private val brevKlient: BrevKlient,
-    private val integrasjonClient: IntegrasjonClient,
+    private val kodeverkService: KodeverkService,
     private val saksbehandlerContext: SaksbehandlerContext,
     private val sammensattKontrollsakService: SammensattKontrollsakService,
     @Lazy private val testVerktøyService: TestVerktøyService,
@@ -86,7 +86,7 @@ class DokumentGenereringService(
                     mottakerIdent,
                     navnTilBrevHeader,
                     saksbehandlerContext.hentSaksbehandlerSignaturTilBrev(),
-                ) { integrasjonClient.hentLandkoderISO2() }
+                ) { kodeverkService.hentLandkoderISO2() }
             return brevKlient.genererBrev(
                 målform = manueltBrevRequest.mottakerMålform.tilSanityFormat(),
                 brev = brev,

@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture
 
 class MinsideAktiveringKafkaProducerTest {
     private val kafkaTemplate: KafkaTemplate<String, String> = mockk()
-    private val minsideAktiveringKafkaProducer = MinsideAktiveringKafkaProducer(kafkaTemplate)
+    private val minsideAktiveringKafkaProducer = DefaultMinsideAktiveringKafkaProducer(kafkaTemplate)
 
     @Nested
     inner class Aktiver {

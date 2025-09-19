@@ -2,16 +2,17 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.FOM_1990
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.FOM_2004
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.TOM_2010
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnSterkesteMedlemskap
+import no.nav.familie.ba.sak.mock.IntegrasjonClientMock
+import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.FOM_1990
+import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.FOM_2004
+import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.TOM_2010
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -21,12 +22,13 @@ import java.time.LocalDate
 
 internal class StatsborgerskapServiceTest {
     private val integrasjonClient = mockk<IntegrasjonClient>()
+    private val kodeverkService = KodeverkService(integrasjonClient)
 
     private lateinit var statsborgerskapService: StatsborgerskapService
 
     @BeforeEach
     fun setUp() {
-        statsborgerskapService = StatsborgerskapService(integrasjonClient)
+        statsborgerskapService = StatsborgerskapService(integrasjonClient, kodeverkService)
         IntegrasjonClientMock.initEuKodeverk(integrasjonClient)
     }
 

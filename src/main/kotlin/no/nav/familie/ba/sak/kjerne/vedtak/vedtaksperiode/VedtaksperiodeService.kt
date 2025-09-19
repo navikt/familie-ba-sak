@@ -2,17 +2,14 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅr
-import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.common.validerBehandlingIkkeErAvsluttet
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -29,14 +26,12 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform.NB
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform.NN
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -69,7 +64,6 @@ import java.time.YearMonth
 
 @Service
 class VedtaksperiodeService(
-    private val personidentService: PersonidentService,
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
@@ -84,9 +78,10 @@ class VedtaksperiodeService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val overgangsstønadService: OvergangsstønadService,
     private val refusjonEøsRepository: RefusjonEøsRepository,
-    private val integrasjonClient: IntegrasjonClient,
+    private val kodeverkService: KodeverkService,
     private val valutakursRepository: ValutakursRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -120,6 +115,7 @@ class VedtaksperiodeService(
         return utledEndringstidspunkt(
             behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
             behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
+            featureToggleService = featureToggleService,
         )
     }
 
@@ -223,81 +219,6 @@ class VedtaksperiodeService(
         }
     }
 
-    fun oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(
-        vedtak: Vedtak,
-        barnaSomVurderes: List<String>,
-    ) {
-        validerBehandlingIkkeErAvsluttet(vedtak.behandling)
-        val barnaAktørSomVurderes = personidentService.hentAktørIder(barnaSomVurderes)
-
-        val vedtaksperioderMedBegrunnelser =
-            vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)
-        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id)
-        val vurderteBarnSomPersoner =
-            barnaAktørSomVurderes.map { barnAktørSomVurderes ->
-                persongrunnlag.barna.find { it.aktør == barnAktørSomVurderes }
-                    ?: throw Feil("Finner ikke barn som har blitt vurdert i persongrunnlaget")
-            }
-
-        vurderteBarnSomPersoner.map { it.fødselsdato.toYearMonth() }.toSet().forEach { fødselsmåned ->
-            val vedtaksperiodeMedBegrunnelser =
-                vedtaksperioderMedBegrunnelser.firstOrNull {
-                    fødselsmåned.plusMonths(1).equals(it.fom?.toYearMonth() ?: TIDENES_ENDE)
-                }
-
-            if (vedtaksperiodeMedBegrunnelser == null) {
-                val vilkårsvurdering =
-                    vilkårsvurderingService.hentAktivForBehandling(behandlingId = vedtak.behandling.id)
-                secureLogger.info(
-                    vilkårsvurdering?.personResultater?.joinToString("\n") {
-                        "Fødselsnummer: ${it.aktør.aktivFødselsnummer()}.  Resultater: ${it.vilkårResultater}"
-                    },
-                )
-                throw Feil("Finner ikke vedtaksperiode å begrunne for barn fra hendelse")
-            }
-
-            vedtaksperiodeMedBegrunnelser.settBegrunnelser(
-                listOf(
-                    Vedtaksbegrunnelse(
-                        standardbegrunnelse =
-                            if (vedtak.behandling.fagsak.status == FagsakStatus.LØPENDE) {
-                                Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN
-                            } else {
-                                Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE
-                            },
-                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                    ),
-                ),
-            )
-            vedtaksperiodeHentOgPersisterService.lagre(vedtaksperiodeMedBegrunnelser)
-
-            /**
-             * Hvis barn(a) er født før desember påvirkes vedtaket av satsendring januar 2022
-             * og vi må derfor også automatisk begrunne satsendringen
-             */
-            if (fødselsmåned <
-                YearMonth.of(
-                    2021,
-                    12,
-                )
-            ) {
-                vedtaksperioderMedBegrunnelser
-                    .firstOrNull { it.fom?.toYearMonth() == YearMonth.of(2022, 1) }
-                    ?.also { satsendringsvedtaksperiode ->
-                        satsendringsvedtaksperiode.settBegrunnelser(
-                            listOf(
-                                Vedtaksbegrunnelse(
-                                    standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
-                                    vedtaksperiodeMedBegrunnelser = satsendringsvedtaksperiode,
-                                ),
-                            ),
-                        )
-                        vedtaksperiodeHentOgPersisterService.lagre(satsendringsvedtaksperiode)
-                    }
-            }
-        }
-    }
-
     @Transactional
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
@@ -317,6 +238,7 @@ class VedtaksperiodeService(
             grunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
             vedtak = vedtak,
             nåDato = LocalDate.now(),
+            featureToggleService = featureToggleService,
         )
     }
 
@@ -611,7 +533,7 @@ class VedtaksperiodeService(
         avklart: Boolean,
     ): Set<String>? {
         val målform = persongrunnlagService.hentAktiv(behandlingId = behandling.id)?.søker?.målform
-        val landkoderISO2 = integrasjonClient.hentLandkoderISO2()
+        val landkoderISO2 = kodeverkService.hentLandkoderISO2()
 
         return refusjonEøsRepository
             .finnRefusjonEøsForBehandling(behandling.id)

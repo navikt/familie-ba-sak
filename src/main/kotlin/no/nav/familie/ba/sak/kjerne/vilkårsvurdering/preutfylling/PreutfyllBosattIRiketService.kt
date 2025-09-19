@@ -2,11 +2,9 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.tilAdresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.BostedsadresserOgDelteBosteder
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.erIFinnmarkEllerNordTroms
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -15,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RI
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.ba.sak.task.dto.AktørId
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
@@ -34,32 +33,43 @@ class PreutfyllBosattIRiketService(
     private val søknadService: SøknadService,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
-    fun preutfyllBosattIRiket(vilkårsvurdering: Vilkårsvurdering) {
-        val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
+    fun preutfyllBosattIRiket(
+        vilkårsvurdering: Vilkårsvurdering,
+        identerVilkårSkalPreutfyllesFor: List<String>? = null,
+    ) {
+        val identer =
+            vilkårsvurdering
+                .personResultater
+                .map { it.aktør.aktivFødselsnummer() }
+                .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
+
         val bostedsadresser = pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer)
 
-        vilkårsvurdering.personResultater.forEach { personResultat ->
-            val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
-            val bostedsadresserForPerson = bostedsadresser[personResultat.aktør.aktivFødselsnummer()].tilAdresser()
+        vilkårsvurdering
+            .personResultater
+            .filter { it.aktør.aktivFødselsnummer() in identer }
+            .forEach { personResultat ->
+                val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
+                val bostedsadresserForPerson = Adresser.opprettFra(bostedsadresser[personResultat.aktør.aktivFødselsnummer()])
 
-            val bosattIRiketVilkårResultat =
-                genererBosattIRiketVilkårResultat(
-                    personResultat = personResultat,
-                    fødselsdatoForBeskjæring = fødselsdatoForBeskjæring,
-                    adresserForPerson = bostedsadresserForPerson,
-                )
+                val bosattIRiketVilkårResultat =
+                    genererBosattIRiketVilkårResultat(
+                        personResultat = personResultat,
+                        fødselsdatoForBeskjæring = fødselsdatoForBeskjæring,
+                        adresserForPerson = bostedsadresserForPerson,
+                    )
 
-            if (bosattIRiketVilkårResultat.isNotEmpty()) {
-                personResultat.vilkårResultater.removeIf { it.vilkårType == BOSATT_I_RIKET }
-                personResultat.vilkårResultater.addAll(bosattIRiketVilkårResultat)
+                if (bosattIRiketVilkårResultat.isNotEmpty()) {
+                    personResultat.vilkårResultater.removeIf { it.vilkårType == BOSATT_I_RIKET }
+                    personResultat.vilkårResultater.addAll(bosattIRiketVilkårResultat)
+                }
             }
-        }
     }
 
     fun genererBosattIRiketVilkårResultat(
         personResultat: PersonResultat,
         fødselsdatoForBeskjæring: LocalDate = LocalDate.MIN,
-        adresserForPerson: BostedsadresserOgDelteBosteder,
+        adresserForPerson: Adresser,
     ): Set<VilkårResultat> {
         val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(adresserForPerson)
         val erBosattIFinnmarkEllerNordTromsTidslinje = lagErBosattIFinnmarkEllerNordTromsTidslinje(adresserForPerson)
@@ -100,10 +110,11 @@ class PreutfyllBosattIRiketService(
                     vilkårType = BOSATT_I_RIKET,
                     periodeFom = erBosattINorgePeriode.fom,
                     periodeTom = erBosattINorgePeriode.tom,
-                    begrunnelse = "Fylt ut automatisk fra registerdata i PDL\n" + erBosattINorgePeriode.verdi.begrunnelse,
+                    begrunnelse = PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT + erBosattINorgePeriode.verdi.begrunnelse,
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                     begrunnelseForManuellKontroll = erBosattINorgePeriode.verdi.begrunnelseForManuellKontroll,
                     utdypendeVilkårsvurderinger = erBosattINorgePeriode.verdi.utdypendeVilkårsvurderinger,
+                    erOpprinneligPreutfylt = true,
                 )
             }.toSet()
     }
@@ -181,11 +192,9 @@ class PreutfyllBosattIRiketService(
         return erBosattINorgePeriode.omfatter(fødselsdato)
     }
 
-    private fun Adresse.erINorge(): Boolean = vegadresse != null || matrikkeladresse != null || ukjentBosted != null
+    private fun lagErBosattINorgeTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser) { it.erINorge() }
 
-    private fun lagErBosattINorgeTidslinje(adresser: BostedsadresserOgDelteBosteder): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser) { it.erINorge() }
-
-    private fun lagErBosattIFinnmarkEllerNordTromsTidslinje(adresser: BostedsadresserOgDelteBosteder): Tidslinje<Boolean> {
+    private fun lagErBosattIFinnmarkEllerNordTromsTidslinje(adresser: Adresser): Tidslinje<Boolean> {
         val bostedsadresserIFinnmarkEllerNordTromsTidslinje = lagTidslinjeForAdresser(adresser.bostedsadresser) { it.erIFinnmarkEllerNordTroms() }
         val delteBostederIFinnmarkEllerNordTromsTidslinje = lagTidslinjeForAdresser(adresser.delteBosteder) { it.erIFinnmarkEllerNordTroms() }
 

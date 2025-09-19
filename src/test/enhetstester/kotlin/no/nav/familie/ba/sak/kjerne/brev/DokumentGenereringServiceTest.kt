@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -40,7 +41,7 @@ class DokumentGenereringServiceTest {
             persongrunnlagService = mockk(),
             brevService = brevService,
             brevKlient = brevKlient,
-            integrasjonClient = integrasjonClient,
+            kodeverkService = KodeverkService(integrasjonClient = integrasjonClient),
             saksbehandlerContext = saksbehandlerContext,
             sammensattKontrollsakService = sammensattKontrollsakService,
             testVerktøyService = testVerktøyService,

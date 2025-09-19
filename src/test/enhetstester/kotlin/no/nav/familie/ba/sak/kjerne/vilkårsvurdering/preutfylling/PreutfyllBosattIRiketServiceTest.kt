@@ -16,12 +16,13 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.BostedsadresserOgDelteBosteder
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 import org.assertj.core.api.Assertions.assertThat
@@ -43,7 +44,7 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
 
         val bostedsadresser =
-            BostedsadresserOgDelteBosteder(
+            Adresser(
                 bostedsadresser =
                     listOf(
                         Adresse(
@@ -68,6 +69,7 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                     ),
                 delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
             )
 
         // Act
@@ -103,9 +105,10 @@ class PreutfyllBosattIRiketServiceTest {
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
                 personResultat = personResultat,
                 adresserForPerson =
-                    BostedsadresserOgDelteBosteder(
+                    Adresser(
                         emptyList(),
                         emptyList(),
+                        oppholdsadresse = emptyList(),
                     ),
             )
 
@@ -124,7 +127,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            BostedsadresserOgDelteBosteder(
+            Adresser(
                 bostedsadresser =
                     listOf(
                         Adresse(
@@ -139,6 +142,7 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                     ),
                 delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
             )
 
         // Act
@@ -167,7 +171,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            BostedsadresserOgDelteBosteder(
+            Adresser(
                 bostedsadresser =
                     listOf(
                         Adresse(
@@ -177,6 +181,7 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                     ),
                 delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
             )
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false)
@@ -212,7 +217,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            BostedsadresserOgDelteBosteder(
+            Adresser(
                 bostedsadresser =
                     listOf(
                         Adresse(
@@ -222,6 +227,7 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                     ),
                 delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
             )
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = true)
@@ -271,7 +277,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            BostedsadresserOgDelteBosteder(
+            Adresser(
                 bostedsadresser =
                     listOf(
                         Adresse(
@@ -281,6 +287,7 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                     ),
                 delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
             )
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false, barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnFnr to true))
@@ -316,7 +323,7 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.søker.aktør)
 
         val bostedsadresser =
-            BostedsadresserOgDelteBosteder(
+            Adresser(
                 bostedsadresser =
                     listOf(
                         Adresse(
@@ -336,6 +343,7 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                     ),
                 delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
             )
 
         // Act
@@ -377,7 +385,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            BostedsadresserOgDelteBosteder(
+            Adresser(
                 bostedsadresser =
                     listOf(
                         Adresse(
@@ -391,6 +399,7 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                     ),
                 delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
             )
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad()
@@ -443,7 +452,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            BostedsadresserOgDelteBosteder(
+            Adresser(
                 bostedsadresser =
                     listOf(
                         Adresse(
@@ -457,6 +466,7 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                     ),
                 delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
             )
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad()
@@ -500,7 +510,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            BostedsadresserOgDelteBosteder(
+            Adresser(
                 bostedsadresser =
                     listOf(
                         Adresse(
@@ -509,6 +519,7 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                     ),
                 delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
             )
 
         // Act
@@ -539,7 +550,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            BostedsadresserOgDelteBosteder(
+            Adresser(
                 bostedsadresser =
                     listOf(
                         Adresse(
@@ -553,6 +564,7 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                     ),
                 delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
             )
 
         // Act
@@ -567,7 +579,7 @@ class PreutfyllBosattIRiketServiceTest {
         val begrunnelse = vilkårResultat.firstOrNull { it.resultat == Resultat.OPPFYLT }?.begrunnelse
         assertThat(vilkårResultat).hasSize(3)
         assertThat(begrunnelse).isEqualTo(
-            "Fylt ut automatisk fra registerdata i PDL\n" +
+            PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT +
                 "- Norsk bostedsadresse i minst 12 måneder.",
         )
         assertThat(vilkårResultat).allSatisfy {
@@ -586,7 +598,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            BostedsadresserOgDelteBosteder(
+            Adresser(
                 bostedsadresser =
                     listOf(
                         Adresse(
@@ -595,6 +607,7 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                     ),
                 delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
             )
 
         // Act
@@ -608,7 +621,7 @@ class PreutfyllBosattIRiketServiceTest {
         // Assert
         val begrunnelse = vilkårResultat.firstOrNull { it.resultat == Resultat.OPPFYLT }?.begrunnelse
         assertThat(begrunnelse).isEqualTo(
-            "Fylt ut automatisk fra registerdata i PDL\n" +
+            PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT +
                 "- Bosatt i Norge siden fødsel.",
         )
         assertThat(vilkårResultat).allSatisfy {
@@ -631,7 +644,7 @@ class PreutfyllBosattIRiketServiceTest {
             )
 
         val bostedsadresser =
-            BostedsadresserOgDelteBosteder(
+            Adresser(
                 bostedsadresser =
                     listOf(
                         Adresse(
@@ -640,6 +653,7 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                     ),
                 delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
             )
 
         // Act
@@ -671,7 +685,7 @@ class PreutfyllBosattIRiketServiceTest {
             )
 
         val bostedsadresser =
-            BostedsadresserOgDelteBosteder(
+            Adresser(
                 bostedsadresser =
                     listOf(
                         Adresse(
@@ -680,6 +694,7 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                     ),
                 delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
             )
 
         // Act
@@ -711,7 +726,7 @@ class PreutfyllBosattIRiketServiceTest {
             )
 
         val bostedsadresser =
-            BostedsadresserOgDelteBosteder(
+            Adresser(
                 bostedsadresser =
                     listOf(
                         Adresse(
@@ -720,6 +735,7 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                     ),
                 delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
             )
 
         // Act
@@ -751,7 +767,7 @@ class PreutfyllBosattIRiketServiceTest {
             )
 
         val bostedsadresser =
-            BostedsadresserOgDelteBosteder(
+            Adresser(
                 bostedsadresser =
                     listOf(
                         Adresse(
@@ -760,6 +776,7 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                     ),
                 delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
             )
 
         // Act
@@ -791,7 +808,7 @@ class PreutfyllBosattIRiketServiceTest {
             )
 
         val bostedsadresser =
-            BostedsadresserOgDelteBosteder(
+            Adresser(
                 bostedsadresser =
                     listOf(
                         Adresse(
@@ -800,6 +817,7 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                     ),
                 delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
             )
 
         // Act

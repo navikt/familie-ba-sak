@@ -10,6 +10,8 @@ import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.YtelsetypeBA
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -100,11 +102,12 @@ class MinSideBarnetrygdControllerTest(
                         status = BehandlingStatus.AVSLUTTET,
                     ),
                 )
+
             val tilkjentYtelse =
                 tilkjentYtelseRepository.save(
                     lagInitiellTilkjentYtelse(
                         behandling = behandling,
-                        utbetalingsoppdrag = "\"klassifisering\":\"BAUTV-OP\"",
+                        utbetalingsoppdrag = lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id, ytelseTypeBa = YtelsetypeBA.UTVIDET_BARNETRYGD),
                     ),
                 )
 

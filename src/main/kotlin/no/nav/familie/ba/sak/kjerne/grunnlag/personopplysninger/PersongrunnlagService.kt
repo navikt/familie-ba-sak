@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -33,7 +34,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.PersonIdent
-import no.nav.familie.kontrakter.felles.kodeverk.KodeverkSpråk
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
@@ -56,6 +56,7 @@ class PersongrunnlagService(
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val integrasjonClient: IntegrasjonClient,
+    private val kodeverkService: KodeverkService,
 ) {
     fun mapTilRestPersonMedStatsborgerskapLand(
         person: Person,
@@ -108,6 +109,8 @@ class PersongrunnlagService(
     }
 
     fun hentAktiv(behandlingId: Long): PersonopplysningGrunnlag? = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
+
+    fun hentAktivForBehandlinger(behandlingIder: Collection<Long>): Map<Long, PersonopplysningGrunnlag> = personopplysningGrunnlagRepository.hentAktivForBehandlinger(behandlingIder).associate { it.behandlingId to it }
 
     fun hentAktivThrows(behandlingId: Long): PersonopplysningGrunnlag =
         hentAktiv(behandlingId = behandlingId)
@@ -281,18 +284,9 @@ class PersongrunnlagService(
         }
     }
 
-    private fun Bostedsadresse.poststed(): String? = poststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
+    private fun Bostedsadresse.poststed(): String? = kodeverkService.hentPoststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
 
-    private fun Oppholdsadresse.poststed(): String? = poststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
-
-    private fun poststed(postnummer: String?): String? =
-        integrasjonClient
-            .hentPoststeder()
-            .betydninger[postnummer]
-            ?.firstOrNull()
-            ?.beskrivelser[KodeverkSpråk.BOKMÅL.kode]
-            ?.term
-            ?.storForbokstav()
+    private fun Oppholdsadresse.poststed(): String? = kodeverkService.hentPoststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
 
     private fun hentPerson(
         aktør: Aktør,

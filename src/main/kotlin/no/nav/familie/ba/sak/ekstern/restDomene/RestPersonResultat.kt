@@ -80,15 +80,3 @@ fun PersonResultat.tilRestPersonResultat() =
                 annenVurdering.tilRestAnnenVurdering()
             },
     )
-
-fun RestPersonResultat.fjernAutomatiskBegrunnelse() =
-    copy(
-        vilkårResultater =
-            vilkårResultater.map { vilkårResultat ->
-                if (vilkårResultat.begrunnelse.startsWith("Fylt ut automatisk fra registerdata i PDL")) {
-                    vilkårResultat.copy(begrunnelse = "", erAutomatiskVurdert = false, begrunnelseForManuellKontroll = null)
-                } else {
-                    vilkårResultat
-                }
-            },
-    )

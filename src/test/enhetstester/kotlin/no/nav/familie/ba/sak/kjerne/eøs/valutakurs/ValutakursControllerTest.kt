@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.UtfyltStatus
 import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakurs
@@ -45,8 +45,8 @@ class ValutakursControllerTest {
 
     @BeforeEach
     fun setup() {
-        every { personidentService.hentAktør(any()) } returns tilAktør(barnId)
-        every { valutakursService.hentValutakurs(any()) } returns restValutakurs.tilValutakurs(listOf(tilAktør(barnId)))
+        every { personidentService.hentAktør(any()) } returns lagAktør(barnId)
+        every { valutakursService.hentValutakurs(any()) } returns restValutakurs.tilValutakurs(listOf(lagAktør(barnId)))
         every { ecbService.hentValutakurs(any(), any()) } returns BigDecimal.valueOf(0.95)
         justRun { tilgangService.validerTilgangTilBehandling(any(), any()) }
         justRun { tilgangService.verifiserHarTilgangTilHandling(any(), any()) }

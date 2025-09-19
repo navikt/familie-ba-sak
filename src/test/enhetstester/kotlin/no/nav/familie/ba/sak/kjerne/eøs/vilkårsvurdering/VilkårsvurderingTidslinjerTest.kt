@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
-import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
@@ -34,9 +34,9 @@ internal class VilkårsvurderingTidslinjerTest {
                 it.personResultater =
                     lagPersonResultaterForSøkerOgToBarn(
                         it,
-                        tilAktør(søkerFnr),
-                        tilAktør(barnFnr),
-                        tilAktør(barn2Fnr),
+                        lagAktør(søkerFnr),
+                        lagAktør(barnFnr),
+                        lagAktør(barn2Fnr),
                         LocalDate.now().minusMonths(3),
                         LocalDate.now().minusMonths(2),
                     )
@@ -84,9 +84,9 @@ internal class VilkårsvurderingTidslinjerTest {
                 it.personResultater =
                     lagPersonResultaterForSøkerOgToBarn(
                         it,
-                        tilAktør(søkerFnr),
-                        tilAktør(barnFnr),
-                        tilAktør(barn2Fnr),
+                        lagAktør(søkerFnr),
+                        lagAktør(barnFnr),
+                        lagAktør(barn2Fnr),
                         LocalDate.now().minusMonths(3),
                         LocalDate.now().minusMonths(2),
                     )

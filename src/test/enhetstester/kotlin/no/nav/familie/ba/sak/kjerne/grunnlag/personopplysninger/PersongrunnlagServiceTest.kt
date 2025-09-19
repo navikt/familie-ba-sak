@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -24,12 +25,12 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.assertj.core.api.Assertions
-import org.hamcrest.MatcherAssert.assertThat
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.YearMonth
-import org.hamcrest.CoreMatchers.`is` as Is
 
 class PersongrunnlagServiceTest {
     val personidentService = mockk<PersonidentService>()
@@ -54,6 +55,7 @@ class PersongrunnlagServiceTest {
                 arbeidsforholdService = mockk(),
                 vilkårsvurderingService = vilkårsvurderingService,
                 integrasjonClient = mockk(),
+                kodeverkService = mockk(),
             ),
         )
 
@@ -182,7 +184,7 @@ class PersongrunnlagServiceTest {
                 )
             }
 
-        assertThat(funksjonellFeil.melding, Is("Du kan ikke sette dødsfall dato til en dato som er før SØKER sin fødselsdato"))
+        assertThat(funksjonellFeil.melding).isEqualTo("Du kan ikke sette dødsfall dato til en dato som er før SØKER sin fødselsdato")
     }
 
     @Test
@@ -215,7 +217,7 @@ class PersongrunnlagServiceTest {
                 )
             }
 
-        assertThat(funksjonellFeil.melding, Is("Dødsfall dato er allerede registrert på person med navn ${person.navn}"))
+        assertThat(funksjonellFeil.melding).isEqualTo("Dødsfall dato er allerede registrert på person med navn ${person.navn}")
     }
 
     @Test
@@ -248,5 +250,44 @@ class PersongrunnlagServiceTest {
         verify(exactly = 1) { personidentService.hentAktør(personFnr) }
         verify(exactly = 1) { loggService.loggManueltRegistrertDødsfallDato(any(), any(), "test") }
         verify(exactly = 1) { vilkårsvurderingService.oppdaterVilkårVedDødsfall(any(), any(), any()) }
+    }
+
+    @Nested
+    inner class HentAktivForBehandlinger {
+        @Test
+        fun `skal hente aktive grunnlag for behandlinger`() {
+            // Arrange
+            val behandlingId1 = 1L
+            val behandlingId2 = 2L
+            val behandlingIder = setOf(behandlingId1, behandlingId2)
+
+            val grunnlag1 = lagPersonopplysningGrunnlag(behandlingId = behandlingId1)
+            val grunnlag2 = lagPersonopplysningGrunnlag(behandlingId = behandlingId2)
+
+            every { personopplysningGrunnlagRepository.hentAktivForBehandlinger(behandlingIder) } returns listOf(grunnlag1, grunnlag2)
+
+            // Act
+            val aktive = persongrunnlagService.hentAktivForBehandlinger(behandlingIder)
+
+            // Assert
+            assertThat(aktive).hasSize(2)
+            assertThat(aktive).containsKeys(behandlingId1, behandlingId2)
+            assertThat(aktive[behandlingId1]).isEqualTo(grunnlag1)
+            assertThat(aktive[behandlingId2]).isEqualTo(grunnlag2)
+        }
+
+        @Test
+        fun `skal returner et tomt map hvis en tom collection av behandlingIder blir sendt inn`() {
+            // Arrange
+            val behandlingIder = emptyList<Long>()
+
+            every { personopplysningGrunnlagRepository.hentAktivForBehandlinger(behandlingIder) } returns emptyList()
+
+            // Act
+            val aktive = persongrunnlagService.hentAktivForBehandlinger(behandlingIder)
+
+            // Assert
+            assertThat(aktive).isEmpty()
+        }
     }
 }

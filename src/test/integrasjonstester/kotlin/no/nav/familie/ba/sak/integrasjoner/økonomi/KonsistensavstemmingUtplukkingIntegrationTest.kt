@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.nyRevurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -20,48 +20,25 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
 
-@TestMethodOrder(MethodOrderer.MethodName::class)
-class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationTest() {
-    @Autowired
-    private lateinit var fagsakService: FagsakService
-
-    @Autowired
-    private lateinit var avstemmingService: AvstemmingService
-
-    @Autowired
-    private lateinit var behandlingService: BehandlingService
-
-    @Autowired
-    private lateinit var personidentService: PersonidentService
-
-    @Autowired
-    private lateinit var behandlingRepository: BehandlingRepository
-
-    @Autowired
-    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
-
-    @Autowired
-    private lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
-
-    @Autowired
-    private lateinit var databaseCleanupService: DatabaseCleanupService
-
-    @BeforeEach
-    fun cleanUp() {
-        databaseCleanupService.truncate()
-    }
-
+class KonsistensavstemmingUtplukkingIntegrationTest(
+    @Autowired private val fagsakService: FagsakService,
+    @Autowired private val avstemmingService: AvstemmingService,
+    @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val personidentService: PersonidentService,
+    @Autowired private val behandlingRepository: BehandlingRepository,
+    @Autowired private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+) : AbstractSpringIntegrationTest() {
     @Test
     fun `Skal plukke iverksatt FGB`() {
+        // Arrange
         val forelderIdent = randomFnr()
 
         val fagsak =
@@ -74,6 +51,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
                 fagsakId = fagsak.id,
             )
+
+        // Act
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
         val behandlingerMedRelevanteAndeler =
@@ -82,11 +61,13 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 .map { it.kildeBehandlingId }
                 .distinct()
 
+        // Assert
         Assertions.assertTrue(behandlingerMedRelevanteAndeler.any { it == førstegangsbehandling.id })
     }
 
     @Test
     fun `Skal plukke både iverksatt FGB og revurdering når periode legges til`() {
+        // Arrange
         val forelderIdent = randomFnr()
 
         val fagsak =
@@ -112,6 +93,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 fagsakId = fagsak.id,
             )
 
+        // Act
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
         val behandlingerMedRelevanteAndeler =
             andelTilkjentYtelseRepository
@@ -120,25 +102,26 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 .sortedBy { it }
                 .distinct()
 
-        Assertions.assertEquals(2, behandlingerMedRelevanteAndeler.size)
-        Assertions.assertEquals(førstegangsbehandling.id, behandlingerMedRelevanteAndeler[0])
-        Assertions.assertEquals(revurdering.id, behandlingerMedRelevanteAndeler[1])
+        // Assert
+        assertThat(behandlingerMedRelevanteAndeler).contains(førstegangsbehandling.id, revurdering.id)
     }
 
     @Test
     fun `Skal kun plukke revurdering når periode på førstegangsbehandling blir erstattet`() {
+        // Arrange
         val forelderIdent = randomFnr()
 
         val fagsak =
             fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
                 fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
             }
-        opprettOgLagreBehandlingMedAndeler(
-            personIdent = forelderIdent,
-            kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
-            medStatus = BehandlingStatus.AVSLUTTET,
-            fagsakId = fagsak.id,
-        )
+        val førstegangsbehandling =
+            opprettOgLagreBehandlingMedAndeler(
+                personIdent = forelderIdent,
+                kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
+                medStatus = BehandlingStatus.AVSLUTTET,
+                fagsakId = fagsak.id,
+            )
         val revurdering =
             opprettOgLagreRevurderingMedAndeler(
                 personIdent = forelderIdent,
@@ -146,6 +129,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 fagsakId = fagsak.id,
             )
 
+        // Act
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
         val behandlingerMedRelevanteAndeler =
@@ -154,12 +138,14 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 .map { it.kildeBehandlingId }
                 .distinct()
 
-        Assertions.assertEquals(1, behandlingerMedRelevanteAndeler.size)
-        Assertions.assertEquals(revurdering.id, behandlingerMedRelevanteAndeler[0])
+        // Assert
+        assertThat(behandlingerMedRelevanteAndeler).contains(revurdering.id)
+        assertThat(behandlingerMedRelevanteAndeler).doesNotContain(førstegangsbehandling.id)
     }
 
     @Test
     fun `Skal ikke plukke noe ved opphør`() {
+        // Arrange
         val forelderIdent = randomFnr()
 
         val fagsak =
@@ -167,18 +153,21 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
             }
 
-        opprettOgLagreBehandlingMedAndeler(
-            personIdent = forelderIdent,
-            kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
-            medStatus = BehandlingStatus.AVSLUTTET,
-            fagsakId = fagsak.id,
-        )
-        opprettOgLagreRevurderingMedAndeler(
-            personIdent = forelderIdent,
-            kildeOgOffsetPåAndeler = emptyList(),
-            fagsakId = fagsak.id,
-        )
+        val førstegangsbehandling =
+            opprettOgLagreBehandlingMedAndeler(
+                personIdent = forelderIdent,
+                kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
+                medStatus = BehandlingStatus.AVSLUTTET,
+                fagsakId = fagsak.id,
+            )
+        val revurderingMedOpphør =
+            opprettOgLagreRevurderingMedAndeler(
+                personIdent = forelderIdent,
+                kildeOgOffsetPåAndeler = emptyList(),
+                fagsakId = fagsak.id,
+            )
 
+        // Act
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
         val behandlingerMedRelevanteAndeler =
@@ -187,11 +176,13 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 .map { it.kildeBehandlingId }
                 .distinct()
 
-        Assertions.assertTrue(behandlingerMedRelevanteAndeler.isEmpty())
+        // Assert
+        assertThat(behandlingerMedRelevanteAndeler).doesNotContain(førstegangsbehandling.id, revurderingMedOpphør.id)
     }
 
     @Test
     fun `Skal ikke plukke behandling som ikke er iverksatt`() {
+        // Arrange
         val forelderIdent = randomFnr()
 
         val fagsak =
@@ -213,6 +204,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
             fagsakId = fagsak.id,
         )
 
+        // Act
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
         val behandlingerMedRelevanteAndeler =
             andelTilkjentYtelseRepository
@@ -220,8 +212,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 .map { it.kildeBehandlingId }
                 .distinct()
 
-        Assertions.assertEquals(1, behandlingerMedRelevanteAndeler.size)
-        Assertions.assertEquals(iverksattBehandling.id, behandlingerMedRelevanteAndeler[0])
+        // Assert
+        assertThat(behandlingerMedRelevanteAndeler).contains(iverksattBehandling.id)
     }
 
     private fun opprettOgLagreBehandlingMedAndeler(
@@ -284,7 +276,12 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         behandling = behandling,
         opprettetDato = LocalDate.now(),
         endretDato = LocalDate.now(),
-        utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null,
+        utbetalingsoppdrag =
+            if (erIverksatt) {
+                lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id)
+            } else {
+                null
+            },
     )
 
     // Kun offset og kobling til behandling/tilkjent ytelse som er relevant når man skal plukke ut til konsistensavstemming

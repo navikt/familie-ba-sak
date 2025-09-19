@@ -5,7 +5,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -38,8 +38,8 @@ internal class AutobrevTaskTest {
     fun `oppretter ingen autobrev tasker for 6 år, 2 for 18 år og 1 for småbarnstillegg`() {
         val fagsaker =
             setOf(
-                Fagsak(1, aktør = tilAktør(randomFnr())),
-                Fagsak(2, aktør = tilAktør(randomFnr())),
+                Fagsak(1, aktør = lagAktør(randomFnr())),
+                Fagsak(2, aktør = lagAktør(randomFnr())),
             )
 
         every { fagsakRepository.finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(any(), any()) } answers { fagsaker }

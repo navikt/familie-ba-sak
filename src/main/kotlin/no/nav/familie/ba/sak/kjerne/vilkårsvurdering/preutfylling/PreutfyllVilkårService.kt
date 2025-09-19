@@ -27,9 +27,16 @@ class PreutfyllVilkårService(
         }
     }
 
-    fun preutfyllBosattIRiket(vilkårsvurdering: Vilkårsvurdering) {
+    fun preutfyllBosattIRiket(
+        vilkårsvurdering: Vilkårsvurdering,
+        identerVilkårSkalPreutfyllesFor: List<String>? = null,
+    ) {
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR)) {
-            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, identerVilkårSkalPreutfyllesFor)
         }
+    }
+
+    companion object {
+        const val PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT = "Fylt ut automatisk fra registerdata i PDL\n"
     }
 }

@@ -144,6 +144,12 @@ class AutovedtakFinnmarkstilleggServiceTest {
                     )
                 }
 
+            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
+                mapOf(
+                    søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                    barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                )
+
             // Act
             val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
 

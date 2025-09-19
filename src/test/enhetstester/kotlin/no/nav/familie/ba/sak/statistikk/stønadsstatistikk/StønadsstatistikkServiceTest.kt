@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseMedEndreteUtbet
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseUtvidet
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -21,6 +22,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
@@ -52,6 +55,7 @@ internal class StønadsstatistikkServiceTest {
     private val vedtakRepository = mockk<VedtakRepository>()
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
     private val featureToggleService = mockk<FeatureToggleService>()
+    private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
 
     private val stønadsstatistikkService =
         StønadsstatistikkService(
@@ -63,6 +67,7 @@ internal class StønadsstatistikkServiceTest {
             kompetanseService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService,
             featureToggleService,
+            tilkjentYtelseRepository,
         )
     private val behandling = lagBehandling()
     private val søkerFnr = "12345678910"
@@ -107,6 +112,7 @@ internal class StønadsstatistikkServiceTest {
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any()) } returns "DK"
         every { featureToggleService.isEnabled(FeatureToggle.STONADSSTATISTIKK_FORTSATT_INNVILGET) } returns true
+        every { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(any()) } returns null
     }
 
     fun mockAndelTilkjentYtelse() {

@@ -1,12 +1,6 @@
 package no.nav.familie.ba.sak.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.FOM_1900
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.FOM_1990
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.FOM_2004
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.LandkodeISO2
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.TOM_2010
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.TOM_9999
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
 import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
 import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
@@ -22,7 +16,14 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournal
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.mock.IntegrasjonClientMock
+import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.FOM_1900
+import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.FOM_1990
+import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.FOM_2004
+import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.TOM_2010
+import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.TOM_9999
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
+import no.nav.familie.ba.sak.testfiler.Testfil.TEST_PDF
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknad
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
 import no.nav.familie.kontrakter.felles.NavIdent
@@ -259,7 +260,7 @@ class FakeIntegrasjonClient(
         val landkoder =
             ClassPathResource("landkoder/landkoder.json").inputStream.bufferedReader().use(BufferedReader::readText)
 
-        return objectMapper.readValue<List<LandkodeISO2>>(landkoder).associate { it.code to it.name }
+        return objectMapper.readValue<List<IntegrasjonClientMock.Companion.LandkodeISO2>>(landkoder).associate { it.code to it.name }
     }
 
     private fun hentKodeverkLand(): KodeverkDto {

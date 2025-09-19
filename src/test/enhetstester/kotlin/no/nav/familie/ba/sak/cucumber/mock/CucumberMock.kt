@@ -243,7 +243,6 @@ class CucumberMock(
 
     val vedtaksperiodeService =
         VedtaksperiodeService(
-            personidentService = personidentService,
             persongrunnlagService = persongrunnlagService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
@@ -258,9 +257,10 @@ class CucumberMock(
             vilkårsvurderingService = vilkårsvurderingService,
             overgangsstønadService = overgangsstønadService,
             refusjonEøsRepository = mockk(),
-            integrasjonClient = mockk(),
+            kodeverkService = mockk(),
             valutakursRepository = valutakursRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+            featureToggleService = featureToggleService,
         )
 
     val behandlingService =
@@ -403,6 +403,7 @@ class CucumberMock(
             kompetanseService = kompetanseService,
             clockProvider = clockProvider,
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
+            featureToggleService = mockFeatureToggleService(),
         )
 
     val småbarnstilleggService = SmåbarnstilleggService(beregningService)
@@ -567,6 +568,7 @@ class CucumberMock(
             vilkårsvurderingMetrics = mockk(),
             andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             preutfyllVilkårService = preutfyllVilkårService,
+            featureToggleService = featureToggleService,
         )
 
     val registrerPersongrunnlag =

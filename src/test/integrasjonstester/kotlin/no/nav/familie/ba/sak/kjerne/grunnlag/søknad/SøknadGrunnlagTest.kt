@@ -1,19 +1,19 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.FakeIntegrasjonClient
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
-import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
+import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
+import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Søknadsinfo
@@ -39,7 +39,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -69,19 +68,12 @@ class SøknadGrunnlagTest(
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired
     private val brevmalService: BrevmalService,
     @Autowired
     private val fakeIntegrasjonClient: FakeIntegrasjonClient,
     @Autowired
     private val personopplysningerService: PersonopplysningerService,
 ) : AbstractSpringIntegrationTest() {
-    @BeforeAll
-    fun init() {
-        databaseCleanupService.truncate()
-    }
-
     @Test
     fun `Skal lagre ned og hente søknadsgrunnlag`() {
         val søkerIdent = randomFnr()
@@ -218,9 +210,9 @@ class SøknadGrunnlagTest(
 
     @Test
     fun `Skal tilbakestille behandling ved endring på søknadsregistrering`() {
-        val søkerFnr = randomFnr()
-        val barn1Fnr = leggTilPersonInfo(randomBarnFnr(alder = 6))
-        val barn2Fnr = leggTilPersonInfo(randomBarnFnr(alder = 2))
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+        val barn1Fnr = leggTilPersonInfo(randomBarnFødselsdato(alder = 6))
+        val barn2Fnr = leggTilPersonInfo(randomBarnFødselsdato(alder = 2))
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VILKÅRSVURDERING,
@@ -290,9 +282,9 @@ class SøknadGrunnlagTest(
 
     @Test
     fun `Skal fjerne barn og mapping til restbehandling skal kjøre ok`() {
-        val søkerFnr = randomFnr()
-        val barn1Fnr = randomFnr()
-        val barn2Fnr = randomFnr()
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+        val barn1Fnr = leggTilPersonInfo(randomBarnFødselsdato())
+        val barn2Fnr = leggTilPersonInfo(randomBarnFødselsdato())
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VILKÅRSVURDERING,

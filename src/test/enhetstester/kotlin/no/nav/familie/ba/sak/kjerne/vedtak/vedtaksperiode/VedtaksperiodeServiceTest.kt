@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -47,7 +48,6 @@ class VedtaksperiodeServiceTest {
     private val vedtaksperiodeService =
         spyk(
             VedtaksperiodeService(
-                personidentService = mockk(),
                 persongrunnlagService = persongrunnlagService,
                 andelTilkjentYtelseRepository = mockk(),
                 vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
@@ -62,9 +62,10 @@ class VedtaksperiodeServiceTest {
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
                 overgangsstønadService = overgangsstønadService,
                 refusjonEøsRepository = refusjonEøsRepository,
-                integrasjonClient = integrasjonClient,
+                kodeverkService = KodeverkService(integrasjonClient = integrasjonClient),
                 valutakursRepository = mockk(),
                 utenlandskPeriodebeløpRepository = mockk(),
+                featureToggleService = mockk(),
             ),
         )
 

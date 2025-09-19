@@ -60,7 +60,7 @@ class BrevServiceTest {
             korrigertVedtakService = mockk(),
             saksbehandlerContext = saksbehandlerContext,
             brevmalService = brevmalService,
-            integrasjonClient = mockk(),
+            kodeverkService = mockk(),
             testVerktøyService = mockk(),
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             utenlandskPeriodebeløpRepository = mockk(),

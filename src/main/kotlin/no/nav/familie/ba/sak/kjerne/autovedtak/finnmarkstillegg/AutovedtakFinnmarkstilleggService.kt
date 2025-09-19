@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.tilAdresser
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
@@ -19,8 +18,8 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus.LØPENDE
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
-import no.nav.familie.ba.sak.kjerne.steg.IverksettMotOppdrag
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
@@ -49,23 +48,23 @@ class AutovedtakFinnmarkstilleggService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun skalAutovedtakBehandles(behandlingsdata: FinnmarkstilleggData): Boolean {
-        val (fagsaktypeKanBehandles, harLøpendeBarnetrygd) =
-            fagsakService.hentPåFagsakId(behandlingsdata.fagsakId).run {
-                (type in FAGSAKTYPER_DER_FINNMARKSTILLEG_KAN_AUTOVEDTAS) to (status == LØPENDE)
-            }
+        val fagsak = fagsakService.hentPåFagsakId(behandlingsdata.fagsakId)
+        val fagsaktypeKanBehandles = fagsak.type in FAGSAKTYPER_DER_FINNMARKSTILLEG_KAN_AUTOVEDTAS
+        val harLøpendeBarnetrygd = fagsak.status == LØPENDE
+
+        if (!fagsaktypeKanBehandles || !harLøpendeBarnetrygd) return false
 
         val sisteIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandlingsdata.fagsakId)
                 ?: return false
 
-        val sisteIverksatteBehandlingHarFinnmarkstilleggAndeler by lazy {
+        val sisteIverksatteBehandlingHarFinnmarkstilleggAndeler =
             beregningService
                 .hentTilkjentYtelseForBehandling(sisteIverksatteBehandling.id)
                 .andelerTilkjentYtelse
                 .any { it.type == YtelseType.FINNMARKSTILLEGG }
-        }
 
-        val minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg by lazy {
+        val minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg =
             persongrunnlagService
                 .hentAktivThrows(sisteIverksatteBehandling.id)
                 .personer
@@ -73,14 +72,11 @@ class AutovedtakFinnmarkstilleggService(
                 .let { identer ->
                     pdlRestClient
                         .hentBostedsadresseOgDeltBostedForPersoner(identer)
-                        .mapValues { it.value.tilAdresser() }
-                        .any { it.value.harBostedsadresseEllerDeltBostedSomErRelevantForFinnmarkstillegg() }
+                        .mapValues { Adresser.opprettFra(it.value) }
+                        .any { it.value.harAdresserSomErRelevantForFinnmarkstillegg() }
                 }
-        }
 
-        return fagsaktypeKanBehandles &&
-            harLøpendeBarnetrygd &&
-            (sisteIverksatteBehandlingHarFinnmarkstilleggAndeler || minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg)
+        return sisteIverksatteBehandlingHarFinnmarkstilleggAndeler || minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg
     }
 
     @Transactional

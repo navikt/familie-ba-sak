@@ -1,10 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -18,7 +17,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -27,13 +25,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
     @Autowired val stegService: StegService,
     @Autowired val persongrunnlagService: PersongrunnlagService,
     @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    @Autowired val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
-    @BeforeEach
-    fun truncate() {
-        databaseCleanupService.truncate()
-    }
-
     @Test
     fun `Ikke bosatt i riket, skal ikke passere vilkår`() {
         val søkerFnr = randomFnr()
@@ -78,7 +70,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
                 LocalDate.parse("1998-10-10"),
                 setOf(
                     ForelderBarnRelasjon(
-                        tilAktør(barnFnr),
+                        lagAktør(barnFnr),
                         FORELDERBARNRELASJONROLLE.BARN,
                     ),
                 ),
@@ -105,7 +97,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
                 LocalDate.parse("1998-10-10"),
                 setOf(
                     ForelderBarnRelasjon(
-                        tilAktør(barnFnr),
+                        lagAktør(barnFnr),
                         FORELDERBARNRELASJONROLLE.BARN,
                     ),
                 ),

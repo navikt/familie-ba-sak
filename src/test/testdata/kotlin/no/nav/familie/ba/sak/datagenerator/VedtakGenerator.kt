@@ -17,17 +17,23 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.random.Random
 
-fun lagVedtak(
+fun lagVedtakMedId(
     behandling: Behandling = lagBehandling(),
     stønadBrevPdF: ByteArray? = null,
     vedtaksdato: LocalDateTime? = LocalDateTime.now(),
-    id: Long = Random.nextLong(10000000),
+    id: Long = Random.nextLong(),
 ) = Vedtak(
     id = id,
     behandling = behandling,
     vedtaksdato = vedtaksdato,
     stønadBrevPdF = stønadBrevPdF,
 )
+
+fun lagVedtak(
+    behandling: Behandling = lagBehandling(),
+    stønadBrevPdF: ByteArray? = null,
+    vedtaksdato: LocalDateTime? = LocalDateTime.now(),
+) = lagVedtakMedId(behandling = behandling, stønadBrevPdF = stønadBrevPdF, vedtaksdato = vedtaksdato, id = 0L)
 
 fun lagVedtaksperiodeMedBegrunnelser(
     vedtak: Vedtak = lagVedtak(),
@@ -48,7 +54,7 @@ fun lagVedtaksperiodeMedBegrunnelser(
 )
 
 fun lagUtvidetVedtaksperiodeMedBegrunnelser(
-    id: Long = Random.nextLong(10000000),
+    id: Long = 0,
     fom: LocalDate? = LocalDate.now().withDayOfMonth(1),
     tom: LocalDate? = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
     type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,

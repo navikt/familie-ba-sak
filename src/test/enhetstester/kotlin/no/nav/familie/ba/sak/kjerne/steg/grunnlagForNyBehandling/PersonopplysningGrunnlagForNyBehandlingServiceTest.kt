@@ -7,7 +7,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
@@ -174,10 +174,10 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
             }
         every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns personopplysningGrunnlag
         every { persongrunnlagService.lagreOgDeaktiverGammel(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
-        every { personidentService.hentOgLagreAktør(any(), any()) } returns tilAktør(søker.ident)
+        every { personidentService.hentOgLagreAktør(any(), any()) } returns lagAktør(søker.ident)
         every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns
             listOf(
-                tilAktør(
+                lagAktør(
                     barn.ident,
                 ),
             )
@@ -285,10 +285,10 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
             }
         every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns personopplysningGrunnlag
         every { persongrunnlagService.lagreOgDeaktiverGammel(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
-        every { personidentService.hentOgLagreAktør(any(), any()) } returns tilAktør(søker.ident)
+        every { personidentService.hentOgLagreAktør(any(), any()) } returns lagAktør(søker.ident)
         every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns
             listOf(
-                tilAktør(
+                lagAktør(
                     barn1.ident,
                 ),
             )

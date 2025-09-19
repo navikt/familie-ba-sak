@@ -25,10 +25,12 @@ class TekstSaniteringUtilTest {
 
     @Test
     fun `erAlfanummeriskPlussKolon skal tillate tekst med kolon, mens erAlfanummerisk skal ikke tillate tekst med kolon`() {
-        assertThat("Tekst:MedKolon".erAlfanummeriskPlussKolon()).isTrue()
-        assertThat("TekstUtenKolon".erAlfanummeriskPlussKolon()).isTrue()
+        assertThat("Tekst:MedKolon".erAlfanummeriskPlussKolonMellomromOgUnderstrek()).isTrue()
+        assertThat("TekstUtenKolon".erAlfanummeriskPlussKolonMellomromOgUnderstrek()).isTrue()
+        assertThat("Tekst: MedMellomrom".erAlfanummeriskPlussKolonMellomromOgUnderstrek()).isTrue()
+        assertThat("Tekst:Med_Understrek".erAlfanummeriskPlussKolonMellomromOgUnderstrek()).isTrue()
         assertThat("TekstUtenKolon".erAlfanummerisk()).isTrue()
         assertThat("Tekst:MedKolon".erAlfanummerisk()).isFalse()
-        assertThat("".erAlfanummeriskPlussKolon()).isTrue()
+        assertThat("".erAlfanummeriskPlussKolonMellomromOgUnderstrek()).isTrue()
     }
 }
