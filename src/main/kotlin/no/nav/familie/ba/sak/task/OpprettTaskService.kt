@@ -162,21 +162,30 @@ class OpprettTaskService(
     fun opprettAutovedtakFinnmarkstilleggTask(
         fagsakId: Long,
     ) {
-        overstyrTaskMedNyCallId(IdUtils.generateId()) {
-            taskRepository.save(
-                Task(
-                    type = AutovedtakFinnmarkstilleggTask.TASK_STEP_TYPE,
-                    payload = fagsakId.toString(),
-                    properties =
-                        Properties().apply {
-                            this["fagsakId"] = fagsakId.toString()
-                        },
-                ).apply {
-                    if (envService.erProd()) {
-                        medTriggerTid(LocalDateTime.now().plusHours(1))
-                    }
-                },
-            )
+        opprettAutovedtakFinnmarkstilleggTasker(setOf(fagsakId))
+    }
+
+    @Transactional
+    fun opprettAutovedtakFinnmarkstilleggTasker(
+        fagsakIder: Collection<Long>,
+    ) {
+        fagsakIder.forEach { fagsakId ->
+            overstyrTaskMedNyCallId(IdUtils.generateId()) {
+                taskRepository.save(
+                    Task(
+                        type = AutovedtakFinnmarkstilleggTask.TASK_STEP_TYPE,
+                        payload = fagsakId.toString(),
+                        properties =
+                            Properties().apply {
+                                this["fagsakId"] = fagsakId.toString()
+                            },
+                    ).apply {
+                        if (envService.erProd()) {
+                            medTriggerTid(LocalDateTime.now().plusHours(1))
+                        }
+                    },
+                )
+            }
         }
     }
 

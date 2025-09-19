@@ -577,9 +577,8 @@ class ForvalterController(
             throw Feil("Toggle for å opprette tasker for autovedtak av Finnmarkstillegg er skrudd av")
         }
 
-        fagsakIder.forEach {
-            opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(it)
-        }
+        opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(fagsakIder)
+
         return ResponseEntity.ok("Tasker for autovedtak av Finnmarkstillegg opprettet")
     }
 
