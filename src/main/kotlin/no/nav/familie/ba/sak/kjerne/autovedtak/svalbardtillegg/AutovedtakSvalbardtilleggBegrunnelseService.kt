@@ -1,7 +1,8 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg
+package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.leggTilBegrunnelseIVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.finnInnvilgedeOgReduserteSvalbardtilleggPerioder
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.leggTilBegrunnelseIVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
