@@ -297,7 +297,7 @@ class BehandlingsresultatSteg(
     private fun validerSvalbardtilleggBehandling(tilkjentYtelse: TilkjentYtelse) {
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(tilkjentYtelse.behandling)
-                ?: throw Feil("Kan ikke kjøre finnmarkstillegg behandling dersom det ikke finnes en tidligere iverksatt behandling")
+                ?: throw Feil("Kan ikke kjøre svalbardtillegg behandling dersom det ikke finnes en tidligere iverksatt behandling")
 
         val andelerNåværendeBehandling = tilkjentYtelse.andelerTilkjentYtelse.toList()
         val andelerFraForrigeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
