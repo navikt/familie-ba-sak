@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutoma
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutomatiskBehandlingFnr
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -40,7 +41,7 @@ import java.time.LocalDate
 @Service
 @Profile("mock-pdl")
 @Primary
-class MockPersonopplysningerService(
+class FakePersonopplysningerService(
     pdlRestClient: PdlRestClient,
     systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
     familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
@@ -55,17 +56,17 @@ class MockPersonopplysningerService(
         settPersoninfoMedRelasjonerForPredefinerteTestpersoner()
     }
 
-    override fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo =
-        when (val id = aktør.aktivFødselsnummer()) {
-            "00000000000" ->
-                throw HttpClientErrorException(
-                    HttpStatus.NOT_FOUND,
-                    "Fant ikke forespurte data på person.",
-                )
-
-            else ->
-                personInfo[id] ?: personInfo.getValue(INTEGRASJONER_FNR)
+    override fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
+        try {
+            Fødselsnummer(aktør.aktivFødselsnummer())
+        } catch (e: IllegalStateException) {
+            throw HttpClientErrorException(
+                HttpStatus.NOT_FOUND,
+                "Fant ikke forespurte data på person.",
+            )
         }
+        return personInfo[aktør.aktivFødselsnummer()] ?: personInfo.getValue(INTEGRASJONER_FNR)
+    }
 
     override fun hentPersoninfoEnkel(aktør: Aktør): PersonInfo =
         personInfo[aktør.aktivFødselsnummer()]
@@ -89,7 +90,7 @@ class MockPersonopplysningerService(
                 null,
             )
 
-    override fun hentLandkodeAlpha2UtenlandskBostedsadresse(aktør: Aktør): String = "NO"
+    override fun hentLandkodeAlpha2UtenlandskBostedsadresse(aktør: Aktør): String = personerMedLandkode[aktør.aktivFødselsnummer()] ?: "NO"
 
     companion object {
         val personInfo: MutableMap<String, PersonInfo> =
@@ -100,13 +101,13 @@ class MockPersonopplysningerService(
                 mockBarnAutomatiskBehandlingSkalFeileFnr to mockBarnAutomatiskBehandlingSkalFeile,
             )
 
-        @Deprecated("Parsing av fødselsdato fra fnr er usikker pga. århundre. Bruk heller leggTilPersonInfo med fødselsdato")
-        fun leggTilPersonInfo(
+        val personerMedLandkode: MutableMap<String, String> = mutableMapOf()
+
+        fun leggTilLandkodeForPerson(
             personIdent: String,
-            egendefinertMock: PersonInfo,
-        ): String {
-            personInfo[personIdent] = egendefinertMock
-            return personIdent
+            Landkode: String,
+        ) {
+            personerMedLandkode.put(personIdent, Landkode)
         }
 
         fun leggTilPersonInfo(

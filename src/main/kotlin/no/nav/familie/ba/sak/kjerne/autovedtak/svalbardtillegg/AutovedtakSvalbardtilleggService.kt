@@ -43,6 +43,7 @@ class AutovedtakSvalbardtilleggService(
     private val simuleringService: SimuleringService,
     private val behandlingService: BehandlingService,
     private val taskService: TaskService,
+    private val autovedtakSvalbardtilleggBegrunnelseService: AutovedtakSvalbardtilleggBegrunnelseService,
 ) : AutovedtakBehandlingService<SvalbardtilleggData> {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -101,7 +102,9 @@ class AutovedtakSvalbardtilleggService(
         }
 
         if (behandlingEtterBehandlingsresultat.steg == StegType.IVERKSETT_MOT_OPPDRAG) {
-            // TODO: Implementer AutovedtakSvalbardtilleggBegrunnelseService
+            autovedtakSvalbardtilleggBegrunnelseService.begrunnAutovedtakForSvalbardtillegg(
+                behandlingEtterBehandlingsresultat,
+            )
         }
 
         val opprettVedtak = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandlingEtterBehandlingsresultat)

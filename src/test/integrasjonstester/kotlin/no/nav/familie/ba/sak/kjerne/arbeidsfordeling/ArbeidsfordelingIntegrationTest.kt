@@ -4,12 +4,12 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
-import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
-import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonClient
-import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilRelasjonIPersonInfo
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilRelasjonIPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -335,7 +335,7 @@ class ArbeidsfordelingIntegrationTest(
 
     private fun mockSøker(): String =
         leggTilPersonInfo(
-            randomFnr(),
+            randomSøkerFødselsdato(),
             PersonInfo(
                 fødselsdato = now().minusYears(20),
                 navn = "Søker Mockesen",
@@ -352,7 +352,7 @@ class ArbeidsfordelingIntegrationTest(
     ): String {
         val barnFnr =
             leggTilPersonInfo(
-                randomBarnFnr(),
+                randomBarnFødselsdato(),
                 PersonInfo(
                     fødselsdato = now().førsteDagIInneværendeMåned(),
                     navn = "Barn Mockesen",

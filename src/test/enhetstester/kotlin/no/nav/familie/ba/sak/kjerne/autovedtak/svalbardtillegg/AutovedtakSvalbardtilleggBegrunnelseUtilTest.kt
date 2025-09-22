@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
+package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
@@ -16,11 +16,11 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.YearMonth
 
-internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
+internal class AutovedtakSvalbardtilleggBegrunnelseUtilTest {
     @Nested
-    inner class FinnInnvilgedeOgReduserteFinnmarkstilleggPerioderTest {
+    inner class FinnInnvilgedeOgReduserteSvalbardtilleggPerioderTest {
         @Test
-        fun `Skal returnere alle perioder der det har kommet nye finnmarkstillegg andeler`() {
+        fun `Skal returnere alle perioder der det har kommet nye svalbardtillegg andeler`() {
             val barn = lagPerson(type = PersonType.BARN)
             val behandling = lagBehandling()
 
@@ -33,18 +33,18 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
                         behandling = behandling,
                         beløp = 500,
                         sats = 500,
-                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
                     ),
                 )
 
-            val innvilgedeOgReduserteFinnmarkstilleggPerioder =
-                finnInnvilgedeOgReduserteFinnmarkstilleggPerioder(
+            val innvilgedeOgReduserteSvalbardtilleggPerioder =
+                finnInnvilgedeOgReduserteSvalbardtilleggPerioder(
                     forrigeAndeler = emptyList(),
                     nåværendeAndeler = nåværendeAndeler,
                 )
 
-            val innvilgedePerioder = innvilgedeOgReduserteFinnmarkstilleggPerioder.first
-            val redusertePerioder = innvilgedeOgReduserteFinnmarkstilleggPerioder.second
+            val innvilgedePerioder = innvilgedeOgReduserteSvalbardtilleggPerioder.first
+            val redusertePerioder = innvilgedeOgReduserteSvalbardtilleggPerioder.second
 
             assertThat(redusertePerioder).isEmpty()
             assertThat(innvilgedePerioder).hasSize(1)
@@ -66,7 +66,7 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
                         behandling = behandling,
                         beløp = 500,
                         sats = 500,
-                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
                     ),
                     lagAndelTilkjentYtelse(
                         fom = YearMonth.of(2025, 10),
@@ -75,18 +75,18 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
                         behandling = behandling,
                         beløp = 500,
                         sats = 500,
-                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
                     ),
                 )
 
-            val innvilgedeOgReduserteFinnmarkstilleggPerioder =
-                finnInnvilgedeOgReduserteFinnmarkstilleggPerioder(
+            val innvilgedeOgReduserteSvalbardtilleggPerioder =
+                finnInnvilgedeOgReduserteSvalbardtilleggPerioder(
                     forrigeAndeler = emptyList(),
                     nåværendeAndeler = nåværendeAndeler,
                 )
 
-            val innvilgedePerioder = innvilgedeOgReduserteFinnmarkstilleggPerioder.first
-            val redusertePerioder = innvilgedeOgReduserteFinnmarkstilleggPerioder.second
+            val innvilgedePerioder = innvilgedeOgReduserteSvalbardtilleggPerioder.first
+            val redusertePerioder = innvilgedeOgReduserteSvalbardtilleggPerioder.second
 
             assertThat(redusertePerioder).isEmpty()
             assertThat(innvilgedePerioder).hasSize(2)
@@ -109,7 +109,7 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
                         behandling = behandling,
                         beløp = 500,
                         sats = 500,
-                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
                     ),
                     lagAndelTilkjentYtelse(
                         fom = YearMonth.of(2025, 11),
@@ -118,18 +118,18 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
                         behandling = behandling,
                         beløp = 500,
                         sats = 500,
-                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
                     ),
                 )
 
-            val innvilgedeOgReduserteFinnmarkstilleggPerioder =
-                finnInnvilgedeOgReduserteFinnmarkstilleggPerioder(
+            val innvilgedeOgReduserteSvalbardtilleggPerioder =
+                finnInnvilgedeOgReduserteSvalbardtilleggPerioder(
                     forrigeAndeler = emptyList(),
                     nåværendeAndeler = nåværendeAndeler,
                 )
 
-            val innvilgedePerioder = innvilgedeOgReduserteFinnmarkstilleggPerioder.first
-            val redusertePerioder = innvilgedeOgReduserteFinnmarkstilleggPerioder.second
+            val innvilgedePerioder = innvilgedeOgReduserteSvalbardtilleggPerioder.first
+            val redusertePerioder = innvilgedeOgReduserteSvalbardtilleggPerioder.second
 
             assertThat(redusertePerioder).isEmpty()
             assertThat(innvilgedePerioder).hasSize(1)
@@ -137,7 +137,7 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
         }
 
         @Test
-        fun `Ved flere barn som både får og mister finnmarkstillegg for samme periode skal det dannes innvilget og reduksjonsperiode`() {
+        fun `Ved flere barn som både får og mister svalbardtillegg for samme periode skal det dannes innvilget og reduksjonsperiode`() {
             val barn = lagPerson(type = PersonType.BARN)
             val barn2 = lagPerson(type = PersonType.BARN)
             val behandling = lagBehandling()
@@ -152,7 +152,7 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
                         behandling = forrigeBehandling,
                         beløp = 500,
                         sats = 500,
-                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
                     ),
                 )
 
@@ -165,18 +165,18 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
                         behandling = behandling,
                         beløp = 500,
                         sats = 500,
-                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
                     ),
                 )
 
-            val innvilgedeOgReduserteFinnmarkstilleggPerioder =
-                finnInnvilgedeOgReduserteFinnmarkstilleggPerioder(
+            val innvilgedeOgReduserteSvalbardtilleggPerioder =
+                finnInnvilgedeOgReduserteSvalbardtilleggPerioder(
                     forrigeAndeler = forrigeAndeler,
                     nåværendeAndeler = nåværendeAndeler,
                 )
 
-            val innvilgedePerioder = innvilgedeOgReduserteFinnmarkstilleggPerioder.first
-            val redusertePerioder = innvilgedeOgReduserteFinnmarkstilleggPerioder.second
+            val innvilgedePerioder = innvilgedeOgReduserteSvalbardtilleggPerioder.first
+            val redusertePerioder = innvilgedeOgReduserteSvalbardtilleggPerioder.second
 
             assertThat(redusertePerioder).hasSize(1)
             assertThat(redusertePerioder.single()).isEqualTo(YearMonth.of(2025, 11))
@@ -200,7 +200,7 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
                         behandling = behandling,
                         beløp = 500,
                         sats = 500,
-                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
                     ),
                     lagAndelTilkjentYtelse(
                         fom = YearMonth.of(2025, 11),
@@ -209,7 +209,7 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
                         behandling = behandling,
                         beløp = 500,
                         sats = 500,
-                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
                     ),
                 )
 
@@ -222,7 +222,7 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
                         behandling = behandling2,
                         beløp = 500,
                         sats = 500,
-                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
                     ),
                     lagAndelTilkjentYtelse(
                         fom = YearMonth.of(2025, 11),
@@ -231,25 +231,25 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
                         behandling = behandling2,
                         beløp = 500,
                         sats = 500,
-                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
                     ),
                 )
 
-            val innvilgedeOgReduserteFinnmarkstilleggPerioder =
-                finnInnvilgedeOgReduserteFinnmarkstilleggPerioder(
+            val innvilgedeOgReduserteSvalbardtilleggPerioder =
+                finnInnvilgedeOgReduserteSvalbardtilleggPerioder(
                     forrigeAndeler = forrigeAndeler,
                     nåværendeAndeler = nåværendeAndeler,
                 )
 
-            val innvilgedePerioder = innvilgedeOgReduserteFinnmarkstilleggPerioder.first
-            val redusertePerioder = innvilgedeOgReduserteFinnmarkstilleggPerioder.second
+            val innvilgedePerioder = innvilgedeOgReduserteSvalbardtilleggPerioder.first
+            val redusertePerioder = innvilgedeOgReduserteSvalbardtilleggPerioder.second
 
             assertThat(redusertePerioder).isEmpty()
             assertThat(innvilgedePerioder).isEmpty()
         }
 
         @Test
-        fun `Skal returnere alle perioder der man har mistet finnmarkstillegg andeler siden forrige behandling`() {
+        fun `Skal returnere alle perioder der man har mistet svalbardtillegg andeler siden forrige behandling`() {
             val barn = lagPerson(type = PersonType.BARN)
             val behandling = lagBehandling()
 
@@ -262,18 +262,18 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
                         behandling = behandling,
                         beløp = 500,
                         sats = 500,
-                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
                     ),
                 )
 
-            val innvilgedeOgReduserteFinnmarkstilleggPerioder =
-                finnInnvilgedeOgReduserteFinnmarkstilleggPerioder(
+            val innvilgedeOgReduserteSvalbardtilleggPerioder =
+                finnInnvilgedeOgReduserteSvalbardtilleggPerioder(
                     forrigeAndeler = forrigeAndeler,
                     nåværendeAndeler = emptyList(),
                 )
 
-            val innvilgedePerioder = innvilgedeOgReduserteFinnmarkstilleggPerioder.first
-            val redusertePerioder = innvilgedeOgReduserteFinnmarkstilleggPerioder.second
+            val innvilgedePerioder = innvilgedeOgReduserteSvalbardtilleggPerioder.first
+            val redusertePerioder = innvilgedeOgReduserteSvalbardtilleggPerioder.second
 
             assertThat(innvilgedePerioder).isEmpty()
             assertThat(redusertePerioder).hasSize(1)
@@ -310,12 +310,12 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
                 assertThrows<Feil> {
                     leggTilBegrunnelseIVedtaksperiode(
                         vedtaksperiodeStartDato = YearMonth.of(2025, 11),
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG,
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG,
                         vedtaksperioder = vedtaksperioderIBehandling,
                     )
                 }.message
 
-            assertThat(feilmelding).isEqualTo("Finner ikke aktuell periode å begrunne ved autovedtak finnmarkstillegg. Se securelogger for detaljer.")
+            assertThat(feilmelding).isEqualTo("Finner ikke aktuell periode å begrunne ved autovedtak svalbardtillegg. Se securelogger for detaljer.")
         }
 
         @Test
@@ -343,13 +343,13 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
             // Act
             leggTilBegrunnelseIVedtaksperiode(
                 vedtaksperiodeStartDato = YearMonth.of(2025, 11),
-                standardbegrunnelse = Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG,
+                standardbegrunnelse = Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG,
                 vedtaksperioder = vedtaksperioderIBehandling,
             )
 
             // Assert
             val vedtaksperiode = vedtaksperioderIBehandling.single { it.fom == LocalDate.of(2025, 11, 1) }
-            assertThat(vedtaksperiode.begrunnelser.map { it.standardbegrunnelse }).contains(Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG)
+            assertThat(vedtaksperiode.begrunnelser.map { it.standardbegrunnelse }).contains(Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG)
         }
     }
 }

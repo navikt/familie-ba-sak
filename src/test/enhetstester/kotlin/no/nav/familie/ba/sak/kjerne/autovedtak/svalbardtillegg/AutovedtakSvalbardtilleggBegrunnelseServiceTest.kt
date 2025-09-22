@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
+package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg
 
 import io.mockk.every
 import io.mockk.mockk
@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggBegrunnelseService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -25,15 +26,15 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.YearMonth
 
-class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
+class AutovedtakSvalbardtilleggBegrunnelseServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val beregningService = mockk<BeregningService>()
     private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     private val vedtakService = mockk<VedtakService>()
     private val vedtaksperiodeHentOgPersisterService = mockk<VedtaksperiodeHentOgPersisterService>()
 
-    private val autovedtakFinnmarkstilleggBegrunnelseService =
-        AutovedtakFinnmarkstilleggBegrunnelseService(
+    private val autovedtakSvalbardtilleggBegrunnelseService =
+        AutovedtakSvalbardtilleggBegrunnelseService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             beregningService = beregningService,
             vedtaksperiodeService = vedtaksperiodeService,
@@ -59,7 +60,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
                     behandling = forrigeBehandling,
                     beløp = 500,
                     sats = 500,
-                    ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ytelseType = YtelseType.SVALBARDTILLEGG,
                 ),
             )
 
@@ -72,7 +73,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
                     behandling = behandling,
                     beløp = 500,
                     sats = 500,
-                    ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ytelseType = YtelseType.SVALBARDTILLEGG,
                 ),
             )
 
@@ -83,7 +84,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
         // Act && Assert
         val feilmelding =
             assertThrows<Feil> {
-                autovedtakFinnmarkstilleggBegrunnelseService.begrunnAutovedtakForFinnmarkstillegg(behandling)
+                autovedtakSvalbardtilleggBegrunnelseService.begrunnAutovedtakForSvalbardtillegg(behandling)
             }.message
 
         assertThat(feilmelding).isEqualTo("Det er forsøkt å begrunne autovedtak men det ble ikke funnet noen perioder med innvilgelse eller reduksjon.")
@@ -101,7 +102,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
                     behandling = behandling,
                     beløp = 500,
                     sats = 500,
-                    ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ytelseType = YtelseType.SVALBARDTILLEGG,
                 ),
             )
 
@@ -124,12 +125,12 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
         every { vedtaksperiodeHentOgPersisterService.lagre(capture(oppdaterteVedtaksperioderSlot)) } answers { firstArg() }
 
         // Act
-        autovedtakFinnmarkstilleggBegrunnelseService.begrunnAutovedtakForFinnmarkstillegg(behandling)
+        autovedtakSvalbardtilleggBegrunnelseService.begrunnAutovedtakForSvalbardtillegg(behandling)
 
         val oppdaterteVedtaksperioder = oppdaterteVedtaksperioderSlot.captured
 
         assertThat(oppdaterteVedtaksperioder.size).isEqualTo(1)
-        assertThat(oppdaterteVedtaksperioder[0].begrunnelser.map { it.standardbegrunnelse }[0]).isEqualTo(Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG)
+        assertThat(oppdaterteVedtaksperioder[0].begrunnelser.map { it.standardbegrunnelse }[0]).isEqualTo(Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG)
     }
 
     @Test
@@ -144,7 +145,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
                     behandling = forrigeBehandling,
                     beløp = 500,
                     sats = 500,
-                    ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ytelseType = YtelseType.SVALBARDTILLEGG,
                 ),
             )
 
@@ -157,7 +158,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
                     behandling = behandling,
                     beløp = 500,
                     sats = 500,
-                    ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ytelseType = YtelseType.SVALBARDTILLEGG,
                 ),
             )
 
@@ -180,12 +181,12 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
         every { vedtaksperiodeHentOgPersisterService.lagre(capture(oppdaterteVedtaksperioderSlot)) } answers { firstArg() }
 
         // Act
-        autovedtakFinnmarkstilleggBegrunnelseService.begrunnAutovedtakForFinnmarkstillegg(behandling)
+        autovedtakSvalbardtilleggBegrunnelseService.begrunnAutovedtakForSvalbardtillegg(behandling)
 
         val oppdaterteVedtaksperioder = oppdaterteVedtaksperioderSlot.captured
 
         assertThat(oppdaterteVedtaksperioder.size).isEqualTo(1)
-        assertThat(oppdaterteVedtaksperioder[0].begrunnelser.map { it.standardbegrunnelse }[0]).isEqualTo(Standardbegrunnelse.REDUKSJON_FINNMARKSTILLEGG)
+        assertThat(oppdaterteVedtaksperioder[0].begrunnelser.map { it.standardbegrunnelse }[0]).isEqualTo(Standardbegrunnelse.REDUKSJON_SVALBARDTILLEGG)
     }
 
     @Test
@@ -200,7 +201,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
                     behandling = forrigeBehandling,
                     beløp = 500,
                     sats = 500,
-                    ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ytelseType = YtelseType.SVALBARDTILLEGG,
                 ),
             )
 
@@ -213,7 +214,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
                     behandling = behandling,
                     beløp = 500,
                     sats = 500,
-                    ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ytelseType = YtelseType.SVALBARDTILLEGG,
                 ),
             )
 
@@ -236,15 +237,15 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
         every { vedtaksperiodeHentOgPersisterService.lagre(capture(oppdaterteVedtaksperioderSlot)) } answers { firstArg() }
 
         // Act
-        autovedtakFinnmarkstilleggBegrunnelseService.begrunnAutovedtakForFinnmarkstillegg(behandling)
+        autovedtakSvalbardtilleggBegrunnelseService.begrunnAutovedtakForSvalbardtillegg(behandling)
 
         val oppdaterteVedtaksperioder = oppdaterteVedtaksperioderSlot.captured
 
         assertThat(oppdaterteVedtaksperioder.size).isEqualTo(1)
         assertThat(oppdaterteVedtaksperioder[0].begrunnelser.map { it.standardbegrunnelse })
             .contains(
-                Standardbegrunnelse.REDUKSJON_FINNMARKSTILLEGG,
-                Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG,
+                Standardbegrunnelse.REDUKSJON_SVALBARDTILLEGG,
+                Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG,
             )
     }
 }

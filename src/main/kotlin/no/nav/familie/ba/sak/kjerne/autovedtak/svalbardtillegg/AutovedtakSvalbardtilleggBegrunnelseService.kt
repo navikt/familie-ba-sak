@@ -1,6 +1,8 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
+package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.finnInnvilgedeOgReduserteSvalbardtilleggPerioder
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.leggTilBegrunnelseIVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -11,22 +13,25 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import org.springframework.stereotype.Service
 
 @Service
-class AutovedtakFinnmarkstilleggBegrunnelseService(
+class AutovedtakSvalbardtilleggBegrunnelseService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val beregningService: BeregningService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
 ) {
-    fun begrunnAutovedtakForFinnmarkstillegg(
+    fun begrunnAutovedtakForSvalbardtillegg(
         behandlingEtterBehandlingsresultat: Behandling,
     ) {
-        val sistIverksatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandlingEtterBehandlingsresultat.fagsak.id) ?: throw Feil("Finner ikke siste iverksatte behandling")
+        val sistIverksatteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandlingEtterBehandlingsresultat.fagsak.id) ?: throw Feil(
+                "Finner ikke siste iverksatte behandling",
+            )
         val forrigeAndeler = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = sistIverksatteBehandling.id)
         val nåværendeAndeler = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = behandlingEtterBehandlingsresultat.id)
 
         val (innvilgetMånedTidspunkt, redusertMånedTidspunkt) =
-            finnInnvilgedeOgReduserteFinnmarkstilleggPerioder(
+            finnInnvilgedeOgReduserteSvalbardtilleggPerioder(
                 forrigeAndeler = forrigeAndeler,
                 nåværendeAndeler = nåværendeAndeler,
             )
@@ -43,24 +48,24 @@ class AutovedtakFinnmarkstilleggBegrunnelseService(
         innvilgetMånedTidspunkt.forEach {
             leggTilBegrunnelseIVedtaksperiode(
                 vedtaksperiodeStartDato = it,
-                standardbegrunnelse = Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG,
+                standardbegrunnelse = Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG,
                 vedtaksperioder = vedtaksperioder,
             )
         }
 
-        val alleFinnmarkstilleggAndelerHarForsvunnet = redusertMånedTidspunkt.size == 1 && nåværendeAndeler.none { it.erFinnmarkstillegg() }
+        val alleSvalbardtilleggAndelerHarForsvunnet = redusertMånedTidspunkt.size == 1 && nåværendeAndeler.none { it.erSvalbardtillegg() }
 
-        if (alleFinnmarkstilleggAndelerHarForsvunnet) {
+        if (alleSvalbardtilleggAndelerHarForsvunnet) {
             leggTilBegrunnelseIVedtaksperiode(
                 vedtaksperiodeStartDato = redusertMånedTidspunkt.single(),
-                standardbegrunnelse = Standardbegrunnelse.REDUKSJON_FINNMARKSTILLEGG_BODDE_IKKE_I_TILLEGGSONE,
+                standardbegrunnelse = Standardbegrunnelse.REDUKSJON_SVALBARDTILLEGG_BODDE_IKKE_PÅ_SVALBARD,
                 vedtaksperioder = vedtaksperioder,
             )
         } else {
             redusertMånedTidspunkt.forEach {
                 leggTilBegrunnelseIVedtaksperiode(
                     vedtaksperiodeStartDato = it,
-                    standardbegrunnelse = Standardbegrunnelse.REDUKSJON_FINNMARKSTILLEGG,
+                    standardbegrunnelse = Standardbegrunnelse.REDUKSJON_SVALBARDTILLEGG,
                     vedtaksperioder = vedtaksperioder,
                 )
             }
