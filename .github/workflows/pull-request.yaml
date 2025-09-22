@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   merge_group:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
