@@ -29,7 +29,6 @@ import org.springframework.test.context.ActiveProfiles
     "mock-sanity-client",
     "mock-unleash",
     "mock-system-only-integrasjon-client",
-    "mock-integrasjon-client",
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
