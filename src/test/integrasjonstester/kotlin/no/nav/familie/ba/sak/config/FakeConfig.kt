@@ -8,9 +8,9 @@ import org.springframework.context.annotation.Profile
 import org.springframework.web.client.RestOperations
 
 @TestConfiguration
-@Profile("integrasjonstest")
 class FakeConfig {
     @Bean
     @Primary
+    @Profile("fake-integrasjon-client")
     fun fakeIntegrasjonClient(restOperations: RestOperations): FakeIntegrasjonClient = FakeIntegrasjonClient(restOperations)
 }
