@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.5</version>
+        <version>3.5.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -23,13 +23,13 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20250915083819_745c62b</prosessering.version>
+        <prosessering.version>2.20250922094930_4bb329c</prosessering.version>
         <felles.version>3.20250915092837_153983f</felles.version>
-        <eksterne-kontrakter-bisys.version>2.0_20250915155846_3e7ecd7</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20250916123655_5035eb9</felles-kontrakter.version>
-        <familie.kontrakter.saksstatistikk>2.0_20250915155846_3e7ecd7</familie.kontrakter.saksstatistikk>
-        <familie.kontrakter.stønadsstatistikk>2.0_20250915155846_3e7ecd7</familie.kontrakter.stønadsstatistikk>
-        <utbetalingsgenerator.version>1.0_20250804104526_5648100</utbetalingsgenerator.version>
+        <eksterne-kontrakter-bisys.version>2.0_20250922093519_c7288d4</eksterne-kontrakter-bisys.version>
+        <felles-kontrakter.version>3.0_20250922092627_acbfa8f</felles-kontrakter.version>
+        <familie.kontrakter.saksstatistikk>2.0_20250922093519_c7288d4</familie.kontrakter.saksstatistikk>
+        <familie.kontrakter.stønadsstatistikk>2.0_20250922093519_c7288d4</familie.kontrakter.stønadsstatistikk>
+        <utbetalingsgenerator.version>1.0_20250922101633_e4c1c4d</utbetalingsgenerator.version>
         <cucumber.version>7.23.0</cucumber.version>
         <mockk.version>1.14.5</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
@@ -69,7 +69,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.5.5</version>
+                <version>3.5.6</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -178,7 +178,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.7</version>
+            <version>42.7.8</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
