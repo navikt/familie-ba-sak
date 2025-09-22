@@ -32,7 +32,7 @@ fun lagEndretUtbetalingAndel(
     tom: YearMonth? = YearMonth.now(),
     årsak: Årsak = Årsak.DELT_BOSTED,
     avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
-    søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
+    søknadstidspunkt: LocalDate? = LocalDate.now().minusMonths(1),
 ) = EndretUtbetalingAndel(
     id = id,
     behandlingId = behandlingId,

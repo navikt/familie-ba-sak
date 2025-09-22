@@ -17,6 +17,8 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -120,6 +122,7 @@ data class Behandling(
             erManuellMigrering() -> false
             erMigrering() -> false
             erIverksetteKAVedtak() -> false
+            erFinnmarksTilleggEllerSvalbardtillegg() && resultat in setOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT) -> false
             else -> true
         }
 
@@ -157,15 +160,13 @@ data class Behandling(
 
     fun skalRettFraBehandlingsresultatTilIverksetting(erEndringFraForrigeBehandlingSendtTilØkonomi: Boolean): Boolean =
         when {
-            skalBehandlesAutomatisk &&
-                erOmregning() &&
-                resultat in listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_OPPHØRT) -> true
-
+            skalBehandlesAutomatisk && erOmregning() && resultat in listOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT) -> true
             skalBehandlesAutomatisk && erMigrering() && !erManuellMigreringForEndreMigreringsdato() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() -> true
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
-            skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID && this.resultat == Behandlingsresultat.FORTSATT_INNVILGET -> true
+            skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID && this.resultat == FORTSATT_INNVILGET -> true
             skalBehandlesAutomatisk && erMånedligValutajustering() -> true
+            skalBehandlesAutomatisk && erFinnmarksTilleggEllerSvalbardtillegg() -> true
             else -> false
         }
 
@@ -224,11 +225,17 @@ data class Behandling(
 
     fun erMånedligValutajustering() = this.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING
 
+    fun erFinnmarkstillegg() = this.opprettetÅrsak == BehandlingÅrsak.FINNMARKSTILLEGG
+
+    fun erSvalbardtillegg() = this.opprettetÅrsak == BehandlingÅrsak.SVALBARDTILLEGG
+
+    fun erFinnmarksTilleggEllerSvalbardtillegg() = erFinnmarkstillegg() || erSvalbardtillegg()
+
     fun erSatsendringEllerMånedligValutajustering() = erSatsendring() || erMånedligValutajustering()
 
     fun erOppdaterUtvidetKlassekode() = this.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE
 
-    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsendringEllerMånedligValutajustering() || erSmåbarnstillegg() || erOmregning()
+    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsendringEllerMånedligValutajustering() || erSmåbarnstillegg() || erOmregning() || erFinnmarksTilleggEllerSvalbardtillegg()
 
     fun erManuellMigreringForEndreMigreringsdato() =
         erMigrering() &&
@@ -349,6 +356,8 @@ enum class BehandlingÅrsak(
     MÅNEDLIG_VALUTAJUSTERING("Månedlig valutajustering"),
     OPPDATER_UTVIDET_KLASSEKODE("Ny klassekode for utvidet barnetrygd"),
     IVERKSETTE_KA_VEDTAK("Iverksette KA-vedtak"),
+    FINNMARKSTILLEGG("Finnmarkstillegg"),
+    SVALBARDTILLEGG("Svalbardtillegg"),
     ;
 
     fun erOmregningsårsak(): Boolean = this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG

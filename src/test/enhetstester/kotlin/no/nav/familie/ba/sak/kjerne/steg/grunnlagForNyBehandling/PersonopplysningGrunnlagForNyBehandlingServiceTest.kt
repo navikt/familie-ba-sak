@@ -7,7 +7,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
@@ -24,9 +24,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagForNyBehandlingServiceTest.Companion.validerAtPersonerIGrunnlagErLike
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresseBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBostedBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
@@ -119,9 +119,9 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         val kopiertPersonopplysningGrunnlag = slot<PersonopplysningGrunnlag>()
 
         val grVegadresse =
-            GrVegadresse(1, "2", null, "123", "Testgate", "23", null, "0682").medPeriodeOgPerson(periode, søkerPerson)
-        val grUkjentBosted = GrUkjentBosted("Oslo").medPeriodeOgPerson(periode, søkerPerson)
-        val grMatrikkeladresse = GrMatrikkeladresse(1, "2", null, "0682", "23").medPeriodeOgPerson(periode, søkerPerson)
+            GrVegadresseBostedsadresse(1, "2", null, "123", "Testgate", "23", null, "0682", "Oslo").medPeriodeOgPerson(periode, søkerPerson)
+        val grUkjentBosted = GrUkjentBostedBostedsadresse("Oslo").medPeriodeOgPerson(periode, søkerPerson)
+        val grMatrikkeladresse = GrMatrikkeladresseBostedsadresse(1, "2", null, "0682", "Oslo", "23").medPeriodeOgPerson(periode, søkerPerson)
 
         val statsborgerskap =
             GrStatsborgerskap(
@@ -174,10 +174,10 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
             }
         every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns personopplysningGrunnlag
         every { persongrunnlagService.lagreOgDeaktiverGammel(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
-        every { personidentService.hentOgLagreAktør(any(), any()) } returns tilAktør(søker.ident)
+        every { personidentService.hentOgLagreAktør(any(), any()) } returns lagAktør(søker.ident)
         every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns
             listOf(
-                tilAktør(
+                lagAktør(
                     barn.ident,
                 ),
             )
@@ -210,9 +210,9 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         val kopiertPersonopplysningGrunnlag = slot<PersonopplysningGrunnlag>()
 
         val grVegadresse =
-            GrVegadresse(1, "2", null, "123", "Testgate", "23", null, "0682").medPeriodeOgPerson(periode, søkerPerson)
-        val grUkjentBosted = GrUkjentBosted("Oslo").medPeriodeOgPerson(periode, søkerPerson)
-        val grMatrikkeladresse = GrMatrikkeladresse(1, "2", null, "0682", "23").medPeriodeOgPerson(periode, søkerPerson)
+            GrVegadresseBostedsadresse(1, "2", null, "123", "Testgate", "23", null, "0682", "Oslo").medPeriodeOgPerson(periode, søkerPerson)
+        val grUkjentBosted = GrUkjentBostedBostedsadresse("Oslo").medPeriodeOgPerson(periode, søkerPerson)
+        val grMatrikkeladresse = GrMatrikkeladresseBostedsadresse(1, "2", null, "0682", "Oslo", "23").medPeriodeOgPerson(periode, søkerPerson)
 
         val statsborgerskap =
             GrStatsborgerskap(
@@ -285,10 +285,10 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
             }
         every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns personopplysningGrunnlag
         every { persongrunnlagService.lagreOgDeaktiverGammel(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
-        every { personidentService.hentOgLagreAktør(any(), any()) } returns tilAktør(søker.ident)
+        every { personidentService.hentOgLagreAktør(any(), any()) } returns lagAktør(søker.ident)
         every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns
             listOf(
-                tilAktør(
+                lagAktør(
                     barn1.ident,
                 ),
             )

@@ -105,6 +105,34 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun finnSisteIverksatteBehandling(fagsakId: Long): Behandling?
 
     @Query(
+        """SELECT DISTINCT ON(b.fk_fagsak_id) b.*
+            FROM behandling b
+                     INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                     INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+            WHERE f.id in :fagsakIder
+              AND ty.utbetalingsoppdrag IS NOT NULL
+              AND f.arkivert = false
+              AND b.status = 'AVSLUTTET'
+            ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC""",
+        nativeQuery = true,
+    )
+    fun finnSisteIverksatteBehandlingForFagsaker(fagsakIder: Collection<Long>): List<Behandling>
+
+    @Query(
+        """SELECT DISTINCT ON(b.fk_fagsak_id) b.id
+            FROM behandling b
+                     INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                     INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+            WHERE f.id = :fagsakId
+              AND ty.utbetalingsoppdrag IS NOT NULL
+              AND f.arkivert = false
+              AND b.status = 'AVSLUTTET'
+            ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC""",
+        nativeQuery = true,
+    )
+    fun finnIdForSisteIverksatteBehandling(fagsakId: Long): Long?
+
+    @Query(
         """
             select b from Behandling b
                             where b.fagsak.id = :fagsakId and b.status = 'IVERKSETTER_VEDTAK'

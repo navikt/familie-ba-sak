@@ -3,16 +3,15 @@ package no.nav.familie.ba.sak.kjerne.brev
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.config.TEST_PDF
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
-import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
+import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -30,7 +29,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresseBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -43,10 +42,10 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.testfiler.Testfil.TEST_PDF
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -86,19 +85,12 @@ class DokumentServiceIntegrationTest(
     @Autowired
     private val dokumentGenereringService: DokumentGenereringService,
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired
     private val brevmalService: BrevmalService,
 ) : AbstractSpringIntegrationTest() {
-    val barnFnr = leggTilPersonInfo(randomBarnFnr())
-
-    @BeforeEach
-    fun setup() {
-        databaseCleanupService.truncate()
-    }
-
     @Test
     fun `Hent vedtaksbrev`() {
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
@@ -135,6 +127,8 @@ class DokumentServiceIntegrationTest(
 
     @Test
     fun `Skal generere vedtaksbrev`() {
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
@@ -175,10 +169,13 @@ class DokumentServiceIntegrationTest(
         val mockBeslutter = "Mock Beslutter"
         val mockBeslutterId = "mock.beslutter@nav.no"
 
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
-                søkerFnr = randomFnr(),
+                søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
@@ -235,6 +232,8 @@ class DokumentServiceIntegrationTest(
 
     @Test
     fun `Skal verifisere at man ikke får generert brev etter at behandlingen er sendt fra beslutter`() {
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+
         val behandlingEtterVedtakBesluttet =
             kjørStegprosessForFGB(
                 tilSteg = StegType.BESLUTTE_VEDTAK,
@@ -494,7 +493,7 @@ class DokumentServiceIntegrationTest(
         barnasFødselsdatoer: List<LocalDate> = barnasIdenter.map { LocalDate.of(2019, 1, 1) },
         barnAktør: List<Aktør> =
             barnasIdenter.map { fødselsnummer ->
-                tilAktør(fødselsnummer).also {
+                lagAktør(fødselsnummer).also {
                     it.personidenter.add(
                         Personident(
                             fødselsnummer = fødselsnummer,
@@ -507,12 +506,13 @@ class DokumentServiceIntegrationTest(
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
         val bostedsadresse =
-            GrMatrikkeladresse(
+            GrMatrikkeladresseBostedsadresse(
                 matrikkelId = null,
                 bruksenhetsnummer = "H301",
                 tilleggsnavn = "navn",
                 postnummer = "0202",
                 kommunenummer = "2231",
+                poststed = "Oslo",
             )
 
         barnAktør.mapIndexed { index, aktør ->

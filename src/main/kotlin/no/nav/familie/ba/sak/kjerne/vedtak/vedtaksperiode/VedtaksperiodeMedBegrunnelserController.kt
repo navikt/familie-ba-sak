@@ -4,13 +4,13 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
@@ -45,9 +45,9 @@ class VedtaksperiodeMedBegrunnelserController(
     private val brevKlient: BrevKlient,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
-    private val integrasjonClient: IntegrasjonClient,
+    private val kodeverkService: KodeverkService,
     private val testVerktøyService: TestVerktøyService,
-    private val unleashNextMedContextService: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")
     fun oppdaterVedtaksperiodeStandardbegrunnelser(
@@ -160,8 +160,8 @@ class VedtaksperiodeMedBegrunnelserController(
                 vedtaksperiode.hentBegrunnelser(
                     grunnlagForBegrunnelse = grunnlagForBegrunnelser,
                     begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
-                    landkoder = integrasjonClient.hentLandkoderISO2(),
-                    skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse = unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE),
+                    landkoder = kodeverkService.hentLandkoderISO2(),
+                    skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse = featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE),
                 )
             } catch (e: BrevBegrunnelseFeil) {
                 secureLogger.info(

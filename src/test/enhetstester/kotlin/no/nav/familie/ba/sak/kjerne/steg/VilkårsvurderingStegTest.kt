@@ -9,8 +9,8 @@ import junit.framework.TestCase.assertTrue
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -53,7 +53,7 @@ class VilkårsvurderingStegTest {
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService = mockk()
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService = mockk()
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService = mockk()
-    private val unleashService: UnleashNextMedContextService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
 
     private val vilkårsvurderingSteg: VilkårsvurderingSteg =
         VilkårsvurderingSteg(
@@ -69,7 +69,7 @@ class VilkårsvurderingStegTest {
             clockProvider = TestClockProvider(),
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
-            unleashService = unleashService,
+            featureToggleService = featureToggleService,
         )
 
     val behandling =
@@ -96,7 +96,7 @@ class VilkårsvurderingStegTest {
 
         every { tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id)) } just Runs
         justRun { automatiskOppdaterValutakursService.oppdaterAndelerMedValutakurser(any()) }
-        every { unleashService.isEnabled(FeatureToggle.PREUTFYLLING_ENDRET_UTBETALING_3ÅR_ELLER_3MND) } returns false
+        every { featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_ENDRET_UTBETALING_3ÅR_ELLER_3MND) } returns false
     }
 
     @Test
@@ -127,7 +127,7 @@ class VilkårsvurderingStegTest {
         vikårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
         every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vikårsvurdering
 
-        assertDoesNotThrow { vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, "") }
+        assertDoesNotThrow { vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, null) }
     }
 
     @Test

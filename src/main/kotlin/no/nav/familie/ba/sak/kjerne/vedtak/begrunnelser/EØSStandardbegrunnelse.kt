@@ -342,6 +342,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
         override val sanityApiNavn = "innvilgetSelvstendigRettTilleggstekstSekundarInfoOmMuligRefusjon"
     },
+    INNVILGET_SELVSTENDIG_RETT_SEKUNDÆR_ANNEN_FORELDER_BOR_I_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetSelvstendigRettSekundaerAnnenForelderBorINorge"
+    },
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosStandard"
@@ -457,6 +461,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     OPPHØR_SEKUNDÆRLAND_INGEN_AV_FORELDRENE_JOBBER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorSekundarlandIngenAvForeldreneJobber"
+    },
+    OPPHØR_ISLAND_AVVENTE_UTBETALING_TIL_SKATTEÅRET_ER_OVER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorIslandAvventeUtbetalingTilSkatteaaretErOver"
     },
     AVSLAG_EØS_IKKE_EØS_BORGER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
@@ -685,6 +693,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     },
     FORTSATT_INNVILGET_TILLEGSTEKST_UK_FULL_UTBETALING {
         override val sanityApiNavn = "fortsattInnvilgetTilleggstekstUkFullUtbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_TILLEGGSTEKST_SELVSTENDIG_RETT_SEKUNDÆR_FULL_UTBETALING {
+        override val sanityApiNavn = "fortsattInnvilgetTilleggstekstSelvstendigRettSekundaerFullUtbetaling"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
     },
     FORTSATT_INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_STANDARD {

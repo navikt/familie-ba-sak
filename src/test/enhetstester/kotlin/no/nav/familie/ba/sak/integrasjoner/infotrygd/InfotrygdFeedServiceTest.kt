@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import org.assertj.core.api.Assertions.assertThat
@@ -22,7 +22,7 @@ internal class InfotrygdFeedServiceTest {
         every { opprettTaskServiceMock.opprettSendStartBehandlingTilInfotrygdTask(capture(identSlot)) } just runs
 
         val infotrygdFeedService = InfotrygdFeedService(opprettTaskServiceMock)
-        infotrygdFeedService.sendStartBehandlingTilInfotrygdFeed(tilAktør(ident))
+        infotrygdFeedService.sendStartBehandlingTilInfotrygdFeed(lagAktør(ident))
         verify(exactly = 1) {
             opprettTaskServiceMock.opprettSendStartBehandlingTilInfotrygdTask(any())
         }

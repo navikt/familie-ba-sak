@@ -3,22 +3,22 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.datagenerator.lagBarnVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagSøkerVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
-import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
+import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.datagenerator.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -54,7 +54,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -76,8 +75,6 @@ class VilkårServiceIntegrasjonTest(
     @Autowired
     private val vilkårService: VilkårService,
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired
     private val personidentService: PersonidentService,
     @Autowired
     private val behandlingstemaService: BehandlingstemaService,
@@ -92,11 +89,6 @@ class VilkårServiceIntegrasjonTest(
     @Autowired
     private val brevmalService: BrevmalService,
 ) : AbstractSpringIntegrationTest() {
-    @BeforeAll
-    fun init() {
-        databaseCleanupService.truncate()
-    }
-
     @Test
     fun `Manuell vilkårsvurdering skal få erAutomatiskVurdert på enkelte vilkår`() {
         val fnr = randomFnr()
@@ -126,7 +118,7 @@ class VilkårServiceIntegrasjonTest(
         vilkårsvurdering.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
                 when (vilkårResultat.vilkårType) {
-                    Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP, Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD -> assertTrue(vilkårResultat.erAutomatiskVurdert)
+                    Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP, Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER -> assertTrue(vilkårResultat.erAutomatiskVurdert)
                     else -> assertFalse(vilkårResultat.erAutomatiskVurdert)
                 }
             }
@@ -427,6 +419,7 @@ class VilkårServiceIntegrasjonTest(
                                     resultatBegrunnelse = ResultatBegrunnelse.IKKE_AKTUELT,
                                     vurderesEtter = Regelverk.EØS_FORORDNINGEN,
                                     periodeFom = LocalDate.of(2019, 5, 8),
+                                    begrunnelse = "Ikke aktuelt",
                                 ),
                             ),
                     ),
@@ -478,6 +471,7 @@ class VilkårServiceIntegrasjonTest(
                                         resultatBegrunnelse = if (it.vilkårType === Vilkår.LOVLIG_OPPHOLD) ResultatBegrunnelse.IKKE_AKTUELT else null,
                                         vurderesEtter = Regelverk.EØS_FORORDNINGEN,
                                         periodeFom = LocalDate.of(2019, 5, 8),
+                                        begrunnelse = "Ikke aktuelt",
                                     ),
                                 ),
                         ),
@@ -813,7 +807,7 @@ class VilkårServiceIntegrasjonTest(
             }
         assertEquals(
             "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for behandling " +
-                "${behandling.id} med behandlingType ${behandling.type.visningsnavn}",
+                "${behandling.id} med behandlingsårsak ${behandling.opprettetÅrsak.visningsnavn}",
             exception.message,
         )
     }
@@ -1311,9 +1305,11 @@ class VilkårServiceIntegrasjonTest(
 
     @Test
     fun `skal sette vurderes etter basert på behandlingstema`() {
-        val barnFnr = leggTilPersonInfo(randomBarnFnr())
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
         val behandling =
             kjørStegprosessForFGB(
+                søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr),
                 tilSteg = StegType.BEHANDLINGSRESULTAT,
                 fagsakService = fagsakService,

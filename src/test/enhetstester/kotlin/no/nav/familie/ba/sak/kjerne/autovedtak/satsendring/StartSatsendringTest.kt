@@ -5,9 +5,9 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring.Companion.hentAktivSatsendringstidspunkt
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
@@ -30,7 +30,7 @@ internal class StartSatsendringTest {
     private val fagsakRepository: FagsakRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val satskjøringRepository: SatskjøringRepository = mockk()
-    private val unleashService: UnleashNextMedContextService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
     private val personidentService: PersonidentService = mockk()
     private val autovedtakSatsendringService: AutovedtakSatsendringService = mockk()
     private val satsendringService: SatsendringService = mockk()
@@ -45,7 +45,7 @@ internal class StartSatsendringTest {
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(any(), any()) } returns null
         val taskSlot = slot<Task>()
         every { taskRepository.save(capture(taskSlot)) } answers { taskSlot.captured }
-        val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
+        val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository, mockk())
 
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
 
@@ -56,7 +56,7 @@ internal class StartSatsendringTest {
                     behandlingHentOgPersisterService = behandlingHentOgPersisterService,
                     opprettTaskService = opprettTaskService,
                     satskjøringRepository = satskjøringRepository,
-                    unleashService = unleashService,
+                    featureToggleService = featureToggleService,
                     personidentService = personidentService,
                     autovedtakSatsendringService = autovedtakSatsendringService,
                     satsendringService = satsendringService,
@@ -66,7 +66,7 @@ internal class StartSatsendringTest {
 
     @Test
     fun `start satsendring og opprett satsendringtask på sak hvis toggler er på `() {
-        every { unleashService.isEnabled(FeatureToggle.SATSENDRING_ENABLET, false) } returns true
+        every { featureToggleService.isEnabled(FeatureToggle.SATSENDRING_ENABLET, false) } returns true
 
         val behandling = lagBehandling()
 
@@ -86,8 +86,8 @@ internal class StartSatsendringTest {
 
     @Test
     fun `finnLøpendeFagsaker har totalt antall sider 3, så den skal kalle finnLøpendeFagsaker 3 ganger for å få 5 satsendringer`() {
-        every { unleashService.isEnabled(any(), false) } returns true
-        every { unleashService.isEnabled(any<FeatureToggle>()) } returns true
+        every { featureToggleService.isEnabled(any(), false) } returns true
+        every { featureToggleService.isEnabled(any<FeatureToggle>()) } returns true
 
         val behandling = lagBehandling()
 

@@ -78,7 +78,7 @@ class StatusFraOppdrag(
     private fun opprettFerdigstillBehandling(statusFraOppdragDTO: StatusFraOppdragDTO) {
         val ferdigstillBehandling =
             FerdigstillBehandlingTask.opprettTask(
-                søkerIdent = statusFraOppdragDTO.aktørId,
+                søkerIdent = statusFraOppdragDTO.personIdent,
                 behandlingsId = statusFraOppdragDTO.behandlingsId,
             )
         taskRepository.save(ferdigstillBehandling)

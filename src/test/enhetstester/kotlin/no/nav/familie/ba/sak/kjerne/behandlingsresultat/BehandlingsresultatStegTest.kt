@@ -16,13 +16,17 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
+import no.nav.familie.ba.sak.datagenerator.lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.lagUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.datagenerator.lagValutakurs
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
+import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat.OPPFYLT
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -36,6 +40,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
@@ -56,6 +61,13 @@ import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -65,6 +77,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -87,6 +101,7 @@ class BehandlingsresultatStegTest {
     private val kompetanseRepository = mockk<KompetanseRepository>()
     private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
     private val tilbakestillBehandlingService = mockk<TilbakestillBehandlingService>()
+    private val clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(LocalDate.of(2025, 10, 10))
 
     private val behandlingsresultatSteg: BehandlingsresultatSteg =
         BehandlingsresultatSteg(
@@ -103,7 +118,7 @@ class BehandlingsresultatStegTest {
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             valutakursRepository = valutakursRepository,
-            clockProvider = TestClockProvider(),
+            clockProvider = clockProvider,
             kompetanseRepository = kompetanseRepository,
             småbarnstilleggService = småbarnstilleggService,
             tilbakestillBehandlingService = tilbakestillBehandlingService,
@@ -336,6 +351,18 @@ class BehandlingsresultatStegTest {
 
     @Nested
     inner class PreValiderStegTest {
+        @ParameterizedTest
+        @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG"])
+        fun `skal ikke valideres om behandlingen ikke har riktig årsak for behandling som skal automatisk behandles`(
+            behandlingÅrsak: BehandlingÅrsak,
+        ) {
+            // Arrange
+            val behandling = lagBehandling(skalBehandlesAutomatisk = true, årsak = behandlingÅrsak)
+
+            // Act & assert
+            assertDoesNotThrow { behandlingsresultatSteg.preValiderSteg(behandling) }
+        }
+
         @Test
         fun `Skal kaste feil dersom det finnes kompetanser der Norge er sekundærland men aktivitetsland og bosted er satt til Norge`() {
             // Arrange
@@ -503,7 +530,7 @@ class BehandlingsresultatStegTest {
                     ),
                 ),
             )
-            lagMocksForPreValiderStegSatsendring(
+            lagMocksForPreValiderSteg(
                 behandling = behandling,
                 tilkjentYtelse = tilkjentYtelse,
                 forrigeBehandling = forrigeBehandling,
@@ -601,7 +628,7 @@ class BehandlingsresultatStegTest {
                     ),
                 ),
             )
-            lagMocksForPreValiderStegSatsendring(
+            lagMocksForPreValiderSteg(
                 behandling = behandling,
                 tilkjentYtelse = tilkjentYtelse,
                 forrigeBehandling = forrigeBehandling,
@@ -613,6 +640,501 @@ class BehandlingsresultatStegTest {
             behandlingsresultatSteg.preValiderSteg(behandling)
 
             assertThatCode { behandlingsresultatSteg.preValiderSteg(behandling) }.doesNotThrowAnyException()
+        }
+
+        @Test
+        fun `Skal ikke kaste feil dersom eneste endringer i andeler har vært i finnmarkstillegg andeler i behandlinger med årsak finnmarkstillegg`() {
+            val søker = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val forrigeBehandling =
+                lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
+
+            val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = forrigeBehandling)
+            forrigeTilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        tilkjentYtelse = forrigeTilkjentYtelse,
+                        beløp = 1000,
+                        person = barn,
+                    ),
+                ),
+            )
+
+            val behandling =
+                lagBehandling(
+                    fagsak = forrigeBehandling.fagsak,
+                    behandlingType = BehandlingType.REVURDERING,
+                    årsak = BehandlingÅrsak.FINNMARKSTILLEGG,
+                )
+            val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+
+            tilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 1000,
+                        person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 500,
+                        person = barn,
+                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ),
+                ),
+            )
+
+            lagMocksForPreValiderSteg(
+                behandling = behandling,
+                tilkjentYtelse = tilkjentYtelse,
+                forrigeBehandling = forrigeBehandling,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                søker = søker,
+                barn = listOf(barn),
+            )
+
+            behandlingsresultatSteg.preValiderSteg(behandling)
+            assertThatCode { behandlingsresultatSteg.preValiderSteg(behandling) }.doesNotThrowAnyException()
+        }
+
+        @Test
+        fun `Skal kaste feil dersom det har vært endringer i andeler annet enn finnmarkstillegg i behandlinger med årsak finnmarkstillegg`() {
+            val søker = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val forrigeBehandling =
+                lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
+
+            val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = forrigeBehandling)
+            forrigeTilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        tilkjentYtelse = forrigeTilkjentYtelse,
+                        beløp = 999,
+                        person = barn,
+                    ),
+                ),
+            )
+
+            val behandling =
+                lagBehandling(
+                    fagsak = forrigeBehandling.fagsak,
+                    behandlingType = BehandlingType.REVURDERING,
+                    årsak = BehandlingÅrsak.FINNMARKSTILLEGG,
+                )
+            val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+
+            tilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 1000,
+                        person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 500,
+                        person = barn,
+                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ),
+                ),
+            )
+
+            lagMocksForPreValiderSteg(
+                behandling = behandling,
+                tilkjentYtelse = tilkjentYtelse,
+                forrigeBehandling = forrigeBehandling,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                søker = søker,
+                barn = listOf(barn),
+            )
+
+            assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
+                .hasMessageContaining("Det er oppdaget forskjell i utbetaling utenom FINNMARKSTILLEGG andeler. Dette kan ikke skje i en behandling der årsak er FINNMARKSTILLEGG, og den automatiske kjøring stoppes derfor.")
+        }
+
+        @Test
+        fun `Skal kaste feil dersom tidspunktet for førstegang innvilgelse av finnmarkstillegget ligger mer enn 1 måned fram i tid`() {
+            val søker = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val forrigeBehandling =
+                lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
+
+            val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = forrigeBehandling)
+            forrigeTilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        tilkjentYtelse = forrigeTilkjentYtelse,
+                        beløp = 999,
+                        person = barn,
+                    ),
+                ),
+            )
+
+            val behandling =
+                lagBehandling(
+                    fagsak = forrigeBehandling.fagsak,
+                    behandlingType = BehandlingType.REVURDERING,
+                    årsak = BehandlingÅrsak.FINNMARKSTILLEGG,
+                )
+            val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+
+            tilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        tilkjentYtelse = forrigeTilkjentYtelse,
+                        beløp = 999,
+                        person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.now(clockProvider.get()).plusMonths(2),
+                        tom = YearMonth.now().plusMonths(122),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 500,
+                        person = barn,
+                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ),
+                ),
+            )
+
+            lagMocksForPreValiderSteg(
+                behandling = behandling,
+                tilkjentYtelse = tilkjentYtelse,
+                forrigeBehandling = forrigeBehandling,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                søker = søker,
+                barn = listOf(barn),
+            )
+
+            assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
+                .hasMessageContaining("Det eksisterer FINNMARKSTILLEGG andeler som først blir innvilget mer enn 1 måned fram i tid. Det er ikke mulig å innvilge disse enda, og behandlingen stoppes derfor.")
+        }
+
+        @Test
+        fun `Skal kaste feil dersom det eksisterer barn som ikke bor i finnmark men har delt bosted i perioder søker bor i finnmark`() {
+            val søker = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val forrigeBehandling =
+                lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = behandling,
+                            person = søker,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS, BOSATT_PÅ_SVALBARD),
+                        ),
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = barn.aktør,
+                            lagVilkårResultater = { personResultat ->
+                                setOf(
+                                    lagVilkårResultat(
+                                        personResultat = personResultat,
+                                        vilkårType = BOSATT_I_RIKET,
+                                        resultat = OPPFYLT,
+                                        periodeFom = LocalDate.of(2025, 1, 1),
+                                        periodeTom = LocalDate.now().plusYears(1),
+                                        behandlingId = behandling.id,
+                                    ),
+                                    lagVilkårResultat(
+                                        personResultat = personResultat,
+                                        vilkårType = UNDER_18_ÅR,
+                                        resultat = OPPFYLT,
+                                        periodeFom = LocalDate.now().minusYears(15),
+                                        periodeTom = LocalDate.now().plusYears(1),
+                                        behandlingId = behandling.id,
+                                    ),
+                                    lagVilkårResultat(
+                                        personResultat = personResultat,
+                                        vilkårType = BOR_MED_SØKER,
+                                        resultat = OPPFYLT,
+                                        periodeFom = LocalDate.of(2025, 1, 1),
+                                        periodeTom = LocalDate.now().plusYears(1),
+                                        behandlingId = behandling.id,
+                                        utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
+                                    ),
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = forrigeBehandling)
+            forrigeTilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        tilkjentYtelse = forrigeTilkjentYtelse,
+                        beløp = 1000,
+                        person = barn,
+                    ),
+                ),
+            )
+
+            val behandling =
+                lagBehandling(
+                    fagsak = forrigeBehandling.fagsak,
+                    behandlingType = BehandlingType.REVURDERING,
+                    årsak = BehandlingÅrsak.FINNMARKSTILLEGG,
+                )
+            val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+
+            tilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        tilkjentYtelse = forrigeTilkjentYtelse,
+                        beløp = 1000,
+                        person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.now().plusMonths(1),
+                        tom = YearMonth.now().plusMonths(122),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 500,
+                        person = barn,
+                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ),
+                ),
+            )
+
+            lagMocksForPreValiderSteg(
+                behandling = behandling,
+                tilkjentYtelse = tilkjentYtelse,
+                forrigeBehandling = forrigeBehandling,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                søker = søker,
+                barn = listOf(barn),
+                vilkårsvurdering = vilkårsvurdering,
+            )
+
+            assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
+                .hasMessageContaining("Det finnes perioder der søker bor i finnmark samtidig som et barn med delt bosted ikke bor i finnmark. Disse sakene støtter vi ikke automatisk, og vi stanser derfor denne behandlingen.")
+        }
+
+        @Test
+        fun `Skal ikke kaste feil dersom eneste endringer i andeler har vært i svalbardtillegg andeler i behandlinger med årsak svalbardtillegg`() {
+            val søker = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val forrigeBehandling =
+                lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
+
+            val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = forrigeBehandling)
+            forrigeTilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        tilkjentYtelse = forrigeTilkjentYtelse,
+                        beløp = 1000,
+                        person = barn,
+                    ),
+                ),
+            )
+
+            val behandling =
+                lagBehandling(
+                    fagsak = forrigeBehandling.fagsak,
+                    behandlingType = BehandlingType.REVURDERING,
+                    årsak = BehandlingÅrsak.SVALBARDTILLEGG,
+                )
+            val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+
+            tilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 1000,
+                        person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 500,
+                        person = barn,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
+                    ),
+                ),
+            )
+
+            lagMocksForPreValiderSteg(
+                behandling = behandling,
+                tilkjentYtelse = tilkjentYtelse,
+                forrigeBehandling = forrigeBehandling,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                søker = søker,
+                barn = listOf(barn),
+            )
+
+            behandlingsresultatSteg.preValiderSteg(behandling)
+            assertThatCode { behandlingsresultatSteg.preValiderSteg(behandling) }.doesNotThrowAnyException()
+        }
+
+        @Test
+        fun `Skal kaste feil dersom det har vært endringer i andeler annet enn svalbardtillegg i behandlinger med årsak svalbardtillegg`() {
+            val søker = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val forrigeBehandling =
+                lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
+
+            val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = forrigeBehandling)
+            forrigeTilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        tilkjentYtelse = forrigeTilkjentYtelse,
+                        beløp = 999,
+                        person = barn,
+                    ),
+                ),
+            )
+
+            val behandling =
+                lagBehandling(
+                    fagsak = forrigeBehandling.fagsak,
+                    behandlingType = BehandlingType.REVURDERING,
+                    årsak = BehandlingÅrsak.SVALBARDTILLEGG,
+                )
+            val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+
+            tilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 1000,
+                        person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 500,
+                        person = barn,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
+                    ),
+                ),
+            )
+
+            lagMocksForPreValiderSteg(
+                behandling = behandling,
+                tilkjentYtelse = tilkjentYtelse,
+                forrigeBehandling = forrigeBehandling,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                søker = søker,
+                barn = listOf(barn),
+            )
+
+            assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
+                .hasMessageContaining("Det er oppdaget forskjell i utbetaling utenom SVALBARDTILLEGG andeler. Dette kan ikke skje i en behandling der årsak er SVALBARDTILLEGG, og den automatiske kjøring stoppes derfor.")
+        }
+
+        @Test
+        fun `Skal kaste feil dersom tidspunktet for førstegang innvilgelse av svalbardtillegget ligger mer enn 1 måned fram i tid`() {
+            val søker = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val forrigeBehandling =
+                lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
+
+            val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = forrigeBehandling)
+            forrigeTilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        tilkjentYtelse = forrigeTilkjentYtelse,
+                        beløp = 999,
+                        person = barn,
+                    ),
+                ),
+            )
+
+            val behandling =
+                lagBehandling(
+                    fagsak = forrigeBehandling.fagsak,
+                    behandlingType = BehandlingType.REVURDERING,
+                    årsak = BehandlingÅrsak.SVALBARDTILLEGG,
+                )
+            val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+
+            tilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        tilkjentYtelse = forrigeTilkjentYtelse,
+                        beløp = 999,
+                        person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.now(clockProvider.get()).plusMonths(2),
+                        tom = YearMonth.now().plusMonths(122),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 500,
+                        person = barn,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
+                    ),
+                ),
+            )
+
+            lagMocksForPreValiderSteg(
+                behandling = behandling,
+                tilkjentYtelse = tilkjentYtelse,
+                forrigeBehandling = forrigeBehandling,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                søker = søker,
+                barn = listOf(barn),
+            )
+
+            assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
+                .hasMessageContaining("Det eksisterer SVALBARDTILLEGG andeler som først blir innvilget mer enn 1 måned fram i tid. Det er ikke mulig å innvilge disse enda, og behandlingen stoppes derfor.")
         }
     }
 
@@ -634,19 +1156,18 @@ class BehandlingsresultatStegTest {
         }
     }
 
-    private fun lagMocksForPreValiderStegSatsendring(
+    private fun lagMocksForPreValiderSteg(
         behandling: Behandling,
         tilkjentYtelse: TilkjentYtelse,
         forrigeBehandling: Behandling,
         forrigeTilkjentYtelse: TilkjentYtelse,
         søker: Person,
         barn: List<Person>,
+        vilkårsvurdering: Vilkårsvurdering = lagVilkårsvurdering(søkerAktør = søker.aktør, behandling = behandling, resultat = Resultat.OPPFYLT),
     ) {
         val personopplysningGrunnlag = mockk<PersonopplysningGrunnlag>()
-        val vikårsvurderings =
-            lagVilkårsvurdering(søkerAktør = søker.aktør, behandling = behandling, resultat = Resultat.OPPFYLT)
-        every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vikårsvurderings
-        every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vikårsvurderings
+        every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vilkårsvurdering
+        every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
         every { persongrunnlagService.hentBarna(any<Behandling>()) } returns emptyList()
         every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns tilkjentYtelse
 
@@ -656,6 +1177,7 @@ class BehandlingsresultatStegTest {
         every { personopplysningGrunnlag.søker } returns søker
         every { personopplysningGrunnlag.barna } returns barn
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns forrigeBehandling
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeTilkjentYtelse.andelerTilkjentYtelse.toList()
         every {
             andelerTilkjentYtelseOgEndreteUtbetalingerService

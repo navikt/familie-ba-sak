@@ -5,8 +5,8 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
@@ -43,12 +44,12 @@ class AvregningServiceTest {
     private val barn1 = lagPerson()
     private val barn2 = lagPerson()
 
-    private val sisteIverksatteBehandling = lagBehandling()
+    private val sisteVedtatteBehandling = lagBehandling()
     private val inneværendeBehandling = lagBehandling()
 
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val unleashService = mockk<UnleashNextMedContextService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
     private val fagsakService = mockk<FagsakService>()
     private val beregningService = mockk<BeregningService>()
 
@@ -57,7 +58,7 @@ class AvregningServiceTest {
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(mar(2025)),
-            unleashService = unleashService,
+            featureToggleService = featureToggleService,
             fagsakService = fagsakService,
             beregningService = beregningService,
         )
@@ -65,8 +66,8 @@ class AvregningServiceTest {
     @BeforeEach
     fun setup() {
         every { behandlingHentOgPersisterService.hent(any()) } returns inneværendeBehandling
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(any()) } returns sisteIverksatteBehandling
-        every { unleashService.isEnabled(FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING) } returns true
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns sisteVedtatteBehandling
+        every { featureToggleService.isEnabled(FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING) } returns true
     }
 
     @Nested
@@ -77,7 +78,7 @@ class AvregningServiceTest {
             val andelerForrigeBehandling = emptyList<AndelTilkjentYtelse>()
             val andelerInneværendeBehandling = emptyList<AndelTilkjentYtelse>()
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
 
             // Act
@@ -111,7 +112,7 @@ class AvregningServiceTest {
                     ),
                 )
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
 
             // Act
@@ -137,7 +138,7 @@ class AvregningServiceTest {
 
             val andelerInneværendeBehandling = emptyList<AndelTilkjentYtelse>()
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
 
             // Act
@@ -163,7 +164,7 @@ class AvregningServiceTest {
                     ),
                 )
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
 
             // Act
@@ -212,7 +213,7 @@ class AvregningServiceTest {
                     ),
                 )
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
 
             // Act
@@ -264,7 +265,7 @@ class AvregningServiceTest {
                     ),
                 )
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
 
             // Act
@@ -324,7 +325,7 @@ class AvregningServiceTest {
                     ),
                 )
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
 
             // Act
@@ -377,7 +378,7 @@ class AvregningServiceTest {
                     ),
                 )
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
 
             // Act
@@ -430,7 +431,7 @@ class AvregningServiceTest {
                     ),
                 )
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
 
             // Act
@@ -482,7 +483,7 @@ class AvregningServiceTest {
                     ),
                 )
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
 
             // Act
@@ -543,9 +544,9 @@ class AvregningServiceTest {
                     ),
                 )
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
-            every { unleashService.isEnabled(FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING) } returns false
+            every { featureToggleService.isEnabled(FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING) } returns false
 
             // Act
             val perioderMedEtterbetalingOgFeilutbetaling =
@@ -592,8 +593,56 @@ class AvregningServiceTest {
             val eøsBehandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS)
 
             every { behandlingHentOgPersisterService.hent(any()) } returns eøsBehandling
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(eøsBehandling.id) } returns andelerInneværendeBehandling
+
+            // Act
+            val perioderMedEtterbetalingOgFeilutbetaling =
+                avregningService.hentPerioderMedAvregning(behandlingId = inneværendeBehandling.id)
+
+            // Assert
+            assertThat(perioderMedEtterbetalingOgFeilutbetaling).isEmpty()
+        }
+
+        @Test
+        fun `skal returnere tom liste hvis behandlingstype er TEKNISK_ENDRING`() {
+            // Arrange
+            val andelerForrigeBehandling =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = jan(2025),
+                        tom = jan(2025),
+                        person = barn1,
+                        kalkulertUtbetalingsbeløp = 1000,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = jan(2025),
+                        tom = jan(2025),
+                        person = barn2,
+                        kalkulertUtbetalingsbeløp = 2000,
+                    ),
+                )
+            val andelerInneværendeBehandling =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = jan(2025),
+                        tom = jan(2025),
+                        person = barn1,
+                        kalkulertUtbetalingsbeløp = 2000,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = jan(2025),
+                        tom = jan(2025),
+                        person = barn2,
+                        kalkulertUtbetalingsbeløp = 1000,
+                    ),
+                )
+
+            val tekniskEndringBehandling = lagBehandling(behandlingType = BehandlingType.TEKNISK_ENDRING)
+
+            every { behandlingHentOgPersisterService.hent(any()) } returns tekniskEndringBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(tekniskEndringBehandling.id) } returns andelerInneværendeBehandling
 
             // Act
             val perioderMedEtterbetalingOgFeilutbetaling =
@@ -638,7 +687,7 @@ class AvregningServiceTest {
                     ),
                 )
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
 
             // Act

@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinje
@@ -33,6 +35,7 @@ internal enum class Endringsresultat {
 
 object BehandlingsresultatEndringUtils {
     internal fun utledEndringsresultat(
+        behandling: Behandling,
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>,
         personerFremstiltKravFor: List<Aktør>,
@@ -47,6 +50,7 @@ object BehandlingsresultatEndringUtils {
         personerIBehandling: Set<Person>,
         personerIForrigeBehandling: Set<Person>,
         nåMåned: YearMonth,
+        featureToggleService: FeatureToggleService,
     ): Endringsresultat {
         val relevantePersoner = (personerIBehandling.map { it.aktør } + personerIForrigeBehandling.map { it.aktør }).distinct()
 
@@ -96,13 +100,15 @@ object BehandlingsresultatEndringUtils {
                     }
 
                 val erEndringIVilkårsvurderingForPerson =
-                    erEndringIVilkårsvurderingForPerson(
-                        tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = tidligsteRelevanteFomDatoForPersonIVilkårsvurdering,
-                        nåværendePersonResultaterForPerson = nåværendePersonResultatForPerson,
-                        forrigePersonResultaterForPerson = forrigePersonResultatForPerson,
-                        personIBehandling = personIBehandling,
-                        personIForrigeBehandling = personIForrigeBehandling,
-                    )
+                    !behandling.erFinnmarksTilleggEllerSvalbardtillegg() &&
+                        erEndringIVilkårsvurderingForPerson(
+                            tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = tidligsteRelevanteFomDatoForPersonIVilkårsvurdering,
+                            nåværendePersonResultaterForPerson = nåværendePersonResultatForPerson,
+                            forrigePersonResultaterForPerson = forrigePersonResultatForPerson,
+                            personIBehandling = personIBehandling,
+                            personIForrigeBehandling = personIForrigeBehandling,
+                            featureToggleService = featureToggleService,
+                        )
 
                 val erEndringIKompetanseForPerson =
                     erEndringIKompetanseForPerson(
@@ -254,6 +260,7 @@ internal fun erEndringIVilkårsvurderingForPerson(
     personIBehandling: Person?,
     personIForrigeBehandling: Person?,
     tidligsteRelevanteFomDatoForPersonIVilkårsvurdering: YearMonth,
+    featureToggleService: FeatureToggleService,
 ): Boolean {
     val endringIVilkårsvurderingTidslinje =
         EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
@@ -262,6 +269,7 @@ internal fun erEndringIVilkårsvurderingForPerson(
             forrigePersonResultater = forrigePersonResultaterForPerson,
             personIBehandling = personIBehandling,
             personIForrigeBehandling = personIForrigeBehandling,
+            featureToggleService = featureToggleService,
         )
 
     return endringIVilkårsvurderingTidslinje.tilPerioder().any { it.verdi == true }

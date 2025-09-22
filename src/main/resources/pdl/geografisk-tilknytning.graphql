@@ -1,0 +1,6 @@
+query($ident: ID!) {
+    geografiskTilknytning: hentGeografiskTilknytning(ident: $ident) {
+        gtType
+        gtKommune
+    }
+}

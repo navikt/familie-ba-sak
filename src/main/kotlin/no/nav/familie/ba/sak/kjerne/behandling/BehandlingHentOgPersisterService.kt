@@ -46,6 +46,10 @@ class BehandlingHentOgPersisterService(
      */
     fun hentSisteBehandlingSomErIverksatt(fagsakId: Long): Behandling? = behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
 
+    fun hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder: Collection<Long>): Map<Long, Behandling> = behandlingRepository.finnSisteIverksatteBehandlingForFagsaker(fagsakIder = fagsakIder).associate { it.fagsak.id to it }
+
+    fun hentIdForSisteBehandlingSomErIverksatt(fagsakId: Long): Long? = behandlingRepository.finnIdForSisteIverksatteBehandling(fagsakId = fagsakId)
+
     /**
      * Henter siste iverksatte behandling FØR en gitt behandling.
      * Bør kun brukes i forbindelse med oppdrag mot økonomisystemet
@@ -62,7 +66,8 @@ class BehandlingHentOgPersisterService(
     }
 
     fun hentSisteBehandlingSomErSendtTilØkonomiPerFagsak(fagsakIder: Set<Long>): List<Behandling> {
-        val behandlingerPåFagsakene = behandlingRepository.finnBehandlinger(fagsakIder)
+        val behandlingerPåFagsakene =
+            behandlingRepository.finnBehandlinger(fagsakIder)
 
         return behandlingerPåFagsakene
             .groupBy { it.fagsak.id }

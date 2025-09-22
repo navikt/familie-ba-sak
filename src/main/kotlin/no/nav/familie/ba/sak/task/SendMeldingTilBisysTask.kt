@@ -141,7 +141,7 @@ class SendMeldingTilBisysTask(
                 payload = behandlingsId.toString(),
                 properties =
                     Properties().apply {
-                        this["behandlingsId"] = behandlingsId.toString()
+                        this["behandlingId"] = behandlingsId.toString()
                     },
             )
     }

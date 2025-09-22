@@ -52,6 +52,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 @Service
@@ -69,7 +70,6 @@ class ForvalterService(
     private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val oppdaterTilkjentYtelseService: OppdaterTilkjentYtelseService,
-    private val taskService: TaskService,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -148,10 +148,10 @@ class ForvalterService(
         logger.info("Alle async jobber er kjørt. Totalt antall sider=${deffereds.size}")
     }
 
-    private fun sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(fagsaker: List<Long>) {
+    fun sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(fagsaker: List<Long>) {
         fagsaker.forEach { fagsakId ->
             val sisteIverksatteBehandling =
-                behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
+                behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
             if (sisteIverksatteBehandling != null) {
                 try {
                     tilkjentYtelseValideringService.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
@@ -279,25 +279,6 @@ class ForvalterService(
                 return@map Pair(fagsakId, andelTilkjentYtelseKorreksjoner.tilAndelerTilkjentYtelseKorreksjonerDto())
             }
             return@map Pair(fagsakId, null)
-        }
-    }
-
-    @Transactional
-    fun finnFagsakSomSkalHaMinsideAktivertOgLagTask(
-        antallFagsaker: Int,
-        dryRun: Boolean = true,
-    ) {
-        val fagsakerSomSkalHaMinsideAktivert =
-            fagsakRepository.finnLøpendeFagsakSomIkkeHarFåttMinsideAktivert(PageRequest.of(0, antallFagsaker)).content
-        logger.info("Fant ${fagsakerSomSkalHaMinsideAktivert.size} fagsaker som ikke har fått minside aktivert")
-
-        if (!dryRun) {
-            logger.info("Oppretter AktiverMinsideTask for ${fagsakerSomSkalHaMinsideAktivert.size} fagsaker")
-            fagsakerSomSkalHaMinsideAktivert.forEach { fagsak ->
-                taskService.save(
-                    AktiverMinsideTask.opprettTask(fagsak.aktør),
-                )
-            }
         }
     }
 

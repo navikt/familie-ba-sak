@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
@@ -8,6 +10,9 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.tidslinje.Tidslinje
@@ -21,6 +26,7 @@ object EndringIVilkårsvurderingUtil {
         personIBehandling: Person?,
         personIForrigeBehandling: Person?,
         tidligsteRelevanteFomDatoForPersonIVilkårsvurdering: YearMonth,
+        featureToggleService: FeatureToggleService,
     ): Tidslinje<Boolean> {
         val tidslinjePerVilkår =
             Vilkår.entries.map { vilkår ->
@@ -37,6 +43,7 @@ object EndringIVilkårsvurderingUtil {
                         vilkår = vilkår,
                         personIBehandling = personIBehandling,
                         personIForrigeBehandling = personIForrigeBehandling,
+                        featureToggleService = featureToggleService,
                     )
                 vilkårTidslinje.beskjærFraOgMed(fraOgMed = tidligsteRelevanteFomDatoForPersonIVilkårsvurdering.førsteDagIInneværendeMåned())
             }
@@ -58,6 +65,7 @@ object EndringIVilkårsvurderingUtil {
         vilkår: Vilkår,
         personIBehandling: Person?,
         personIForrigeBehandling: Person?,
+        featureToggleService: FeatureToggleService,
     ): Tidslinje<Boolean> {
         val nåværendeVilkårResultatTidslinje =
             nåværendeOppfylteVilkårResultaterForPerson
@@ -71,19 +79,30 @@ object EndringIVilkårsvurderingUtil {
             nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->
 
                 val erEndringerIUtdypendeVilkårsvurdering =
-                    nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet()
+                    nåværende.relevanteUtdypendeVilkårsvurderinger() != forrige.relevanteUtdypendeVilkårsvurderinger()
                 val erEndringerIRegelverk = nåværende.vurderesEtter != forrige.vurderesEtter
                 val erVilkårSomErSplittetOpp = nåværende.periodeFom != forrige.periodeFom
 
+                val erEndringIFinnmarkstillegg = nåværende.finnmarkOgSvalbardUtdypendeVilkårsvurdering() != forrige.finnmarkOgSvalbardUtdypendeVilkårsvurdering()
+                val erKunEndringIFinnmarkstillegg = erEndringIFinnmarkstillegg && !erEndringerIUtdypendeVilkårsvurdering && !erEndringerIRegelverk
+
                 (forrige.obligatoriskUtdypendeVilkårsvurderingErSatt() && erEndringerIUtdypendeVilkårsvurdering) ||
                     erEndringerIRegelverk ||
-                    erVilkårSomErSplittetOpp
+                    if (featureToggleService.isEnabled(FeatureToggle.SLÅ_SAMMEN_FINNMARK_ELLER_SVALBARD)) {
+                        (erVilkårSomErSplittetOpp && !erKunEndringIFinnmarkstillegg)
+                    } else {
+                        erVilkårSomErSplittetOpp
+                    }
             }
 
         return endringIVilkårResultat
     }
 
-    private fun VilkårResultat.obligatoriskUtdypendeVilkårsvurderingErSatt(): Boolean = this.utdypendeVilkårsvurderinger.isNotEmpty() || !this.utdypendeVilkårsvurderingErObligatorisk()
+    private fun VilkårResultat.obligatoriskUtdypendeVilkårsvurderingErSatt(): Boolean = relevanteUtdypendeVilkårsvurderinger().isNotEmpty() || !this.utdypendeVilkårsvurderingErObligatorisk()
+
+    private fun VilkårResultat.relevanteUtdypendeVilkårsvurderinger(): Set<UtdypendeVilkårsvurdering> = utdypendeVilkårsvurderinger.filterNot { it in setOf(BOSATT_I_FINNMARK_NORD_TROMS, BOSATT_PÅ_SVALBARD) }.toSet()
+
+    private fun VilkårResultat.finnmarkOgSvalbardUtdypendeVilkårsvurdering(): Set<UtdypendeVilkårsvurdering> = utdypendeVilkårsvurderinger.filter { it in setOf(BOSATT_I_FINNMARK_NORD_TROMS, BOSATT_PÅ_SVALBARD) }.toSet()
 
     private fun VilkårResultat.utdypendeVilkårsvurderingErObligatorisk(): Boolean =
         if (this.vurderesEtter == Regelverk.NASJONALE_REGLER) {

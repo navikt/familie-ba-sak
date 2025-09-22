@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -22,8 +21,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBostedBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -37,7 +36,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -51,17 +49,10 @@ class VilkårVurderingTest(
     @Autowired
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired
     private val personidentService: PersonidentService,
     @Autowired
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
 ) : AbstractSpringIntegrationTest() {
-    @BeforeAll
-    fun init() {
-        databaseCleanupService.truncate()
-    }
-
     @Test
     fun `Henting og evaluering av oppfylte vilkår gir rett antall samlede resultater`() {
         val fnr = randomFnr()
@@ -137,7 +128,7 @@ class VilkårVurderingTest(
     @Test
     fun `Sjekk barn bor med søker`() {
         val søkerAddress =
-            GrVegadresse(
+            GrVegadresseBostedsadresse(
                 1234,
                 "11",
                 "B",
@@ -146,9 +137,10 @@ class VilkårVurderingTest(
                 "1232",
                 "whatever",
                 "4322",
+                "Oslo",
             )
         val barnAddress =
-            GrVegadresse(
+            GrVegadresseBostedsadresse(
                 1235,
                 "11",
                 "B",
@@ -157,6 +149,7 @@ class VilkårVurderingTest(
                 "1232",
                 "whatever",
                 "4322",
+                "Oslo",
             )
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 1)
 
@@ -180,7 +173,7 @@ class VilkårVurderingTest(
     @Test
     fun `Sjekk barn bor med mor når mor har bodd på adressen lengre enn barn`() {
         val søkerAddress =
-            GrVegadresse(
+            GrVegadresseBostedsadresse(
                 1234,
                 "11",
                 "B",
@@ -189,12 +182,13 @@ class VilkårVurderingTest(
                 "1232",
                 "whatever",
                 "4322",
+                "Oslo",
             ).apply {
                 periode = DatoIntervallEntitet(LocalDate.now().minusYears(10))
             }
 
         val barnAddress =
-            GrVegadresse(
+            GrVegadresseBostedsadresse(
                 1234,
                 "11",
                 "B",
@@ -203,6 +197,7 @@ class VilkårVurderingTest(
                 "1232",
                 "whatever",
                 "4322",
+                "Oslo",
             ).apply {
                 periode = DatoIntervallEntitet(LocalDate.now().minusMonths(1))
             }
@@ -233,7 +228,7 @@ class VilkårVurderingTest(
     @Test
     fun `Skal kaste exception - ingen søker`() {
         val søkerAddress =
-            GrVegadresse(
+            GrVegadresseBostedsadresse(
                 1234,
                 "11",
                 "B",
@@ -242,6 +237,7 @@ class VilkårVurderingTest(
                 "1232",
                 "whatever",
                 "4322",
+                "Oslo",
             )
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 4)
@@ -257,7 +253,7 @@ class VilkårVurderingTest(
 
     @Test
     fun `Negativ vurdering - søker har ukjentadresse`() {
-        val ukjentbosted = GrUkjentBosted("Oslo")
+        val ukjentbosted = GrUkjentBostedBostedsadresse("Oslo")
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
         val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, ukjentbosted)
         personopplysningGrunnlag.personer.add(søker)
@@ -323,7 +319,7 @@ class VilkårVurderingTest(
             genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTANDTYPE.GIFT).apply {
                 bostedsadresser =
                     mutableListOf(
-                        GrVegadresse(
+                        GrVegadresseBostedsadresse(
                             1234,
                             "11",
                             "B",
@@ -332,6 +328,7 @@ class VilkårVurderingTest(
                             "1232",
                             "whatever",
                             "4322",
+                            "Oslo",
                         ).apply {
                             periode = DatoIntervallEntitet(LocalDate.now().minusDays(10))
                         },
@@ -348,7 +345,7 @@ class VilkårVurderingTest(
     @Test
     fun `Sjekk at mor er bosatt i norge`() {
         val vegadresse =
-            GrVegadresse(
+            GrVegadresseBostedsadresse(
                 1234,
                 "11",
                 "B",
@@ -357,6 +354,7 @@ class VilkårVurderingTest(
                 "1232",
                 "whatever",
                 "4322",
+                "Oslo",
             ).apply {
                 periode = DatoIntervallEntitet(TIDENES_MORGEN)
             }
@@ -370,7 +368,7 @@ class VilkårVurderingTest(
     @Test
     fun `Sjekk at mor har vært bosatt i norge siden barnet ble født`() {
         val vegadresse =
-            GrVegadresse(
+            GrVegadresseBostedsadresse(
                 matrikkelId = 1234,
                 husnummer = "11",
                 husbokstav = "B",
@@ -379,6 +377,7 @@ class VilkårVurderingTest(
                 kommunenummer = "1232",
                 tilleggsnavn = "whatever",
                 postnummer = "4322",
+                poststed = "Oslo",
             ).apply {
                 periode = DatoIntervallEntitet(LocalDate.now().minusMonths(10))
             }
@@ -400,7 +399,7 @@ class VilkårVurderingTest(
                 DatoIntervallEntitet(LocalDate.now().minusMonths(7), LocalDate.now().minusMonths(4)),
                 DatoIntervallEntitet(LocalDate.now().minusMonths(2)),
             ).map {
-                GrVegadresse(
+                GrVegadresseBostedsadresse(
                     matrikkelId = 1234,
                     husnummer = "11",
                     husbokstav = "B",
@@ -409,6 +408,7 @@ class VilkårVurderingTest(
                     kommunenummer = "1232",
                     tilleggsnavn = "whatever",
                     postnummer = "4322",
+                    poststed = "Oslo",
                 ).apply {
                     periode = it
                 }

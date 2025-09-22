@@ -143,7 +143,6 @@ class EndretUtbetalingAndelTest(
                             fødselsdato = barnFødselsdato.toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
-                            bostedsadresser = emptyList(),
                         ),
                     ),
             ).also { stubScenario(it) }
@@ -176,7 +175,7 @@ class EndretUtbetalingAndelTest(
             )
 
         restUtvidetBehandling.data!!.personResultater.forEach { restPersonResultat ->
-            restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
+            restPersonResultat.vilkårResultater.forEach {
                 familieBaSakKlient().putVilkår(
                     behandlingId = restUtvidetBehandling.data!!.behandlingId,
                     vilkårId = it.id,
@@ -192,6 +191,7 @@ class EndretUtbetalingAndelTest(
                                             listOfNotNull(
                                                 if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
                                             ),
+                                        begrunnelse = "Oppfylt",
                                     ),
                                 ),
                         ),

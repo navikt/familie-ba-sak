@@ -9,10 +9,11 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
@@ -39,6 +40,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -53,7 +56,7 @@ class EndretUtbetalingAndelServiceTest {
     private val mockEndretUtbetalingAndelHentOgPersisterService = mockk<EndretUtbetalingAndelHentOgPersisterService>()
     private val mockBeregningService = mockk<BeregningService>()
     private val mockBehandlingSøknadsinfoService = mockk<BehandlingSøknadsinfoService>()
-    private val mockUnleashService = mockk<UnleashNextMedContextService>()
+    private val mockFeatureToggleService = mockk<FeatureToggleService>()
 
     private lateinit var endretUtbetalingAndelService: EndretUtbetalingAndelService
 
@@ -69,7 +72,7 @@ class EndretUtbetalingAndelServiceTest {
                 vilkårsvurderingService = mockVilkårsvurderingService,
                 endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService,
                 behandlingSøknadsinfoService = mockBehandlingSøknadsinfoService,
-                unleashService = mockUnleashService,
+                featureToggleService = mockFeatureToggleService,
             )
     }
 
@@ -130,7 +133,7 @@ class EndretUtbetalingAndelServiceTest {
         every { mockAndelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id) } returns andelerTilkjentYtelse
         every { mockEndretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = behandling.id) } returns emptyList()
         every { mockVilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id) } returns vilkårsvurderingUtenDeltBosted
-        every { mockUnleashService.isEnabled(FeatureToggle.SKAL_SPLITTE_ENDRET_UTBETALING_ANDELER) } returns true
+        every { mockFeatureToggleService.isEnabled(FeatureToggle.SKAL_SPLITTE_ENDRET_UTBETALING_ANDELER) } returns true
 
         val feil =
             assertThrows<FunksjonellFeil> {
@@ -189,7 +192,7 @@ class EndretUtbetalingAndelServiceTest {
         every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns lagTestPersonopplysningGrunnlag(behandling.id, barn1, barn2)
         every { mockAndelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id) } returns andelerTilkjentYtelse
         every { mockEndretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = behandling.id) } returns emptyList()
-        every { mockUnleashService.isEnabled(FeatureToggle.SKAL_SPLITTE_ENDRET_UTBETALING_ANDELER) } returns true
+        every { mockFeatureToggleService.isEnabled(FeatureToggle.SKAL_SPLITTE_ENDRET_UTBETALING_ANDELER) } returns true
         every { mockBeregningService.oppdaterBehandlingMedBeregning(any(), any(), any()) } returns mockk()
         every { mockVilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id) } returns mockk()
 
@@ -306,6 +309,49 @@ class EndretUtbetalingAndelServiceTest {
             verify(exactly = 0) { mockEndretUtbetalingAndelRepository.deleteAllById(any()) }
             verify(exactly = 0) { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) }
             verify(exactly = 0) { mockBeregningService.oppdaterBehandlingMedBeregning(any(), any()) }
+        }
+    }
+
+    @Nested
+    inner class FjernEndretUtbetalingAndelerMedÅrsak3MndEller3ÅrGenerertIDenneBehandlingen {
+        @Test
+        fun `Skal slette eksisterende endretUtbetalingAndeler hvis den er ugyldig`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id) // Mangler påkrevde felter
+            val endretUtbetalingAndelIDer = slot<List<Long>>()
+
+            every { mockEndretUtbetalingAndelRepository.findByBehandlingId(behandling.id) } returns listOf(endretUtbetalingAndel)
+            every { mockEndretUtbetalingAndelRepository.deleteAllById(capture(endretUtbetalingAndelIDer)) } just Runs
+            every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns mockk()
+            every { mockBeregningService.oppdaterBehandlingMedBeregning(behandling, any()) } returns mockk()
+
+            // Act
+            endretUtbetalingAndelService.fjernEndretUtbetalingAndelerMedÅrsak3MndEller3ÅrGenerertIDenneBehandlingen(behandling)
+
+            // Assert
+            assertThat(endretUtbetalingAndelIDer.captured).containsExactly(endretUtbetalingAndel.id)
+        }
+
+        @ParameterizedTest
+        @EnumSource(Årsak::class, names = ["ETTERBETALING_3ÅR", "ETTERBETALING_3MND"])
+        fun `Skal slette eksisterende endretUtbetalingAndeler hvis årsak er etterbetaling`(årsak: Årsak) {
+            // Arrange
+            val behandling = lagBehandling()
+            val person = lagPerson()
+            val endretUtbetalingAndel = lagEndretUtbetalingAndel(behandlingId = behandling.id, årsak = årsak, personer = setOf(person))
+            val endretUtbetalingAndelIDer = slot<List<Long>>()
+
+            every { mockEndretUtbetalingAndelRepository.findByBehandlingId(behandling.id) } returns listOf(endretUtbetalingAndel)
+            every { mockEndretUtbetalingAndelRepository.deleteAllById(capture(endretUtbetalingAndelIDer)) } just Runs
+            every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns mockk()
+            every { mockBeregningService.oppdaterBehandlingMedBeregning(behandling, any()) } returns mockk()
+
+            // Act
+            endretUtbetalingAndelService.fjernEndretUtbetalingAndelerMedÅrsak3MndEller3ÅrGenerertIDenneBehandlingen(behandling)
+
+            // Assert
+            assertThat(endretUtbetalingAndelIDer.captured).containsExactly(endretUtbetalingAndel.id)
         }
     }
 }

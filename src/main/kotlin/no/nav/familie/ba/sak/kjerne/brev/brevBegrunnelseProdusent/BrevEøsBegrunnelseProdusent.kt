@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataMedKompetan
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataUtenKompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.begrunnelseGjelderOpphørFraForrigeBehandling
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.begrunnelseSkalTriggesForOpphørFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserPerPerson
 
 fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
@@ -33,7 +33,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
         begrunnelsesGrunnlagPerPerson.filter { (person, _) -> person in personerGjeldendeForBegrunnelse }
 
     val gjelderSøker = personerGjeldendeForBegrunnelse.any { it.type == PersonType.SØKER }
-    val begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling = (sanityBegrunnelse.begrunnelseGjelderOpphørFraForrigeBehandling()) && gjelderSøker
+    val begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling = (sanityBegrunnelse.begrunnelseSkalTriggesForOpphørFraForrigeBehandling()) && gjelderSøker
     val kompetanser =
         when (sanityBegrunnelse.periodeResultat) {
             SanityPeriodeResultat.INNVILGET_ELLER_ØKNING,
@@ -72,6 +72,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
                 gjelderSøker = gjelderSøker,
                 personerIBegrunnelse = personerGjeldendeForBegrunnelse,
                 begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+                vedtaksperiode = vedtaksperiode,
             )
 
         listOf(

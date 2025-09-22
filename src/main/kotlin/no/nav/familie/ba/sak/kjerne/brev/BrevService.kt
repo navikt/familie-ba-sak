@@ -10,9 +10,9 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.BrevBegrunnelseFeil
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakFinnmarkstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtFørsteBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Avslag
@@ -91,7 +92,7 @@ class BrevService(
     private val korrigertVedtakService: KorrigertVedtakService,
     private val saksbehandlerContext: SaksbehandlerContext,
     private val brevmalService: BrevmalService,
-    private val integrasjonClient: IntegrasjonClient,
+    private val kodeverkService: KodeverkService,
     private val testVerktøyService: TestVerktøyService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
@@ -100,7 +101,7 @@ class BrevService(
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val hjemmeltekstUtleder: HjemmeltekstUtleder,
     private val avregningService: AvregningService,
-    private val unleashNextMedContextService: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -248,6 +249,11 @@ class BrevService(
                     etterbetaling = hentEtterbetaling(vedtak),
                 )
 
+            Brevmal.AUTOVEDTAK_FINNMARKSTILLEGG ->
+                AutovedtakFinnmarkstillegg(
+                    vedtakFellesfelter = vedtakFellesfelter,
+                )
+
             else -> throw Feil("Forsøker å hente vedtaksbrevdata for brevmal ${brevmal.visningsTekst}")
         }
     }
@@ -260,7 +266,7 @@ class BrevService(
 
         return utbetalingerPerMndEøs?.let {
             val endringstidspunkt = finnStarttidspunktForUtbetalingstabell(behandling = vedtak.behandling)
-            val landkoder = integrasjonClient.hentLandkoderISO2()
+            val landkoder = kodeverkService.hentLandkoderISO2()
             val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = behandlingId)
             return hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt.toYearMonth(), landkoder, kompetanser)
         }
@@ -450,8 +456,8 @@ class BrevService(
                 try {
                     vedtaksperiode.lagBrevPeriode(
                         grunnlagForBegrunnelse = grunnlagForBegrunnelser,
-                        landkoder = integrasjonClient.hentLandkoderISO2(),
-                        skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse = unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE),
+                        landkoder = kodeverkService.hentLandkoderISO2(),
+                        skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse = featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE),
                     )
                 } catch (e: BrevBegrunnelseFeil) {
                     secureLogger.warn(

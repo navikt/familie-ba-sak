@@ -4,6 +4,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
@@ -14,6 +15,7 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIBeløpForPerson
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.utledEndringsresultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
@@ -29,297 +31,26 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import org.hamcrest.MatcherAssert.assertThat
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
-import org.hamcrest.CoreMatchers.`is` as Is
 
 class BehandlingsresultatEndringUtilsTest {
-    val søker = tilfeldigPerson()
+    private val søker = tilfeldigPerson()
 
     private val barn1Aktør = randomAktør()
 
-    val jan22 = YearMonth.of(2022, 1)
-    val feb22 = YearMonth.of(2022, 2)
-    val mai22 = YearMonth.of(2022, 5)
-    val aug22 = YearMonth.of(2022, 8)
-    val des22 = YearMonth.of(2022, 12)
-
-    @Test
-    fun `utledEndringsresultat skal returnere INGEN_ENDRING dersom det ikke finnes noe endringer i behandling`() {
-        val endringsresultat =
-            utledEndringsresultat(
-                nåværendeAndeler = emptyList(),
-                forrigeAndeler = emptyList(),
-                personerFremstiltKravFor = emptyList(),
-                nåværendeKompetanser = emptyList(),
-                forrigeKompetanser = emptyList(),
-                nåværendePersonResultat = emptySet(),
-                forrigePersonResultat = emptySet(),
-                nåværendeEndretAndeler = emptyList(),
-                forrigeEndretAndeler = emptyList(),
-                personerIBehandling = emptySet(),
-                personerIForrigeBehandling = emptySet(),
-                nåMåned = YearMonth.now(),
-                nåværendeUtenlandskPeriodebeløp = emptyList(),
-                forrigeUtenlandskPeriodebeløp = emptyList(),
-            )
-
-        assertThat(endringsresultat, Is(Endringsresultat.INGEN_ENDRING))
-    }
-
-    @Test
-    fun `utledEndringsresultat skal returnere ENDRING dersom det finnes endringer i beløp`() {
-        val person = lagPerson()
-
-        val forrigeAndel =
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = aug22,
-                beløp = 1054,
-                aktør = person.aktør,
-            )
-
-        val endringsresultat =
-            utledEndringsresultat(
-                nåværendeAndeler = listOf(forrigeAndel.copy(kalkulertUtbetalingsbeløp = 40)),
-                forrigeAndeler = listOf(forrigeAndel),
-                personerFremstiltKravFor = emptyList(),
-                nåværendeKompetanser = emptyList(),
-                forrigeKompetanser = emptyList(),
-                nåværendePersonResultat = emptySet(),
-                forrigePersonResultat = emptySet(),
-                nåværendeEndretAndeler = emptyList(),
-                forrigeEndretAndeler = emptyList(),
-                personerIBehandling = setOf(person),
-                personerIForrigeBehandling = setOf(person),
-                nåMåned = YearMonth.now(),
-                nåværendeUtenlandskPeriodebeløp = emptyList(),
-                forrigeUtenlandskPeriodebeløp = emptyList(),
-            )
-
-        assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
-    }
-
-    @Test
-    fun `utledEndringsresultat skal returnere ENDRING dersom det finnes endringer i vilkårsvurderingen`() {
-        val fødselsdato = LocalDate.of(2015, 1, 1)
-        val barn = lagPerson(aktør = barn1Aktør, fødselsdato = fødselsdato, type = PersonType.BARN)
-        val forrigeAndeler =
-            listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2015, 2),
-                    tom = YearMonth.of(2020, 1),
-                ),
-            )
-
-        val nåværendeAndeler =
-            listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2015, 2),
-                    tom = YearMonth.of(2020, 1),
-                ),
-            )
-
-        val forrigeVilkårResultater =
-            listOf(
-                VilkårResultat(
-                    personResultat = null,
-                    vilkårType = Vilkår.BOSATT_I_RIKET,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = fødselsdato,
-                    periodeTom = LocalDate.of(2020, 1, 1),
-                    begrunnelse = "begrunnelse",
-                    sistEndretIBehandlingId = 0,
-                    utdypendeVilkårsvurderinger =
-                        listOf(
-                            UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
-                            UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
-                        ),
-                    vurderesEtter = Regelverk.NASJONALE_REGLER,
-                ),
-            )
-
-        val nåværendeVilkårResultater =
-            listOf(
-                VilkårResultat(
-                    personResultat = null,
-                    vilkårType = Vilkår.BOSATT_I_RIKET,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = fødselsdato,
-                    periodeTom = LocalDate.of(2020, 1, 1),
-                    begrunnelse = "begrunnelse",
-                    sistEndretIBehandlingId = 0,
-                    utdypendeVilkårsvurderinger =
-                        listOf(
-                            UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
-                            UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
-                        ),
-                    vurderesEtter = Regelverk.EØS_FORORDNINGEN,
-                ),
-            )
-
-        val forrigePersonResultat =
-            PersonResultat(
-                id = 0,
-                vilkårsvurdering = mockk(),
-                aktør = barn1Aktør,
-                vilkårResultater = forrigeVilkårResultater.toMutableSet(),
-            )
-
-        val nåværendePersonResultat =
-            PersonResultat(
-                id = 0,
-                vilkårsvurdering = mockk(),
-                aktør = barn1Aktør,
-                vilkårResultater = nåværendeVilkårResultater.toMutableSet(),
-            )
-
-        val endringsresultat =
-            utledEndringsresultat(
-                nåværendeAndeler = nåværendeAndeler,
-                forrigeAndeler = forrigeAndeler,
-                personerFremstiltKravFor = emptyList(),
-                nåværendeKompetanser = emptyList(),
-                forrigeKompetanser = emptyList(),
-                nåværendePersonResultat = setOf(nåværendePersonResultat),
-                forrigePersonResultat = setOf(forrigePersonResultat),
-                nåværendeEndretAndeler = emptyList(),
-                forrigeEndretAndeler = emptyList(),
-                personerIBehandling = setOf(barn),
-                personerIForrigeBehandling = setOf(barn),
-                nåMåned = YearMonth.now(),
-                nåværendeUtenlandskPeriodebeløp = emptyList(),
-                forrigeUtenlandskPeriodebeløp = emptyList(),
-            )
-
-        assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
-    }
-
-    @Test
-    fun `utledEndringsresultat skal returnere ENDRING dersom det finnes endringer i kompetanse`() {
-        val forrigeBehandling = lagBehandling()
-        val nåværendeBehandling = lagBehandling()
-
-        val barnPerson = lagPerson(aktør = barn1Aktør)
-
-        val forrigeKompetanse =
-            lagKompetanse(
-                behandlingId = forrigeBehandling.id,
-                barnAktører = setOf(barn1Aktør),
-                barnetsBostedsland = "NO",
-                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
-                søkersAktivitetsland = "NO",
-                annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
-                annenForeldersAktivitetsland = "PO",
-                kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-                fom = YearMonth.now().minusMonths(6),
-                tom = null,
-            )
-
-        val endringsresultat =
-            utledEndringsresultat(
-                nåværendeAndeler = emptyList(),
-                forrigeAndeler = emptyList(),
-                personerFremstiltKravFor = emptyList(),
-                nåværendeKompetanser =
-                    listOf(
-                        forrigeKompetanse
-                            .copy(søkersAktivitet = KompetanseAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL)
-                            .apply { behandlingId = nåværendeBehandling.id },
-                    ),
-                forrigeKompetanser = listOf(forrigeKompetanse),
-                nåværendePersonResultat = emptySet(),
-                forrigePersonResultat = emptySet(),
-                nåværendeEndretAndeler = emptyList(),
-                forrigeEndretAndeler = emptyList(),
-                personerIBehandling = setOf(barnPerson),
-                personerIForrigeBehandling = setOf(barnPerson),
-                nåMåned = YearMonth.now(),
-                nåværendeUtenlandskPeriodebeløp = emptyList(),
-                forrigeUtenlandskPeriodebeløp = emptyList(),
-            )
-
-        assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
-    }
-
-    @Test
-    fun `utledEndringsresultat skal returnere ENDRING dersom det finnes endringer i endret utbetaling andeler`() {
-        val barn = lagPerson(type = PersonType.BARN)
-        val forrigeEndretAndel =
-            lagEndretUtbetalingAndel(
-                personer = setOf(barn),
-                prosent = BigDecimal.ZERO,
-                fom = jan22,
-                tom = aug22,
-                årsak = Årsak.ETTERBETALING_3ÅR,
-                søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
-            )
-
-        val endringsresultat =
-            utledEndringsresultat(
-                nåværendeAndeler = emptyList(),
-                forrigeAndeler = emptyList(),
-                personerFremstiltKravFor = emptyList(),
-                nåværendeKompetanser = emptyList(),
-                forrigeKompetanser = emptyList(),
-                nåværendePersonResultat = emptySet(),
-                forrigePersonResultat = emptySet(),
-                nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT)),
-                forrigeEndretAndeler = listOf(forrigeEndretAndel),
-                personerIBehandling = setOf(barn),
-                personerIForrigeBehandling = setOf(barn),
-                nåMåned = YearMonth.now(),
-                nåværendeUtenlandskPeriodebeløp = emptyList(),
-                forrigeUtenlandskPeriodebeløp = emptyList(),
-            )
-
-        assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
-    }
-
-    @Test
-    fun `utledEndringsresultat skal returnere ENDRING dersom det finnes endringer i utenlandsk periodebeløp`() {
-        val barnPerson = lagPerson(aktør = barn1Aktør)
-        val forrigeBehandling = lagBehandling()
-        val nåværendeBehandling = lagBehandling()
-
-        val forrigeUtenlandskPeriodebeløp =
-            lagUtenlandskPeriodebeløp(
-                behandlingId = forrigeBehandling.id,
-                barnAktører = setOf(barn1Aktør),
-                valutakode = "NOK",
-                beløp = BigDecimal(500),
-                intervall = Intervall.MÅNEDLIG,
-                utbetalingsland = "NORGE",
-                fom = jan22,
-                tom = mai22,
-            )
-
-        val endringsresultat =
-            utledEndringsresultat(
-                nåværendeAndeler = emptyList(),
-                forrigeAndeler = emptyList(),
-                personerFremstiltKravFor = emptyList(),
-                nåværendeKompetanser = emptyList(),
-                forrigeKompetanser = emptyList(),
-                nåværendePersonResultat = emptySet(),
-                forrigePersonResultat = emptySet(),
-                nåværendeEndretAndeler = emptyList(),
-                forrigeEndretAndeler = emptyList(),
-                personerIBehandling = setOf(barnPerson),
-                personerIForrigeBehandling = setOf(barnPerson),
-                nåMåned = YearMonth.now(),
-                nåværendeUtenlandskPeriodebeløp = listOf(forrigeUtenlandskPeriodebeløp.copy(valutakode = "SEK").apply { behandlingId = nåværendeBehandling.id }),
-                forrigeUtenlandskPeriodebeløp = listOf(forrigeUtenlandskPeriodebeløp),
-            )
-
-        assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
-    }
+    private val jan22 = YearMonth.of(2022, 1)
+    private val feb22 = YearMonth.of(2022, 2)
+    private val mai22 = YearMonth.of(2022, 5)
+    private val aug22 = YearMonth.of(2022, 8)
+    private val des22 = YearMonth.of(2022, 12)
 
     @Test
     fun `Endring i beløp - Skal returnere false dersom eneste endring er opphør`() {
@@ -900,7 +631,7 @@ class BehandlingsresultatEndringUtilsTest {
     }
 
     @Test
-    fun `Endring i endret utbetaling andel - skal returnere true hvis søknadstidspunkt er endret`() {
+    fun `Endring i endret utbetaling andel - skal returnere true hvis søknadstidspunkt er endret og det ikke var satt før`() {
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeEndretAndel =
             lagEndretUtbetalingAndel(
@@ -909,7 +640,7 @@ class BehandlingsresultatEndringUtilsTest {
                 fom = jan22,
                 tom = aug22,
                 årsak = Årsak.DELT_BOSTED,
-                søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
+                søknadstidspunkt = null,
                 avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned(),
             )
 
@@ -1356,9 +1087,10 @@ class BehandlingsresultatEndringUtilsTest {
                 personIBehandling = barn,
                 personIForrigeBehandling = barn,
                 tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
+                featureToggleService = mockFeatureToggleService(),
             )
 
-        assertThat(erEndringIVilkårvurderingForPerson, Is(false))
+        assertThat(erEndringIVilkårvurderingForPerson).isFalse()
     }
 
     @Test
@@ -1412,9 +1144,10 @@ class BehandlingsresultatEndringUtilsTest {
                 personIBehandling = barn,
                 personIForrigeBehandling = barn,
                 tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
+                featureToggleService = mockFeatureToggleService(),
             )
 
-        assertThat(erEndringIVilkårvurderingForPerson, Is(true))
+        assertThat(erEndringIVilkårvurderingForPerson).isTrue()
     }
 
     @Test
@@ -1467,9 +1200,10 @@ class BehandlingsresultatEndringUtilsTest {
                 personIBehandling = barn,
                 personIForrigeBehandling = barn,
                 tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
+                featureToggleService = mockFeatureToggleService(),
             )
 
-        assertThat(erEndringIVilkårvurderingForPerson, Is(true))
+        assertThat(erEndringIVilkårvurderingForPerson).isTrue()
     }
 
     @Test
@@ -1526,9 +1260,10 @@ class BehandlingsresultatEndringUtilsTest {
                 personIBehandling = barn,
                 personIForrigeBehandling = barn,
                 tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
+                featureToggleService = mockFeatureToggleService(),
             )
 
-        assertThat(erEndringIVilkårvurderingForPerson, Is(true))
+        assertThat(erEndringIVilkårvurderingForPerson).isTrue()
     }
 
     @Test
@@ -1582,9 +1317,491 @@ class BehandlingsresultatEndringUtilsTest {
                 personIBehandling = barn,
                 personIForrigeBehandling = barn,
                 tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
+                featureToggleService = mockFeatureToggleService(),
             )
 
-        assertThat(erEndringIVilkårvurderingForPerson, Is(false))
+        assertThat(erEndringIVilkårvurderingForPerson).isFalse()
+    }
+
+    @Nested
+    inner class UtledEndringsresultat {
+        @Test
+        fun `skal returnere INGEN_ENDRING dersom det ikke finnes noe endringer i behandling`() {
+            // Act
+            val endringsresultat =
+                utledEndringsresultat(
+                    behandling = lagBehandling(),
+                    nåværendeAndeler = emptyList(),
+                    forrigeAndeler = emptyList(),
+                    personerFremstiltKravFor = emptyList(),
+                    nåværendeKompetanser = emptyList(),
+                    forrigeKompetanser = emptyList(),
+                    nåværendePersonResultat = emptySet(),
+                    forrigePersonResultat = emptySet(),
+                    nåværendeEndretAndeler = emptyList(),
+                    forrigeEndretAndeler = emptyList(),
+                    personerIBehandling = emptySet(),
+                    personerIForrigeBehandling = emptySet(),
+                    nåMåned = YearMonth.now(),
+                    nåværendeUtenlandskPeriodebeløp = emptyList(),
+                    forrigeUtenlandskPeriodebeløp = emptyList(),
+                    featureToggleService = mockFeatureToggleService(),
+                )
+
+            // Assert
+            assertThat(endringsresultat).isEqualTo(Endringsresultat.INGEN_ENDRING)
+        }
+
+        @Test
+        fun `skal returnere ENDRING dersom det finnes endringer i beløp`() {
+            // Arrange
+            val person = lagPerson()
+
+            val forrigeAndel =
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = aug22,
+                    beløp = 1054,
+                    aktør = person.aktør,
+                )
+
+            // Act
+            val endringsresultat =
+                utledEndringsresultat(
+                    behandling = lagBehandling(),
+                    nåværendeAndeler = listOf(forrigeAndel.copy(kalkulertUtbetalingsbeløp = 40)),
+                    forrigeAndeler = listOf(forrigeAndel),
+                    personerFremstiltKravFor = emptyList(),
+                    nåværendeKompetanser = emptyList(),
+                    forrigeKompetanser = emptyList(),
+                    nåværendePersonResultat = emptySet(),
+                    forrigePersonResultat = emptySet(),
+                    nåværendeEndretAndeler = emptyList(),
+                    forrigeEndretAndeler = emptyList(),
+                    personerIBehandling = setOf(person),
+                    personerIForrigeBehandling = setOf(person),
+                    nåMåned = YearMonth.now(),
+                    nåværendeUtenlandskPeriodebeløp = emptyList(),
+                    forrigeUtenlandskPeriodebeløp = emptyList(),
+                    featureToggleService = mockFeatureToggleService(),
+                )
+
+            // Assert
+            assertThat(endringsresultat).isEqualTo(Endringsresultat.ENDRING)
+        }
+
+        @Test
+        fun `skal returnere ENDRING dersom det finnes endringer i vilkårsvurderingen`() {
+            // Arrange
+            val fødselsdato = LocalDate.of(2015, 1, 1)
+
+            val barn = lagPerson(aktør = barn1Aktør, fødselsdato = fødselsdato, type = PersonType.BARN)
+
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2015, 2),
+                        tom = YearMonth.of(2020, 1),
+                    ),
+                )
+
+            val nåværendeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2015, 2),
+                        tom = YearMonth.of(2020, 1),
+                    ),
+                )
+
+            val forrigeVilkårResultater =
+                listOf(
+                    VilkårResultat(
+                        personResultat = null,
+                        vilkårType = Vilkår.BOSATT_I_RIKET,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = fødselsdato,
+                        periodeTom = LocalDate.of(2020, 1, 1),
+                        begrunnelse = "begrunnelse",
+                        sistEndretIBehandlingId = 0,
+                        utdypendeVilkårsvurderinger =
+                            listOf(
+                                UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                                UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
+                            ),
+                        vurderesEtter = Regelverk.NASJONALE_REGLER,
+                    ),
+                )
+
+            val nåværendeVilkårResultater =
+                listOf(
+                    VilkårResultat(
+                        personResultat = null,
+                        vilkårType = Vilkår.BOSATT_I_RIKET,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = fødselsdato,
+                        periodeTom = LocalDate.of(2020, 1, 1),
+                        begrunnelse = "begrunnelse",
+                        sistEndretIBehandlingId = 0,
+                        utdypendeVilkårsvurderinger =
+                            listOf(
+                                UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                                UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
+                            ),
+                        vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                    ),
+                )
+
+            val forrigePersonResultat =
+                PersonResultat(
+                    id = 0,
+                    vilkårsvurdering = mockk(),
+                    aktør = barn1Aktør,
+                    vilkårResultater = forrigeVilkårResultater.toMutableSet(),
+                )
+
+            val nåværendePersonResultat =
+                PersonResultat(
+                    id = 0,
+                    vilkårsvurdering = mockk(),
+                    aktør = barn1Aktør,
+                    vilkårResultater = nåværendeVilkårResultater.toMutableSet(),
+                )
+
+            // Act
+            val endringsresultat =
+                utledEndringsresultat(
+                    behandling = lagBehandling(),
+                    nåværendeAndeler = nåværendeAndeler,
+                    forrigeAndeler = forrigeAndeler,
+                    personerFremstiltKravFor = emptyList(),
+                    nåværendeKompetanser = emptyList(),
+                    forrigeKompetanser = emptyList(),
+                    nåværendePersonResultat = setOf(nåværendePersonResultat),
+                    forrigePersonResultat = setOf(forrigePersonResultat),
+                    nåværendeEndretAndeler = emptyList(),
+                    forrigeEndretAndeler = emptyList(),
+                    personerIBehandling = setOf(barn),
+                    personerIForrigeBehandling = setOf(barn),
+                    nåMåned = YearMonth.now(),
+                    nåværendeUtenlandskPeriodebeløp = emptyList(),
+                    forrigeUtenlandskPeriodebeløp = emptyList(),
+                    featureToggleService = mockFeatureToggleService(),
+                )
+
+            // Assert
+            assertThat(endringsresultat).isEqualTo(Endringsresultat.ENDRING)
+        }
+
+        @Test
+        fun `skal returnere ENDRING dersom det finnes endringer i kompetanse`() {
+            // Arrange
+            val forrigeBehandling = lagBehandling()
+            val nåværendeBehandling = lagBehandling()
+
+            val barnPerson = lagPerson(aktør = barn1Aktør)
+
+            val forrigeKompetanse =
+                lagKompetanse(
+                    behandlingId = forrigeBehandling.id,
+                    barnAktører = setOf(barn1Aktør),
+                    barnetsBostedsland = "NO",
+                    søkersAktivitet = KompetanseAktivitet.ARBEIDER,
+                    søkersAktivitetsland = "NO",
+                    annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
+                    annenForeldersAktivitetsland = "PO",
+                    kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                    fom = YearMonth.now().minusMonths(6),
+                    tom = null,
+                )
+
+            // Act
+            val endringsresultat =
+                utledEndringsresultat(
+                    behandling = lagBehandling(),
+                    nåværendeAndeler = emptyList(),
+                    forrigeAndeler = emptyList(),
+                    personerFremstiltKravFor = emptyList(),
+                    nåværendeKompetanser =
+                        listOf(
+                            forrigeKompetanse
+                                .copy(søkersAktivitet = KompetanseAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL)
+                                .apply { behandlingId = nåværendeBehandling.id },
+                        ),
+                    forrigeKompetanser = listOf(forrigeKompetanse),
+                    nåværendePersonResultat = emptySet(),
+                    forrigePersonResultat = emptySet(),
+                    nåværendeEndretAndeler = emptyList(),
+                    forrigeEndretAndeler = emptyList(),
+                    personerIBehandling = setOf(barnPerson),
+                    personerIForrigeBehandling = setOf(barnPerson),
+                    nåMåned = YearMonth.now(),
+                    nåværendeUtenlandskPeriodebeløp = emptyList(),
+                    forrigeUtenlandskPeriodebeløp = emptyList(),
+                    featureToggleService = mockFeatureToggleService(),
+                )
+
+            // Assert
+            assertThat(endringsresultat).isEqualTo(Endringsresultat.ENDRING)
+        }
+
+        @Test
+        fun `skal returnere ENDRING dersom det finnes endringer i endret utbetaling andeler`() {
+            // Arrange
+            val barn = lagPerson(type = PersonType.BARN)
+
+            val forrigeEndretAndel =
+                lagEndretUtbetalingAndel(
+                    personer = setOf(barn),
+                    prosent = BigDecimal.ZERO,
+                    fom = jan22,
+                    tom = aug22,
+                    årsak = Årsak.ETTERBETALING_3ÅR,
+                    søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
+                )
+
+            // Act
+            val endringsresultat =
+                utledEndringsresultat(
+                    behandling = lagBehandling(),
+                    nåværendeAndeler = emptyList(),
+                    forrigeAndeler = emptyList(),
+                    personerFremstiltKravFor = emptyList(),
+                    nåværendeKompetanser = emptyList(),
+                    forrigeKompetanser = emptyList(),
+                    nåværendePersonResultat = emptySet(),
+                    forrigePersonResultat = emptySet(),
+                    nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT)),
+                    forrigeEndretAndeler = listOf(forrigeEndretAndel),
+                    personerIBehandling = setOf(barn),
+                    personerIForrigeBehandling = setOf(barn),
+                    nåMåned = YearMonth.now(),
+                    nåværendeUtenlandskPeriodebeløp = emptyList(),
+                    forrigeUtenlandskPeriodebeløp = emptyList(),
+                    featureToggleService = mockFeatureToggleService(),
+                )
+
+            // Assert
+            assertThat(endringsresultat).isEqualTo(Endringsresultat.ENDRING)
+        }
+
+        @Test
+        fun `skal returnere ENDRING dersom det finnes endringer i utenlandsk periodebeløp`() {
+            // Arrange
+            val barnPerson = lagPerson(aktør = barn1Aktør)
+
+            val forrigeBehandling = lagBehandling()
+            val nåværendeBehandling = lagBehandling()
+
+            val forrigeUtenlandskPeriodebeløp =
+                lagUtenlandskPeriodebeløp(
+                    behandlingId = forrigeBehandling.id,
+                    barnAktører = setOf(barn1Aktør),
+                    valutakode = "NOK",
+                    beløp = BigDecimal(500),
+                    intervall = Intervall.MÅNEDLIG,
+                    utbetalingsland = "NORGE",
+                    fom = jan22,
+                    tom = mai22,
+                )
+
+            // Act
+            val endringsresultat =
+                utledEndringsresultat(
+                    behandling = lagBehandling(),
+                    nåværendeAndeler = emptyList(),
+                    forrigeAndeler = emptyList(),
+                    personerFremstiltKravFor = emptyList(),
+                    nåværendeKompetanser = emptyList(),
+                    forrigeKompetanser = emptyList(),
+                    nåværendePersonResultat = emptySet(),
+                    forrigePersonResultat = emptySet(),
+                    nåværendeEndretAndeler = emptyList(),
+                    forrigeEndretAndeler = emptyList(),
+                    personerIBehandling = setOf(barnPerson),
+                    personerIForrigeBehandling = setOf(barnPerson),
+                    nåMåned = YearMonth.now(),
+                    nåværendeUtenlandskPeriodebeløp = listOf(forrigeUtenlandskPeriodebeløp.copy(valutakode = "SEK").apply { behandlingId = nåværendeBehandling.id }),
+                    forrigeUtenlandskPeriodebeløp = listOf(forrigeUtenlandskPeriodebeløp),
+                    featureToggleService = mockFeatureToggleService(),
+                )
+
+            // Assert
+            assertThat(endringsresultat).isEqualTo(Endringsresultat.ENDRING)
+        }
+
+        @Test
+        fun `skal returnere INGEN_ENDRING hvis behandlingsårsak er FINNMARKSTILLEGG og eneste endring er i vilkårsvurdering`() {
+            // Arrange
+            val fødselsdato = LocalDate.of(2015, 1, 1)
+
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.FINNMARKSTILLEGG)
+
+            val forrigePersonResultat =
+                PersonResultat(
+                    id = 0,
+                    vilkårsvurdering = mockk(),
+                    aktør = barn1Aktør,
+                    vilkårResultater =
+                        mutableSetOf(
+                            VilkårResultat(
+                                personResultat = null,
+                                vilkårType = Vilkår.BOSATT_I_RIKET,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = fødselsdato,
+                                periodeTom = null,
+                                begrunnelse = "begrunnelse",
+                                sistEndretIBehandlingId = 0,
+                                utdypendeVilkårsvurderinger = listOf(),
+                                vurderesEtter = Regelverk.NASJONALE_REGLER,
+                            ),
+                        ),
+                )
+
+            val nåværendePersonResultat =
+                PersonResultat(
+                    id = 0,
+                    vilkårsvurdering = mockk(),
+                    aktør = barn1Aktør,
+                    vilkårResultater =
+                        mutableSetOf(
+                            VilkårResultat(
+                                personResultat = null,
+                                vilkårType = Vilkår.BOSATT_I_RIKET,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = fødselsdato,
+                                periodeTom = LocalDate.of(2024, 12, 31),
+                                begrunnelse = "begrunnelse",
+                                sistEndretIBehandlingId = 0,
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
+                                vurderesEtter = Regelverk.NASJONALE_REGLER,
+                            ),
+                            VilkårResultat(
+                                personResultat = null,
+                                vilkårType = Vilkår.BOSATT_I_RIKET,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = LocalDate.of(2025, 1, 1),
+                                periodeTom = null,
+                                begrunnelse = "begrunnelse",
+                                sistEndretIBehandlingId = 0,
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
+                                vurderesEtter = Regelverk.NASJONALE_REGLER,
+                            ),
+                        ),
+                )
+
+            val barn = lagPerson(aktør = barn1Aktør, fødselsdato = fødselsdato, type = PersonType.BARN)
+
+            // Act
+            val endringsresultat =
+                utledEndringsresultat(
+                    behandling = behandling,
+                    nåværendeAndeler = emptyList(),
+                    forrigeAndeler = emptyList(),
+                    personerFremstiltKravFor = emptyList(),
+                    nåværendeKompetanser = emptyList(),
+                    forrigeKompetanser = emptyList(),
+                    nåværendePersonResultat = setOf(nåværendePersonResultat),
+                    forrigePersonResultat = setOf(forrigePersonResultat),
+                    nåværendeEndretAndeler = emptyList(),
+                    forrigeEndretAndeler = emptyList(),
+                    personerIBehandling = setOf(barn),
+                    personerIForrigeBehandling = setOf(barn),
+                    nåMåned = YearMonth.now(),
+                    nåværendeUtenlandskPeriodebeløp = emptyList(),
+                    forrigeUtenlandskPeriodebeløp = emptyList(),
+                    featureToggleService = mockFeatureToggleService(),
+                )
+
+            // Assert
+            assertThat(endringsresultat).isEqualTo(Endringsresultat.INGEN_ENDRING)
+        }
+
+        @Test
+        fun `skal returnere INGEN_ENDRING hvis behandlingsårsak er SVALBARDTILLEGG og eneste endring er i vilkårsvurdering`() {
+            // Arrange
+            val fødselsdato = LocalDate.of(2015, 1, 1)
+
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.SVALBARDTILLEGG)
+
+            val forrigePersonResultat =
+                PersonResultat(
+                    id = 0,
+                    vilkårsvurdering = mockk(),
+                    aktør = barn1Aktør,
+                    vilkårResultater =
+                        mutableSetOf(
+                            VilkårResultat(
+                                personResultat = null,
+                                vilkårType = Vilkår.BOSATT_I_RIKET,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = fødselsdato,
+                                periodeTom = null,
+                                begrunnelse = "begrunnelse",
+                                sistEndretIBehandlingId = 0,
+                                utdypendeVilkårsvurderinger = listOf(),
+                                vurderesEtter = Regelverk.NASJONALE_REGLER,
+                            ),
+                        ),
+                )
+
+            val nåværendePersonResultat =
+                PersonResultat(
+                    id = 0,
+                    vilkårsvurdering = mockk(),
+                    aktør = barn1Aktør,
+                    vilkårResultater =
+                        mutableSetOf(
+                            VilkårResultat(
+                                personResultat = null,
+                                vilkårType = Vilkår.BOSATT_I_RIKET,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = fødselsdato,
+                                periodeTom = LocalDate.of(2024, 12, 31),
+                                begrunnelse = "begrunnelse",
+                                sistEndretIBehandlingId = 0,
+                                utdypendeVilkårsvurderinger = emptyList(),
+                                vurderesEtter = Regelverk.NASJONALE_REGLER,
+                            ),
+                            VilkårResultat(
+                                personResultat = null,
+                                vilkårType = Vilkår.BOSATT_I_RIKET,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = LocalDate.of(2025, 1, 1),
+                                periodeTom = null,
+                                begrunnelse = "begrunnelse",
+                                sistEndretIBehandlingId = 0,
+                                utdypendeVilkårsvurderinger = emptyList(),
+                                vurderesEtter = Regelverk.NASJONALE_REGLER,
+                            ),
+                        ),
+                )
+
+            val barn = lagPerson(aktør = barn1Aktør, fødselsdato = fødselsdato, type = PersonType.BARN)
+
+            // Act
+            val endringsresultat =
+                utledEndringsresultat(
+                    behandling = behandling,
+                    nåværendeAndeler = emptyList(),
+                    forrigeAndeler = emptyList(),
+                    personerFremstiltKravFor = emptyList(),
+                    nåværendeKompetanser = emptyList(),
+                    forrigeKompetanser = emptyList(),
+                    nåværendePersonResultat = setOf(nåværendePersonResultat),
+                    forrigePersonResultat = setOf(forrigePersonResultat),
+                    nåværendeEndretAndeler = emptyList(),
+                    forrigeEndretAndeler = emptyList(),
+                    personerIBehandling = setOf(barn),
+                    personerIForrigeBehandling = setOf(barn),
+                    nåMåned = YearMonth.now(),
+                    nåværendeUtenlandskPeriodebeløp = emptyList(),
+                    forrigeUtenlandskPeriodebeløp = emptyList(),
+                    featureToggleService = mockFeatureToggleService(),
+                )
+
+            // Assert
+            assertThat(endringsresultat).isEqualTo(Endringsresultat.INGEN_ENDRING)
+        }
     }
 
     private fun lagPersonResultatFraVilkårResultater(

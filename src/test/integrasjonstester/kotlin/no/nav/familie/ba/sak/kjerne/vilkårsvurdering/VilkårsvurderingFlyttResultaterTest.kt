@@ -1,14 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.personInfo
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
-import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
+import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.personInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -25,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForBehandling
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -35,8 +33,6 @@ class VilkårsvurderingFlyttResultaterTest(
     private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired
     private val fagsakService: FagsakService,
-    @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
     @Autowired
     private val personidentService: PersonidentService,
     @Autowired
@@ -48,18 +44,13 @@ class VilkårsvurderingFlyttResultaterTest(
     @Autowired
     private val brevmalService: BrevmalService,
 ) : AbstractSpringIntegrationTest() {
-    @BeforeAll
-    fun init() {
-        databaseCleanupService.truncate()
-    }
-
     @Test
     fun `Skal ikke endre på forrige behandling sin vilkårsvurdering ved flytting av resultater`() {
         val søker = lagPerson(type = PersonType.SØKER)
-        val barn1Fnr = leggTilPersonInfo(randomBarnFnr(alder = 6))
+        val barn1Fnr = leggTilPersonInfo(randomBarnFødselsdato(alder = 6))
         val barn1Aktør = personidentService.hentAktør(barn1Fnr)
 
-        val barn2Fnr = leggTilPersonInfo(randomBarnFnr(alder = 2))
+        val barn2Fnr = leggTilPersonInfo(randomBarnFødselsdato(alder = 2))
         val barn2Aktør = personidentService.hentAktør(barn2Fnr)
 
         // Lager førstegangsbehandling med utvidet vilkåret avslått

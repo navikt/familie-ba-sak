@@ -8,8 +8,6 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -17,8 +15,11 @@ import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
+import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -43,9 +44,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresseBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBostedBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -95,8 +96,6 @@ class BehandlingIntegrationTest(
     @Autowired
     private val fagsakService: FagsakService,
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     @Autowired
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
@@ -105,11 +104,6 @@ class BehandlingIntegrationTest(
     @Autowired
     private val taskRepository: TaskRepositoryWrapper,
 ) : AbstractSpringIntegrationTest() {
-    @BeforeEach
-    fun truncate() {
-        databaseCleanupService.truncate()
-    }
-
     @BeforeEach
     fun førHverTest() {
         mockkObject(SatsTidspunkt)
@@ -525,10 +519,6 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Hent en persons bostedsadresse fra PDL og lagre den i database`() {
-        val søkerFnr = randomFnr()
-        val barn1Fnr = randomFnr()
-        val barn2Fnr = randomFnr()
-
         val matrikkelId = 123456L
         val søkerHusnummer = "12"
         val søkerHusbokstav = "A"
@@ -544,56 +534,59 @@ class BehandlingIntegrationTest(
         val barn1Kommunenummer = "3233"
         val barn2BostedKommune = "Oslo"
 
-        leggTilPersonInfo(
-            søkerFnr,
-            PersonInfo(
-                fødselsdato = LocalDate.of(1990, 1, 1),
-                bostedsadresser =
-                    mutableListOf(
-                        Bostedsadresse(
-                            vegadresse =
-                                Vegadresse(
-                                    matrikkelId,
-                                    søkerHusnummer,
-                                    søkerHusbokstav,
-                                    søkerBruksenhetsnummer,
-                                    søkerAdressnavn,
-                                    søkerKommunenummer,
-                                    søkerTilleggsnavn,
-                                    søkerPostnummer,
-                                ),
+        val søkerFnr =
+            leggTilPersonInfo(
+                randomSøkerFødselsdato(),
+                PersonInfo(
+                    fødselsdato = LocalDate.of(1990, 1, 1),
+                    bostedsadresser =
+                        mutableListOf(
+                            Bostedsadresse(
+                                vegadresse =
+                                    Vegadresse(
+                                        matrikkelId,
+                                        søkerHusnummer,
+                                        søkerHusbokstav,
+                                        søkerBruksenhetsnummer,
+                                        søkerAdressnavn,
+                                        søkerKommunenummer,
+                                        søkerTilleggsnavn,
+                                        søkerPostnummer,
+                                    ),
+                            ),
                         ),
-                    ),
-            ),
-        )
+                ),
+            )
 
-        leggTilPersonInfo(
-            barn1Fnr,
-            PersonInfo(
-                fødselsdato = LocalDate.of(2009, 1, 1),
-                bostedsadresser =
-                    mutableListOf(
-                        Bostedsadresse(
-                            matrikkeladresse =
-                                Matrikkeladresse(
-                                    matrikkelId,
-                                    barn1Bruksenhetsnummer,
-                                    barn1Tilleggsnavn,
-                                    barn1Postnummer,
-                                    barn1Kommunenummer,
-                                ),
+        val barn1Fnr =
+            leggTilPersonInfo(
+                randomBarnFødselsdato(),
+                PersonInfo(
+                    fødselsdato = LocalDate.of(2009, 1, 1),
+                    bostedsadresser =
+                        mutableListOf(
+                            Bostedsadresse(
+                                matrikkeladresse =
+                                    Matrikkeladresse(
+                                        matrikkelId,
+                                        barn1Bruksenhetsnummer,
+                                        barn1Tilleggsnavn,
+                                        barn1Postnummer,
+                                        barn1Kommunenummer,
+                                    ),
+                            ),
                         ),
-                    ),
-            ),
-        )
+                ),
+            )
 
-        leggTilPersonInfo(
-            barn2Fnr,
-            PersonInfo(
-                fødselsdato = LocalDate.of(1990, 1, 1),
-                bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune))),
-            ),
-        )
+        val barn2Fnr =
+            leggTilPersonInfo(
+                randomBarnFødselsdato(),
+                PersonInfo(
+                    fødselsdato = LocalDate.of(1990, 1, 1),
+                    bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune))),
+                ),
+            )
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling =
@@ -616,7 +609,7 @@ class BehandlingIntegrationTest(
         )
 
         val søker = personRepository.findByAktør(søkerAktør).first()
-        val vegadresse = søker.bostedsadresser.sisteAdresse() as GrVegadresse
+        val vegadresse = søker.bostedsadresser.sisteAdresse() as GrVegadresseBostedsadresse
         assertEquals(søkerAdressnavn, vegadresse.adressenavn)
         assertEquals(matrikkelId, vegadresse.matrikkelId)
         assertEquals(søkerBruksenhetsnummer, vegadresse.bruksenhetsnummer)
@@ -631,7 +624,7 @@ class BehandlingIntegrationTest(
         søker.personopplysningGrunnlag.barna.forEach {
             when (it.aktør.aktivFødselsnummer()) {
                 barn1Fnr -> {
-                    val matrikkeladresse = it.bostedsadresser.sisteAdresse() as GrMatrikkeladresse
+                    val matrikkeladresse = it.bostedsadresser.sisteAdresse() as GrMatrikkeladresseBostedsadresse
                     assertEquals(barn1Bruksenhetsnummer, matrikkeladresse.bruksenhetsnummer)
                     assertEquals(barn1Kommunenummer, matrikkeladresse.kommunenummer)
                     assertEquals(barn1Postnummer, matrikkeladresse.postnummer)
@@ -639,7 +632,7 @@ class BehandlingIntegrationTest(
                 }
 
                 barn2Fnr -> {
-                    val ukjentBosted = it.bostedsadresser.sisteAdresse() as GrUkjentBosted
+                    val ukjentBosted = it.bostedsadresser.sisteAdresse() as GrUkjentBostedBostedsadresse
                     assertEquals(barn2BostedKommune, ukjentBosted.bostedskommune)
                 }
 
@@ -672,6 +665,7 @@ class BehandlingIntegrationTest(
                 .finnMeldingerKlarForSending()
                 .filter { it.type == SaksstatistikkMellomlagringType.BEHANDLING }
                 .map { it.jsonToBehandlingDVH() }
+                .filter { it.behandlingId == behandling.id.toString() }
 
         assertEquals(2, behandlingDvhMeldinger.size)
         assertThat(behandlingDvhMeldinger.last().resultat).isEqualTo("AVSLÅTT")

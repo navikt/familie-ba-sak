@@ -2,19 +2,13 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.tilAktør
-import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
@@ -54,15 +48,12 @@ class FagsakControllerTest(
     @Autowired
     private val personidentRepository: PersonidentRepository,
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired
     private val skyggesakRepository: SkyggesakRepository,
 ) : AbstractSpringIntegrationTest() {
     @BeforeEach
     fun init() {
         MDC.put(MDCConstants.MDC_CALL_ID, "00001111")
         BrukerContextUtil.mockBrukerContext(SikkerhetContext.SYSTEM_FORKORTELSE)
-        databaseCleanupService.truncate()
     }
 
     @AfterEach
@@ -76,7 +67,7 @@ class FagsakControllerTest(
         val fnr = randomFnr()
 
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
-        val fagsak = fagsakService.hentNormalFagsak(tilAktør(fnr))
+        val fagsak = fagsakService.hentNormalFagsak(lagAktør(fnr))
         assertEquals(fnr, fagsak?.aktør?.aktivFødselsnummer())
         assertEquals(FagsakType.NORMAL, fagsak?.type)
         assertNull(fagsak?.institusjon)
@@ -92,7 +83,7 @@ class FagsakControllerTest(
 
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr, fagsakType = FagsakType.SKJERMET_BARN, skjermetBarnSøker = skjermetBarnSøker))
 
-        val fagsak = fagsakService.hentFagsakPåPerson(tilAktør(fnr), FagsakType.SKJERMET_BARN)
+        val fagsak = fagsakService.hentFagsakPåPerson(lagAktør(fnr), FagsakType.SKJERMET_BARN)
 
         assertThat(fnr).isEqualTo(fagsak?.aktør?.aktivFødselsnummer())
         assertThat(fagsak?.type).isEqualTo(FagsakType.SKJERMET_BARN)
@@ -118,7 +109,7 @@ class FagsakControllerTest(
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
-        assertEquals(fnr, fagsakService.hentNormalFagsak(tilAktør(fnr))?.aktør?.aktivFødselsnummer())
+        assertEquals(fnr, fagsakService.hentNormalFagsak(lagAktør(fnr))?.aktør?.aktivFødselsnummer())
 
         val eksisterendeRestFagsak =
             fagsakController.hentEllerOpprettFagsak(
@@ -178,59 +169,6 @@ class FagsakControllerTest(
     }
 
     @Test
-    fun `Skal oppgi person med fagsak som fagsakdeltaker`() {
-        val personAktør = mockPersonidentService.hentAktør(randomFnr())
-
-        fagsakService
-            .hentEllerOpprettFagsak(personAktør.aktivFødselsnummer())
-            .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
-
-        fagsakController.oppgiFagsakdeltagere(RestSøkParam(personAktør.aktivFødselsnummer(), emptyList())).apply {
-            assertEquals(personAktør.aktivFødselsnummer(), body!!.data!!.first().ident)
-            assertEquals(FagsakDeltagerRolle.FORELDER, body!!.data!!.first().rolle)
-        }
-    }
-
-    @Test
-    fun `Skal oppgi det første barnet i listen som fagsakdeltaker`() {
-        val personAktør = mockPersonidentService.hentOgLagreAktør(randomFnr(), true)
-        val søkerFnr = randomFnr()
-        val barnaFnr = listOf(randomBarnFnr())
-        val søkerAktør = mockPersonidentService.hentOgLagreAktør(søkerFnr, true)
-        val barnaAktør = mockPersonidentService.hentOgLagreAktørIder(barnaFnr, true)
-
-        val fagsak =
-            fagsakService.hentEllerOpprettFagsak(
-                søkerAktør.aktivFødselsnummer(),
-            )
-
-        val behandling =
-            behandlingService.opprettBehandling(
-                nyOrdinærBehandling(
-                    søkersIdent = søkerFnr,
-                    fagsakId = fagsak.id,
-                ),
-            )
-        persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-            personAktør,
-            barnaAktør,
-            behandling,
-            Målform.NB,
-        )
-
-        fagsakController
-            .oppgiFagsakdeltagere(
-                RestSøkParam(
-                    personAktør.aktivFødselsnummer(),
-                    barnaFnr + randomFnr(),
-                ),
-            ).apply {
-                assertEquals(barnaFnr, body!!.data!!.map { it.ident })
-                assertEquals(listOf(FagsakDeltagerRolle.BARN), body!!.data!!.map { it.rolle })
-            }
-    }
-
-    @Test
     @Tag("integration")
     fun `Skal få valideringsfeil ved oppretting av fagsak av type INSTITUSJON uten FagsakInstitusjon satt`() {
         val fnr = randomFnr()
@@ -244,7 +182,7 @@ class FagsakControllerTest(
                     ),
                 )
             }
-        val fagsaker = fagsakService.hentMinimalFagsakerForPerson(tilAktør(fnr))
+        val fagsaker = fagsakService.hentMinimalFagsakerForPerson(lagAktør(fnr))
         assertThat(fagsaker.data!!).isEmpty()
         assertThat(exception.message).isEqualTo("Institusjon mangler for fagsaktype institusjon.")
     }
@@ -262,7 +200,7 @@ class FagsakControllerTest(
                 institusjon = RestInstitusjon(orgNrNav, "tss-id"),
             ),
         )
-        val fagsakerRessurs = fagsakService.hentMinimalFagsakerForPerson(tilAktør(fnr))
+        val fagsakerRessurs = fagsakService.hentMinimalFagsakerForPerson(lagAktør(fnr))
         assert(fagsakerRessurs.status == Ressurs.Status.SUKSESS)
         val fagsaker = fagsakerRessurs.data!!
         assert(fagsaker.isNotEmpty()) { "Fagsak skulle ha blitt opprettet" }

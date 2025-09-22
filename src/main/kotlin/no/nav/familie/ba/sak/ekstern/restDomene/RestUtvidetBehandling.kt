@@ -48,4 +48,6 @@ data class RestUtvidetBehandling(
     val vurderingsstrategiForValutakurser: VurderingsstrategiForValutakurser? = VurderingsstrategiForValutakurser.AUTOMATISK,
     val søknadMottattDato: LocalDateTime?,
     val tilbakekrevingsvedtakMotregning: RestTilbakekrevingsvedtakMotregning?,
+    val manglendeSvalbardmerking: List<ManglendeFinnmarkSvalbardMerkingDto>,
+    val manglendeFinnmarkmerking: ManglendeFinnmarkSvalbardMerkingDto?,
 )

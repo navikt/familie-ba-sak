@@ -24,6 +24,9 @@ import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresseBostedsadresse.Companion.fraMatrikkeladresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBostedBostedsadresse.Companion.fraUkjentBosted
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse.Companion.fraVegadresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import java.time.LocalDate
@@ -93,21 +96,13 @@ abstract class GrBostedsadresse(
         fun fraBostedsadresse(
             bostedsadresse: Bostedsadresse,
             person: Person,
+            poststed: String? = null,
         ): GrBostedsadresse {
             val mappetAdresse =
                 when {
-                    bostedsadresse.vegadresse != null -> {
-                        GrVegadresse.fraVegadresse(bostedsadresse.vegadresse!!)
-                    }
-
-                    bostedsadresse.matrikkeladresse != null -> {
-                        GrMatrikkeladresse.fraMatrikkeladresse(bostedsadresse.matrikkeladresse!!)
-                    }
-
-                    bostedsadresse.ukjentBosted != null -> {
-                        GrUkjentBosted.fraUkjentBosted(bostedsadresse.ukjentBosted!!)
-                    }
-
+                    bostedsadresse.vegadresse != null -> fraVegadresse(bostedsadresse.vegadresse!!, poststed)
+                    bostedsadresse.matrikkeladresse != null -> fraMatrikkeladresse(bostedsadresse.matrikkeladresse!!, poststed)
+                    bostedsadresse.ukjentBosted != null -> fraUkjentBosted(bostedsadresse.ukjentBosted!!)
                     else -> throw Feil("Vegadresse, matrikkeladresse og ukjent bosted har verdi null ved mapping fra bostedadresse")
                 }
             return mappetAdresse.also {
@@ -121,7 +116,7 @@ abstract class GrBostedsadresse(
             andreAdresse: GrBostedsadresse?,
         ): Boolean =
             adresse != null &&
-                adresse !is GrUkjentBosted &&
+                adresse !is GrUkjentBostedBostedsadresse &&
                 adresse == andreAdresse
     }
 }

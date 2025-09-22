@@ -35,12 +35,12 @@ class KlageClient(
         }
     }
 
-    fun hentKlagebehandlinger(eksternIder: Set<Long>): Map<Long, List<KlagebehandlingDto>> {
+    fun hentKlagebehandlinger(fagsakId: Long): List<KlagebehandlingDto> {
         val uri =
             UriComponentsBuilder
                 .fromUri(familieKlageUri)
-                .pathSegment("api/ekstern/behandling/${Fagsystem.BA}")
-                .queryParam("eksternFagsakId", eksternIder.joinToString(","))
+                .pathSegment("api/ekstern/behandling/baks/${Fagsystem.BA}")
+                .queryParam("eksternFagsakId", fagsakId)
                 .build()
                 .toUri()
 

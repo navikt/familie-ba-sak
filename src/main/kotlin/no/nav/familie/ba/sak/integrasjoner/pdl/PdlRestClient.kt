@@ -3,29 +3,30 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.GeografiskTilknytning
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlDødsfallResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlGeografiskTilknytningResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlOppholdResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequestVariables
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlStatsborgerskapResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlUtenlandskAdresssePersonUtenlandskAdresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlUtenlandskAdressseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlVergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.VergemaalEllerFremtidsfullmakt
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerKjønnPåKilde
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerNavnPåKilde
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.util.UriUtil
 import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import no.nav.familie.kontrakter.felles.personopplysning.UtenlandskAdresse
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -110,10 +111,11 @@ class PdlRestClient(
                     // Hvis det ikke finnes fødselsdato på person forsøker vi å bruke dato for barnets død fordi det var et dødfødt barn.
                     fødselsdato = LocalDate.parse(it.foedselsdato.firstOrNull()?.foedselsdato ?: it.doedfoedtBarn.first().dato),
                     navn = it.navn.filtrerNavnPåKilde()?.fulltNavn(),
-                    kjønn = it.kjoenn.filtrerKjønnPåKilde()?.kjoenn,
+                    kjønn = it.kjoenn.filtrerKjønnPåKilde()?.kjoenn ?: Kjønn.UKJENT,
                     forelderBarnRelasjon = forelderBarnRelasjon,
                     adressebeskyttelseGradering = it.adressebeskyttelse.firstOrNull()?.gradering,
                     bostedsadresser = it.bostedsadresse,
+                    oppholdsadresser = it.oppholdsadresse,
                     statsborgerskap = it.statsborgerskap,
                     opphold = it.opphold,
                     sivilstander = it.sivilstand,
@@ -183,17 +185,20 @@ class PdlRestClient(
         }
     }
 
-    fun hentOppholdUtenHistorikk(aktør: Aktør): List<Opphold> {
+    fun hentOppholdstillatelse(
+        aktør: Aktør,
+        historikk: Boolean = false,
+    ): List<Opphold> {
         val pdlPersonRequest =
             PdlPersonRequest(
-                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
-                query = hentGraphqlQuery("opphold-uten-historikk"),
+                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer(), historikk = historikk),
+                query = hentGraphqlQuery("oppholdstillatelse"),
             )
         val pdlResponse: PdlBaseResponse<PdlOppholdResponse> =
             kallEksternTjeneste(
                 tjeneste = "pdl",
                 uri = pdlUri,
-                formål = "Hent opphold uten historikk",
+                formål = "Hent oppholdstillatelse",
             ) {
                 postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
             }
@@ -206,31 +211,7 @@ class PdlRestClient(
         }
     }
 
-    fun hentBostedsadresserForPerson(fødselsnummer: String): List<Bostedsadresse> {
-        val pdlPersonRequest =
-            PdlPersonRequest(
-                variables = PdlPersonRequestVariables(fødselsnummer),
-                query = hentGraphqlQuery("bostedsadresse"),
-            )
-
-        val pdlResponse: PdlBaseResponse<PdlBostedsadresseResponse> =
-            kallEksternTjeneste(
-                tjeneste = "pdl",
-                uri = pdlUri,
-                formål = "Hent bostedsadresse for person",
-            ) {
-                postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
-            }
-
-        return feilsjekkOgReturnerData(
-            ident = fødselsnummer,
-            pdlResponse = pdlResponse,
-        ) {
-            it.person?.bostedsadresse ?: emptyList()
-        }
-    }
-
-    fun hentUtenlandskBostedsadresse(aktør: Aktør): PdlUtenlandskAdresssePersonUtenlandskAdresse? {
+    fun hentUtenlandskBostedsadresse(aktør: Aktør): UtenlandskAdresse? {
         val pdlPersonRequest =
             PdlPersonRequest(
                 variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
@@ -253,6 +234,27 @@ class PdlRestClient(
                 it.person!!.bostedsadresse
             }
         return bostedsadresser.firstOrNull { bostedsadresse -> bostedsadresse.utenlandskAdresse != null }?.utenlandskAdresse
+    }
+
+    fun hentGeografiskTilknytning(ident: String): GeografiskTilknytning? {
+        val pdlPersonRequest =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(ident),
+                query = hentGraphqlQuery("geografisk-tilknytning"),
+            )
+        val pdlResponse: PdlBaseResponse<PdlGeografiskTilknytningResponse> =
+            kallEksternTjeneste(
+                tjeneste = "pdl",
+                uri = pdlUri,
+                formål = "Hent geografisk tilknytning",
+            ) {
+                postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+            }
+
+        return feilsjekkOgReturnerData(
+            ident = ident,
+            pdlResponse = pdlResponse,
+        ) { it.geografiskTilknytning }
     }
 
     fun httpHeaders(): HttpHeaders =

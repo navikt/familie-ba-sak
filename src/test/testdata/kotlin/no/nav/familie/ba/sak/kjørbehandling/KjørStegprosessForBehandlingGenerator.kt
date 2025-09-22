@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjørbehandling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.leggTilBegrunnelsePåVedtaksperiodeIBehandling
-import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -219,7 +218,6 @@ private fun håndterStatusFraOppdragSteg(
                 StatusFraOppdragDTO(
                     fagsystem = FAGSYSTEM,
                     personIdent = søkerFnr,
-                    aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktørId,
                     behandlingsId = behandlingEtterIverksetteVedtak.id,
                     vedtaksId = vedtak!!.id,
                 ),
@@ -343,7 +341,7 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
 fun kjørStegprosessForFGB(
     tilSteg: StegType,
     barnasIdenter: List<String>,
-    søkerFnr: String = randomFnr(),
+    søkerFnr: String,
     fagsakService: FagsakService,
     vedtakService: VedtakService,
     persongrunnlagService: PersongrunnlagService,
@@ -459,7 +457,6 @@ fun kjørStegprosessForFGB(
                     StatusFraOppdragDTO(
                         fagsystem = FAGSYSTEM,
                         personIdent = søkerFnr,
-                        aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktivFødselsnummer(),
                         behandlingsId = behandlingEtterIverksetteVedtak.id,
                         vedtaksId = vedtak.id,
                     ),
@@ -597,7 +594,6 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                     StatusFraOppdragDTO(
                         fagsystem = FAGSYSTEM,
                         personIdent = søkerFnr,
-                        aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktørId,
                         behandlingsId = behandlingEtterIverksetteVedtak.id,
                         vedtaksId = vedtak.id,
                     ),

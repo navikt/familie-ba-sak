@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
@@ -13,8 +14,9 @@ import java.time.LocalDate
 @Service
 class StatsborgerskapService(
     private val integrasjonClient: IntegrasjonClient,
+    private val kodeverkService: KodeverkService,
 ) {
-    fun hentLand(landkode: String): String = integrasjonClient.hentLand(landkode)
+    fun hentLand(landkode: String): String = kodeverkService.hentLand(landkode)
 
     fun hentStatsborgerskapMedMedlemskap(
         statsborgerskap: Statsborgerskap,
@@ -35,8 +37,7 @@ class StatsborgerskapService(
             )
         }
 
-        val eøsMedlemskapsPerioderForValgtLand =
-            integrasjonClient.hentAlleEØSLand().betydninger[statsborgerskap.land] ?: emptyList()
+        val eøsMedlemskapsPerioderForValgtLand = kodeverkService.henteEøsMedlemskapsPerioderForValgtLand(statsborgerskap.land)
 
         var datoFra = statsborgerskap.hentFom()
 
@@ -87,8 +88,7 @@ class StatsborgerskapService(
             return Medlemskap.NORDEN
         }
 
-        val eøsMedlemskapsPerioderForValgtLand =
-            integrasjonClient.hentAlleEØSLand().betydninger[statsborgerskap.land] ?: emptyList()
+        val eøsMedlemskapsPerioderForValgtLand = kodeverkService.henteEøsMedlemskapsPerioderForValgtLand(statsborgerskap.land)
         var datoFra = statsborgerskap.hentFom()
 
         return if (datoFra == null && statsborgerskap.gyldigTilOgMed == null) {
@@ -204,7 +204,7 @@ class StatsborgerskapService(
 
 fun Statsborgerskap.hentFom() = this.bekreftelsesdato ?: this.gyldigFraOgMed
 
-fun Statsborgerskap.iNordiskLand() = Norden.values().map { it.name }.contains(this.land)
+fun Statsborgerskap.iNordiskLand() = Norden.entries.map { it.name }.contains(this.land)
 
 fun Statsborgerskap.iTredjeland() = this.land != StatsborgerskapService.LANDKODE_UKJENT
 

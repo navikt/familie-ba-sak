@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
@@ -74,6 +75,7 @@ class EndringIVilkårsvurderingUtilTest {
                     personIBehandling = person,
                     personIForrigeBehandling = person,
                     tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = MIN_MÅNED,
+                    featureToggleService = mockFeatureToggleService(),
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
@@ -132,6 +134,7 @@ class EndringIVilkårsvurderingUtilTest {
                     personIBehandling = person,
                     personIForrigeBehandling = person,
                     tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = MIN_MÅNED,
+                    featureToggleService = mockFeatureToggleService(),
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
@@ -192,6 +195,7 @@ class EndringIVilkårsvurderingUtilTest {
                     personIBehandling = person,
                     personIForrigeBehandling = person,
                     tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = jun(2022),
+                    featureToggleService = mockFeatureToggleService(),
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
@@ -253,6 +257,7 @@ class EndringIVilkårsvurderingUtilTest {
                     personIBehandling = person,
                     personIForrigeBehandling = person,
                     tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = MIN_MÅNED,
+                    featureToggleService = mockFeatureToggleService(),
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
@@ -313,6 +318,7 @@ class EndringIVilkårsvurderingUtilTest {
                     personIBehandling = person,
                     personIForrigeBehandling = person,
                     tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = MIN_MÅNED,
+                    featureToggleService = mockFeatureToggleService(),
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
@@ -366,6 +372,7 @@ class EndringIVilkårsvurderingUtilTest {
                     personIBehandling = person,
                     personIForrigeBehandling = person,
                     tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = MIN_MÅNED,
+                    featureToggleService = mockFeatureToggleService(),
                 ).tilPerioder()
                 .filter { it.verdi == true }
 

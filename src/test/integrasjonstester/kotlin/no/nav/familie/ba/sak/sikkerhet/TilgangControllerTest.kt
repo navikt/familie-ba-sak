@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.sikkerhet
 import io.mockk.every
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -22,10 +22,11 @@ class TilgangControllerTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun testHarTilgangTilKode6Person() {
+        val fødselsdato = LocalDate.now()
         val fnr =
             leggTilPersonInfo(
-                FnrGenerator.generer(),
-                PersonInfo(fødselsdato = LocalDate.now(), adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG),
+                fødselsdato,
+                PersonInfo(fødselsdato = fødselsdato, adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG),
             )
         every {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(fnr))

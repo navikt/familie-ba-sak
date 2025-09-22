@@ -4,13 +4,16 @@ import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
+import no.nav.familie.ba.sak.common.Utils.tilEtterfølgendePar
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer.er11Siffer
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -33,7 +36,7 @@ internal class UtilsTest {
     @Test
     fun `Nullable verdier blir tom string`() {
         val adresse =
-            GrVegadresse(
+            GrVegadresseBostedsadresse(
                 matrikkelId = null,
                 bruksenhetsnummer = null,
                 husnummer = "1",
@@ -42,6 +45,7 @@ internal class UtilsTest {
                 adressenavn = "TEST",
                 husbokstav = null,
                 postnummer = "1234",
+                poststed = null,
             )
 
         assertEquals("Test 1, 1234", adresse.tilFrontendString())
@@ -100,5 +104,20 @@ internal class UtilsTest {
         assertFalse(er11Siffer("1234567890A"))
         assertFalse(er11Siffer("1234567890123"))
         assertTrue(er11Siffer("12345678901"))
+    }
+
+    @Nested
+    inner class TilEtterfølgendePar {
+        @Test
+        fun `skal plukke ut to og to etterfølgende elementer inkludert det siste elementet`() {
+            val liste = listOf(1, 2, 3, 4, 5)
+            val par = liste.tilEtterfølgendePar { a, b -> a to b }
+            assertThat(par).hasSize(5)
+            assertThat(par[0]).isEqualTo(Pair(1, 2))
+            assertThat(par[1]).isEqualTo(Pair(2, 3))
+            assertThat(par[2]).isEqualTo(Pair(3, 4))
+            assertThat(par[3]).isEqualTo(Pair(4, 5))
+            assertThat(par[4]).isEqualTo(Pair(5, null))
+        }
     }
 }

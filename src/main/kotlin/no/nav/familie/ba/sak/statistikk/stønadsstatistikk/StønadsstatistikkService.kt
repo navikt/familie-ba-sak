@@ -4,12 +4,14 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -28,12 +30,13 @@ import no.nav.familie.eksterne.kontrakter.Kompetanse
 import no.nav.familie.eksterne.kontrakter.KompetanseAktivitet
 import no.nav.familie.eksterne.kontrakter.KompetanseResultat
 import no.nav.familie.eksterne.kontrakter.PersonDVHV2
-import no.nav.familie.eksterne.kontrakter.UnderkategoriV2
 import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVHV2
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
+import no.nav.familie.eksterne.kontrakter.YtelseType.FINNMARKSTILLEGG
 import no.nav.familie.eksterne.kontrakter.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.eksterne.kontrakter.YtelseType.SMÅBARNSTILLEGG
+import no.nav.familie.eksterne.kontrakter.YtelseType.SVALBARDTILLEGG
 import no.nav.familie.eksterne.kontrakter.YtelseType.UTVIDET_BARNETRYGD
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
@@ -52,6 +55,8 @@ class StønadsstatistikkService(
     private val vedtakRepository: VedtakRepository,
     private val kompetanseService: KompetanseService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val featureToggleService: FeatureToggleService,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
     fun hentVedtakV2(behandlingId: Long): VedtakDVHV2 {
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId)
@@ -67,20 +72,29 @@ class StønadsstatistikkService(
         }
 
         val tidspunktVedtak = datoVedtak
+        val sisteIverksatteBehandlingId =
+            if (featureToggleService.isEnabled(FeatureToggle.STONADSSTATISTIKK_FORTSATT_INNVILGET)) {
+                val behandlingHarUtbetalingsoppdrag = tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) != null
+                if (behandlingHarUtbetalingsoppdrag) {
+                    null
+                } else {
+                    behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.id.toString()
+                }
+            } else {
+                null
+            }
+
         return VedtakDVHV2(
             fagsakId = behandling.fagsak.id.toString(),
             fagsakType = FagsakType.valueOf(behandling.fagsak.type.name),
             behandlingsId = behandlingId.toString(),
+            sisteIverksatteBehandlingId = sisteIverksatteBehandlingId,
             tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
             personV2 = hentSøkerV2(persongrunnlag),
             // TODO implementere støtte for dette
             ensligForsørger = utledEnsligForsørger(behandlingId),
             kategoriV2 = KategoriV2.valueOf(behandling.kategori.name),
-            underkategoriV2 =
-                when (behandling.underkategori) {
-                    BehandlingUnderkategori.ORDINÆR -> UnderkategoriV2.ORDINÆR
-                    BehandlingUnderkategori.UTVIDET -> UnderkategoriV2.UTVIDET
-                },
+            underkategoriV2 = null,
             behandlingTypeV2 = BehandlingTypeV2.valueOf(behandling.type.name),
             utbetalingsperioderV2 = hentUtbetalingsperioderTilDatavarehus(behandling, persongrunnlag),
             funksjonellId = UUID.randomUUID().toString(),
@@ -190,9 +204,11 @@ class StønadsstatistikkService(
                                 YtelseType.ORDINÆR_BARNETRYGD -> ORDINÆR_BARNETRYGD
                                 YtelseType.UTVIDET_BARNETRYGD -> UTVIDET_BARNETRYGD
                                 YtelseType.SMÅBARNSTILLEGG -> SMÅBARNSTILLEGG
+                                YtelseType.FINNMARKSTILLEGG -> FINNMARKSTILLEGG
+                                YtelseType.SVALBARDTILLEGG -> SVALBARDTILLEGG
                             },
                         utbetaltPrMnd = andel.kalkulertUtbetalingsbeløp,
-                        delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset,
+                        delytelseId = if (andel.periodeOffset != null) behandling.fagsak.id.toString() + andel.periodeOffset else null,
                     )
                 },
         )

@@ -2,10 +2,9 @@ package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.MockLeaderClientService
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.fake.MockLeaderClientService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakController
@@ -41,8 +40,6 @@ class SaksstatistikkTest(
     @Autowired
     private val behandlingService: BehandlingService,
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     @Autowired
     private val mockLeaderClientService: MockLeaderClientService,
@@ -61,7 +58,6 @@ class SaksstatistikkTest(
                 kafkaProducer = kafkaProducer,
                 leaderClientService = mockLeaderClientService,
             )
-        databaseCleanupService.truncate()
     }
 
     @AfterEach

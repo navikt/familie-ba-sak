@@ -1,14 +1,21 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.LOVLIG_OPPHOLD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_ARBEIDSFORHOLD
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_OPPHOLDSTILLATELSE
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
@@ -19,25 +26,24 @@ import java.time.LocalDate
 
 @Service
 class PreutfyllLovligOppholdService(
-    private val pdlRestClient: PdlRestClient,
+    private val pdlRestClient: SystemOnlyPdlRestClient,
     private val statsborgerskapService: StatsborgerskapService,
-    private val integrasjonClient: IntegrasjonClient,
+    private val systemOnlyIntegrasjonClient: SystemOnlyIntegrasjonClient,
+    private val persongrunnlagService: PersongrunnlagService,
 ) {
     fun preutfyllLovligOpphold(vilkårsvurdering: Vilkårsvurdering) {
+        val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
+        val bostedsadresser = pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer)
         val søkersResultater = vilkårsvurdering.personResultater.first { it.erSøkersResultater() }
 
-        val datoFørsteBostedadresseNorgeSøker = finnDatoFørsteBostedsadresseINorge(søkersResultater) ?: LocalDate.MIN
-        val erEØSBorgerOgHarArbeidsforholdTidslinjeSøker = lagErEØSBorgerOgHarArbeidsforholdTidslinje(søkersResultater, datoFørsteBostedadresseNorgeSøker)
+        val bostedsadresserSøker = bostedsadresser[søkersResultater.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
+        val fomDatoForBeskjæring = finnFomDatoForBeskjæring(søkersResultater, vilkårsvurdering, bostedsadresserSøker) ?: PRAKTISK_TIDLIGSTE_DAG
+        val erEØSBorgerOgHarArbeidsforholdTidslinjeSøker = lagErEØSBorgerOgHarArbeidsforholdTidslinje(søkersResultater, fomDatoForBeskjæring)
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
+            val bostedsadresserForPerson = bostedsadresser[personResultat.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
             val lovligOppholdVilkårResultat =
-                if (personResultat.erSøkersResultater()) {
-                    genererLovligOppholdVilkårResultat(personResultat)
-                } else {
-                    val datoFørsteBostedadresseNorgeBarn = finnDatoFørsteBostedsadresseINorge(personResultat) ?: LocalDate.MIN
-                    val erEøsBorgerOgHarArbeidsforholdTidslinjeBarn = erEØSBorgerOgHarArbeidsforholdTidslinjeSøker.beskjærFraOgMed(datoFørsteBostedadresseNorgeBarn)
-                    genererLovligOppholdVilkårResultat(personResultat, erEøsBorgerOgHarArbeidsforholdTidslinjeBarn)
-                }
+                genererLovligOppholdVilkårResultat(personResultat, erEØSBorgerOgHarArbeidsforholdTidslinjeSøker, bostedsadresserForPerson)
 
             if (lovligOppholdVilkårResultat.isNotEmpty()) {
                 personResultat.vilkårResultater.removeIf { it.vilkårType == LOVLIG_OPPHOLD }
@@ -46,28 +52,27 @@ class PreutfyllLovligOppholdService(
         }
     }
 
-    fun genererLovligOppholdVilkårResultat(
+    private fun genererLovligOppholdVilkårResultat(
         personResultat: PersonResultat,
-        erEøsBorgerOgHarArbeidsforholdTidslinjeOverride: Tidslinje<Boolean>? = null,
+        erEØSBorgerOgHarArbeidsforholdTidslinje: Tidslinje<Boolean>,
+        bostedsadresserForPerson: List<Bostedsadresse>,
     ): Set<VilkårResultat> {
         val erNordiskStatsborgerTidslinje = pdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat)
 
-        val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(personResultat)
+        val fomDatoForBeskjæring = finnFomDatoForBeskjæring(personResultat, personResultat.vilkårsvurdering, bostedsadresserForPerson) ?: PRAKTISK_TIDLIGSTE_DAG
 
-        val datoFørsteBostedadresse = finnDatoFørsteBostedsadresseINorge(personResultat) ?: LocalDate.MIN
-
-        val erEØSBorgerOgHarArbeidsforholdTidslinje =
-            erEøsBorgerOgHarArbeidsforholdTidslinjeOverride ?: lagErEØSBorgerOgHarArbeidsforholdTidslinje(personResultat, datoFørsteBostedadresse)
+        val harOppholdstillatelseTidslinje = lagHarOppholdstillatelseTidslinje(personResultat)
 
         val harLovligOppholdTidslinje =
-            erBosattINorgeTidslinje
-                .kombinerMed(erNordiskStatsborgerTidslinje, erEØSBorgerOgHarArbeidsforholdTidslinje) { erBosatt, erNordisk, erEøsOgArbeidsforhold ->
+            erNordiskStatsborgerTidslinje
+                .kombinerMed(erEØSBorgerOgHarArbeidsforholdTidslinje, harOppholdstillatelseTidslinje) { erNordisk, erEØSBorgerOgArbeidsforhold, harOppholdstillatelse ->
                     when {
-                        erBosatt == true && erNordisk == true -> OppfyltDelvilkår("- Norsk/nordisk statsborgerskap.")
-                        erBosatt == true && erEøsOgArbeidsforhold == true -> OppfyltDelvilkår("- EØS-borger og har arbeidsforhold i Norge.")
+                        erNordisk == true -> OppfyltDelvilkår("- Norsk/nordisk statsborgerskap.")
+                        erEØSBorgerOgArbeidsforhold == true -> OppfyltDelvilkår("- EØS-borger og har arbeidsforhold i Norge.", begrunnelseForManuellKontroll = INFORMASJON_OM_ARBEIDSFORHOLD)
+                        harOppholdstillatelse == true -> OppfyltDelvilkår("- Har gyldig oppholdstillatelse i Norge.", begrunnelseForManuellKontroll = INFORMASJON_OM_OPPHOLDSTILLATELSE)
                         else -> IkkeOppfyltDelvilkår
                     }
-                }.beskjærFraOgMed(datoFørsteBostedadresse)
+                }.beskjærFraOgMed(fomDatoForBeskjæring)
 
         return harLovligOppholdTidslinje
             .tilPerioderIkkeNull()
@@ -79,46 +84,41 @@ class PreutfyllLovligOppholdService(
                     vilkårType = LOVLIG_OPPHOLD,
                     periodeFom = periode.fom,
                     periodeTom = periode.tom,
-                    begrunnelse = "Fylt ut automatisk fra registerdata i PDL\n" + periode.verdi.begrunnelse,
+                    begrunnelse = PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT + periode.verdi.begrunnelse,
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                     begrunnelseForManuellKontroll = periode.verdi.begrunnelseForManuellKontroll,
+                    erOpprinneligPreutfylt = true,
                 )
             }.toSet()
     }
 
-    private fun lagErBosattINorgeTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
-        val alleBostedsadresserForPerson =
-            pdlRestClient
-                .hentBostedsadresserForPerson(fødselsnummer = personResultat.aktør.aktivFødselsnummer())
-                .sortedBy { it.gyldigFraOgMed }
+    private fun finnFomDatoForBeskjæring(
+        personResultat: PersonResultat,
+        vilkårsvurdering: Vilkårsvurdering,
+        bostedsadresser: List<Bostedsadresse>,
+    ): LocalDate? {
+        val førsteBostedFomDato =
+            bostedsadresser
+                .filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
+                .mapNotNull { it.gyldigFraOgMed }
+                .minOrNull()
 
-        return alleBostedsadresserForPerson
-            .windowed(size = 2, step = 1, partialWindows = true) {
-                val denne = it.first()
-                val neste = it.getOrNull(1)
+        val barna = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id).barna
 
-                Periode(
-                    verdi = denne.vegadresse != null || denne.matrikkeladresse != null || denne.ukjentBosted != null,
-                    fom = denne.gyldigFraOgMed,
-                    tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
-                )
-            }.tilTidslinje()
+        return førsteBostedFomDato ?: if (personResultat.erSøkersResultater()) {
+            barna.minOfOrNull { it.fødselsdato }
+        } else {
+            barna.find { it.aktør.aktørId == personResultat.aktør.aktørId }?.fødselsdato
+        }
     }
-
-    private fun finnDatoFørsteBostedsadresseINorge(personResultat: PersonResultat?): LocalDate? =
-        pdlRestClient
-            .hentBostedsadresserForPerson(fødselsnummer = personResultat!!.aktør.aktivFødselsnummer())
-            .filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
-            .mapNotNull { it.gyldigFraOgMed }
-            .minByOrNull { it }
 
     private fun lagErEØSBorgerOgHarArbeidsforholdTidslinje(
         personResultat: PersonResultat,
-        datoFørsteBostedadresse: LocalDate,
+        fomDatoForBeskjæring: LocalDate,
     ): Tidslinje<Boolean> =
         lagErEØSBorgerTidslinje(personResultat)
-            .kombinerMed(lagHarArbeidsforholdTidslinje(personResultat, datoFørsteBostedadresse)) { erEøs, harArbeidsforhold ->
-                erEøs == true && harArbeidsforhold == true
+            .kombinerMed(lagHarArbeidsforholdTidslinje(personResultat, fomDatoForBeskjæring)) { erEØSBorger, harArbeidsforhold ->
+                erEØSBorger == true && harArbeidsforhold == true
             }
 
     private fun lagErEØSBorgerTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
@@ -129,10 +129,10 @@ class PreutfyllLovligOppholdService(
                 val gjeldende = it.first()
                 val neste = it.getOrNull(1)
 
-                val erEøs = statsborgerskapService.hentSterkesteMedlemskap(gjeldende) == Medlemskap.EØS
+                val erEØSBorger = statsborgerskapService.hentSterkesteMedlemskap(gjeldende) == Medlemskap.EØS
 
                 Periode(
-                    verdi = erEøs,
+                    verdi = erEØSBorger,
                     fom = gjeldende.gyldigFraOgMed,
                     tom = gjeldende.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
                 )
@@ -141,12 +141,12 @@ class PreutfyllLovligOppholdService(
 
     private fun lagHarArbeidsforholdTidslinje(
         personResultat: PersonResultat,
-        datoFørsteBostedadresse: LocalDate,
+        fomDatoForBeskjæring: LocalDate,
     ): Tidslinje<Boolean> {
         val arbeidsforhold =
-            integrasjonClient.hentArbeidsforhold(
+            systemOnlyIntegrasjonClient.hentArbeidsforholdMedSystembruker(
                 ident = personResultat.aktør.aktivFødselsnummer(),
-                ansettelsesperiodeFom = datoFørsteBostedadresse,
+                ansettelsesperiodeFom = fomDatoForBeskjæring,
             )
 
         return arbeidsforhold
@@ -156,6 +156,21 @@ class PreutfyllLovligOppholdService(
                     verdi = true,
                     fom = it.fom,
                     tom = it.tom,
+                )
+            }.tilTidslinje()
+    }
+
+    private fun lagHarOppholdstillatelseTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
+        val oppholdstillatelse = pdlRestClient.hentOppholdstillatelse(personResultat.aktør, historikk = true)
+
+        return oppholdstillatelse
+            .filter { it.type == OPPHOLDSTILLATELSE.PERMANENT || it.type == OPPHOLDSTILLATELSE.MIDLERTIDIG }
+            .mapIndexed { index, it ->
+                val erSiste = index == oppholdstillatelse.lastIndex
+                Periode(
+                    verdi = true,
+                    fom = it.oppholdFra,
+                    tom = if (erSiste) null else it.oppholdTil,
                 )
             }.tilTidslinje()
     }

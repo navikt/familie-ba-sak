@@ -9,8 +9,8 @@ import io.mockk.mockk
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagSettPåVent
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
@@ -352,12 +352,12 @@ internal class SaksstatistikkServiceTest {
     @Test
     fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER, bostedsadresse i Norge`() {
         every { fagsakService.hentPåFagsakId(any()) } answers {
-            Fagsak(status = FagsakStatus.OPPRETTET, aktør = tilAktør("12345678910"))
+            Fagsak(status = FagsakStatus.OPPRETTET, aktør = lagAktør("12345678910"))
         }
 
         every { personidentService.hentAktør("12345678910") } returns Aktør("1234567891000")
         every { personidentService.hentAktør("12345678911") } returns Aktør("1234567891100")
-        every { personopplysningerService.hentPersoninfoEnkel(tilAktør("12345678910")) } returns
+        every { personopplysningerService.hentPersoninfoEnkel(lagAktør("12345678910")) } returns
             PersonInfo(
                 fødselsdato =
                     LocalDate.of(
@@ -398,13 +398,13 @@ internal class SaksstatistikkServiceTest {
     @Test
     fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER, bostedsadresse i Utland`() {
         every { fagsakService.hentPåFagsakId(any()) } answers {
-            Fagsak(status = FagsakStatus.OPPRETTET, aktør = tilAktør("12345678910"))
+            Fagsak(status = FagsakStatus.OPPRETTET, aktør = lagAktør("12345678910"))
         }
 
         every { personidentService.hentAktør("12345678910") } returns Aktør("1234567891000")
         every { personidentService.hentAktør("12345678911") } returns Aktør("1234567891100")
 
-        every { personopplysningerService.hentPersoninfoEnkel(tilAktør("12345678910")) } returns
+        every { personopplysningerService.hentPersoninfoEnkel(lagAktør("12345678910")) } returns
             PersonInfo(
                 fødselsdato =
                     LocalDate.of(
@@ -413,7 +413,7 @@ internal class SaksstatistikkServiceTest {
                         1,
                     ),
             )
-        every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(tilAktør("12345678910")) } returns "SE"
+        every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(lagAktør("12345678910")) } returns "SE"
 
         every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns null
 
@@ -460,17 +460,17 @@ internal class SaksstatistikkServiceTest {
     fun `Enum-verdier brukt i behandlingDVH skal validere mot json schema`() {
         val enumVerdier =
             listOf(
-                BehandlingType.values(),
-                BehandlingStatus.values(),
-                BehandlingUnderkategori.values(),
-                BehandlingÅrsak.values(),
-                BehandlingKategori.values(),
-                Behandlingsresultat.values(),
-                SettPåVentÅrsak.values(),
+                BehandlingType.entries,
+                BehandlingStatus.entries,
+                BehandlingUnderkategori.entries,
+                BehandlingÅrsak.entries,
+                BehandlingKategori.entries,
+                Behandlingsresultat.entries,
+                SettPåVentÅrsak.entries,
             )
 
         val alleMuligeResultatBegrunnelser =
-            Standardbegrunnelse.values().map {
+            Standardbegrunnelse.entries.map {
                 ResultatBegrunnelseDVH(now(), now(), it.vedtakBegrunnelseType.name, it.name)
             }
 
@@ -542,9 +542,9 @@ internal class SaksstatistikkServiceTest {
     @Test
     fun `Enum-verdier brukt i sakDvh skal validere mot json schema`() {
         val deltagere =
-            PersonType.values().map { personType -> AktørDVH(randomAktør().aktørId.toLong(), personType.name) }
+            PersonType.entries.map { personType -> AktørDVH(randomAktør().aktørId.toLong(), personType.name) }
 
-        FagsakStatus.values().forEach {
+        FagsakStatus.entries.forEach {
             val sakDvh =
                 SakDVH(
                     funksjonellTid = ZonedDateTime.now(),

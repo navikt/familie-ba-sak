@@ -139,6 +139,10 @@ data class AndelTilkjentYtelse(
 
     fun erSmåbarnstillegg() = this.type == YtelseType.SMÅBARNSTILLEGG
 
+    fun erFinnmarkstillegg() = this.type == YtelseType.FINNMARKSTILLEGG
+
+    fun erSvalbardtillegg() = this.type == YtelseType.SVALBARDTILLEGG
+
     fun erSøkersAndel() = erUtvidet() || erSmåbarnstillegg()
 
     fun erLøpende(): Boolean = this.stønadTom > YearMonth.now()
@@ -184,6 +188,8 @@ enum class YtelseType(
     ORDINÆR_BARNETRYGD("BATR"),
     UTVIDET_BARNETRYGD("BAUTV-OP"),
     SMÅBARNSTILLEGG("BATRSMA"),
+    FINNMARKSTILLEGG("BATRFIN"),
+    SVALBARDTILLEGG("BATRSVAL"),
     ;
 
     fun tilYtelseType(): YtelsetypeBA =
@@ -191,6 +197,8 @@ enum class YtelseType(
             ORDINÆR_BARNETRYGD -> YtelsetypeBA.ORDINÆR_BARNETRYGD
             UTVIDET_BARNETRYGD -> YtelsetypeBA.UTVIDET_BARNETRYGD
             SMÅBARNSTILLEGG -> YtelsetypeBA.SMÅBARNSTILLEGG
+            FINNMARKSTILLEGG -> YtelsetypeBA.FINNMARKSTILLEGG
+            SVALBARDTILLEGG -> YtelsetypeBA.SVALBARDTILLEGG
         }
 
     fun tilSatsType(
@@ -209,6 +217,8 @@ enum class YtelseType(
             }
             UTVIDET_BARNETRYGD -> setOf(SatsType.UTVIDET_BARNETRYGD)
             SMÅBARNSTILLEGG -> setOf(SatsType.SMA)
+            FINNMARKSTILLEGG -> setOf(SatsType.FINNMARKSTILLEGG)
+            SVALBARDTILLEGG -> setOf(SatsType.SVALBARDTILLEGG)
         }
 }
 

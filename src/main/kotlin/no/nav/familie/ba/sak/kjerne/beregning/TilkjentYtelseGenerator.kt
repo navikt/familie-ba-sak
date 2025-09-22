@@ -1,8 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndretUtbetalingGenerator.lagAndelerMedEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -24,7 +25,7 @@ import java.time.LocalDate
 class TilkjentYtelseGenerator(
     private val overgangsstønadService: OvergangsstønadService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val unleashService: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun genererTilkjentYtelse(
         behandling: Behandling,
@@ -68,7 +69,7 @@ class TilkjentYtelseGenerator(
                 }
 
         val endretUtbetalingAndelÅrsakerSomSkalInkluderes =
-            if (unleashService.isEnabled(FeatureToggle.SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER)) {
+            if (featureToggleService.isEnabled(FeatureToggle.SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER)) {
                 listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND, Årsak.ENDRE_MOTTAKER)
             } else {
                 listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND)
@@ -126,7 +127,33 @@ class TilkjentYtelseGenerator(
                 tilkjentYtelse = tilkjentYtelse,
             )
 
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarnaMedAlleEndringer.map { it.andel } + andelerTilkjentYtelseUtvidetMedAlleEndringer.map { it.andel } + andelerTilkjentYtelseSmåbarnstillegg.map { it.andel })
+        val finnmarkstilleggAndeler =
+            if (featureToggleService.isEnabled(SKAL_GENERERE_FINNMARKSTILLEGG)) {
+                FinnmarkstilleggGenerator.lagFinnmarkstilleggAndeler(
+                    behandling = behandling,
+                    vilkårsvurdering = vilkårsvurdering,
+                    barnasAndeler = andelerTilkjentYtelseBarnaMedAlleEndringer,
+                    tilkjentYtelse = tilkjentYtelse,
+                )
+            } else {
+                emptyList()
+            }
+
+        val svalbardtilleggAndeler =
+            SvalbardtilleggGenerator.lagSvalbardtilleggAndeler(
+                behandling = behandling,
+                vilkårsvurdering = vilkårsvurdering,
+                barnasAndeler = andelerTilkjentYtelseBarnaMedAlleEndringer,
+                tilkjentYtelse = tilkjentYtelse,
+            )
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+            andelerTilkjentYtelseBarnaMedAlleEndringer.map { it.andel } +
+                andelerTilkjentYtelseUtvidetMedAlleEndringer.map { it.andel } +
+                andelerTilkjentYtelseSmåbarnstillegg.map { it.andel } +
+                finnmarkstilleggAndeler +
+                svalbardtilleggAndeler,
+        )
 
         return tilkjentYtelse
     }

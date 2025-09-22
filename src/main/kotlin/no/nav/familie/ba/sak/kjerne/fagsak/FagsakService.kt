@@ -3,22 +3,17 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
-import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestMinimalFagsak
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -26,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -38,14 +32,9 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.client.HttpStatusCodeException
-import java.time.LocalDate
-import java.time.Period
 
 @Service
 class FagsakService(
@@ -55,8 +44,6 @@ class FagsakService(
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val behandlingService: BehandlingService,
-    private val personopplysningerService: PersonopplysningerService,
-    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val skyggesakService: SkyggesakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
@@ -64,7 +51,7 @@ class FagsakService(
     private val organisasjonService: OrganisasjonService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val skjermetBarnSøkerRepository: SkjermetBarnSøkerRepository,
-    private val unleashService: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val antallFagsakerOpprettetFraManuell =
         Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "manuell")
@@ -103,7 +90,7 @@ class FagsakService(
     ): Fagsak {
         if (type == FagsakType.SKJERMET_BARN) {
             when {
-                !unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) -> {
+                !featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) -> {
                     throw FunksjonellFeil(
                         melding = "Fagsaktype SKJERMET_BARN er ikke støttet i denne versjonen av tjenesten.",
                         frontendFeilmelding = "Fagsaktype SKJERMET_BARN er ikke støttet i denne versjonen av tjenesten.",
@@ -202,7 +189,7 @@ class FagsakService(
 
     fun hentMinimalFagsakerForPerson(
         aktør: Aktør,
-        fagsakTyper: List<FagsakType> = FagsakType.values().toList(),
+        fagsakTyper: List<FagsakType> = FagsakType.entries.toList(),
     ): Ressurs<List<RestMinimalFagsak>> {
         val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør).filter { fagsakTyper.contains(it.type) }
         return Ressurs.success(data = lagRestMinimalFagsaker(fagsaker))
@@ -314,187 +301,7 @@ class FagsakService(
 
     fun hentLøpendeFagsaker(): List<Fagsak> = fagsakRepository.finnLøpendeFagsaker()
 
-    fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
-        val aktør = personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(personIdent) ?: return emptyList()
-
-        val maskertDeltaker =
-            runCatching {
-                hentMaskertFagsakdeltakerVedManglendeTilgang(aktør)
-            }.fold(
-                onSuccess = { it },
-                onFailure = { return sjekkStatuskodeOgHåndterFeil(it) },
-            )
-
-        if (maskertDeltaker != null) {
-            return listOf(maskertDeltaker)
-        }
-
-        val personInfoMedRelasjoner =
-            runCatching {
-                personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
-            }.fold(
-                onSuccess = { it },
-                onFailure = { return sjekkStatuskodeOgHåndterFeil(it) },
-            )
-        val assosierteFagsakDeltagere = hentAssosierteFagsakdeltagere(aktør, personInfoMedRelasjoner)
-
-        val erBarn = Period.between(personInfoMedRelasjoner.fødselsdato, LocalDate.now()).years < 18
-
-        val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør).ifEmpty { listOf(null) }
-        fagsaker.forEach { fagsak ->
-            if (assosierteFagsakDeltagere.find { it.ident == aktør.aktivFødselsnummer() && it.fagsakId == fagsak?.id } == null) {
-                assosierteFagsakDeltagere.add(
-                    RestFagsakDeltager(
-                        navn = personInfoMedRelasjoner.navn,
-                        ident = aktør.aktivFødselsnummer(),
-                        // we set the role to unknown when the person is not a child because the person may not have a child
-                        rolle = if (erBarn) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
-                        kjønn = personInfoMedRelasjoner.kjønn,
-                        fagsakId = fagsak?.id,
-                        fagsakType = fagsak?.type,
-                    ),
-                )
-            }
-        }
-
-        if (erBarn) {
-            personInfoMedRelasjoner.forelderBarnRelasjon
-                .filter { relasjon ->
-                    relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR ||
-                        relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MOR ||
-                        relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
-                }.forEach { relasjon ->
-                    if (assosierteFagsakDeltagere.find { fagsakDeltager ->
-                            fagsakDeltager.ident == relasjon.aktør.aktivFødselsnummer()
-                        } == null
-                    ) {
-                        val maskertForelder =
-                            hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.aktør)
-                        if (maskertForelder != null) {
-                            assosierteFagsakDeltagere.add(maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER))
-                        } else {
-                            val forelderInfo =
-                                runCatching {
-                                    personopplysningerService.hentPersoninfoEnkel(relasjon.aktør)
-                                }.fold(
-                                    onSuccess = { it },
-                                    onFailure = {
-                                        throw Feil("Feil ved henting av person fra PDL", throwable = it)
-                                    },
-                                )
-
-                            val fagsakerForRelasjon = fagsakRepository.finnFagsakerForAktør(relasjon.aktør).ifEmpty { listOf(null) }
-                            fagsakerForRelasjon.forEach { fagsak ->
-                                assosierteFagsakDeltagere.add(
-                                    RestFagsakDeltager(
-                                        navn = forelderInfo.navn,
-                                        ident = relasjon.aktør.aktivFødselsnummer(),
-                                        rolle = FagsakDeltagerRolle.FORELDER,
-                                        kjønn = forelderInfo.kjønn,
-                                        fagsakId = fagsak?.id,
-                                        fagsakType = fagsak?.type,
-                                    ),
-                                )
-                            }
-                        }
-                    }
-                }
-        }
-        return assosierteFagsakDeltagere
-    }
-
-    private fun sjekkStatuskodeOgHåndterFeil(throwable: Throwable): List<RestFagsakDeltager> {
-        val clientError = throwable as? HttpStatusCodeException?
-        return if ((clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND) ||
-            throwable.message?.contains("Fant ikke person") == true
-        ) {
-            emptyList()
-        } else {
-            throw throwable
-        }
-    }
-
-    // We find all cases that either have the given person as applicant, or have it as a child
-    private fun hentAssosierteFagsakdeltagere(
-        aktør: Aktør,
-        personInfoMedRelasjoner: PersonInfo,
-    ): MutableList<RestFagsakDeltager> {
-        val assosierteFagsakDeltagerMap = mutableMapOf<Long, RestFagsakDeltager>()
-
-        personRepository.findByAktør(aktør).forEach { person: Person ->
-            if (person.personopplysningGrunnlag.aktiv) {
-                val behandling = behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
-                if (behandling.aktiv &&
-                    !behandling.fagsak.arkivert &&
-                    !assosierteFagsakDeltagerMap.containsKey(
-                        behandling.fagsak.id,
-                    )
-                ) {
-                    // get applicant info from PDL. we assume that the applicant is always a person whose info is stored in PDL.
-                    if (behandling.fagsak.aktør == aktør) {
-                        assosierteFagsakDeltagerMap[behandling.fagsak.id] =
-                            RestFagsakDeltager(
-                                navn = personInfoMedRelasjoner.navn,
-                                ident = behandling.fagsak.aktør.aktivFødselsnummer(),
-                                rolle =
-                                    if (behandling.fagsak.type == FagsakType.NORMAL) {
-                                        FagsakDeltagerRolle.FORELDER
-                                    } else {
-                                        FagsakDeltagerRolle.UKJENT
-                                    },
-                                kjønn = personInfoMedRelasjoner.kjønn,
-                                fagsakId = behandling.fagsak.id,
-                                fagsakType = behandling.fagsak.type,
-                            )
-                    } else {
-                        val maskertForelder =
-                            hentMaskertFagsakdeltakerVedManglendeTilgang(behandling.fagsak.aktør)
-                        if (maskertForelder != null) {
-                            assosierteFagsakDeltagerMap[behandling.fagsak.id] =
-                                maskertForelder.copy(
-                                    rolle = FagsakDeltagerRolle.FORELDER,
-                                    fagsakType = behandling.fagsak.type,
-                                )
-                        } else {
-                            val personinfo =
-                                runCatching {
-                                    personopplysningerService.hentPersoninfoEnkel(behandling.fagsak.aktør)
-                                }.fold(
-                                    onSuccess = { it },
-                                    onFailure = {
-                                        throw Feil("Feil ved henting av person fra PDL", throwable = it)
-                                    },
-                                )
-
-                            assosierteFagsakDeltagerMap[behandling.fagsak.id] =
-                                RestFagsakDeltager(
-                                    navn = personinfo.navn,
-                                    ident = behandling.fagsak.aktør.aktivFødselsnummer(),
-                                    rolle = FagsakDeltagerRolle.FORELDER,
-                                    kjønn = personinfo.kjønn,
-                                    fagsakId = behandling.fagsak.id,
-                                    fagsakType = behandling.fagsak.type,
-                                )
-                        }
-                    }
-                }
-            }
-        }
-
-        // The given person and its parents may be included in the result, no matter whether they have a case.
-        return assosierteFagsakDeltagerMap.values.toMutableList()
-    }
-
-    private fun hentMaskertFagsakdeltakerVedManglendeTilgang(aktør: Aktør): RestFagsakDeltager? =
-        familieIntegrasjonerTilgangskontrollService
-            .hentMaskertPersonInfoVedManglendeTilgang(aktør)
-            ?.let {
-                RestFagsakDeltager(
-                    rolle = FagsakDeltagerRolle.UKJENT,
-                    adressebeskyttelseGradering = it.adressebeskyttelseGradering,
-                    harTilgang = false,
-                )
-            }
+    fun hentIdPåLøpendeFagsaker(): List<Long> = fagsakRepository.finnIdPåLøpendeFagsaker()
 
     fun finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(
         aktør: Aktør,
@@ -526,38 +333,9 @@ class FagsakService(
         return (alleLøpendeFagsakerPåAktør + fagsakerHvorAktørHarLøpendeOrdinærBarnetrygd).distinct()
     }
 
-    fun oppgiFagsakdeltagere(
-        aktør: Aktør,
-        barnasAktørId: List<Aktør>,
-    ): List<RestFagsakDeltager> {
-        val fagsakDeltagere = mutableListOf<RestFagsakDeltager>()
+    fun finnOrgnummerForLøpendeFagsaker(): List<String> = fagsakRepository.finnOrgnummerForLøpendeFagsaker()
 
-        hentFagsakPåPerson(aktør)?.also { fagsak ->
-            fagsakDeltagere.add(
-                RestFagsakDeltager(
-                    ident = aktør.aktivFødselsnummer(),
-                    fagsakId = fagsak.id,
-                    fagsakStatus = fagsak.status,
-                    rolle = FagsakDeltagerRolle.FORELDER,
-                ),
-            )
-        }
-
-        barnasAktørId.forEach { barnsAktørId ->
-            hentFagsakerPåPerson(barnsAktørId).toSet().forEach { fagsak ->
-                fagsakDeltagere.add(
-                    RestFagsakDeltager(
-                        ident = barnsAktørId.aktivFødselsnummer(),
-                        fagsakId = fagsak.id,
-                        fagsakStatus = fagsak.status,
-                        rolle = FagsakDeltagerRolle.BARN,
-                    ),
-                )
-            }
-        }
-
-        return fagsakDeltagere
-    }
+    fun finnIdenterForLøpendeFagsaker(): List<String> = fagsakRepository.finnIdenterForLøpendeFagsaker()
 
     companion object {
         private val logger = LoggerFactory.getLogger(FagsakService::class.java)

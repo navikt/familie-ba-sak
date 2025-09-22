@@ -46,6 +46,9 @@ object SatsService {
             Sats(SatsType.UTVIDET_BARNETRYGD, 1054, LocalDate.of(2019, 3, 1), LocalDate.of(2023, 2, 28)),
             Sats(SatsType.UTVIDET_BARNETRYGD, 2489, LocalDate.of(2023, 3, 1), LocalDate.of(2023, 6, 30)),
             Sats(SatsType.UTVIDET_BARNETRYGD, 2516, LocalDate.of(2023, 7, 1), LocalDate.MAX),
+            // TODO: Endre på dato før vi går live tilbake til oktober 2025. Den settes til august siden vi ønsker muligheten til å teste med vedtaksperioder osv nå allerede.
+            Sats(SatsType.FINNMARKSTILLEGG, 500, LocalDate.of(2025, 8, 1), LocalDate.MAX),
+            Sats(SatsType.SVALBARDTILLEGG, 500, LocalDate.of(2025, 10, 1), LocalDate.MAX),
         )
 
     fun finnSisteSatsFor(satstype: SatsType) = finnAlleSatserFor(satstype).maxBy { it.gyldigTom }

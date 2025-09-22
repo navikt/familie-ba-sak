@@ -4,10 +4,15 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.KAN_KJØRE_AUTOVEDTAK_SVALBARDTILLEGG
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødselshendelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
@@ -20,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.prosessering.error.RekjørSenereException
 import no.nav.familie.util.VirkedagerProvider
+import no.nav.familie.util.VirkedagerProvider.nesteVirkedag
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -39,6 +45,8 @@ enum class Autovedtaktype(
     FØDSELSHENDELSE("Fødselshendelse"),
     SMÅBARNSTILLEGG("Småbarnstillegg"),
     OMREGNING_BREV("Omregning"),
+    FINNMARKSTILLEGG("Finnmarkstillegg"),
+    SVALBARDTILLEGG("Svalbardtillegg"),
 }
 
 sealed interface AutomatiskBehandlingData {
@@ -66,6 +74,18 @@ data class OmregningBrevData(
     override val type = Autovedtaktype.OMREGNING_BREV
 }
 
+data class FinnmarkstilleggData(
+    val fagsakId: Long,
+) : AutomatiskBehandlingData {
+    override val type = Autovedtaktype.FINNMARKSTILLEGG
+}
+
+data class SvalbardtilleggData(
+    val fagsakId: Long,
+) : AutomatiskBehandlingData {
+    override val type = Autovedtaktype.SVALBARDTILLEGG
+}
+
 @Service
 class AutovedtakStegService(
     private val fagsakService: FagsakService,
@@ -74,14 +94,17 @@ class AutovedtakStegService(
     private val autovedtakFødselshendelseService: AutovedtakFødselshendelseService,
     private val autovedtakBrevService: AutovedtakBrevService,
     private val autovedtakSmåbarnstilleggService: AutovedtakSmåbarnstilleggService,
+    private val autovedtakFinnmarkstilleggService: AutovedtakFinnmarkstilleggService,
+    private val autovedtakSvalbardtilleggService: AutovedtakSvalbardtilleggService,
     private val snikeIKøenService: SnikeIKøenService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val antallAutovedtak: Map<Autovedtaktype, Counter> =
-        Autovedtaktype.values().associateWith {
+        Autovedtaktype.entries.associateWith {
             Metrics.counter("behandling.saksbehandling.autovedtak", "type", it.name)
         }
     private val antallAutovedtakÅpenBehandling: Map<Autovedtaktype, Counter> =
-        Autovedtaktype.values().associateWith {
+        Autovedtaktype.entries.associateWith {
             Metrics.counter("behandling.saksbehandling.autovedtak.aapen_behandling", "type", it.name)
         }
 
@@ -119,6 +142,38 @@ class AutovedtakStegService(
             førstegangKjørt = førstegangKjørt,
         )
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun kjørBehandlingFinnmarkstillegg(
+        mottakersAktør: Aktør,
+        fagsakId: Long,
+        førstegangKjørt: LocalDateTime = LocalDateTime.now(),
+    ): String {
+        if (!featureToggleService.isEnabled(KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG)) {
+            return "Autovedtak for Finnmarkstillegg er deaktivert"
+        }
+        return kjørBehandling(
+            mottakersAktør = mottakersAktør,
+            automatiskBehandlingData = FinnmarkstilleggData(fagsakId),
+            førstegangKjørt = førstegangKjørt,
+        )
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun kjørBehandlingSvalbardtillegg(
+        mottakersAktør: Aktør,
+        fagsakId: Long,
+        førstegangKjørt: LocalDateTime = LocalDateTime.now(),
+    ): String {
+        if (!featureToggleService.isEnabled(KAN_KJØRE_AUTOVEDTAK_SVALBARDTILLEGG)) {
+            return "Autovedtak for Svalbardtillegg er deaktivert"
+        }
+        return kjørBehandling(
+            mottakersAktør = mottakersAktør,
+            automatiskBehandlingData = SvalbardtilleggData(fagsakId),
+            førstegangKjørt = førstegangKjørt,
+        )
+    }
+
     private fun kjørBehandling(
         automatiskBehandlingData: AutomatiskBehandlingData,
         mottakersAktør: Aktør,
@@ -132,6 +187,8 @@ class AutovedtakStegService(
                 is FødselshendelseData -> autovedtakFødselshendelseService.skalAutovedtakBehandles(automatiskBehandlingData)
                 is OmregningBrevData -> autovedtakBrevService.skalAutovedtakBehandles(automatiskBehandlingData)
                 is SmåbarnstilleggData -> autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(automatiskBehandlingData)
+                is FinnmarkstilleggData -> autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(automatiskBehandlingData)
+                is SvalbardtilleggData -> autovedtakSvalbardtilleggService.skalAutovedtakBehandles(automatiskBehandlingData)
             }
 
         if (!skalAutovedtakBehandles) {
@@ -163,6 +220,8 @@ class AutovedtakStegService(
                 is FødselshendelseData -> autovedtakFødselshendelseService.kjørBehandling(automatiskBehandlingData)
                 is OmregningBrevData -> autovedtakBrevService.kjørBehandling(automatiskBehandlingData)
                 is SmåbarnstilleggData -> autovedtakSmåbarnstilleggService.kjørBehandling(automatiskBehandlingData)
+                is FinnmarkstilleggData -> autovedtakFinnmarkstilleggService.kjørBehandling(automatiskBehandlingData)
+                is SvalbardtilleggData -> autovedtakSvalbardtilleggService.kjørBehandling(automatiskBehandlingData)
             }
 
         secureLoggAutovedtakBehandling(
@@ -179,6 +238,8 @@ class AutovedtakStegService(
     ): Long? =
         when (behandlingsdata) {
             is OmregningBrevData -> behandlingsdata.fagsakId
+            is FinnmarkstilleggData -> behandlingsdata.fagsakId
+            is SvalbardtilleggData -> behandlingsdata.fagsakId
             is FødselshendelseData,
             is SmåbarnstilleggData,
             -> null
@@ -211,6 +272,11 @@ class AutovedtakStegService(
                         årsak = autovedtaktype.tilMaskinellVentÅrsak(),
                     )
                     return false
+                } else if (autovedtaktype == Autovedtaktype.FINNMARKSTILLEGG) {
+                    throw RekjørSenereException(
+                        årsak = "Åpen behandling med status ${åpenBehandling.status} ble endret for under fire timer siden. Prøver igjen klokken 06.00 neste virkedag",
+                        triggerTid = nesteVirkedag(LocalDate.now()).atTime(6, 0),
+                    )
                 }
             }
 
@@ -265,4 +331,6 @@ private fun Autovedtaktype.tilMaskinellVentÅrsak() =
         Autovedtaktype.FØDSELSHENDELSE -> SettPåMaskinellVentÅrsak.FØDSELSHENDELSE
         Autovedtaktype.OMREGNING_BREV -> SettPåMaskinellVentÅrsak.OMREGNING_6_ELLER_18_ÅR
         Autovedtaktype.SMÅBARNSTILLEGG -> SettPåMaskinellVentÅrsak.SMÅBARNSTILLEGG
+        Autovedtaktype.FINNMARKSTILLEGG -> SettPåMaskinellVentÅrsak.FINNMARKSTILLEGG
+        Autovedtaktype.SVALBARDTILLEGG -> SettPåMaskinellVentÅrsak.SVALBARDTILLEGG
     }

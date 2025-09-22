@@ -7,9 +7,11 @@ import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødselshendelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -26,6 +28,8 @@ class AutobrevStegServiceTest {
     private val autovedtakFødselshendelseService = mockk<AutovedtakFødselshendelseService>()
     private val autovedtakBrevService = mockk<AutovedtakBrevService>()
     private val autovedtakSmåbarnstilleggService = mockk<AutovedtakSmåbarnstilleggService>()
+    private val autovedtakFinnmarkstilleggService = mockk<AutovedtakFinnmarkstilleggService>()
+    private val autovedtakSvalbardtilleggService = mockk<AutovedtakSvalbardtilleggService>()
     private val snikeIKøenService = mockk<SnikeIKøenService>()
 
     val autovedtakStegService =
@@ -37,6 +41,9 @@ class AutobrevStegServiceTest {
             autovedtakBrevService = autovedtakBrevService,
             autovedtakSmåbarnstilleggService = autovedtakSmåbarnstilleggService,
             snikeIKøenService = snikeIKøenService,
+            autovedtakFinnmarkstilleggService = autovedtakFinnmarkstilleggService,
+            autovedtakSvalbardtilleggService = autovedtakSvalbardtilleggService,
+            featureToggleService = mockk(),
         )
 
     @Test

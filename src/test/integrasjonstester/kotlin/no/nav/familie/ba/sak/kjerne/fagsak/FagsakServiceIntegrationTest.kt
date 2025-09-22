@@ -1,24 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
-import io.mockk.every
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.FakePdlIdentRestClient
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -30,27 +20,17 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.steg.RegistrerPersongrunnlagDTO
-import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
-import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType.SAK
-import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import no.nav.familie.unleash.UnleashService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
-import org.springframework.web.client.HttpServerErrorException
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -62,285 +42,15 @@ class FagsakServiceIntegrationTest(
     @Autowired
     private val personidentService: PersonidentService,
     @Autowired
-    private val stegService: StegService,
-    @Autowired
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     @Autowired
     private val persongrunnlagRepository: PersonopplysningGrunnlagRepository,
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
-    @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired
-    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
-    @Autowired
-    private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
-    @Autowired
-    private val unleashService: UnleashService,
-    @Autowired
-    private val fakePdlIdentRestClient: FakePdlIdentRestClient,
 ) : AbstractSpringIntegrationTest() {
-    @BeforeEach
-    fun init() {
-        databaseCleanupService.truncate()
-    }
-
-    /*
-    This is a complicated test against following family relationship:
-    søker3-----------
-    (no case)       | (medmor)
-                    barn2
-                    | (medmor)
-    søker1-----------
-                    | (mor)
-                    barn1
-                    | (far)
-    søker2-----------
-                    | (far)
-                    barn3
-
-     We tests three search:
-     1) search for søker1, one participant (søker1) should be returned
-     2) search for barn1, three participants (barn1, søker1, søker2) should be returned
-     3) search for barn2, three participants (barn2, søker3, søker1) should be returned, where fagsakId of søker3 is null
-     */
-    @Test
-    fun `test å søke fagsak med fnr`() {
-        val søker1Fnr = randomFnr()
-        val søker2Fnr = randomFnr()
-        val søker3Fnr = randomFnr()
-        val barn1Fnr = randomFnr()
-        val barn2Fnr = randomFnr()
-        val barn3Fnr = randomFnr()
-
-        val søker1Aktør = personidentService.hentAktør(søker1Fnr)
-        val søker3Aktør = personidentService.hentAktør(søker3Fnr)
-
-        leggTilPersonInfo(
-            barn1Fnr,
-            PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "barn1"),
-        )
-
-        leggTilPersonInfo(
-            barn2Fnr,
-            PersonInfo(
-                fødselsdato = LocalDate.of(2019, 5, 1),
-                kjønn = Kjønn.MANN,
-                navn = "barn2",
-                forelderBarnRelasjon =
-                    setOf(
-                        ForelderBarnRelasjon(
-                            søker1Aktør,
-                            FORELDERBARNRELASJONROLLE.MEDMOR,
-                            "søker1",
-                            LocalDate.of(1990, 2, 19),
-                        ),
-                        ForelderBarnRelasjon(
-                            søker3Aktør,
-                            FORELDERBARNRELASJONROLLE.MEDMOR,
-                            "søker3",
-                            LocalDate.of(1990, 1, 10),
-                        ),
-                    ),
-            ),
-        )
-
-        leggTilPersonInfo(
-            søker1Fnr,
-            PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1"),
-        )
-
-        leggTilPersonInfo(
-            søker2Fnr,
-            PersonInfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "søker2"),
-        )
-
-        leggTilPersonInfo(
-            barn3Fnr,
-            PersonInfo(fødselsdato = LocalDate.of(2017, 3, 1), kjønn = Kjønn.KVINNE, navn = "barn3"),
-        )
-
-        leggTilPersonInfo(
-            søker3Fnr,
-            PersonInfo(fødselsdato = LocalDate.of(1990, 1, 10), kjønn = Kjønn.KVINNE, navn = "søker3"),
-        )
-
-        val fagsak0 =
-            fagsakService.hentEllerOpprettFagsak(
-                FagsakRequest(
-                    søker1Fnr,
-                ),
-            )
-
-        val fagsak1 =
-            fagsakService.hentEllerOpprettFagsak(
-                FagsakRequest(
-                    søker2Fnr,
-                ),
-            )
-
-        val førsteBehandling =
-            stegService.håndterNyBehandling(
-                NyBehandling(
-                    kategori = BehandlingKategori.NASJONAL,
-                    underkategori = BehandlingUnderkategori.ORDINÆR,
-                    søkersIdent = søker1Fnr,
-                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    søknadMottattDato = LocalDate.now(),
-                    fagsakId = fagsak0.data!!.id,
-                ),
-            )
-        stegService.håndterPersongrunnlag(
-            førsteBehandling,
-            RegistrerPersongrunnlagDTO(ident = søker1Fnr, barnasIdenter = listOf(barn1Fnr)),
-        )
-
-        behandlingService.oppdaterStatusPåBehandling(førsteBehandling.id, BehandlingStatus.AVSLUTTET)
-
-        val andreBehandling =
-            stegService.håndterNyBehandling(
-                NyBehandling(
-                    kategori = BehandlingKategori.NASJONAL,
-                    underkategori = BehandlingUnderkategori.ORDINÆR,
-                    søkersIdent = søker1Fnr,
-                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    søknadMottattDato = LocalDate.now(),
-                    fagsakId = fagsak0.data!!.id,
-                ),
-            )
-        stegService.håndterPersongrunnlag(
-            andreBehandling,
-            RegistrerPersongrunnlagDTO(
-                ident = søker1Fnr,
-                barnasIdenter = listOf(barn1Fnr, barn2Fnr),
-            ),
-        )
-
-        val tredjeBehandling =
-            stegService.håndterNyBehandling(
-                NyBehandling(
-                    kategori = BehandlingKategori.NASJONAL,
-                    underkategori = BehandlingUnderkategori.ORDINÆR,
-                    søkersIdent = søker2Fnr,
-                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    søknadMottattDato = LocalDate.now(),
-                    fagsakId = fagsak1.data!!.id,
-                ),
-            )
-        stegService.håndterPersongrunnlag(
-            tredjeBehandling,
-            RegistrerPersongrunnlagDTO(ident = søker2Fnr, barnasIdenter = listOf(barn1Fnr)),
-        )
-
-        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
-        assertEquals(1, søkeresultat1.size)
-        assertEquals(Kjønn.KVINNE, søkeresultat1[0].kjønn)
-        assertEquals("søker1", søkeresultat1[0].navn)
-        assertEquals(fagsak0.data!!.id, søkeresultat1[0].fagsakId)
-
-        val søkeresultat2 = fagsakService.hentFagsakDeltager(barn1Fnr)
-        assertEquals(3, søkeresultat2.size)
-        var matching = 0
-        søkeresultat2.forEach {
-            matching +=
-                if (it.fagsakId == fagsak0.data!!.id) {
-                    1
-                } else if (it.fagsakId == fagsak1.data!!.id) {
-                    10
-                } else {
-                    0
-                }
-        }
-        assertEquals(11, matching)
-        assertEquals(1, søkeresultat2.filter { it.ident == barn1Fnr }.size)
-
-        val søkeresultat3 = fagsakService.hentFagsakDeltager(barn2Fnr)
-        assertEquals(3, søkeresultat3.size)
-        assertEquals(1, søkeresultat3.filter { it.ident == barn2Fnr }.size)
-        assertNull(søkeresultat3.find { it.ident == barn2Fnr }!!.fagsakId)
-        assertEquals(fagsak0.data!!.id, søkeresultat3.find { it.ident == søker1Fnr }!!.fagsakId)
-        assertEquals(1, søkeresultat3.filter { it.ident == søker3Fnr }.size)
-        assertEquals("søker3", søkeresultat3.filter { it.ident == søker3Fnr }[0].navn)
-        assertNull(søkeresultat3.find { it.ident == søker3Fnr }!!.fagsakId)
-
-        val fagsak = fagsakService.hentNormalFagsak(søker1Aktør)!!
-
-        assertEquals(
-            FagsakStatus.OPPRETTET.name,
-            saksstatistikkMellomlagringRepository
-                .findByTypeAndTypeId(SAK, fagsak.id)
-                .last()
-                .jsonToSakDVH()
-                .sakStatus,
-        )
-    }
-
-    @Test
-    fun `Skal teste at arkiverte fagsaker med behandling ikke blir funnet ved søk`() {
-        val søker1Fnr = randomFnr()
-        val søker1Aktør = tilAktør(søker1Fnr)
-
-        leggTilPersonInfo(
-            søker1Fnr,
-            PersonInfo(fødselsdato = LocalDate.of(1991, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1"),
-        )
-
-        val fagsak =
-            fagsakService.hentEllerOpprettFagsak(
-                FagsakRequest(
-                    søker1Fnr,
-                ),
-            )
-
-        stegService.håndterNyBehandling(
-            NyBehandling(
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                søkersIdent = søker1Fnr,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                søknadMottattDato = LocalDate.now(),
-                fagsakId = fagsak.data!!.id,
-            ),
-        )
-
-        fagsakService.lagre(
-            fagsakService.hentFagsakPåPerson(søker1Aktør).also { it?.arkivert = true }!!,
-        )
-
-        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
-
-        assertEquals(1, søkeresultat1.size)
-        assertNull(søkeresultat1.first().fagsakId)
-    }
-
-    @Test
-    fun `Skal teste at arkiverte fagsaker uten behandling ikke blir funnet ved søk`() {
-        val søker1Fnr = randomFnr()
-        val søker1Aktør = tilAktør(søker1Fnr)
-
-        leggTilPersonInfo(
-            søker1Fnr,
-            PersonInfo(fødselsdato = LocalDate.of(1992, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1"),
-        )
-
-        fagsakService.hentEllerOpprettFagsak(
-            FagsakRequest(
-                søker1Fnr,
-            ),
-        )
-
-        fagsakService.lagre(
-            fagsakService.hentFagsakPåPerson(søker1Aktør).also { it?.arkivert = true }!!,
-        )
-
-        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
-
-        assertEquals(1, søkeresultat1.size)
-        assertNull(søkeresultat1.first().fagsakId)
-    }
-
     @Test
     fun `Skal teste at man henter alle fagsakene til barnet`() {
+        // Arrange
         val barnFnr = randomFnr()
 
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
@@ -354,52 +64,37 @@ class FagsakServiceIntegrationTest(
                 barnAktør = barnAktør,
             )
 
+        val personopplysningGrunnlag = mutableListOf<PersonopplysningGrunnlag>()
+
         val fagsakMor = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandlingMor = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsakMor))
-        persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor))
-        persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor))
+        personopplysningGrunnlag.add(persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor)))
+        personopplysningGrunnlag.add(persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor)))
         behandlingService.oppdaterStatusPåBehandling(behandlingMor.id, BehandlingStatus.AVSLUTTET)
         val behandlingMor2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsakMor))
-        persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor2))
+        personopplysningGrunnlag.add(persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor2)))
 
         val fagsakFar = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandlingFar = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsakFar))
-        persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingFar))
+        personopplysningGrunnlag.add(persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingFar)))
 
+        // Oppretter fagsak med tilhørende behandling og personopplsyninggrunnlag, og arkiverer den.
+        val arkivertFagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandlingArkivertFagsak = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(arkivertFagsak))
+        personopplysningGrunnlag.add(persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingArkivertFagsak)))
+        fagsakService.lagre(arkivertFagsak.also { it.arkivert = true })
+
+        // Act
         val fagsaker = fagsakService.hentFagsakerPåPerson(barnAktør.first())
+
+        // Assert
         assertEquals(2, fagsaker.size)
-        assertThat(persongrunnlagRepository.findAll()).hasSize(4)
-    }
-
-    // Satte XX for at dette testet skal kjøre sist.
-    @Test
-    fun `XX Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
-        every {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
-        } answers {
-            throw HttpServerErrorException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "[PdlRestClient][Feil ved oppslag på person: Fant ikke person]",
-            )
-        }
-        assertEquals(emptyList<RestFagsakDeltager>(), fagsakService.hentFagsakDeltager(randomFnr()))
-    }
-
-    @Test
-    fun `Skal returnere tom liste ved søk hvis ident ikke har aktiv fødselsnummer`() {
-        val fnr = randomFnr()
-        fakePdlIdentRestClient.leggTilIdent(
-            fnr,
-            listOf(
-                IdentInformasjon("npid", gruppe = "NPID", historisk = false),
-                IdentInformasjon("122334343", gruppe = "AKTOERID", historisk = false),
-            ),
-        )
-        assertThat(fagsakService.hentFagsakDeltager(fnr)).hasSize(0)
+        assertThat(persongrunnlagRepository.findAll().map { it.id }).containsAll(personopplysningGrunnlag.map { it.id })
     }
 
     @Test
     fun `Skal kun hente løpende fagsak for søker`() {
+        // Arrange
         val søker = lagPerson(type = PersonType.SØKER)
 
         val normalFagsakForSøker = opprettFagsakForPersonMedStatus(personIdent = søker.aktør.aktivFødselsnummer(), fagsakStatus = FagsakStatus.LØPENDE)
@@ -407,14 +102,17 @@ class FagsakServiceIntegrationTest(
         opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.AVSLUTTET)
         opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.OPPRETTET)
 
+        // Act
         val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(søker.aktør)
 
+        // Assert
         assertEquals(1, fagsakerMedSøkerSomDeltaker.size)
         assertEquals(normalFagsakForSøker, fagsakerMedSøkerSomDeltaker.single())
     }
 
     @Test
     fun `Skal hente løpende institusjonsfagsak for søker`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
 
         val normalFagsakForSøker = opprettFagsakForPersonMedStatus(personIdent = barn.aktør.aktivFødselsnummer(), fagsakStatus = FagsakStatus.LØPENDE, fagsakType = FagsakType.INSTITUSJON)
@@ -422,14 +120,17 @@ class FagsakServiceIntegrationTest(
         opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.AVSLUTTET)
         opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.OPPRETTET)
 
+        // Act
         val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(barn.aktør)
 
+        // Assert
         assertEquals(1, fagsakerMedSøkerSomDeltaker.size)
         assertEquals(normalFagsakForSøker, fagsakerMedSøkerSomDeltaker.single())
     }
 
     @Test
     fun `Skal hente fagsak hvor barn har løpende andel`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         personidentService.hentOgLagreAktørIder(listOf(barn.aktør.aktivFødselsnummer()), lagre = true)
 
@@ -452,14 +153,17 @@ class FagsakServiceIntegrationTest(
 
         opprettAndelerOgBehandling(fagsak = fagsak, barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilAndeler)
 
+        // Act
         val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(barn.aktør)
 
+        // Assert
         assertEquals(1, fagsakerMedSøkerSomDeltaker.size)
         assertEquals(fagsak, fagsakerMedSøkerSomDeltaker.single())
     }
 
     @Test
     fun `Skal ikke hente fagsak hvor barn har andel som ikke er løpende`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         personidentService.hentOgLagreAktørIder(listOf(barn.aktør.aktivFødselsnummer()), lagre = true)
 
@@ -476,13 +180,16 @@ class FagsakServiceIntegrationTest(
             )
         opprettAndelerOgBehandling(fagsak = fagsak, barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilAndeler)
 
+        // Act
         val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(barn.aktør)
 
+        // Assert
         assertEquals(0, fagsakerMedSøkerSomDeltaker.size)
     }
 
     @Test
     fun `Skal hente to fagsaker hvis aktør er søker i en sak og blir mottatt barnetrygd for i en annen`() {
+        // Arrange
         val person = lagPerson(type = PersonType.BARN)
         personidentService.hentOgLagreAktørIder(listOf(person.aktør.aktivFødselsnummer()), lagre = true)
 
@@ -506,8 +213,10 @@ class FagsakServiceIntegrationTest(
 
         opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErBarn, barnasIdenter = listOf(person.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilAndeler)
 
+        // Act
         val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(person.aktør)
 
+        // Assert
         assertEquals(2, fagsakerMedSøkerSomDeltaker.size)
         assertEquals(fagsakHvorPersonErSøker, fagsakerMedSøkerSomDeltaker.first())
         assertEquals(fagsakHvorPersonErBarn, fagsakerMedSøkerSomDeltaker.last())
@@ -515,6 +224,7 @@ class FagsakServiceIntegrationTest(
 
     @Test
     fun `Skal ikke hente fagsak hvis barn kun har løpende andeler i en gammel behandling som senere er opphørt`() {
+        // Arrange
         val person = lagPerson(type = PersonType.BARN)
         personidentService.hentOgLagreAktørIder(listOf(person.aktør.aktivFødselsnummer()), lagre = true)
 
@@ -547,13 +257,16 @@ class FagsakServiceIntegrationTest(
         opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErBarn, barnasIdenter = listOf(person.aktør.aktivFødselsnummer()), perioderTilAndeler = gamlePerioder) // gammel behandling
         opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErBarn, barnasIdenter = listOf(person.aktør.aktivFødselsnummer()), perioderTilAndeler = nyePerioder) // ny behandling
 
+        // Act
         val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(person.aktør)
 
+        // Assert
         assertEquals(0, fagsakerMedSøkerSomDeltaker.size)
     }
 
     @Test
     fun `Skal returnere fagsak hvor person mottar løpende utvidet`() {
+        // Arrange
         val person = lagPerson(type = PersonType.SØKER)
         val barn = lagPerson(type = PersonType.BARN)
         personidentService.hentOgLagreAktørIder(listOf(person.aktør.aktivFødselsnummer(), barn.aktør.aktivFødselsnummer()), lagre = true)
@@ -584,14 +297,17 @@ class FagsakServiceIntegrationTest(
 
         opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErSøker, barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()), perioderTilAndeler = perioder)
 
+        // Act
         val fagsakerMedPersonSomFårUtvidetEllerOrdinær = fagsakService.finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør = person.aktør, ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD, YtelseType.UTVIDET_BARNETRYGD))
 
+        // Assert
         assertEquals(1, fagsakerMedPersonSomFårUtvidetEllerOrdinær.size)
         assertEquals(fagsakHvorPersonErSøker, fagsakerMedPersonSomFårUtvidetEllerOrdinær.single())
     }
 
     @Test
     fun `Skal returnere ikke fagsak hvor person mottok utvidet som ikke er løpende lenger`() {
+        // Arrange
         val person = lagPerson(type = PersonType.SØKER)
         val barn = lagPerson(type = PersonType.BARN)
         personidentService.hentOgLagreAktørIder(listOf(person.aktør.aktivFødselsnummer(), barn.aktør.aktivFødselsnummer()), lagre = true)
@@ -616,13 +332,16 @@ class FagsakServiceIntegrationTest(
 
         opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErSøker, barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()), perioderTilAndeler = perioder)
 
+        // Act
         val fagsakerMedPersonSomFårUtvidetEllerOrdinær = fagsakService.finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør = person.aktør, ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD, YtelseType.UTVIDET_BARNETRYGD))
 
+        // Assert
         assertEquals(0, fagsakerMedPersonSomFårUtvidetEllerOrdinær.size)
     }
 
     @Test
     fun `Skal kun hente én fagsak hvis aktør er søker i en sak (uten løpende utvidet) og blir mottatt barnetrygd for i en annen`() {
+        // Arrange
         val person = lagPerson(type = PersonType.BARN)
         personidentService.hentOgLagreAktørIder(listOf(person.aktør.aktivFødselsnummer()), lagre = true)
 
@@ -646,14 +365,17 @@ class FagsakServiceIntegrationTest(
 
         opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErBarn, barnasIdenter = listOf(person.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilAndeler)
 
+        // Act
         val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør = person.aktør, ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD, YtelseType.UTVIDET_BARNETRYGD))
 
+        // Assert
         assertEquals(1, fagsakerMedSøkerSomDeltaker.size)
         assertEquals(fagsakHvorPersonErBarn, fagsakerMedSøkerSomDeltaker.single())
     }
 
     @Test
     fun `Skal hente to fagsaker hvor person mottar løpende utvidet i en behandling og blir mottatt løpende ordinær for i en annen`() {
+        // Arrange
         val person = lagPerson(type = PersonType.BARN)
         val barn = lagPerson(type = PersonType.BARN)
         personidentService.hentOgLagreAktørIder(listOf(person.aktør.aktivFødselsnummer(), barn.aktør.aktivFødselsnummer()), lagre = true)
@@ -695,8 +417,10 @@ class FagsakServiceIntegrationTest(
         opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErBarn, barnasIdenter = listOf(person.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilFagsakBarn)
         opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErSøker, barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilFagsakSøker)
 
+        // Act
         val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør = person.aktør, ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD, YtelseType.UTVIDET_BARNETRYGD))
 
+        // Assert
         assertEquals(2, fagsakerMedSøkerSomDeltaker.size)
         assertEquals(fagsakHvorPersonErBarn, fagsakerMedSøkerSomDeltaker.first())
         assertEquals(fagsakHvorPersonErSøker, fagsakerMedSøkerSomDeltaker.last())
@@ -728,7 +452,6 @@ class FagsakServiceIntegrationTest(
     @Test
     fun `Skal opprette fagsak for skjermet barn som ikke er automatisk behandling`() {
         // Arrange
-        System.setProperty("mockFeatureToggleAnswer", "true")
         val barn = lagPerson(type = PersonType.BARN)
 
         // Act
@@ -744,8 +467,6 @@ class FagsakServiceIntegrationTest(
     fun `Skal ikke opprette fagsak for skjermet barn hvis automatisk behandling`() {
         // Arrange
         val barn = lagPerson(type = PersonType.BARN)
-
-        System.setProperty("mockFeatureToggleAnswer", "true")
 
         // Act
         assertThrows<FunksjonellFeil> {

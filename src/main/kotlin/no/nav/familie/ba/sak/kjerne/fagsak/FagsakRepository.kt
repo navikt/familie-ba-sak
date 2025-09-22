@@ -58,6 +58,10 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
 
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f.id from Fagsak f WHERE f.status = 'LØPENDE'  AND f.arkivert = false")
+    fun finnIdPåLøpendeFagsaker(): List<Long>
+
+    @Lock(LockModeType.NONE)
+    @Query(value = "SELECT f.id from Fagsak f WHERE f.status = 'LØPENDE'  AND f.arkivert = false")
     fun finnLøpendeFagsaker(page: Pageable): Slice<Long>
 
     @Query(
@@ -73,6 +77,54 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     )
     fun finnLøpendeFagsakerForSatsendring(
         satsTidspunkt: LocalDate,
+        page: Pageable,
+    ): Page<Long>
+
+    @Query(
+        value = """SELECT distinct f.institusjon.orgNummer
+            FROM   Fagsak f
+            WHERE  f.status = 'LØPENDE' 
+            AND f.institusjon is not null
+            AND f.arkivert = false""",
+        nativeQuery = false,
+    )
+    fun finnOrgnummerForLøpendeFagsaker(): List<String>
+
+    @Query(
+        value = """
+            SELECT f.id
+            FROM   Fagsak f
+            WHERE  NOT EXISTS (
+                SELECT 1
+                FROM   finnmarkstillegg_kjoering
+                WHERE  fk_fagsak_id = f.id
+            )
+            AND f.status = 'LØPENDE'
+            AND f.arkivert = false
+            AND f.type IN ('NORMAL', 'BARN_ENSLIG_MINDREÅRIG')
+            """,
+        nativeQuery = true,
+    )
+    fun finnLøpendeFagsakerForFinnmarkstilleggKjøring(
+        page: Pageable,
+    ): Page<Long>
+
+    @Query(
+        value = """
+            SELECT f.id
+            FROM   Fagsak f
+            WHERE  NOT EXISTS (
+                SELECT 1
+                FROM   svalbardtillegg_kjoering
+                WHERE  fk_fagsak_id = f.id
+            )
+            AND f.status = 'LØPENDE'
+            AND f.arkivert = false
+            AND f.type IN ('NORMAL', 'BARN_ENSLIG_MINDREÅRIG')
+            """,
+        nativeQuery = true,
+    )
+    fun finnLøpendeFagsakerForSvalbardtilleggKjøring(
         page: Pageable,
     ): Page<Long>
 
@@ -189,24 +241,6 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     ): List<Long>
 
     @Query(
-        value = """
-        SELECT * 
-        FROM fagsak f
-        WHERE f.status = 'LØPENDE'
-          AND f.type IN ('NORMAL', 'BARN_ENSLIG_MINDREÅRIG')
-          AND f.arkivert = false
-          AND NOT EXISTS (
-              SELECT 1 
-              FROM minside_aktivering m 
-              WHERE m.fk_aktor_id = f.fk_aktoer_id
-          )
-        ORDER BY f.id
-        """,
-        nativeQuery = true,
-    )
-    fun finnLøpendeFagsakSomIkkeHarFåttMinsideAktivert(pageable: Pageable): Slice<Fagsak>
-
-    @Query(
         """
         SELECT distinct f from Fagsak f
          JOIN Behandling b ON b.fagsak.id = f.id
@@ -254,4 +288,27 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         nativeQuery = true,
     )
     fun finnFagsakerMedFlereMigreringsbehandlinger(month: LocalDateTime): List<FagsakMedFlereMigreringer>
+
+    @Query(
+        """
+        WITH siste_iverksatte_behandling_for_løpende_fagsaker AS (
+            SELECT DISTINCT ON (b.fk_fagsak_id) b.id
+            FROM behandling b
+                INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+            WHERE f.status = 'LØPENDE'
+            AND ty.utbetalingsoppdrag IS NOT NULL
+            AND f.arkivert = false
+            ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC
+        )
+        SELECT DISTINCT personident.foedselsnummer
+        FROM siste_iverksatte_behandling_for_løpende_fagsaker b
+            INNER JOIN gr_personopplysninger po ON b.id = po.fk_behandling_id
+            INNER JOIN po_person p ON po.id = p.fk_gr_personopplysninger_id
+            INNER JOIN personident ON personident.fk_aktoer_id = p.fk_aktoer_id
+        WHERE personident.aktiv = true
+        """,
+        nativeQuery = true,
+    )
+    fun finnIdenterForLøpendeFagsaker(): List<String>
 }

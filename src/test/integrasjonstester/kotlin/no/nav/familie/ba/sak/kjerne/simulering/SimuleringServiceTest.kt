@@ -1,11 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.config.simuleringMottakerMock
-import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
-import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -15,13 +13,11 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.mock.simuleringMottakerMock
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-@Tag("integration")
 class SimuleringServiceTest(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
@@ -30,21 +26,16 @@ class SimuleringServiceTest(
     @Autowired private val stegService: StegService,
     @Autowired private val simuleringService: SimuleringService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
-    @Autowired private val databaseCleanupService: DatabaseCleanupService,
     @Autowired private val brevmalService: BrevmalService,
 ) : AbstractSpringIntegrationTest() {
-    @BeforeAll
-    fun init() {
-        databaseCleanupService.truncate()
-    }
-
     @Test
     fun `Skal verifisere at simulering blir lagert og oppdatert`() {
-        val barnFnr = leggTilPersonInfo(randomBarnFnr())
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
-                søkerFnr = randomFnr(),
+                søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,

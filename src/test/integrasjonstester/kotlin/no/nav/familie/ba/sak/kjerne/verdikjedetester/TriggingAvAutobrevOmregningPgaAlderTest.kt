@@ -70,19 +70,16 @@ class TriggingAvAutobrevOmregningPgaAlderTest(
                             fødselsdato = LocalDate.now().minusYears(2).toString(),
                             fornavn = "Toåringen",
                             etternavn = "Barnesen",
-                            bostedsadresser = emptyList(),
                         ),
                         RestScenarioPerson(
                             fødselsdato = LocalDate.now().minusYears(6).toString(),
                             fornavn = "Seksåringen",
                             etternavn = "Barnesen",
-                            bostedsadresser = emptyList(),
                         ),
                         RestScenarioPerson(
                             fødselsdato = LocalDate.now().minusYears(18).toString(),
                             fornavn = "Attenåringen",
                             etternavn = "Barnesen",
-                            bostedsadresser = emptyList(),
                         ),
                     ),
             ).also { stubScenario(it) }

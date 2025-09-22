@@ -465,6 +465,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetOppholdPaaSvalbard"
     },
+    INNVILGET_ARBEID_PÅ_SVALBARD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetArbeidPaaSvalbard"
+    },
     INNVILGET_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetUtenlandsoppholdOverTreMaaneder"
@@ -492,6 +496,22 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     INNVILGET_FORLENGET_OPPHOLD_ETTER_ETTÅRIG_OPPHOLDSTILLATELSE {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetForlengetOppholdEtterEttaarigOppholdstillatelse"
+    },
+    INNVILGET_FINNMARKSTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetFinnmarkstillegg"
+    },
+    INNVILGET_SVALBARDTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetSvalbardtillegg"
+    },
+    INNVILGET_AUTOVEDTAK_FØDSEL_FINNMARKSTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetAutovedtakFoedselFinnmarkstillegg"
+    },
+    INNVILGET_AUTOVEDTAK_FØDSEL_SVALBARDTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetAutovedtakFoedselSvalbard"
     },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
@@ -788,6 +808,22 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     REDUKSJON_BARN_BOR_I_INSTITUSJON {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBarnBorIInstitusjon"
+    },
+    REDUKSJON_FINNMARKSTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonFinnmarkstillegg"
+    },
+    REDUKSJON_FINNMARKSTILLEGG_BODDE_IKKE_I_TILLEGGSONE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonFinnmarkstilleggBoddeIkkeITilleggSone"
+    },
+    REDUKSJON_SVALBARDTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSvalbardtillegg"
+    },
+    REDUKSJON_SVALBARDTILLEGG_BODDE_IKKE_PÅ_SVALBARD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSvalbardtilleggBoddeIkkePaaSvalbard"
     },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
@@ -1473,6 +1509,14 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetSatsendring"
     },
+    FORTSATT_INNVILGET_FINNMARKSTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetFinnmarkstillegg"
+    },
+    FORTSATT_INNVILGET_SVALBARDTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetSvalbardtillegg"
+    },
     ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingDeltBostedIngenUtbetaling"
@@ -1631,6 +1675,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     INNVILGET_BOR_FAST_I_INSTITUSJON {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_INNVILGET
         override val sanityApiNavn = "innvilgetBorFastIInstitusjon"
+    },
+    INNVILGET_FINNMARKSTILLEGG_INSTITUSJON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_INNVILGET
+        override val sanityApiNavn = "innvilgetFinnmarkstilleggInstitusjon"
     },
     INNVILGET_SATSENDRING_INSTITUSJON {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_INNVILGET

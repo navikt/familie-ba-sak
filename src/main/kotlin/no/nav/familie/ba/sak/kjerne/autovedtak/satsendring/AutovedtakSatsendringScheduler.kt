@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
-import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.LeaderClientService
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ContextClosedEvent
@@ -12,14 +12,14 @@ import org.springframework.stereotype.Service
 @Service
 class AutovedtakSatsendringScheduler(
     private val startSatsendring: StartSatsendring,
-    private val unleashService: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
     private val leaderClientService: LeaderClientService,
 ) : ApplicationListener<ContextClosedEvent> {
     @Volatile private var isShuttingDown = false
 
     @Scheduled(cron = CRON_HVERT_10_MIN_UKEDAG)
     fun triggSatsendring() {
-        if (unleashService.isEnabled(FeatureToggle.SATSENDRING_HØYT_VOLUM, false)) {
+        if (featureToggleService.isEnabled(FeatureToggle.SATSENDRING_HØYT_VOLUM, false)) {
             startSatsendring(1200)
         } else {
             startSatsendring(100)
@@ -28,14 +28,14 @@ class AutovedtakSatsendringScheduler(
 
     @Scheduled(cron = CRON_HVERT_5_MIN_UKEDAG_UTENFOR_ARBEIDSTID)
     fun triggSatsendringUtenforArbeidstid() {
-        if (unleashService.isEnabled(FeatureToggle.SATSENDRING_KVELD, false)) {
+        if (featureToggleService.isEnabled(FeatureToggle.SATSENDRING_KVELD, false)) {
             startSatsendring(1000)
         }
     }
 
     @Scheduled(cron = CRON_HVERT_5_MIN_LØRDAG)
     fun triggSatsendringLørdag() {
-        if (unleashService.isEnabled(FeatureToggle.SATSENDRING_LØRDAG, false)) {
+        if (featureToggleService.isEnabled(FeatureToggle.SATSENDRING_LØRDAG, false)) {
             startSatsendring(1000)
         }
     }
