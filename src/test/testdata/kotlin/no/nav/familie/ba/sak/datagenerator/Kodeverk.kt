@@ -14,7 +14,7 @@ val DEU_EØS_FOM = LocalDate.of(1900, Month.JANUARY, 1)
 val DNK_EØS_FOM = LocalDate.of(1990, Month.JANUARY, 1)
 val TOM_UENDELIG = LocalDate.of(9999, Month.DECEMBER, 31)
 
-fun hentKodeverkLand(): KodeverkDto {
+fun lagKodeverkLand(): KodeverkDto {
     val beskrivelsePolen = BeskrivelseDto("POL", "")
     val betydningPolen =
         BetydningDto(

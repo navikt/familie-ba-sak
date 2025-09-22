@@ -5,7 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.datagenerator.GBR_EØS_TOM
 import no.nav.familie.ba.sak.datagenerator.POL_EØS_FOM
-import no.nav.familie.ba.sak.datagenerator.hentKodeverkLand
+import no.nav.familie.ba.sak.datagenerator.lagKodeverkLand
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
@@ -30,7 +30,7 @@ internal class StatsborgerskapServiceTest {
     @BeforeEach
     fun setUp() {
         statsborgerskapService = StatsborgerskapService(integrasjonClient, kodeverkService)
-        every { integrasjonClient.hentAlleEØSLand() } returns hentKodeverkLand()
+        every { integrasjonClient.hentAlleEØSLand() } returns lagKodeverkLand()
     }
 
     @Test

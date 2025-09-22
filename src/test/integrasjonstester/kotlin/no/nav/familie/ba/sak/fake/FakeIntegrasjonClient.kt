@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.fake
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ba.sak.datagenerator.hentKodeverkLand
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
+import no.nav.familie.ba.sak.datagenerator.lagKodeverkLand
 import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
 import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -64,7 +64,7 @@ class FakeIntegrasjonClient(
     private val versjonerteBarnetrygdSøknader = mutableMapOf<String, VersjonertBarnetrygdSøknad>()
     private val journalførteDokumenter = mutableListOf<ArkiverDokumentRequest>()
 
-    override fun hentAlleEØSLand(): KodeverkDto = hentKodeverkLand()
+    override fun hentAlleEØSLand(): KodeverkDto = lagKodeverkLand()
 
     override fun hentLand(landkode: String): String = "Testland"
 
@@ -85,10 +85,7 @@ class FakeIntegrasjonClient(
 
     override fun hentBehandlendeEnhet(ident: String): List<Arbeidsfordelingsenhet> =
         behandlendeEnhetForIdent[ident] ?: listOf(
-            Arbeidsfordelingsenhet(
-                BarnetrygdEnhet.OSLO.enhetsnummer,
-                BarnetrygdEnhet.OSLO.enhetsnavn,
-            ),
+            Arbeidsfordelingsenhet.opprettFra(BarnetrygdEnhet.OSLO),
         )
 
     override fun hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent: NavIdent): List<BarnetrygdEnhet> = BarnetrygdEnhet.entries
@@ -193,12 +190,12 @@ class FakeIntegrasjonClient(
     override fun leggTilLogiskVedlegg(
         request: LogiskVedleggRequest,
         dokumentinfoId: String,
-    ): LogiskVedleggResponse = LogiskVedleggResponse(12345678)
+    ): LogiskVedleggResponse = LogiskVedleggResponse(12345678L)
 
     override fun slettLogiskVedlegg(
         logiskVedleggId: String,
         dokumentinfoId: String,
-    ): LogiskVedleggResponse = super.slettLogiskVedlegg(logiskVedleggId, dokumentinfoId)
+    ): LogiskVedleggResponse = LogiskVedleggResponse(12345678L)
 
     override fun hentDokument(
         dokumentInfoId: String,
@@ -237,7 +234,7 @@ class FakeIntegrasjonClient(
                 ),
         )
 
-    override fun hentDistribusjonskanal(request: DokdistkanalRequest): Distribusjonskanal = super.hentDistribusjonskanal(request)
+    override fun hentDistribusjonskanal(request: DokdistkanalRequest): Distribusjonskanal = Distribusjonskanal.UKJENT
 
     override fun settNyAktivBrukerIModiaContext(nyAktivBruker: RestNyAktivBrukerIModiaContext): ModiaContext =
         ModiaContext(
@@ -270,9 +267,6 @@ class FakeIntegrasjonClient(
             enhetsnavn = BarnetrygdEnhet.OSLO.enhetsnavn,
         )
 
-    companion object {
-    }
-
     fun leggTilEgenansatt(ident: String) {
         egenansatt.add(ident)
     }
@@ -283,9 +277,8 @@ class FakeIntegrasjonClient(
     ) {
         behandlendeEnhetForIdent[ident] =
             enheter.map { enhet ->
-                Arbeidsfordelingsenhet(
-                    enhet.enhetsnummer,
-                    enhet.enhetsnavn,
+                Arbeidsfordelingsenhet.opprettFra(
+                    enhet,
                 )
             }
     }
