@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.fake
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ba.sak.datagenerator.hentKodeverkLand
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
 import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
 import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
@@ -18,7 +19,6 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournal
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.mock.IntegrasjonClientMock
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.testfiler.Testfil
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknad
@@ -270,6 +270,9 @@ class FakeIntegrasjonClient(
             enhetsnavn = BarnetrygdEnhet.OSLO.enhetsnavn,
         )
 
+    companion object {
+    }
+
     fun leggTilEgenansatt(ident: String) {
         egenansatt.add(ident)
     }
@@ -298,47 +301,11 @@ class FakeIntegrasjonClient(
         val landkoder =
             ClassPathResource("landkoder/landkoder.json").inputStream.bufferedReader().use(BufferedReader::readText)
 
-        return objectMapper.readValue<List<IntegrasjonClientMock.Companion.LandkodeISO2>>(landkoder).associate { it.code to it.name }
+        return objectMapper.readValue<List<LandkodeISO2>>(landkoder).associate { it.code to it.name }
     }
 
-    private fun hentKodeverkLand(): KodeverkDto {
-        val beskrivelsePolen = BeskrivelseDto("POL", "")
-        val betydningPolen =
-            BetydningDto(
-                IntegrasjonClientMock.Companion.FOM_2004,
-                IntegrasjonClientMock.Companion.TOM_9999,
-                mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelsePolen),
-            )
-        val beskrivelseTyskland = BeskrivelseDto("DEU", "")
-        val betydningTyskland =
-            BetydningDto(
-                IntegrasjonClientMock.Companion.FOM_1900,
-                IntegrasjonClientMock.Companion.TOM_9999,
-                mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseTyskland),
-            )
-        val beskrivelseDanmark = BeskrivelseDto("DNK", "")
-        val betydningDanmark =
-            BetydningDto(
-                IntegrasjonClientMock.Companion.FOM_1990,
-                IntegrasjonClientMock.Companion.TOM_9999,
-                mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseDanmark),
-            )
-        val beskrivelseUK = BeskrivelseDto("GBR", "")
-        val betydningUK =
-            BetydningDto(
-                IntegrasjonClientMock.Companion.FOM_1900,
-                IntegrasjonClientMock.Companion.TOM_2010,
-                mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseUK),
-            )
-
-        return KodeverkDto(
-            betydninger =
-                mapOf(
-                    "POL" to listOf(betydningPolen),
-                    "DEU" to listOf(betydningTyskland),
-                    "DNK" to listOf(betydningDanmark),
-                    "GBR" to listOf(betydningUK),
-                ),
-        )
-    }
+    data class LandkodeISO2(
+        val code: String,
+        val name: String,
+    )
 }

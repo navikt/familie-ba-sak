@@ -1,7 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.datagenerator.GBR_EØS_TOM
+import no.nav.familie.ba.sak.datagenerator.POL_EØS_FOM
+import no.nav.familie.ba.sak.datagenerator.hentKodeverkLand
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
@@ -9,16 +13,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnSterkesteMedlemskap
-import no.nav.familie.ba.sak.mock.IntegrasjonClientMock
-import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.FOM_1990
-import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.FOM_2004
-import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.TOM_2010
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.Month
 
 internal class StatsborgerskapServiceTest {
     private val integrasjonClient = mockk<IntegrasjonClient>()
@@ -29,17 +30,20 @@ internal class StatsborgerskapServiceTest {
     @BeforeEach
     fun setUp() {
         statsborgerskapService = StatsborgerskapService(integrasjonClient, kodeverkService)
-        IntegrasjonClientMock.initEuKodeverk(integrasjonClient)
+        every { integrasjonClient.hentAlleEØSLand() } returns hentKodeverkLand()
     }
 
     @Test
     fun `Skal generere GrStatsborgerskap med flere perioder fordi Polen ble medlem av EØS`() {
+        val statsborgerskapPolenFom = LocalDate.of(1990, Month.JANUARY, 1)
+        val stasborgerskapPolenTom = LocalDate.of(2009, Month.DECEMBER, 31)
+
         val statsborgerskapMedGyldigFom =
             Statsborgerskap(
                 "POL",
                 bekreftelsesdato = null,
-                gyldigFraOgMed = FOM_1990,
-                gyldigTilOgMed = TOM_2010,
+                gyldigFraOgMed = statsborgerskapPolenFom,
+                gyldigTilOgMed = stasborgerskapPolenTom,
             )
 
         val grStatsborgerskap =
@@ -50,14 +54,14 @@ internal class StatsborgerskapServiceTest {
 
         assertEquals(2, grStatsborgerskap.size)
         assertEquals(
-            FOM_1990,
+            statsborgerskapPolenFom,
             grStatsborgerskap
                 .sortedBy { it.gyldigPeriode?.fom }
                 .first()
                 .gyldigPeriode
                 ?.fom,
         )
-        val dagenFørPolenBleMedlemAvEØS = FOM_2004.minusDays(1)
+        val dagenFørPolenBleMedlemAvEØS = POL_EØS_FOM.minusDays(1)
         assertEquals(
             dagenFørPolenBleMedlemAvEØS,
             grStatsborgerskap
@@ -71,7 +75,7 @@ internal class StatsborgerskapServiceTest {
             grStatsborgerskap.sortedBy { it.gyldigPeriode?.fom }.first().medlemskap,
         )
         assertEquals(
-            FOM_2004,
+            POL_EØS_FOM,
             grStatsborgerskap
                 .sortedBy { it.gyldigPeriode?.fom }
                 .last()
@@ -213,7 +217,7 @@ internal class StatsborgerskapServiceTest {
             )
         assertEquals(2, grStatsborgerskapUnderBrexit.size)
         assertEquals(datoFørBrexit, grStatsborgerskapUnderBrexit.first().gyldigPeriode?.fom)
-        assertEquals(TOM_2010, grStatsborgerskapUnderBrexit.first().gyldigPeriode?.tom)
+        assertEquals(GBR_EØS_TOM, grStatsborgerskapUnderBrexit.first().gyldigPeriode?.tom)
         assertEquals(Medlemskap.EØS, grStatsborgerskapUnderBrexit.sortedBy { it.gyldigPeriode?.fom }.first().medlemskap)
         assertEquals(
             Medlemskap.TREDJELANDSBORGER,
