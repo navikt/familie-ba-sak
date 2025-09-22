@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.config
+package no.nav.familie.ba.sak.fake
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestNyAktivBrukerIModiaContext
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsgiver
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
@@ -17,13 +19,8 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.mock.IntegrasjonClientMock
-import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.FOM_1900
-import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.FOM_1990
-import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.FOM_2004
-import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.TOM_2010
-import no.nav.familie.ba.sak.mock.IntegrasjonClientMock.Companion.TOM_9999
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
-import no.nav.familie.ba.sak.testfiler.Testfil.TEST_PDF
+import no.nav.familie.ba.sak.testfiler.Testfil
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknad
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
 import no.nav.familie.kontrakter.felles.NavIdent
@@ -48,26 +45,24 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.organisasjon.Gyldighetsperiode
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
-import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
+import no.nav.familie.kontrakter.felles.organisasjon.OrganisasjonAdresse
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.springframework.core.io.ClassPathResource
-import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import java.io.BufferedReader
 import java.net.URI
 import java.time.LocalDate
 import java.util.UUID
 
-@Service
-@Profile("mock-integrasjon-client")
-@Primary
 class FakeIntegrasjonClient(
     restOperations: RestOperations,
 ) : IntegrasjonClient(URI("integrasjoner-url"), restOperations) {
     private val egenansatt = mutableSetOf<String>()
     private val behandlendeEnhetForIdent = mutableMapOf<String, List<Arbeidsfordelingsenhet>>()
     private val versjonerteBarnetrygdSøknader = mutableMapOf<String, VersjonertBarnetrygdSøknad>()
+    private val journalførteDokumenter = mutableListOf<ArkiverDokumentRequest>()
 
     override fun hentAlleEØSLand(): KodeverkDto = hentKodeverkLand()
 
@@ -101,7 +96,16 @@ class FakeIntegrasjonClient(
     override fun hentArbeidsforhold(
         ident: String,
         ansettelsesperiodeFom: LocalDate,
-    ): List<Arbeidsforhold> = emptyList()
+    ): List<Arbeidsforhold> =
+        listOf(
+            Arbeidsforhold(
+                arbeidsgiver =
+                    Arbeidsgiver(
+                        type = ArbeidsgiverType.Organisasjon,
+                        organisasjonsnummer = "123456789",
+                    ),
+            ),
+        )
 
     override fun distribuerBrev(distribuerDokumentDTO: DistribuerDokumentDTO): String = "bestillingsId"
 
@@ -199,9 +203,14 @@ class FakeIntegrasjonClient(
     override fun hentDokument(
         dokumentInfoId: String,
         journalpostId: String,
-    ): ByteArray = TEST_PDF
+    ): ByteArray = Testfil.TEST_PDF
 
-    override fun journalførDokument(arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse = ArkiverDokumentResponse(ferdigstilt = true, journalpostId = "journalpostId")
+    override fun journalførDokument(arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse {
+        journalførteDokumenter.add(arkiverDokumentRequest)
+        return ArkiverDokumentResponse(ferdigstilt = true, journalpostId = "journalpostId")
+    }
+
+    fun hentJournalførteDokumenter(): List<ArkiverDokumentRequest> = journalførteDokumenter
 
     override fun opprettSkyggesak(
         aktør: Aktør,
@@ -216,6 +225,16 @@ class FakeIntegrasjonClient(
         Organisasjon(
             "998765432",
             "Testinstitusjon",
+            adresse =
+                OrganisasjonAdresse(
+                    type = "Forretningsadresse",
+                    adresselinje1 = "Fyrstikkalleen 1",
+                    adresselinje2 = null,
+                    adresselinje3 = "Avd BAKS",
+                    postnummer = "0661",
+                    kommunenummer = "0301",
+                    gyldighetsperiode = Gyldighetsperiode(fom = LocalDate.of(2020, 1, 1), tom = null),
+                ),
         )
 
     override fun hentDistribusjonskanal(request: DokdistkanalRequest): Distribusjonskanal = super.hentDistribusjonskanal(request)
@@ -232,11 +251,24 @@ class FakeIntegrasjonClient(
             aktivEnhet = "0000",
         )
 
-    override fun hentVersjonertBarnetrygdSøknad(journalpostId: String): VersjonertBarnetrygdSøknad = versjonerteBarnetrygdSøknader[journalpostId] ?: VersjonertBarnetrygdSøknadV9(lagBarnetrygdSøknadV9())
+    override fun hentVersjonertBarnetrygdSøknad(journalpostId: String): VersjonertBarnetrygdSøknad =
+        versjonerteBarnetrygdSøknader[journalpostId] ?: VersjonertBarnetrygdSøknadV9(
+            lagBarnetrygdSøknadV9(),
+        )
 
     override fun hentAInntektUrl(personIdent: PersonIdent): String = "/test/1234"
 
     override fun sjekkErEgenAnsattBulk(personIdenter: List<String>): Map<String, Boolean> = personIdenter.associateWith { egenansatt.contains(it) }
+
+    override fun hentSaksbehandler(id: String): Saksbehandler =
+        Saksbehandler(
+            azureId = UUID.randomUUID(),
+            navIdent = id,
+            fornavn = "System",
+            etternavn = "",
+            enhet = BarnetrygdEnhet.OSLO.enhetsnummer,
+            enhetsnavn = BarnetrygdEnhet.OSLO.enhetsnavn,
+        )
 
     fun leggTilEgenansatt(ident: String) {
         egenansatt.add(ident)
@@ -246,7 +278,13 @@ class FakeIntegrasjonClient(
         ident: String,
         enheter: List<BarnetrygdEnhet>,
     ) {
-        behandlendeEnhetForIdent[ident] = enheter.map { enhet -> Arbeidsfordelingsenhet(enhet.enhetsnummer, enhet.enhetsnavn) }
+        behandlendeEnhetForIdent[ident] =
+            enheter.map { enhet ->
+                Arbeidsfordelingsenhet(
+                    enhet.enhetsnummer,
+                    enhet.enhetsnavn,
+                )
+            }
     }
 
     fun leggTilVersjonertBarnetrygdSøknad(
@@ -265,15 +303,33 @@ class FakeIntegrasjonClient(
 
     private fun hentKodeverkLand(): KodeverkDto {
         val beskrivelsePolen = BeskrivelseDto("POL", "")
-        val betydningPolen = BetydningDto(FOM_2004, TOM_9999, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelsePolen))
+        val betydningPolen =
+            BetydningDto(
+                IntegrasjonClientMock.Companion.FOM_2004,
+                IntegrasjonClientMock.Companion.TOM_9999,
+                mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelsePolen),
+            )
         val beskrivelseTyskland = BeskrivelseDto("DEU", "")
         val betydningTyskland =
-            BetydningDto(FOM_1900, TOM_9999, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseTyskland))
+            BetydningDto(
+                IntegrasjonClientMock.Companion.FOM_1900,
+                IntegrasjonClientMock.Companion.TOM_9999,
+                mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseTyskland),
+            )
         val beskrivelseDanmark = BeskrivelseDto("DNK", "")
         val betydningDanmark =
-            BetydningDto(FOM_1990, TOM_9999, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseDanmark))
+            BetydningDto(
+                IntegrasjonClientMock.Companion.FOM_1990,
+                IntegrasjonClientMock.Companion.TOM_9999,
+                mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseDanmark),
+            )
         val beskrivelseUK = BeskrivelseDto("GBR", "")
-        val betydningUK = BetydningDto(FOM_1900, TOM_2010, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseUK))
+        val betydningUK =
+            BetydningDto(
+                IntegrasjonClientMock.Companion.FOM_1900,
+                IntegrasjonClientMock.Companion.TOM_2010,
+                mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseUK),
+            )
 
         return KodeverkDto(
             betydninger =

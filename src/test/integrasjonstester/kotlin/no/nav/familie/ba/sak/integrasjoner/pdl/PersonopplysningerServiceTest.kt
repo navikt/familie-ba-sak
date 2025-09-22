@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.FakeIntegrasjonClient
 import no.nav.familie.ba.sak.datagenerator.lagAktør
+import no.nav.familie.ba.sak.fake.FakeIntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService

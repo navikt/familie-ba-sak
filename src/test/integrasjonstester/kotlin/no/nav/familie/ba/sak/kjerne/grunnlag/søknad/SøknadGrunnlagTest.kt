@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.FakeIntegrasjonClient
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
@@ -13,6 +12,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
+import no.nav.familie.ba.sak.fake.FakeIntegrasjonClient
 import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -360,17 +360,6 @@ class SøknadGrunnlagTest(
                     ),
             ),
         )
-
-//        every { fakeIntegrasjonClient.hentVersjonertBarnetrygdSøknad(journalpostIdSøknad) } returns
-//            VersjonertBarnetrygdSøknadV9(
-//                barnetrygdSøknad =
-//                    lagBarnetrygdSøknadV9(
-//                        søkerFnr = søker.aktivFødselsnummer(),
-//                        barnFnr = listOf(barnUtenRelasjon, barnMedRelasjonUtenAdressebeskyttelse),
-//                        søknadstype = Søknadstype.UTVIDET,
-//                        originalspråk = "nn",
-//                    ),
-//            )
 
         // Act
         val behandling =

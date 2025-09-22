@@ -1,11 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
-import io.mockk.verify
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
+import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsbo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsboAdresse
@@ -22,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.defaultBostedsadresseHistorikk
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -29,8 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 class PersongrunnlagIntegrationTest(
-    @Autowired
-    private val mockIntegrasjonClient: IntegrasjonClient,
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
     @Autowired
@@ -43,7 +41,7 @@ class PersongrunnlagIntegrationTest(
     @Test
     fun `Skal lagre dødsfall på person når person er død`() {
         val søkerAktør = personidentService.hentOgLagreAktør(randomFnr(), true)
-        val barn1Aktør = personidentService.hentOgLagreAktør(randomFnr(), true)
+        val barn1Aktør = personidentService.hentOgLagreAktør(randomBarnFnr(), true)
 
         val dødsdato = "2020-04-04"
         val adresselinje1 = "Gatenavn 1"
@@ -140,14 +138,17 @@ class PersongrunnlagIntegrationTest(
                 ),
             )
 
-        persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-            aktør = morAktør,
-            barnFraInneværendeBehandling = listOf(barn1Aktør),
-            behandling = behandling,
-            målform = Målform.NB,
-        )
+        val personopplysningGrunnlag =
+            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                aktør = morAktør,
+                barnFraInneværendeBehandling = listOf(barn1Aktør),
+                behandling = behandling,
+                målform = Målform.NB,
+            )
 
-        verify(exactly = 1) { mockIntegrasjonClient.hentArbeidsforhold(fødselsnrMor, any()) }
+        val søker = personopplysningGrunnlag.personer.single { it.type == PersonType.SØKER }
+
+        assertThat(søker.arbeidsforhold).isNotEmpty()
     }
 
     @Test
@@ -191,14 +192,17 @@ class PersongrunnlagIntegrationTest(
                 ),
             )
 
-        persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-            aktør = morAktør,
-            barnFraInneværendeBehandling = listOf(barn1Aktør),
-            behandling = behandling,
-            målform = Målform.NB,
-        )
+        val personopplysningGrunnlag =
+            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                aktør = morAktør,
+                barnFraInneværendeBehandling = listOf(barn1Aktør),
+                behandling = behandling,
+                målform = Målform.NB,
+            )
 
-        verify(exactly = 0) { mockIntegrasjonClient.hentArbeidsforhold(fødselsnrMor, any()) }
+        val søker = personopplysningGrunnlag.personer.single { it.type == PersonType.SØKER }
+
+        assertThat(søker.arbeidsforhold).isEmpty()
     }
 
     @Test

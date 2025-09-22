@@ -2,12 +2,12 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.FakeIntegrasjonClient
 import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.fake.FakeIntegrasjonClient
 import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilRelasjonIPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
