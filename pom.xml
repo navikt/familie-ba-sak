@@ -30,7 +30,7 @@
         <familie.kontrakter.saksstatistikk>2.0_20250922093519_c7288d4</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20250922093519_c7288d4</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250922101633_e4c1c4d</utbetalingsgenerator.version>
-        <cucumber.version>7.23.0</cucumber.version>
+        <cucumber.version>7.28.0</cucumber.version>
         <mockk.version>1.14.5</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
         <token-validation-spring.version>5.0.36</token-validation-spring.version>
@@ -42,16 +42,14 @@
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
-        <mock-oauth2-server.version>2.2.1</mock-oauth2-server.version>
+        <mock-oauth2-server.version>2.3.0</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <testcontainers.postgresql.version>1.21.2</testcontainers.postgresql.version>
         <unleash.version>11.1.0</unleash.version>
         <testcontainers.postgresql.version>1.21.3</testcontainers.postgresql.version>
         <maven.model.version>3.9.11</maven.model.version>
-        <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
         <avro.version>1.12.0</avro.version>
         <confluent.version>8.0.0</confluent.version>
         <sonar.organization>navikt</sonar.organization>
@@ -66,6 +64,14 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <!-- Denne inkluderer junit-platform nyere enn 1.13.3 som kreves av cucumber 7.26, kan muligens fjernes når spring bumper til junit versjon 1.13.3 -->
+                <version>5.13.4</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
