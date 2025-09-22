@@ -1238,21 +1238,23 @@ class StegServiceIntegrationTest(
     }
 
     private fun mockHentPersoninfoForIdenter(): Pair<String, String> {
+        val søkerFødselsdato = randomSøkerFødselsdato()
         val søkerFnr =
             leggTilPersonInfo(
-                fødselsdato = randomSøkerFødselsdato(),
+                fødselsdato = søkerFødselsdato,
                 egendefinertMock =
                     PersonInfo(
-                        fødselsdato = LocalDate.of(2018, 5, 1),
+                        fødselsdato = søkerFødselsdato,
                         kjønn = Kjønn.KVINNE,
-                        navn = "Barn Barnesen",
+                        navn = "Mor Moresen",
                         sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
                     ),
             )
+        val barnFødselsdato = randomBarnFødselsdato()
         val barnFnr =
             leggTilPersonInfo(
-                fødselsdato = randomBarnFødselsdato(),
-                egendefinertMock = PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen"),
+                fødselsdato = barnFødselsdato,
+                egendefinertMock = PersonInfo(fødselsdato = barnFødselsdato, kjønn = Kjønn.KVINNE, navn = "Barn Barnesen"),
             )
         return søkerFnr to barnFnr
     }
