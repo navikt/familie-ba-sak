@@ -22,8 +22,6 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
-import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask
-import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.FinnPersonerSomBorPåSvalbardIFagsakerTask
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -47,7 +45,6 @@ import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsis
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
 import no.nav.familie.kontrakter.ba.finnmarkstillegg.kommuneErIFinnmarkEllerNordTroms
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -72,7 +69,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import kotlin.concurrent.thread
-import kotlin.time.measureTimedValue
 
 @RestController
 @RequestMapping("/api/forvalter")
@@ -641,96 +637,6 @@ class ForvalterController(
         return ResponseEntity.ok("Task for deaktivering av minside for ident opprettet")
     }
 
-    @PostMapping("/opprett-tasker-som-finner-personer-som-bor-i-finnmark-nord-troms-eller-paa-svalbard")
-    @Operation(
-        summary = "Oppretter tasker som finner personer med bostedsadresse eller delt bosted i Finnmark/Nord-Troms eller oppholdsadresse på Svalbard",
-    )
-    fun opprettTaskerSomFinnerPersonerMedOppholdsadressePåSvalbard(
-        @RequestParam dryRun: Boolean = true,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Opprett tasker som finner personer med bostedsadresse eller delt bosted i Finnmark/Nord-Troms eller oppholdsadresse på Svalbard",
-        )
-
-        val (antallTasker, tid) =
-            measureTimedValue {
-                val chunksMedIdenter =
-                    fagsakService
-                        .finnIdenterForLøpendeFagsaker()
-                        .also { logger.info("Hentet ${it.size} identer for løpende fagsaker") }
-                        .chunked(10000)
-
-                logger.info("Lagde ${chunksMedIdenter.size} chunks á 10 000 identer")
-
-                chunksMedIdenter
-                    .onEachIndexed { index, identer ->
-                        val task =
-                            FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask
-                                .opprettTask(identer)
-                                .medTriggerTid(LocalDateTime.now().plusSeconds(index * 5L))
-
-                        if (!dryRun) taskService.save(task)
-
-                        if (index % 10 == 0) {
-                            logger.info("Opprettet og lagret task $index/${chunksMedIdenter.size}")
-                        }
-                    }.size
-            }
-
-        logger.info("Brukte ${tid.inWholeSeconds} sekunder på å opprette $antallTasker tasker for å finne personer som bor i Finnmark, Nord-Troms eller på Svalbard")
-
-        return ResponseEntity.ok("Brukte ${tid.inWholeSeconds} sekunder på å opprette $antallTasker tasker")
-    }
-
-    @PostMapping("/opprett-tasker-som-finner-fagsaker-for-personer-med-oppholdsadresse-paa-svalbard")
-    @Operation(summary = "Oppretter tasker som finner fagsaker for personer med oppholdsadresse på Svalbard")
-    fun opprettTaskerSomFinnerFagsakerMedPersonerMedOppholdsadressePåSvalbard(
-        @RequestParam dryRun: Boolean = true,
-        @RequestParam antallFagsaker: Int = Int.MAX_VALUE,
-        @RequestParam minutterMellomHverTask: Long = 1,
-        @RequestParam chunkSize: Int = 250,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Opprett tasker som finner fagsaker med personer med oppholdsadresse på Svalbard",
-        )
-
-        if (chunkSize > 250) {
-            throw Feil("chunkSize kan ikke være større enn 250")
-        }
-
-        val (antallTasker, tid) =
-            measureTimedValue {
-                val chunksMedFagsakIder =
-                    fagsakService
-                        .hentIdPåLøpendeFagsaker()
-                        .also { logger.info("Hentet ${it.size} fagsaker for løpende fagsaker") }
-                        .take(antallFagsaker)
-                        .chunked(chunkSize)
-
-                logger.info("Lagde ${chunksMedFagsakIder.size} chunks á $chunkSize fagsaker")
-
-                chunksMedFagsakIder
-                    .onEachIndexed { index, fagsakIder ->
-                        val task =
-                            FinnPersonerSomBorPåSvalbardIFagsakerTask
-                                .opprettTask(fagsakIder)
-                                .medTriggerTid(LocalDateTime.now().plusMinutes(index * minutterMellomHverTask))
-
-                        if (!dryRun) taskService.save(task)
-
-                        if (index % 10 == 0) {
-                            logger.info("Opprettet og lagret task $index/${chunksMedFagsakIder.size}")
-                        }
-                    }.size
-            }
-
-        logger.info("Brukte ${tid.inWholeMilliseconds} ms på å opprette $antallTasker tasker for å finne personer som bor i Finnmark, Nord-Troms eller på Svalbard")
-
-        return ResponseEntity.ok("Brukte ${tid.inWholeSeconds} sekunder på å opprette $antallTasker tasker")
-    }
-
     @PostMapping("/sjekk-om-personer-i-fagsak-har-utbetalinger-som-overstiger-100-prosent")
     fun sjekkOmPersonerIFagsakHarUtbetalingerSomOverstiger100Prosent(
         @RequestBody fagsakIder: List<Long>,
@@ -742,30 +648,6 @@ class ForvalterController(
 
         forvalterService.sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(fagsakIder)
         return ResponseEntity.ok("Sjekket om fagsaker har utbetalinger som overstiger 100 prosent")
-    }
-
-    @PostMapping("/rekjor-feilede-tasker-med-type-finnFagsakerForPersonerSomBorPaaSvalbard")
-    fun rekjørFeiledeTaskerMedTypeFinnFagsakerForPersonerSomBorPåSvalbard(
-        @RequestParam minutterMellomHverTask: Long = 1,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Rekjør feilede task med type finnFagsakerForPersonerSomBorPåSvalbard",
-        )
-
-        val tasker =
-            taskRepository
-                .findByStatus(Status.FEILET)
-                .filter { it.type == FinnPersonerSomBorPåSvalbardIFagsakerTask.TASK_STEP_TYPE }
-                .onEachIndexed { index, task ->
-                    taskService.save(
-                        task
-                            .copy(status = Status.KLAR_TIL_PLUKK)
-                            .medTriggerTid(LocalDateTime.now().plusMinutes(index * minutterMellomHverTask)),
-                    )
-                }
-
-        return ResponseEntity.ok("Rekjørte ${tasker.size} feilede tasker med type finnFagsakerForPersonerSomBorPåSvalbard")
     }
 
     @GetMapping("/identifiser-institusjoner-med-finnmarkstillegg")
@@ -792,20 +674,6 @@ class ForvalterController(
                 }
 
         return ResponseEntity.ok(institusjonerSomSkalHaFinnmarkstillegg)
-    }
-
-    @PostMapping("/opprett-finn-personer-som-bor-paa-svalbard-i-fagsaker-task")
-    fun opprettPersonerSomBorPåSvalbardIFagsakerTask(
-        @RequestBody fagsakIder: List<Long>,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Finn personer som bor på Svalbard i fagsaker",
-        )
-
-        taskService.save(FinnPersonerSomBorPåSvalbardIFagsakerTask.opprettTask(fagsakIder))
-
-        return ResponseEntity.ok("Opprettet task for å finne personer som bor på Svalbard i ${fagsakIder.size} fagsaker")
     }
 }
 
