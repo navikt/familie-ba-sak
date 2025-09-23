@@ -148,12 +148,8 @@ class BehandlingsresultatStegTest {
                 )
             every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.INNVILGET_OG_ENDRET
             every { behandlingService.nullstillEndringstidspunkt(fødselshendelseBehandling.id) } just runs
-            every {
-                behandlingService.oppdaterBehandlingsresultat(
-                    any(),
-                    any(),
-                )
-            } returns fødselshendelseBehandling.copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
+            every { behandlingService.oppdaterBehandlingsresultat(any(), any(), any()) } returns
+                fødselshendelseBehandling.copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
             every {
                 behandlingService.oppdaterStatusPåBehandling(
                     fødselshendelseBehandling.id,
@@ -176,12 +172,8 @@ class BehandlingsresultatStegTest {
         fun `Skal kaste exception hvis behandlingsresultat er Avslått for en manuell migrering`() {
             every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.AVSLÅTT
 
-            every {
-                behandlingService.oppdaterBehandlingsresultat(
-                    any(),
-                    any(),
-                )
-            } returns behandling.copy(resultat = Behandlingsresultat.AVSLÅTT)
+            every { behandlingService.oppdaterBehandlingsresultat(any(), any(), any()) } returns
+                behandling.copy(resultat = Behandlingsresultat.AVSLÅTT)
 
             val exception = assertThrows<RuntimeException> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
             Assertions.assertEquals(
@@ -196,12 +188,8 @@ class BehandlingsresultatStegTest {
         fun `Skal kaste exception hvis behandlingsresultat er Delvis Innvilget for en manuell migrering`() {
             every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.DELVIS_INNVILGET
 
-            every {
-                behandlingService.oppdaterBehandlingsresultat(
-                    any(),
-                    any(),
-                )
-            } returns behandling.copy(resultat = Behandlingsresultat.DELVIS_INNVILGET)
+            every { behandlingService.oppdaterBehandlingsresultat(any(), any(), any()) } returns
+                behandling.copy(resultat = Behandlingsresultat.DELVIS_INNVILGET)
 
             val exception = assertThrows<RuntimeException> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
             Assertions.assertEquals(
@@ -216,12 +204,8 @@ class BehandlingsresultatStegTest {
         fun `Skal kaste exception hvis behandlingsresultat er Avslått,Endret og Opphørt for en manuell migrering`() {
             every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
 
-            every {
-                behandlingService.oppdaterBehandlingsresultat(
-                    any(),
-                    any(),
-                )
-            } returns behandling.copy(resultat = Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT)
+            every { behandlingService.oppdaterBehandlingsresultat(any(), any(), any()) } returns
+                behandling.copy(resultat = Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT)
 
             val exception = assertThrows<RuntimeException> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
             Assertions.assertEquals(
@@ -236,12 +220,8 @@ class BehandlingsresultatStegTest {
         fun `Skal kaste exception dersom det finnes utenlandskperiodebeløp som ikke er fylt ut`() {
             every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.FORTSATT_INNVILGET
 
-            every {
-                behandlingService.oppdaterBehandlingsresultat(
-                    any(),
-                    any(),
-                )
-            } returns behandling.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET)
+            every { behandlingService.oppdaterBehandlingsresultat(any(), any(), any()) } returns
+                behandling.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET)
 
             every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(any()) } returns listOf(lagUtenlandskPeriodebeløp())
             every { valutakursRepository.finnFraBehandlingId(any()) } returns listOf(lagValutakurs())
@@ -257,12 +237,8 @@ class BehandlingsresultatStegTest {
         fun `Skal kaste exception dersom det finnes valutakurser som ikke er fylt ut`() {
             every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.FORTSATT_INNVILGET
 
-            every {
-                behandlingService.oppdaterBehandlingsresultat(
-                    any(),
-                    any(),
-                )
-            } returns behandling.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET)
+            every { behandlingService.oppdaterBehandlingsresultat(any(), any(), any()) } returns
+                behandling.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET)
 
             every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(any()) } returns
                 listOf(
@@ -291,12 +267,8 @@ class BehandlingsresultatStegTest {
         fun `Skal ikke kaste exception dersom upb og valutakurser er utfylt`() {
             every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.FORTSATT_INNVILGET
 
-            every {
-                behandlingService.oppdaterBehandlingsresultat(
-                    any(),
-                    any(),
-                )
-            } returns behandling.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET)
+            every { behandlingService.oppdaterBehandlingsresultat(any(), any(), any()) } returns
+                behandling.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET)
 
             every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(any()) } returns
                 listOf(
@@ -331,7 +303,7 @@ class BehandlingsresultatStegTest {
 
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any()) } returns lagBehandling()
 
-            every { småbarnstilleggService.kanAutomatiskIverksetteSmåbarnstilleggEndring(any(), any()) } returns true
+            every { småbarnstilleggService.kanAutomatiskIverksetteSmåbarnstilleggEndring(any()) } returns true
 
             every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns lagBehandling()
 

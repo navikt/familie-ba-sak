@@ -406,7 +406,11 @@ class CucumberMock(
             featureToggleService = mockFeatureToggleService(),
         )
 
-    val småbarnstilleggService = SmåbarnstilleggService(beregningService)
+    val småbarnstilleggService =
+        SmåbarnstilleggService(
+            beregningService = beregningService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+        )
 
     val behandlingsresultatSteg =
         BehandlingsresultatSteg(

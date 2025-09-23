@@ -178,13 +178,8 @@ class BehandlingsresultatSteg(
                 endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi == ENDRING_I_UTBETALING,
             )
 
-        val sistIverksatteBehandling by lazy { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandlingMedOppdatertBehandlingsresultat) }
-
         if (skalRettFraBehandlingsresultatTilIverksetting ||
-            småbarnstilleggService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
-                behandling = behandlingMedOppdatertBehandlingsresultat,
-                sistIverksatteBehandling = sistIverksatteBehandling,
-            )
+            småbarnstilleggService.kanAutomatiskIverksetteSmåbarnstilleggEndring(behandlingMedOppdatertBehandlingsresultat)
         ) {
             behandlingService.oppdaterStatusPåBehandling(
                 behandlingMedOppdatertBehandlingsresultat.id,
