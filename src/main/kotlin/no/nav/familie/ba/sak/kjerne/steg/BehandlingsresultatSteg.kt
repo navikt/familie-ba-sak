@@ -145,16 +145,11 @@ class BehandlingsresultatSteg(
         data: String,
     ): StegType {
         val behandlingMedOppdatertBehandlingsresultat =
-            if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
-                settBehandlingsresultat(behandling, Behandlingsresultat.INNVILGET)
-            } else {
-                val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
-
-                behandlingService.oppdaterBehandlingsresultat(
-                    behandlingId = behandling.id,
-                    resultat = resultat,
-                )
-            }
+            behandlingService.oppdaterBehandlingsresultat(
+                behandlingId = behandling.id,
+                resultat = behandlingsresultatService.utledBehandlingsresultat(behandling.id),
+                opprettVilkårsvurderingLogg = !(behandling.erMigrering() && behandling.skalBehandlesAutomatisk),
+            )
 
         validerBehandlingsresultatErGyldigForÅrsak(behandlingMedOppdatertBehandlingsresultat)
 
@@ -221,14 +216,6 @@ class BehandlingsresultatSteg(
                     "Meld sak i Porten om du er uenig i resultatet.",
             )
         }
-    }
-
-    private fun settBehandlingsresultat(
-        behandling: Behandling,
-        resultat: Behandlingsresultat,
-    ): Behandling {
-        behandling.resultat = resultat
-        return behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
     }
 
     private fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {

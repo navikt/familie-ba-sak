@@ -259,16 +259,19 @@ class BehandlingService(
     fun oppdaterBehandlingsresultat(
         behandlingId: Long,
         resultat: Behandlingsresultat,
+        opprettVilkårsvurderingLogg: Boolean,
     ): Behandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         BehandlingsresultatValideringUtils.validerBehandlingsresultat(behandling, resultat)
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
-        loggService.opprettVilkårsvurderingLogg(
-            behandling = behandling,
-            forrigeBehandlingsresultat = behandling.resultat,
-            nyttBehandlingsresultat = resultat,
-        )
+        if (opprettVilkårsvurderingLogg) {
+            loggService.opprettVilkårsvurderingLogg(
+                behandling = behandling,
+                forrigeBehandlingsresultat = behandling.resultat,
+                nyttBehandlingsresultat = resultat,
+            )
+        }
 
         behandling.resultat = resultat
         return behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
