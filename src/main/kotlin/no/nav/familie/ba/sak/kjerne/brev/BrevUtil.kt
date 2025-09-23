@@ -73,6 +73,9 @@ fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
         BehandlingÅrsak.FINNMARKSTILLEGG,
         -> Brevmal.AUTOVEDTAK_FINNMARKSTILLEGG
 
+        BehandlingÅrsak.SVALBARDTILLEGG,
+        -> Brevmal.AUTOVEDTAK_SVALBARDTILLEGG
+
         else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
     }
 }
