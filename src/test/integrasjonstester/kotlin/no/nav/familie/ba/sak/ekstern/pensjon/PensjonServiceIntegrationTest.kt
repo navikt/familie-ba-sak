@@ -55,6 +55,9 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
     @Autowired
     lateinit var infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
 
+    @Autowired
+    lateinit var envService: FakeEnvService
+
     @Test
     fun `skal finne en relaterte fagsaker per barn`() {
         val søker = tilfeldigPerson()
@@ -192,7 +195,7 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         stønadFom: YearMonth = YearMonth.now(),
         stønadTom: YearMonth = YearMonth.now(),
     ) {
-        FakeEnvService.setErPreprod(false)
+        envService.setErPreprod(false)
         val identFraRequest = slot<String>()
         every { infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(capture(identFraRequest), any()) } answers {
             BarnetrygdTilPensjonResponse(
