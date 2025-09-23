@@ -10,8 +10,11 @@ import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagSøknad
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVegadresse
+import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -23,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 import org.assertj.core.api.Assertions.assertThat
@@ -975,5 +979,57 @@ class PreutfyllBosattIRiketServiceTest {
         assertThat(vilkårResultat).anySatisfy {
             assertThat(it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)).isTrue()
         }
+    }
+
+    @Test
+    fun `skal ikke preutfylle bosatt i riket om personen har ukrainsk statsborgerskap`() {
+        // Arrange
+        val aktør = randomAktør()
+        val vilkårsvurdering =
+            lagVilkårsvurdering(
+                lagPersonResultater = {
+                    setOf(
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = aktør,
+                            lagVilkårResultater = { emptySet() },
+                            lagAnnenVurderinger = { emptySet() },
+                        ),
+                    )
+                },
+            )
+
+        every { pdlRestClient.hentStatsborgerskap(any()) } returns
+            listOf(
+                Statsborgerskap(land = "UKR", gyldigFraOgMed = LocalDate.now().minusYears(10), gyldigTilOgMed = null, bekreftelsesdato = null),
+            )
+
+        every { pdlRestClient.hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(any()) } answers {
+            val identer = firstArg<List<String>>()
+            identer.associateWith {
+                PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                    bostedsadresse =
+                        listOf(
+                            Bostedsadresse(
+                                gyldigFraOgMed = LocalDate.now().minusYears(1),
+                                gyldigTilOgMed = null,
+                                vegadresse = lagVegadresse(12345L),
+                            ),
+                        ),
+                    deltBosted = emptyList(),
+                )
+            }
+        }
+
+        // Act
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering = vilkårsvurdering)
+
+        // Assert
+        val bosattIRiketResultater =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == aktør }
+                .vilkårResultater
+
+        assertThat(bosattIRiketResultater).isEmpty()
     }
 }
