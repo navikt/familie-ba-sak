@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.behandlingsresultat
+package no.nav.familie.ba.sak.kjerne.steg
 
 import io.mockk.every
 import io.mockk.just
@@ -26,7 +26,6 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat.OPPFYLT
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -34,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -55,23 +55,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.småbarnstillegg.SmåbarnstilleggService
-import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
-import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatCode
-import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -101,7 +91,7 @@ class BehandlingsresultatStegTest {
     private val kompetanseRepository = mockk<KompetanseRepository>()
     private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
     private val tilbakestillBehandlingService = mockk<TilbakestillBehandlingService>()
-    private val clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(LocalDate.of(2025, 10, 10))
+    private val clockProvider = TestClockProvider.Companion.lagClockProviderMedFastTidspunkt(LocalDate.of(2025, 10, 10))
 
     private val behandlingsresultatSteg: BehandlingsresultatSteg =
         BehandlingsresultatSteg(
@@ -176,7 +166,7 @@ class BehandlingsresultatStegTest {
             every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(fødselshendelseBehandling.id) } returns emptyList()
             every { valutakursRepository.finnFraBehandlingId(fødselshendelseBehandling.id) } returns emptyList()
 
-            assertEquals(
+            Assertions.assertEquals(
                 behandlingsresultatSteg.utførStegOgAngiNeste(fødselshendelseBehandling, ""),
                 StegType.IVERKSETT_MOT_OPPDRAG,
             )
@@ -194,7 +184,7 @@ class BehandlingsresultatStegTest {
             } returns behandling.copy(resultat = Behandlingsresultat.AVSLÅTT)
 
             val exception = assertThrows<RuntimeException> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
-            assertEquals(
+            Assertions.assertEquals(
                 "Du har fått behandlingsresultatet Avslått. " +
                     "Dette er ikke støttet på migreringsbehandlinger. " +
                     "Meld sak i Porten om du er uenig i resultatet.",
@@ -214,7 +204,7 @@ class BehandlingsresultatStegTest {
             } returns behandling.copy(resultat = Behandlingsresultat.DELVIS_INNVILGET)
 
             val exception = assertThrows<RuntimeException> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
-            assertEquals(
+            Assertions.assertEquals(
                 "Du har fått behandlingsresultatet Delvis innvilget. " +
                     "Dette er ikke støttet på migreringsbehandlinger. " +
                     "Meld sak i Porten om du er uenig i resultatet.",
@@ -234,7 +224,7 @@ class BehandlingsresultatStegTest {
             } returns behandling.copy(resultat = Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT)
 
             val exception = assertThrows<RuntimeException> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
-            assertEquals(
+            Assertions.assertEquals(
                 "Du har fått behandlingsresultatet Avslått, endret og opphørt. " +
                     "Dette er ikke støttet på migreringsbehandlinger. " +
                     "Meld sak i Porten om du er uenig i resultatet.",
@@ -257,7 +247,7 @@ class BehandlingsresultatStegTest {
             every { valutakursRepository.finnFraBehandlingId(any()) } returns listOf(lagValutakurs())
 
             val exception = assertThrows<FunksjonellFeil> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
-            assertEquals(
+            Assertions.assertEquals(
                 "Kan ikke fullføre behandlingsresultat-steg før utbetalt i det andre landet og valutakurs er fylt ut for alle barn og perioder",
                 exception.message,
             )
@@ -291,7 +281,7 @@ class BehandlingsresultatStegTest {
             every { valutakursRepository.finnFraBehandlingId(any()) } returns listOf(lagValutakurs())
 
             val exception = assertThrows<FunksjonellFeil> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
-            assertEquals(
+            Assertions.assertEquals(
                 "Kan ikke fullføre behandlingsresultat-steg før utbetalt i det andre landet og valutakurs er fylt ut for alle barn og perioder",
                 exception.message,
             )
@@ -402,7 +392,9 @@ class BehandlingsresultatStegTest {
                     behandlingsresultatSteg.preValiderSteg(behandling)
                 }.melding
 
-            assertThat(feilmelding).isEqualTo("Dersom Norge er sekundærland, må søkers aktivitetsland, annen forelders aktivitetsland eller barnets bostedsland være satt til noe annet enn Norge")
+            org.assertj.core.api.Assertions
+                .assertThat(feilmelding)
+                .isEqualTo("Dersom Norge er sekundærland, må søkers aktivitetsland, annen forelders aktivitetsland eller barnets bostedsland være satt til noe annet enn Norge")
         }
 
         @Test
@@ -539,7 +531,8 @@ class BehandlingsresultatStegTest {
                 barn = listOf(barn),
             )
 
-            assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
+            org.assertj.core.api.Assertions
+                .assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
                 .isInstanceOf(SatsendringFeil::class.java)
                 .hasMessageContaining("Satsendring kan ikke endre på prosenten til en andel")
         }
@@ -639,7 +632,9 @@ class BehandlingsresultatStegTest {
 
             behandlingsresultatSteg.preValiderSteg(behandling)
 
-            assertThatCode { behandlingsresultatSteg.preValiderSteg(behandling) }.doesNotThrowAnyException()
+            org.assertj.core.api.Assertions
+                .assertThatCode { behandlingsresultatSteg.preValiderSteg(behandling) }
+                .doesNotThrowAnyException()
         }
 
         @Test
@@ -703,7 +698,9 @@ class BehandlingsresultatStegTest {
             )
 
             behandlingsresultatSteg.preValiderSteg(behandling)
-            assertThatCode { behandlingsresultatSteg.preValiderSteg(behandling) }.doesNotThrowAnyException()
+            org.assertj.core.api.Assertions
+                .assertThatCode { behandlingsresultatSteg.preValiderSteg(behandling) }
+                .doesNotThrowAnyException()
         }
 
         @Test
@@ -766,7 +763,8 @@ class BehandlingsresultatStegTest {
                 barn = listOf(barn),
             )
 
-            assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
+            org.assertj.core.api.Assertions
+                .assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
                 .hasMessageContaining("Det er oppdaget forskjell i utbetaling utenom FINNMARKSTILLEGG andeler. Dette kan ikke skje i en behandling der årsak er FINNMARKSTILLEGG, og den automatiske kjøring stoppes derfor.")
         }
 
@@ -830,7 +828,8 @@ class BehandlingsresultatStegTest {
                 barn = listOf(barn),
             )
 
-            assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
+            org.assertj.core.api.Assertions
+                .assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
                 .hasMessageContaining("Det eksisterer FINNMARKSTILLEGG andeler som først blir innvilget mer enn 1 måned fram i tid. Det er ikke mulig å innvilge disse enda, og behandlingen stoppes derfor.")
         }
 
@@ -849,7 +848,7 @@ class BehandlingsresultatStegTest {
                             person = søker,
                             perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
                             vilkårsvurdering = it,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS, BOSATT_PÅ_SVALBARD),
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS, UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                         ),
                         lagPersonResultat(
                             vilkårsvurdering = it,
@@ -858,28 +857,28 @@ class BehandlingsresultatStegTest {
                                 setOf(
                                     lagVilkårResultat(
                                         personResultat = personResultat,
-                                        vilkårType = BOSATT_I_RIKET,
-                                        resultat = OPPFYLT,
+                                        vilkårType = Vilkår.BOSATT_I_RIKET,
+                                        resultat = Resultat.OPPFYLT,
                                         periodeFom = LocalDate.of(2025, 1, 1),
                                         periodeTom = LocalDate.now().plusYears(1),
                                         behandlingId = behandling.id,
                                     ),
                                     lagVilkårResultat(
                                         personResultat = personResultat,
-                                        vilkårType = UNDER_18_ÅR,
-                                        resultat = OPPFYLT,
+                                        vilkårType = Vilkår.UNDER_18_ÅR,
+                                        resultat = Resultat.OPPFYLT,
                                         periodeFom = LocalDate.now().minusYears(15),
                                         periodeTom = LocalDate.now().plusYears(1),
                                         behandlingId = behandling.id,
                                     ),
                                     lagVilkårResultat(
                                         personResultat = personResultat,
-                                        vilkårType = BOR_MED_SØKER,
-                                        resultat = OPPFYLT,
+                                        vilkårType = Vilkår.BOR_MED_SØKER,
+                                        resultat = Resultat.OPPFYLT,
                                         periodeFom = LocalDate.of(2025, 1, 1),
                                         periodeTom = LocalDate.now().plusYears(1),
                                         behandlingId = behandling.id,
-                                        utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
+                                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                                     ),
                                 )
                             },
@@ -941,7 +940,8 @@ class BehandlingsresultatStegTest {
                 vilkårsvurdering = vilkårsvurdering,
             )
 
-            assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
+            org.assertj.core.api.Assertions
+                .assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
                 .hasMessageContaining("Det finnes perioder der søker bor i finnmark samtidig som et barn med delt bosted ikke bor i finnmark. Disse sakene støtter vi ikke automatisk, og vi stanser derfor denne behandlingen.")
         }
 
@@ -1006,7 +1006,9 @@ class BehandlingsresultatStegTest {
             )
 
             behandlingsresultatSteg.preValiderSteg(behandling)
-            assertThatCode { behandlingsresultatSteg.preValiderSteg(behandling) }.doesNotThrowAnyException()
+            org.assertj.core.api.Assertions
+                .assertThatCode { behandlingsresultatSteg.preValiderSteg(behandling) }
+                .doesNotThrowAnyException()
         }
 
         @Test
@@ -1069,7 +1071,8 @@ class BehandlingsresultatStegTest {
                 barn = listOf(barn),
             )
 
-            assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
+            org.assertj.core.api.Assertions
+                .assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
                 .hasMessageContaining("Det er oppdaget forskjell i utbetaling utenom SVALBARDTILLEGG andeler. Dette kan ikke skje i en behandling der årsak er SVALBARDTILLEGG, og den automatiske kjøring stoppes derfor.")
         }
 
@@ -1133,7 +1136,8 @@ class BehandlingsresultatStegTest {
                 barn = listOf(barn),
             )
 
-            assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
+            org.assertj.core.api.Assertions
+                .assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
                 .hasMessageContaining("Det eksisterer SVALBARDTILLEGG andeler som først blir innvilget mer enn 1 måned fram i tid. Det er ikke mulig å innvilge disse enda, og behandlingen stoppes derfor.")
         }
     }
