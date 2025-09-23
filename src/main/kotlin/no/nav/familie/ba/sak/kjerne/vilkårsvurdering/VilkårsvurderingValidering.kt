@@ -2,15 +2,18 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.slåSammen
+import no.nav.familie.ba.sak.common.VilkårFeil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -136,6 +139,38 @@ fun validerResultatBegrunnelse(restVilkårResultat: RestVilkårResultat) {
                 throw FunksjonellFeil(this, this)
             }
         }
+    }
+}
+
+fun validerBarnasVilkår(
+    barna: List<PersonEnkel>,
+    vilkårsvurdering: Vilkårsvurdering,
+) {
+    val listeAvFeil = mutableListOf<String>()
+
+    barna.map { barn ->
+        vilkårsvurdering.personResultater
+            .flatMap { it.vilkårResultater }
+            .filter { it.personResultat?.aktør == barn.aktør }
+            .forEach { vilkårResultat ->
+                if (vilkårResultat.resultat == Resultat.OPPFYLT && vilkårResultat.periodeFom == null) {
+                    listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato.tilDagMånedÅr()} mangler fom dato.")
+                }
+                if (vilkårResultat.periodeFom != null && vilkårResultat.toPeriode().fom.isBefore(barn.fødselsdato)) {
+                    listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato.tilDagMånedÅr()} har fra-og-med dato før barnets fødselsdato.")
+                }
+                if (vilkårResultat.periodeFom != null &&
+                    vilkårResultat.toPeriode().fom.isAfter(barn.fødselsdato.plusYears(18)) &&
+                    vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR &&
+                    vilkårResultat.erEksplisittAvslagPåSøknad != true
+                ) {
+                    listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato.tilDagMånedÅr()} har fra-og-med dato etter barnet har fylt 18.")
+                }
+            }
+    }
+
+    if (listeAvFeil.isNotEmpty()) {
+        throw VilkårFeil(listeAvFeil.joinToString(separator = "\n"))
     }
 }
 

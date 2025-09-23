@@ -2,14 +2,10 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.VilkårFeil
 import no.nav.familie.ba.sak.common.erMellom
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetaling3MndFom
@@ -17,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetaling3ÅrFom
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.lagForskjøvetTidslinjeForOppfylteVilkår
@@ -34,7 +29,6 @@ import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
-import kotlin.collections.map
 
 object EndretUtbetalingAndelValidering {
     fun validerOgSettTomDatoHvisNull(
@@ -352,35 +346,3 @@ private fun Tidslinje<Boolean>.tilSammenhengendeDeltBostedPerioder(): List<Måne
         .tilPerioderIkkeNull()
         .filter { it.verdi }
         .map { MånedPeriode(fom = it.fom!!.toYearMonth(), tom = it.tom?.toYearMonth() ?: PRAKTISK_SENESTE_DAG.toYearMonth()) }
-
-fun validerBarnasVilkår(
-    barna: List<PersonEnkel>,
-    vilkårsvurdering: Vilkårsvurdering,
-) {
-    val listeAvFeil = mutableListOf<String>()
-
-    barna.map { barn ->
-        vilkårsvurdering.personResultater
-            .flatMap { it.vilkårResultater }
-            .filter { it.personResultat?.aktør == barn.aktør }
-            .forEach { vilkårResultat ->
-                if (vilkårResultat.resultat == Resultat.OPPFYLT && vilkårResultat.periodeFom == null) {
-                    listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato.tilDagMånedÅr()} mangler fom dato.")
-                }
-                if (vilkårResultat.periodeFom != null && vilkårResultat.toPeriode().fom.isBefore(barn.fødselsdato)) {
-                    listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato.tilDagMånedÅr()} har fra-og-med dato før barnets fødselsdato.")
-                }
-                if (vilkårResultat.periodeFom != null &&
-                    vilkårResultat.toPeriode().fom.isAfter(barn.fødselsdato.plusYears(18)) &&
-                    vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR &&
-                    vilkårResultat.erEksplisittAvslagPåSøknad != true
-                ) {
-                    listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato.tilDagMånedÅr()} har fra-og-med dato etter barnet har fylt 18.")
-                }
-            }
-    }
-
-    if (listeAvFeil.isNotEmpty()) {
-        throw VilkårFeil(listeAvFeil.joinToString(separator = "\n"))
-    }
-}
