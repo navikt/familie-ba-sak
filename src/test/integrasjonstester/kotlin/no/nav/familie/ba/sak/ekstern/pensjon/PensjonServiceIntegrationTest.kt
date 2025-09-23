@@ -2,13 +2,13 @@ package no.nav.familie.ba.sak.ekstern.pensjon
 
 import io.mockk.every
 import io.mockk.slot
-import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.datagenerator.årMnd
+import no.nav.familie.ba.sak.fake.FakeEnvService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -56,7 +56,7 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
     lateinit var infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
 
     @Autowired
-    lateinit var envService: EnvService
+    lateinit var envService: FakeEnvService
 
     @Test
     fun `skal finne en relaterte fagsaker per barn`() {
@@ -195,7 +195,7 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         stønadFom: YearMonth = YearMonth.now(),
         stønadTom: YearMonth = YearMonth.now(),
     ) {
-        every { envService.erPreprod() } returns false
+        envService.setErPreprod(false)
         val identFraRequest = slot<String>()
         every { infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(capture(identFraRequest), any()) } answers {
             BarnetrygdTilPensjonResponse(
