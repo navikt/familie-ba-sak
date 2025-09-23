@@ -58,6 +58,7 @@ fun stubScenario(scenario: RestScenario) {
         stubHentOppholdstillatelse(it)
     }
     stubHentBostedsadresserOgDeltBostedForPerson(scenario)
+    stubHenthentBostedsadresseDeltBostedOgOppholdsadresseForPerson(scenario)
     stubHentPerson(scenario)
     stubHentArbeidsforhold(scenario.søker.ident)
 }
@@ -170,6 +171,48 @@ private fun stubHentBostedsadresserOgDeltBostedForPerson(restScenario: RestScena
             PdlPersonBolkRequest(
                 variables = PdlPersonBolkRequestVariables(personer.map { it.ident }),
                 query = hentGraphqlQuery("bostedsadresse-og-delt-bosted"),
+            )
+
+        val response =
+            PdlBolkResponse(
+                data =
+                    PersonBolk(
+                        personBolk =
+                            personer.map { person ->
+                                PersonDataBolk(
+                                    ident = person.ident,
+                                    code = "ok",
+                                    person =
+                                        PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                                            bostedsadresse = person.bostedsadresser,
+                                            deltBosted = emptyList(),
+                                        ),
+                                )
+                            },
+                    ),
+                errors = null,
+                extensions = null,
+            )
+
+        stubFor(
+            post(urlEqualTo("/rest/api/pdl/graphql"))
+                .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody), true, true))
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(response)),
+                ),
+        )
+    }
+}
+
+private fun stubHenthentBostedsadresseDeltBostedOgOppholdsadresseForPerson(restScenario: RestScenario) {
+    genererAlleKombinasjoner(restScenario.barna + restScenario.søker).forEach { personer ->
+        val pdlRequestBody =
+            PdlPersonBolkRequest(
+                variables = PdlPersonBolkRequestVariables(personer.map { it.ident }),
+                query = hentGraphqlQuery("bostedsadresse-delt-bosted-oppholdsadresse"),
             )
 
         val response =
