@@ -44,7 +44,7 @@ class PreutfyllBosattIRiketService(
                 .map { it.aktør.aktivFødselsnummer() }
                 .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
 
-        val bostedsadresser = pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer)
+        val bostedsadresser = pdlRestClient.hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(identer)
 
         vilkårsvurdering
             .personResultater

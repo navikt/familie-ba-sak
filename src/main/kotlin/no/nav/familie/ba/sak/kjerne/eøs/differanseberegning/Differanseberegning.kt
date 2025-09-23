@@ -52,7 +52,8 @@ fun beregnDifferanse(
         andelerTilkjentYtelse
             .filter { !it.erSøkersAndel() && it.type == YtelseType.ORDINÆR_BARNETRYGD }
 
-    val barnasFinnmarkstilleggAndeler = andelerTilkjentYtelse.filter { it.type == YtelseType.FINNMARKSTILLEGG }
+    val barnasFinnmarkstilleggAndeler = andelerTilkjentYtelse.filter { it.erFinnmarkstillegg() }
+    val barnasSvalbardtilleggAndeler = andelerTilkjentYtelse.filter { it.erSvalbardtillegg() }
 
     val barnasOrdinæreAndelerTidslinjer = barnasOrdinæreAndeler.tilSeparateTidslinjerForBarna()
 
@@ -88,7 +89,7 @@ fun beregnDifferanse(
     val barnasDifferanseberegnetFinnmarksAndeler = barnasDifferanseberegneteFinnmarkstilleggAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
     val søkersAndeler = andelerTilkjentYtelse.filter { it.erSøkersAndel() }
 
-    return søkersAndeler + barnasDifferanseberegnetOrdinæreAndeler + barnasDifferanseberegnetFinnmarksAndeler
+    return søkersAndeler + barnasDifferanseberegnetOrdinæreAndeler + barnasDifferanseberegnetFinnmarksAndeler + barnasSvalbardtilleggAndeler
 }
 
 /**

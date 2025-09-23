@@ -36,6 +36,28 @@ fun mockSystemOnlyPdlRestClient(
             }
         }
 
+        every { hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(any()) } answers {
+            val identer = firstArg<List<String>>()
+            val vegadresseIOslo = Vegadresse(null, null, null, null, null, "0301", null, null)
+            identer.associateWith { ident ->
+                val fødselsdato =
+                    dataFraCucumber.persongrunnlag
+                        .flatMap { it.value.personer }
+                        .first { it.aktør.aktivFødselsnummer() == ident }
+                        .fødselsdato
+
+                val eksisterendeAdresser = dataFraCucumber.adresser[ident]
+                if (eksisterendeAdresser == null || eksisterendeAdresser.bostedsadresse.isEmpty()) {
+                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                        bostedsadresse = listOf(Bostedsadresse(gyldigFraOgMed = fødselsdato, vegadresse = vegadresseIOslo)),
+                        deltBosted = eksisterendeAdresser?.deltBosted ?: emptyList(),
+                    )
+                } else {
+                    eksisterendeAdresser
+                }
+            }
+        }
+
         every { hentStatsborgerskap(any(), any()) } answers {
             val aktør = firstArg<Aktør>()
             val fødselsdato =
