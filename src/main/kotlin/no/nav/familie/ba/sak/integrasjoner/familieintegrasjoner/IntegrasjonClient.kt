@@ -278,7 +278,7 @@ class IntegrasjonClient(
     }
 
     @Cacheable("enhet", cacheManager = "dailyCache")
-    fun hentEnhet(enhetId: String?): NavKontorEnhet {
+    fun hentEnhet(enhetId: String): NavKontorEnhet {
         val uri = URI.create("$integrasjonUri/arbeidsfordeling/nav-kontor/$enhetId")
 
         return kallEksternTjenesteRessurs(
