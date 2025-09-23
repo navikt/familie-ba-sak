@@ -82,7 +82,7 @@ class BehandlingsresultatSteg(
         behandling: Behandling,
         stegService: StegService?,
     ) {
-        if ((!behandling.erSatsendringEllerMånedligValutajustering() || !behandling.erFinnmarksTilleggEllerSvalbardtillegg()) && behandling.skalBehandlesAutomatisk) {
+        if (!behandling.erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() && behandling.skalBehandlesAutomatisk) {
             return
         }
 
@@ -113,7 +113,7 @@ class BehandlingsresultatSteg(
             søkerOgBarn = søkerOgBarn,
         )
 
-        if (!behandling.erSatsendringEllerMånedligValutajustering() || !behandling.erFinnmarksTilleggEllerSvalbardtillegg()) {
+        if (!behandling.erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg()) {
             val endreteUtbetalingerMedAndeler =
                 andelerTilkjentYtelseOgEndreteUtbetalingerService
                     .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)

@@ -342,7 +342,11 @@ class BehandlingsresultatStegTest {
     @Nested
     inner class PreValiderStegTest {
         @ParameterizedTest
-        @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG"])
+        @EnumSource(
+            value = BehandlingÅrsak::class,
+            names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG"],
+            mode = EXCLUDE,
+        )
         fun `skal ikke valideres om behandlingen ikke har riktig årsak for behandling som skal automatisk behandles`(
             behandlingÅrsak: BehandlingÅrsak,
         ) {

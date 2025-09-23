@@ -233,9 +233,11 @@ data class Behandling(
 
     fun erSatsendringEllerMånedligValutajustering() = erSatsendring() || erMånedligValutajustering()
 
+    fun erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() = erFinnmarksTilleggEllerSvalbardtillegg() || erSatsendringEllerMånedligValutajustering()
+
     fun erOppdaterUtvidetKlassekode() = this.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE
 
-    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsendringEllerMånedligValutajustering() || erSmåbarnstillegg() || erOmregning() || erFinnmarksTilleggEllerSvalbardtillegg()
+    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() || erSmåbarnstillegg() || erOmregning()
 
     fun erManuellMigreringForEndreMigreringsdato() =
         erMigrering() &&
