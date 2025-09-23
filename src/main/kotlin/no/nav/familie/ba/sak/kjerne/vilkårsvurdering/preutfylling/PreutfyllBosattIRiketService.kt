@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.erUkraina
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -50,6 +52,9 @@ class PreutfyllBosattIRiketService(
             .personResultater
             .filter { it.aktør.aktivFødselsnummer() in identer }
             .forEach { personResultat ->
+                val erUkrainskStatsborger = hentErUkrainskStatsborger(personResultat.aktør)
+                if (erUkrainskStatsborger) return@forEach
+
                 val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
                 val bostedsadresserForPerson = Adresser.opprettFra(bostedsadresser[personResultat.aktør.aktivFødselsnummer()])
 
@@ -129,6 +134,11 @@ class PreutfyllBosattIRiketService(
                     erOpprinneligPreutfylt = true,
                 )
             }.toSet()
+    }
+
+    private fun hentErUkrainskStatsborger(aktør: Aktør): Boolean {
+        val statsborgerskap = pdlRestClient.hentStatsborgerskap(aktør)
+        return statsborgerskap.any { it.erUkraina() }
     }
 
     private fun lagErØvrigeKravForBosattIRiketOppfyltTidslinje(
