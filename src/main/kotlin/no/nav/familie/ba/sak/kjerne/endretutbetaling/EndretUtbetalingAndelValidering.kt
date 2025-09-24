@@ -339,7 +339,12 @@ private fun Vilkårsvurdering.tilOppfyltDeltBostedTidslinjePerAktør(): Map<Akt�
     this.personResultater
         .flatMap { it.vilkårResultater }
         .groupBy { it.personResultat?.aktør }
-        .mapValues { (_, vilkårResultater) -> vilkårResultater.filter { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) }.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår = Vilkår.BOR_MED_SØKER).mapVerdi { vilkårResultat -> vilkårResultat != null } }
+        .mapValues { (_, vilkårResultater) ->
+            vilkårResultater
+                .filter { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) }
+                .lagForskjøvetTidslinjeForOppfylteVilkår(vilkår = Vilkår.BOR_MED_SØKER)
+                .mapVerdi { vilkårResultat -> vilkårResultat != null }
+        }
 
 private fun Tidslinje<Boolean>.tilSammenhengendeDeltBostedPerioder(): List<MånedPeriode> =
     this
