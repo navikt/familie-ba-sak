@@ -159,7 +159,6 @@ enum class Brevmal(
     VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON(true, "opphorMedEndringInstitusjon", "Opphør med endring"),
     VEDTAK_AVSLAG_INSTITUSJON(true, "vedtakAvslagInstitusjon", "Avslag"),
     VEDTAK_FORTSATT_INNVILGET_INSTITUSJON(true, "vedtakFortsattInnvilgetInstitusjon", "Vedtak fortstatt innvilget"),
-    AUTOVEDTAK_FINNMARKSTILLEGG(true, "autovedtakFinnmarkstillegg", "Vedtak finnmarkstillegg innvilget"),
 
     AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG(
         true,
@@ -168,6 +167,8 @@ enum class Brevmal(
     ),
     AUTOVEDTAK_NYFØDT_FØRSTE_BARN(true, "autovedtakNyfodtForsteBarn", "Autovedtak nyfødt - første barn"),
     AUTOVEDTAK_NYFØDT_BARN_FRA_FØR(true, "autovedtakNyfodtBarnFraFor", "Autovedtak nyfødt - barn fra før"),
+    AUTOVEDTAK_FINNMARKSTILLEGG(true, "autovedtakFinnmarkstillegg", "Vedtak finnmarkstillegg innvilget"),
+    AUTOVEDTAK_SVALBARDTILLEGG(true, "autovedtakSvalbardtillegg", "Vedtak svalbardtillegg innvilget"),
     ;
 
     fun skalGenerereForside(): Boolean =
@@ -229,6 +230,7 @@ enum class Brevmal(
             AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
             AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
             AUTOVEDTAK_FINNMARKSTILLEGG,
+            AUTOVEDTAK_SVALBARDTILLEGG,
             -> throw Feil("$this støtter ikke generering av forside")
         }
 
@@ -288,6 +290,7 @@ enum class Brevmal(
             AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
             AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
             AUTOVEDTAK_FINNMARKSTILLEGG,
+            AUTOVEDTAK_SVALBARDTILLEGG,
             -> throw Feil("Ingen dokumenttype for $this")
         }
 
@@ -336,6 +339,7 @@ enum class Brevmal(
                 AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
                 AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
                 AUTOVEDTAK_FINNMARKSTILLEGG,
+                AUTOVEDTAK_SVALBARDTILLEGG,
                 -> Distribusjonstype.VEDTAK
 
                 HENLEGGE_TRUKKET_SØKNAD,
