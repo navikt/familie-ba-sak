@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvni
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.tidslinje.PRAKTISK_SENESTE_DAG
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.mapVerdi
 import no.nav.familie.tidslinje.tomTidslinje
@@ -153,7 +154,6 @@ object EndretUtbetalingAndelValidering {
                             person = person,
                             vilkårsvurdering = vilkårsvurdering,
                         )
-
                     validerDeltBosted(
                         endretUtbetalingAndel = endretUtbetalingAndel,
                         deltBostedPerioder = deltBostedPerioder,
@@ -209,6 +209,7 @@ object EndretUtbetalingAndelValidering {
         if (endretUtbetalingAndel.fom == null || endretUtbetalingAndel.tom == null) {
             throw FunksjonellFeil("Du må sette fom og tom.")
         }
+
         val endringsperiode = MånedPeriode(fom = endretUtbetalingAndel.fom!!, tom = endretUtbetalingAndel.tom!!)
 
         if (
@@ -344,8 +345,8 @@ private fun Tidslinje<Boolean>.tilSammenhengendeDeltBostedPerioder(): List<Måne
     this
         .slåSammenLikePerioder()
         .tilPerioderIkkeNull()
-        .filter { it.verdi && it.fom != null && it.tom != null }
-        .map { MånedPeriode(fom = it.fom!!.toYearMonth(), tom = it.tom!!.toYearMonth()) }
+        .filter { it.verdi }
+        .map { MånedPeriode(fom = it.fom!!.toYearMonth(), tom = it.tom?.toYearMonth() ?: PRAKTISK_SENESTE_DAG.toYearMonth()) }
 
 fun validerBarnasVilkår(
     barna: List<PersonEnkel>,
