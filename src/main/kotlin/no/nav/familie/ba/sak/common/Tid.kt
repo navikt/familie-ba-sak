@@ -8,8 +8,6 @@ import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import java.util.NavigableMap
-import java.util.TreeMap
 
 val TIDENES_MORGEN = LocalDate.MIN
 val TIDENES_ENDE = LocalDate.MAX
@@ -202,45 +200,6 @@ fun DatoIntervallEntitet.erInnenfor(dato: LocalDate): Boolean =
         tom == null -> dato.isSameOrAfter(fom)
         else -> dato.isSameOrAfter(fom) && dato.isSameOrBefore(tom)
     }
-
-fun slåSammenOverlappendePerioder(input: Collection<DatoIntervallEntitet>): List<DatoIntervallEntitet> {
-    val map: NavigableMap<LocalDate, LocalDate?> =
-        TreeMap()
-    for (periode in input) {
-        if (periode.fom != null &&
-            (!map.containsKey(periode.fom) || periode.tom == null || periode.tom.isAfter(map[periode.fom]))
-        ) {
-            map[periode.fom] = periode.tom
-        }
-    }
-    val result = mutableListOf<DatoIntervallEntitet>()
-    var prevIntervall: DatoIntervallEntitet? = null
-    for ((key, value) in map) {
-        prevIntervall =
-            if (prevIntervall != null && prevIntervall.erInnenfor(key)) {
-                val fom = prevIntervall.fom
-                val tom =
-                    if (prevIntervall.tom == null) {
-                        null
-                    } else {
-                        if (value != null && prevIntervall.tom!!.isAfter(value)) {
-                            prevIntervall.tom
-                        } else {
-                            value
-                        }
-                    }
-                result.remove(prevIntervall)
-                val nyttIntervall = DatoIntervallEntitet(fom, tom)
-                result.add(nyttIntervall)
-                nyttIntervall
-            } else {
-                val nyttIntervall = DatoIntervallEntitet(key, value)
-                result.add(nyttIntervall)
-                nyttIntervall
-            }
-    }
-    return result
-}
 
 class YearMonthIterator(
     startMåned: YearMonth,
