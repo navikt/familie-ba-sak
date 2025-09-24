@@ -780,9 +780,3 @@ class ForvalterController(
         return ResponseEntity.ok("Opprettet task for å finne personer som bor på Svalbard i ${fagsakIder.size} fagsaker")
     }
 }
-
-data class FinnOgPatchAndelerRequestDto(
-    val fagsaker: Set<Long>,
-    val korrigerAndelerFraOgMedDato: LocalDate = LocalDate.of(2025, 2, 1),
-    val dryRun: Boolean = true,
-)
