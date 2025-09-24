@@ -8,13 +8,19 @@ import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.EnumSource.Mode.INCLUDE
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -250,6 +256,73 @@ internal class BehandlingsresultatValideringUtilsTest {
             BehandlingsresultatValideringUtils.validerSatsErUendret(
                 andelerForrigeBehandling = listOf(originalAndel),
                 andelerDenneBehandlingen = nyeAndeler,
+            )
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = Behandlingsresultat::class,
+        names = ["AVSLÅTT", "AVSLÅTT_OG_OPPHØRT", "AVSLÅTT_OG_ENDRET", "AVSLÅTT_ENDRET_OG_OPPHØRT", "DELVIS_INNVILGET"],
+        mode = INCLUDE,
+    )
+    fun `Skal kaste exception hvis behandlingsresultat er ugyldig for en manuell migrering`(
+        behandlingsresultat: Behandlingsresultat,
+    ) {
+        val behandling =
+            lagBehandling(
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+            )
+
+        val exception =
+            assertThrows<FunksjonellFeil> {
+                BehandlingsresultatValideringUtils.validerBehandlingsresultat(
+                    behandling = behandling,
+                    resultat = behandlingsresultat,
+                )
+            }
+
+        assertThat(exception.message)
+            .isEqualTo(
+                "Du har fått behandlingsresultatet ${behandlingsresultat.displayName}. " +
+                    "Dette er ikke støttet på migreringsbehandlinger. " +
+                    "Meld sak i Porten om du er uenig i resultatet.",
+            )
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = Behandlingsresultat::class,
+        names = ["ENDRET_UTBETALING", "ENDRET_UTEN_UTBETALING", "ENDRET_OG_OPPHØRT", "OPPHØRT"],
+        mode = INCLUDE,
+    )
+    fun `skal kaste feil hvis behandlingsresultat ved omregning er endret`(
+        behandlingsresultat: Behandlingsresultat,
+    ) {
+        val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.OMREGNING_18ÅR)
+        assertThrows<Feil> {
+            BehandlingsresultatValideringUtils.validerBehandlingsresultat(
+                behandling = behandling,
+                resultat = behandlingsresultat,
+            )
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = Behandlingsresultat::class,
+        names = ["FORTSATT_INNVILGET", "FORTSATT_OPPHØRT"],
+        mode = INCLUDE,
+    )
+    fun `skal ikke kaste feil hvis behandlingsresultat ved omregning er uendret`(
+        behandlingsresultat: Behandlingsresultat,
+    ) {
+        val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.OMREGNING_18ÅR)
+        assertDoesNotThrow {
+            BehandlingsresultatValideringUtils.validerBehandlingsresultat(
+                behandling = behandling,
+                resultat = behandlingsresultat,
             )
         }
     }

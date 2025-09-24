@@ -6,9 +6,19 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT_OG_ENDRET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT_OG_OPPHØRT
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_UTBETALING
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_UTEN_UTBETALING
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_OPPHØRT
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.IKKE_VURDERT
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.OPPHØRT
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
@@ -41,37 +51,47 @@ object BehandlingsresultatValideringUtils {
         behandling: Behandling,
         resultat: Behandlingsresultat,
     ) {
-        if ((
-                behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING &&
-                    setOf(
-                        Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
-                        Behandlingsresultat.ENDRET_UTBETALING,
-                        Behandlingsresultat.ENDRET_UTEN_UTBETALING,
-                        Behandlingsresultat.ENDRET_OG_OPPHØRT,
-                        Behandlingsresultat.OPPHØRT,
-                        Behandlingsresultat.FORTSATT_INNVILGET,
-                        Behandlingsresultat.IKKE_VURDERT,
-                    ).contains(resultat)
-            ) ||
-            (behandling.type == BehandlingType.REVURDERING && resultat == Behandlingsresultat.IKKE_VURDERT)
-        ) {
-            val feilmelding =
-                "Behandlingsresultatet ${resultat.displayName.lowercase()} " +
-                    "er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'."
-            throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
+        // Valider kombinasjon av behandlingstype og behandlingsresultat
+        when {
+            behandling.erFørstegangsbehandling() -> {
+                val ugyldigeBehandlingsresultaterForTypeFørstegangsbehandling =
+                    setOf(AVSLÅTT_OG_OPPHØRT, ENDRET_UTBETALING, ENDRET_UTEN_UTBETALING, ENDRET_OG_OPPHØRT, OPPHØRT, FORTSATT_INNVILGET, IKKE_VURDERT)
+                if (resultat in ugyldigeBehandlingsresultaterForTypeFørstegangsbehandling) {
+                    throw FunksjonellFeil("Behandlingsresultatet '${resultat.displayName}' er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'.")
+                }
+            }
+
+            behandling.erRevurdering() -> {
+                if (resultat == IKKE_VURDERT) {
+                    throw FunksjonellFeil("Behandlingsresultatet '${resultat.displayName}' er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'.")
+                }
+            }
         }
-        if (behandling.opprettetÅrsak == BehandlingÅrsak.KLAGE &&
-            setOf(
-                Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
-                Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
-                Behandlingsresultat.AVSLÅTT_OG_ENDRET,
-                Behandlingsresultat.AVSLÅTT,
-            ).contains(resultat)
-        ) {
-            val feilmelding =
-                "Behandlingsårsak ${behandling.opprettetÅrsak.visningsnavn.lowercase()} " +
-                    "er ugyldig i kombinasjon med resultat '${resultat.displayName.lowercase()}'."
-            throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
+
+        // Valider kombinasjon av behandlingsårsak og behandlingsresultat
+        when {
+            behandling.erKlage() -> {
+                val ugyldigeBehandlingsresultaterForÅrsakKlage =
+                    setOf(AVSLÅTT_OG_OPPHØRT, AVSLÅTT_ENDRET_OG_OPPHØRT, AVSLÅTT_OG_ENDRET, AVSLÅTT)
+                if (resultat in ugyldigeBehandlingsresultaterForÅrsakKlage) {
+                    throw FunksjonellFeil("Behandlingsårsak '${behandling.opprettetÅrsak.visningsnavn}' er ugyldig i kombinasjon med resultat '${resultat.displayName}'.")
+                }
+            }
+
+            behandling.erManuellMigrering() -> {
+                if (resultat.erAvslått() || resultat == DELVIS_INNVILGET) {
+                    throw FunksjonellFeil(
+                        "Du har fått behandlingsresultatet ${resultat.displayName}. " +
+                            "Dette er ikke støttet på migreringsbehandlinger. Meld sak i Porten om du er uenig i resultatet.",
+                    )
+                }
+            }
+
+            behandling.erOmregning() -> {
+                if (resultat !in setOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT)) {
+                    throw Feil("Behandling $behandling er omregningssak, men er ikke uendret behandlingsresultat")
+                }
+            }
         }
     }
 

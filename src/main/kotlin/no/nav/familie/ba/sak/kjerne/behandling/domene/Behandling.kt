@@ -213,6 +213,10 @@ data class Behandling(
         return this
     }
 
+    fun erFørstegangsbehandling() = type == BehandlingType.FØRSTEGANGSBEHANDLING
+
+    fun erRevurdering() = type == BehandlingType.REVURDERING
+
     fun erSmåbarnstillegg() = this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG
 
     fun erKlage() = this.opprettetÅrsak == BehandlingÅrsak.KLAGE
@@ -257,7 +261,7 @@ data class Behandling(
 
     fun kanLeggeTilOgFjerneUtvidetVilkår() = erManuellMigrering() || erTekniskEndring() || erKorrigereVedtak() || erKlage() || erIverksetteKAVedtak()
 
-    private fun erOmregning() = this.opprettetÅrsak.erOmregningsårsak()
+    fun erOmregning() = this.opprettetÅrsak.erOmregningsårsak()
 
     private fun erFødselshendelse() = this.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
 

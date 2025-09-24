@@ -6,7 +6,6 @@ import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.runs
 import no.nav.familie.ba.sak.TestClockProvider
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.SatsendringFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
@@ -165,54 +164,6 @@ class BehandlingsresultatStegTest {
             Assertions.assertEquals(
                 behandlingsresultatSteg.utførStegOgAngiNeste(fødselshendelseBehandling, ""),
                 StegType.IVERKSETT_MOT_OPPDRAG,
-            )
-        }
-
-        @Test
-        fun `Skal kaste exception hvis behandlingsresultat er Avslått for en manuell migrering`() {
-            every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.AVSLÅTT
-
-            every { behandlingService.oppdaterBehandlingsresultat(any(), any(), any()) } returns
-                behandling.copy(resultat = Behandlingsresultat.AVSLÅTT)
-
-            val exception = assertThrows<RuntimeException> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
-            Assertions.assertEquals(
-                "Du har fått behandlingsresultatet Avslått. " +
-                    "Dette er ikke støttet på migreringsbehandlinger. " +
-                    "Meld sak i Porten om du er uenig i resultatet.",
-                exception.message,
-            )
-        }
-
-        @Test
-        fun `Skal kaste exception hvis behandlingsresultat er Delvis Innvilget for en manuell migrering`() {
-            every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.DELVIS_INNVILGET
-
-            every { behandlingService.oppdaterBehandlingsresultat(any(), any(), any()) } returns
-                behandling.copy(resultat = Behandlingsresultat.DELVIS_INNVILGET)
-
-            val exception = assertThrows<RuntimeException> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
-            Assertions.assertEquals(
-                "Du har fått behandlingsresultatet Delvis innvilget. " +
-                    "Dette er ikke støttet på migreringsbehandlinger. " +
-                    "Meld sak i Porten om du er uenig i resultatet.",
-                exception.message,
-            )
-        }
-
-        @Test
-        fun `Skal kaste exception hvis behandlingsresultat er Avslått,Endret og Opphørt for en manuell migrering`() {
-            every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
-
-            every { behandlingService.oppdaterBehandlingsresultat(any(), any(), any()) } returns
-                behandling.copy(resultat = Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT)
-
-            val exception = assertThrows<RuntimeException> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
-            Assertions.assertEquals(
-                "Du har fått behandlingsresultatet Avslått, endret og opphørt. " +
-                    "Dette er ikke støttet på migreringsbehandlinger. " +
-                    "Meld sak i Porten om du er uenig i resultatet.",
-                exception.message,
             )
         }
 
@@ -1118,24 +1069,6 @@ class BehandlingsresultatStegTest {
         }
     }
 
-    @Test
-    fun `postValiderSteg - skal validere at behandlingsresultat ved omregning er uendret`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.OMREGNING_18ÅR)
-
-        for (resultat in endretBehandlingsresultat()) {
-            behandling.resultat = resultat
-            assertThrows<Feil> {
-                behandlingsresultatSteg.postValiderSteg(behandling)
-            }
-        }
-        for (resultat in uendretBehandlingsresultat()) {
-            behandling.resultat = resultat
-            assertDoesNotThrow {
-                behandlingsresultatSteg.postValiderSteg(behandling)
-            }
-        }
-    }
-
     private fun lagMocksForPreValiderSteg(
         behandling: Behandling,
         tilkjentYtelse: TilkjentYtelse,
@@ -1175,18 +1108,4 @@ class BehandlingsresultatStegTest {
                 .hentAndelerFraForrigeIverksattebehandling(behandling)
         } returns emptyList()
     }
-
-    private fun endretBehandlingsresultat() =
-        listOf(
-            Behandlingsresultat.ENDRET_UTBETALING,
-            Behandlingsresultat.ENDRET_UTEN_UTBETALING,
-            Behandlingsresultat.ENDRET_OG_OPPHØRT,
-            Behandlingsresultat.OPPHØRT,
-        )
-
-    private fun uendretBehandlingsresultat() =
-        listOf(
-            Behandlingsresultat.FORTSATT_INNVILGET,
-            Behandlingsresultat.FORTSATT_OPPHØRT,
-        )
 }

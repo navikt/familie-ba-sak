@@ -11,8 +11,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_INNVILGET
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils
@@ -151,8 +149,6 @@ class BehandlingsresultatSteg(
                 opprettVilkårsvurderingLogg = !(behandling.erMigrering() && behandling.skalBehandlesAutomatisk),
             )
 
-        validerBehandlingsresultatErGyldigForÅrsak(behandlingMedOppdatertBehandlingsresultat)
-
         validerAtUtenlandskPeriodeBeløpOgValutakursErUtfylt(behandling = behandling)
 
         if (behandlingMedOppdatertBehandlingsresultat.erBehandlingMedVedtaksbrevutsending()) {
@@ -192,31 +188,7 @@ class BehandlingsresultatSteg(
         )
     }
 
-    override fun postValiderSteg(behandling: Behandling) {
-        if (behandling.opprettetÅrsak.erOmregningsårsak() &&
-            behandling.resultat !in listOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT)
-        ) {
-            throw Feil("Behandling $behandling er omregningssak men er ikke uendret behandlingsresultat")
-        }
-    }
-
     override fun stegType(): StegType = StegType.BEHANDLINGSRESULTAT
-
-    private fun validerBehandlingsresultatErGyldigForÅrsak(behandlingMedOppdatertBehandlingsresultat: Behandling) {
-        if (behandlingMedOppdatertBehandlingsresultat.erManuellMigrering() &&
-            (
-                behandlingMedOppdatertBehandlingsresultat.resultat.erAvslått() ||
-                    behandlingMedOppdatertBehandlingsresultat.resultat == Behandlingsresultat.DELVIS_INNVILGET
-            )
-        ) {
-            throw FunksjonellFeil(
-                "Du har fått behandlingsresultatet " +
-                    "${behandlingMedOppdatertBehandlingsresultat.resultat.displayName}. " +
-                    "Dette er ikke støttet på migreringsbehandlinger. " +
-                    "Meld sak i Porten om du er uenig i resultatet.",
-            )
-        }
-    }
 
     private fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {
         if (behandling.status == BehandlingStatus.AVSLUTTET) return
