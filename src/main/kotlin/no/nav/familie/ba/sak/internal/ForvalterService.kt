@@ -209,3 +209,8 @@ class ForvalterService(
         }
     }
 }
+
+interface FagsakMedFlereMigreringer {
+    val fagsakId: Long
+    val fødselsnummer: String
+}
