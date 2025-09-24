@@ -29,7 +29,7 @@ internal class StatsborgerskapServiceTest {
 
     @BeforeEach
     fun setUp() {
-        statsborgerskapService = StatsborgerskapService(integrasjonClient, kodeverkService)
+        statsborgerskapService = StatsborgerskapService(kodeverkService)
         every { integrasjonClient.hentAlleEØSLand() } returns lagKodeverkLand()
     }
 
