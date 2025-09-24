@@ -24,7 +24,6 @@ enum class FeatureToggle(
 
     // NAV-24387
     BRUK_UTBETALINGSTIDSLINJER_VED_GENERERING_AV_PERIODER_TIL_AVSTEMMING("familie-ba-sak.bruk-utbetalingstidslinjer-ved-generering-av-perioder-til-avstemming"),
-    SKAL_FINNE_OG_PATCHE_ANDELER_I_FAGAKER_MED_AVVIK("familie-ba-sak.skal-finne-og-patche-andeler-i-fagsaker-med-avvik"),
 
     // satsendring
     // Oppretter satsendring-tasker for de som ikke har fått ny task
