@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.mock
+package no.nav.familie.ba.sak.fake
 
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.kontrakter.felles.ef.Datakilde
