@@ -1,12 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import io.mockk.every
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -22,7 +20,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
-import no.nav.familie.ba.sak.mock.EfSakRestClientMock
+import no.nav.familie.ba.sak.mock.FakeEfSakRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
@@ -42,7 +40,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val stegService: StegService,
-    @Autowired private val efSakRestClient: EfSakRestClientMock,
+    @Autowired private val efSakRestClient: FakeEfSakRestClient,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {

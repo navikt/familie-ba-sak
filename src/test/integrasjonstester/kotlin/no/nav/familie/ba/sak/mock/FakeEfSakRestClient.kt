@@ -14,7 +14,7 @@ import java.time.LocalDate
 @Service
 @Profile("mock-ef-client")
 @Primary
-class EfSakRestClientMock(
+class FakeEfSakRestClient(
     restOperations: RestOperations,
 ) : EfSakRestClient(
         URI("dummy_uri"),

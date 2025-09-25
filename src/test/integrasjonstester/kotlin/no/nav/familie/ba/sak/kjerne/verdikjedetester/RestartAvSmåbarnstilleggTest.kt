@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandard
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
@@ -38,7 +37,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
-import no.nav.familie.ba.sak.mock.EfSakRestClientMock
+import no.nav.familie.ba.sak.mock.FakeEfSakRestClient
 import no.nav.familie.ba.sak.task.SatsendringTaskDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.Datakilde
@@ -59,7 +58,7 @@ class RestartAvSmåbarnstilleggTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val efSakRestClient: EfSakRestClientMock,
+    @Autowired private val efSakRestClient: FakeEfSakRestClient,
     @Autowired private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val autovedtakSatsendringService: AutovedtakSatsendringService,

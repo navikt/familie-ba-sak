@@ -4,7 +4,6 @@ import io.mockk.isMockKMock
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
-import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
@@ -12,7 +11,6 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClientMo
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
-import no.nav.familie.ba.sak.mock.EfSakRestClientMock
 import no.nav.familie.ba.sak.mock.IntegrasjonClientMock
 import no.nav.familie.ba.sak.mock.LocalDateServiceTestConfig
 import no.nav.familie.ba.sak.mock.TilbakekrevingKlientTestConfig
