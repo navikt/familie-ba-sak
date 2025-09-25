@@ -38,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatStegValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
@@ -412,25 +413,31 @@ class CucumberMock(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         )
 
+    val behandlingsresultatStegValideringService =
+        BehandlingsresultatStegValideringService(
+            beregningService = beregningService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            vilkårService = vilkårService,
+            kompetanseRepository = kompetanseRepository,
+            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+            valutakursRepository = valutakursRepository,
+            clockProvider = clockProvider,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+        )
+
     val behandlingsresultatSteg =
         BehandlingsresultatSteg(
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             behandlingService = behandlingService,
             simuleringService = simuleringService,
             vedtakService = vedtakService,
             vedtaksperiodeService = vedtaksperiodeService,
             behandlingsresultatService = behandlingsresultatService,
-            vilkårService = vilkårService,
             persongrunnlagService = persongrunnlagService,
             beregningService = beregningService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
-            valutakursRepository = valutakursRepository,
-            clockProvider = clockProvider,
-            kompetanseRepository = kompetanseRepository,
             småbarnstilleggService = småbarnstilleggService,
             tilbakestillBehandlingService = tilbakestillBehandlingService,
+            behandlingsresultatstegValideringService = behandlingsresultatStegValideringService,
         )
 
     val saksbehandlerContext = SaksbehandlerContext("", mockk())

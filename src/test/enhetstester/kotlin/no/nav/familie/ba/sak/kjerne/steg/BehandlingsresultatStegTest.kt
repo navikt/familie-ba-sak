@@ -33,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatStegValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -91,26 +92,20 @@ class BehandlingsresultatStegTest {
     private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
     private val tilbakestillBehandlingService = mockk<TilbakestillBehandlingService>()
     private val clockProvider = TestClockProvider.Companion.lagClockProviderMedFastTidspunkt(LocalDate.of(2025, 10, 10))
+    private val behandlingsresultatstegValideringService = mockk<BehandlingsresultatStegValideringService>()
 
     private val behandlingsresultatSteg: BehandlingsresultatSteg =
         BehandlingsresultatSteg(
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             behandlingService = behandlingService,
             simuleringService = simuleringService,
             vedtakService = vedtakService,
             vedtaksperiodeService = vedtaksperiodeService,
             behandlingsresultatService = mockBehandlingsresultatService,
-            vilkårService = vilkårService,
             persongrunnlagService = persongrunnlagService,
             beregningService = beregningService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
-            valutakursRepository = valutakursRepository,
-            clockProvider = clockProvider,
-            kompetanseRepository = kompetanseRepository,
             småbarnstilleggService = småbarnstilleggService,
             tilbakestillBehandlingService = tilbakestillBehandlingService,
+            behandlingsresultatstegValideringService = behandlingsresultatstegValideringService,
         )
 
     private val behandling =
