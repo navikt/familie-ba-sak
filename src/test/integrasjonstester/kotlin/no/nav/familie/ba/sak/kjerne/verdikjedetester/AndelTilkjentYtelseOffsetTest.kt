@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
+import no.nav.familie.ba.sak.mock.EfSakRestClientMock
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
@@ -41,7 +42,7 @@ class AndelTilkjentYtelseOffsetTest(
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val stegService: StegService,
-    @Autowired private val efSakRestClient: EfSakRestClient,
+    @Autowired private val efSakRestClient: EfSakRestClientMock,
     @Autowired private val beregningService: BeregningService,
     @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
@@ -111,11 +112,13 @@ class AndelTilkjentYtelseOffsetTest(
         personScenario: RestScenario,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
-            EksternePerioderResponse(
-                perioder = emptyList(),
-            )
-
+        efSakRestClient.leggTilEksternPeriode(
+            personIdent = personScenario.søker.ident,
+            eksternePerioderResponse =
+                EksternePerioderResponse(
+                    perioder = emptyList(),
+                ),
+        )
         val restBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,
@@ -163,19 +166,21 @@ class AndelTilkjentYtelseOffsetTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
-            EksternePerioderResponse(
-                perioder =
-                    listOf(
-                        EksternPeriode(
-                            personIdent = personScenario.søker.ident,
-                            fomDato = barnFødselsdato.plusYears(1),
-                            tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                            datakilde = Datakilde.EF,
+        efSakRestClient.leggTilEksternPeriode(
+            personIdent = personScenario.søker.ident,
+            eksternePerioderResponse =
+                EksternePerioderResponse(
+                    perioder =
+                        listOf(
+                            EksternPeriode(
+                                personIdent = personScenario.søker.ident,
+                                fomDato = barnFødselsdato.plusYears(1),
+                                tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
+                                datakilde = Datakilde.EF,
+                            ),
                         ),
-                    ),
-            )
-
+                ),
+        )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,

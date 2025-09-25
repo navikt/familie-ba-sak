@@ -38,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
+import no.nav.familie.ba.sak.mock.EfSakRestClientMock
 import no.nav.familie.ba.sak.task.SatsendringTaskDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.Datakilde
@@ -58,7 +59,7 @@ class RestartAvSmåbarnstilleggTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val efSakRestClient: EfSakRestClient,
+    @Autowired private val efSakRestClient: EfSakRestClientMock,
     @Autowired private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val autovedtakSatsendringService: AutovedtakSatsendringService,
@@ -174,6 +175,7 @@ class RestartAvSmåbarnstilleggTest(
         Assertions.assertFalse(fagsaker.contains(fagsak3.id))
     }
 
+    // TODO
     @Test
     @Disabled("TODO denne er ustabil i main og trenger å fikses. Sikkert pga månedskifte. Sees på senere")
     fun `Skal finne en fagsak hvor småbarnstillegg starter opp igjen inneværende måned selv om det er utført satsendring`() {
@@ -289,10 +291,12 @@ class RestartAvSmåbarnstilleggTest(
         personScenario: RestScenario,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+        efSakRestClient.leggTilEksternPeriode(
+            personScenario.søker.ident,
             EksternePerioderResponse(
                 perioder = emptyList(),
-            )
+            ),
+        )
 
         val restBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
@@ -343,10 +347,13 @@ class RestartAvSmåbarnstilleggTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
-            EksternePerioderResponse(
-                perioder = mockPerioderMedOvergangsstønad,
-            )
+        efSakRestClient.leggTilEksternPeriode(
+            personIdent = personScenario.søker.ident,
+            eksternePerioderResponse =
+                EksternePerioderResponse(
+                    perioder = mockPerioderMedOvergangsstønad,
+                ),
+        )
 
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
@@ -419,7 +426,8 @@ class RestartAvSmåbarnstilleggTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+        efSakRestClient.leggTilEksternPeriode(
+            personScenario.søker.ident,
             EksternePerioderResponse(
                 perioder =
                     listOf(
@@ -430,8 +438,8 @@ class RestartAvSmåbarnstilleggTest(
                             datakilde = Datakilde.EF,
                         ),
                     ),
-            )
-
+            ),
+        )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,

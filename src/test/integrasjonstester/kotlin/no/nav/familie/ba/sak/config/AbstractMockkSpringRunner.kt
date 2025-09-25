@@ -39,9 +39,6 @@ abstract class AbstractMockkSpringRunner {
     private lateinit var mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
 
     @Autowired
-    private lateinit var mockEfSakRestClient: EfSakRestClient
-
-    @Autowired
     private lateinit var mockValutakursRestClient: ValutakursRestClient
 
     @Autowired
@@ -95,10 +92,6 @@ abstract class AbstractMockkSpringRunner {
         IntegrasjonClientMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(
             mockFamilieIntegrasjonerTilgangskontrollClient,
         )
-
-        if (isMockKMock(mockEfSakRestClient)) {
-            EfSakRestClientMock.clearEfSakRestMocks(mockEfSakRestClient)
-        }
 
         if (isMockKMock(mockValutakursRestClient)) {
             ValutakursRestClientMock.clearValutakursRestClient(mockValutakursRestClient)

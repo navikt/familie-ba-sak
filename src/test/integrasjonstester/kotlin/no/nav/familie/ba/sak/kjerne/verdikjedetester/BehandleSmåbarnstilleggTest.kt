@@ -72,7 +72,7 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val stegService: StegService,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val personidentService: PersonidentService,
-    @Autowired private val efSakRestClient: EfSakRestClient,
+    @Autowired private val efSakRestClient: EfSakRestClientMock,
     @Autowired private val autovedtakStegService: AutovedtakStegService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val opprettTaskService: OpprettTaskService,
@@ -111,18 +111,21 @@ class BehandleSmåbarnstilleggTest(
     }
 
     private fun settOppefSakMockForDeFørste2Testene(søkersIdent: String) {
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
-            EksternePerioderResponse(
-                perioder =
-                    listOf(
-                        EksternPeriode(
-                            personIdent = søkersIdent,
-                            fomDato = periodeMedFullOvergangsstønadFom,
-                            tomDato = barnFødselsdato.plusYears(18),
-                            datakilde = Datakilde.EF,
+        efSakRestClient.leggTilEksternPeriode(
+            personIdent = søkersIdent,
+            eksternePerioderResponse =
+                EksternePerioderResponse(
+                    perioder =
+                        listOf(
+                            EksternPeriode(
+                                personIdent = søkersIdent,
+                                fomDato = periodeMedFullOvergangsstønadFom,
+                                tomDato = barnFødselsdato.plusYears(18),
+                                datakilde = Datakilde.EF,
+                            ),
                         ),
-                    ),
-            )
+                ),
+        )
     }
 
     @Test
@@ -318,28 +321,33 @@ class BehandleSmåbarnstilleggTest(
     @Test
     @Order(3)
     fun `Skal stoppe automatisk behandling som må fortsette manuelt pga tilbakekreving`() {
-        EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
-
+        efSakRestClient.reset()
         val søkersAktør = personidentService.hentAktør(scenario.søker.aktørId)
 
         val periodeOvergangsstønadTom = LocalDate.now().minusMonths(3)
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
-            EksternePerioderResponse(
-                perioder =
-                    listOf(
-                        EksternPeriode(
-                            personIdent = søkersAktør.aktivFødselsnummer(),
-                            fomDato = periodeMedFullOvergangsstønadFom,
-                            tomDato = periodeOvergangsstønadTom,
-                            datakilde = Datakilde.EF,
+        efSakRestClient.leggTilEksternPeriode(
+            personIdent = scenario.søker.ident,
+            eksternePerioderResponse =
+                EksternePerioderResponse(
+                    perioder =
+                        listOf(
+                            EksternPeriode(
+                                personIdent = søkersAktør.aktivFødselsnummer(),
+                                fomDato = periodeMedFullOvergangsstønadFom,
+                                tomDato = periodeOvergangsstønadTom,
+                                datakilde = Datakilde.EF,
+                            ),
                         ),
-                    ),
-            )
+                ),
+        )
+
+        // Act
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
             aktør = søkersAktør,
         )
 
+        // Assert
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
 
@@ -378,24 +386,27 @@ class BehandleSmåbarnstilleggTest(
     @Test
     @Order(4)
     fun `Skal automatisk endre småbarnstilleggperioder`() {
-        EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
+        efSakRestClient.reset()
 
         val søkersIdent = scenario.søker.ident
         val søkersAktør = personidentService.hentAktør(søkersIdent)
 
         val periodeOvergangsstønadTom = LocalDate.now()
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
-            EksternePerioderResponse(
-                perioder =
-                    listOf(
-                        EksternPeriode(
-                            personIdent = søkersIdent,
-                            fomDato = periodeMedFullOvergangsstønadFom,
-                            tomDato = periodeOvergangsstønadTom,
-                            datakilde = Datakilde.EF,
+        efSakRestClient.leggTilEksternPeriode(
+            personIdent = søkersIdent,
+            eksternePerioderResponse =
+                EksternePerioderResponse(
+                    perioder =
+                        listOf(
+                            EksternPeriode(
+                                personIdent = søkersIdent,
+                                fomDato = periodeMedFullOvergangsstønadFom,
+                                tomDato = periodeOvergangsstønadTom,
+                                datakilde = Datakilde.EF,
+                            ),
                         ),
-                    ),
-            )
+                ),
+        )
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
             aktør = søkersAktør,

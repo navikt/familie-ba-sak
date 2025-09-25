@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles
     "mock-pdl",
     "mock-pdl-client",
     "mock-ident-client",
+    "mock-ef-client",
     "mock-task-repository",
     "mock-infotrygd-barnetrygd",
     "mock-tilbakekreving-klient",
