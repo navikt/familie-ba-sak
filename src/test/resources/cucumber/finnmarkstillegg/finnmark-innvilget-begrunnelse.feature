@@ -62,12 +62,6 @@ Egenskap: Innvilget Finnmarkstillegg begrunnelse pga søker
       | 3       | UNDER_18_ÅR                  |                              | 10.11.2024 | 09.11.2042 | OPPFYLT  |
       | 3       | BOSATT_I_RIKET               | BOSATT_I_FINNMARK_NORD_TROMS | 10.11.2024 |            | OPPFYLT  |
 
-    Og med endrede utbetalinger
-      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak              | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
-      | 2       | 1            | 01.09.2015 | 30.11.2024 | ETTERBETALING_3MND | 0       | 01.09.2025       |                             |
-      | 3,2     | 1            | 01.12.2024 | 31.05.2025 | ETTERBETALING_3MND | 0       | 01.09.2025       |                             |
-      | 2       | 2            | 01.09.2015 | 30.11.2024 | ETTERBETALING_3MND | 0       | 01.09.2025       |                             |
-      | 3,2     | 2            | 01.12.2024 | 31.05.2025 | ETTERBETALING_3MND | 0       | 01.09.2025       |                             |
 
     Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
