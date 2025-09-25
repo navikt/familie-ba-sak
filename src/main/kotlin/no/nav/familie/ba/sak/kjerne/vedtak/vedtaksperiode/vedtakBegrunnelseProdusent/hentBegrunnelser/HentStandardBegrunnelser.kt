@@ -211,14 +211,21 @@ private fun SanityBegrunnelse.erGjeldendeForFinnmarkstillegg(
     val harKravPåFinnmarkstilleggForrigePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåFinnmarkstilleggForrigePeriode()
     val harKravPåFinnmarkstilleggDennePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåFinnmarkstilleggDennePeriode()
 
-    val erFinnmarkstilleggIForrigeBehandlingPeriode = begrunnelseGrunnlag.sjekkOmharKravPåFinnmarkstilleggIForrigeBehandlingPeriode()
-    val erEndringIFinnmarkstilleggFraForrigeBehandling = erFinnmarkstilleggIForrigeBehandlingPeriode != harKravPåFinnmarkstilleggDennePeriode
+    val harFinnmarkstilleggIForrigeBehandlingPeriode =
+        // For innvilgete perioder ønsker vi å ha med alle barna det ble utbetalt for. For f.eks. Reduksjon ønsker vi kun å begrunne for personen som ikke oppfyller kravet
+        if (this.periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING) {
+            begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.FINNMARKSTILLEGG } == true
+        } else {
+            begrunnelseGrunnlag.sjekkOmharKravPåFinnmarkstilleggIForrigeBehandlingPeriode()
+        }
+
+    val erEndringIFinnmarkstilleggFraForrigeBehandling = harFinnmarkstilleggIForrigeBehandlingPeriode != harKravPåFinnmarkstilleggDennePeriode
 
     val begrunnelseMatcherPeriodeResultat =
         this.matcherPerioderesultat(
             harKravPåFinnmarkstilleggForrigePeriode,
             harKravPåFinnmarkstilleggDennePeriode,
-            erFinnmarkstilleggIForrigeBehandlingPeriode,
+            harFinnmarkstilleggIForrigeBehandlingPeriode,
         )
 
     val erEndringIFinnmarkstillegg = harKravPåFinnmarkstilleggForrigePeriode != harKravPåFinnmarkstilleggDennePeriode
