@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Profile
 
 @TestConfiguration
 @Profile("dev", "postgres")
-class FamilieIntegrasjonerTilgangskontrollMock {
+class FakeFamilieIntegrasjonerTilgangskontrollClient {
     @Bean
     @Primary
     fun mockFamilieIntegrasjonerTilgangskontrollClient(): FamilieIntegrasjonerTilgangskontrollClient {

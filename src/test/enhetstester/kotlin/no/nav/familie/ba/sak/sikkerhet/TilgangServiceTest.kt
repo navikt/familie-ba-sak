@@ -23,7 +23,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
-import no.nav.familie.ba.sak.mock.FamilieIntegrasjonerTilgangskontrollMock.Companion.mockSjekkTilgang
+import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollClient.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.log.mdc.MDCConstants
