@@ -21,8 +21,8 @@ import java.time.YearMonth
 
 object EndringIVilkårsvurderingUtil {
     fun lagEndringIVilkårsvurderingTidslinje(
-        nåværendePersonResultaterForPerson: Set<PersonResultat>,
-        forrigePersonResultater: Set<PersonResultat>,
+        nåværendePersonResultaterForPerson: PersonResultat?,
+        forrigePersonResultater: PersonResultat?,
         personIBehandling: Person?,
         personIForrigeBehandling: Person?,
         tidligsteRelevanteFomDatoForPersonIVilkårsvurdering: YearMonth,
@@ -34,12 +34,12 @@ object EndringIVilkårsvurderingUtil {
                     lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
                         nåværendeOppfylteVilkårResultaterForPerson =
                             nåværendePersonResultaterForPerson
-                                .flatMap { it.vilkårResultater }
-                                .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
+                                ?.vilkårResultater
+                                ?.filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT } ?: emptyList(),
                         forrigeOppfylteVilkårResultaterForPerson =
                             forrigePersonResultater
-                                .flatMap { it.vilkårResultater }
-                                .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
+                                ?.vilkårResultater
+                                ?.filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT } ?: emptyList(),
                         vilkår = vilkår,
                         personIBehandling = personIBehandling,
                         personIForrigeBehandling = personIForrigeBehandling,
