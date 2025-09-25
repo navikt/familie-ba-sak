@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -138,129 +137,6 @@ internal class TidTest {
 
         assertTrue(førsteVilkårResultat.erEtterfølgendePeriode(etterfølgendeVilkårResultat))
         assertFalse(førsteVilkårResultat.erEtterfølgendePeriode(ikkeEtterfølgendeVilkårResultat))
-    }
-
-    @Test
-    fun `skal slå sammen overlappende perioder til en periode og bruke laveste fom og beholde tom fra periode 3`() {
-        val periode1 = DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2005, 9, 2))
-        val periode2 = DatoIntervallEntitet(LocalDate.of(2005, 10, 1), LocalDate.of(2015, 5, 20))
-        val periode3 = DatoIntervallEntitet(LocalDate.of(2014, 10, 1), LocalDate.of(2018, 5, 20))
-        val currentPeriode = DatoIntervallEntitet(LocalDate.of(2018, 6, 1), null)
-
-        val result = slåSammenOverlappendePerioder(listOf(periode2, periode3, periode1, currentPeriode))
-        Assertions
-            .assertThat(result)
-            .hasSize(3)
-            .contains(periode1)
-            .contains(DatoIntervallEntitet(LocalDate.of(2005, 10, 1), LocalDate.of(2018, 5, 20)))
-            .contains(currentPeriode)
-    }
-
-    @Test
-    fun `skal slå sammen overlappende perioder til en periode og bruke laveste fom og beholde tom fra periode 2`() {
-        val periode1 = DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2005, 9, 2))
-        val periode2 = DatoIntervallEntitet(LocalDate.of(2005, 10, 1), LocalDate.of(2018, 5, 20))
-        val periode3 = DatoIntervallEntitet(LocalDate.of(2014, 10, 1), LocalDate.of(2015, 5, 20))
-        val currentPeriode = DatoIntervallEntitet(LocalDate.of(2018, 6, 1), null)
-
-        val result = slåSammenOverlappendePerioder(listOf(periode2, periode3, periode1, currentPeriode))
-        Assertions
-            .assertThat(result)
-            .hasSize(3)
-            .contains(periode1)
-            .contains(DatoIntervallEntitet(LocalDate.of(2005, 10, 1), LocalDate.of(2018, 5, 20)))
-            .contains(currentPeriode)
-    }
-
-    @Test
-    fun `skal slå sammen overlappende perioder med samme startdato`() {
-        val result =
-            slåSammenOverlappendePerioder(
-                listOf(
-                    DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 2, 1)),
-                    DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 3, 1)),
-                    DatoIntervallEntitet(LocalDate.of(2005, 1, 1), LocalDate.of(2005, 3, 1)),
-                    DatoIntervallEntitet(LocalDate.of(2005, 1, 1), LocalDate.of(2005, 2, 1)),
-                ),
-            )
-
-        Assertions
-            .assertThat(result)
-            .hasSize(2)
-            .contains(DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 3, 1)))
-            .contains(DatoIntervallEntitet(LocalDate.of(2005, 1, 1), LocalDate.of(2005, 3, 1)))
-    }
-
-    @Test
-    fun `skal ikke slå sammen perioder som ligger inntil hverandre`() {
-        val result =
-            slåSammenOverlappendePerioder(
-                listOf(
-                    DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 1, 31)),
-                    DatoIntervallEntitet(LocalDate.of(2004, 2, 1), LocalDate.of(2004, 2, 28)),
-                ),
-            )
-
-        Assertions
-            .assertThat(result)
-            .hasSize(2)
-            .contains(DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 1, 31)))
-            .contains(DatoIntervallEntitet(LocalDate.of(2004, 2, 1), LocalDate.of(2004, 2, 28)))
-    }
-
-    @Test
-    fun `skal slå sammen overlappende perioder til en periode og videreføre null i tom`() {
-        val periode1 = DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2005, 9, 2))
-        val periode2 = DatoIntervallEntitet(LocalDate.of(2005, 10, 1), LocalDate.of(2015, 5, 20))
-        val periode3 = DatoIntervallEntitet(LocalDate.of(2014, 10, 1), LocalDate.of(2018, 5, 20))
-        val currentPeriode = DatoIntervallEntitet(LocalDate.of(2008, 6, 1), null)
-
-        val result = slåSammenOverlappendePerioder(listOf(periode2, periode3, periode1, currentPeriode))
-        Assertions
-            .assertThat(result)
-            .hasSize(2)
-            .contains(periode1)
-            .contains(DatoIntervallEntitet(LocalDate.of(2005, 10, 1), null))
-    }
-
-    @Test
-    fun `skal slå sammen perioder til én periode hvor første periode har tom som null`() {
-        val periode1 = DatoIntervallEntitet(LocalDate.of(2004, 1, 1), null)
-        val periode2 = DatoIntervallEntitet(LocalDate.of(2005, 10, 1), LocalDate.of(2015, 5, 20))
-
-        val result = slåSammenOverlappendePerioder(listOf(periode1, periode2))
-        Assertions
-            .assertThat(result)
-            .hasSize(1)
-            .contains(periode1)
-            .contains(DatoIntervallEntitet(LocalDate.of(2004, 1, 1), null))
-    }
-
-    @Test
-    fun `hopp over perioder som ikke har fra-dato`() {
-        val periode1 = DatoIntervallEntitet(null, null)
-        val periode2 = DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 1, 5))
-
-        val result = slåSammenOverlappendePerioder(listOf(periode1, periode2))
-        Assertions
-            .assertThat(result)
-            .hasSize(1)
-    }
-
-    @Test
-    fun `det skal kun finnes en periode med tom = null  etter sammenslåing`() {
-        val result =
-            slåSammenOverlappendePerioder(
-                listOf(
-                    DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 1, 1)),
-                    DatoIntervallEntitet(LocalDate.of(2005, 1, 1), null),
-                    DatoIntervallEntitet(LocalDate.of(2005, 5, 1), LocalDate.of(2005, 6, 1)),
-                    DatoIntervallEntitet(LocalDate.of(2006, 1, 1), null),
-                    DatoIntervallEntitet(LocalDate.of(2006, 5, 1), LocalDate.of(2006, 6, 1)),
-                ),
-            )
-        Assertions.assertThat(result).hasSize(2)
-        Assertions.assertThat(result.filter { it.tom != null }).hasSize(1)
     }
 
     @Test

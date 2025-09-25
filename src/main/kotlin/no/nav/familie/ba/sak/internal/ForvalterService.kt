@@ -10,50 +10,28 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinjeService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.Utbetalingstidslinje
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.OppdaterTilkjentYtelseService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.task.AktiverMinsideTask
 import no.nav.familie.log.mdc.MDCConstants
-import no.nav.familie.prosessering.internal.TaskService
-import no.nav.familie.tidslinje.Periode
-import no.nav.familie.tidslinje.Tidslinje
-import no.nav.familie.tidslinje.tilTidslinje
-import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
-import no.nav.familie.tidslinje.utvidelser.kombinerMed
-import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
-import no.nav.familie.tidslinje.verdier
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
 
 @Service
 class ForvalterService(
@@ -62,14 +40,10 @@ class ForvalterService(
     private val beregningService: BeregningService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val fagsakRepository: FagsakRepository,
-    private val behandlingRepository: BehandlingRepository,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val oppdaterTilkjentYtelseService: OppdaterTilkjentYtelseService,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -234,114 +208,9 @@ class ForvalterService(
             throw Feil("Det finnes flere vilkårresultater som begynner før fødselsdato til person: $this")
         }
     }
-
-    @Transactional
-    fun finnOgPatchAndelerTilkjentYtelseIFagsakerMedAvvik(
-        fagsaker: Set<Long>,
-        korrigerAndelerFraOgMedDato: LocalDate,
-        dryRun: Boolean = true,
-    ): List<Pair<Long, List<AndelTilkjentYtelseKorreksjonDto>?>> {
-        return fagsaker.map { fagsakId ->
-            val sisteIverksatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId)
-            if (sisteIverksatteBehandling != null) {
-                val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = sisteIverksatteBehandling.id)
-                val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.groupBy { Pair(it.aktør, it.type) }
-                val utbetalingstidslinjer = utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId = fagsakId)
-                val andelTilkjentYtelseKorreksjoner: List<AndelTilkjentYtelseKorreksjon> =
-                    utbetalingstidslinjer.flatMap { utbetalingstidslinje ->
-                        val andeltidslinjeForUtbetalingstidslinje = finnAndelerTilkjentYtelseForUtbetalingstidslinje(utbetalingstidslinje = utbetalingstidslinje, andelerTilkjentYtelsePerAktørOgType = andelerTilkjentYtelse)
-                        utbetalingstidslinje.tidslinje
-                            // Ser kun på andeler som løper fra og med korrigerAndelerFraOgMedDato. Tanken er at vi ikke ønsker å korrigere bakover i tid.
-                            .beskjærFraOgMed(korrigerAndelerFraOgMedDato)
-                            .kombinerMed(andeltidslinjeForUtbetalingstidslinje) { utbetalingsperiode, andelTilkjentYtelse ->
-                                // Dersom verken utbetalingsperiode eller andelTilkjentYtelse er null betyr det at de overlapper.
-                                // Dersom de har ulike verdier for enten periodeId, forrigePeriodeId eller kildeBehandlingId oppretter vi en AndelTilkjentYtelseKorreksjon
-                                // Korreksjonen inneholder andelen med feil samt en korrigert versjon av andelen.
-                                if (utbetalingsperiode != null && andelTilkjentYtelse != null) {
-                                    if (utbetalingsperiode.periodeId != andelTilkjentYtelse.periodeOffset || utbetalingsperiode.forrigePeriodeId != andelTilkjentYtelse.forrigePeriodeOffset || utbetalingsperiode.behandlingId != andelTilkjentYtelse.kildeBehandlingId) {
-                                        return@kombinerMed AndelTilkjentYtelseKorreksjon(andelTilkjentYtelse, andelTilkjentYtelse.copy(id = 0, periodeOffset = utbetalingsperiode.periodeId, forrigePeriodeOffset = utbetalingsperiode.forrigePeriodeId, kildeBehandlingId = utbetalingsperiode.behandlingId))
-                                    }
-                                }
-                                return@kombinerMed null
-                            }.filtrerIkkeNull()
-                            .tilPerioderIkkeNull()
-                            .verdier()
-                    }
-
-                if (!dryRun) {
-                    // Sletter andeler med feil og oppretter korrigerte andeler.
-                    // Slettede andeler lagres i ny tabell PatchetAndelTilkjentYtelse slik at vi har mulighet til å finne ut hvordan de så ut før endringen.
-                    oppdaterTilkjentYtelseService.oppdaterTilkjentYtelseMedKorrigerteAndeler(
-                        tilkjentYtelse = tilkjentYtelse,
-                        andelTilkjentYtelseKorreksjoner = andelTilkjentYtelseKorreksjoner,
-                    )
-                }
-                return@map Pair(fagsakId, andelTilkjentYtelseKorreksjoner.tilAndelerTilkjentYtelseKorreksjonerDto())
-            }
-            return@map Pair(fagsakId, null)
-        }
-    }
-
-    private fun finnAndelerTilkjentYtelseForUtbetalingstidslinje(
-        utbetalingstidslinje: Utbetalingstidslinje,
-        andelerTilkjentYtelsePerAktørOgType: Map<Pair<Aktør, YtelseType>, List<AndelTilkjentYtelse>>,
-    ): Tidslinje<AndelTilkjentYtelse> =
-        andelerTilkjentYtelsePerAktørOgType.entries
-            .single { (_, andeler) ->
-
-                val førsteOffset =
-                    andeler
-                        .firstOrNull { it.erAndelSomSkalSendesTilOppdrag() && it.periodeOffset != null }
-                        ?.periodeOffset
-                if (førsteOffset != null) {
-                    return@single utbetalingstidslinje.erTidslinjeForPeriodeId(førsteOffset)
-                }
-                return@single false
-            }.value
-            .map { Periode(verdi = it, fom = it.stønadFom.førsteDagIInneværendeMåned(), tom = it.stønadTom.sisteDagIInneværendeMåned()) }
-            .tilTidslinje()
 }
 
 interface FagsakMedFlereMigreringer {
     val fagsakId: Long
     val fødselsnummer: String
 }
-
-data class AndelTilkjentYtelseKorreksjon(
-    val andelMedFeil: AndelTilkjentYtelse,
-    val korrigertAndel: AndelTilkjentYtelse,
-)
-
-fun List<AndelTilkjentYtelseKorreksjon>.tilAndelerTilkjentYtelseKorreksjonerDto() =
-    this.map {
-        AndelTilkjentYtelseKorreksjonDto(
-            andelMedFeil = it.andelMedFeil.tilAndelTilkjentYtelseDto(),
-            korrigertAndel = it.korrigertAndel.tilAndelTilkjentYtelseDto(),
-        )
-    }
-
-fun AndelTilkjentYtelse.tilAndelTilkjentYtelseDto() =
-    AndelTilkjentYtelseDto(
-        id = this.id,
-        stønadFom = this.stønadFom,
-        stønadTom = this.stønadTom,
-        beløp = this.kalkulertUtbetalingsbeløp,
-        periodeId = this.periodeOffset,
-        forrigePeriodeId = this.forrigePeriodeOffset,
-        kildeBehandlingId = this.kildeBehandlingId,
-    )
-
-data class AndelTilkjentYtelseKorreksjonDto(
-    val andelMedFeil: AndelTilkjentYtelseDto,
-    val korrigertAndel: AndelTilkjentYtelseDto,
-)
-
-data class AndelTilkjentYtelseDto(
-    val id: Long,
-    val stønadFom: YearMonth,
-    val stønadTom: YearMonth,
-    val beløp: Int,
-    val periodeId: Long?,
-    val forrigePeriodeId: Long?,
-    val kildeBehandlingId: Long?,
-)

@@ -40,6 +40,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
     "mock-sanity-client",
     "mock-unleash",
     "mock-infotrygd-barnetrygd",
+    "fake-integrasjon-client",
 )
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
 @Tag("verdikjedetest")

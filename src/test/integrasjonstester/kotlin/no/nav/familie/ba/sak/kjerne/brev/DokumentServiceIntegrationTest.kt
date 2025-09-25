@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
-import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.fake.FakeIntegrasjonClient
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -45,6 +45,7 @@ import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.testfiler.Testfil.TEST_PDF
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -75,7 +76,7 @@ class DokumentServiceIntegrationTest(
     @Autowired
     private val brevService: BrevService,
     @Autowired
-    private val integrasjonClient: IntegrasjonClient,
+    private val fakeIntegrasjonClient: FakeIntegrasjonClient,
     @Autowired
     private val arbeidsfordelingService: ArbeidsfordelingService,
     @Autowired
@@ -289,9 +290,7 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        verify(exactly = 1) {
-            integrasjonClient.journalførDokument(match { it.fnr == fnr })
-        }
+        assertThat(fakeIntegrasjonClient.hentJournalførteDokumenter().filter { it.fnr == fnr }).isNotEmpty()
     }
 
     @Test
@@ -332,9 +331,7 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        verify(exactly = 1) {
-            integrasjonClient.journalførDokument(match { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" })
-        }
+        assertThat(fakeIntegrasjonClient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
         assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
         assertEquals("institusjonsbarnets navn", manueltBrevRequest.vedrørende?.navn)
         verify {
@@ -389,9 +386,7 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        verify(exactly = 1) {
-            integrasjonClient.journalførDokument(match { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" })
-        }
+        assertThat(fakeIntegrasjonClient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
         assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
         assertEquals("institusjonsbarnets navn", manueltBrevRequest.vedrørende?.navn)
     }
@@ -434,16 +429,14 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        verify(exactly = 1) {
-            integrasjonClient.journalførDokument(match { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" })
-        }
+        assertThat(fakeIntegrasjonClient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
         assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
         assertEquals("institusjonsbarnets navn", manueltBrevRequest.vedrørende?.navn)
     }
 
     @Test
     fun `Test sending forlenget svartidsbrev til institusjon`() {
-        val fnr = "11121079074"
+        val fnr = randomFnr()
         val orgNummer = "998765432"
 
         val fagsak =
@@ -480,9 +473,7 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        verify(exactly = 1) {
-            integrasjonClient.journalførDokument(match { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" })
-        }
+        assertThat(fakeIntegrasjonClient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
         assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
         assertEquals("institusjonsbarnets navn", manueltBrevRequest.vedrørende?.navn)
     }

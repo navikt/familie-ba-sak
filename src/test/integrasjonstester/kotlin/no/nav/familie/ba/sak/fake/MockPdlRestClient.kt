@@ -7,8 +7,10 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.VergemaalEllerFremtidsfull
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
+import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
@@ -42,7 +44,27 @@ class MockPdlRestClient(
                                 ukjentBosted = null,
                             ),
                         ),
-                deltBosted = emptyList(),
+                deltBosted = deltBosteder[it] ?: emptyList(),
+                oppholdsadresse = emptyList(),
+            )
+        }
+
+    override fun hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(identer: List<String>): Map<String, PdlBostedsadresseDeltBostedOppholdsadressePerson> =
+        identer.associateWith {
+            PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                bostedsadresse =
+                    bostedsadresser[it]
+                        ?: listOf(
+                            Bostedsadresse(
+                                gyldigFraOgMed = LocalDate.now().minusYears(1),
+                                gyldigTilOgMed = null,
+                                vegadresse = null,
+                                matrikkeladresse = lagMatrikkeladresse(1234L),
+                                ukjentBosted = null,
+                            ),
+                        ),
+                deltBosted = deltBosteder[it] ?: emptyList(),
+                oppholdsadresse = oppholdsadresser[it] ?: emptyList(),
             )
         }
 
@@ -75,6 +97,8 @@ class MockPdlRestClient(
 
     companion object {
         private val bostedsadresser = mutableMapOf<String, List<Bostedsadresse>>()
+        private val deltBosteder = mutableMapOf<String, List<DeltBosted>>()
+        private val oppholdsadresser = mutableMapOf<String, List<Oppholdsadresse>>()
 
         fun leggTilBostedsadresseIPDL(
             personIdenter: List<String>,
@@ -82,6 +106,24 @@ class MockPdlRestClient(
         ) {
             personIdenter.forEach { personIdent ->
                 bostedsadresser[personIdent] = listOf(bostedsadresse)
+            }
+        }
+
+        fun leggTilDeltBostedIPDL(
+            personIdenter: List<String>,
+            deltBosted: DeltBosted,
+        ) {
+            personIdenter.forEach { personIdent ->
+                deltBosteder[personIdent] = listOf(deltBosted)
+            }
+        }
+
+        fun leggTilOppholdsadresseIPDL(
+            personIdenter: List<String>,
+            oppholdsadresse: Oppholdsadresse,
+        ) {
+            personIdenter.forEach { personIdent ->
+                oppholdsadresser[personIdent] = listOf(oppholdsadresse)
             }
         }
     }

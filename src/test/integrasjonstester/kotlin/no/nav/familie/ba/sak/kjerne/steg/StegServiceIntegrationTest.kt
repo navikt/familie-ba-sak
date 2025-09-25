@@ -5,9 +5,10 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
-import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
-import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -176,9 +177,7 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Skal feile når man prøver å håndtere feil steg`() {
-        val søkerFnr = randomFnr()
-
-        mockHentPersoninfoForIdenter(søkerFnr, "98765432110")
+        val (søkerFnr, _) = mockHentPersoninfoForIdenter()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
@@ -191,9 +190,7 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Skal feile når man prøver å endre en avsluttet behandling`() {
-        val søkerFnr = randomFnr()
-
-        mockHentPersoninfoForIdenter(søkerFnr, "98765432110")
+        val (søkerFnr, _) = mockHentPersoninfoForIdenter()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
@@ -215,9 +212,7 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Skal feile når man prøver å noe annet enn å beslutte behandling når den er på dette steget`() {
-        val søkerFnr = randomFnr()
-
-        mockHentPersoninfoForIdenter(søkerFnr, "98765432110")
+        val (søkerFnr, _) = mockHentPersoninfoForIdenter()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
@@ -234,9 +229,7 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Skal feile når man prøver å kalle beslutning-steget med feil status på behandling`() {
-        val søkerFnr = randomFnr()
-
-        mockHentPersoninfoForIdenter(søkerFnr, "98765432110")
+        val (søkerFnr, _) = mockHentPersoninfoForIdenter()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
@@ -252,12 +245,8 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Underkjent beslutning setter steg tilbake til send til beslutter`() {
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
-
+        val (søkerFnr, _) = mockHentPersoninfoForIdenter()
         val søkerAktørId = personidentService.hentAktør(søkerFnr)
-
-        mockHentPersoninfoForIdenter(søkerFnr, barnFnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
@@ -381,9 +370,7 @@ class StegServiceIntegrationTest(
     // Disse vil bli stoppet i BehandlingStegController.
     @Test
     fun `Henlegge dersom behandling står på FERDIGSTILLE_BEHANDLING steget`() {
-        val søkerFnr = randomFnr()
-
-        mockHentPersoninfoForIdenter(søkerFnr, "98765432110")
+        val (søkerFnr, _) = mockHentPersoninfoForIdenter()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
@@ -1250,24 +1237,25 @@ class StegServiceIntegrationTest(
         assertEquals(migreringsdato, behandlingService.hentMigreringsdatoIBehandling(behandling.id))
     }
 
-    private fun mockHentPersoninfoForIdenter(
-        søkerFnr: String,
-        barnFnr: String,
-    ) {
-        leggTilPersonInfo(
-            personIdent = barnFnr,
-            egendefinertMock =
-                PersonInfo(
-                    fødselsdato = LocalDate.of(2018, 5, 1),
-                    kjønn = Kjønn.KVINNE,
-                    navn = "Barn Barnesen",
-                    sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
-                ),
-        )
-        leggTilPersonInfo(
-            personIdent = søkerFnr,
-            egendefinertMock =
-                PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen"),
-        )
+    private fun mockHentPersoninfoForIdenter(): Pair<String, String> {
+        val søkerFødselsdato = randomSøkerFødselsdato()
+        val søkerFnr =
+            leggTilPersonInfo(
+                fødselsdato = søkerFødselsdato,
+                egendefinertMock =
+                    PersonInfo(
+                        fødselsdato = søkerFødselsdato,
+                        kjønn = Kjønn.KVINNE,
+                        navn = "Mor Moresen",
+                        sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
+                    ),
+            )
+        val barnFødselsdato = randomBarnFødselsdato()
+        val barnFnr =
+            leggTilPersonInfo(
+                fødselsdato = barnFødselsdato,
+                egendefinertMock = PersonInfo(fødselsdato = barnFødselsdato, kjønn = Kjønn.KVINNE, navn = "Barn Barnesen"),
+            )
+        return søkerFnr to barnFnr
     }
 }

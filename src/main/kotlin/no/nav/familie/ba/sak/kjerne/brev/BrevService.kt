@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåba
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakFinnmarkstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtFørsteBarn
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakSvalbardtillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Avslag
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -251,6 +252,11 @@ class BrevService(
 
             Brevmal.AUTOVEDTAK_FINNMARKSTILLEGG ->
                 AutovedtakFinnmarkstillegg(
+                    vedtakFellesfelter = vedtakFellesfelter,
+                )
+
+            Brevmal.AUTOVEDTAK_SVALBARDTILLEGG ->
+                AutovedtakSvalbardtillegg(
                     vedtakFellesfelter = vedtakFellesfelter,
                 )
 

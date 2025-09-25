@@ -5,10 +5,13 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.erUkraina
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -43,12 +46,15 @@ class PreutfyllBosattIRiketService(
                 .map { it.aktør.aktivFødselsnummer() }
                 .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
 
-        val bostedsadresser = pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer)
+        val bostedsadresser = pdlRestClient.hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(identer)
 
         vilkårsvurdering
             .personResultater
             .filter { it.aktør.aktivFødselsnummer() in identer }
             .forEach { personResultat ->
+                val erUkrainskStatsborger = hentErUkrainskStatsborger(personResultat.aktør)
+                if (erUkrainskStatsborger) return@forEach
+
                 val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
                 val bostedsadresserForPerson = Adresser.opprettFra(bostedsadresser[personResultat.aktør.aktivFødselsnummer()])
 
@@ -73,13 +79,24 @@ class PreutfyllBosattIRiketService(
     ): Set<VilkårResultat> {
         val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(adresserForPerson)
         val erBosattIFinnmarkEllerNordTromsTidslinje = lagErBosattIFinnmarkEllerNordTromsTidslinje(adresserForPerson)
+        val erOppholdsadressePåSvalbardTidslinje = lagErBosattPåSvalbardTidslinje(adresserForPerson)
         val erNordiskStatsborgerTidslinje = pdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat)
 
+        val erNordiskStatsborgerOgBosattINorgeTidslinje =
+            erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeTidslinje) { erNordiskStatsborger, erBosattINorge ->
+                erNordiskStatsborger == true && erBosattINorge == true
+            }
         val erBosattOgHarNordiskStatsborgerskapTidslinje =
-            erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeTidslinje, erBosattIFinnmarkEllerNordTromsTidslinje) { erNordisk, erBosattINorge, erBosattIFinnmarkEllerNordTroms ->
-                val nordiskOgBosatt = erNordisk == true && erBosattINorge == true
-                val utdypendeVilkårsvurderinger = if (erBosattIFinnmarkEllerNordTroms == true) listOf(BOSATT_I_FINNMARK_NORD_TROMS) else emptyList()
-                if (nordiskOgBosatt) {
+            erNordiskStatsborgerOgBosattINorgeTidslinje.kombinerMed(erBosattIFinnmarkEllerNordTromsTidslinje, erOppholdsadressePåSvalbardTidslinje) { erNordiskStatsborgerOgBosattINorge, erBosattIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
+                val utdypendeVilkårsvurderinger =
+                    if (erOppholdsadressePåSvalbard == true) {
+                        listOf(BOSATT_PÅ_SVALBARD)
+                    } else if (erBosattIFinnmarkEllerNordTroms == true) {
+                        listOf(BOSATT_I_FINNMARK_NORD_TROMS)
+                    } else {
+                        emptyList()
+                    }
+                if (erNordiskStatsborgerOgBosattINorge == true) {
                     OppfyltDelvilkår(begrunnelse = "- Norsk/nordisk statsborgerskap", utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger)
                 } else {
                     IkkeOppfyltDelvilkår
@@ -117,6 +134,11 @@ class PreutfyllBosattIRiketService(
                     erOpprinneligPreutfylt = true,
                 )
             }.toSet()
+    }
+
+    private fun hentErUkrainskStatsborger(aktør: Aktør): Boolean {
+        val statsborgerskap = pdlRestClient.hentStatsborgerskap(aktør)
+        return statsborgerskap.any { it.erUkraina() }
     }
 
     private fun lagErØvrigeKravForBosattIRiketOppfyltTidslinje(
@@ -203,6 +225,8 @@ class PreutfyllBosattIRiketService(
                 bostedsadresseIFinnmarkEllerNordTroms == true || deltBostedIFinnmarkEllerNordTroms == true
             }
     }
+
+    private fun lagErBosattPåSvalbardTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.oppholdsadresse) { it.erPåSvalbard() }
 
     private fun lagTidslinjeForAdresser(
         adresser: List<Adresse>,

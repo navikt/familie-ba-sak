@@ -1,18 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
-import io.mockk.every
-import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
-import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
-import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
+import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.fake.MockPersonopplysningerService.Companion.leggTilRelasjonIPersonInfo
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.fake.FakeIntegrasjonClient
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilRelasjonIPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -33,17 +30,25 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate.now
 
 class ArbeidsfordelingIntegrationTest(
-    @Autowired private val fagsakService: FagsakService,
-    @Autowired private val stegService: StegService,
-    @Autowired private val arbeidsfordelingService: ArbeidsfordelingService,
-    @Autowired private val integrasjonClient: IntegrasjonClient,
-    @Autowired private val oppgaveService: OppgaveService,
+    @Autowired
+    private val fagsakService: FagsakService,
+    @Autowired
+    private val stegService: StegService,
+    @Autowired
+    private val arbeidsfordelingService: ArbeidsfordelingService,
+    @Autowired
+    private val fakeIntegrasjonClient: FakeIntegrasjonClient,
+    @Autowired
+    private val oppgaveService: OppgaveService,
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Skal fastsette behandlende enhet ved opprettelse av behandling`() {
         // Arrange
         val søkerFnr = mockSøker()
-        mockBehandlendeEnhetForPerson(søkerFnr, IKKE_FORTROLIG_ENHET)
+        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+            søkerFnr,
+            listOf(IKKE_FORTROLIG_ENHET),
+        )
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerFnr)
 
@@ -54,7 +59,9 @@ class ArbeidsfordelingIntegrationTest(
             )
 
         // Assert
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+
         assertEquals(IKKE_FORTROLIG_ENHET.enhetsnummer, arbeidsfordelingPåBehandling.behandlendeEnhetId)
     }
 
@@ -63,8 +70,14 @@ class ArbeidsfordelingIntegrationTest(
         // Arrange
         val søkerFnr = mockSøker()
         val ikkeFortreligBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.UGRADERT)
-        mockBehandlendeEnhetForPerson(søkerFnr, IKKE_FORTROLIG_ENHET)
-        mockBehandlendeEnhetForPerson(ikkeFortreligBarnFnr, IKKE_FORTROLIG_ENHET)
+        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+            søkerFnr,
+            listOf(IKKE_FORTROLIG_ENHET),
+        )
+        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+            ikkeFortreligBarnFnr,
+            listOf(IKKE_FORTROLIG_ENHET),
+        )
 
         val fagsak =
             fagsakService.hentEllerOpprettFagsak(
@@ -75,7 +88,8 @@ class ArbeidsfordelingIntegrationTest(
                 lagNyBehandling(fagsak.id, søkerFnr),
             )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET.enhetsnummer, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         // Act
@@ -92,7 +106,8 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         // Assert
-        val arbeidsfordelingPåBehandlingEtterSøknadsregistrering = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandlingEtterSøknadsregistrering =
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET.enhetsnummer, arbeidsfordelingPåBehandlingEtterSøknadsregistrering.behandlendeEnhetId)
     }
 
@@ -101,8 +116,14 @@ class ArbeidsfordelingIntegrationTest(
         // Arrange
         val søkerFnr = mockSøker()
         val fortroligBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.FORTROLIG)
-        mockBehandlendeEnhetForPerson(søkerFnr, IKKE_FORTROLIG_ENHET)
-        mockBehandlendeEnhetForPerson(fortroligBarnFnr, FORTROLIG_ENHET)
+        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+            søkerFnr,
+            listOf(IKKE_FORTROLIG_ENHET),
+        )
+        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+            fortroligBarnFnr,
+            listOf(FORTROLIG_ENHET),
+        )
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerFnr)
         val behandling =
@@ -110,7 +131,8 @@ class ArbeidsfordelingIntegrationTest(
                 lagNyBehandling(fagsak.id, søkerFnr),
             )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET.enhetsnummer, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         // Act
@@ -127,7 +149,8 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         // Assert
-        val arbeidsfordelingPåBehandlingEtterSøknadsregistrering = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandlingEtterSøknadsregistrering =
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(FORTROLIG_ENHET.enhetsnummer, arbeidsfordelingPåBehandlingEtterSøknadsregistrering.behandlendeEnhetId)
     }
 
@@ -137,9 +160,18 @@ class ArbeidsfordelingIntegrationTest(
         val søkerFnr = mockSøker()
         val ugradertBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.UGRADERT)
         val fortroligBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.FORTROLIG)
-        mockBehandlendeEnhetForPerson(søkerFnr, IKKE_FORTROLIG_ENHET)
-        mockBehandlendeEnhetForPerson(ugradertBarnFnr, IKKE_FORTROLIG_ENHET)
-        mockBehandlendeEnhetForPerson(fortroligBarnFnr, FORTROLIG_ENHET)
+        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+            søkerFnr,
+            listOf(IKKE_FORTROLIG_ENHET),
+        )
+        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+            ugradertBarnFnr,
+            listOf(IKKE_FORTROLIG_ENHET),
+        )
+        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+            fortroligBarnFnr,
+            listOf(FORTROLIG_ENHET),
+        )
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerFnr)
         val behandling =
@@ -147,7 +179,8 @@ class ArbeidsfordelingIntegrationTest(
                 lagNyBehandling(fagsak.id, søkerFnr),
             )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET.enhetsnummer, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         stegService.håndterSøknad(
@@ -162,7 +195,8 @@ class ArbeidsfordelingIntegrationTest(
             ),
         )
 
-        val arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode =
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(
             IKKE_FORTROLIG_ENHET.enhetsnummer,
             arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode.behandlendeEnhetId,
@@ -185,7 +219,8 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         // Assert
-        val arbeidsfordelingPåBehandlingEtterSøknadsregistreringMedDiskresjonskode = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandlingEtterSøknadsregistreringMedDiskresjonskode =
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(
             FORTROLIG_ENHET.enhetsnummer,
             arbeidsfordelingPåBehandlingEtterSøknadsregistreringMedDiskresjonskode.behandlendeEnhetId,
@@ -197,7 +232,10 @@ class ArbeidsfordelingIntegrationTest(
         // Arrange
         val søkerFnr = mockSøker()
         val ugradertBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.UGRADERT)
-        mockBehandlendeEnhetForPerson(søkerFnr, IKKE_FORTROLIG_ENHET)
+        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+            søkerFnr,
+            listOf(IKKE_FORTROLIG_ENHET),
+        )
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerFnr)
         val behandling =
@@ -205,7 +243,8 @@ class ArbeidsfordelingIntegrationTest(
                 lagNyBehandling(fagsak.id, søkerFnr),
             )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET.enhetsnummer, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         arbeidsfordelingService.manueltOppdaterBehandlendeEnhet(
@@ -230,7 +269,8 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         // Assert
-        val arbeidsfordelingPåBehandlingEtterSøknadsregistrering = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandlingEtterSøknadsregistrering =
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(MANUELT_OVERSTYRT_ENHET.enhetsnummer, arbeidsfordelingPåBehandlingEtterSøknadsregistrering.behandlendeEnhetId)
     }
 
@@ -239,8 +279,14 @@ class ArbeidsfordelingIntegrationTest(
         // Arrange
         val søkerFnr = mockSøker()
         val fortroligBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.FORTROLIG)
-        mockBehandlendeEnhetForPerson(søkerFnr, IKKE_FORTROLIG_ENHET)
-        mockBehandlendeEnhetForPerson(fortroligBarnFnr, FORTROLIG_ENHET)
+        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+            søkerFnr,
+            listOf(IKKE_FORTROLIG_ENHET),
+        )
+        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+            fortroligBarnFnr,
+            listOf(FORTROLIG_ENHET),
+        )
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerFnr)
         val behandling =
@@ -248,7 +294,8 @@ class ArbeidsfordelingIntegrationTest(
                 lagNyBehandling(fagsak.id, søkerFnr),
             )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET.enhetsnummer, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         oppgaveService.opprettOppgave(behandling.id, Oppgavetype.BehandleSak, now())
@@ -266,11 +313,8 @@ class ArbeidsfordelingIntegrationTest(
             ),
         )
 
-        // Assert
-        verify(exactly = 1) {
-            integrasjonClient.tilordneEnhetOgRessursForOppgave(any(), FORTROLIG_ENHET.enhetsnummer)
-        }
-        val arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode =
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(
             FORTROLIG_ENHET.enhetsnummer,
             arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode.behandlendeEnhetId,
@@ -291,7 +335,7 @@ class ArbeidsfordelingIntegrationTest(
 
     private fun mockSøker(): String =
         leggTilPersonInfo(
-            randomFnr(),
+            randomSøkerFødselsdato(),
             PersonInfo(
                 fødselsdato = now().minusYears(20),
                 navn = "Søker Mockesen",
@@ -308,7 +352,7 @@ class ArbeidsfordelingIntegrationTest(
     ): String {
         val barnFnr =
             leggTilPersonInfo(
-                randomBarnFnr(),
+                randomBarnFødselsdato(),
                 PersonInfo(
                     fødselsdato = now().førsteDagIInneværendeMåned(),
                     navn = "Barn Mockesen",
@@ -320,13 +364,6 @@ class ArbeidsfordelingIntegrationTest(
             )
         leggTilRelasjonIPersonInfo(barnFnr, relasjonFnr, FORELDERBARNRELASJONROLLE.MOR)
         return barnFnr
-    }
-
-    private fun mockBehandlendeEnhetForPerson(
-        fnr: String,
-        enhet: BarnetrygdEnhet,
-    ) {
-        every { integrasjonClient.hentBehandlendeEnhet(eq(fnr)) } returns listOf(Arbeidsfordelingsenhet.opprettFra(enhet))
     }
 
     companion object {

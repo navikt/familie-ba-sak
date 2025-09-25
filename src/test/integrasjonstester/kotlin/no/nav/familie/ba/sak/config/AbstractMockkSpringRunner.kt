@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClientMo
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
-import no.nav.familie.ba.sak.mock.IntegrasjonClientMock
+import no.nav.familie.ba.sak.mock.FamilieIntegrasjonerTilgangskontrollMock
 import no.nav.familie.ba.sak.mock.LocalDateServiceTestConfig
 import no.nav.familie.ba.sak.mock.TilbakekrevingKlientTestConfig
 import no.nav.familie.ba.sak.mock.ValutakursRestClientMock
@@ -83,11 +83,7 @@ abstract class AbstractMockkSpringRunner {
         val fakePdlIdentRestClient = pdlIdentRestClient as? FakePdlIdentRestClient
         fakePdlIdentRestClient?.reset()
 
-        if (isMockKMock(mockIntegrasjonClient)) {
-            IntegrasjonClientMock.clearIntegrasjonMocks(mockIntegrasjonClient)
-        }
-
-        IntegrasjonClientMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(
+        FamilieIntegrasjonerTilgangskontrollMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(
             mockFamilieIntegrasjonerTilgangskontrollClient,
         )
 

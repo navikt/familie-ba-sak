@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -13,7 +12,6 @@ import java.time.LocalDate
 
 @Service
 class StatsborgerskapService(
-    private val integrasjonClient: IntegrasjonClient,
     private val kodeverkService: KodeverkService,
 ) {
     fun hentLand(landkode: String): String = kodeverkService.hentLand(landkode)
@@ -209,6 +207,8 @@ fun Statsborgerskap.iNordiskLand() = Norden.entries.map { it.name }.contains(thi
 fun Statsborgerskap.iTredjeland() = this.land != StatsborgerskapService.LANDKODE_UKJENT
 
 fun Statsborgerskap.erStatsløs() = this.land == StatsborgerskapService.LANDKODE_STATSLØS
+
+fun Statsborgerskap.erUkraina() = this.land == "UKR"
 
 /**
  * Norge, Sverige, Finland, Danmark, Island, Grønland, Færøyene og Åland
