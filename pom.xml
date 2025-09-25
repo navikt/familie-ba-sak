@@ -39,12 +39,7 @@
         <sentry.version>8.21.1</sentry.version>
         <kotlinx.version>1.10.2</kotlinx.version>
         <kotlinx-kover.version>0.9.2</kotlinx-kover.version>
-
-        <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
-        <okhttp3.version>4.9.0</okhttp3.version>
         <mock-oauth2-server.version>3.0.0</mock-oauth2-server.version>
-        <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
-
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <unleash.version>11.1.0</unleash.version>
