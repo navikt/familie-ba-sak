@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.config
 import io.mockk.isMockKMock
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.fake.FakeEfSakRestClient
 import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
+import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
@@ -29,6 +31,9 @@ import java.util.UUID
 abstract class AbstractMockkSpringRunner {
     @Autowired
     private lateinit var pdlIdentRestClient: PdlIdentRestClient
+
+    @Autowired
+    private lateinit var efSakRestClient: EfSakRestClient
 
     @Autowired
     private lateinit var mockIntegrasjonClient: IntegrasjonClient
@@ -82,6 +87,9 @@ abstract class AbstractMockkSpringRunner {
 
         val fakePdlIdentRestClient = pdlIdentRestClient as? FakePdlIdentRestClient
         fakePdlIdentRestClient?.reset()
+
+        val fakeEfSakRestClient = efSakRestClient as? FakeEfSakRestClient
+        fakeEfSakRestClient?.reset()
 
         FamilieIntegrasjonerTilgangskontrollMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(
             mockFamilieIntegrasjonerTilgangskontrollClient,
