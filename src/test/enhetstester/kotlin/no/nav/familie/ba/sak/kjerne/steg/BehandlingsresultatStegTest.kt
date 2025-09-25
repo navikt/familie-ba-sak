@@ -5,16 +5,24 @@ import io.mockk.just
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagPersonEnkel
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SATSENDRING
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SVALBARDTILLEGG
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatStegValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -88,6 +96,22 @@ class BehandlingsresultatStegTest {
 
     @Nested
     inner class PreValiderStegTest {
+        @BeforeEach
+        fun setup() {
+            every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(any()) } returns listOf(lagPersonEnkel(personType = PersonType.SØKER))
+            every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns mockk(relaxed = true)
+
+            justRun { behandlingsresultatstegValideringService.validerAtUtenlandskPeriodebeløpOgValutakursErUtfylt(any()) }
+            justRun { behandlingsresultatstegValideringService.validerSatsendring(any()) }
+            justRun { behandlingsresultatstegValideringService.validerFinnmarkstilleggBehandling(any()) }
+            justRun { behandlingsresultatstegValideringService.validerSvalbardtilleggBehandling(any()) }
+            justRun { behandlingsresultatstegValideringService.validerEndredeUtbetalingsandeler(any()) }
+            justRun { behandlingsresultatstegValideringService.validerKompetanse(any()) }
+            justRun { behandlingsresultatstegValideringService.validerIngenEndringTilbakeITid(any()) }
+            justRun { behandlingsresultatstegValideringService.validerSatsErUendret(any()) }
+            justRun { behandlingsresultatstegValideringService.validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(any()) }
+        }
+
         @ParameterizedTest
         @EnumSource(
             value = BehandlingÅrsak::class,
@@ -102,6 +126,113 @@ class BehandlingsresultatStegTest {
 
             // Act & assert
             assertDoesNotThrow { behandlingsresultatSteg.preValiderSteg(behandling) }
+        }
+
+        @Test
+        fun `skal validere at utenlandsk periodebeløp og valutakurs er utfylt`() {
+            // Arrange
+            val behandling = lagBehandling()
+
+            // Act
+            behandlingsresultatSteg.preValiderSteg(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatstegValideringService.validerAtUtenlandskPeriodebeløpOgValutakursErUtfylt(behandling)
+            }
+        }
+
+        @Test
+        fun `skal validere satsendring`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = SATSENDRING)
+
+            // Act
+            behandlingsresultatSteg.preValiderSteg(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatstegValideringService.validerSatsendring(any())
+            }
+        }
+
+        @Test
+        fun `skal validere finnmarkstillegg`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = FINNMARKSTILLEGG)
+
+            // Act
+            behandlingsresultatSteg.preValiderSteg(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatstegValideringService.validerFinnmarkstilleggBehandling(any())
+            }
+        }
+
+        @Test
+        fun `skal validere svalbardtillegg`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = SVALBARDTILLEGG)
+
+            // Act
+            behandlingsresultatSteg.preValiderSteg(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatstegValideringService.validerSvalbardtilleggBehandling(any())
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = BehandlingÅrsak::class,
+            names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG"],
+            mode = EXCLUDE,
+        )
+        fun `skal validere endrede utbetalinger og kompetanse`(
+            behandlingsÅrsak: BehandlingÅrsak,
+        ) {
+            // Arrange
+            val behandling = lagBehandling(årsak = behandlingsÅrsak)
+
+            // Act
+            behandlingsresultatSteg.preValiderSteg(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatstegValideringService.validerEndredeUtbetalingsandeler(any())
+                behandlingsresultatstegValideringService.validerKompetanse(any())
+            }
+        }
+
+        @Test
+        fun `skal validere månedlig valutajustering`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = MÅNEDLIG_VALUTAJUSTERING)
+
+            // Act
+            behandlingsresultatSteg.preValiderSteg(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatstegValideringService.validerIngenEndringTilbakeITid(any())
+                behandlingsresultatstegValideringService.validerSatsErUendret(any())
+            }
+        }
+
+        @Test
+        fun `skal validere endre migreringsdato`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = ENDRE_MIGRERINGSDATO)
+
+            // Act
+            behandlingsresultatSteg.preValiderSteg(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatstegValideringService.validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(any())
+            }
         }
     }
 }
