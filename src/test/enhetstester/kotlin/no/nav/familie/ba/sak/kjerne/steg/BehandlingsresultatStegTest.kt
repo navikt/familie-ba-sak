@@ -5,10 +5,8 @@ import io.mockk.just
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.runs
-import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -17,114 +15,74 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatStegValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
-import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
-import no.nav.familie.ba.sak.kjerne.småbarnstillegg.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
-import org.junit.jupiter.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import java.time.LocalDate
+import org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE
 
 class BehandlingsresultatStegTest {
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val behandlingService: BehandlingService = mockk()
-    private val simuleringService: SimuleringService = mockk()
     private val vedtakService: VedtakService = mockk()
     private val vedtaksperiodeService: VedtaksperiodeService = mockk()
-    private val mockBehandlingsresultatService: BehandlingsresultatService = mockk()
-    private val vilkårService: VilkårService = mockk()
+    private val behandlingsresultatService: BehandlingsresultatService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val beregningService: BeregningService = mockk()
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
-    private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository = mockk()
-    private val valutakursRepository: ValutakursRepository = mockk()
-    private val valutakursService = mockk<ValutakursService>()
-    private val kompetanseRepository = mockk<KompetanseRepository>()
-    private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
-    private val tilbakestillBehandlingService = mockk<TilbakestillBehandlingService>()
-    private val clockProvider = TestClockProvider.Companion.lagClockProviderMedFastTidspunkt(LocalDate.of(2025, 10, 10))
-    private val behandlingsresultatstegValideringService = mockk<BehandlingsresultatStegValideringService>()
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService = mockk()
+    private val behandlingsresultatstegValideringService: BehandlingsresultatStegValideringService = mockk()
 
     private val behandlingsresultatSteg: BehandlingsresultatSteg =
         BehandlingsresultatSteg(
             behandlingService = behandlingService,
-            simuleringService = simuleringService,
+            simuleringService = mockk(),
             vedtakService = vedtakService,
             vedtaksperiodeService = vedtaksperiodeService,
-            behandlingsresultatService = mockBehandlingsresultatService,
+            behandlingsresultatService = behandlingsresultatService,
             persongrunnlagService = persongrunnlagService,
             beregningService = beregningService,
-            småbarnstilleggService = småbarnstilleggService,
+            småbarnstilleggService = mockk(),
             tilbakestillBehandlingService = tilbakestillBehandlingService,
             behandlingsresultatstegValideringService = behandlingsresultatstegValideringService,
         )
 
-    private val behandling =
-        lagBehandling(
-            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-        )
-
-    @BeforeEach
-    fun init() {
-        every { simuleringService.oppdaterSimuleringPåBehandling(any()) } returns emptyList()
-        every { simuleringService.hentSimuleringPåBehandling(any()) } returns emptyList()
-        every { valutakursService.hentValutakurser(any()) } returns emptyList()
-        every { kompetanseRepository.finnFraBehandlingId(any()) } returns emptyList()
-        justRun {
-            tilbakestillBehandlingService
-                .slettTilbakekrevingsvedtakMotregningHvisBehandlingIkkeAvregner(any())
-        }
-    }
-
     @Nested
     inner class UtførStegOgAngiNesteTest {
+        @BeforeEach
+        fun init() {
+            justRun { tilbakestillBehandlingService.slettTilbakekrevingsvedtakMotregningHvisBehandlingIkkeAvregner(any()) }
+        }
+
         @Test
         fun `Skal gå rett fra behandlingsresultat til iverksetting for alle fødselshendelser`() {
+            // Arrange
             val fødselshendelseBehandling =
-                behandling.copy(
+                lagBehandling(
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    årsak = BehandlingÅrsak.FØDSELSHENDELSE,
                     skalBehandlesAutomatisk = true,
-                    opprettetÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
-                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 )
-            val vedtak =
-                lagVedtak(
-                    fødselshendelseBehandling,
-                )
-            every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.INNVILGET_OG_ENDRET
+
+            every { behandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.INNVILGET_OG_ENDRET
             every { behandlingService.nullstillEndringstidspunkt(fødselshendelseBehandling.id) } just runs
             every { behandlingService.oppdaterBehandlingsresultat(any(), any(), any()) } returns
                 fødselshendelseBehandling.copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
-            every {
-                behandlingService.oppdaterStatusPåBehandling(
-                    fødselshendelseBehandling.id,
-                    BehandlingStatus.IVERKSETTER_VEDTAK,
-                )
-            } returns fødselshendelseBehandling.copy(status = BehandlingStatus.IVERKSETTER_VEDTAK)
-            every { vedtakService.hentAktivForBehandlingThrows(fødselshendelseBehandling.id) } returns vedtak
-            every { vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak) } just runs
+            every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns
+                fødselshendelseBehandling.copy(status = BehandlingStatus.IVERKSETTER_VEDTAK)
+            every { vedtakService.hentAktivForBehandlingThrows(fødselshendelseBehandling.id) } returns lagVedtak(fødselshendelseBehandling)
+            every { vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(any()) } just runs
             every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(fødselshendelseBehandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
-            every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(fødselshendelseBehandling.id) } returns emptyList()
-            every { valutakursRepository.finnFraBehandlingId(fødselshendelseBehandling.id) } returns emptyList()
 
-            Assertions.assertEquals(
-                behandlingsresultatSteg.utførStegOgAngiNeste(fødselshendelseBehandling, ""),
-                StegType.IVERKSETT_MOT_OPPDRAG,
-            )
+            // Act
+            val nesteSteg = behandlingsresultatSteg.utførStegOgAngiNeste(fødselshendelseBehandling, "")
+
+            // Assert
+            assertThat(nesteSteg).isEqualTo(StegType.IVERKSETT_MOT_OPPDRAG)
         }
     }
 
