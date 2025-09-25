@@ -237,112 +237,112 @@ object EndretUtbetalingAndelValidering {
             )
         }
     }
-}
 
-fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-    endretUtbetalingAndelerMedÅrsakDeltBosted: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
-) {
-    val endredeUtvidetUtbetalingerAndeler =
-        endretUtbetalingAndelerMedÅrsakDeltBosted
-            .filter { endretUtbetaling ->
-                endretUtbetaling.andelerTilkjentYtelse.any { it.erUtvidet() }
+    fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
+        endretUtbetalingAndelerMedÅrsakDeltBosted: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
+    ) {
+        val endredeUtvidetUtbetalingerAndeler =
+            endretUtbetalingAndelerMedÅrsakDeltBosted
+                .filter { endretUtbetaling ->
+                    endretUtbetaling.andelerTilkjentYtelse.any { it.erUtvidet() }
+                }
+
+        endredeUtvidetUtbetalingerAndeler.forEach { endretPåUtvidetUtbetalinger ->
+            val endretUtbetalingAndelInneholderBarn = endretPåUtvidetUtbetalinger.personer.any { it.type == PersonType.BARN }
+
+            val deltBostedEndringerISammePeriode =
+                endretUtbetalingAndelerMedÅrsakDeltBosted.filter {
+                    it.årsak == Årsak.DELT_BOSTED &&
+                        it.fom!!.isSameOrBefore(endretPåUtvidetUtbetalinger.fom!!) &&
+                        it.tom!!.isSameOrAfter(endretPåUtvidetUtbetalinger.tom!!) &&
+                        it.id != endretPåUtvidetUtbetalinger.id
+                }
+
+            if (!endretUtbetalingAndelInneholderBarn && deltBostedEndringerISammePeriode.isEmpty()) {
+                val feilmelding =
+                    "Det kan ikke være en endring på en utvidet ytelse uten en endring på en delt bosted ytelse. " +
+                        "Legg til en delt bosted endring i perioden ${endretPåUtvidetUtbetalinger.fom} til " +
+                        "${endretPåUtvidetUtbetalinger.tom} eller fjern endringen på den utvidede ytelsen."
+                throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
             }
+        }
+    }
 
-    endredeUtvidetUtbetalingerAndeler.forEach { endretPåUtvidetUtbetalinger ->
-        val endretUtbetalingAndelInneholderBarn = endretPåUtvidetUtbetalinger.personer.any { it.type == PersonType.BARN }
-
-        val deltBostedEndringerISammePeriode =
-            endretUtbetalingAndelerMedÅrsakDeltBosted.filter {
-                it.årsak == Årsak.DELT_BOSTED &&
-                    it.fom!!.isSameOrBefore(endretPåUtvidetUtbetalinger.fom!!) &&
-                    it.tom!!.isSameOrAfter(endretPåUtvidetUtbetalinger.tom!!) &&
-                    it.id != endretPåUtvidetUtbetalinger.id
-            }
-
-        if (!endretUtbetalingAndelInneholderBarn && deltBostedEndringerISammePeriode.isEmpty()) {
-            val feilmelding =
-                "Det kan ikke være en endring på en utvidet ytelse uten en endring på en delt bosted ytelse. " +
-                    "Legg til en delt bosted endring i perioden ${endretPåUtvidetUtbetalinger.fom} til " +
-                    "${endretPåUtvidetUtbetalinger.tom} eller fjern endringen på den utvidede ytelsen."
+    fun validerUtbetalingMotÅrsak(
+        årsak: Årsak?,
+        skalUtbetales: Boolean,
+    ) {
+        if (skalUtbetales && (årsak == Årsak.ENDRE_MOTTAKER || årsak == Årsak.ALLEREDE_UTBETALT)) {
+            val feilmelding = "Du kan ikke velge denne årsaken og si at barnetrygden skal utbetales."
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
         }
     }
-}
 
-fun validerUtbetalingMotÅrsak(
-    årsak: Årsak?,
-    skalUtbetales: Boolean,
-) {
-    if (skalUtbetales && (årsak == Årsak.ENDRE_MOTTAKER || årsak == Årsak.ALLEREDE_UTBETALT)) {
-        val feilmelding = "Du kan ikke velge denne årsaken og si at barnetrygden skal utbetales."
-        throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
-    }
-}
-
-fun validerTomDato(
-    tomDato: YearMonth?,
-    gyldigTomEtterDagensDato: YearMonth?,
-    årsak: Årsak?,
-) {
-    if (årsak != Årsak.ENDRE_MOTTAKER && tomDato == null) {
-        throw FunksjonellFeil(melding = "Til og med-dato kan ikke være tom for årsak '${årsak?.visningsnavn}'")
-    }
-    val dagensDato = YearMonth.now()
-    if (årsak == Årsak.ALLEREDE_UTBETALT && tomDato?.isAfter(dagensDato) == true) {
-        val feilmelding =
-            "For årsak '${årsak.visningsnavn}' kan du ikke legge inn til og med dato som er i neste måned eller senere."
-        throw FunksjonellFeil(
-            frontendFeilmelding = feilmelding,
-            melding = feilmelding,
-        )
-    }
-    if (tomDato?.isAfter(dagensDato) == true && tomDato != gyldigTomEtterDagensDato) {
-        val feilmelding =
-            "Du kan ikke legge inn til og med dato som er i neste måned eller senere. Om det gjelder en løpende periode vil systemet legge inn riktig dato for deg."
-        throw FunksjonellFeil(
-            frontendFeilmelding = feilmelding,
-            melding = feilmelding,
-        )
-    }
-}
-
-fun finnDeltBostedPerioderForPerson(
-    person: Person?,
-    vilkårsvurdering: Vilkårsvurdering?,
-): List<MånedPeriode> {
-    if (vilkårsvurdering == null || person == null) return emptyList()
-    val deltBostedPerioder =
-        if (person.type == PersonType.SØKER) {
-            vilkårsvurdering
-                .tilOppfyltDeltBostedTidslinjePerAktør()
-                .values
-                // Kombinerer delt bosted tidslinjer for alle barn
-                .kombiner { harDeltBostedIPeriode -> harDeltBostedIPeriode.any { it } }
-                .tilSammenhengendeDeltBostedPerioder()
-        } else {
-            vilkårsvurdering
-                .tilOppfyltDeltBostedTidslinjePerAktør()
-                // Kun relevant med delt bosted tidslinjen for person (barnet)
-                .getOrDefault(person.aktør, tomTidslinje())
-                .tilSammenhengendeDeltBostedPerioder()
+    fun validerTomDato(
+        tomDato: YearMonth?,
+        gyldigTomEtterDagensDato: YearMonth?,
+        årsak: Årsak?,
+    ) {
+        if (årsak != Årsak.ENDRE_MOTTAKER && tomDato == null) {
+            throw FunksjonellFeil(melding = "Til og med-dato kan ikke være tom for årsak '${årsak?.visningsnavn}'")
         }
-    return deltBostedPerioder
-}
-
-private fun Vilkårsvurdering.tilOppfyltDeltBostedTidslinjePerAktør(): Map<Aktør?, Tidslinje<Boolean>> =
-    this.personResultater
-        .flatMap { it.vilkårResultater }
-        .groupBy { it.personResultat?.aktør }
-        .mapValues { (_, vilkårResultater) ->
-            vilkårResultater
-                .filter { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) }
-                .lagForskjøvetTidslinjeForOppfylteVilkår(vilkår = Vilkår.BOR_MED_SØKER)
-                .mapVerdi { vilkårResultat -> vilkårResultat != null }
+        val dagensDato = YearMonth.now()
+        if (årsak == Årsak.ALLEREDE_UTBETALT && tomDato?.isAfter(dagensDato) == true) {
+            val feilmelding =
+                "For årsak '${årsak.visningsnavn}' kan du ikke legge inn til og med dato som er i neste måned eller senere."
+            throw FunksjonellFeil(
+                frontendFeilmelding = feilmelding,
+                melding = feilmelding,
+            )
         }
+        if (tomDato?.isAfter(dagensDato) == true && tomDato != gyldigTomEtterDagensDato) {
+            val feilmelding =
+                "Du kan ikke legge inn til og med dato som er i neste måned eller senere. Om det gjelder en løpende periode vil systemet legge inn riktig dato for deg."
+            throw FunksjonellFeil(
+                frontendFeilmelding = feilmelding,
+                melding = feilmelding,
+            )
+        }
+    }
 
-private fun Tidslinje<Boolean>.tilSammenhengendeDeltBostedPerioder(): List<MånedPeriode> =
-    this
-        .slåSammenLikePerioder()
-        .tilPerioderIkkeNull()
-        .filter { it.verdi }
-        .map { MånedPeriode(fom = it.fom!!.toYearMonth(), tom = it.tom?.toYearMonth() ?: PRAKTISK_SENESTE_DAG.toYearMonth()) }
+    fun finnDeltBostedPerioderForPerson(
+        person: Person?,
+        vilkårsvurdering: Vilkårsvurdering?,
+    ): List<MånedPeriode> {
+        if (vilkårsvurdering == null || person == null) return emptyList()
+        val deltBostedPerioder =
+            if (person.type == PersonType.SØKER) {
+                vilkårsvurdering
+                    .tilOppfyltDeltBostedTidslinjePerAktør()
+                    .values
+                    // Kombinerer delt bosted tidslinjer for alle barn
+                    .kombiner { harDeltBostedIPeriode -> harDeltBostedIPeriode.any { it } }
+                    .tilSammenhengendeDeltBostedPerioder()
+            } else {
+                vilkårsvurdering
+                    .tilOppfyltDeltBostedTidslinjePerAktør()
+                    // Kun relevant med delt bosted tidslinjen for person (barnet)
+                    .getOrDefault(person.aktør, tomTidslinje())
+                    .tilSammenhengendeDeltBostedPerioder()
+            }
+        return deltBostedPerioder
+    }
+
+    private fun Vilkårsvurdering.tilOppfyltDeltBostedTidslinjePerAktør(): Map<Aktør?, Tidslinje<Boolean>> =
+        this.personResultater
+            .flatMap { it.vilkårResultater }
+            .groupBy { it.personResultat?.aktør }
+            .mapValues { (_, vilkårResultater) ->
+                vilkårResultater
+                    .filter { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) }
+                    .lagForskjøvetTidslinjeForOppfylteVilkår(vilkår = Vilkår.BOR_MED_SØKER)
+                    .mapVerdi { vilkårResultat -> vilkårResultat != null }
+            }
+
+    private fun Tidslinje<Boolean>.tilSammenhengendeDeltBostedPerioder(): List<MånedPeriode> =
+        this
+            .slåSammenLikePerioder()
+            .tilPerioderIkkeNull()
+            .filter { it.verdi }
+            .map { MånedPeriode(fom = it.fom!!.toYearMonth(), tom = it.tom?.toYearMonth() ?: PRAKTISK_SENESTE_DAG.toYearMonth()) }
+}

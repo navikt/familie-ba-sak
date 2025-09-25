@@ -2,9 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.IVERKSETTER_VEDTAK
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatStegValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -41,8 +39,14 @@ class BehandlingsresultatSteg(
         }
 
         val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id)
-
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
+
+        validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+            tilkjentYtelse = tilkjentYtelse,
+            søkerOgBarn = søkerOgBarn,
+        )
+
+        behandlingsresultatstegValideringService.validerAtUtenlandskPeriodebeløpOgValutakursErUtfylt(behandling = behandling)
 
         if (behandling.erSatsendring()) {
             behandlingsresultatstegValideringService.validerSatsendring(tilkjentYtelse)
@@ -56,11 +60,6 @@ class BehandlingsresultatSteg(
             behandlingsresultatstegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse)
         }
 
-        validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
-            tilkjentYtelse = tilkjentYtelse,
-            søkerOgBarn = søkerOgBarn,
-        )
-
         if (!behandling.erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg()) {
             behandlingsresultatstegValideringService.validerEndredeUtbetalingsandeler(tilkjentYtelse)
             behandlingsresultatstegValideringService.validerKompetanse(behandling.id)
@@ -71,7 +70,7 @@ class BehandlingsresultatSteg(
             behandlingsresultatstegValideringService.validerSatsErUendret(tilkjentYtelse)
         }
 
-        if (behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
+        if (behandling.erEndreMigreringsdato()) {
             behandlingsresultatstegValideringService
                 .validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling)
         }
@@ -89,16 +88,10 @@ class BehandlingsresultatSteg(
                 opprettVilkårsvurderingLogg = !(behandling.erMigrering() && behandling.skalBehandlesAutomatisk),
             )
 
-        behandlingsresultatstegValideringService.validerAtUtenlandskPeriodebeløpOgValutakursErUtfylt(behandling = behandling)
-
         if (behandlingMedOppdatertBehandlingsresultat.erBehandlingMedVedtaksbrevutsending()) {
             behandlingService.nullstillEndringstidspunkt(behandling.id)
-            vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(
-                vedtak =
-                    vedtakService.hentAktivForBehandlingThrows(
-                        behandlingId = behandling.id,
-                    ),
-            )
+            val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+            vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak)
         }
 
         val endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi =
@@ -112,10 +105,7 @@ class BehandlingsresultatSteg(
         if (skalRettFraBehandlingsresultatTilIverksetting ||
             småbarnstilleggService.kanAutomatiskIverksetteSmåbarnstilleggEndring(behandlingMedOppdatertBehandlingsresultat)
         ) {
-            behandlingService.oppdaterStatusPåBehandling(
-                behandlingMedOppdatertBehandlingsresultat.id,
-                BehandlingStatus.IVERKSETTER_VEDTAK,
-            )
+            behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = IVERKSETTER_VEDTAK)
         } else {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }

@@ -251,6 +251,8 @@ data class Behandling(
 
     fun erManuellMigrering() = erManuellMigreringForEndreMigreringsdato() || erHelmanuellMigrering()
 
+    fun erEndreMigreringsdato() = opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
 
     fun erRevurderingKlage() = type == BehandlingType.REVURDERING && opprettetÅrsak in setOf(BehandlingÅrsak.KLAGE, BehandlingÅrsak.IVERKSETTE_KA_VEDTAK)
