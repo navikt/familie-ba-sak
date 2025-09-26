@@ -27,6 +27,7 @@ import java.time.YearMonth
 internal class BehandlingsresultatValideringUtilsTest {
     @Test
     fun `Valider eksplisitt avlag - Skal kaste feil hvis eksplisitt avslått for barn det ikke er fremstilt krav for`() {
+        // Arrange
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
         val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(5))
@@ -55,6 +56,7 @@ internal class BehandlingsresultatValideringUtilsTest {
                 erEksplisittAvslagPåSøknad = true,
             )
 
+        // Act & Assert
         assertThrows<FunksjonellFeil> {
             BehandlingsresultatValideringUtils.validerAtBarePersonerFremstiltKravForEllerSøkerHarFåttEksplisittAvslag(
                 personResultater = setOf(barn1PersonResultat, barn2PersonResultat),
@@ -65,6 +67,7 @@ internal class BehandlingsresultatValideringUtilsTest {
 
     @Test
     fun `Valider eksplisitt avslag - Skal ikke kaste feil hvis søker er eksplisitt avslått`() {
+        // Arrange
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søker = lagPerson(type = PersonType.SØKER)
@@ -81,6 +84,7 @@ internal class BehandlingsresultatValideringUtilsTest {
                 erEksplisittAvslagPåSøknad = true,
             )
 
+        // Act & Assert
         assertDoesNotThrow {
             BehandlingsresultatValideringUtils.validerAtBarePersonerFremstiltKravForEllerSøkerHarFåttEksplisittAvslag(
                 personResultater = setOf(søkerPersonResultat),
@@ -91,6 +95,7 @@ internal class BehandlingsresultatValideringUtilsTest {
 
     @Test
     fun `Valider eksplisitt avslag - Skal ikke kaste feil hvis person med eksplsitt avslag er fremstilt krav for`() {
+        // Arrange
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
         val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(5))
@@ -119,6 +124,7 @@ internal class BehandlingsresultatValideringUtilsTest {
                 erEksplisittAvslagPåSøknad = false,
             )
 
+        // Act & Assert
         assertDoesNotThrow {
             BehandlingsresultatValideringUtils.validerAtBarePersonerFremstiltKravForEllerSøkerHarFåttEksplisittAvslag(
                 personResultater = setOf(barn1PersonResultat, barn2PersonResultat),
@@ -129,6 +135,7 @@ internal class BehandlingsresultatValideringUtilsTest {
 
     @Test
     fun `validerIngenEndringTilbakeITid - Skal kaste feil ved endring tilbake i tid`() {
+        // Arrange
         val originalAndel =
             lagAndelTilkjentYtelse(
                 fom = YearMonth.now().minusMonths(12),
@@ -142,6 +149,7 @@ internal class BehandlingsresultatValideringUtilsTest {
         val andelerDenneBehandlingenLavereBeløp = listOf(andelMedLavereBeløp)
         val andelerDenneBehandlingenAvsluttesTidlig = listOf(andelSomAvsluttesTidligere)
 
+        // Act & Assert
         assertThatExceptionOfType(Feil::class.java).isThrownBy {
             BehandlingsresultatValideringUtils.validerIngenEndringTilbakeITid(
                 andelerDenneBehandlingen = andelerDenneBehandlingenAvsluttesTidlig,
@@ -161,6 +169,7 @@ internal class BehandlingsresultatValideringUtilsTest {
 
     @Test
     fun `validerIngenEndringTilbakeITid - Skal ikke kaste feil ved endring framover i tid`() {
+        // Arrange
         val originalAndel =
             lagAndelTilkjentYtelse(
                 fom = YearMonth.now().minusMonths(12),
@@ -174,6 +183,7 @@ internal class BehandlingsresultatValideringUtilsTest {
         val andelerDenneBehandlingenLavereBeløpIFramtiden = listOf(andelSomAvsluttesTidligere, andelMedLavereBeløpIFramtiden)
         val andelerDenneBehandlingenSomAvsluttesTidligere = listOf(andelSomAvsluttesTidligere)
 
+        // Act & Assert
         assertDoesNotThrow {
             BehandlingsresultatValideringUtils.validerIngenEndringTilbakeITid(
                 andelerDenneBehandlingen = andelerDenneBehandlingenSomAvsluttesTidligere,
@@ -193,6 +203,7 @@ internal class BehandlingsresultatValideringUtilsTest {
 
     @Test
     fun `validerSatsErUendret - Skal kaste feil dersom sats endrer seg`() {
+        // Arrange
         val originalAndel =
             lagAndelTilkjentYtelse(
                 fom = YearMonth.now().minusMonths(12),
@@ -207,6 +218,7 @@ internal class BehandlingsresultatValideringUtilsTest {
                 sats = 2000,
             )
 
+        // Act & Assert
         assertThatExceptionOfType(Feil::class.java).isThrownBy {
             BehandlingsresultatValideringUtils.validerSatsErUendret(
                 andelerForrigeBehandling = listOf(originalAndel),
@@ -224,6 +236,7 @@ internal class BehandlingsresultatValideringUtilsTest {
 
     @Test
     fun `validerSatsErUendret - Skal ikke kaste feil dersom sats endrer seg hvis kalkulertUtbetalingsbeløp er 0`() {
+        // Arrange
         val person = tilfeldigPerson()
         val originalAndel =
             lagAndelTilkjentYtelse(
@@ -252,6 +265,7 @@ internal class BehandlingsresultatValideringUtilsTest {
                 ),
             )
 
+        // Act & Assert
         assertDoesNotThrow {
             BehandlingsresultatValideringUtils.validerSatsErUendret(
                 andelerForrigeBehandling = listOf(originalAndel),
@@ -269,13 +283,15 @@ internal class BehandlingsresultatValideringUtilsTest {
     fun `Skal kaste exception hvis behandlingsresultat er ugyldig for en manuell migrering`(
         behandlingsresultat: Behandlingsresultat,
     ) {
+        // Arrange
         val behandling =
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
             )
 
-        val exception =
+        // Act & Assert
+        val feil =
             assertThrows<FunksjonellFeil> {
                 BehandlingsresultatValideringUtils.validerBehandlingsresultat(
                     behandling = behandling,
@@ -283,7 +299,7 @@ internal class BehandlingsresultatValideringUtilsTest {
                 )
             }
 
-        assertThat(exception.message)
+        assertThat(feil.message)
             .isEqualTo(
                 "Du har fått behandlingsresultatet ${behandlingsresultat.displayName}. " +
                     "Dette er ikke støttet på migreringsbehandlinger. " +
@@ -300,7 +316,10 @@ internal class BehandlingsresultatValideringUtilsTest {
     fun `skal kaste feil hvis behandlingsresultat ved omregning er endret`(
         behandlingsresultat: Behandlingsresultat,
     ) {
+        // Arrange
         val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.OMREGNING_18ÅR)
+
+        // Act & Assert
         assertThrows<Feil> {
             BehandlingsresultatValideringUtils.validerBehandlingsresultat(
                 behandling = behandling,
@@ -318,7 +337,10 @@ internal class BehandlingsresultatValideringUtilsTest {
     fun `skal ikke kaste feil hvis behandlingsresultat ved omregning er uendret`(
         behandlingsresultat: Behandlingsresultat,
     ) {
+        // Arrange
         val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.OMREGNING_18ÅR)
+
+        // Act & Assert
         assertDoesNotThrow {
             BehandlingsresultatValideringUtils.validerBehandlingsresultat(
                 behandling = behandling,
