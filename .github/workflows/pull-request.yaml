@@ -1,9 +1,9 @@
-name: Sonar
+name: Pull request
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - 'main'
+  merge_group:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -24,7 +24,7 @@ jobs:
     uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@main # ratchet:exclude
     with:
       profile: 'enhetstest'
-      with-coverage: true
+      with-coverage: ${{ github.actor != 'dependabot[bot]' && github.event_name != 'merge_group' && true || false }}
       coverage-artifact-name: 'enhetstest'
       coverage-artifact-path: 'target/coverage/enhetstest.xml'
     secrets: inherit
@@ -36,12 +36,31 @@ jobs:
     uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@main # ratchet:exclude
     with:
       profile: 'integrasjonstest'
-      with-coverage: true
+      with-coverage: ${{ github.actor != 'dependabot[bot]' && github.event_name != 'merge_group' && true || false }}
       coverage-artifact-name: 'integrasjonstest'
       coverage-artifact-path: 'target/coverage/integrasjonstest.xml'
     secrets: inherit
 
+  verdikjedetest-feature-toggle-off:
+    name: Verdikjedetester toggle off
+    permissions:
+      contents: read
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@main # ratchet:exclude
+    with:
+      profile: 'verdikjedetest-toggle-off'
+    secrets: inherit
+
+  verdikjedetest-feature-toggle-on:
+    name: Verdikjedetester toggle on
+    permissions:
+      contents: read
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@main # ratchet:exclude
+    with:
+      profile: 'verdikjedetest-toggle-on'
+    secrets: inherit
+
   sonar:
+    if: github.actor != 'dependabot[bot]' && github.event_name != 'merge_group'
     name: Sonar
     needs: [ unit-test, integration-test ]
     uses: navikt/familie-baks-gha-workflows/.github/workflows/sonar.yaml@main # ratchet:exclude
