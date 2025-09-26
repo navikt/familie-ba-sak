@@ -288,15 +288,13 @@ internal class BehandlingsresultatValideringUtilsTest {
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+                resultat = behandlingsresultat,
             )
 
         // Act & Assert
         val feil =
             assertThrows<FunksjonellFeil> {
-                BehandlingsresultatValideringUtils.validerBehandlingsresultat(
-                    behandling = behandling,
-                    resultat = behandlingsresultat,
-                )
+                BehandlingsresultatValideringUtils.validerBehandlingsresultat(behandling)
             }
 
         assertThat(feil.message)
@@ -317,14 +315,16 @@ internal class BehandlingsresultatValideringUtilsTest {
         behandlingsresultat: Behandlingsresultat,
     ) {
         // Arrange
-        val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.OMREGNING_18ÅR)
+        val behandling =
+            lagBehandling(
+                behandlingType = BehandlingType.REVURDERING,
+                årsak = BehandlingÅrsak.OMREGNING_18ÅR,
+                resultat = behandlingsresultat,
+            )
 
         // Act & Assert
         assertThrows<Feil> {
-            BehandlingsresultatValideringUtils.validerBehandlingsresultat(
-                behandling = behandling,
-                resultat = behandlingsresultat,
-            )
+            BehandlingsresultatValideringUtils.validerBehandlingsresultat(behandling)
         }
     }
 
@@ -338,14 +338,16 @@ internal class BehandlingsresultatValideringUtilsTest {
         behandlingsresultat: Behandlingsresultat,
     ) {
         // Arrange
-        val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.OMREGNING_18ÅR)
+        val behandling =
+            lagBehandling(
+                behandlingType = BehandlingType.REVURDERING,
+                årsak = BehandlingÅrsak.OMREGNING_18ÅR,
+                resultat = behandlingsresultat,
+            )
 
         // Act & Assert
         assertDoesNotThrow {
-            BehandlingsresultatValideringUtils.validerBehandlingsresultat(
-                behandling = behandling,
-                resultat = behandlingsresultat,
-            )
+            BehandlingsresultatValideringUtils.validerBehandlingsresultat(behandling)
         }
     }
 }

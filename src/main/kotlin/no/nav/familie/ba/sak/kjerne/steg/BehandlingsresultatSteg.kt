@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.IVERKSETTER_VEDTAK
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatStegValideringService
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -116,6 +117,10 @@ class BehandlingsresultatSteg(
             behandling,
             endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi,
         )
+    }
+
+    override fun postValiderSteg(behandling: Behandling) {
+        BehandlingsresultatValideringUtils.validerBehandlingsresultat(behandling)
     }
 
     override fun stegType(): StegType = StegType.BEHANDLINGSRESULTAT

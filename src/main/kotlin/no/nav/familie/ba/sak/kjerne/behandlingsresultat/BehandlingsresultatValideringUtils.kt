@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT_OG_ENDRET
@@ -62,28 +61,26 @@ object BehandlingsresultatValideringUtils {
 
     internal fun validerBehandlingsresultat(
         behandling: Behandling,
-        resultat: Behandlingsresultat,
     ) {
-        validerBehandlingsresultatMotBehandlingstype(behandling, resultat)
-        validerBehandlingsresultatMotBehandlingsårsak(behandling, resultat)
+        validerBehandlingsresultatMotBehandlingstype(behandling)
+        validerBehandlingsresultatMotBehandlingsårsak(behandling)
     }
 
     private fun validerBehandlingsresultatMotBehandlingstype(
         behandling: Behandling,
-        resultat: Behandlingsresultat,
     ) {
         when {
             behandling.erFørstegangsbehandling() -> {
                 val ugyldigeBehandlingsresultaterForTypeFørstegangsbehandling =
                     setOf(AVSLÅTT_OG_OPPHØRT, ENDRET_UTBETALING, ENDRET_UTEN_UTBETALING, ENDRET_OG_OPPHØRT, OPPHØRT, FORTSATT_INNVILGET, IKKE_VURDERT)
-                if (resultat in ugyldigeBehandlingsresultaterForTypeFørstegangsbehandling) {
-                    throw FunksjonellFeil("Behandlingsresultatet '${resultat.displayName}' er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'.")
+                if (behandling.resultat in ugyldigeBehandlingsresultaterForTypeFørstegangsbehandling) {
+                    throw FunksjonellFeil("Behandlingsresultatet '${behandling.resultat.displayName}' er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'.")
                 }
             }
 
             behandling.erRevurdering() -> {
-                if (resultat == IKKE_VURDERT) {
-                    throw FunksjonellFeil("Behandlingsresultatet '${resultat.displayName}' er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'.")
+                if (behandling.resultat == IKKE_VURDERT) {
+                    throw FunksjonellFeil("Behandlingsresultatet '${behandling.resultat.displayName}' er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'.")
                 }
             }
         }
@@ -91,28 +88,27 @@ object BehandlingsresultatValideringUtils {
 
     private fun validerBehandlingsresultatMotBehandlingsårsak(
         behandling: Behandling,
-        resultat: Behandlingsresultat,
     ) {
         when {
             behandling.erKlage() -> {
                 val ugyldigeBehandlingsresultaterForÅrsakKlage =
                     setOf(AVSLÅTT_OG_OPPHØRT, AVSLÅTT_ENDRET_OG_OPPHØRT, AVSLÅTT_OG_ENDRET, AVSLÅTT)
-                if (resultat in ugyldigeBehandlingsresultaterForÅrsakKlage) {
-                    throw FunksjonellFeil("Behandlingsårsak '${behandling.opprettetÅrsak.visningsnavn}' er ugyldig i kombinasjon med resultat '${resultat.displayName}'.")
+                if (behandling.resultat in ugyldigeBehandlingsresultaterForÅrsakKlage) {
+                    throw FunksjonellFeil("Behandlingsårsak '${behandling.opprettetÅrsak.visningsnavn}' er ugyldig i kombinasjon med resultat '${behandling.resultat.displayName}'.")
                 }
             }
 
             behandling.erManuellMigrering() -> {
-                if (resultat.erAvslått() || resultat == DELVIS_INNVILGET) {
+                if (behandling.resultat.erAvslått() || behandling.resultat == DELVIS_INNVILGET) {
                     throw FunksjonellFeil(
-                        "Du har fått behandlingsresultatet ${resultat.displayName}. " +
+                        "Du har fått behandlingsresultatet ${behandling.resultat.displayName}. " +
                             "Dette er ikke støttet på migreringsbehandlinger. Meld sak i Porten om du er uenig i resultatet.",
                     )
                 }
             }
 
             behandling.erOmregning() -> {
-                if (resultat !in setOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT)) {
+                if (behandling.resultat !in setOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT)) {
                     throw Feil("Behandling $behandling er omregningssak, men er ikke uendret behandlingsresultat")
                 }
             }
