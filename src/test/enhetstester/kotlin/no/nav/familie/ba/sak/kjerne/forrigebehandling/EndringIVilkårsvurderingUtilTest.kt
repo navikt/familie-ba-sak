@@ -70,8 +70,8 @@ class EndringIVilkårsvurderingUtilTest {
         val perioderMedEndring =
             EndringIVilkårsvurderingUtil
                 .lagEndringIVilkårsvurderingTidslinje(
-                    nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
-                    forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
+                    nåværendePersonResultaterForPerson = lagPersonResultatFraVilkårResultater(vilkårResultater, aktør),
+                    forrigePersonResultater = lagPersonResultatFraVilkårResultater(vilkårResultater, aktør),
                     personIBehandling = person,
                     personIForrigeBehandling = person,
                     tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = MIN_MÅNED,
@@ -129,8 +129,8 @@ class EndringIVilkårsvurderingUtilTest {
         val perioderMedEndring =
             EndringIVilkårsvurderingUtil
                 .lagEndringIVilkårsvurderingTidslinje(
-                    nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-                    forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+                    nåværendePersonResultaterForPerson = lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør),
+                    forrigePersonResultater = lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør),
                     personIBehandling = person,
                     personIForrigeBehandling = person,
                     tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = MIN_MÅNED,
@@ -190,8 +190,8 @@ class EndringIVilkårsvurderingUtilTest {
         val perioderMedEndring =
             EndringIVilkårsvurderingUtil
                 .lagEndringIVilkårsvurderingTidslinje(
-                    nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-                    forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+                    nåværendePersonResultaterForPerson = lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør),
+                    forrigePersonResultater = lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør),
                     personIBehandling = person,
                     personIForrigeBehandling = person,
                     tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = jun(2022),
@@ -252,8 +252,8 @@ class EndringIVilkårsvurderingUtilTest {
         val perioderMedEndring =
             EndringIVilkårsvurderingUtil
                 .lagEndringIVilkårsvurderingTidslinje(
-                    nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-                    forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+                    nåværendePersonResultaterForPerson = lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør),
+                    forrigePersonResultater = lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør),
                     personIBehandling = person,
                     personIForrigeBehandling = person,
                     tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = MIN_MÅNED,
@@ -313,8 +313,8 @@ class EndringIVilkårsvurderingUtilTest {
         val perioderMedEndring =
             EndringIVilkårsvurderingUtil
                 .lagEndringIVilkårsvurderingTidslinje(
-                    nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-                    forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+                    nåværendePersonResultaterForPerson = lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør),
+                    forrigePersonResultater = lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør),
                     personIBehandling = person,
                     personIForrigeBehandling = person,
                     tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = MIN_MÅNED,
@@ -367,8 +367,8 @@ class EndringIVilkårsvurderingUtilTest {
         val perioderMedEndring =
             EndringIVilkårsvurderingUtil
                 .lagEndringIVilkårsvurderingTidslinje(
-                    nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-                    forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+                    nåværendePersonResultaterForPerson = lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør),
+                    forrigePersonResultater = lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør),
                     personIBehandling = person,
                     personIForrigeBehandling = person,
                     tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = MIN_MÅNED,
