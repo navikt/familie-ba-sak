@@ -82,11 +82,13 @@ class BehandlingsresultatSteg(
         behandling: Behandling,
         data: String,
     ): StegType {
+        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultat(behandling.id)
+        val opprettVilkårsvurderingLogg = !(behandling.erMigrering() && behandling.skalBehandlesAutomatisk)
         val behandlingMedOppdatertBehandlingsresultat =
             behandlingService.oppdaterBehandlingsresultat(
                 behandlingId = behandling.id,
-                resultat = behandlingsresultatService.utledBehandlingsresultat(behandling.id),
-                opprettVilkårsvurderingLogg = !(behandling.erMigrering() && behandling.skalBehandlesAutomatisk),
+                resultat = behandlingsresultat,
+                opprettVilkårsvurderingLogg = opprettVilkårsvurderingLogg,
             )
 
         if (behandlingMedOppdatertBehandlingsresultat.erBehandlingMedVedtaksbrevutsending()) {
