@@ -64,7 +64,14 @@ object BehandlingsresultatValideringUtils {
         behandling: Behandling,
         resultat: Behandlingsresultat,
     ) {
-        // Valider kombinasjon av behandlingstype og behandlingsresultat
+        validerBehandlingsresultatMotBehandlingstype(behandling, resultat)
+        validerBehandlingsresultatMotBehandlingsårsak(behandling, resultat)
+    }
+
+    private fun validerBehandlingsresultatMotBehandlingstype(
+        behandling: Behandling,
+        resultat: Behandlingsresultat,
+    ) {
         when {
             behandling.erFørstegangsbehandling() -> {
                 val ugyldigeBehandlingsresultaterForTypeFørstegangsbehandling =
@@ -80,8 +87,12 @@ object BehandlingsresultatValideringUtils {
                 }
             }
         }
+    }
 
-        // Valider kombinasjon av behandlingsårsak og behandlingsresultat
+    private fun validerBehandlingsresultatMotBehandlingsårsak(
+        behandling: Behandling,
+        resultat: Behandlingsresultat,
+    ) {
         when {
             behandling.erKlage() -> {
                 val ugyldigeBehandlingsresultaterForÅrsakKlage =
