@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.config
 import io.mockk.isMockKMock
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.fake.FakeEfSakRestClient
 import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
@@ -12,7 +13,6 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClientMo
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
-import no.nav.familie.ba.sak.mock.EfSakRestClientMock
 import no.nav.familie.ba.sak.mock.FamilieIntegrasjonerTilgangskontrollMock
 import no.nav.familie.ba.sak.mock.LocalDateServiceTestConfig
 import no.nav.familie.ba.sak.mock.TilbakekrevingKlientTestConfig
@@ -33,13 +33,13 @@ abstract class AbstractMockkSpringRunner {
     private lateinit var pdlIdentRestClient: PdlIdentRestClient
 
     @Autowired
+    private lateinit var efSakRestClient: EfSakRestClient
+
+    @Autowired
     private lateinit var mockIntegrasjonClient: IntegrasjonClient
 
     @Autowired
     private lateinit var mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
-
-    @Autowired
-    private lateinit var mockEfSakRestClient: EfSakRestClient
 
     @Autowired
     private lateinit var mockValutakursRestClient: ValutakursRestClient
@@ -88,13 +88,12 @@ abstract class AbstractMockkSpringRunner {
         val fakePdlIdentRestClient = pdlIdentRestClient as? FakePdlIdentRestClient
         fakePdlIdentRestClient?.reset()
 
+        val fakeEfSakRestClient = efSakRestClient as? FakeEfSakRestClient
+        fakeEfSakRestClient?.reset()
+
         FamilieIntegrasjonerTilgangskontrollMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(
             mockFamilieIntegrasjonerTilgangskontrollClient,
         )
-
-        if (isMockKMock(mockEfSakRestClient)) {
-            EfSakRestClientMock.clearEfSakRestMocks(mockEfSakRestClient)
-        }
 
         if (isMockKMock(mockValutakursRestClient)) {
             ValutakursRestClientMock.clearValutakursRestClient(mockValutakursRestClient)

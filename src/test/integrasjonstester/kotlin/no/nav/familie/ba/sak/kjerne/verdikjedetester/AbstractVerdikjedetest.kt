@@ -33,6 +33,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
     "mock-brev-klient",
     "mock-økonomi",
     "mock-infotrygd-feed",
+    "mock-ef-client",
     "mock-rest-template-config",
     "mock-task-repository",
     "mock-task-service",
