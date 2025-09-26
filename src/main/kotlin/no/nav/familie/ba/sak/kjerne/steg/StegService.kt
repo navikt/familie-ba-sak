@@ -527,8 +527,8 @@ class StegService(
 
             behandlingSteg.preValiderSteg(behandling, this)
             val nesteSteg = utførendeSteg()
-            behandlingSteg.postValiderSteg(behandling)
             val behandlingEtterUtførtSteg = behandlingHentOgPersisterService.hent(behandling.id)
+            behandlingSteg.postValiderSteg(behandlingEtterUtførtSteg)
 
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
