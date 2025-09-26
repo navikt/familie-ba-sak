@@ -169,7 +169,7 @@ class BehandlingsresultatStegValideringService(
         BehandlingsresultatValideringUtils.validerIngenEndringTilbakeITid(
             andelerDenneBehandlingen = andelerDenneBehandlingen,
             andelerForrigeBehandling = andelerForrigeBehandling,
-            nåMåned = YearMonth.now(),
+            nåMåned = YearMonth.now(clockProvider.get()),
         )
     }
 
