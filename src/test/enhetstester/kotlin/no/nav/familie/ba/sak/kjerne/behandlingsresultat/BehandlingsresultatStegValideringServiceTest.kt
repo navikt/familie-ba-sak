@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.REVURDERING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FINNMARKSTILLEGG
@@ -40,6 +41,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -760,6 +762,97 @@ class BehandlingsresultatStegValideringServiceTest {
                 "Det eksisterer SVALBARDTILLEGG andeler som først blir innvilget mer enn 1 måned " +
                     "fram i tid. Det er ikke mulig å innvilge disse enda, og behandlingen stoppes derfor.",
             )
+        }
+    }
+
+    @Nested
+    inner class ValiderIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling {
+        @Test
+        fun `skal ikke kaste feil når det ikke er endringer etter migreringsdato`() {
+            // Arrange
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2025, 1),
+                        tom = YearMonth.of(2042, 12),
+                        beløp = 1000,
+                        aktør = barn.aktør,
+                    ),
+                )
+            val nåværendeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2024, 1),
+                        tom = YearMonth.of(2042, 12),
+                        beløp = 1000,
+                        aktør = barn.aktør,
+                    ),
+                )
+
+            val endringIUtbetalingTidslinje =
+                EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
+                    nåværendeAndeler = nåværendeAndeler,
+                    forrigeAndeler = forrigeAndeler,
+                )
+
+            every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomiTidslinje(behandling) } returns endringIUtbetalingTidslinje
+            every { beregningService.hentAndelerFraForrigeIverksattebehandling(behandling) } returns forrigeAndeler
+
+            // Act & Assert
+            assertDoesNotThrow {
+                behandlingsresultatStegValideringService.validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling)
+            }
+        }
+
+        @Test
+        fun `skal kaste feil når det er endringer etter migreringsdato`() {
+            // Arrange
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2025, 1),
+                        tom = YearMonth.of(2042, 12),
+                        beløp = 1000,
+                        aktør = barn.aktør,
+                    ),
+                )
+            val nåværendeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2026, 1),
+                        tom = YearMonth.of(2042, 12),
+                        beløp = 1000,
+                        aktør = barn.aktør,
+                    ),
+                )
+
+            val endringIUtbetalingTidslinje =
+                EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
+                    nåværendeAndeler = nåværendeAndeler,
+                    forrigeAndeler = forrigeAndeler,
+                )
+
+            every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomiTidslinje(behandling) } returns endringIUtbetalingTidslinje
+            every { beregningService.hentAndelerFraForrigeIverksattebehandling(behandling) } returns forrigeAndeler
+
+            // Act & Assert
+            val feil =
+                assertThrows<FunksjonellFeil> {
+                    behandlingsresultatStegValideringService.validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling)
+                }
+
+            assertThat(feil.message).contains("Det finnes endringer i behandlingen som har økonomisk konsekvens for bruker")
+        }
+
+        @Test
+        fun `skal ikke kaste feil når behandling er avsluttet`() {
+            // Arrange
+            val behandling = lagBehandling(status = BehandlingStatus.AVSLUTTET)
+
+            // Act & Assert
+            assertDoesNotThrow {
+                behandlingsresultatStegValideringService.validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling)
+            }
         }
     }
 }
