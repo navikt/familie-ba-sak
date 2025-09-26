@@ -6,19 +6,41 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT_OG_ENDRET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT_OG_OPPHØRT
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_UTBETALING
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_UTEN_UTBETALING
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_OPPHØRT
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.IKKE_VURDERT
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.lagForskjøvetTidslinjeForOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.outerJoin
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.time.YearMonth
 
@@ -39,39 +61,57 @@ object BehandlingsresultatValideringUtils {
 
     internal fun validerBehandlingsresultat(
         behandling: Behandling,
-        resultat: Behandlingsresultat,
     ) {
-        if ((
-                behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING &&
-                    setOf(
-                        Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
-                        Behandlingsresultat.ENDRET_UTBETALING,
-                        Behandlingsresultat.ENDRET_UTEN_UTBETALING,
-                        Behandlingsresultat.ENDRET_OG_OPPHØRT,
-                        Behandlingsresultat.OPPHØRT,
-                        Behandlingsresultat.FORTSATT_INNVILGET,
-                        Behandlingsresultat.IKKE_VURDERT,
-                    ).contains(resultat)
-            ) ||
-            (behandling.type == BehandlingType.REVURDERING && resultat == Behandlingsresultat.IKKE_VURDERT)
-        ) {
-            val feilmelding =
-                "Behandlingsresultatet ${resultat.displayName.lowercase()} " +
-                    "er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'."
-            throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
+        validerBehandlingsresultatMotBehandlingstype(behandling)
+        validerBehandlingsresultatMotBehandlingsårsak(behandling)
+    }
+
+    private fun validerBehandlingsresultatMotBehandlingstype(
+        behandling: Behandling,
+    ) {
+        when {
+            behandling.erFørstegangsbehandling() -> {
+                val ugyldigeBehandlingsresultaterForTypeFørstegangsbehandling =
+                    setOf(AVSLÅTT_OG_OPPHØRT, ENDRET_UTBETALING, ENDRET_UTEN_UTBETALING, ENDRET_OG_OPPHØRT, OPPHØRT, FORTSATT_INNVILGET, IKKE_VURDERT)
+                if (behandling.resultat in ugyldigeBehandlingsresultaterForTypeFørstegangsbehandling) {
+                    throw FunksjonellFeil("Behandlingsresultatet '${behandling.resultat.displayName}' er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'.")
+                }
+            }
+
+            behandling.erRevurdering() -> {
+                if (behandling.resultat == IKKE_VURDERT) {
+                    throw FunksjonellFeil("Behandlingsresultatet '${behandling.resultat.displayName}' er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'.")
+                }
+            }
         }
-        if (behandling.opprettetÅrsak == BehandlingÅrsak.KLAGE &&
-            setOf(
-                Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
-                Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
-                Behandlingsresultat.AVSLÅTT_OG_ENDRET,
-                Behandlingsresultat.AVSLÅTT,
-            ).contains(resultat)
-        ) {
-            val feilmelding =
-                "Behandlingsårsak ${behandling.opprettetÅrsak.visningsnavn.lowercase()} " +
-                    "er ugyldig i kombinasjon med resultat '${resultat.displayName.lowercase()}'."
-            throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
+    }
+
+    private fun validerBehandlingsresultatMotBehandlingsårsak(
+        behandling: Behandling,
+    ) {
+        when {
+            behandling.erKlage() -> {
+                val ugyldigeBehandlingsresultaterForÅrsakKlage =
+                    setOf(AVSLÅTT_OG_OPPHØRT, AVSLÅTT_ENDRET_OG_OPPHØRT, AVSLÅTT_OG_ENDRET, AVSLÅTT)
+                if (behandling.resultat in ugyldigeBehandlingsresultaterForÅrsakKlage) {
+                    throw FunksjonellFeil("Behandlingsårsak '${behandling.opprettetÅrsak.visningsnavn}' er ugyldig i kombinasjon med resultat '${behandling.resultat.displayName}'.")
+                }
+            }
+
+            behandling.erManuellMigrering() -> {
+                if (behandling.resultat.erAvslått() || behandling.resultat == DELVIS_INNVILGET) {
+                    throw FunksjonellFeil(
+                        "Du har fått behandlingsresultatet ${behandling.resultat.displayName}. " +
+                            "Dette er ikke støttet på migreringsbehandlinger. Meld sak i Porten om du er uenig i resultatet.",
+                    )
+                }
+            }
+
+            behandling.erOmregning() -> {
+                if (behandling.resultat !in setOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT)) {
+                    throw Feil("Behandling $behandling er omregningssak, men er ikke uendret behandlingsresultat")
+                }
+            }
         }
     }
 
@@ -131,6 +171,133 @@ object BehandlingsresultatValideringUtils {
                 }
             }
         }
+    }
+
+    fun validerKompetanse(
+        kompetanser: Collection<Kompetanse>,
+    ) {
+        kompetanser.forEach { kompetanse ->
+            val erNorgeSekundærland = kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND
+            if (erNorgeSekundærland && setOf(kompetanse.søkersAktivitetsland, kompetanse.annenForeldersAktivitetsland, kompetanse.barnetsBostedsland).all { it == "NO" }) {
+                throw FunksjonellFeil("Dersom Norge er sekundærland, må søkers aktivitetsland, annen forelders aktivitetsland eller barnets bostedsland være satt til noe annet enn Norge")
+            }
+        }
+    }
+
+    fun validerFinnmarkstilleggBehandling(
+        andelerNåværendeBehandling: Collection<AndelTilkjentYtelse>,
+        andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
+        vilkårsvurdering: Vilkårsvurdering,
+        inneværendeMåned: YearMonth,
+    ) {
+        validerAtDetIkkeHarVærtEndringIUtbetalingUtenomYtelseType(
+            andelerNåværendeBehandling = andelerNåværendeBehandling,
+            andelerForrigeBehandling = andelerForrigeBehandling,
+            ytelseType = YtelseType.FINNMARKSTILLEGG,
+            behandlingÅrsak = BehandlingÅrsak.FINNMARKSTILLEGG,
+        )
+
+        validerAtIngenAndelerMedYtelseTypeErInnvilgetFramITid(
+            andeler = andelerNåværendeBehandling,
+            ytelseType = YtelseType.FINNMARKSTILLEGG,
+            inneværendeMåned = inneværendeMåned,
+        )
+
+        validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering)
+    }
+
+    fun validerSvalbardtilleggBehandling(
+        andelerNåværendeBehandling: Collection<AndelTilkjentYtelse>,
+        andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
+        inneværendeMåned: YearMonth,
+    ) {
+        validerAtDetIkkeHarVærtEndringIUtbetalingUtenomYtelseType(
+            andelerNåværendeBehandling = andelerNåværendeBehandling,
+            andelerForrigeBehandling = andelerForrigeBehandling,
+            ytelseType = YtelseType.SVALBARDTILLEGG,
+            behandlingÅrsak = BehandlingÅrsak.SVALBARDTILLEGG,
+        )
+
+        validerAtIngenAndelerMedYtelseTypeErInnvilgetFramITid(
+            andeler = andelerNåværendeBehandling,
+            ytelseType = YtelseType.SVALBARDTILLEGG,
+            inneværendeMåned = inneværendeMåned,
+        )
+    }
+
+    private fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering: Vilkårsvurdering) {
+        val søkersPersonResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() } ?: return
+
+        val søkerBosattIFinnmarkTidslinje =
+            søkersPersonResultat.vilkårResultater
+                .filter { it.vilkårType == BOSATT_I_RIKET && BOSATT_I_FINNMARK_NORD_TROMS in it.utdypendeVilkårsvurderinger }
+                .lagForskjøvetTidslinjeForOppfylteVilkår(BOSATT_I_RIKET)
+
+        vilkårsvurdering
+            .personResultater
+            .filterNot { it.erSøkersResultater() }
+            .forEach { personResultat ->
+                val barnBosattIFinnmarkTidslinje =
+                    personResultat.vilkårResultater
+                        .filter { it.vilkårType == BOSATT_I_RIKET && BOSATT_I_FINNMARK_NORD_TROMS in it.utdypendeVilkårsvurderinger }
+                        .lagForskjøvetTidslinjeForOppfylteVilkår(BOSATT_I_RIKET)
+
+                val barnDeltBostedTidslinje =
+                    personResultat.vilkårResultater
+                        .filter { it.vilkårType == Vilkår.BOR_MED_SØKER && (it.utdypendeVilkårsvurderinger.contains(DELT_BOSTED) || it.utdypendeVilkårsvurderinger.contains(DELT_BOSTED_SKAL_IKKE_DELES)) }
+                        .lagForskjøvetTidslinjeForOppfylteVilkår(Vilkår.BOR_MED_SØKER)
+
+                val finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerIFinnmark =
+                    søkerBosattIFinnmarkTidslinje.kombinerMed(barnBosattIFinnmarkTidslinje, barnDeltBostedTidslinje) { søkerBosattIFinnmark, barnBosattIFinnmark, barnDeltBosted ->
+                        søkerBosattIFinnmark != null && barnBosattIFinnmark == null && barnDeltBosted != null
+                    }
+
+                if (finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerIFinnmark.tilPerioder().any { it.verdi == true }) {
+                    throw Feil("Det finnes perioder der søker bor i finnmark samtidig som et barn med delt bosted ikke bor i finnmark. Disse sakene støtter vi ikke automatisk, og vi stanser derfor denne behandlingen.")
+                }
+            }
+    }
+
+    private fun validerAtDetIkkeHarVærtEndringIUtbetalingUtenomYtelseType(
+        andelerNåværendeBehandling: Collection<AndelTilkjentYtelse>,
+        andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
+        ytelseType: YtelseType,
+        behandlingÅrsak: BehandlingÅrsak,
+    ) {
+        val andelerUtenomYtelseTypeDenneBehandling = andelerNåværendeBehandling.filterNot { it.type == ytelseType }
+        val andelerUtenomYtelseTypeForrigeBehandling = andelerForrigeBehandling.filterNot { it.type == ytelseType }
+
+        val erEndringIUtbetaling =
+            EndringIUtbetalingUtil
+                .lagEndringIUtbetalingTidslinje(
+                    nåværendeAndeler = andelerUtenomYtelseTypeDenneBehandling,
+                    forrigeAndeler = andelerUtenomYtelseTypeForrigeBehandling,
+                ).tilPerioder()
+                .any { it.verdi == true }
+
+        if (erEndringIUtbetaling) {
+            throw Feil("Det er oppdaget forskjell i utbetaling utenom $ytelseType andeler. Dette kan ikke skje i en behandling der årsak er $behandlingÅrsak, og den automatiske kjøring stoppes derfor.")
+        }
+    }
+
+    private fun validerAtIngenAndelerMedYtelseTypeErInnvilgetFramITid(
+        andeler: Collection<AndelTilkjentYtelse>,
+        ytelseType: YtelseType,
+        inneværendeMåned: YearMonth,
+    ) {
+        val andelerMedYtelseType = andeler.filter { it.type == ytelseType }
+        val enMånedFramITid = inneværendeMåned.plusMonths(1)
+
+        andelerMedYtelseType
+            .groupBy { it.aktør }
+            .forEach { (_, andel) ->
+                val tidligsteAndelMedYtelseTypeForAktør = andel.minOfOrNull { it.stønadFom } ?: return@forEach
+
+                // TODO: Fiks valideringen når vi går live i oktober
+                if ((tidligsteAndelMedYtelseTypeForAktør > enMånedFramITid) && inneværendeMåned >= YearMonth.of(2025, 10)) {
+                    throw Feil("Det eksisterer $ytelseType andeler som først blir innvilget mer enn 1 måned fram i tid. Det er ikke mulig å innvilge disse enda, og behandlingen stoppes derfor.")
+                }
+            }
     }
 }
 

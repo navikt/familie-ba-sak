@@ -81,9 +81,9 @@ class SimuleringService(
     @Transactional
     fun lagreSimuleringPåBehandling(
         simuleringMottakere: List<SimuleringMottaker>,
-        beahndling: Behandling,
+        behandling: Behandling,
     ): List<ØkonomiSimuleringMottaker> {
-        val vedtakSimuleringMottakere = simuleringMottakere.map { it.tilBehandlingSimuleringMottaker(beahndling) }
+        val vedtakSimuleringMottakere = simuleringMottakere.map { it.tilBehandlingSimuleringMottaker(behandling) }
         return økonomiSimuleringMottakerRepository.saveAll(vedtakSimuleringMottakere)
     }
 

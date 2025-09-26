@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.småbarnstillegg
 
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import org.springframework.stereotype.Service
@@ -8,17 +9,19 @@ import org.springframework.stereotype.Service
 @Service
 class SmåbarnstilleggService(
     private val beregningService: BeregningService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     fun kanAutomatiskIverksetteSmåbarnstilleggEndring(
         behandling: Behandling,
-        sistIverksatteBehandling: Behandling?,
     ): Boolean {
         if (!behandling.skalBehandlesAutomatisk || !behandling.erSmåbarnstillegg()) return false
+
+        val sisteIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) =
             finnInnvilgedeOgReduserteAndelerSmåbarnstillegg(
                 behandling = behandling,
-                sistIverksatteBehandling = sistIverksatteBehandling,
+                sistIverksatteBehandling = sisteIverksatteBehandling,
             )
 
         return kanAutomatiskIverksetteSmåbarnstillegg(

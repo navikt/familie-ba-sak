@@ -13,8 +13,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggels
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
+import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.TilgangService

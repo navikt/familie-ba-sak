@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
