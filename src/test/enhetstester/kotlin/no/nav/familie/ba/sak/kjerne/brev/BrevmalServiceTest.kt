@@ -58,7 +58,10 @@ internal class BrevmalServiceTest {
                 every { resultat } returns behandlingsresultat
                 every { fagsak.institusjon } returns mockk()
                 every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                every { id } returns 1L
             }
+
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns emptyList()
 
         assertThat(brevmalService.hentManuellVedtaksbrevtype(behandling), Is(Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON))
     }
@@ -74,7 +77,10 @@ internal class BrevmalServiceTest {
                 every { resultat } returns behandlingsresultat
                 every { fagsak.institusjon } returns null
                 every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                every { id } returns 1L
             }
+
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns emptyList()
 
         assertThat(brevmalService.hentManuellVedtaksbrevtype(behandling), Is(Brevmal.VEDTAK_FØRSTEGANGSVEDTAK))
     }

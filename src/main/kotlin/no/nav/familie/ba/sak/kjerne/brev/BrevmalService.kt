@@ -56,167 +56,197 @@ class BrevmalService(
             "Vi finner ikke vedtaksbrev som matcher med behandlingen og resultatet du har fått. " +
                 "Meld sak i Porten slik at vi kan se nærmere på saken."
 
-        return when (behandlingType) {
+        return if (erInstitusjon) {
+            hentManuellBrevmalForInstitusjon(behandlingType, behandlingsresultat, ytelseErLøpende, feilmeldingBehandlingTypeOgResultat, frontendFeilmelding, feilmelidingBehandlingType)
+        } else {
+            hentManuellBrevmal(behandlingType, behandlingsresultat, ytelseErLøpende, feilmeldingBehandlingTypeOgResultat, frontendFeilmelding, feilmelidingBehandlingType)
+        }
+    }
+
+    private fun hentManuellBrevmal(
+        behandlingstype: BehandlingType,
+        behandlingsresultat: Behandlingsresultat,
+        ytelseErLøpende: Boolean,
+        feilmeldingBehandlingTypeOgResultat: String,
+        frontendFeilmelding: String,
+        feilmeldingBehandlingType: String,
+    ): Brevmal =
+        when (behandlingstype) {
             BehandlingType.FØRSTEGANGSBEHANDLING ->
-                if (erInstitusjon) {
-                    when (behandlingsresultat) {
-                        Behandlingsresultat.INNVILGET,
-                        Behandlingsresultat.INNVILGET_OG_ENDRET,
-                        Behandlingsresultat.INNVILGET_OG_OPPHØRT,
-                        Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT,
-                        Behandlingsresultat.DELVIS_INNVILGET,
-                        Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET,
-                        Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT,
-                        Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
-                        Behandlingsresultat.AVSLÅTT_OG_ENDRET,
-                        Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
-                        Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
-                        -> Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON
+                when (behandlingsresultat) {
+                    Behandlingsresultat.INNVILGET,
+                    Behandlingsresultat.INNVILGET_OG_ENDRET,
+                    Behandlingsresultat.INNVILGET_OG_OPPHØRT,
+                    Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT,
+                    Behandlingsresultat.DELVIS_INNVILGET,
+                    Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET,
+                    Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT,
+                    Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
+                    Behandlingsresultat.AVSLÅTT_OG_ENDRET,
+                    Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
+                    Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
+                    -> Brevmal.VEDTAK_FØRSTEGANGSVEDTAK
 
-                        Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG_INSTITUSJON
+                    Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
 
-                        Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET,
-                        Behandlingsresultat.ENDRET_UTBETALING,
-                        Behandlingsresultat.ENDRET_UTEN_UTBETALING,
-                        Behandlingsresultat.ENDRET_OG_OPPHØRT,
-                        Behandlingsresultat.OPPHØRT,
-                        Behandlingsresultat.FORTSATT_OPPHØRT,
-                        Behandlingsresultat.FORTSATT_INNVILGET,
-                        Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
-                        Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
-                        Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
-                        Behandlingsresultat.HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG,
-                        Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                        Behandlingsresultat.IKKE_VURDERT,
-                        -> throw FunksjonellFeil(
-                            melding = feilmeldingBehandlingTypeOgResultat,
-                            frontendFeilmelding = frontendFeilmelding,
-                        )
-                    }
-                } else {
-                    when (behandlingsresultat) {
-                        Behandlingsresultat.INNVILGET,
-                        Behandlingsresultat.INNVILGET_OG_ENDRET,
-                        Behandlingsresultat.INNVILGET_OG_OPPHØRT,
-                        Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT,
-                        Behandlingsresultat.DELVIS_INNVILGET,
-                        Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET,
-                        Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT,
-                        Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
-                        Behandlingsresultat.AVSLÅTT_OG_ENDRET,
-                        Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
-                        Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
-                        -> Brevmal.VEDTAK_FØRSTEGANGSVEDTAK
-
-                        Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
-
-                        Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET,
-                        Behandlingsresultat.ENDRET_UTBETALING,
-                        Behandlingsresultat.ENDRET_UTEN_UTBETALING,
-                        Behandlingsresultat.ENDRET_OG_OPPHØRT,
-                        Behandlingsresultat.OPPHØRT,
-                        Behandlingsresultat.FORTSATT_OPPHØRT,
-                        Behandlingsresultat.FORTSATT_INNVILGET,
-                        Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
-                        Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
-                        Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
-                        Behandlingsresultat.HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG,
-                        Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                        Behandlingsresultat.IKKE_VURDERT,
-                        -> throw FunksjonellFeil(
-                            melding = feilmeldingBehandlingTypeOgResultat,
-                            frontendFeilmelding = frontendFeilmelding,
-                        )
-                    }
+                    Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET,
+                    Behandlingsresultat.ENDRET_UTBETALING,
+                    Behandlingsresultat.ENDRET_UTEN_UTBETALING,
+                    Behandlingsresultat.ENDRET_OG_OPPHØRT,
+                    Behandlingsresultat.OPPHØRT,
+                    Behandlingsresultat.FORTSATT_OPPHØRT,
+                    Behandlingsresultat.FORTSATT_INNVILGET,
+                    Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
+                    Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
+                    Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+                    Behandlingsresultat.HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG,
+                    Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                    Behandlingsresultat.IKKE_VURDERT,
+                    -> throw FunksjonellFeil(
+                        melding = feilmeldingBehandlingTypeOgResultat,
+                        frontendFeilmelding = frontendFeilmelding,
+                    )
                 }
 
             BehandlingType.REVURDERING ->
-                if (erInstitusjon) {
-                    when (behandlingsresultat) {
-                        Behandlingsresultat.INNVILGET,
-                        Behandlingsresultat.INNVILGET_OG_ENDRET,
-                        Behandlingsresultat.INNVILGET_OG_OPPHØRT,
-                        Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT,
-                        Behandlingsresultat.DELVIS_INNVILGET,
-                        Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET,
-                        Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT,
-                        Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
-                        Behandlingsresultat.AVSLÅTT_OG_ENDRET,
-                        Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
-                        Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
-                        Behandlingsresultat.ENDRET_UTBETALING,
-                        Behandlingsresultat.ENDRET_OG_OPPHØRT,
-                        -> if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING_INSTITUSJON else Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON
+                when (behandlingsresultat) {
+                    Behandlingsresultat.INNVILGET,
+                    Behandlingsresultat.INNVILGET_OG_ENDRET,
+                    Behandlingsresultat.INNVILGET_OG_OPPHØRT,
+                    Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT,
+                    Behandlingsresultat.DELVIS_INNVILGET,
+                    Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET,
+                    Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT,
+                    Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
+                    Behandlingsresultat.AVSLÅTT_OG_ENDRET,
+                    Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
+                    Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
+                    Behandlingsresultat.ENDRET_UTBETALING,
+                    Behandlingsresultat.ENDRET_OG_OPPHØRT,
+                    -> if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING else Brevmal.VEDTAK_OPPHØR_MED_ENDRING
 
-                        Behandlingsresultat.OPPHØRT,
-                        Behandlingsresultat.FORTSATT_OPPHØRT,
-                        -> Brevmal.VEDTAK_OPPHØRT_INSTITUSJON
+                    Behandlingsresultat.OPPHØRT,
+                    Behandlingsresultat.FORTSATT_OPPHØRT,
+                    -> Brevmal.VEDTAK_OPPHØRT
 
-                        Behandlingsresultat.FORTSATT_INNVILGET,
-                        Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET,
-                        -> Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON
+                    Behandlingsresultat.FORTSATT_INNVILGET,
+                    Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET,
+                    -> Brevmal.VEDTAK_FORTSATT_INNVILGET
 
-                        Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG_INSTITUSJON
-
-                        Behandlingsresultat.ENDRET_UTEN_UTBETALING,
-                        Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
-                        Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
-                        Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
-                        Behandlingsresultat.HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG,
-                        Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                        Behandlingsresultat.IKKE_VURDERT,
-                        -> throw FunksjonellFeil(
-                            melding = feilmeldingBehandlingTypeOgResultat,
-                            frontendFeilmelding = frontendFeilmelding,
-                        )
-                    }
-                } else {
-                    when (behandlingsresultat) {
-                        Behandlingsresultat.INNVILGET,
-                        Behandlingsresultat.INNVILGET_OG_ENDRET,
-                        Behandlingsresultat.INNVILGET_OG_OPPHØRT,
-                        Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT,
-                        Behandlingsresultat.DELVIS_INNVILGET,
-                        Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET,
-                        Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT,
-                        Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
-                        Behandlingsresultat.AVSLÅTT_OG_ENDRET,
-                        Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
-                        Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
-                        Behandlingsresultat.ENDRET_UTBETALING,
-                        Behandlingsresultat.ENDRET_OG_OPPHØRT,
-                        -> if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING else Brevmal.VEDTAK_OPPHØR_MED_ENDRING
-
-                        Behandlingsresultat.OPPHØRT,
-                        Behandlingsresultat.FORTSATT_OPPHØRT,
-                        -> Brevmal.VEDTAK_OPPHØRT
-
-                        Behandlingsresultat.FORTSATT_INNVILGET,
-                        Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET,
-                        -> Brevmal.VEDTAK_FORTSATT_INNVILGET
-
-                        Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
-                        Behandlingsresultat.ENDRET_UTEN_UTBETALING,
-                        Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
-                        Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
-                        Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
-                        Behandlingsresultat.HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG,
-                        Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                        Behandlingsresultat.IKKE_VURDERT,
-                        -> throw FunksjonellFeil(
-                            melding = feilmeldingBehandlingTypeOgResultat,
-                            frontendFeilmelding = frontendFeilmelding,
-                        )
-                    }
+                    Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
+                    Behandlingsresultat.ENDRET_UTEN_UTBETALING,
+                    Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
+                    Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
+                    Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+                    Behandlingsresultat.HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG,
+                    Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                    Behandlingsresultat.IKKE_VURDERT,
+                    -> throw FunksjonellFeil(
+                        melding = feilmeldingBehandlingTypeOgResultat,
+                        frontendFeilmelding = frontendFeilmelding,
+                    )
                 }
 
             BehandlingType.MIGRERING_FRA_INFOTRYGD,
             BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
             BehandlingType.TEKNISK_ENDRING,
             -> throw FunksjonellFeil(
-                melding = feilmelidingBehandlingType,
+                melding = feilmeldingBehandlingType,
                 frontendFeilmelding = frontendFeilmelding,
             )
         }
-    }
+
+    private fun hentManuellBrevmalForInstitusjon(
+        behandlingstype: BehandlingType,
+        behandlingsresultat: Behandlingsresultat,
+        ytelseErLøpende: Boolean,
+        feilmeldingBehandlingTypeOgResultat: String,
+        frontendFeilmelding: String,
+        feilmeldingBehandlingType: String,
+    ): Brevmal =
+        when (behandlingstype) {
+            BehandlingType.FØRSTEGANGSBEHANDLING ->
+                when (behandlingsresultat) {
+                    Behandlingsresultat.INNVILGET,
+                    Behandlingsresultat.INNVILGET_OG_ENDRET,
+                    Behandlingsresultat.INNVILGET_OG_OPPHØRT,
+                    Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT,
+                    Behandlingsresultat.DELVIS_INNVILGET,
+                    Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET,
+                    Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT,
+                    Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
+                    Behandlingsresultat.AVSLÅTT_OG_ENDRET,
+                    Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
+                    Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
+                    -> Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON
+
+                    Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG_INSTITUSJON
+
+                    Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET,
+                    Behandlingsresultat.ENDRET_UTBETALING,
+                    Behandlingsresultat.ENDRET_UTEN_UTBETALING,
+                    Behandlingsresultat.ENDRET_OG_OPPHØRT,
+                    Behandlingsresultat.OPPHØRT,
+                    Behandlingsresultat.FORTSATT_OPPHØRT,
+                    Behandlingsresultat.FORTSATT_INNVILGET,
+                    Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
+                    Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
+                    Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+                    Behandlingsresultat.HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG,
+                    Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                    Behandlingsresultat.IKKE_VURDERT,
+                    -> throw FunksjonellFeil(
+                        melding = feilmeldingBehandlingTypeOgResultat,
+                        frontendFeilmelding = frontendFeilmelding,
+                    )
+                }
+
+            BehandlingType.REVURDERING ->
+                when (behandlingsresultat) {
+                    Behandlingsresultat.INNVILGET,
+                    Behandlingsresultat.INNVILGET_OG_ENDRET,
+                    Behandlingsresultat.INNVILGET_OG_OPPHØRT,
+                    Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT,
+                    Behandlingsresultat.DELVIS_INNVILGET,
+                    Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET,
+                    Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT,
+                    Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
+                    Behandlingsresultat.AVSLÅTT_OG_ENDRET,
+                    Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
+                    Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
+                    Behandlingsresultat.ENDRET_UTBETALING,
+                    Behandlingsresultat.ENDRET_OG_OPPHØRT,
+                    -> if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING_INSTITUSJON else Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON
+
+                    Behandlingsresultat.OPPHØRT,
+                    Behandlingsresultat.FORTSATT_OPPHØRT,
+                    -> Brevmal.VEDTAK_OPPHØRT_INSTITUSJON
+
+                    Behandlingsresultat.FORTSATT_INNVILGET,
+                    Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET,
+                    -> Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON
+
+                    Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG_INSTITUSJON
+
+                    Behandlingsresultat.ENDRET_UTEN_UTBETALING,
+                    Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
+                    Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
+                    Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+                    Behandlingsresultat.HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG,
+                    Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                    Behandlingsresultat.IKKE_VURDERT,
+                    -> throw FunksjonellFeil(
+                        melding = feilmeldingBehandlingTypeOgResultat,
+                        frontendFeilmelding = frontendFeilmelding,
+                    )
+                }
+
+            BehandlingType.MIGRERING_FRA_INFOTRYGD,
+            BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
+            BehandlingType.TEKNISK_ENDRING,
+            -> throw FunksjonellFeil(
+                melding = feilmeldingBehandlingType,
+                frontendFeilmelding = frontendFeilmelding,
+            )
+        }
 }
