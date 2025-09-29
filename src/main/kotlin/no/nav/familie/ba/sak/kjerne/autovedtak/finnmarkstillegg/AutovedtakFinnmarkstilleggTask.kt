@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.IngenEndringIBosattIRiketVilkårFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UgyldigBehandlingsresultatForFinnmarkstillegg
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -35,8 +34,6 @@ class AutovedtakFinnmarkstilleggTask(
                     førstegangKjørt = task.opprettetTid,
                 )
             } catch (e: IngenEndringIBosattIRiketVilkårFeil) {
-                "Finnmarkstillegg: ${e.message}"
-            } catch (e: UgyldigBehandlingsresultatForFinnmarkstillegg) {
                 "Finnmarkstillegg: ${e.message}"
             }
 
