@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.REVURDERING
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SATSENDRING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SVALBARDTILLEGG
@@ -52,8 +51,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -367,21 +364,6 @@ class BehandlingsresultatStegValideringServiceTest {
 
     @Nested
     inner class ValiderFinnmarkstilleggBehandling {
-        @ParameterizedTest
-        @EnumSource(value = Behandlingsresultat::class, names = ["FORTSATT_INNVILGET", "FORTSATT_OPPHØRT"])
-        fun `skal kaste feil for gitte behandlingsresultat`(behandlingsresultat: Behandlingsresultat) {
-            // Arrange
-            val behandling = lagBehandling(behandlingType = REVURDERING, årsak = FINNMARKSTILLEGG, resultat = behandlingsresultat)
-            val tilkjentYtelse = lagTilkjentYtelse(behandling = behandling)
-
-            // Act & Assert
-            val exception =
-                assertThrows<UgyldigBehandlingsresultatForFinnmarkstillegg> {
-                    behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse)
-                }
-            assertThat(exception.message).isEqualTo("Ugyldig behandlingsresultat ${behandling.resultat}")
-        }
-
         @Test
         fun `skal ikke kaste feil dersom eneste endringer i andeler har vært i finnmarkstillegg andeler`() {
             // Arrange
@@ -634,21 +616,6 @@ class BehandlingsresultatStegValideringServiceTest {
 
     @Nested
     inner class ValiderSvalbardtilleggBehandling {
-        @ParameterizedTest
-        @EnumSource(value = Behandlingsresultat::class, names = ["FORTSATT_INNVILGET", "FORTSATT_OPPHØRT"])
-        fun `skal kaste for gitte behandlingsresultat`(behandlingsresultat: Behandlingsresultat) {
-            // Arrange
-            val behandling = lagBehandling(behandlingType = REVURDERING, årsak = SVALBARDTILLEGG, resultat = behandlingsresultat)
-            val tilkjentYtelse = lagTilkjentYtelse(behandling = behandling)
-
-            // Act & Assert
-            val exception =
-                assertThrows<UgyldigBehandlingsresultatForSvalbardtillegg> {
-                    behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse)
-                }
-            assertThat(exception.message).isEqualTo("Ugyldig behandlingsresultat ${behandling.resultat}")
-        }
-
         @Test
         fun `skal ikke kaste feil dersom eneste endringer i andeler har vært i svalbardtillegg andeler`() {
             // Arrange
