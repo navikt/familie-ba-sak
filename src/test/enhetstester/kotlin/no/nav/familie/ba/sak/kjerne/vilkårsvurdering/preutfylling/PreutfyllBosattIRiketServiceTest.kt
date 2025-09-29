@@ -82,6 +82,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(4),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -110,10 +111,11 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 adresserForPerson =
                     Adresser(
-                        emptyList(),
-                        emptyList(),
+                        bostedsadresser = emptyList(),
+                        delteBosteder = emptyList(),
                         oppholdsadresse = emptyList(),
                     ),
+                behandling = behandling,
             )
 
         // Assert
@@ -154,6 +156,7 @@ class PreutfyllBosattIRiketServiceTest {
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
                 personResultat = personResultat,
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -195,6 +198,7 @@ class PreutfyllBosattIRiketServiceTest {
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
                 personResultat = personResultat,
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -242,6 +246,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(2),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -302,6 +307,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(2),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -356,6 +362,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(10),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -419,6 +426,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(10),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -488,6 +496,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(5),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -532,6 +541,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusMonths(2),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -577,6 +587,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(4),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -620,6 +631,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(4),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -666,6 +678,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(4),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -714,6 +727,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(4),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -755,6 +769,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(4),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -796,6 +811,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(4),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -837,6 +853,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(4),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -878,6 +895,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(4),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -925,6 +943,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(4),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert
@@ -973,6 +992,7 @@ class PreutfyllBosattIRiketServiceTest {
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(4),
                 adresserForPerson = bostedsadresser,
+                behandling = behandling,
             )
 
         // Assert

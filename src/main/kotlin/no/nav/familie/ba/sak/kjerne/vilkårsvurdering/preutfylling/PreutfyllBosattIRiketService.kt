@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
@@ -70,6 +71,7 @@ class PreutfyllBosattIRiketService(
                         personResultat = personResultat,
                         fødselsdatoForBeskjæring = fødselsdatoForBeskjæring,
                         adresserForPerson = adresserForPerson,
+                        behandling = behandling,
                     )
 
                 if (bosattIRiketVilkårResultat.isNotEmpty()) {
@@ -83,27 +85,43 @@ class PreutfyllBosattIRiketService(
         personResultat: PersonResultat,
         fødselsdatoForBeskjæring: LocalDate = LocalDate.MIN,
         adresserForPerson: Adresser,
+        behandling: Behandling,
     ): Set<VilkårResultat> {
-        val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(adresserForPerson)
-        val erBosattIFinnmarkEllerNordTromsTidslinje = lagErBosattIFinnmarkEllerNordTromsTidslinje(adresserForPerson)
-        val erOppholdsadressePåSvalbardTidslinje = lagErBosattPåSvalbardTidslinje(adresserForPerson)
+        val erBosattINorgeTidslinje = lagTidslinjeForAdresser(adresserForPerson.bostedsadresser) { it.erINorge() }
         val erNordiskStatsborgerTidslinje = pdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat)
+        val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresserForPerson)
+        val erDeltBostedIFinnmarkEllerNordTromsTidslinje = lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresserForPerson)
+        val erOppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje(adresserForPerson)
+
+        if (behandling.erFinnmarksEllerSvalbardtillegg()) {
+            validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
+                behandling = behandling,
+                erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
+                erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
+            )
+        }
+
+        val erBosattIFinnmarkEllerNordTromsTidslinje =
+            erBostedsadresseIFinnmarkEllerNordTromsTidslinje.kombinerMed(erDeltBostedIFinnmarkEllerNordTromsTidslinje) { erBostedsadresseIFinnmarkEllerNordTroms, erDeltBostedIFinnmarkEllerNordTroms ->
+                erBostedsadresseIFinnmarkEllerNordTroms == true || erDeltBostedIFinnmarkEllerNordTroms == true
+            }
 
         val erNordiskStatsborgerOgBosattINorgeTidslinje =
             erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeTidslinje) { erNordiskStatsborger, erBosattINorge ->
                 erNordiskStatsborger == true && erBosattINorge == true
             }
+
         val erBosattOgHarNordiskStatsborgerskapTidslinje =
             erNordiskStatsborgerOgBosattINorgeTidslinje.kombinerMed(erBosattIFinnmarkEllerNordTromsTidslinje, erOppholdsadressePåSvalbardTidslinje) { erNordiskStatsborgerOgBosattINorge, erBosattIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
-                val utdypendeVilkårsvurderinger =
-                    if (erOppholdsadressePåSvalbard == true) {
-                        listOf(BOSATT_PÅ_SVALBARD)
-                    } else if (erBosattIFinnmarkEllerNordTroms == true) {
-                        listOf(BOSATT_I_FINNMARK_NORD_TROMS)
-                    } else {
-                        emptyList()
-                    }
                 if (erNordiskStatsborgerOgBosattINorge == true) {
+                    val utdypendeVilkårsvurderinger =
+                        if (erOppholdsadressePåSvalbard == true) {
+                            listOf(BOSATT_PÅ_SVALBARD)
+                        } else if (erBosattIFinnmarkEllerNordTroms == true) {
+                            listOf(BOSATT_I_FINNMARK_NORD_TROMS)
+                        } else {
+                            emptyList()
+                        }
                     OppfyltDelvilkår(begrunnelse = "- Norsk/nordisk statsborgerskap", utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger)
                 } else {
                     IkkeOppfyltDelvilkår
@@ -223,17 +241,11 @@ class PreutfyllBosattIRiketService(
 
     private fun lagErBosattINorgeTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser) { it.erINorge() }
 
-    private fun lagErBosattIFinnmarkEllerNordTromsTidslinje(adresser: Adresser): Tidslinje<Boolean> {
-        val bostedsadresserIFinnmarkEllerNordTromsTidslinje = lagTidslinjeForAdresser(adresser.bostedsadresser) { it.erIFinnmarkEllerNordTroms() }
-        val delteBostederIFinnmarkEllerNordTromsTidslinje = lagTidslinjeForAdresser(adresser.delteBosteder) { it.erIFinnmarkEllerNordTroms() }
+    private fun lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser) { it.erIFinnmarkEllerNordTroms() }
 
-        return bostedsadresserIFinnmarkEllerNordTromsTidslinje
-            .kombinerMed(delteBostederIFinnmarkEllerNordTromsTidslinje) { bostedsadresseIFinnmarkEllerNordTroms, deltBostedIFinnmarkEllerNordTroms ->
-                bostedsadresseIFinnmarkEllerNordTroms == true || deltBostedIFinnmarkEllerNordTroms == true
-            }
-    }
+    private fun lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.delteBosteder) { it.erIFinnmarkEllerNordTroms() }
 
-    private fun lagErBosattPåSvalbardTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.oppholdsadresse) { it.erPåSvalbard() }
+    private fun lagErOppholdsadresserPåSvalbardTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.oppholdsadresse) { it.erPåSvalbard() }
 
     private fun lagTidslinjeForAdresser(
         adresser: List<Adresse>,
@@ -251,4 +263,21 @@ class PreutfyllBosattIRiketService(
                     tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
                 )
             }.tilTidslinje()
+
+    private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
+        behandling: Behandling,
+        erDeltBostedIFinnmarkEllerNordTromsTidslinje: Tidslinje<Boolean>,
+        erOppholdsadressePåSvalbardTidslinje: Tidslinje<Boolean>,
+    ) {
+        val harDeltBostedIFinnmarkOgOppholdsadressePåSvalbardISammePeriode =
+            erDeltBostedIFinnmarkEllerNordTromsTidslinje
+                .kombinerMed(erOppholdsadressePåSvalbardTidslinje) { erDeltBostedIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
+                    erDeltBostedIFinnmarkEllerNordTroms == true && erOppholdsadressePåSvalbard == true
+                }.tilPerioder()
+                .any { it.verdi == true }
+
+        if (harDeltBostedIFinnmarkOgOppholdsadressePåSvalbardISammePeriode) {
+            throw Feil("Kan ikke behandle ${behandling.opprettetÅrsak.visningsnavn} automatisk, fordi barn har delt bosted i Finnmark/Nord-Troms og oppholdsadresse på Svalbard")
+        }
+    }
 }
