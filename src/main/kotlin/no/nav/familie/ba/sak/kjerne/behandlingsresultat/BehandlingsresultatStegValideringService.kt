@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -98,6 +99,10 @@ class BehandlingsresultatStegValideringService(
 
     fun validerFinnmarkstilleggBehandling(tilkjentYtelse: TilkjentYtelse) {
         val behandling = tilkjentYtelse.behandling
+        if (behandling.resultat in setOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_OPPHØRT)) {
+            throw UgyldigBehandlingsresultatForFinnmarkstillegg("Ugyldig behandlingsresultat ${behandling.resultat}")
+        }
+
         val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandlingId = behandling.id)
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(tilkjentYtelse.behandling)
@@ -115,8 +120,13 @@ class BehandlingsresultatStegValideringService(
     }
 
     fun validerSvalbardtilleggBehandling(tilkjentYtelse: TilkjentYtelse) {
+        val behandling = tilkjentYtelse.behandling
+        if (behandling.resultat in setOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_OPPHØRT)) {
+            throw UgyldigBehandlingsresultatForSvalbardtillegg("Ugyldig behandlingsresultat ${behandling.resultat}")
+        }
+
         val forrigeBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(tilkjentYtelse.behandling)
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
                 ?: throw Feil("Kan ikke kjøre svalbardtillegg behandling dersom det ikke finnes en tidligere iverksatt behandling")
 
         val andelerNåværendeBehandling = tilkjentYtelse.andelerTilkjentYtelse.toList()
