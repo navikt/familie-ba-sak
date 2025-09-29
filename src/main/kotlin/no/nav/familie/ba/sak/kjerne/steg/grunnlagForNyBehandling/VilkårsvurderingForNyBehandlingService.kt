@@ -165,7 +165,7 @@ class VilkårsvurderingForNyBehandlingService(
                     personopplysningGrunnlag = personopplysningGrunnlag,
                 ).also {
                     if (inneværendeBehandling.erFinnmarksTilleggEllerSvalbardtillegg()) {
-                        preutfyllVilkårService.preutfyllBosattIRiket(it)
+                        preutfyllVilkårService.preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(it)
                     }
                 }
 
@@ -213,7 +213,7 @@ class VilkårsvurderingForNyBehandlingService(
                     }
                 }
             try {
-                preutfyllVilkårService.preutfyllBosattIRiket(
+                preutfyllVilkårService.preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(
                     vilkårsvurdering = initiellVilkårsvurdering,
                     identerVilkårSkalPreutfyllesFor = identerVilkårSkalPreutfyllesFor,
                 )
