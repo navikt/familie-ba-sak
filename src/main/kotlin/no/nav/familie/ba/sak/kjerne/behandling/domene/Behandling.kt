@@ -213,6 +213,10 @@ data class Behandling(
         return this
     }
 
+    fun erFørstegangsbehandling() = type == BehandlingType.FØRSTEGANGSBEHANDLING
+
+    fun erRevurdering() = type == BehandlingType.REVURDERING
+
     fun erSmåbarnstillegg() = this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG
 
     fun erKlage() = this.opprettetÅrsak == BehandlingÅrsak.KLAGE
@@ -233,9 +237,11 @@ data class Behandling(
 
     fun erSatsendringEllerMånedligValutajustering() = erSatsendring() || erMånedligValutajustering()
 
+    fun erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() = erFinnmarksTilleggEllerSvalbardtillegg() || erSatsendringEllerMånedligValutajustering()
+
     fun erOppdaterUtvidetKlassekode() = this.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE
 
-    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsendringEllerMånedligValutajustering() || erSmåbarnstillegg() || erOmregning() || erFinnmarksTilleggEllerSvalbardtillegg()
+    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() || erSmåbarnstillegg() || erOmregning()
 
     fun erManuellMigreringForEndreMigreringsdato() =
         erMigrering() &&
@@ -244,6 +250,8 @@ data class Behandling(
     fun erHelmanuellMigrering() = erMigrering() && opprettetÅrsak == BehandlingÅrsak.HELMANUELL_MIGRERING
 
     fun erManuellMigrering() = erManuellMigreringForEndreMigreringsdato() || erHelmanuellMigrering()
+
+    fun erEndreMigreringsdato() = opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
 
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
 
@@ -255,7 +263,7 @@ data class Behandling(
 
     fun kanLeggeTilOgFjerneUtvidetVilkår() = erManuellMigrering() || erTekniskEndring() || erKorrigereVedtak() || erKlage() || erIverksetteKAVedtak()
 
-    private fun erOmregning() = this.opprettetÅrsak.erOmregningsårsak()
+    fun erOmregning() = this.opprettetÅrsak.erOmregningsårsak()
 
     private fun erFødselshendelse() = this.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
 

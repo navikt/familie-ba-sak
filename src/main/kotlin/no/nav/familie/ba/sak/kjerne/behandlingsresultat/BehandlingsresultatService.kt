@@ -31,6 +31,11 @@ class BehandlingsresultatService(
 ) {
     internal fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+
+        if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
+            return Behandlingsresultat.INNVILGET
+        }
+
         val forrigeBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
 
         val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
