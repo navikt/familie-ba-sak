@@ -892,7 +892,7 @@ class BehandlingsresultatStegValideringServiceTest {
         }
 
         @Test
-        fun `skal ikke kaste feil dersom finnmarkstillegg er innvilget fra og med inneværende måned for et barn og neste måned for et annet barn`() {
+        fun `skal ikke kaste feil dersom svalbardtillegg er innvilget fra og med inneværende måned for et barn og neste måned for et annet barn`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
             val forrigeAndeler =
@@ -959,11 +959,11 @@ class BehandlingsresultatStegValideringServiceTest {
             every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns mockk(relaxed = true)
 
             // Act & Assert
-            assertDoesNotThrow { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
+            assertDoesNotThrow { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
         }
 
         @Test
-        fun `skal kaste feil dersom finnmarkstillegg er innvilget fra og med inneværende måned for et barn og om to måneder eller mer for et annet barn`() {
+        fun `skal kaste feil dersom svalbardtillegg er innvilget fra og med inneværende måned for et barn og om to måneder eller mer for et annet barn`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
             val forrigeAndeler =
@@ -1030,7 +1030,7 @@ class BehandlingsresultatStegValideringServiceTest {
             every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns mockk(relaxed = true)
 
             // Act & Assert
-            val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
+            val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
 
             assertThat(feil.message).isEqualTo(
                 "Det eksisterer SVALBARDTILLEGG-andeler som er innvilget inneværende måned eller tidligere, " +
@@ -1040,7 +1040,7 @@ class BehandlingsresultatStegValideringServiceTest {
         }
 
         @Test
-        fun `skal kaste rekjør senere-exception dersom finnmarkstillegg er innvilget fra og med neste måned for et barn og om to måneder for et annet barn`() {
+        fun `skal kaste rekjør senere-exception dersom svalbardtillegg er innvilget fra og med neste måned for et barn og om to måneder for et annet barn`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
             val forrigeAndeler =
@@ -1107,7 +1107,7 @@ class BehandlingsresultatStegValideringServiceTest {
             every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns mockk(relaxed = true)
 
             // Act & Assert
-            val feil = assertThrows<RekjørSenereException> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
+            val feil = assertThrows<RekjørSenereException> { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
 
             val forventetTriggertid = LocalDate.now(clockProvider.get()).førsteDagINesteMåned().atTime(6, 0)
             assertThat(feil.triggerTid).isEqualTo(forventetTriggertid)
