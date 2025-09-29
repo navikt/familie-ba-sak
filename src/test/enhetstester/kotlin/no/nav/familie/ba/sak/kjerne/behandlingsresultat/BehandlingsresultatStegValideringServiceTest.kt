@@ -372,28 +372,7 @@ class BehandlingsresultatStegValideringServiceTest {
         fun `skal kaste feil for gitte behandlingsresultat`(behandlingsresultat: Behandlingsresultat) {
             // Arrange
             val behandling = lagBehandling(behandlingType = REVURDERING, årsak = FINNMARKSTILLEGG, resultat = behandlingsresultat)
-            val tilkjentYtelse =
-                lagTilkjentYtelse(behandling = behandling) {
-                    setOf(
-                        lagAndelTilkjentYtelse(
-                            fom = YearMonth.of(2023, 1),
-                            tom = YearMonth.of(2023, 2),
-                            behandling = behandling,
-                            tilkjentYtelse = it,
-                            beløp = 1000,
-                            person = barn,
-                        ),
-                        lagAndelTilkjentYtelse(
-                            fom = YearMonth.of(2023, 1),
-                            tom = YearMonth.of(2023, 2),
-                            behandling = behandling,
-                            tilkjentYtelse = it,
-                            beløp = 500,
-                            person = barn,
-                            ytelseType = YtelseType.FINNMARKSTILLEGG,
-                        ),
-                    )
-                }
+            val tilkjentYtelse = lagTilkjentYtelse(behandling = behandling)
 
             // Act & Assert
             val exception =
@@ -660,28 +639,7 @@ class BehandlingsresultatStegValideringServiceTest {
         fun `skal kaste for gitte behandlingsresultat`(behandlingsresultat: Behandlingsresultat) {
             // Arrange
             val behandling = lagBehandling(behandlingType = REVURDERING, årsak = SVALBARDTILLEGG, resultat = behandlingsresultat)
-            val tilkjentYtelse =
-                lagTilkjentYtelse(behandling = behandling) {
-                    setOf(
-                        lagAndelTilkjentYtelse(
-                            fom = YearMonth.of(2023, 1),
-                            tom = YearMonth.of(2023, 2),
-                            behandling = behandling,
-                            tilkjentYtelse = it,
-                            beløp = 1000,
-                            person = barn,
-                        ),
-                        lagAndelTilkjentYtelse(
-                            fom = YearMonth.of(2023, 1),
-                            tom = YearMonth.of(2023, 2),
-                            behandling = behandling,
-                            tilkjentYtelse = it,
-                            beløp = 500,
-                            person = barn,
-                            ytelseType = YtelseType.SVALBARDTILLEGG,
-                        ),
-                    )
-                }
+            val tilkjentYtelse = lagTilkjentYtelse(behandling = behandling)
 
             // Act & Assert
             val exception =
