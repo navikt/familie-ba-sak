@@ -96,6 +96,7 @@ class PreutfyllBosattIRiketService(
         if (behandling.erFinnmarksEllerSvalbardtillegg()) {
             validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
                 behandling = behandling,
+                erBosattINorgeTidslinje = erBosattINorgeTidslinje,
                 erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
                 erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
             )
@@ -266,6 +267,7 @@ class PreutfyllBosattIRiketService(
 
     private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
         behandling: Behandling,
+        erBosattINorgeTidslinje: Tidslinje<Boolean>,
         erDeltBostedIFinnmarkEllerNordTromsTidslinje: Tidslinje<Boolean>,
         erOppholdsadressePåSvalbardTidslinje: Tidslinje<Boolean>,
     ) {
@@ -278,6 +280,17 @@ class PreutfyllBosattIRiketService(
 
         if (harDeltBostedIFinnmarkOgOppholdsadressePåSvalbardISammePeriode) {
             throw Feil("Kan ikke behandle ${behandling.opprettetÅrsak.visningsnavn} automatisk, fordi barn har delt bosted i Finnmark/Nord-Troms og oppholdsadresse på Svalbard")
+        }
+
+        val harOppholdsadresseUtenBostedsadresse =
+            erOppholdsadressePåSvalbardTidslinje
+                .kombinerMed(erBosattINorgeTidslinje) { erOppholdsadressePåSvalbard, harBostedsadresseINorge ->
+                    erOppholdsadressePåSvalbard == true && harBostedsadresseINorge != true
+                }.tilPerioder()
+                .any { it.verdi == true }
+
+        if (harOppholdsadresseUtenBostedsadresse) {
+            throw Feil("Kan ikke behandle ${behandling.opprettetÅrsak.visningsnavn} automatisk, fordi person har oppholdsadresse på Svalbard, men ikke bostedsadresse i Norge")
         }
     }
 }
