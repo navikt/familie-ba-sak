@@ -98,6 +98,7 @@ class BehandlingsresultatStegValideringService(
 
     fun validerFinnmarkstilleggBehandling(tilkjentYtelse: TilkjentYtelse) {
         val behandling = tilkjentYtelse.behandling
+
         val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandlingId = behandling.id)
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(tilkjentYtelse.behandling)
@@ -115,8 +116,10 @@ class BehandlingsresultatStegValideringService(
     }
 
     fun validerSvalbardtilleggBehandling(tilkjentYtelse: TilkjentYtelse) {
+        val behandling = tilkjentYtelse.behandling
+
         val forrigeBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(tilkjentYtelse.behandling)
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
                 ?: throw Feil("Kan ikke kjøre svalbardtillegg behandling dersom det ikke finnes en tidligere iverksatt behandling")
 
         val andelerNåværendeBehandling = tilkjentYtelse.andelerTilkjentYtelse.toList()
