@@ -49,7 +49,7 @@ class MockPdlRestClient(
             )
         }
 
-    override fun hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(identer: List<String>): Map<String, PdlBostedsadresseDeltBostedOppholdsadressePerson> =
+    override fun hentAdresserForPersoner(identer: List<String>): Map<String, PdlBostedsadresseDeltBostedOppholdsadressePerson> =
         identer.associateWith {
             PdlBostedsadresseDeltBostedOppholdsadressePerson(
                 bostedsadresse =

@@ -144,7 +144,7 @@ class AutovedtakSvalbardtilleggServiceTest {
                     )
                 }
 
-            every { pdlRestClient.hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(listOf(søkerIdent, barnIdent)) } returns
+            every { pdlRestClient.hentAdresserForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
                     søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
                     barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
@@ -160,7 +160,7 @@ class AutovedtakSvalbardtilleggServiceTest {
         @Test
         fun `skal returnere false når ingen av personene har oppholdsadresse på Svalbard`() {
             // Arrange
-            every { pdlRestClient.hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(listOf(søkerIdent, barnIdent)) } returns
+            every { pdlRestClient.hentAdresserForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
                     søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
                     barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
@@ -176,7 +176,7 @@ class AutovedtakSvalbardtilleggServiceTest {
         @Test
         fun `skal returnere true når minst èn person har oppholdsadresse på Svalbard`() {
             // Arrange
-            every { pdlRestClient.hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(listOf(søkerIdent, barnIdent)) } returns
+            every { pdlRestClient.hentAdresserForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
                     søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholsadressePåSvalbard), deltBosted = emptyList()),
                     barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),

@@ -46,7 +46,7 @@ class PreutfyllBosattIRiketService(
                 .map { it.aktør.aktivFødselsnummer() }
                 .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
 
-        val bostedsadresser = pdlRestClient.hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(identer)
+        val adresser = pdlRestClient.hentAdresserForPersoner(identer)
 
         vilkårsvurdering
             .personResultater
@@ -56,13 +56,13 @@ class PreutfyllBosattIRiketService(
                 if (erUkrainskStatsborger) return@forEach
 
                 val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
-                val bostedsadresserForPerson = Adresser.opprettFra(bostedsadresser[personResultat.aktør.aktivFødselsnummer()])
+                val adresserForPerson = Adresser.opprettFra(adresser[personResultat.aktør.aktivFødselsnummer()])
 
                 val bosattIRiketVilkårResultat =
                     genererBosattIRiketVilkårResultat(
                         personResultat = personResultat,
                         fødselsdatoForBeskjæring = fødselsdatoForBeskjæring,
-                        adresserForPerson = bostedsadresserForPerson,
+                        adresserForPerson = adresserForPerson,
                     )
 
                 if (bosattIRiketVilkårResultat.isNotEmpty()) {

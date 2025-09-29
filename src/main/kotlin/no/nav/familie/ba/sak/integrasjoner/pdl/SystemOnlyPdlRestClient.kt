@@ -92,7 +92,7 @@ class SystemOnlyPdlRestClient(
         return feilsjekkOgReturnerData(pdlResponse = pdlResponse)
     }
 
-    fun hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(identer: List<String>): Map<String, PdlBostedsadresseDeltBostedOppholdsadressePerson> {
+    fun hentAdresserForPersoner(identer: List<String>): Map<String, PdlBostedsadresseDeltBostedOppholdsadressePerson> {
         val pdlPersonRequest =
             PdlPersonBolkRequest(
                 variables = PdlPersonBolkRequestVariables(identer),

@@ -52,7 +52,7 @@ class AutovedtakSvalbardtilleggTaskOppretter(
                 .chunked(1000)
                 .flatMap { personer ->
                     pdlRestClient
-                        .hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(personer)
+                        .hentAdresserForPersoner(personer)
                         .mapValues { Adresser.opprettFra(it.value) }
                         .filterValues { it.harAdresserSomErRelevantForSvalbardtillegg() }
                         .keys

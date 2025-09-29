@@ -36,7 +36,7 @@ fun mockSystemOnlyPdlRestClient(
             }
         }
 
-        every { hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(any()) } answers {
+        every { hentAdresserForPersoner(any()) } answers {
             val identer = firstArg<List<String>>()
             val vegadresseIOslo = Vegadresse(null, null, null, null, null, "0301", null, null)
             identer.associateWith { ident ->

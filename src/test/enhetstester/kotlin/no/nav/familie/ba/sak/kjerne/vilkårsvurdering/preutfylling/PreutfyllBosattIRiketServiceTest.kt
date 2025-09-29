@@ -1004,7 +1004,7 @@ class PreutfyllBosattIRiketServiceTest {
                 Statsborgerskap(land = "UKR", gyldigFraOgMed = LocalDate.now().minusYears(10), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
 
-        every { pdlRestClient.hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(any()) } answers {
+        every { pdlRestClient.hentAdresserForPersoner(any()) } answers {
             val identer = firstArg<List<String>>()
             identer.associateWith {
                 PdlBostedsadresseDeltBostedOppholdsadressePerson(
