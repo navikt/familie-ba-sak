@@ -31,8 +31,6 @@ class AutovedtakFinnmarkstilleggTaskOppretter(
             val page = fagsakRepository.finnLøpendeFagsakerForFinnmarkstilleggKjøring(Pageable.ofSize(antallFagsaker))
             val fagsakIder = page.toSet()
 
-            finnmarkstilleggKjøringRepository.saveAll(fagsakIder.map { FinnmarkstilleggKjøring(fagsakId = it) })
-
             val iverksatteBehandlinger =
                 behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder).values
 
@@ -66,6 +64,9 @@ class AutovedtakFinnmarkstilleggTaskOppretter(
                 fagsakerMedPersonidenter
                     .filterValues { personerSomBorIFinnmarkEllerNordTroms.intersect(it).isNotEmpty() }
                     .keys
+
+            val fagsakerSomErSjekketMenIkkeKvalifisert = fagsakIder - fagsakerDerMinstEnAktørBorIFinnmarkEllerNordTroms
+            finnmarkstilleggKjøringRepository.saveAll(fagsakerSomErSjekketMenIkkeKvalifisert.map { FinnmarkstilleggKjøring(fagsakId = it) })
 
             opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(fagsakerDerMinstEnAktørBorIFinnmarkEllerNordTroms)
 

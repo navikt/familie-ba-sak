@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.IngenEndringIBosattIRiketVilkårFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøring
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service
 class AutovedtakFinnmarkstilleggTask(
     private val autovedtakStegService: AutovedtakStegService,
     private val fagsakService: FagsakService,
+    private val finnmarkstilleggKjøringRepository: FinnmarkstilleggKjøringRepository,
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
@@ -38,6 +41,7 @@ class AutovedtakFinnmarkstilleggTask(
             }
 
         logger.info(resultat)
+        finnmarkstilleggKjøringRepository.save(FinnmarkstilleggKjøring(fagsakId = fagsakId))
     }
 
     companion object {
