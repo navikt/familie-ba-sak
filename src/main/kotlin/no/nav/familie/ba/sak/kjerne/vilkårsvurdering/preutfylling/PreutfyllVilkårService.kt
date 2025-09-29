@@ -27,13 +27,11 @@ class PreutfyllVilkårService(
         }
     }
 
-    fun preutfyllBosattIRiket(
+    fun preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(
         vilkårsvurdering: Vilkårsvurdering,
         identerVilkårSkalPreutfyllesFor: List<String>? = null,
     ) {
-        if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR)) {
-            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, identerVilkårSkalPreutfyllesFor)
-        }
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, identerVilkårSkalPreutfyllesFor)
     }
 
     companion object {
