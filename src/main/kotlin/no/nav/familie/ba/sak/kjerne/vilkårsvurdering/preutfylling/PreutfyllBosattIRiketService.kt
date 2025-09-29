@@ -40,6 +40,7 @@ class PreutfyllBosattIRiketService(
         vilkårsvurdering: Vilkårsvurdering,
         identerVilkårSkalPreutfyllesFor: List<String>? = null,
     ) {
+        val behandling = vilkårsvurdering.behandling
         val identer =
             vilkårsvurdering
                 .personResultater
@@ -53,7 +54,13 @@ class PreutfyllBosattIRiketService(
             .filter { it.aktør.aktivFødselsnummer() in identer }
             .forEach { personResultat ->
                 val erUkrainskStatsborger = hentErUkrainskStatsborger(personResultat.aktør)
-                if (erUkrainskStatsborger) return@forEach
+                if (erUkrainskStatsborger) {
+                    if (behandling.erFinnmarksEllerSvalbardtillegg()) {
+                        throw Feil("Kan ikke automatisk behandle ${behandling.opprettetÅrsak.visningsnavn} for ukrainske statsborgere")
+                    } else {
+                        return@forEach
+                    }
+                }
 
                 val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
                 val adresserForPerson = Adresser.opprettFra(adresser[personResultat.aktør.aktivFødselsnummer()])
