@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingMedOverstyrendeResultater
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -45,7 +45,7 @@ class PreutfyllBorHosSøkerServiceTest {
         every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
             val identer = firstArg<List<String>>()
             identer.associateWith {
-                PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                PdlAdresserPerson(
                     bostedsadresse =
                         listOf(
                             Bostedsadresse(
@@ -100,7 +100,7 @@ class PreutfyllBorHosSøkerServiceTest {
         every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer) } returns
             identer.associateWith { ident ->
                 if (ident == aktørSøker.aktivFødselsnummer()) {
-                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                    PdlAdresserPerson(
                         bostedsadresse =
                             listOf(
                                 Bostedsadresse(
@@ -112,7 +112,7 @@ class PreutfyllBorHosSøkerServiceTest {
                         deltBosted = emptyList(),
                     )
                 } else {
-                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                    PdlAdresserPerson(
                         bostedsadresse =
                             listOf(
                                 Bostedsadresse(
@@ -159,7 +159,7 @@ class PreutfyllBorHosSøkerServiceTest {
         every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer) } returns
             identer.associateWith { ident ->
                 if (ident == aktørSøker.aktivFødselsnummer()) {
-                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                    PdlAdresserPerson(
                         bostedsadresse =
                             listOf(
                                 Bostedsadresse(
@@ -171,7 +171,7 @@ class PreutfyllBorHosSøkerServiceTest {
                         deltBosted = emptyList(),
                     )
                 } else {
-                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                    PdlAdresserPerson(
                         bostedsadresse =
                             listOf(
                                 Bostedsadresse(
@@ -229,7 +229,7 @@ class PreutfyllBorHosSøkerServiceTest {
         every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer) } returns
             identer.associateWith { ident ->
                 if (ident == aktørSøker.aktivFødselsnummer()) {
-                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                    PdlAdresserPerson(
                         bostedsadresse =
                             listOf(
                                 Bostedsadresse(
@@ -246,7 +246,7 @@ class PreutfyllBorHosSøkerServiceTest {
                         deltBosted = emptyList(),
                     )
                 } else {
-                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                    PdlAdresserPerson(
                         bostedsadresse =
                             listOf(
                                 Bostedsadresse(
@@ -302,7 +302,7 @@ class PreutfyllBorHosSøkerServiceTest {
         every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
             val identer = firstArg<List<String>>()
             identer.associateWith {
-                PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                PdlAdresserPerson(
                     bostedsadresse =
                         listOf(
                             Bostedsadresse(

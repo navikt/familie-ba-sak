@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -134,7 +134,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
             every { pdlRestClient.hentAdresserForPersoner(any()) } returns
                 mapOf(
                     person1.aktør.aktivFødselsnummer() to
-                        PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                        PdlAdresserPerson(
                             oppholdsadresse =
                                 listOf(
                                     lagOppholdsadresse(
@@ -145,7 +145,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                                 ),
                         ),
                     person2.aktør.aktivFødselsnummer() to
-                        PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                        PdlAdresserPerson(
                             oppholdsadresse =
                                 listOf(
                                     lagOppholdsadresse(
@@ -200,7 +200,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
             every { pdlRestClient.hentAdresserForPersoner(any()) } returns
                 mapOf(
                     person1.aktør.aktivFødselsnummer() to
-                        PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                        PdlAdresserPerson(
                             oppholdsadresse =
                                 listOf(
                                     lagOppholdsadresse(
@@ -211,7 +211,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                                 ),
                         ),
                     person2.aktør.aktivFødselsnummer() to
-                        PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                        PdlAdresserPerson(
                             oppholdsadresse =
                                 listOf(
                                     lagOppholdsadresse(
@@ -267,7 +267,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
             every { pdlRestClient.hentAdresserForPersoner(any()) } returns
                 mapOf(
                     person1.aktør.aktivFødselsnummer() to
-                        PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                        PdlAdresserPerson(
                             oppholdsadresse =
                                 listOf(
                                     lagOppholdsadresse(
@@ -278,7 +278,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                                 ),
                         ),
                     person2.aktør.aktivFødselsnummer() to
-                        PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                        PdlAdresserPerson(
                             oppholdsadresse =
                                 listOf(
                                     lagOppholdsadresse(

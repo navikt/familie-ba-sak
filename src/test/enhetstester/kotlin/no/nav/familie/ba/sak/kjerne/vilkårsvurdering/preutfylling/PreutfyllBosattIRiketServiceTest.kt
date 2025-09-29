@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -1007,7 +1007,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { pdlRestClient.hentAdresserForPersoner(any()) } answers {
             val identer = firstArg<List<String>>()
             identer.associateWith {
-                PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                PdlAdresserPerson(
                     bostedsadresse =
                         listOf(
                             Bostedsadresse(

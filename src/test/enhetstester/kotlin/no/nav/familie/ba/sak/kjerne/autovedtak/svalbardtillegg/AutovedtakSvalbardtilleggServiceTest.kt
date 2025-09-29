@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.SvalbardtilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -146,8 +146,8 @@ class AutovedtakSvalbardtilleggServiceTest {
 
             every { pdlRestClient.hentAdresserForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
-                    søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
-                    barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
+                    søkerIdent to PdlAdresserPerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
+                    barnIdent to PdlAdresserPerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
                 )
 
             // Act
@@ -162,8 +162,8 @@ class AutovedtakSvalbardtilleggServiceTest {
             // Arrange
             every { pdlRestClient.hentAdresserForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
-                    søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
-                    barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
+                    søkerIdent to PdlAdresserPerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
+                    barnIdent to PdlAdresserPerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
                 )
 
             // Act
@@ -178,8 +178,8 @@ class AutovedtakSvalbardtilleggServiceTest {
             // Arrange
             every { pdlRestClient.hentAdresserForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
-                    søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholsadressePåSvalbard), deltBosted = emptyList()),
-                    barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
+                    søkerIdent to PdlAdresserPerson(oppholdsadresse = listOf(oppholsadressePåSvalbard), deltBosted = emptyList()),
+                    barnIdent to PdlAdresserPerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
                 )
 
             // Act
