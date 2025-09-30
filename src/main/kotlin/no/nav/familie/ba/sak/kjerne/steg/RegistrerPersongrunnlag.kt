@@ -66,7 +66,7 @@ class RegistrerPersongrunnlag(
     }
 
     override fun postValiderSteg(behandling: Behandling) {
-        if (!behandling.erFinnmarksTilleggEllerSvalbardtillegg()) {
+        if (!behandling.erFinnmarksEllerSvalbardtillegg()) {
             return
         }
         val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)

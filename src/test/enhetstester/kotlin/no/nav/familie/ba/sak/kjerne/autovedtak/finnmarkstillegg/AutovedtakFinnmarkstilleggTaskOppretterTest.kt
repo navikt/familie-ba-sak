@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -65,7 +65,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
         )
 
     private val bostedsadresseIFinnmark =
-        PdlBostedsadresseDeltBostedOppholdsadressePerson(
+        PdlAdresserPerson(
             bostedsadresse =
                 listOf(
                     Bostedsadresse(
@@ -87,7 +87,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
         )
 
     private val bostedsadresseIOslo =
-        PdlBostedsadresseDeltBostedOppholdsadressePerson(
+        PdlAdresserPerson(
             bostedsadresse =
                 listOf(
                     Bostedsadresse(

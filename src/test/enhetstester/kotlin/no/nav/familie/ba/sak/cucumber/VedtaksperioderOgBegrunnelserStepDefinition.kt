@@ -28,7 +28,7 @@ import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockAutovedtakFinnmark
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.FinnmarkstilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -92,7 +92,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     var uregistrerteBarn = listOf<BarnMedOpplysninger>()
     var dagensDato: LocalDate = LocalDate.now()
     var toggles = mapOf<Long, Map<String, Boolean>>()
-    var adresser = mutableMapOf<String, PdlBostedsadresseDeltBostedOppholdsadressePerson>()
+    var adresser = mutableMapOf<String, PdlAdresserPerson>()
 
     var utvidetVedtaksperiodeMedBegrunnelser = listOf<UtvidetVedtaksperiodeMedBegrunnelser>()
 

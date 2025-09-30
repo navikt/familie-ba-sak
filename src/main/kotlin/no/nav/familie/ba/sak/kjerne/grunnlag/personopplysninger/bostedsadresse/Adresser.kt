@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse
 
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import java.time.LocalDate
 
 private val FØRSTE_RELEVANTE_ADRESSEDATO_FOR_FINNMARKSTILLEGG = LocalDate.of(2025, 9, 30)
@@ -20,7 +20,7 @@ data class Adresser(
     fun harAdresserSomErRelevantForSvalbardtillegg(): Boolean = finnAdressehistorikkFraOgMedDato(oppholdsadresse, FØRSTE_RELEVANTE_ADRESSEDATO_FOR_SVALBARDSTILLEGG).any { it.erPåSvalbard() }
 
     companion object {
-        fun opprettFra(pdlAdresser: PdlBostedsadresseDeltBostedOppholdsadressePerson?): Adresser =
+        fun opprettFra(pdlAdresser: PdlAdresserPerson?): Adresser =
             Adresser(
                 bostedsadresser = pdlAdresser?.bostedsadresse?.map { Adresse.opprettFra(it) } ?: emptyList(),
                 delteBosteder = pdlAdresser?.deltBosted?.map { Adresse.opprettFra(it) } ?: emptyList(),
