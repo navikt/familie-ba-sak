@@ -42,9 +42,12 @@ import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
+import org.slf4j.LoggerFactory
 import java.time.YearMonth
 
 object BehandlingsresultatValideringUtils {
+    private val logger = LoggerFactory.getLogger(BehandlingsresultatValideringUtils::class.java)
+
     internal fun validerAtBarePersonerFremstiltKravForEllerSøkerHarFåttEksplisittAvslag(
         personerFremstiltKravFor: List<Aktør>,
         personResultater: Set<PersonResultat>,
@@ -253,7 +256,7 @@ object BehandlingsresultatValideringUtils {
                     }
 
                 if (finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerIFinnmark.tilPerioder().any { it.verdi == true }) {
-                    throw Feil("Det finnes perioder der søker bor i finnmark samtidig som et barn med delt bosted ikke bor i finnmark. Disse sakene støtter vi ikke automatisk, og vi stanser derfor denne behandlingen.")
+                    logger.warn("For fagsak ${vilkårsvurdering.behandling.fagsak.id} finnes det perioder der søker bor i finnmark samtidig som et barn med delt bosted ikke bor i finnmark.")
                 }
             }
     }
