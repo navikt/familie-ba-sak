@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBoste
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -51,6 +52,9 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
 
     private val behandling1 = lagBehandling(id = 1, fagsak = lagFagsak(id = 1))
     private val behandling2 = lagBehandling(id = 2, fagsak = lagFagsak(id = 2))
+
+    private val eøsBehandling1 = lagBehandling(id = 1, fagsak = lagFagsak(id = 1), behandlingKategori = BehandlingKategori.EØS)
+    private val eøsBehandling2 = lagBehandling(id = 2, fagsak = lagFagsak(id = 2), behandlingKategori = BehandlingKategori.EØS)
 
     private val persongrunnlag1 =
         lagPersonopplysningGrunnlag(
@@ -168,6 +172,51 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
             // Assert
             verify(exactly = 1) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(setOf(behandling1.fagsak.id)) }
             verify(exactly = 1) { finnmarkstilleggKjøringRepository.saveAll(listOf(FinnmarkstilleggKjøring(fagsakId = behandling1.fagsak.id), FinnmarkstilleggKjøring(fagsakId = behandling2.fagsak.id))) }
+        }
+
+        @Test
+        fun `skal ikke opprette tasks for fagsaker som har siste iverksatte behandling med kategori EØS `() {
+            // Arrange
+            every {
+                fagsakRepository.finnLøpendeFagsakerForFinnmarkstilleggKjøring(any())
+            } returns PageImpl(listOf(eøsBehandling1.fagsak.id, eøsBehandling2.fagsak.id), Pageable.ofSize(1000), 2)
+
+            every {
+                behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(
+                    setOf(
+                        eøsBehandling1.fagsak.id,
+                        eøsBehandling2.fagsak.id,
+                    ),
+                )
+            } returns
+                mapOf(
+                    eøsBehandling1.fagsak.id to eøsBehandling1,
+                    eøsBehandling2.fagsak.id to eøsBehandling2,
+                )
+
+            every {
+                persongrunnlagService.hentAktivForBehandlinger(emptyList())
+            } returns emptyMap()
+
+            every {
+                pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(
+                    listOf(
+                        søker1.aktør.aktivFødselsnummer(),
+                        søker2.aktør.aktivFødselsnummer(),
+                    ),
+                )
+            } returns
+                mapOf(
+                    søker1.aktør.aktivFødselsnummer() to bostedsadresseIFinnmark,
+                    søker2.aktør.aktivFødselsnummer() to bostedsadresseIOslo,
+                )
+
+            // Act
+            autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(1000)
+
+            // Assert
+            verify(exactly = 1) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(emptySet()) }
+            verify(exactly = 1) { finnmarkstilleggKjøringRepository.saveAll(listOf(FinnmarkstilleggKjøring(fagsakId = eøsBehandling1.fagsak.id), FinnmarkstilleggKjøring(fagsakId = eøsBehandling2.fagsak.id))) }
         }
 
         @Test
