@@ -129,7 +129,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
         val oppdaterteVedtaksperioder = oppdaterteVedtaksperioderSlot.captured
 
         assertThat(oppdaterteVedtaksperioder.size).isEqualTo(1)
-        assertThat(oppdaterteVedtaksperioder[0].begrunnelser.map { it.standardbegrunnelse }[0]).isEqualTo(Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG)
+        assertThat(oppdaterteVedtaksperioder[0].begrunnelser.map { it.standardbegrunnelse }[0]).isEqualTo(Standardbegrunnelse.INNVILGET_AUTOVEDTAK_FØDSEL_FINNMARKSTILLEGG)
     }
 
     @Test
@@ -244,7 +244,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
         assertThat(oppdaterteVedtaksperioder[0].begrunnelser.map { it.standardbegrunnelse })
             .contains(
                 Standardbegrunnelse.REDUKSJON_FINNMARKSTILLEGG,
-                Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG,
+                Standardbegrunnelse.INNVILGET_AUTOVEDTAK_FØDSEL_FINNMARKSTILLEGG,
             )
     }
 }
