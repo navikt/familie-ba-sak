@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -17,6 +19,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun begrunnAutovedtakForFinnmarkstillegg(
         behandlingEtterBehandlingsresultat: Behandling,
@@ -24,6 +27,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseService(
         val sistIverksatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandlingEtterBehandlingsresultat.fagsak.id) ?: throw Feil("Finner ikke siste iverksatte behandling")
         val forrigeAndeler = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = sistIverksatteBehandling.id)
         val nåværendeAndeler = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = behandlingEtterBehandlingsresultat.id)
+        val skalBrukeInnvilgetFinnmarkstilleggMedDatoBegrunnelse = featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG)
 
         val (innvilgetMånedTidspunkt, redusertMånedTidspunkt) =
             finnInnvilgedeOgReduserteFinnmarkstilleggPerioder(
@@ -43,7 +47,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseService(
         innvilgetMånedTidspunkt.forEach {
             leggTilBegrunnelseIVedtaksperiode(
                 vedtaksperiodeStartDato = it,
-                standardbegrunnelse = Standardbegrunnelse.INNVILGET_AUTOVEDTAK_FØDSEL_FINNMARKSTILLEGG,
+                standardbegrunnelse = if (skalBrukeInnvilgetFinnmarkstilleggMedDatoBegrunnelse) Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG_MED_DATO else Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG_UTEN_DATO,
                 vedtaksperioder = vedtaksperioder,
             )
         }

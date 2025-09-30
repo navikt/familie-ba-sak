@@ -310,7 +310,7 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
                 assertThrows<Feil> {
                     leggTilBegrunnelseIVedtaksperiode(
                         vedtaksperiodeStartDato = YearMonth.of(2025, 11),
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG,
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG_MED_DATO,
                         vedtaksperioder = vedtaksperioderIBehandling,
                     )
                 }.message
@@ -343,13 +343,13 @@ internal class AutovedtakFinnmarkstilleggBegrunnelseUtilTest {
             // Act
             leggTilBegrunnelseIVedtaksperiode(
                 vedtaksperiodeStartDato = YearMonth.of(2025, 11),
-                standardbegrunnelse = Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG,
+                standardbegrunnelse = Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG_MED_DATO,
                 vedtaksperioder = vedtaksperioderIBehandling,
             )
 
             // Assert
             val vedtaksperiode = vedtaksperioderIBehandling.single { it.fom == LocalDate.of(2025, 11, 1) }
-            assertThat(vedtaksperiode.begrunnelser.map { it.standardbegrunnelse }).contains(Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG)
+            assertThat(vedtaksperiode.begrunnelser.map { it.standardbegrunnelse }).contains(Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG_MED_DATO)
         }
     }
 }

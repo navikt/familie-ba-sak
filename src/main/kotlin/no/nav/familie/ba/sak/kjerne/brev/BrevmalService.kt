@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.RIKTIG_BREV_OG_BEGRUNNELSE_AUTOKJØRING_FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -29,7 +29,7 @@ class BrevmalService(
             throw FunksjonellFeil("Kan ikke opprette brev. Behandlingen er ikke vurdert.")
         }
 
-        val skalBrukeAutovedtakEndringsbrev = featureToggleService.isEnabled(RIKTIG_BREV_OG_BEGRUNNELSE_AUTOKJØRING_FINNMARKSTILLEGG)
+        val skalBrukeAutovedtakEndringsbrev = featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG)
 
         val brevmal =
             if (behandling.skalBehandlesAutomatisk) {
