@@ -48,13 +48,22 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
                 } == true && forrigePeriode?.erOrdinæreVilkårInnvilget() == true
     }
 
-    fun sjekkOmharKravPåSvalbardtilleggIForrigeBehandlingPeriode() =
-        sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true ||
-            sammePeriodeForrigeBehandling?.vilkårResultater?.any {
-                it.vilkårType == Vilkår.BOSATT_I_RIKET &&
-                    it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
-            } == true &&
-            sammePeriodeForrigeBehandling?.erOrdinæreVilkårInnvilget() == true
+    fun sjekkOmharKravPåSvalbardtilleggIForrigeBehandlingPeriode(): Boolean {
+        val startdatoForSvalbardtillegg =
+            SatsService
+                .hentAllesatser()
+                .filter { it.type == SatsType.SVALBARDTILLEGG }
+                .minOfOrNull { it.gyldigFom } ?: LocalDate.MAX
+
+        return forrigePeriode?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true ||
+            forrigePeriode
+                ?.vilkårResultater
+                ?.any {
+                    it.vilkårType == Vilkår.BOSATT_I_RIKET &&
+                        it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD) &&
+                        (it.tom == null || it.tom >= startdatoForSvalbardtillegg)
+                } == true
+    }
 
     fun sjekkOmHarKravPåSvalbardtilleggDennePeriode() =
         dennePerioden.andeler.any { it.type == YtelseType.SVALBARDTILLEGG } ||
