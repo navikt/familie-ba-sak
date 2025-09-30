@@ -34,7 +34,7 @@ class TilbakekrevingKlient(
         val uri = URI.create("$familieTilbakeUri/dokument/forhandsvis-varselbrev")
 
         return kallEksternTjeneste(
-            tjeneste = "familie-tilbake",
+            tjeneste = FAMILIE_TILBAKE,
             uri = uri,
             formål = "Henter forhåndsvisning av varselbrev",
         ) {
@@ -53,7 +53,7 @@ class TilbakekrevingKlient(
         val uri = URI.create("$familieTilbakeUri/behandling/v1")
 
         return kallEksternTjenesteRessurs(
-            tjeneste = "familie-tilbake",
+            tjeneste = FAMILIE_TILBAKE,
             uri = uri,
             formål = "Oppretter behandling for tilbakekreving",
         ) {
@@ -66,7 +66,7 @@ class TilbakekrevingKlient(
 
         val finnesBehandlingsresponsDto: FinnesBehandlingsresponsDto =
             kallEksternTjenesteRessurs(
-                tjeneste = "familie-tilbake",
+                tjeneste = FAMILIE_TILBAKE,
                 uri = uri,
                 formål = "Sjekker om en fagsak har åpen tilbakekrevingsbehandling",
             ) { getForEntity(uri) }
@@ -78,7 +78,7 @@ class TilbakekrevingKlient(
         val uri = URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/$fagsakId/behandlinger/v1")
 
         return kallEksternTjenesteRessurs(
-            tjeneste = "familie-tilbake",
+            tjeneste = FAMILIE_TILBAKE,
             uri = uri,
             formål = "Henter tilbakekrevingsbehandlinger på fagsak",
         ) { getForEntity(uri) }
@@ -88,7 +88,7 @@ class TilbakekrevingKlient(
         val uri = URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/$fagsakId/vedtak/v1")
 
         return kallEksternTjenesteRessurs(
-            tjeneste = "familie-tilbake",
+            tjeneste = FAMILIE_TILBAKE,
             uri = uri,
             formål = "Henter tilbakekrevingsvedtak på fagsak",
         ) { getForEntity(uri) }
@@ -101,7 +101,7 @@ class TilbakekrevingKlient(
             )
 
         return kallEksternTjenesteRessurs(
-            tjeneste = "familie-tilbake",
+            tjeneste = FAMILIE_TILBAKE,
             uri = uri,
             formål = "Sjekker om tilbakekrevingsbehandling kan opprettes manuelt",
         ) { getForEntity(uri) }
@@ -111,9 +111,13 @@ class TilbakekrevingKlient(
         val uri = URI.create("$familieTilbakeUri/behandling/manuelt/task/v1")
 
         return kallEksternTjenesteRessurs(
-            tjeneste = "familie-tilbake",
+            tjeneste = FAMILIE_TILBAKE,
             uri = uri,
             formål = "Oppretter tilbakekrevingsbehandling manuelt",
         ) { postForEntity(uri, request) }
+    }
+
+    companion object {
+        const val FAMILIE_TILBAKE = "familie-tilbake"
     }
 }

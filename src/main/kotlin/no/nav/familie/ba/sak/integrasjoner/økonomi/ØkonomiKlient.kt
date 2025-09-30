@@ -30,7 +30,7 @@ class ØkonomiKlient(
     fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): String {
         val uri = URI.create("$familieOppdragUri/oppdrag")
         return kallEksternTjenesteRessurs(
-            tjeneste = "familie-oppdrag",
+            tjeneste = FAMILIE_OPPDRAG,
             uri = uri,
             formål = "Iverksetter mot oppdrag",
         ) {
@@ -47,7 +47,7 @@ class ØkonomiKlient(
         val uri = URI.create("$familieOppdragUri/simulering/v1")
 
         return kallEksternTjenesteRessurs(
-            tjeneste = "familie-oppdrag",
+            tjeneste = FAMILIE_OPPDRAG,
             uri = uri,
             formål = "Henter simulering på fagsak ${utbetalingsoppdrag.saksnummer} fra Økonomi",
         ) {
@@ -58,7 +58,7 @@ class ØkonomiKlient(
     fun hentStatus(oppdragId: OppdragId): OppdragStatus {
         val uri = URI.create("$familieOppdragUri/status")
         return kallEksternTjenesteRessurs(
-            tjeneste = "familie-oppdrag",
+            tjeneste = FAMILIE_OPPDRAG,
             uri = uri,
             formål = "Henter oppdragstatus fra Økonomi",
         ) {
@@ -73,7 +73,7 @@ class ØkonomiKlient(
     ): String {
         val uri = URI.create("$familieOppdragUri/grensesnittavstemming")
         return kallEksternTjenesteRessurs(
-            tjeneste = "familie-oppdrag",
+            tjeneste = FAMILIE_OPPDRAG,
             uri = uri,
             formål = "Gjør grensesnittavstemming mot oppdrag",
         ) {
@@ -100,7 +100,7 @@ class ØkonomiKlient(
             )
 
         return kallEksternTjenesteRessurs(
-            tjeneste = "familie-oppdrag",
+            tjeneste = FAMILIE_OPPDRAG,
             uri = uri,
             formål = "Start konsistensavstemming mot oppdrag i batch",
         ) {
@@ -127,7 +127,7 @@ class ØkonomiKlient(
             )
 
         return kallEksternTjenesteRessurs(
-            tjeneste = "familie-oppdrag",
+            tjeneste = FAMILIE_OPPDRAG,
             uri = uri,
             formål = "Konsistenstavstemmer chunk mot oppdrag",
         ) {
@@ -152,7 +152,7 @@ class ØkonomiKlient(
                     "?sendStartmelding=false&sendAvsluttmelding=true&transaksjonsId=$transaksjonsId",
             )
         return kallEksternTjenesteRessurs(
-            tjeneste = "familie-oppdrag",
+            tjeneste = FAMILIE_OPPDRAG,
             uri = uri,
             formål = "Avslutt konsistensavstemming mot oppdrag",
         ) {
@@ -173,7 +173,7 @@ class ØkonomiKlient(
         val uri = URI.create("$familieOppdragUri/$FAGSYSTEM/fagsaker/siste-utbetalingsoppdrag")
 
         return kallEksternTjenesteRessurs(
-            tjeneste = "familie-oppdrag",
+            tjeneste = FAMILIE_OPPDRAG,
             uri = uri,
             formål = "Hent utbetalingsoppdrag for fagsaker",
         ) { postForEntity(uri = uri, payload = fagsakIder) }
@@ -182,12 +182,16 @@ class ØkonomiKlient(
     fun opprettManuellKvitteringPåOppdrag(oppdragId: OppdragId): OppdragStatus {
         val uri = URI.create("$familieOppdragUri/oppdrag/manuell-kvittering")
         return kallEksternTjenesteRessurs(
-            tjeneste = "familie-oppdrag",
+            tjeneste = FAMILIE_OPPDRAG,
             uri = uri,
             formål = "Oppretter kvitteringsmelding på oppdrag og setter status til KVITTERT_OK",
         ) {
             postForEntity(uri = uri, oppdragId)
         }
+    }
+
+    companion object {
+        const val FAMILIE_OPPDRAG = "familie-oppdrag"
     }
 }
 
