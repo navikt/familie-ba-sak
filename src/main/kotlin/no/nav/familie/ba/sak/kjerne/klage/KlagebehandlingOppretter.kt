@@ -4,8 +4,6 @@ import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.TilpassArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -29,7 +27,6 @@ class KlagebehandlingOppretter(
     private val integrasjonClient: IntegrasjonClient,
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
     private val clockProvider: ClockProvider,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(KlagebehandlingOppretter::class.java)
 
@@ -52,35 +49,25 @@ class KlagebehandlingOppretter(
         val fødselsnummer = fagsak.aktør.aktivFødselsnummer()
         val navIdent = NavIdent(SikkerhetContext.hentSaksbehandler())
 
-        val behandlendeEnhet =
-            if (featureToggleService.isEnabled(FeatureToggle.BRUK_NY_LOGIKK_FOR_AA_FINNE_ENHET_FOR_OPPRETTING_AV_KLAGEBEHANDLING)) {
-                val arbeidsfordelingsenheter = integrasjonClient.hentBehandlendeEnhet(fødselsnummer)
+        val arbeidsfordelingsenheter = integrasjonClient.hentBehandlendeEnhet(fødselsnummer)
 
-                if (arbeidsfordelingsenheter.isEmpty()) {
-                    logger.error("Fant ingen arbeidsfordelingsenheter for aktør. Se SecureLogs for detaljer.")
-                    secureLogger.error("Fant ingen arbeidsfordelingsenheter for aktør $fødselsnummer.")
-                    throw Feil("Fant ingen arbeidsfordelingsenhet for aktør.")
-                }
+        if (arbeidsfordelingsenheter.isEmpty()) {
+            logger.error("Fant ingen arbeidsfordelingsenheter for aktør. Se SecureLogs for detaljer.")
+            secureLogger.error("Fant ingen arbeidsfordelingsenheter for aktør $fødselsnummer.")
+            throw Feil("Fant ingen arbeidsfordelingsenhet for aktør.")
+        }
 
-                if (arbeidsfordelingsenheter.size > 1) {
-                    logger.error("Fant flere arbeidsfordelingsenheter for aktør. Se SecureLogs for detaljer.")
-                    secureLogger.error("Fant flere arbeidsfordelingsenheter for aktør $fødselsnummer.")
-                    throw Feil("Fant flere arbeidsfordelingsenheter for aktør.")
-                }
+        if (arbeidsfordelingsenheter.size > 1) {
+            logger.error("Fant flere arbeidsfordelingsenheter for aktør. Se SecureLogs for detaljer.")
+            secureLogger.error("Fant flere arbeidsfordelingsenheter for aktør $fødselsnummer.")
+            throw Feil("Fant flere arbeidsfordelingsenheter for aktør.")
+        }
 
-                val tilpassetArbeidsfordelingsenhet =
-                    tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
-                        arbeidsfordelingsenheter.single(),
-                        navIdent,
-                    )
-
-                tilpassetArbeidsfordelingsenhet.enhetId
-            } else {
-                integrasjonClient
-                    .hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent)
-                    .first()
-                    .enhetsnummer
-            }
+        val tilpassetArbeidsfordelingsenhet =
+            tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
+                arbeidsfordelingsenheter.single(),
+                navIdent,
+            )
 
         return klageClient.opprettKlage(
             OpprettKlagebehandlingRequest(
@@ -89,7 +76,7 @@ class KlagebehandlingOppretter(
                 eksternFagsakId = fagsak.id.toString(),
                 fagsystem = Fagsystem.BA,
                 klageMottatt = klageMottattDato,
-                behandlendeEnhet = behandlendeEnhet,
+                behandlendeEnhet = tilpassetArbeidsfordelingsenhet.enhetId,
                 behandlingsårsak = Klagebehandlingsårsak.ORDINÆR,
             ),
         )
