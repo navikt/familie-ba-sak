@@ -30,13 +30,21 @@ class PreutfyllVilkårService(
 
     fun preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(
         vilkårsvurdering: Vilkårsvurdering,
-        identerVilkårSkalPreutfyllesFor: List<String>? = null,
-        cutOffFomDato: LocalDate? = null,
+        cutOffFomDato: LocalDate,
+    ) {
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(
+            vilkårsvurdering = vilkårsvurdering,
+            cutOffFomDato = cutOffFomDato,
+        )
+    }
+
+    fun preutfyllBosattIRiketForFødselshendelseBehandlinger(
+        vilkårsvurdering: Vilkårsvurdering,
+        identerVilkårSkalPreutfyllesFor: List<String>?,
     ) {
         preutfyllBosattIRiketService.preutfyllBosattIRiket(
             vilkårsvurdering = vilkårsvurdering,
             identerVilkårSkalPreutfyllesFor = identerVilkårSkalPreutfyllesFor,
-            cutOffFomDato = cutOffFomDato,
         )
     }
 

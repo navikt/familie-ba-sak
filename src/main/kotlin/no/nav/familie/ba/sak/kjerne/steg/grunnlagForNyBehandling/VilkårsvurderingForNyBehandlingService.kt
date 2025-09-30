@@ -218,7 +218,7 @@ class VilkårsvurderingForNyBehandlingService(
                     }
                 }
             try {
-                preutfyllVilkårService.preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(
+                preutfyllVilkårService.preutfyllBosattIRiketForFødselshendelseBehandlinger(
                     vilkårsvurdering = initiellVilkårsvurdering,
                     identerVilkårSkalPreutfyllesFor = identerVilkårSkalPreutfyllesFor,
                 )
