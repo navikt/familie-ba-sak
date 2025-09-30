@@ -16,8 +16,7 @@ import no.nav.familie.eksterne.kontrakter.bisys.BarnetrygdEndretType
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.tidslinje.tomTidslinje
-import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.slåSammenLikePerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.slf4j.LoggerFactory
@@ -95,26 +94,22 @@ class SendMeldingTilBisysTask(
 
         val opphørEllerReduksjonPerAktør =
             forrigeAndelTilkjentYtelseTidslinjerPerAktørOgType
-                .flatMap { (aktørOgType, forrigeAtyTidslinjeForAktørOgType) ->
-                    val nyAtyTidslinjeForAktørOgType = andelTilkjentYtelseTidslinjerPerAktørOgType[aktørOgType] ?: tomTidslinje()
-                    forrigeAtyTidslinjeForAktørOgType
-                        .kombinerMed(nyAtyTidslinjeForAktørOgType) { forrigeAtyIPeriode, nyAtyIPeriode ->
-                            when {
-                                forrigeAtyIPeriode != null && nyAtyIPeriode == null ->
-                                    BarnetrygdEndretType.RO // Opphør
-                                forrigeAtyIPeriode != null && nyAtyIPeriode != null && nyAtyIPeriode.prosent < forrigeAtyIPeriode.prosent ->
-                                    BarnetrygdEndretType.RR // Reduksjon
-                                else -> null
-                            }
-                        }.slåSammenLikePerioder()
-                        .tilPerioderIkkeNull()
-                        .map { endretPeriodeForAktør ->
-                            BarnEndretOpplysning(
-                                ident = aktørOgType.first.aktivFødselsnummer(),
-                                fom = endretPeriodeForAktør.fom!!.toYearMonth(),
-                                årsakskode = endretPeriodeForAktør.verdi,
-                            )
-                        }
+                .outerJoin(andelTilkjentYtelseTidslinjerPerAktørOgType) { forrigeAtyIPeriode, nyAtyIPeriode ->
+                    when {
+                        forrigeAtyIPeriode != null && nyAtyIPeriode == null ->
+                            BarnetrygdEndretType.RO // Opphør
+                        forrigeAtyIPeriode != null && nyAtyIPeriode != null && nyAtyIPeriode.prosent < forrigeAtyIPeriode.prosent ->
+                            BarnetrygdEndretType.RR // Reduksjon
+                        else -> null
+                    }
+                }.flatMap { (aktørOgType, tidslinje) ->
+                    tidslinje.slåSammenLikePerioder().tilPerioderIkkeNull().map { endretPeriodeForAktør ->
+                        BarnEndretOpplysning(
+                            ident = aktørOgType.first.aktivFødselsnummer(),
+                            fom = endretPeriodeForAktør.fom!!.toYearMonth(),
+                            årsakskode = endretPeriodeForAktør.verdi,
+                        )
+                    }
                 }.groupBy { it.ident }
 
         return opphørEllerReduksjonPerAktør
