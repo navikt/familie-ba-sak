@@ -55,12 +55,8 @@ class PreutfyllBosattIRiketService(
             .filter { it.aktør.aktivFødselsnummer() in identer }
             .forEach { personResultat ->
                 val erUkrainskStatsborger = hentErUkrainskStatsborger(personResultat.aktør)
-                if (erUkrainskStatsborger) {
-                    if (behandling.erFinnmarksEllerSvalbardtillegg()) {
-                        throw Feil("Kan ikke automatisk behandle ${behandling.opprettetÅrsak.visningsnavn} for ukrainske statsborgere")
-                    } else {
-                        return@forEach
-                    }
+                if (erUkrainskStatsborger && !behandling.erFinnmarksEllerSvalbardtillegg()) {
+                    return@forEach
                 }
 
                 val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
