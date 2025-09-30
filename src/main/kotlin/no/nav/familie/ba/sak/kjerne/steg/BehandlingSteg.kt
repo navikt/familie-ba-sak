@@ -55,9 +55,12 @@ interface BehandlingSteg<T> {
         behandling: Behandling,
         stegService: StegService? = null,
     ) {
+        // Funksjon for å kunne validere tilstand før utførelse av steg. Tom implementasjon slik at funksjonen er valgfri å overstyre.
     }
 
-    fun postValiderSteg(behandling: Behandling) {}
+    fun postValiderSteg(behandling: Behandling) {
+        // Funksjon for å kunne validere tilstand etter utførelse av steg. Tom implementasjon slik at funksjonen er valgfri å overstyre.
+    }
 }
 
 enum class EndringerIUtbetalingForBehandlingSteg {
