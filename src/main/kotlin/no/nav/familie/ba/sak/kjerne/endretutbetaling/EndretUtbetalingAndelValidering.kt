@@ -239,19 +239,19 @@ object EndretUtbetalingAndelValidering {
     }
 
     fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-        endretUtbetalingAndelerMedÅrsakDeltBosted: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
+        endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
     ) {
-        val endredeUtvidetUtbetalingerAndeler =
-            endretUtbetalingAndelerMedÅrsakDeltBosted
+        val endredeUtvidetUtbetalingerAndelerMedÅrsakDeltBosted =
+            endretUtbetalingAndeler
                 .filter { endretUtbetaling ->
-                    endretUtbetaling.andelerTilkjentYtelse.any { it.erUtvidet() }
+                    endretUtbetaling.årsak == Årsak.DELT_BOSTED && endretUtbetaling.andelerTilkjentYtelse.any { it.erUtvidet() }
                 }
 
-        endredeUtvidetUtbetalingerAndeler.forEach { endretPåUtvidetUtbetalinger ->
+        endredeUtvidetUtbetalingerAndelerMedÅrsakDeltBosted.forEach { endretPåUtvidetUtbetalinger ->
             val endretUtbetalingAndelInneholderBarn = endretPåUtvidetUtbetalinger.personer.any { it.type == PersonType.BARN }
 
             val deltBostedEndringerISammePeriode =
-                endretUtbetalingAndelerMedÅrsakDeltBosted.filter {
+                endretUtbetalingAndeler.filter {
                     it.årsak == Årsak.DELT_BOSTED &&
                         it.fom!!.isSameOrBefore(endretPåUtvidetUtbetalinger.fom!!) &&
                         it.tom!!.isSameOrAfter(endretPåUtvidetUtbetalinger.tom!!) &&
