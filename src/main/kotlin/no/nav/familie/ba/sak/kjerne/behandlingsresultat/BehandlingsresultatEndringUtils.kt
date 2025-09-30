@@ -68,7 +68,7 @@ object BehandlingsresultatEndringUtils {
                     )
 
                 val erEndringIVilkårsvurderingForPerson =
-                    !behandling.erFinnmarksTilleggEllerSvalbardtillegg() &&
+                    !behandling.erFinnmarksEllerSvalbardtillegg() &&
                         erEndringIVilkårsvurderingForPerson(
                             aktør = aktør,
                             nåværendePersonResultat = nåværendePersonResultat,

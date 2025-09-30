@@ -71,7 +71,7 @@ class AutovedtakSvalbardtilleggService(
                 .map { it.aktør.aktivFødselsnummer() }
                 .let { identer ->
                     pdlRestClient
-                        .hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(identer)
+                        .hentAdresserForPersoner(identer)
                         .mapValues { Adresser.opprettFra(it.value) }
                         .any { it.value.harAdresserSomErRelevantForSvalbardtillegg() }
                 }
