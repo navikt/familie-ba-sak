@@ -69,5 +69,7 @@ enum class FeatureToggle(
 
     SKAL_PREUTFYLLE_BOSATT_I_RIKET_I_FØDSELSHENDELSER("familie-ba-sak.skal-preutfylle-bosatt-i-riket-i-foedselshendelse"),
 
+    RIKTIG_BREV_OG_BEGRUNNELSE_AUTOKJØRING_FINNMARKSTILLEGG("familie-ba-sak.skal-generere-riktig-brev-begrunnelse-autokjoring-finnmarkstillegg"),
+
     VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR("familie-ba-sak.valider-endring-av-preutfylte-vilkaar"),
 }

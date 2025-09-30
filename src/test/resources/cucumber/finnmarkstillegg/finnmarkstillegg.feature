@@ -244,4 +244,4 @@ Egenskap: Finnmarkstillegg autovedtak
 
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.10.2025 til 31.12.2042
       | Begrunnelse                                         | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
-      | REDUKSJON_FINNMARKSTILLEGG_BODDE_IKKE_I_TILLEGGSONE | STANDARD | Ja            |                      | 0           | september 2025                            |         | 1 968 |                  | SØKER_HAR_IKKE_RETT     |                             |
+      | REDUKSJON_FINNMARKSTILLEGG_BODDE_IKKE_I_TILLEGGSONE | STANDARD | Ja            |                      | 0           | september 2025                       |         | 1 968 |                  | SØKER_HAR_IKKE_RETT     |                             |
