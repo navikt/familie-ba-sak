@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelsePerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequestVariables
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
@@ -73,14 +73,14 @@ class SystemOnlyPdlRestClient(
         )
     }
 
-    fun hentBostedsadresseOgDeltBostedForPersoner(identer: List<String>): Map<String, PdlBostedsadresseDeltBostedOppholdsadressePerson> {
+    fun hentBostedsadresseOgDeltBostedForPersoner(identer: List<String>): Map<String, PdlAdresserPerson> {
         val pdlPersonRequest =
             PdlPersonBolkRequest(
                 variables = PdlPersonBolkRequestVariables(identer),
                 query = hentGraphqlQuery("bostedsadresse-og-delt-bosted"),
             )
 
-        val pdlResponse: PdlBolkResponse<PdlBostedsadresseDeltBostedOppholdsadressePerson> =
+        val pdlResponse: PdlBolkResponse<PdlAdresserPerson> =
             kallEksternTjeneste(
                 tjeneste = "pdl",
                 uri = pdlUri,
@@ -92,14 +92,14 @@ class SystemOnlyPdlRestClient(
         return feilsjekkOgReturnerData(pdlResponse = pdlResponse)
     }
 
-    fun hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(identer: List<String>): Map<String, PdlBostedsadresseDeltBostedOppholdsadressePerson> {
+    fun hentAdresserForPersoner(identer: List<String>): Map<String, PdlAdresserPerson> {
         val pdlPersonRequest =
             PdlPersonBolkRequest(
                 variables = PdlPersonBolkRequestVariables(identer),
                 query = hentGraphqlQuery("bostedsadresse-delt-bosted-oppholdsadresse"),
             )
 
-        val pdlResponse: PdlBolkResponse<PdlBostedsadresseDeltBostedOppholdsadressePerson> =
+        val pdlResponse: PdlBolkResponse<PdlAdresserPerson> =
             kallEksternTjeneste(
                 tjeneste = "pdl",
                 uri = pdlUri,

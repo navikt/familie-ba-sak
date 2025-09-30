@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag.AKTØR_ID
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørId
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørIdListe
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
@@ -16,7 +16,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 fun parseAdresser(
     dataTable: DataTable,
     persongrunnlag: Map<Long, PersonopplysningGrunnlag>,
-): Map<String, PdlBostedsadresseDeltBostedOppholdsadressePerson> =
+): Map<String, PdlAdresserPerson> =
     dataTable
         .asMaps()
         .flatMap {
@@ -89,7 +89,7 @@ fun parseAdresser(
                     .aktivFødselsnummer()
 
             ident to
-                PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                PdlAdresserPerson(
                     bostedsadresse = bostedsadresser,
                     deltBosted = deltBosted,
                 )

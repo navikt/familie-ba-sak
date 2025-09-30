@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
 import no.nav.familie.ba.sak.datagenerator.lagOppholdsadresse
 import no.nav.familie.ba.sak.datagenerator.lagUkjentBosted
 import no.nav.familie.ba.sak.datagenerator.lagVegadresse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
 import no.nav.familie.kontrakter.ba.finnmarkstillegg.KommunerIFinnmarkOgNordTroms
 import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted
@@ -656,7 +656,7 @@ class AdresserTest {
             val bostedsadresse = lagBostedsadresse(vegadresse = vegadresse)
 
             val pdlAdresser =
-                PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                PdlAdresserPerson(
                     bostedsadresse = listOf(bostedsadresse),
                     deltBosted = emptyList(),
                     oppholdsadresse = emptyList(),
@@ -686,7 +686,7 @@ class AdresserTest {
             val deltBosted = lagDeltBosted(vegadresse = vegadresse)
 
             val pdlAdresser =
-                PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                PdlAdresserPerson(
                     bostedsadresse = emptyList(),
                     deltBosted = listOf(deltBosted),
                     oppholdsadresse = emptyList(),
@@ -716,7 +716,7 @@ class AdresserTest {
             val oppholdsadresse = lagOppholdsadresse(vegadresse = vegadresse)
 
             val pdlAdresser =
-                PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                PdlAdresserPerson(
                     bostedsadresse = emptyList(),
                     deltBosted = emptyList(),
                     oppholdsadresse = listOf(oppholdsadresse),

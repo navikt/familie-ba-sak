@@ -122,7 +122,7 @@ data class Behandling(
             erManuellMigrering() -> false
             erMigrering() -> false
             erIverksetteKAVedtak() -> false
-            erFinnmarksTilleggEllerSvalbardtillegg() && resultat in setOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT) -> false
+            erFinnmarksEllerSvalbardtillegg() && resultat in setOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT) -> false
             else -> true
         }
 
@@ -166,7 +166,7 @@ data class Behandling(
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
             skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID && this.resultat == FORTSATT_INNVILGET -> true
             skalBehandlesAutomatisk && erMånedligValutajustering() -> true
-            skalBehandlesAutomatisk && erFinnmarksTilleggEllerSvalbardtillegg() -> true
+            skalBehandlesAutomatisk && erFinnmarksEllerSvalbardtillegg() -> true
             else -> false
         }
 
@@ -233,11 +233,11 @@ data class Behandling(
 
     fun erSvalbardtillegg() = this.opprettetÅrsak == BehandlingÅrsak.SVALBARDTILLEGG
 
-    fun erFinnmarksTilleggEllerSvalbardtillegg() = erFinnmarkstillegg() || erSvalbardtillegg()
+    fun erFinnmarksEllerSvalbardtillegg() = erFinnmarkstillegg() || erSvalbardtillegg()
 
     fun erSatsendringEllerMånedligValutajustering() = erSatsendring() || erMånedligValutajustering()
 
-    fun erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() = erFinnmarksTilleggEllerSvalbardtillegg() || erSatsendringEllerMånedligValutajustering()
+    fun erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() = erFinnmarksEllerSvalbardtillegg() || erSatsendringEllerMånedligValutajustering()
 
     fun erOppdaterUtvidetKlassekode() = this.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE
 

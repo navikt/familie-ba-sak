@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.fake
 
 import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.VergemaalEllerFremtidsfullmakt
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -30,9 +30,9 @@ class MockPdlRestClient(
         restTemplate = restOperations,
         personidentService = personidentService,
     ) {
-    override fun hentBostedsadresseOgDeltBostedForPersoner(identer: List<String>): Map<String, PdlBostedsadresseDeltBostedOppholdsadressePerson> =
+    override fun hentBostedsadresseOgDeltBostedForPersoner(identer: List<String>): Map<String, PdlAdresserPerson> =
         identer.associateWith {
-            PdlBostedsadresseDeltBostedOppholdsadressePerson(
+            PdlAdresserPerson(
                 bostedsadresse =
                     bostedsadresser[it]
                         ?: listOf(
@@ -49,9 +49,9 @@ class MockPdlRestClient(
             )
         }
 
-    override fun hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(identer: List<String>): Map<String, PdlBostedsadresseDeltBostedOppholdsadressePerson> =
+    override fun hentAdresserForPersoner(identer: List<String>): Map<String, PdlAdresserPerson> =
         identer.associateWith {
-            PdlBostedsadresseDeltBostedOppholdsadressePerson(
+            PdlAdresserPerson(
                 bostedsadresse =
                     bostedsadresser[it]
                         ?: listOf(

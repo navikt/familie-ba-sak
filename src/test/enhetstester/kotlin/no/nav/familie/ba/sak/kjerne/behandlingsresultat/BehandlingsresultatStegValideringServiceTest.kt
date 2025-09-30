@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.SatsendringFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -46,6 +47,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.prosessering.error.RekjørSenereException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -81,6 +83,7 @@ class BehandlingsresultatStegValideringServiceTest {
 
     private val søker = lagPerson(type = PersonType.SØKER)
     private val barn = lagPerson(type = PersonType.BARN)
+    private val barn2 = lagPerson(type = PersonType.BARN)
     private val behandling = lagBehandling()
 
     @Nested
@@ -464,7 +467,7 @@ class BehandlingsresultatStegValideringServiceTest {
         }
 
         @Test
-        fun `skal kaste feil dersom tidspunktet for førstegang innvilgelse av finnmarkstillegget ligger mer enn 1 måned fram i tid`() {
+        fun `skal ikke kaste feil dersom finnmarkstillegg er innvilget fra og med inneværende måned for et barn og neste måned for et annet barn`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
             val forrigeAndeler =
@@ -475,6 +478,13 @@ class BehandlingsresultatStegValideringServiceTest {
                         behandling = forrigeBehandling,
                         beløp = 999,
                         person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        beløp = 999,
+                        person = barn2,
                     ),
                 )
 
@@ -491,12 +501,29 @@ class BehandlingsresultatStegValideringServiceTest {
                             person = barn,
                         ),
                         lagAndelTilkjentYtelse(
-                            fom = YearMonth.now(clockProvider.get()).plusMonths(2), // Mer enn 1 måned fram i tid
+                            fom = YearMonth.now(clockProvider.get()), // Inneværende måned
                             tom = YearMonth.now(clockProvider.get()).plusMonths(122),
                             behandling = behandling,
                             tilkjentYtelse = it,
                             beløp = 500,
                             person = barn,
+                            ytelseType = YtelseType.FINNMARKSTILLEGG,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.of(2023, 1),
+                            tom = YearMonth.of(2023, 2),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 999,
+                            person = barn2,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.now(clockProvider.get()).plusMonths(1), // Neste måned
+                            tom = YearMonth.now(clockProvider.get()).plusMonths(122),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 500,
+                            person = barn2,
                             ytelseType = YtelseType.FINNMARKSTILLEGG,
                         ),
                     )
@@ -507,16 +534,11 @@ class BehandlingsresultatStegValideringServiceTest {
             every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns mockk(relaxed = true)
 
             // Act & Assert
-            val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
-
-            assertThat(feil.message).contains(
-                "Det eksisterer FINNMARKSTILLEGG andeler som først blir innvilget mer enn 1 måned " +
-                    "fram i tid. Det er ikke mulig å innvilge disse enda, og behandlingen stoppes derfor.",
-            )
+            assertDoesNotThrow { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
         }
 
         @Test
-        fun `skal kaste feil dersom det eksisterer barn som ikke bor i finnmark men har delt bosted i perioder søker bor i finnmark`() {
+        fun `skal kaste feil dersom finnmarkstillegg er innvilget fra og med inneværende måned for et barn og om to måneder eller mer for et annet barn`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
             val forrigeAndeler =
@@ -525,8 +547,15 @@ class BehandlingsresultatStegValideringServiceTest {
                         fom = YearMonth.of(2023, 1),
                         tom = YearMonth.of(2023, 2),
                         behandling = forrigeBehandling,
-                        beløp = 1000,
+                        beløp = 999,
                         person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        beløp = 999,
+                        person = barn2,
                     ),
                 )
 
@@ -539,77 +568,127 @@ class BehandlingsresultatStegValideringServiceTest {
                             tom = YearMonth.of(2023, 2),
                             behandling = behandling,
                             tilkjentYtelse = it,
-                            beløp = 1000,
+                            beløp = 999,
                             person = barn,
                         ),
                         lagAndelTilkjentYtelse(
-                            fom = YearMonth.now().plusMonths(1),
-                            tom = YearMonth.now().plusMonths(122),
+                            fom = YearMonth.now(clockProvider.get()), // Inneværende måned
+                            tom = YearMonth.now(clockProvider.get()).plusMonths(122),
                             behandling = behandling,
                             tilkjentYtelse = it,
                             beløp = 500,
                             person = barn,
                             ytelseType = YtelseType.FINNMARKSTILLEGG,
                         ),
-                    )
-                }
-
-            val vilkårsvurdering =
-                lagVilkårsvurdering(behandling = behandling) {
-                    setOf(
-                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.of(2023, 1),
+                            tom = YearMonth.of(2023, 2),
                             behandling = behandling,
-                            person = søker,
-                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
-                            vilkårsvurdering = it,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS, UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
+                            tilkjentYtelse = it,
+                            beløp = 999,
+                            person = barn2,
                         ),
-                        lagPersonResultat(
-                            vilkårsvurdering = it,
-                            aktør = barn.aktør,
-                            lagVilkårResultater = { personResultat ->
-                                setOf(
-                                    lagVilkårResultat(
-                                        personResultat = personResultat,
-                                        vilkårType = Vilkår.BOSATT_I_RIKET,
-                                        resultat = Resultat.OPPFYLT,
-                                        periodeFom = LocalDate.of(2025, 1, 1),
-                                        periodeTom = LocalDate.now().plusYears(1),
-                                        behandlingId = behandling.id,
-                                    ),
-                                    lagVilkårResultat(
-                                        personResultat = personResultat,
-                                        vilkårType = Vilkår.UNDER_18_ÅR,
-                                        resultat = Resultat.OPPFYLT,
-                                        periodeFom = LocalDate.now().minusYears(15),
-                                        periodeTom = LocalDate.now().plusYears(1),
-                                        behandlingId = behandling.id,
-                                    ),
-                                    lagVilkårResultat(
-                                        personResultat = personResultat,
-                                        vilkårType = Vilkår.BOR_MED_SØKER,
-                                        resultat = Resultat.OPPFYLT,
-                                        periodeFom = LocalDate.of(2025, 1, 1),
-                                        periodeTom = LocalDate.now().plusYears(1),
-                                        behandlingId = behandling.id,
-                                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
-                                    ),
-                                )
-                            },
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.now(clockProvider.get()).plusMonths(2), // Mer enn 1 måned fram i tid
+                            tom = YearMonth.now(clockProvider.get()).plusMonths(122),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 500,
+                            person = barn2,
+                            ytelseType = YtelseType.FINNMARKSTILLEGG,
                         ),
                     )
                 }
 
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
-            every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vilkårsvurdering
+            every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns mockk(relaxed = true)
 
             // Act & Assert
             val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
 
-            assertThat(feil.message).contains(
-                "Det finnes perioder der søker bor i finnmark samtidig som et barn med delt bosted ikke bor " +
-                    "i finnmark. Disse sakene støtter vi ikke automatisk, og vi stanser derfor denne behandlingen.",
+            assertThat(feil.message).isEqualTo(
+                "Det eksisterer FINNMARKSTILLEGG-andeler som er innvilget inneværende måned eller tidligere, " +
+                    "samtidig som det eksisterer andeler som blir innvilget mer enn en måned fram i tid. " +
+                    "Dette kan ikke behandles automatisk, og behandlingen stoppes derfor.",
+            )
+        }
+
+        @Test
+        fun `skal kaste rekjør senere-exception dersom finnmarkstillegg er innvilget to måneder fram i tid`() {
+            // Arrange
+            val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        beløp = 999,
+                        person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        beløp = 999,
+                        person = barn2,
+                    ),
+                )
+
+            val behandling = lagBehandling(behandlingType = REVURDERING, årsak = FINNMARKSTILLEGG)
+            val tilkjentYtelse =
+                lagTilkjentYtelse(behandling = behandling) {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.of(2023, 1),
+                            tom = YearMonth.of(2023, 2),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 999,
+                            person = barn,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.now(clockProvider.get()).plusMonths(1), // Neste måned
+                            tom = YearMonth.now(clockProvider.get()).plusMonths(122),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 500,
+                            person = barn,
+                            ytelseType = YtelseType.FINNMARKSTILLEGG,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.of(2023, 1),
+                            tom = YearMonth.of(2023, 2),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 999,
+                            person = barn2,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.now(clockProvider.get()).plusMonths(2), // Mer enn 1 måned fram i tid
+                            tom = YearMonth.now(clockProvider.get()).plusMonths(122),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 500,
+                            person = barn2,
+                            ytelseType = YtelseType.FINNMARKSTILLEGG,
+                        ),
+                    )
+                }
+
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
+            every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns mockk(relaxed = true)
+
+            // Act & Assert
+            val feil = assertThrows<RekjørSenereException> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
+
+            val forventetTriggertid = LocalDate.now(clockProvider.get()).førsteDagINesteMåned().atTime(6, 0)
+            assertThat(feil.triggerTid).isEqualTo(forventetTriggertid)
+            assertThat(feil.årsak).isEqualTo(
+                "Det eksisterer FINNMARKSTILLEGG-andeler som er innvilget mer enn en måned fram i tid. " +
+                    "Disse andelene kan ikke innvilges ennå. Prøver igjen neste måned.",
             )
         }
     }
@@ -714,7 +793,7 @@ class BehandlingsresultatStegValideringServiceTest {
         }
 
         @Test
-        fun `skal kaste feil dersom tidspunktet for førstegang innvilgelse av svalbardtillegget ligger mer enn 1 måned fram i tid`() {
+        fun `skal ikke kaste feil dersom svalbardtillegg er innvilget fra og med inneværende måned for et barn og neste måned for et annet barn`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
             val forrigeAndeler =
@@ -725,6 +804,13 @@ class BehandlingsresultatStegValideringServiceTest {
                         behandling = forrigeBehandling,
                         beløp = 999,
                         person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        beløp = 999,
+                        person = barn2,
                     ),
                 )
 
@@ -741,7 +827,7 @@ class BehandlingsresultatStegValideringServiceTest {
                             person = barn,
                         ),
                         lagAndelTilkjentYtelse(
-                            fom = YearMonth.now(clockProvider.get()).plusMonths(2), // Mer enn 1 måned fram i tid
+                            fom = YearMonth.now(clockProvider.get()), // Inneværende måned
                             tom = YearMonth.now(clockProvider.get()).plusMonths(122),
                             behandling = behandling,
                             tilkjentYtelse = it,
@@ -749,18 +835,186 @@ class BehandlingsresultatStegValideringServiceTest {
                             person = barn,
                             ytelseType = YtelseType.SVALBARDTILLEGG,
                         ),
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.of(2023, 1),
+                            tom = YearMonth.of(2023, 2),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 999,
+                            person = barn2,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.now(clockProvider.get()).plusMonths(1), // Neste måned
+                            tom = YearMonth.now(clockProvider.get()).plusMonths(122),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 500,
+                            person = barn2,
+                            ytelseType = YtelseType.SVALBARDTILLEGG,
+                        ),
                     )
                 }
 
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
+            every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns mockk(relaxed = true)
+
+            // Act & Assert
+            assertDoesNotThrow { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
+        }
+
+        @Test
+        fun `skal kaste feil dersom svalbardtillegg er innvilget fra og med inneværende måned for et barn og om to måneder eller mer for et annet barn`() {
+            // Arrange
+            val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        beløp = 999,
+                        person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        beløp = 999,
+                        person = barn2,
+                    ),
+                )
+
+            val behandling = lagBehandling(behandlingType = REVURDERING, årsak = SVALBARDTILLEGG)
+            val tilkjentYtelse =
+                lagTilkjentYtelse(behandling = behandling) {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.of(2023, 1),
+                            tom = YearMonth.of(2023, 2),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 999,
+                            person = barn,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.now(clockProvider.get()), // Inneværende måned
+                            tom = YearMonth.now(clockProvider.get()).plusMonths(122),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 500,
+                            person = barn,
+                            ytelseType = YtelseType.SVALBARDTILLEGG,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.of(2023, 1),
+                            tom = YearMonth.of(2023, 2),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 999,
+                            person = barn2,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.now(clockProvider.get()).plusMonths(2), // Mer enn 1 måned fram i tid
+                            tom = YearMonth.now(clockProvider.get()).plusMonths(122),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 500,
+                            person = barn2,
+                            ytelseType = YtelseType.SVALBARDTILLEGG,
+                        ),
+                    )
+                }
+
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
+            every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns mockk(relaxed = true)
 
             // Act & Assert
             val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
 
-            assertThat(feil.message).contains(
-                "Det eksisterer SVALBARDTILLEGG andeler som først blir innvilget mer enn 1 måned " +
-                    "fram i tid. Det er ikke mulig å innvilge disse enda, og behandlingen stoppes derfor.",
+            assertThat(feil.message).isEqualTo(
+                "Det eksisterer SVALBARDTILLEGG-andeler som er innvilget inneværende måned eller tidligere, " +
+                    "samtidig som det eksisterer andeler som blir innvilget mer enn en måned fram i tid. " +
+                    "Dette kan ikke behandles automatisk, og behandlingen stoppes derfor.",
+            )
+        }
+
+        @Test
+        fun `skal kaste rekjør senere-exception dersom svalbardtillegg er innvilget to måneder fram i tid`() {
+            // Arrange
+            val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        beløp = 999,
+                        person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        beløp = 999,
+                        person = barn2,
+                    ),
+                )
+
+            val behandling = lagBehandling(behandlingType = REVURDERING, årsak = SVALBARDTILLEGG)
+            val tilkjentYtelse =
+                lagTilkjentYtelse(behandling = behandling) {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.of(2023, 1),
+                            tom = YearMonth.of(2023, 2),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 999,
+                            person = barn,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.now(clockProvider.get()).plusMonths(1), // Neste måned
+                            tom = YearMonth.now(clockProvider.get()).plusMonths(122),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 500,
+                            person = barn,
+                            ytelseType = YtelseType.SVALBARDTILLEGG,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.of(2023, 1),
+                            tom = YearMonth.of(2023, 2),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 999,
+                            person = barn2,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.now(clockProvider.get()).plusMonths(2), // Mer enn 1 måned fram i tid
+                            tom = YearMonth.now(clockProvider.get()).plusMonths(122),
+                            behandling = behandling,
+                            tilkjentYtelse = it,
+                            beløp = 500,
+                            person = barn2,
+                            ytelseType = YtelseType.SVALBARDTILLEGG,
+                        ),
+                    )
+                }
+
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
+            every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns mockk(relaxed = true)
+
+            // Act & Assert
+            val feil = assertThrows<RekjørSenereException> { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
+
+            val forventetTriggertid = LocalDate.now(clockProvider.get()).førsteDagINesteMåned().atTime(6, 0)
+            assertThat(feil.triggerTid).isEqualTo(forventetTriggertid)
+            assertThat(feil.årsak).isEqualTo(
+                "Det eksisterer SVALBARDTILLEGG-andeler som er innvilget mer enn en måned fram i tid. " +
+                    "Disse andelene kan ikke innvilges ennå. Prøver igjen neste måned.",
             )
         }
     }
