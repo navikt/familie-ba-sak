@@ -615,7 +615,7 @@ class BehandlingsresultatStegValideringServiceTest {
         }
 
         @Test
-        fun `skal kaste rekjør senere-exception dersom finnmarkstillegg er innvilget mer enn to måneder fram i tid`() {
+        fun `skal kaste rekjør senere-exception dersom finnmarkstillegg er innvilget to måneder fram i tid`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
             val forrigeAndeler =
@@ -1039,7 +1039,7 @@ class BehandlingsresultatStegValideringServiceTest {
         }
 
         @Test
-        fun `skal kaste rekjør senere-exception dersom svalbardtillegg er innvilget fra og med neste måned for et barn og om to måneder for et annet barn`() {
+        fun `skal kaste rekjør senere-exception dersom svalbardtillegg er innvilget to måneder fram i tid`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
             val forrigeAndeler =
@@ -1111,9 +1111,8 @@ class BehandlingsresultatStegValideringServiceTest {
             val forventetTriggertid = LocalDate.now(clockProvider.get()).førsteDagINesteMåned().atTime(6, 0)
             assertThat(feil.triggerTid).isEqualTo(forventetTriggertid)
             assertThat(feil.årsak).isEqualTo(
-                "Det eksisterer SVALBARDTILLEGG-andeler som er innvilget neste måned, " +
-                    "samtidig som det eksisterer andeler som blir innvilget mer enn en måned fram i tid. " +
-                    "Dette kan ikke behandles automatisk, og behandlingen stoppes derfor. Prøver igjen 1. i neste måned.",
+                "Det eksisterer SVALBARDTILLEGG-andeler som er innvilget mer enn en måned fram i tid. " +
+                    "Disse andelene kan ikke innvilges ennå. Prøver igjen neste måned.",
             )
         }
     }
