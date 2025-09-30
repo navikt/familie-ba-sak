@@ -73,13 +73,19 @@ sealed interface BrevBegrunnelse : Comparable<BrevBegrunnelse> {
     override fun compareTo(other: BrevBegrunnelse): Int =
         when {
             this.type == Begrunnelsetype.FRITEKST -> Int.MAX_VALUE
-            other.type == Begrunnelsetype.FRITEKST -> -Int.MAX_VALUE
+            other.type == Begrunnelsetype.FRITEKST -> Int.MIN_VALUE
             this.vedtakBegrunnelseType == null -> Int.MAX_VALUE
-            other.vedtakBegrunnelseType == null -> -Int.MAX_VALUE
+            other.vedtakBegrunnelseType == null -> Int.MIN_VALUE
+            erFinnmarkEllerSvalbardBegrunnelse(this) && !erFinnmarkEllerSvalbardBegrunnelse(other) -> Int.MAX_VALUE
+            !erFinnmarkEllerSvalbardBegrunnelse(this) && erFinnmarkEllerSvalbardBegrunnelse(other) -> Int.MIN_VALUE
 
             else -> this.vedtakBegrunnelseType!!.sorteringsrekkefølge - other.vedtakBegrunnelseType!!.sorteringsrekkefølge
         }
 }
+
+fun erFinnmarkEllerSvalbardBegrunnelse(begrunnelse: BrevBegrunnelse): Boolean =
+    begrunnelse is BegrunnelseMedData && begrunnelse.apiNavn.lowercase().contains("finnmarkstillegg") ||
+        begrunnelse is BegrunnelseMedData && begrunnelse.apiNavn.lowercase().contains("svalbard")
 
 interface BegrunnelseMedData : BrevBegrunnelse {
     val apiNavn: String
