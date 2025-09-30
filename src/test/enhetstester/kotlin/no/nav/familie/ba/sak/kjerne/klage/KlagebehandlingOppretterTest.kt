@@ -6,8 +6,6 @@ import io.mockk.slot
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -20,7 +18,6 @@ import no.nav.familie.kontrakter.felles.klage.Klagebehandlingsårsak
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import no.nav.familie.kontrakter.felles.klage.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -35,7 +32,6 @@ class KlagebehandlingOppretterTest {
     private val integrasjonClient = mockk<IntegrasjonClient>()
     private val tilpassArbeidsfordelingService = mockk<TilpassArbeidsfordelingService>()
     private val clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(dagensDato)
-    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val klagebehandlingOppretter =
         KlagebehandlingOppretter(
@@ -44,13 +40,7 @@ class KlagebehandlingOppretterTest {
             integrasjonClient,
             tilpassArbeidsfordelingService,
             clockProvider,
-            featureToggleService,
         )
-
-    @BeforeEach
-    fun setup() {
-        every { featureToggleService.isEnabled(FeatureToggle.BRUK_NY_LOGIKK_FOR_AA_FINNE_ENHET_FOR_OPPRETTING_AV_KLAGEBEHANDLING) } returns true
-    }
 
     @Nested
     inner class OpprettKlage {
@@ -184,33 +174,6 @@ class KlagebehandlingOppretterTest {
             assertThat(opprettKlageRequest.captured.eksternFagsakId).isEqualTo(fagsak.id.toString())
             assertThat(opprettKlageRequest.captured.fagsystem).isEqualTo(Fagsystem.BA)
             assertThat(opprettKlageRequest.captured.behandlendeEnhet).isEqualTo(tilpassetArbeidsfordelingsenhet.enhetId)
-            assertThat(opprettKlageRequest.captured.behandlingsårsak).isEqualTo(Klagebehandlingsårsak.ORDINÆR)
-        }
-
-        @Test
-        fun `skal lage OpprettKlageRequest hvor behandlendeEnhet er satt til saksbehandlers enhet når toggle er av`() {
-            // Arrange
-            val fagsak = lagFagsak()
-            val klageMottattDato = dagensDato
-
-            val klagebehandlingId = UUID.randomUUID()
-
-            val opprettKlageRequest = slot<OpprettKlagebehandlingRequest>()
-
-            every { featureToggleService.isEnabled(FeatureToggle.BRUK_NY_LOGIKK_FOR_AA_FINNE_ENHET_FOR_OPPRETTING_AV_KLAGEBEHANDLING) } returns false
-            every { integrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(any()) } returns listOf(BarnetrygdEnhet.OSLO, BarnetrygdEnhet.VIKAFOSSEN)
-            every { klageClient.opprettKlage(capture(opprettKlageRequest)) } returns klagebehandlingId
-
-            // Act
-            val id = klagebehandlingOppretter.opprettKlage(fagsak, klageMottattDato)
-
-            // Assert
-            assertThat(id).isEqualTo(klagebehandlingId)
-            assertThat(opprettKlageRequest.captured.ident).isEqualTo(fagsak.aktør.aktivFødselsnummer())
-            assertThat(opprettKlageRequest.captured.stønadstype).isEqualTo(Stønadstype.BARNETRYGD)
-            assertThat(opprettKlageRequest.captured.eksternFagsakId).isEqualTo(fagsak.id.toString())
-            assertThat(opprettKlageRequest.captured.fagsystem).isEqualTo(Fagsystem.BA)
-            assertThat(opprettKlageRequest.captured.behandlendeEnhet).isEqualTo(BarnetrygdEnhet.OSLO.enhetsnummer)
             assertThat(opprettKlageRequest.captured.behandlingsårsak).isEqualTo(Klagebehandlingsårsak.ORDINÆR)
         }
     }
