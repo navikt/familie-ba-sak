@@ -10,6 +10,7 @@ internal fun hentResultaterForPeriode(
     begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
     erUtbetalingPåSøkerIPeriode: Boolean,
     erReduksjonIFinnmarkstillegg: Boolean,
+    erReduksjonISvalbardtilleggIPeriode: Boolean,
 ): List<SanityPeriodeResultat> {
     val erAndelerPåPersonHvisBarn =
         begrunnelseGrunnlagForPeriode.person.type != PersonType.BARN ||
@@ -27,11 +28,18 @@ internal fun hentResultaterForPeriode(
             erReduksjonIFinnmarkstillegg,
         )
 
+    val erReduksjonISvalbardtilleggPgaPerson =
+        hentErReduksjonISvalbardtilleggPgaPerson(
+            begrunnelseGrunnlagForPeriode.vilkårResultater,
+            begrunnelseGrunnlagForrigePeriode?.vilkårResultater,
+            erReduksjonISvalbardtilleggIPeriode,
+        )
+
     val erReduksjonIAndel =
         erReduksjonIAndelMellomPerioder(
             begrunnelseGrunnlagForPeriode,
             begrunnelseGrunnlagForrigePeriode,
-        ) || erReduksjonIFinnmarkPgaPerson
+        ) || erReduksjonIFinnmarkPgaPerson || erReduksjonISvalbardtilleggPgaPerson
 
     val erEøs = begrunnelseGrunnlagForPeriode.kompetanse != null
 
@@ -84,6 +92,23 @@ private fun hentErReduksjonIFinnmarkPgaPerson(
             .any { it == UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS }
 
     return erBosattIFinnmarkForrigePeriode && !erBosattIFinnmarkDennePeriode && erReduksjonIFinnmarkstillegg
+}
+
+private fun hentErReduksjonISvalbardtilleggPgaPerson(
+    vilkårResultaterDennePerioden: Iterable<VilkårResultatForVedtaksperiode>,
+    vilkårResultaterForrigePeriode: Iterable<VilkårResultatForVedtaksperiode>?,
+    erReduksjonISvalbardtillegg: Boolean,
+): Boolean {
+    val erBosattPåSvalbardForrigePeriode =
+        vilkårResultaterForrigePeriode
+            ?.flatMap { it.utdypendeVilkårsvurderinger }
+            ?.any { it == UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD } ?: false
+    val erBosattPåSvalbardDennePeriode =
+        vilkårResultaterDennePerioden
+            .flatMap { it.utdypendeVilkårsvurderinger }
+            .any { it == UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD }
+
+    return erBosattPåSvalbardForrigePeriode && !erBosattPåSvalbardDennePeriode && erReduksjonISvalbardtillegg
 }
 
 private fun erKunReduksjonAvSats(

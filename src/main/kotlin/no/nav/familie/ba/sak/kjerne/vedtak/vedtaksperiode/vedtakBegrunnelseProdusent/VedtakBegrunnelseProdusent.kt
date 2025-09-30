@@ -92,6 +92,7 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
             ?.let { it > 0 } ?: false
 
     val erReduksjonIFinnmarkstilleggIPeriode = hentErReduksjonIFinnmarkstilleggIPeriode(grunnlag.behandlingsGrunnlagForVedtaksperioder.andelerTilkjentYtelse, this.fom)
+    val erReduksjonISvalbardtilleggIPeriode = hentErReduksjonISvalbardtilleggIPeriode(grunnlag.behandlingsGrunnlagForVedtaksperioder.andelerTilkjentYtelse, this.fom)
 
     return begrunnelseGrunnlagPerPerson.mapValues { (person, begrunnelseGrunnlag) ->
         val relevantePeriodeResultater =
@@ -100,6 +101,7 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
                 begrunnelseGrunnlagForrigePeriode = begrunnelseGrunnlag.forrigePeriode,
                 erUtbetalingPåSøkerIPeriode = erUtbetalingPåSøkerIPeriode,
                 erReduksjonIFinnmarkstillegg = erReduksjonIFinnmarkstilleggIPeriode,
+                erReduksjonISvalbardtilleggIPeriode = erReduksjonISvalbardtilleggIPeriode,
             )
 
         val temaSomPeriodeErVurdertEtter = hentTemaSomPeriodeErVurdertEtter(begrunnelseGrunnlag)
@@ -158,6 +160,25 @@ private fun hentErReduksjonIFinnmarkstilleggIPeriode(
             .any { it.type == YtelseType.FINNMARKSTILLEGG }
 
     return !erFinnmarksAndelDennePerioden && finnmarksAndelForrigePeriode
+}
+
+private fun hentErReduksjonISvalbardtilleggIPeriode(
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    periodeFom: LocalDate?,
+): Boolean {
+    if (periodeFom == null) return false
+
+    val erSvalbardAndelDennePerioden =
+        andelerTilkjentYtelse
+            .filter { it.stønadFom == periodeFom.toYearMonth() }
+            .any { it.type == YtelseType.SVALBARDTILLEGG }
+
+    val svalbardAndelForrigePeriode =
+        andelerTilkjentYtelse
+            .filter { it.stønadTom == periodeFom.toYearMonth().minusMonths(1) }
+            .any { it.type == YtelseType.SVALBARDTILLEGG }
+
+    return !erSvalbardAndelDennePerioden && svalbardAndelForrigePeriode
 }
 
 fun erUtbetalingEllerDeltBostedIPeriode(begrunnelseGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
