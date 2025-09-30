@@ -379,7 +379,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
 
                 every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
                 every { vilkårsvurderingService.hentAktivForBehandling(forrigeBehandling.id) } returns forrigeVilkårsvurdering
-                every { preutfyllVilkårService.preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(any()) } just runs
+                every { preutfyllVilkårService.preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(any(), any(), any()) } just runs
                 every { endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(behandling, forrigeBehandling) } just runs
                 every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(capture(vilkårsvurderingSlot)) } returnsArgument 0
 
@@ -504,7 +504,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
 
                 every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
                 every { vilkårsvurderingService.hentAktivForBehandling(forrigeBehandling.id) } returns forrigeVilkårsvurdering
-                every { preutfyllVilkårService.preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(any()) } just runs
+                every { preutfyllVilkårService.preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(any(), any(), any()) } just runs
                 every { endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(behandling, forrigeBehandling) } just runs
                 every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(capture(vilkårsvurderingSlot)) } returnsArgument 0
 

@@ -16,7 +16,6 @@ Egenskap: Finnmarkstillegg autovedtak
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 01.01.2000  |
       | 1            | 2       | BARN       | 01.01.2025  |
-      | 1            | 3       | BARN       | 01.04.2025  |
 
   Scenario: Skal oppdatere vilkårresultater og generere andeler når autovedtak finnmarkstillegg kjøres
     Og dagens dato er 01.09.2025
@@ -45,14 +44,14 @@ Egenskap: Finnmarkstillegg autovedtak
 
     Så forvent følgende vilkårresultater for behandling 2
       | AktørId | Vilkår                        | Fra dato   | Til dato   | Resultat | Utdypende vilkår             |
-      | 1       | BOSATT_I_RIKET                | 01.01.2025 | 30.04.2025 | OPPFYLT  |                              |
-      | 1       | BOSATT_I_RIKET                | 01.05.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
+      | 1       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                              |
+      | 1       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
       | 1       | LOVLIG_OPPHOLD                | 01.01.2025 |            | OPPFYLT  |                              |
 
       | 2       | UNDER_18_ÅR                   | 01.01.2025 | 31.12.2042 | OPPFYLT  |                              |
       | 2       | GIFT_PARTNERSKAP              | 01.01.2025 |            | OPPFYLT  |                              |
-      | 2       | BOSATT_I_RIKET                | 01.01.2025 | 30.04.2025 | OPPFYLT  |                              |
-      | 2       | BOSATT_I_RIKET                | 01.05.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
+      | 2       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                              |
+      | 2       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
       | 2       | BOR_MED_SØKER, LOVLIG_OPPHOLD | 01.01.2025 |            | OPPFYLT  |                              |
 
     Så forvent følgende andeler tilkjent ytelse for behandling 2
@@ -63,7 +62,7 @@ Egenskap: Finnmarkstillegg autovedtak
 
     Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype | Begrunnelser               |
-      | 01.05.2025 | 30.09.2025 | Utbetaling         |                            |
+      | 01.09.2025 | 30.09.2025 | Utbetaling         |                            |
       | 01.10.2025 | 31.12.2042 | Utbetaling         | INNVILGET_FINNMARKSTILLEGG |
       | 01.01.2043 |            | Opphør             |                            |
 
@@ -139,14 +138,14 @@ Egenskap: Finnmarkstillegg autovedtak
     Og lag personresultater for behandling 1
     Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                        | Fra dato   | Til dato   | Resultat | Utdypende vilkår             |
-      | 1       | BOSATT_I_RIKET                | 01.01.2025 | 30.04.2025 | OPPFYLT  |                              |
-      | 1       | BOSATT_I_RIKET                | 01.05.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
+      | 1       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                              |
+      | 1       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
       | 1       | LOVLIG_OPPHOLD                | 01.01.2025 |            | OPPFYLT  |                              |
 
       | 2       | UNDER_18_ÅR                   | 01.01.2025 | 31.12.2042 | OPPFYLT  |                              |
       | 2       | GIFT_PARTNERSKAP              | 01.01.2025 |            | OPPFYLT  |                              |
-      | 2       | BOSATT_I_RIKET                | 01.01.2025 | 30.04.2025 | OPPFYLT  |                              |
-      | 2       | BOSATT_I_RIKET                | 01.05.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
+      | 2       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                              |
+      | 2       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
       | 2       | BOR_MED_SØKER, LOVLIG_OPPHOLD | 01.01.2025 |            | OPPFYLT  |                              |
 
     Og med andeler tilkjent ytelse
@@ -165,13 +164,14 @@ Egenskap: Finnmarkstillegg autovedtak
 
     Så forvent følgende vilkårresultater for behandling 2
       | AktørId | Vilkår                        | Fra dato   | Til dato   | Resultat | Utdypende vilkår             |
-      | 1       | BOSATT_I_RIKET                | 01.01.2025 | 30.04.2025 | OPPFYLT  |                              |
-      | 1       | BOSATT_I_RIKET                | 01.05.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
+      | 1       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                              |
+      | 1       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
       | 1       | LOVLIG_OPPHOLD                | 01.01.2025 |            | OPPFYLT  |                              |
 
       | 2       | UNDER_18_ÅR                   | 01.01.2025 | 31.12.2042 | OPPFYLT  |                              |
       | 2       | GIFT_PARTNERSKAP              | 01.01.2025 |            | OPPFYLT  |                              |
-      | 2       | BOSATT_I_RIKET                | 01.01.2025 |            | OPPFYLT  |                              |
+      | 2       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                              |
+      | 2       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  |                              |
       | 2       | BOR_MED_SØKER, LOVLIG_OPPHOLD | 01.01.2025 |            | OPPFYLT  |                              |
 
     Så forvent følgende andeler tilkjent ytelse for behandling 2
@@ -181,7 +181,7 @@ Egenskap: Finnmarkstillegg autovedtak
 
     Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype                                      | Begrunnelser                                        |
-      | 01.05.2025 | 30.09.2025 | Utbetaling                                              |                                                     |
+      | 01.09.2025 | 30.09.2025 | Utbetaling                                              |                                                     |
       | 01.10.2025 | 31.12.2042 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING | REDUKSJON_FINNMARKSTILLEGG_BODDE_IKKE_I_TILLEGGSONE |
       | 01.01.2043 |            | Opphør                                                  |                                                     |
 
@@ -195,14 +195,14 @@ Egenskap: Finnmarkstillegg autovedtak
     Og lag personresultater for behandling 1
     Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                        | Fra dato   | Til dato   | Resultat | Utdypende vilkår             |
-      | 1       | BOSATT_I_RIKET                | 01.01.2025 | 30.04.2025 | OPPFYLT  |                              |
-      | 1       | BOSATT_I_RIKET                | 01.05.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
+      | 1       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                              |
+      | 1       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
       | 1       | LOVLIG_OPPHOLD                | 01.01.2025 |            | OPPFYLT  |                              |
 
       | 2       | UNDER_18_ÅR                   | 01.01.2025 | 31.12.2042 | OPPFYLT  |                              |
       | 2       | GIFT_PARTNERSKAP              | 01.01.2025 |            | OPPFYLT  |                              |
-      | 2       | BOSATT_I_RIKET                | 01.01.2025 | 30.04.2025 | OPPFYLT  |                              |
-      | 2       | BOSATT_I_RIKET                | 01.05.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
+      | 2       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                              |
+      | 2       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
       | 2       | BOR_MED_SØKER, LOVLIG_OPPHOLD | 01.01.2025 |            | OPPFYLT  |                              |
 
     Og med andeler tilkjent ytelse
@@ -221,13 +221,14 @@ Egenskap: Finnmarkstillegg autovedtak
 
     Så forvent følgende vilkårresultater for behandling 2
       | AktørId | Vilkår                        | Fra dato   | Til dato   | Resultat | Utdypende vilkår             |
-      | 1       | BOSATT_I_RIKET                | 01.01.2025 |            | OPPFYLT  |                              |
+      | 1       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                              |
+      | 1       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  |                              |
       | 1       | LOVLIG_OPPHOLD                | 01.01.2025 |            | OPPFYLT  |                              |
 
       | 2       | UNDER_18_ÅR                   | 01.01.2025 | 31.12.2042 | OPPFYLT  |                              |
       | 2       | GIFT_PARTNERSKAP              | 01.01.2025 |            | OPPFYLT  |                              |
-      | 2       | BOSATT_I_RIKET                | 01.01.2025 | 30.04.2025 | OPPFYLT  |                              |
-      | 2       | BOSATT_I_RIKET                | 01.05.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
+      | 2       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                              |
+      | 2       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
       | 2       | BOR_MED_SØKER, LOVLIG_OPPHOLD | 01.01.2025 |            | OPPFYLT  |                              |
 
     Så forvent følgende andeler tilkjent ytelse for behandling 2
@@ -237,7 +238,7 @@ Egenskap: Finnmarkstillegg autovedtak
 
     Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype                                      | Begrunnelser                                        |
-      | 01.05.2025 | 30.09.2025 | Utbetaling                                              |                                                     |
+      | 01.09.2025 | 30.09.2025 | Utbetaling                                              |                                                     |
       | 01.10.2025 | 31.12.2042 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING | REDUKSJON_FINNMARKSTILLEGG_BODDE_IKKE_I_TILLEGGSONE |
       | 01.01.2043 |            | Opphør                                                  |                                                     |
 

@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
+private val PREUTFYLLING_BOSATT_I_RIKET_CUT_OFF_FOM_DATO_FINNMARKS_OG_SVALBARDTILLEGG = LocalDate.of(2025, 9, 1)
+
 @Service
 class VilkårsvurderingForNyBehandlingService(
     private val vilkårsvurderingService: VilkårsvurderingService,
@@ -165,7 +167,10 @@ class VilkårsvurderingForNyBehandlingService(
                     personopplysningGrunnlag = personopplysningGrunnlag,
                 ).also {
                     if (inneværendeBehandling.erFinnmarksEllerSvalbardtillegg()) {
-                        preutfyllVilkårService.preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(it)
+                        preutfyllVilkårService.preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(
+                            vilkårsvurdering = it,
+                            cutOffFomDato = PREUTFYLLING_BOSATT_I_RIKET_CUT_OFF_FOM_DATO_FINNMARKS_OG_SVALBARDTILLEGG,
+                        )
                     }
                 }
 
