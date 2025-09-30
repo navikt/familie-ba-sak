@@ -332,16 +332,12 @@ object BehandlingsresultatValideringUtils {
                 )
             }
 
-            val andelErInnvilgetNesteMåned = tidligsteInnvilgelsesTidspunktPerAktør.any { it.value != null && it.value!! == nesteMåned }
-            if (andelErInnvilgetNesteMåned) {
-                throw RekjørSenereException(
-                    årsak =
-                        "Det eksisterer $ytelseType-andeler som er innvilget neste måned, " +
-                            "samtidig som det eksisterer andeler som blir innvilget mer enn en måned fram i tid. " +
-                            "Dette kan ikke behandles automatisk, og behandlingen stoppes derfor. Prøver igjen 1. i neste måned.",
-                    triggerTid = nesteMåned.førsteDagIInneværendeMåned().atTime(6, 0),
-                )
-            }
+            throw RekjørSenereException(
+                årsak =
+                    "Det eksisterer $ytelseType-andeler som er innvilget mer enn en måned fram i tid. " +
+                        "Disse andelene kan ikke innvilges ennå. Prøver igjen neste måned.",
+                triggerTid = nesteMåned.førsteDagIInneværendeMåned().atTime(6, 0),
+            )
         }
     }
 }
