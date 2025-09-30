@@ -17,6 +17,11 @@ Egenskap: Finnmarkstillegg autovedtak
       | 1            | 1       | SØKER      | 01.01.2000  |
       | 1            | 2       | BARN       | 01.01.2025  |
 
+    Og med følgende feature toggles
+      | BehandlingId | FeatureToggleId                                                     | Er togglet på |
+      | 2            | familie-ba-sak.skal-bruke-adressehendelseloype-for-finnmarkstillegg | Ja            |
+
+
   Scenario: Skal oppdatere vilkårresultater og generere andeler når autovedtak finnmarkstillegg kjøres
     Og dagens dato er 01.09.2025
 
@@ -61,14 +66,17 @@ Egenskap: Finnmarkstillegg autovedtak
       | 2       | 2            | 01.10.2025 | 31.12.2042 | 500   | 100     | FINNMARKSTILLEGG   |
 
     Så forvent følgende vedtaksperioder for behandling 2
-      | Fra dato   | Til dato   | Vedtaksperiodetype | Begrunnelser               |
-      | 01.09.2025 | 30.09.2025 | Utbetaling         |                            |
-      | 01.10.2025 | 31.12.2042 | Utbetaling         | INNVILGET_FINNMARKSTILLEGG |
-      | 01.01.2043 |            | Opphør             |                            |
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Begrunnelser                                 |
+      | 01.05.2025 | 30.09.2025 | Utbetaling         |                                              |
+      | 01.10.2025 | 31.12.2042 | Utbetaling         | INNVILGET_FINNMARKSTILLEGG_MED_DATO |
+      | 01.01.2043 |            | Opphør             |                                              |
 
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.10.2025 til 31.12.2042
-      | Begrunnelse                | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
-      | INNVILGET_FINNMARKSTILLEGG | STANDARD | Ja            | 01.01.25             | 1           | september 2025                            |         | 2 468 |                  | SØKER_HAR_IKKE_RETT     |                             |
+      | Begrunnelse                                  | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
+      | INNVILGET_FINNMARKSTILLEGG_MED_DATO | STANDARD | Ja            | 01.01.25             | 1           | september 2025                       |         | 2 468 |                  | SØKER_HAR_IKKE_RETT     |                             |
+
+    Så forvent at brevmal AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG er brukt for behandling 2
+
 
   Scenario: Skal oppdatere vilkårresultater og opphøre andeler når autovedtak finnmarkstillegg kjøres og man ikke lenger bor i finnmark
     Og dagens dato er 01.09.2025

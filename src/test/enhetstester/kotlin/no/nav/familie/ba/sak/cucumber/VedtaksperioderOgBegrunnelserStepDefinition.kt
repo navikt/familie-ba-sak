@@ -38,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.LANDKODER
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -600,6 +601,17 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
             fagsakId = fagsakId,
             nyBehanldingId = finnmarkstilleggBehandlingId,
         ).kjørBehandling(FinnmarkstilleggData(fagsakId))
+    }
+
+    @Så("forvent at brevmal {} er brukt for behandling {}")
+    fun `forvent følgende brevmal for behandling`(
+        forventetBrevmal: Brevmal,
+        behandlingId: Long,
+    ) {
+        val behandling = behandlinger.finnBehandling(behandlingId)
+        val faktiskBrevmal = CucumberMock(this, behandlingId).brevmalService.hentBrevmal(behandling)
+
+        assertThat(faktiskBrevmal).isEqualTo(forventetBrevmal)
     }
 
     @Så("forvent følgende vilkårresultater for behandling {}")
