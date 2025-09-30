@@ -201,7 +201,7 @@ class ForvalterController(
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "hente data til test",
+            handling = "Hente begrunnelsetest",
         )
 
         return testVerktøyService
@@ -216,7 +216,7 @@ class ForvalterController(
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "hente data til test",
+            handling = "Hente vedtaksperiodertest",
         )
 
         return testVerktøyService
@@ -346,7 +346,7 @@ class ForvalterController(
         )
 
         taskService.save(OpprettInternKonsistensavstemmingTaskerTask.opprettTask(maksAntallTasker))
-        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+        return ResponseEntity.ok(Ressurs.success("Intern konsistensavstemming startet"))
     }
 
     @PostMapping("/valutajustering/{fagsakId}/juster-valuta")
@@ -375,7 +375,7 @@ class ForvalterController(
         )
 
         månedligValutajusteringScheduler.lagMånedligValutajusteringTask(triggerTid = LocalDateTime.now())
-        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+        return ResponseEntity.ok(Ressurs.success("Valutajustering for alle sekundærlandsaker i gjeldende måned startet"))
     }
 
     @DeleteMapping("/slett-alle-kompetanser-for-behandling/{behandlingId}")
@@ -417,7 +417,7 @@ class ForvalterController(
         val oppdaterLøpendeFlaggTask = Task(type = OppdaterLøpendeFlagg.TASK_STEP_TYPE, payload = "")
         taskRepository.save(oppdaterLøpendeFlaggTask)
         logger.info("Opprettet oppdaterLøpendeFlaggTask")
-        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+        return ResponseEntity.ok(Ressurs.success("Task for oppdatering av løpende flagg startet"))
     }
 
     @PostMapping("/henlegg-autovedtak-og-sett-behandling-tilbake-paa-vent")
@@ -436,7 +436,7 @@ class ForvalterController(
             val hennleggAutovedtakTask = HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask.opprettTask(behandlingId)
             taskRepository.save(hennleggAutovedtakTask)
         }
-        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+        return ResponseEntity.ok(Ressurs.success("Task for henleggelse av autovedtak startet"))
     }
 
     @GetMapping("/stonadstatistikk-utbetalingsperioder/{behandlingId}")
@@ -446,7 +446,7 @@ class ForvalterController(
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "hente data til test",
+            handling = "Hente utbetalingsperioder til datavarehus for behandling",
         )
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
@@ -461,7 +461,7 @@ class ForvalterController(
     ): ResponseEntity<List<String>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "hente data til test",
+            handling = "Hente alle identer som sendes til pensjon",
         )
 
         return ResponseEntity.ok(hentAlleIdenterTilPsysTask.hentAlleIdenterMedBarnetrygd(aar.toInt(), UUID.randomUUID()))
@@ -477,7 +477,7 @@ class ForvalterController(
     ): ResponseEntity<Long> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "hente data til test",
+            handling = "Hente fagsakId for journalpost",
         )
 
         val opprettetTask = taskRepository.save(LogFagsakIdForJournalpostTask.opprettTask(journalpostId))
@@ -495,7 +495,7 @@ class ForvalterController(
     ): ResponseEntity<Long> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "hente data til test",
+            handling = "Hente journalpostId for fagsak",
         )
 
         val opprettetTask = taskRepository.save(LogJournalpostIdForFagsakTask.opprettTask(fagsakId))
