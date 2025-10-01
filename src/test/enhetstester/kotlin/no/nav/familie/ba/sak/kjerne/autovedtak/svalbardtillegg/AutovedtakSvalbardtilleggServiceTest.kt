@@ -71,10 +71,10 @@ class AutovedtakSvalbardtilleggServiceTest {
 
     private val adresse = Vegadresse(null, null, null, null, null, null, null, null)
     private val oppholdsadresseUtenforSvalbard =
-        Oppholdsadresse(gyldigFraOgMed = LocalDate.now(), vegadresse = adresse.copy(kommunenummer = "0301"))
+        Oppholdsadresse(gyldigFraOgMed = LocalDate.of(2025, 9, 15), vegadresse = adresse.copy(kommunenummer = "0301"))
 
     private val oppholsadressePåSvalbard =
-        Oppholdsadresse(gyldigFraOgMed = LocalDate.now(), vegadresse = adresse.copy(kommunenummer = "2100"))
+        Oppholdsadresse(gyldigFraOgMed = LocalDate.of(2025, 9, 15), vegadresse = adresse.copy(kommunenummer = "2100"))
 
     @BeforeEach
     fun setUp() {
