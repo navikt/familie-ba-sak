@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.validation.Valid
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
@@ -96,6 +97,7 @@ class ForvalterController(
     private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
     private val personidentRepository: PersonidentRepository,
     private val autovedtakFinnmarkstilleggTaskOppretter: AutovedtakFinnmarkstilleggTaskOppretter,
+    private val envService: EnvService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -543,8 +545,8 @@ class ForvalterController(
             handling = "Opprett task for autovedtak av Finnmarkstillegg",
         )
 
-        if (!featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG)) {
-            throw Feil("Toggle for å opprette tasker for autovedtak av Finnmarkstillegg er skrudd av")
+        if (envService.erProd()) {
+            throw Feil("Dette endepunktet skal ikke brukes i prod")
         }
 
         opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(fagsakIder)
@@ -585,8 +587,8 @@ class ForvalterController(
             handling = "Opprett task for autovedtak av Svalbardtillegg",
         )
 
-        if (!featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOVEDTAK_SVALBARDTILLEGG)) {
-            throw Feil("Toggle for å opprette tasker for autovedtak av Svalbardtillegg er skrudd av")
+        if (envService.erProd()) {
+            throw Feil("Dette endepunktet skal ikke brukes i prod")
         }
 
         opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(fagsakIder)
