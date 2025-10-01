@@ -42,6 +42,7 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatStegV
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterTilkjentYtelseService
@@ -155,6 +156,7 @@ class CucumberMock(
             togglesForBehandling.forEach { (toggleId, isEnabled) ->
                 val featureToggle = FeatureToggle.entries.find { it.navn == toggleId } ?: throw Feil("$toggleId does not exist")
                 every { featureToggleService.isEnabled(featureToggle, behandlingId) } returns isEnabled
+                every { featureToggleService.isEnabled(featureToggle) } returns isEnabled
             }
         }
     }
@@ -597,6 +599,7 @@ class CucumberMock(
             beregningService = beregningService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
+            featureToggleService = featureToggleService,
         )
 
     val vilkårsvurderingSteg =
@@ -713,8 +716,16 @@ class CucumberMock(
             stegService = stegService,
             småbarnstilleggService = småbarnstilleggService,
         )
+
+    val brevmalService =
+        BrevmalService(
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            featureToggleService = featureToggleService,
+        )
+
     val iverksettMotOppdragTask = IverksettMotOppdragTask(stegService, behandlingHentOgPersisterService, taskRepository)
     val ferdigstillBehandlingTask = FerdigstillBehandlingTask(stegService = stegService, behandlingHentOgPersisterService = behandlingHentOgPersisterService)
+
     val statusFraOppdragTask = StatusFraOppdragTask(stegService, behandlingHentOgPersisterService, taskRepository, featureToggleService)
 
     val taskservices = listOf(iverksettMotOppdragTask, ferdigstillBehandlingTask, statusFraOppdragTask)
