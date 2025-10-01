@@ -71,5 +71,7 @@ enum class FeatureToggle(
 
     SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG("familie-ba-sak.skal-bruke-adressehendelseloype-for-finnmarkstillegg"),
 
+    SKAL_BRUKE_ADRESSEHENDELSELØYPE_SVALBARDTILLEGG("familie-ba-sak.skal-bruke-adressehendelseloype-for-svalbardtillegg"),
+
     VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR("familie-ba-sak.valider-endring-av-preutfylte-vilkaar"),
 }
