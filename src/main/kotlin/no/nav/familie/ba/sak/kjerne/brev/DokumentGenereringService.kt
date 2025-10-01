@@ -52,6 +52,10 @@ class DokumentGenereringService(
                     else -> brevService.hentVedtaksbrevData(vedtak)
                 }
             return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
+        } catch (funksjonellFeil: FunksjonellFeil) {
+            secureLogger.info("Funksjonell feil ved dokumentgenerering av vedtaksbrev i behandling ${vedtak.behandling.id}.")
+
+            throw funksjonellFeil
         } catch (feil: Throwable) {
             secureLogger.info("Feil ved dokumentgenerering. Genererer hentBegrunnelsetest \n ${testVerktøyService.hentBegrunnelsetest(vedtak.behandling.id)}")
             secureLogger.info("Feil ved dokumentgenerering. Genererer hentVedtaksperioderTest \n ${testVerktøyService.hentVedtaksperioderTest(vedtak.behandling.id)}")
