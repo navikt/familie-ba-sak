@@ -124,15 +124,7 @@ class PreutfyllBosattIRiketService(
         val erBosattOgHarNordiskStatsborgerskapTidslinje =
             erNordiskStatsborgerOgBosattINorgeTidslinje.kombinerMed(erBosattIFinnmarkEllerNordTromsTidslinje, erOppholdsadressePåSvalbardTidslinje) { erNordiskStatsborgerOgBosattINorge, erBosattIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
                 if (erNordiskStatsborgerOgBosattINorge == true) {
-                    val utdypendeVilkårsvurderinger =
-                        if (erOppholdsadressePåSvalbard == true) {
-                            listOf(BOSATT_PÅ_SVALBARD)
-                        } else if (erBosattIFinnmarkEllerNordTroms == true) {
-                            listOf(BOSATT_I_FINNMARK_NORD_TROMS)
-                        } else {
-                            emptyList()
-                        }
-                    OppfyltDelvilkår(begrunnelse = "- Norsk/nordisk statsborgerskap", utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger)
+                    OppfyltDelvilkår(begrunnelse = "- Norsk/nordisk statsborgerskap")
                 } else {
                     IkkeOppfyltDelvilkår
                 }
@@ -149,6 +141,19 @@ class PreutfyllBosattIRiketService(
                         erNordiskOgBosatt is OppfyltDelvilkår -> erNordiskOgBosatt
                         erØvrigeKravOppfylt is OppfyltDelvilkår -> erØvrigeKravOppfylt
                         else -> IkkeOppfyltDelvilkår
+                    }
+                }.kombinerMed(erBosattIFinnmarkEllerNordTromsTidslinje, erOppholdsadressePåSvalbardTidslinje) { erBosattIRiket, erBosattIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
+                    when (erBosattIRiket) {
+                        is OppfyltDelvilkår -> {
+                            val utdypendeVilkårsvurderinger =
+                                when {
+                                    erOppholdsadressePåSvalbard == true -> listOf(BOSATT_PÅ_SVALBARD)
+                                    erBosattIFinnmarkEllerNordTroms == true -> listOf(BOSATT_I_FINNMARK_NORD_TROMS)
+                                    else -> emptyList()
+                                }
+                            erBosattIRiket.copy(utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger)
+                        }
+                        else -> erBosattIRiket
                     }
                 }.beskjærFraOgMed(maxOf(fødselsdatoForBeskjæring, førsteBosattINorgeDato))
 

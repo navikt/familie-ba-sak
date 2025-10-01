@@ -863,7 +863,7 @@ class PreutfyllBosattIRiketServiceTest {
     }
 
     @Test
-    fun `Skal ikke automatisk sette bosatt i finnmark i utdypendevilkårsvurdering dersom person ikke er nordisk borger`() {
+    fun `Skal automatisk sette bosatt i finnmark i utdypendevilkårsvurdering dersom vilkår er oppfylt basert på øvrige vilkår`() {
         // Arrange
         val behandling = lagBehandling()
         val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barnasFødselsdatoer = listOf(LocalDate.now().minusMonths(2)), søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
@@ -900,12 +900,12 @@ class PreutfyllBosattIRiketServiceTest {
 
         // Assert
         assertThat(vilkårResultat).allSatisfy {
-            assertThat(it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)).isFalse()
+            assertThat(it.utdypendeVilkårsvurderinger).contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
         }
     }
 
     @Test
-    fun `Skal ikke automatisk sette bosatt på svalbard i utdypendevilkårsvurdering dersom person ikke er nordisk borger`() {
+    fun `Skal automatisk sette bosatt på svalbard i utdypendevilkårsvurdering dersom vilkår er oppfylt basert på øvrige vilkår`() {
         // Arrange
         val behandling = lagBehandling()
         val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barnasFødselsdatoer = listOf(LocalDate.now().minusMonths(2)), søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
@@ -948,7 +948,7 @@ class PreutfyllBosattIRiketServiceTest {
 
         // Assert
         assertThat(vilkårResultat).allSatisfy {
-            assertThat(it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)).isFalse()
+            assertThat(it.utdypendeVilkårsvurderinger).contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
         }
     }
 
