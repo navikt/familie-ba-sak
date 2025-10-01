@@ -68,12 +68,12 @@ Egenskap: Finnmarkstillegg autovedtak
     Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype | Begrunnelser                        |
       | 01.09.2025 | 30.09.2025 | Utbetaling         |                                     |
-      | 01.10.2025 | 31.12.2042 | Utbetaling         | INNVILGET_FINNMARKSTILLEGG_MED_DATO |
+      | 01.10.2025 | 31.12.2042 | Utbetaling         | INNVILGET_FINNMARKSTILLEGG |
       | 01.01.2043 |            | Opphør             |                                     |
 
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.10.2025 til 31.12.2042
       | Begrunnelse                         | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
-      | INNVILGET_FINNMARKSTILLEGG_MED_DATO | STANDARD | Ja            | 01.01.25             | 1           | september 2025                       |         | 2 468 |                  | SØKER_HAR_IKKE_RETT     |                             |
+      | INNVILGET_FINNMARKSTILLEGG | STANDARD | Ja            | 01.01.25             | 1           | september 2025                       |         | 2 468 |                  | SØKER_HAR_IKKE_RETT     |                             |
 
     Så forvent at brevmal AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG er brukt for behandling 2
 
