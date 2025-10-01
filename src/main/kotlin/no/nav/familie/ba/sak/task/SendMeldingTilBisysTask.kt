@@ -78,8 +78,7 @@ class SendMeldingTilBisysTask(
 
     fun finnBarnEndretOpplysning(behandling: Behandling): Map<String, List<BarnEndretOpplysning>> {
         val forrigeIverksatteBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling = behandling)
-                ?: throw Feil("Finnes ikke forrige behandling for behandling ${behandling.id}")
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling = behandling) ?: return emptyMap()
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         val forrigeTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(forrigeIverksatteBehandling.id)
