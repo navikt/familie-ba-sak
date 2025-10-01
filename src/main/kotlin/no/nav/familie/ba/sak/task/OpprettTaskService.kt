@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggTask
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøring
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggTask
@@ -37,6 +39,7 @@ class OpprettTaskService(
     private val satskjøringRepository: SatskjøringRepository,
     private val envService: EnvService,
     private val featureToggleService: FeatureToggleService,
+    private val finnmarkstilleggKjøringRepository: FinnmarkstilleggKjøringRepository,
 ) {
     fun opprettOppgaveTask(
         behandlingId: Long,
@@ -189,6 +192,8 @@ class OpprettTaskService(
                     },
                 )
             }
+
+            finnmarkstilleggKjøringRepository.save(FinnmarkstilleggKjøring(fagsakId = fagsakId))
         }
     }
 
