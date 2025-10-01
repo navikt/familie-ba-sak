@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -234,6 +235,79 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
             verify(exactly = 1) { persongrunnlagService.hentAktivForBehandlinger(listOf(behandling1.id)) }
             verify(exactly = 1) { pdlRestClient.hentAdresserForPersoner(any()) }
             verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(setOf(fagsak1.id)) }
+        }
+
+        @Test
+        fun `skal filtrere bort fagsak som har sist iverksatt behandling med kategori EØS`() {
+            // Arrange
+            val pageable = Pageable.ofSize(2)
+
+            val person1 = lagPerson()
+            val person2 = lagPerson()
+
+            val fagsak1 = lagFagsak(id = 1, aktør = person1.aktør)
+            val eøsBehandling1 = lagBehandling(id = 1, fagsak = fagsak1, behandlingKategori = BehandlingKategori.EØS)
+            val persongrunnlag1 = lagTestPersonopplysningGrunnlag(eøsBehandling1.id, person1)
+
+            val fagsak2 = lagFagsak(id = 2, aktør = person2.aktør)
+            val eøsBehandling2 = lagBehandling(id = 2, fagsak = fagsak2, behandlingKategori = BehandlingKategori.EØS)
+            val persongrunnlag2 = lagTestPersonopplysningGrunnlag(eøsBehandling2.id, person2)
+
+            val fagsakIder = setOf(fagsak1.id, fagsak2.id)
+
+            every { fagsakRepository.finnLøpendeFagsakerForSvalbardtilleggKjøring(any()) } returns
+                PageImpl(
+                    fagsakIder.toList(),
+                    pageable,
+                    1,
+                )
+
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder) } returns
+                mapOf(
+                    fagsak1.id to eøsBehandling1,
+                    fagsak2.id to eøsBehandling2,
+                )
+
+            every {
+                persongrunnlagService.hentAktivForBehandlinger(emptyList())
+            } returns mapOf(eøsBehandling1.id to persongrunnlag1, eøsBehandling2.id to persongrunnlag2)
+
+            every { pdlRestClient.hentAdresserForPersoner(any()) } returns
+                mapOf(
+                    person1.aktør.aktivFødselsnummer() to
+                        PdlAdresserPerson(
+                            oppholdsadresse =
+                                listOf(
+                                    lagOppholdsadresse(
+                                        gyldigFraOgMed = LocalDate.of(2025, 1, 1),
+                                        gyldigTilOgMed = LocalDate.of(2025, 12, 31),
+                                        vegadresse = lagVegadresse(kommunenummer = SvalbardKommune.SVALBARD.kommunenummer),
+                                    ),
+                                ),
+                        ),
+                    person2.aktør.aktivFødselsnummer() to
+                        PdlAdresserPerson(
+                            oppholdsadresse =
+                                listOf(
+                                    lagOppholdsadresse(
+                                        gyldigFraOgMed = LocalDate.of(2025, 1, 1),
+                                        gyldigTilOgMed = LocalDate.of(2025, 12, 31),
+                                        vegadresse = lagVegadresse(kommunenummer = SvalbardKommune.SVALBARD.kommunenummer),
+                                    ),
+                                ),
+                        ),
+                )
+
+            every { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(emptySet()) } just runs
+
+            // Act
+            autovedtakSvalbardtilleggTaskOppretter.opprettTasker(2)
+
+            // Assert
+            verify(exactly = 1) { svalbardtilleggKjøringRepository.saveAll(any<List<SvalbardtilleggKjøring>>()) }
+            verify(exactly = 1) { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder) }
+            verify(exactly = 1) { persongrunnlagService.hentAktivForBehandlinger(emptyList()) }
+            verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(emptySet()) }
         }
 
         @Test
