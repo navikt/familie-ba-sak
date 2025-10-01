@@ -86,7 +86,7 @@ Egenskap: Gyldige begrunnelser for behandlingstema
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                     | Regelverk Ugyldige begrunnelser | Ugyldige begrunnelser         |
-      | 01.10.2019 | 31.08.2020 | UTBETALING         | NASJONALE_REGLER               | INNVILGET_BOSATT_I_RIKET_LOVLIG_OPPHOLD | EØS_FORORDNINGEN                | INNVILGET_PRIMÆRLAND_STANDARD |
+      | 01.10.2019 | 31.08.2020 | UTBETALING         | NASJONALE_REGLER               | INNVILGET_BOSATT_I_RIKTET_LOVLIG_OPPHOLD | EØS_FORORDNINGEN                | INNVILGET_PRIMÆRLAND_STANDARD |
       | 01.09.2020 | 31.08.2021 | UTBETALING         |                                |                                          |                                 |                               |
       | 01.09.2021 | 31.12.2021 | UTBETALING         |                                |                                          |                                 |                               |
       | 01.01.2022 | 28.02.2023 | UTBETALING         |                                |                                          |                                 |                               |

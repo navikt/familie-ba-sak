@@ -47,11 +47,11 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
 
     Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser      | Eøsbegrunnelser | Fritekster |
-      | 01.12.2022 | 28.02.2023 | INNVILGET_BOSATT_I_RIKET |                 |            |
+      | 01.12.2022 | 28.02.2023 | INNVILGET_BOSATT_I_RIKTET |                 |            |
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.12.2022 til 28.02.2023
       | Begrunnelse               | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | INNVILGET_BOSATT_I_RIKET | Ja            | 02.02.15 og 07.09.19 | 2           | november 2022                        | NB      | 2 730 |                  | SØKER_HAR_IKKE_RETT     |
+      | INNVILGET_BOSATT_I_RIKTET | Ja            | 02.02.15 og 07.09.19 | 2           | november 2022                        | NB      | 2 730 |                  | SØKER_HAR_IKKE_RETT     |
 
 
   Scenario: barnet - skal kun ta med et barn når det bare er et barn som har endring i vilkår
@@ -82,11 +82,11 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
 
     Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser      | Eøsbegrunnelser | Fritekster |
-      | 01.12.2022 | 28.02.2023 | INNVILGET_BOSATT_I_RIKET |                 |            |
+      | 01.12.2022 | 28.02.2023 | INNVILGET_BOSATT_I_RIKTET |                 |            |
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.12.2022 til 28.02.2023
       | Begrunnelse               | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | INNVILGET_BOSATT_I_RIKET | Nei           | 07.09.19             | 1           | november 2022                        | NB      | 1 676 |                  | SØKER_HAR_IKKE_RETT     |
+      | INNVILGET_BOSATT_I_RIKTET | Nei           | 07.09.19             | 1           | november 2022                        | NB      | 1 676 |                  | SØKER_HAR_IKKE_RETT     |
 
 
   Scenario: Back to back perioder - ønsker kun å begrunne barnet som har flyttet til søker i INNVILGET_BOR_HOS_SØKER

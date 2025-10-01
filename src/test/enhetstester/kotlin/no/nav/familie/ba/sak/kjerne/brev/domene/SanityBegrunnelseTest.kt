@@ -10,7 +10,7 @@ class SanityBegrunnelseTest {
     fun `skal fjerne ugyldige enumverdier`() {
         val restSanityBegrunnelse =
             lagRestSanityBegrunnelse(
-                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET.sanityApiNavn,
+                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
                 ovrigeTriggere =
                     listOf(
                         ØvrigTrigger.BARN_MED_6_ÅRS_DAG.name,

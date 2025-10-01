@@ -195,14 +195,14 @@ class VilkårsvurderingUtilsTest {
     fun `skal liste opp begrunnelser uten vilkår`() {
         val sanityBegrunnelser =
             mapOf(
-                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET to
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
                     SanityBegrunnelse(
                         vilkår = emptySet(),
                         apiNavn = "innvilgetBosattIRiket",
                         navnISystem = "",
                     ),
             )
-        val vedtakBegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET
+        val vedtakBegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
 
         val restVedtakBegrunnelserTilknyttetVilkår =
             vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(sanityBegrunnelser, vedtakBegrunnelse)
@@ -214,14 +214,14 @@ class VilkårsvurderingUtilsTest {
     fun `skal liste opp begrunnelsene en gang per vilkår`() {
         val sanityBegrunnelser =
             mapOf(
-                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET to
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
                     SanityBegrunnelse(
                         vilkår = setOf(Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD),
                         apiNavn = "innvilgetBosattIRiket",
                         navnISystem = "",
                     ),
             )
-        val vedtakBegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET
+        val vedtakBegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
 
         val restVedtakBegrunnelserTilknyttetVilkår =
             vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(sanityBegrunnelser, vedtakBegrunnelse)

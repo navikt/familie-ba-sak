@@ -55,7 +55,7 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                              | Ugyldige begrunnelser |
-      | 01.05.2020 | 31.03.2021 | UTBETALING         | INNVILGET_BOSATT_I_RIKET                         |                       |
+      | 01.05.2020 | 31.03.2021 | UTBETALING         | INNVILGET_BOSATT_I_RIKTET                         |                       |
       | 01.04.2021 |            | OPPHØR             | OPPHØR_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                       |
 
   Scenario: Skal detektere endring i utdypende vilkår

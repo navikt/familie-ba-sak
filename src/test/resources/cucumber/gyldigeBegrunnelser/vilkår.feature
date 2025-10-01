@@ -52,7 +52,7 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                     | Ugyldige begrunnelser |
-      | 01.02.2021 | 31.03.2021 | UTBETALING         | INNVILGET_BOSATT_I_RIKET_LOVLIG_OPPHOLD |                       |
+      | 01.02.2021 | 31.03.2021 | UTBETALING         | INNVILGET_BOSATT_I_RIKTET_LOVLIG_OPPHOLD |                       |
       | 01.04.2021 |            | OPPHØR             | OPPHØR_BARN_FLYTTET_FRA_SØKER            |                       |
 
   Scenario: Bor med søker for barn er eneste utgjørende vilkår skal kun gi bor med søker begrunnelser
