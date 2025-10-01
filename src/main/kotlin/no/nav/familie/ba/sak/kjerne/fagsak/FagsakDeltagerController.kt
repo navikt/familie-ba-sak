@@ -33,7 +33,7 @@ class FagsakDeltagerController(
         søkParam.valider()
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} søker fagsak")
 
-        val fagsakDeltagere = fagsakDeltagerService.hentFagsakDeltager(søkParam.personIdent)
+        val fagsakDeltagere = fagsakDeltagerService.hentFagsakDeltagere(søkParam.personIdent)
         return ResponseEntity.ok().body(Ressurs.success(fagsakDeltagere))
     }
 

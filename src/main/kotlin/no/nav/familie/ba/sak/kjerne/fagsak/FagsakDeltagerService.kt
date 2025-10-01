@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasj
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfoBase
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
@@ -30,100 +31,89 @@ class FagsakDeltagerService(
     private val fagsakService: FagsakService,
     private val integrasjonClient: IntegrasjonClient,
 ) {
-    fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
+    fun hentFagsakDeltagere(personIdent: String): List<RestFagsakDeltager> {
         val aktør = personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(personIdent) ?: return emptyList()
 
-        val maskertDeltaker = hentMaskertFagsakdeltakerVedManglendeTilgang(aktør)
-
-        if (maskertDeltaker != null) {
-            return listOf(maskertDeltaker)
+        val maskertPersonVedManglendeTiltak = hentMaskertPersonVedManglendeTilgang(aktør)
+        if (maskertPersonVedManglendeTiltak != null) {
+            return listOf(maskertPersonVedManglendeTiltak)
         }
 
-        val personInfoMedRelasjoner = hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
-
-        if (personInfoMedRelasjoner == null) {
-            return emptyList()
-        }
+        val personInfoMedRelasjoner = hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør) ?: return emptyList()
 
         // Finner alle fagsaker relatert til aktør og finner ut hvem som står som eier. Dette kan være aktør selv, en forelder eller en person som ikke har en direkte relasjon.
         val assosierteFagsakDeltagere = hentFagsakDeltakereSomEierFagsakerAssosiertMedAktør(aktør, personInfoMedRelasjoner)
 
-        val erBarn = Period.between(personInfoMedRelasjoner.fødselsdato, LocalDate.now()).years < 18
-
-        val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør)
-
-        if (fagsaker.isEmpty()) {
-            assosierteFagsakDeltagere.add(
-                RestFagsakDeltager(
-                    navn = personInfoMedRelasjoner.navn,
-                    ident = aktør.aktivFødselsnummer(),
-                    // we set the role to unknown when the person is not a child because the person may not have a child
-                    rolle = if (erBarn) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
-                    kjønn = personInfoMedRelasjoner.kjønn,
-                    fagsakId = null,
-                    fagsakType = null,
-                    adressebeskyttelseGradering = personInfoMedRelasjoner.adressebeskyttelseGradering,
-                ),
+        // Legger til fagsak deltaker for hver fagsak hvor aktør selv står som eier, eller en default fagsak deltaker dersom aktør ikke eier noen fagsak.
+        val fagsakDeltakerPerFagsakAktørEierEllerFagsakDeltakerUtenFagsak =
+            hentFagsakDeltakerPerFagsakAktørEierEllerFagsakDeltakerUtenFagsak(
+                aktør = aktør,
+                personInfoBase = personInfoMedRelasjoner,
+                assosierteFagsakDeltagere = assosierteFagsakDeltagere,
+                // Setter rolle til barn dersom aktør er barn, ellers ukjent da vi ikke kan vite om aktør har barn/er forelder.
+                rolle = if (personInfoMedRelasjoner.erBarn()) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
             )
+        assosierteFagsakDeltagere.addAll(fagsakDeltakerPerFagsakAktørEierEllerFagsakDeltakerUtenFagsak)
+
+        if (personInfoMedRelasjoner.erBarn()) {
+            // Legger til foreldre som fagsak deltagere dersom de ikke allerede er lagt til
+            val forelderFagsakDeltakereSomMangler = hentForelderFagsakDeltagereSomMangler(personInfoMedRelasjoner, assosierteFagsakDeltagere)
+            assosierteFagsakDeltagere.addAll(forelderFagsakDeltakereSomMangler)
         }
 
-//        fagsaker.forEach { fagsak ->
-//            if (assosierteFagsakDeltagere.find { it.ident == aktør.aktivFødselsnummer() && it.fagsakId == fagsak?.id } == null) {
-//                assosierteFagsakDeltagere.add(
-//                    RestFagsakDeltager(
-//                        navn = personInfoMedRelasjoner.navn,
-//                        ident = aktør.aktivFødselsnummer(),
-//                        // we set the role to unknown when the person is not a child because the person may not have a child
-//                        rolle = if (erBarn) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
-//                        kjønn = personInfoMedRelasjoner.kjønn,
-//                        fagsakId = fagsak?.id,
-//                        fagsakType = fagsak?.type,
-//                        adressebeskyttelseGradering = personInfoMedRelasjoner.adressebeskyttelseGradering,
-//                    ),
-//                )
-//            }
-//        }
-
-        if (erBarn) {
-            personInfoMedRelasjoner.forelderBarnRelasjon
-                .filter { relasjon ->
-                    relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR ||
-                        relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MOR ||
-                        relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
-                }.forEach { relasjon ->
-                    if (assosierteFagsakDeltagere.find { fagsakDeltager ->
-                            fagsakDeltager.ident == relasjon.aktør.aktivFødselsnummer()
-                        } == null
-                    ) {
-                        val maskertForelder =
-                            hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.aktør)
-                        if (maskertForelder != null) {
-                            assosierteFagsakDeltagere.add(maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER))
-                        } else {
-                            val fagsakerForRelasjon = fagsakRepository.finnFagsakerForAktør(relasjon.aktør).ifEmpty { listOf(null) }
-                            fagsakerForRelasjon.forEach { fagsak ->
-                                assosierteFagsakDeltagere.add(
-                                    RestFagsakDeltager(
-                                        navn = relasjon.navn,
-                                        ident = relasjon.aktør.aktivFødselsnummer(),
-                                        rolle = FagsakDeltagerRolle.FORELDER,
-                                        kjønn = relasjon.kjønn,
-                                        fagsakId = fagsak?.id,
-                                        fagsakType = fagsak?.type,
-                                        adressebeskyttelseGradering = relasjon.adressebeskyttelseGradering,
-                                    ),
-                                )
-                            }
-                        }
-                    }
-                }
-        }
         val fagsakDeltagereMedEgenAnsattStatus = settEgenAnsattStatusPåFagsakDeltagere(assosierteFagsakDeltagere)
 
         return fagsakDeltagereMedEgenAnsattStatus
     }
 
-    private fun sjekkStatuskodeOgHåndterFeil(throwable: Throwable): RestFagsakDeltager? {
+    private fun PersonInfo.erBarn(): Boolean = Period.between(this.fødselsdato, LocalDate.now()).years < 18
+
+    private fun hentFagsakDeltakerPerFagsakAktørEierEllerFagsakDeltakerUtenFagsak(
+        aktør: Aktør,
+        personInfoBase: PersonInfoBase,
+        assosierteFagsakDeltagere: List<RestFagsakDeltager>,
+        rolle: FagsakDeltagerRolle,
+    ) = fagsakRepository
+        .finnFagsakerForAktør(aktør)
+        .ifEmpty { listOf(null) }
+        .filter { fagsak -> fagsak == null || !assosierteFagsakDeltagere.map { it.fagsakId }.contains(fagsak.id) }
+        .map {
+            RestFagsakDeltager(
+                navn = personInfoBase.navn,
+                ident = aktør.aktivFødselsnummer(),
+                rolle = rolle,
+                kjønn = personInfoBase.kjønn,
+                fagsakId = it?.id,
+                fagsakType = it?.type,
+                adressebeskyttelseGradering = personInfoBase.adressebeskyttelseGradering,
+            )
+        }
+
+    private fun hentForelderFagsakDeltagereSomMangler(
+        personInfo: PersonInfo,
+        assosierteFagsakDeltakere: MutableList<RestFagsakDeltager>,
+    ): List<RestFagsakDeltager> =
+        personInfo.forelderBarnRelasjon
+            .filter { relasjon ->
+                assosierteFagsakDeltakere.none { it.ident == relasjon.aktør.aktivFødselsnummer() } && (
+                    relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR ||
+                        relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MOR ||
+                        relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
+                )
+            }.flatMap { relasjon ->
+                val maskertPerson = hentMaskertPersonVedManglendeTilgang(relasjon.aktør)
+                if (maskertPerson != null) {
+                    return@flatMap listOf(hentMaskertPersonVedManglendeTilgang(relasjon.aktør)!!)
+                }
+                hentFagsakDeltakerPerFagsakAktørEierEllerFagsakDeltakerUtenFagsak(
+                    aktør = relasjon.aktør,
+                    personInfoBase = relasjon,
+                    assosierteFagsakDeltagere = assosierteFagsakDeltakere,
+                    rolle = FagsakDeltagerRolle.FORELDER,
+                )
+            }
+
+    private fun <T> sjekkStatuskodeOgHåndterFeil(throwable: Throwable): T? {
         val clientError = throwable as? HttpStatusCodeException?
         return if ((clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND) ||
             throwable.message?.contains("Fant ikke person") == true
@@ -177,13 +167,9 @@ class FagsakDeltagerService(
                 adressebeskyttelseGradering = personInfoMedRelasjoner.adressebeskyttelseGradering,
             )
         }
-
-        val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(fagsak.aktør)
-        if (maskertForelder != null) {
-            return maskertForelder.copy(
-                rolle = FagsakDeltagerRolle.FORELDER,
-                fagsakType = fagsak.type,
-            )
+        val maskertPerson = hentMaskertPersonVedManglendeTilgang(fagsak.aktør)
+        if (maskertPerson != null) {
+            return maskertPerson.copy(rolle = FagsakDeltagerRolle.FORELDER, fagsakType = fagsak.type)
         }
 
         val forelderInfo = personInfoMedRelasjoner.forelderBarnRelasjon.find { it.aktør.aktivFødselsnummer() == fagsak.aktør.aktivFødselsnummer() }
@@ -220,10 +206,9 @@ class FagsakDeltagerService(
         )
     }
 
-    private fun hentMaskertFagsakdeltakerVedManglendeTilgang(aktør: Aktør): RestFagsakDeltager? =
+    private fun hentMaskertPersonVedManglendeTilgang(aktør: Aktør): RestFagsakDeltager? =
         runCatching {
-            familieIntegrasjonerTilgangskontrollService
-                .hentMaskertPersonInfoVedManglendeTilgang(aktør)
+            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
         }.fold(
             onSuccess = {
                 it?.let {
@@ -234,7 +219,7 @@ class FagsakDeltagerService(
                     )
                 }
             },
-            onFailure = { return sjekkStatuskodeOgHåndterFeil(it) },
+            onFailure = { sjekkStatuskodeOgHåndterFeil(throwable = it) },
         )
 
     private fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo? =
@@ -242,7 +227,7 @@ class FagsakDeltagerService(
             personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
         }.fold(
             onSuccess = { it },
-            onFailure = { return null },
+            onFailure = { sjekkStatuskodeOgHåndterFeil(it) },
         )
 
     private fun settEgenAnsattStatusPåFagsakDeltagere(fagsakDeltagere: List<RestFagsakDeltager>): List<RestFagsakDeltager> {

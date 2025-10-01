@@ -57,14 +57,12 @@ class FakePersonopplysningerService(
     }
 
     override fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
-        try {
-            Fødselsnummer(aktør.aktivFødselsnummer())
-        } catch (e: IllegalStateException) {
-            throw HttpClientErrorException(
-                HttpStatus.NOT_FOUND,
-                "Fant ikke forespurte data på person.",
-            )
-        }
+        // Er fødselsnummer gyldig
+        validerFødselsnummer(aktør.aktivFødselsnummer())
+
+        // Sjekk om personen er lagt til som "ikke funnet"
+        sjekkPersonIkkeFunnet(aktør.aktivFødselsnummer())
+
         return personInfo[aktør.aktivFødselsnummer()] ?: personInfo.getValue(INTEGRASJONER_FNR)
     }
 
@@ -101,14 +99,42 @@ class FakePersonopplysningerService(
                 mockBarnAutomatiskBehandlingSkalFeileFnr to mockBarnAutomatiskBehandlingSkalFeile,
             )
 
+        val personInfoIkkeFunnet: MutableSet<String> = mutableSetOf()
+
         val personerMedLandkode: MutableMap<String, String> = mutableMapOf()
 
         fun leggTilLandkodeForPerson(
             personIdent: String,
             Landkode: String,
         ) {
-            personerMedLandkode.put(personIdent, Landkode)
+            personerMedLandkode[personIdent] = Landkode
         }
+
+        fun leggTilPersonIkkeFunnet(
+            personIdent: String,
+        ) {
+            personInfoIkkeFunnet.add(personIdent)
+        }
+
+        fun sjekkPersonIkkeFunnet(personIdent: String) {
+            if (personInfoIkkeFunnet.contains(personIdent)) {
+                throw notFoundException()
+            }
+        }
+
+        fun validerFødselsnummer(fødselsnummer: String) {
+            try {
+                Fødselsnummer(fødselsnummer)
+            } catch (e: IllegalStateException) {
+                throw notFoundException()
+            }
+        }
+
+        private fun notFoundException() =
+            HttpClientErrorException(
+                HttpStatus.NOT_FOUND,
+                "Fant ikke forespurte data på person.",
+            )
 
         fun leggTilPersonInfo(
             fødselsdato: LocalDate,
