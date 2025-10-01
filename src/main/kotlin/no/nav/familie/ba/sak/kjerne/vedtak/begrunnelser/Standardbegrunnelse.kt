@@ -5,11 +5,11 @@ import com.fasterxml.jackson.annotation.JsonValue
 val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
 
 enum class Standardbegrunnelse : IVedtakBegrunnelse {
-    INNVILGET_BOSATT_I_RIKTET {
+    INNVILGET_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetBosattIRiket"
     },
-    INNVILGET_BOSATT_I_RIKTET_LOVLIG_OPPHOLD {
+    INNVILGET_BOSATT_I_RIKET_LOVLIG_OPPHOLD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetBosattIRiketLovligOpphold"
     },

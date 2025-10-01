@@ -88,7 +88,7 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
             vedtaksperiodeId = perisisterteVedtaksperioder.first { it.type == Vedtaksperiodetype.UTBETALING }.id,
             standardbegrunnelserFraFrontend =
                 listOf(
-                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET,
                 ),
             eøsStandardbegrunnelserFraFrontend = emptyList(),
         )

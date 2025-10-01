@@ -71,7 +71,7 @@ class HjemmeltekstUtlederTest {
                     begrunnelser =
                         mutableSetOf(
                             lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET,
                                 vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(),
                             ),
                         ),
@@ -103,9 +103,9 @@ class HjemmeltekstUtlederTest {
             sanityService.hentSanityBegrunnelser()
         } returns
             mapOf(
-                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET to
                     lagSanityBegrunnelse(
-                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET.sanityApiNavn,
                         hjemler = listOf("11", "4", "2", "10"),
                     ),
                 Standardbegrunnelse.INNVILGET_SATSENDRING to
@@ -144,7 +144,7 @@ class HjemmeltekstUtlederTest {
                     begrunnelser =
                         mutableSetOf(
                             lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET,
                             ),
                         ),
                 ),
@@ -174,9 +174,9 @@ class HjemmeltekstUtlederTest {
             sanityService.hentSanityBegrunnelser()
         } returns
             mapOf(
-                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET to
                     lagSanityBegrunnelse(
-                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET.sanityApiNavn,
                         hjemler = listOf("11", "4", "2", "10"),
                     ),
                 Standardbegrunnelse.INNVILGET_SATSENDRING to
@@ -215,7 +215,7 @@ class HjemmeltekstUtlederTest {
                     begrunnelser =
                         mutableSetOf(
                             lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET,
                             ),
                         ),
                 ),
@@ -246,9 +246,9 @@ class HjemmeltekstUtlederTest {
             sanityService.hentSanityBegrunnelser()
         } returns
             mapOf(
-                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET to
                     lagSanityBegrunnelse(
-                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET.sanityApiNavn,
                         hjemler = listOf("11", "4", "2", "10"),
                     ),
                 Standardbegrunnelse.INNVILGET_SATSENDRING to
@@ -352,7 +352,7 @@ class HjemmeltekstUtlederTest {
                     begrunnelser =
                         mutableSetOf(
                             lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET,
                             ),
                         ),
                 ),
@@ -382,9 +382,9 @@ class HjemmeltekstUtlederTest {
             sanityService.hentSanityBegrunnelser()
         } returns
             mapOf(
-                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET to
                     lagSanityBegrunnelse(
-                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET.sanityApiNavn,
                         hjemler = listOf("11", "4", "2", "10"),
                     ),
                 Standardbegrunnelse.INNVILGET_SATSENDRING to
@@ -534,7 +534,7 @@ class HjemmeltekstUtlederTest {
                     begrunnelser =
                         mutableSetOf(
                             lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET,
                             ),
                         ),
                     eøsBegrunnelser =
@@ -578,9 +578,9 @@ class HjemmeltekstUtlederTest {
             sanityService.hentSanityBegrunnelser()
         } returns
             mapOf(
-                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET to
                     lagSanityBegrunnelse(
-                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET.sanityApiNavn,
                         hjemler = listOf("11", "4"),
                     ),
                 Standardbegrunnelse.INNVILGET_SATSENDRING to
@@ -633,7 +633,7 @@ class HjemmeltekstUtlederTest {
                     begrunnelser =
                         mutableSetOf(
                             lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET,
                             ),
                         ),
                     eøsBegrunnelser =
@@ -677,9 +677,9 @@ class HjemmeltekstUtlederTest {
             sanityService.hentSanityBegrunnelser()
         } returns
             mapOf(
-                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET to
                     lagSanityBegrunnelse(
-                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET.sanityApiNavn,
                         hjemler = listOf("11", "4"),
                     ),
                 Standardbegrunnelse.INNVILGET_SATSENDRING to
@@ -733,7 +733,7 @@ class HjemmeltekstUtlederTest {
                     begrunnelser =
                         mutableSetOf(
                             lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET,
                             ),
                         ),
                     eøsBegrunnelser =
@@ -777,9 +777,9 @@ class HjemmeltekstUtlederTest {
             sanityService.hentSanityBegrunnelser()
         } returns
             mapOf(
-                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET to
                     lagSanityBegrunnelse(
-                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET.sanityApiNavn,
                         hjemler = listOf("11", "4"),
                     ),
                 Standardbegrunnelse.INNVILGET_SATSENDRING to
@@ -833,7 +833,7 @@ class HjemmeltekstUtlederTest {
                     begrunnelser =
                         mutableSetOf(
                             lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET,
                             ),
                         ),
                     eøsBegrunnelser =
@@ -877,9 +877,9 @@ class HjemmeltekstUtlederTest {
             sanityService.hentSanityBegrunnelser()
         } returns
             mapOf(
-                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET to
                     lagSanityBegrunnelse(
-                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET.sanityApiNavn,
                         hjemler = listOf("11", "4"),
                     ),
                 Standardbegrunnelse.INNVILGET_SATSENDRING to
@@ -932,7 +932,7 @@ class HjemmeltekstUtlederTest {
                     begrunnelser =
                         mutableSetOf(
                             lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET,
                             ),
                         ),
                     eøsBegrunnelser =
@@ -976,9 +976,9 @@ class HjemmeltekstUtlederTest {
             sanityService.hentSanityBegrunnelser()
         } returns
             mapOf(
-                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET to
                     lagSanityBegrunnelse(
-                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET.sanityApiNavn,
                         hjemler = listOf("11", "4"),
                     ),
                 Standardbegrunnelse.INNVILGET_SATSENDRING to
@@ -1067,7 +1067,7 @@ class HjemmeltekstUtlederTest {
             mapOf(
                 Standardbegrunnelse.INNVILGET_MEDLEM_I_FOLKETRYGDEN to
                     lagSanityBegrunnelse(
-                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET.sanityApiNavn,
                         hjemler = listOf("11", "4", "2", "10"),
                         hjemlerFolketrygdloven = listOf("644", "322"),
                     ),
@@ -1151,7 +1151,7 @@ class HjemmeltekstUtlederTest {
             mapOf(
                 Standardbegrunnelse.INNVILGET_MEDLEM_I_FOLKETRYGDEN to
                     lagSanityBegrunnelse(
-                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKET.sanityApiNavn,
                         hjemler = listOf("11", "4", "2", "10"),
                         hjemlerFolketrygdloven = listOf("644", "322"),
                     ),
