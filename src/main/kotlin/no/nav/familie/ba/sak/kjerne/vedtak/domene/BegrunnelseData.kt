@@ -27,8 +27,8 @@ enum class Begrunnelsetype {
 }
 
 private fun erFinnmarkEllerSvalbardBegrunnelse(begrunnelse: BrevBegrunnelse): Boolean =
-    begrunnelse is BegrunnelseMedData && begrunnelse.apiNavn.lowercase().contains("finnmark") ||
-        begrunnelse is BegrunnelseMedData && begrunnelse.apiNavn.lowercase().contains("svalbard")
+    begrunnelse is BegrunnelseMedData && begrunnelse.apiNavn.lowercase().contains("finnmarkstillegg") ||
+        begrunnelse is BegrunnelseMedData && begrunnelse.apiNavn.lowercase().contains("svalbardtillegg")
 
 interface BegrunnelseMedData : BrevBegrunnelse {
     val apiNavn: String
