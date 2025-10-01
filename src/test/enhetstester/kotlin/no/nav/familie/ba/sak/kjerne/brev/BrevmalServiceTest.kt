@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -21,7 +22,8 @@ import org.hamcrest.CoreMatchers.`is` as Is
 
 internal class BrevmalServiceTest {
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
-    private val brevmalService = BrevmalService(andelTilkjentYtelseRepository)
+    private val featureToggleService = mockk<FeatureToggleService>()
+    private val brevmalService = BrevmalService(andelTilkjentYtelseRepository, featureToggleService)
 
     @Test
     fun `hentBrevmal skal returnere VEDTAK_OPPHØR_DØDSFALL dersom behandlingårsak er DØDSFALL_BRUKER`() {

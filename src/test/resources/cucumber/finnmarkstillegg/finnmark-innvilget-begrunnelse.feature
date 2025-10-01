@@ -82,17 +82,17 @@ Egenskap: Innvilget Finnmarkstillegg begrunnelse pga søker
 
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser       | Ugyldige begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                | Ugyldige begrunnelser |
       | 01.08.2025 | 31.07.2033 | UTBETALING         |                                | INNVILGET_FINNMARKSTILLEGG |                       |
 
 
     Og når disse begrunnelsene er valgt for behandling 2
-      | Fra dato   | Til dato   | Standardbegrunnelser       | Eøsbegrunnelser | Fritekster |
+      | Fra dato   | Til dato   | Standardbegrunnelser                | Eøsbegrunnelser | Fritekster |
       | 01.08.2025 | 31.07.2033 | INNVILGET_FINNMARKSTILLEGG |                 |            |
 
 
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.08.2025 til 31.07.2033
-      | Begrunnelse                | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
+      | Begrunnelse                         | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | INNVILGET_FINNMARKSTILLEGG | STANDARD | Ja            | 10.11.24             | 1           | juli 2025                            |         | 4 436 |                  | SØKER_HAR_IKKE_RETT     |                             |
 
 
