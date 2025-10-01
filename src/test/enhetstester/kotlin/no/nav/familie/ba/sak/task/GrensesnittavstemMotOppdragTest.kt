@@ -26,7 +26,7 @@ class GrensesnittavstemMotOppdragTest {
     fun setUp() {
         val avstemmingServiceMock = mockk<AvstemmingService>()
         taskRepositoryMock = mockk()
-        grensesnittavstemMotOppdrag = GrensesnittavstemMotOppdrag(avstemmingServiceMock, OpprettTaskService(taskRepositoryMock, mockk(), mockk()))
+        grensesnittavstemMotOppdrag = GrensesnittavstemMotOppdrag(avstemmingServiceMock, OpprettTaskService(taskRepositoryMock, mockk(), mockk(), featureToggleService))
     }
 
     @ParameterizedTest

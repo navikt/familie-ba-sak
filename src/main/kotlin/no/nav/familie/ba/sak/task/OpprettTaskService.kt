@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
@@ -34,6 +36,7 @@ class OpprettTaskService(
     private val taskRepository: TaskRepositoryWrapper,
     private val satskjøringRepository: SatskjøringRepository,
     private val envService: EnvService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun opprettOppgaveTask(
         behandlingId: Long,
@@ -180,7 +183,7 @@ class OpprettTaskService(
                                 this["fagsakId"] = fagsakId.toString()
                             },
                     ).apply {
-                        if (envService.erProd()) {
+                        if (envService.erProd() && featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG)) {
                             medTriggerTid(LocalDateTime.now().plusHours(1))
                         }
                     },

@@ -45,7 +45,7 @@ internal class StartSatsendringTest {
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(any(), any()) } returns null
         val taskSlot = slot<Task>()
         every { taskRepository.save(capture(taskSlot)) } answers { taskSlot.captured }
-        val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository, mockk())
+        val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository, mockk(), featureToggleService)
 
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
 
