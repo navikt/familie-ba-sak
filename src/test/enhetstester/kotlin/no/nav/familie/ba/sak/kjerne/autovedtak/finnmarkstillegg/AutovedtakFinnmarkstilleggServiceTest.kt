@@ -71,10 +71,10 @@ class AutovedtakFinnmarkstilleggServiceTest {
 
     private val adresse = Vegadresse(null, null, null, null, null, null, null, null)
     private val bostedsadresseUtenforFinnmark =
-        Bostedsadresse(gyldigFraOgMed = LocalDate.now(), vegadresse = adresse.copy(kommunenummer = "0301"))
+        Bostedsadresse(gyldigFraOgMed = LocalDate.of(2025, 9, 15), vegadresse = adresse.copy(kommunenummer = "0301"))
 
     private val bostedsadresseIFinnmark =
-        Bostedsadresse(gyldigFraOgMed = LocalDate.now(), vegadresse = adresse.copy(kommunenummer = "5601"))
+        Bostedsadresse(gyldigFraOgMed = LocalDate.of(2025, 9, 15), vegadresse = adresse.copy(kommunenummer = "5601"))
 
     @BeforeEach
     fun setUp() {
