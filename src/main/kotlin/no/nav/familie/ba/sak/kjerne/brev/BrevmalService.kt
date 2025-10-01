@@ -29,11 +29,11 @@ class BrevmalService(
             throw FunksjonellFeil("Kan ikke opprette brev. Behandlingen er ikke vurdert.")
         }
 
-        val skalBrukeAutovedtakEndringsbrev = featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG)
+        val skalBrukeAutovedtakEndringsbrevForFinnmarkstillegg = featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG)
 
         val brevmal =
             if (behandling.skalBehandlesAutomatisk) {
-                hentAutomatiskVedtaksbrevtype(behandling, skalBrukeAutovedtakEndringsbrev)
+                hentAutomatiskVedtaksbrevtype(behandling, skalBrukeAutovedtakEndringsbrevForFinnmarkstillegg)
             } else {
                 hentManuellVedtaksbrevtype(behandling)
             }

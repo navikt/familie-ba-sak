@@ -30,7 +30,7 @@ internal class IVedtakBegrunnelseTest {
     @EnumSource(
         value = Standardbegrunnelse::class,
         names = [
-            "INNVILGET_FINNMARKSTILLEGG_MED_DATO",
+            "INNVILGET_FINNMARKSTILLEGG",
             "INNVILGET_FINNMARKSTILLEGG_INSTITUSJON",
             "INNVILGET_SVALBARDTILLEGG",
             "INNVILGET_FINNMARKSTILLEGG_UTEN_DATO",

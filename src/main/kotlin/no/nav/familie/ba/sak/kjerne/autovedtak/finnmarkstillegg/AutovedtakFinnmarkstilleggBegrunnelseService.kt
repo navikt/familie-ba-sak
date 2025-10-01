@@ -47,7 +47,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseService(
         innvilgetMånedTidspunkt.forEach {
             leggTilBegrunnelseIVedtaksperiode(
                 vedtaksperiodeStartDato = it,
-                standardbegrunnelse = if (skalBrukeInnvilgetFinnmarkstilleggMedDatoBegrunnelse) Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG_MED_DATO else Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG_UTEN_DATO,
+                standardbegrunnelse = if (skalBrukeInnvilgetFinnmarkstilleggMedDatoBegrunnelse) Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG else Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG_UTEN_DATO,
                 vedtaksperioder = vedtaksperioder,
             )
         }

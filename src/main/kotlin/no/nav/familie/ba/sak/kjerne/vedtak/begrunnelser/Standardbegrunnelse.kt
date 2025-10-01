@@ -497,7 +497,7 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetForlengetOppholdEtterEttaarigOppholdstillatelse"
     },
-    INNVILGET_FINNMARKSTILLEGG_MED_DATO {
+    INNVILGET_FINNMARKSTILLEGG {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetFinnmarkstillegg"
     },
@@ -507,7 +507,7 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     },
     INNVILGET_FINNMARKSTILLEGG_UTEN_DATO {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
-        override val sanityApiNavn = "innvilgetAutovedtakFoedselFinnmarkstillegg"
+        override val sanityApiNavn = "innvilgetFinnmarkstilleggUtenDato"
     },
     INNVILGET_AUTOVEDTAK_FØDSEL_SVALBARDTILLEGG {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
