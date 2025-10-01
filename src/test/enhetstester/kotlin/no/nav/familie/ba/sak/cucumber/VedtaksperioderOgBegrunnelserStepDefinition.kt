@@ -469,8 +469,8 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     /**
      * Mulige verdier: | Begrunnelse | Type | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Avtale tidspunkt delt bosted | Søkers rett til utvidet |
      */
-    @Så("forvent følgende brevbegrunnelser for behandling {} i periode {} til {}")
-    fun `forvent følgende brevbegrunnelser for behandling i periode`(
+    @Så("forvent følgende brevbegrunnelser i rekkefølge for behandling {} i periode {} til {}")
+    fun `forvent følgende brevbegrunnelser i rekkefølge for behandling i periode`(
         behandlingId: Long,
         periodeFom: String,
         periodeTom: String,

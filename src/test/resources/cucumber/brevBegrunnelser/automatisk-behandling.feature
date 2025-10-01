@@ -39,7 +39,7 @@ Egenskap: Brevbegrunnelser ved automatiske behandlinger
       | Fra dato   | Til dato   | Standardbegrunnelser                         | Eøsbegrunnelser | Fritekster |
       | 01.07.2023 | 31.05.2029 | INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.07.2023 til 31.05.2029
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.07.2023 til 31.05.2029
       | Begrunnelse                                  | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
       | INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE | Nei           | 04.06.23             | 1           | juni 2023                            | NB      | 1 766 |                  | SØKER_HAR_IKKE_RETT     |
 
@@ -104,6 +104,6 @@ Egenskap: Brevbegrunnelser ved automatiske behandlinger
       | Fra dato   | Til dato   | Standardbegrunnelser                                       | Eøsbegrunnelser | Fritekster |
       | 01.11.2023 | 30.09.2027 | REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.11.2023 til 30.09.2027
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.11.2023 til 30.09.2027
       | Begrunnelse                                                | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
       | REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD | Ja            | 11.10.21             | 1           | oktober 2023                         | NB      | 2 730 |                  | SØKER_FÅR_UTVIDET       |

@@ -95,7 +95,7 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
       | 01.11.2032 |            |                                                                                                                                              |                 |            |
 
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.06.2023 til 30.06.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.06.2023 til 30.06.2023
       | Begrunnelse                                                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY                         | STANDARD |               | 16.05.06             | 1           | mai 2023                             |         | 0     | 18.02.24         | SØKER_FÅR_UTVIDET       |                             |
       | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_MOTTATT_FULL_ORDINÆR_ETTERBETALT_UTVIDET_NY | STANDARD |               | 26.11.14             | 1           | mai 2023                             |         | 1 083 | 10.04.24         | SØKER_FÅR_UTVIDET       |                             |
@@ -180,7 +180,7 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
       | 01.01.2024 | 30.11.2028 |                                                                                                                                              |                 |            |
       | 01.12.2028 |            |                                                                                                                                              |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.01.2023 til 28.02.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.01.2023 til 28.02.2023
       | Begrunnelse                                                                            | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_AVTALETIDSPUNKT                                   | STANDARD |               | 14.12.10             | 1           | desember 2022                        |         | 0     |                  | SØKER_FÅR_UTVIDET       |                             |
       | ENDRET_UTBETALING_ETTERBETALT_UTVIDET_DEL_FRA_AVTALETIDSPUNKT_SØKT_FOR_PRAKTISERT_DELT | STANDARD |               | 14.12.10             | 1           | desember 2022                        |         | 0     | 13.04.23         | SØKER_FÅR_UTVIDET       |                             |
@@ -286,7 +286,7 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
       | 01.06.2032 | 30.11.2036 |                                                                                                                                                                         |                 |            |
       | 01.12.2036 |            |                                                                                                                                                                         |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.05.2024 til 31.05.2024
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.05.2024 til 31.05.2024
       | Begrunnelse                                                             | Type     | Gjelder søker | Barnas fødselsdatoer           | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | INNVILGET_DELT_FRA_SKRIFTLIG_AVTALE_HAR_SØKT_FOR_PRAKTISERT_DELT_BOSTED | STANDARD |               | 26.09.11, 03.06.14 og 18.12.18 | 3           | april 2024                           |         | 0     |                  | SØKER_FÅR_UTVIDET       |                             |
       | INNVILGET_BOR_ALENE_MED_BARN                                            | STANDARD | Ja            | 26.09.11, 03.06.14 og 18.12.18 | 3           | april 2024                           |         | 1 258 |                  | SØKER_FÅR_UTVIDET       |                             |
@@ -410,7 +410,7 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
       | Fra dato   | Til dato   | Standardbegrunnelser                           | Eøsbegrunnelser | Fritekster |
       | 01.12.2024 | 30.11.2033 | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.12.2024 til 30.11.2033
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.12.2024 til 30.11.2033
       | Begrunnelse                                    | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED | STANDARD | Ja            | 12.03.21 og 03.05.23 | 2           | november 2024                        |         | 6 048 | 21.10.24         | SØKER_FÅR_UTVIDET       |                             |
 
@@ -513,7 +513,7 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
       | Fra dato   | Til dato   | Standardbegrunnelser                           | Eøsbegrunnelser | Fritekster |
       | 01.02.2025 | 28.02.2025 | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.02.2025 til 28.02.2025
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.02.2025 til 28.02.2025
       | Begrunnelse                                    | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED | STANDARD | Nei           | 29.08.11             | 1           | januar 2025                          |         | 883   | 22.01.25         | SØKER_FÅR_UTVIDET       |                             |
 
@@ -599,6 +599,6 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
       | Fra dato   | Til dato   | Standardbegrunnelser                           | Eøsbegrunnelser | Fritekster |
       | 01.03.2025 | 31.03.2025 | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.03.2025 til 31.03.2025
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.03.2025 til 31.03.2025
       | Begrunnelse                                    | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED | STANDARD |               | 30.11.17             | 1           | februar 2025                         |         | 883   | 18.02.25         | SØKER_FÅR_UTVIDET       |                             |

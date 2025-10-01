@@ -92,7 +92,7 @@ Egenskap: Innvilget Finnmarkstillegg begrunnelse pga søker
       | 01.08.2025 | 31.07.2033 | INNVILGET_FINNMARKSTILLEGG, INNVILGET_BOSATT_I_RIKET |                 |            |
 
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.08.2025 til 31.07.2033
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.08.2025 til 31.07.2033
       | Begrunnelse                | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | INNVILGET_BOSATT_I_RIKET   | STANDARD | Nei           | 05.08.15             | 1           | juli 2025                            |         | 1 968 |                  | SØKER_HAR_IKKE_RETT     |                             |
       | INNVILGET_FINNMARKSTILLEGG | STANDARD | Ja            | 10.11.24             | 1           | juli 2025                            |         | 4 436 |                  | SØKER_HAR_IKKE_RETT     |                             |

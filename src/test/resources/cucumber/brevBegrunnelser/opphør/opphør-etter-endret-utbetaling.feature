@@ -154,6 +154,6 @@ Egenskap: Opphør etter endret utbetaling
       | Brevperiodetype  | Fra dato     | Til dato | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
       | INGEN_UTBETALING | oktober 2024 |          | 0     | 0                          |                     | du                     |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.10.2024 til null
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.10.2024 til null
       | Begrunnelse                        | Type | Barnas fødselsdatoer | Antall barn | Målform | Annen forelders aktivitetsland | Barnets bostedsland | Søkers aktivitetsland | Annen forelders aktivitet | Søkers aktivitet | Gjelder søker |
       | OPPHØR_IKKE_STATSBORGER_I_EØS_LAND | EØS  | 07.09.13             | 1           | NB      |                                |                     |                       |                           |                  | Ja            |

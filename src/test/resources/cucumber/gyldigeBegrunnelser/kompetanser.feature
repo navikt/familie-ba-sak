@@ -368,7 +368,7 @@ Egenskap: Gyldige begrunnelser for kompetanser
       | Fra dato   | Til dato   | Standardbegrunnelser | Eøsbegrunnelser               | Fritekster |
       | 01.01.2022 | 31.03.2022 |                      | INNVILGET_PRIMÆRLAND_STANDARD |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.01.2022 til 31.03.2022
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.01.2022 til 31.03.2022
       | Begrunnelse                   | Type | Barnas fødselsdatoer | Antall barn | Målform | Søkers aktivitet                     | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland | Gjelder søker |
       | INNVILGET_PRIMÆRLAND_STANDARD | EØS  | 10.08.09             | 1           | NB      | MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN | INAKTIV                   | Norge                 | Polen                          | Norge               | Nei           |
       | INNVILGET_PRIMÆRLAND_STANDARD | EØS  | 07.05.14             | 1           | NB      | MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN | I_ARBEID                  | Norge                 | Polen                          | Norge               | Nei           |

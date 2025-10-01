@@ -74,7 +74,7 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | Fra dato   | Til dato   | Standardbegrunnelser | Eøsbegrunnelser                | Fritekster |
       | 01.04.2023 | 30.06.2023 |                      | REDUKSJON_IKKE_ANSVAR_FOR_BARN |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.04.2023 til 30.06.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.04.2023 til 30.06.2023
       | Begrunnelse                    | Type | Barnas fødselsdatoer | Antall barn | Målform | Annen forelders aktivitetsland | Barnets bostedsland | Søkers aktivitetsland | Annen forelders aktivitet | Søkers aktivitet | Gjelder søker |
       | REDUKSJON_IKKE_ANSVAR_FOR_BARN | EØS  | 09.04.05             | 1           | NB      | Danmark                        | Danmark             | Norge                 | I_ARBEID                  | ARBEIDER         | Nei           |
 
@@ -116,7 +116,7 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | Fra dato   | Til dato   | Standardbegrunnelser   | Eøsbegrunnelser | Fritekster |
       | 01.07.2022 | 28.02.2023 | REDUKSJON_FLYTTET_BARN |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.07.2022 til 28.02.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.07.2022 til 28.02.2023
       | Begrunnelse            | Barnas fødselsdatoer | Antall barn | Målform | Beløp | Gjelder søker | Måned og år begrunnelsen gjelder for |
       | REDUKSJON_FLYTTET_BARN | 15.04.05             | 1           | NB      | 0     | Nei           | juni 2022                            |
 
@@ -204,7 +204,7 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | Brevperiodetype | Fra dato     | Til dato         | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
       | UTBETALING      | februar 2023 | til februar 2023 | 1054  | 1                          | 09.06.09            | du                     |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.02.2023 til 28.02.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.02.2023 til 28.02.2023
       | Begrunnelse                                          | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | REDUKSJON_AVTALE_FAST_BOSTED                         | STANDARD | Nei           | 07.08.11             | 1           | januar 2023                          | NB      | 0     |
       | INNVILGET_ENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED | STANDARD | Nei           | 09.06.09             | 1           | januar 2023                          | NB      | 1 054 |
@@ -309,6 +309,6 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | Brevperiodetype | Fra dato  | Til dato           | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
       | UTBETALING      | mars 2024 | til september 2029 | 1766  | 1                          | 10.10.23            | du                     |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.03.2024 til 30.09.2029
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.03.2024 til 30.09.2029
       | Begrunnelse            | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | REDUKSJON_FLYTTET_BARN | STANDARD | Nei           | 01.09.07             | 1           | februar 2024                         | NB      | 0     |
