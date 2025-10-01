@@ -439,6 +439,7 @@ class StegServiceIntegrationTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             brevmalService = brevmalService,
+            vilkårInnvilgetFom = LocalDate.now().minusMonths(4),
         )
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
@@ -553,6 +554,7 @@ class StegServiceIntegrationTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             brevmalService = brevmalService,
+            vilkårInnvilgetFom = LocalDate.now().minusMonths(4),
         )
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
@@ -667,6 +669,7 @@ class StegServiceIntegrationTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             brevmalService = brevmalService,
+            vilkårInnvilgetFom = LocalDate.now().minusMonths(4),
         )
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
@@ -1134,6 +1137,7 @@ class StegServiceIntegrationTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             brevmalService = brevmalService,
+            vilkårInnvilgetFom = LocalDate.now().minusMonths(4),
         )
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
