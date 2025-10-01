@@ -3,13 +3,12 @@ package no.nav.familie.ba.sak.task
 import io.micrometer.core.instrument.Metrics
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.eksterne.kontrakter.bisys.BarnEndretOpplysning
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetrygdBisysMelding
@@ -17,9 +16,11 @@ import no.nav.familie.eksterne.kontrakter.bisys.BarnetrygdEndretType
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.tidslinje.utvidelser.outerJoin
+import no.nav.familie.tidslinje.utvidelser.slåSammenLikePerioder
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.YearMonth
 import java.util.Properties
 
 @Service
@@ -43,13 +44,19 @@ class SendMeldingTilBisysTask(
         // Bisys vil kun ha rene manuelle opphør eller reduksjon
         if (behandling.resultat == Behandlingsresultat.OPPHØRT ||
             behandling.resultat == Behandlingsresultat.ENDRET_UTBETALING ||
-            behandling.resultat == Behandlingsresultat.ENDRET_OG_OPPHØRT
+            behandling.resultat == Behandlingsresultat.ENDRET_OG_OPPHØRT ||
+            behandling.resultat == Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT ||
+            behandling.resultat == Behandlingsresultat.INNVILGET_OG_OPPHØRT ||
+            behandling.resultat == Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT ||
+            behandling.resultat == Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT ||
+            behandling.resultat == Behandlingsresultat.AVSLÅTT_OG_OPPHØRT ||
+            behandling.resultat == Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT
         ) {
             val barnEndretOpplysning = finnBarnEndretOpplysning(behandling)
             val barnetrygdBisysMelding =
                 BarnetrygdBisysMelding(
                     søker = behandling.fagsak.aktør.aktivFødselsnummer(),
-                    barn = barnEndretOpplysning.filter { it.value.isNotEmpty() }.map { it.value.first() },
+                    barn = barnEndretOpplysning.map { it.value.minByOrNull { barnEndretOpplysning -> barnEndretOpplysning.fom }!! }, // Tar kun med den første endringen per aktør
                 )
 
             if (barnetrygdBisysMelding.barn.isEmpty()) {
@@ -77,59 +84,35 @@ class SendMeldingTilBisysTask(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         val forrigeTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(forrigeIverksatteBehandling.id)
 
-        val endretOpplysning: MutableMap<String, MutableList<BarnEndretOpplysning>> = mutableMapOf()
+        val andelTilkjentYtelseTidslinjerPerAktørOgType =
+            tilkjentYtelse.andelerTilkjentYtelse
+                .tilTidslinjerPerAktørOgType()
 
-        forrigeTilkjentYtelse.andelerTilkjentYtelse.groupBy { it.aktør.aktørId }.entries.forEach { entry ->
-            val nyAndelerTilkjentYtelse =
-                tilkjentYtelse.andelerTilkjentYtelse
-                    .filter { it.aktør.aktørId == entry.key }
-                    .sortedBy { it.stønadFom }
-            entry.value.sortedBy { it.periode.fom }.forEach {
-                var forblePeriode: MånedPeriode? = it.periode
-                val prosent = it.prosent
-                val barnIdent = it.aktør.aktivFødselsnummer()
-                if (!endretOpplysning.contains(barnIdent)) {
-                    endretOpplysning[barnIdent] = mutableListOf()
-                }
-                run checkEndretPerioder@{
-                    nyAndelerTilkjentYtelse.forEach {
-                        val intersectPerioder = forblePeriode!!.intersect(it.periode)
-                        if (intersectPerioder.first != null) {
-                            endretOpplysning[it.aktør.aktivFødselsnummer()]!!.add(
-                                BarnEndretOpplysning(
-                                    ident = barnIdent,
-                                    fom = forblePeriode!!.fom,
-                                    årsakskode = BarnetrygdEndretType.RO,
-                                ),
-                            )
-                        }
-                        if (intersectPerioder.second != null && it.prosent < prosent) {
-                            endretOpplysning[it.aktør.aktivFødselsnummer()]!!.add(
-                                BarnEndretOpplysning(
-                                    ident = barnIdent,
-                                    fom = latest(it.periode.fom, forblePeriode!!.fom),
-                                    årsakskode = BarnetrygdEndretType.RR,
-                                ),
-                            )
-                        }
-                        forblePeriode = intersectPerioder.third
-                        if (forblePeriode == null) {
-                            return@checkEndretPerioder
-                        }
+        val forrigeAndelTilkjentYtelseTidslinjerPerAktørOgType =
+            forrigeTilkjentYtelse.andelerTilkjentYtelse
+                .tilTidslinjerPerAktørOgType()
+
+        val opphørEllerReduksjonPerAktør =
+            forrigeAndelTilkjentYtelseTidslinjerPerAktørOgType
+                .outerJoin(andelTilkjentYtelseTidslinjerPerAktørOgType) { forrigeAtyIPeriode, nyAtyIPeriode ->
+                    when {
+                        forrigeAtyIPeriode != null && nyAtyIPeriode == null ->
+                            BarnetrygdEndretType.RO // Opphør
+                        forrigeAtyIPeriode != null && nyAtyIPeriode != null && nyAtyIPeriode.prosent < forrigeAtyIPeriode.prosent ->
+                            BarnetrygdEndretType.RR // Reduksjon
+                        else -> null
                     }
-                }
-                if (forblePeriode != null && !forblePeriode!!.erTom()) {
-                    endretOpplysning[it.aktør.aktivFødselsnummer()]!!.add(
+                }.flatMap { (aktørOgType, tidslinje) ->
+                    tidslinje.slåSammenLikePerioder().tilPerioderIkkeNull().map { endretPeriodeForAktør ->
                         BarnEndretOpplysning(
-                            ident = barnIdent,
-                            fom = forblePeriode!!.fom,
-                            årsakskode = BarnetrygdEndretType.RO,
-                        ),
-                    )
-                }
-            }
-        }
-        return endretOpplysning
+                            ident = aktørOgType.first.aktivFødselsnummer(),
+                            fom = endretPeriodeForAktør.fom!!.toYearMonth(),
+                            årsakskode = endretPeriodeForAktør.verdi,
+                        )
+                    }
+                }.groupBy { it.ident }
+
+        return opphørEllerReduksjonPerAktør
     }
 
     companion object {
@@ -146,25 +129,3 @@ class SendMeldingTilBisysTask(
             )
     }
 }
-
-fun earlist(
-    yearMonth1: YearMonth,
-    yearMonth2: YearMonth,
-): YearMonth = if (yearMonth1.isSameOrBefore(yearMonth2)) yearMonth1 else yearMonth2
-
-fun latest(
-    yearMonth1: YearMonth,
-    yearMonth2: YearMonth,
-): YearMonth = if (yearMonth1.isSameOrAfter(yearMonth2)) yearMonth1 else yearMonth2
-
-fun MånedPeriode.intersect(periode: MånedPeriode): Triple<MånedPeriode?, MånedPeriode?, MånedPeriode?> {
-    val overlappetFom = latest(this.fom, periode.fom)
-    val overlappetTom = earlist(this.tom, periode.tom)
-    return Triple(
-        if (this.fom.isSameOrAfter(periode.fom)) null else MånedPeriode(this.fom, periode.fom.minusMonths(1)),
-        if (overlappetTom.isBefore(overlappetFom)) null else MånedPeriode(overlappetFom, overlappetTom),
-        if (this.tom.isSameOrBefore(periode.tom)) null else MånedPeriode(periode.tom.plusMonths(1), this.tom),
-    )
-}
-
-fun MånedPeriode.erTom() = fom.isAfter(tom)

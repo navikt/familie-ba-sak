@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
@@ -15,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.ba.sak.task.dto.AktørId
@@ -39,35 +41,51 @@ class PreutfyllBosattIRiketService(
     fun preutfyllBosattIRiket(
         vilkårsvurdering: Vilkårsvurdering,
         identerVilkårSkalPreutfyllesFor: List<String>? = null,
+        cutOffFomDato: LocalDate? = null,
     ) {
+        val behandling = vilkårsvurdering.behandling
         val identer =
             vilkårsvurdering
                 .personResultater
                 .map { it.aktør.aktivFødselsnummer() }
                 .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
 
-        val bostedsadresser = pdlRestClient.hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(identer)
+        val adresser = pdlRestClient.hentAdresserForPersoner(identer)
 
         vilkårsvurdering
             .personResultater
             .filter { it.aktør.aktivFødselsnummer() in identer }
             .forEach { personResultat ->
                 val erUkrainskStatsborger = hentErUkrainskStatsborger(personResultat.aktør)
-                if (erUkrainskStatsborger) return@forEach
+                if (erUkrainskStatsborger && !behandling.erFinnmarksEllerSvalbardtillegg()) {
+                    return@forEach
+                }
 
                 val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
-                val bostedsadresserForPerson = Adresser.opprettFra(bostedsadresser[personResultat.aktør.aktivFødselsnummer()])
+                val adresserForPerson = Adresser.opprettFra(adresser[personResultat.aktør.aktivFødselsnummer()])
 
                 val bosattIRiketVilkårResultat =
                     genererBosattIRiketVilkårResultat(
                         personResultat = personResultat,
                         fødselsdatoForBeskjæring = fødselsdatoForBeskjæring,
-                        adresserForPerson = bostedsadresserForPerson,
+                        adresserForPerson = adresserForPerson,
+                        behandling = behandling,
                     )
 
-                if (bosattIRiketVilkårResultat.isNotEmpty()) {
+                val nyeBosattIRiketVilkårResultater =
+                    if (cutOffFomDato != null) {
+                        val eksisterendeBosattIRiketVilkårResultater = personResultat.vilkårResultater.filter { it.vilkårType == BOSATT_I_RIKET }
+                        kombinerNyeOgGamleVilkårResultater(
+                            nyeBosattIRiketVilkårResultaterTidslinje = bosattIRiketVilkårResultat.tilTidslinje().beskjærFraOgMed(cutOffFomDato),
+                            eksisterendeBosattIRiketVilkårResultaterTidslinje = eksisterendeBosattIRiketVilkårResultater.tilTidslinje(),
+                        )
+                    } else {
+                        bosattIRiketVilkårResultat
+                    }
+
+                if (nyeBosattIRiketVilkårResultater.isNotEmpty()) {
                     personResultat.vilkårResultater.removeIf { it.vilkårType == BOSATT_I_RIKET }
-                    personResultat.vilkårResultater.addAll(bosattIRiketVilkårResultat)
+                    personResultat.vilkårResultater.addAll(nyeBosattIRiketVilkårResultater)
                 }
             }
     }
@@ -76,27 +94,44 @@ class PreutfyllBosattIRiketService(
         personResultat: PersonResultat,
         fødselsdatoForBeskjæring: LocalDate = LocalDate.MIN,
         adresserForPerson: Adresser,
+        behandling: Behandling,
     ): Set<VilkårResultat> {
-        val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(adresserForPerson)
-        val erBosattIFinnmarkEllerNordTromsTidslinje = lagErBosattIFinnmarkEllerNordTromsTidslinje(adresserForPerson)
-        val erOppholdsadressePåSvalbardTidslinje = lagErBosattPåSvalbardTidslinje(adresserForPerson)
+        val erBosattINorgeTidslinje = lagTidslinjeForAdresser(adresserForPerson.bostedsadresser) { it.erINorge() }
         val erNordiskStatsborgerTidslinje = pdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat)
+        val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresserForPerson)
+        val erDeltBostedIFinnmarkEllerNordTromsTidslinje = lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresserForPerson)
+        val erOppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje(adresserForPerson)
+
+        if (behandling.erFinnmarksEllerSvalbardtillegg()) {
+            validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
+                behandling = behandling,
+                erBosattINorgeTidslinje = erBosattINorgeTidslinje,
+                erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
+                erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
+            )
+        }
+
+        val erBosattIFinnmarkEllerNordTromsTidslinje =
+            erBostedsadresseIFinnmarkEllerNordTromsTidslinje.kombinerMed(erDeltBostedIFinnmarkEllerNordTromsTidslinje) { erBostedsadresseIFinnmarkEllerNordTroms, erDeltBostedIFinnmarkEllerNordTroms ->
+                erBostedsadresseIFinnmarkEllerNordTroms == true || erDeltBostedIFinnmarkEllerNordTroms == true
+            }
 
         val erNordiskStatsborgerOgBosattINorgeTidslinje =
             erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeTidslinje) { erNordiskStatsborger, erBosattINorge ->
                 erNordiskStatsborger == true && erBosattINorge == true
             }
+
         val erBosattOgHarNordiskStatsborgerskapTidslinje =
             erNordiskStatsborgerOgBosattINorgeTidslinje.kombinerMed(erBosattIFinnmarkEllerNordTromsTidslinje, erOppholdsadressePåSvalbardTidslinje) { erNordiskStatsborgerOgBosattINorge, erBosattIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
-                val utdypendeVilkårsvurderinger =
-                    if (erOppholdsadressePåSvalbard == true) {
-                        listOf(BOSATT_PÅ_SVALBARD)
-                    } else if (erBosattIFinnmarkEllerNordTroms == true) {
-                        listOf(BOSATT_I_FINNMARK_NORD_TROMS)
-                    } else {
-                        emptyList()
-                    }
                 if (erNordiskStatsborgerOgBosattINorge == true) {
+                    val utdypendeVilkårsvurderinger =
+                        if (erOppholdsadressePåSvalbard == true) {
+                            listOf(BOSATT_PÅ_SVALBARD)
+                        } else if (erBosattIFinnmarkEllerNordTroms == true) {
+                            listOf(BOSATT_I_FINNMARK_NORD_TROMS)
+                        } else {
+                            emptyList()
+                        }
                     OppfyltDelvilkår(begrunnelse = "- Norsk/nordisk statsborgerskap", utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger)
                 } else {
                     IkkeOppfyltDelvilkår
@@ -216,17 +251,11 @@ class PreutfyllBosattIRiketService(
 
     private fun lagErBosattINorgeTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser) { it.erINorge() }
 
-    private fun lagErBosattIFinnmarkEllerNordTromsTidslinje(adresser: Adresser): Tidslinje<Boolean> {
-        val bostedsadresserIFinnmarkEllerNordTromsTidslinje = lagTidslinjeForAdresser(adresser.bostedsadresser) { it.erIFinnmarkEllerNordTroms() }
-        val delteBostederIFinnmarkEllerNordTromsTidslinje = lagTidslinjeForAdresser(adresser.delteBosteder) { it.erIFinnmarkEllerNordTroms() }
+    private fun lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser) { it.erIFinnmarkEllerNordTroms() }
 
-        return bostedsadresserIFinnmarkEllerNordTromsTidslinje
-            .kombinerMed(delteBostederIFinnmarkEllerNordTromsTidslinje) { bostedsadresseIFinnmarkEllerNordTroms, deltBostedIFinnmarkEllerNordTroms ->
-                bostedsadresseIFinnmarkEllerNordTroms == true || deltBostedIFinnmarkEllerNordTroms == true
-            }
-    }
+    private fun lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.delteBosteder) { it.erIFinnmarkEllerNordTroms() }
 
-    private fun lagErBosattPåSvalbardTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.oppholdsadresse) { it.erPåSvalbard() }
+    private fun lagErOppholdsadresserPåSvalbardTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.oppholdsadresse) { it.erPåSvalbard() }
 
     private fun lagTidslinjeForAdresser(
         adresser: List<Adresse>,
@@ -244,4 +273,47 @@ class PreutfyllBosattIRiketService(
                     tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
                 )
             }.tilTidslinje()
+
+    private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
+        behandling: Behandling,
+        erBosattINorgeTidslinje: Tidslinje<Boolean>,
+        erDeltBostedIFinnmarkEllerNordTromsTidslinje: Tidslinje<Boolean>,
+        erOppholdsadressePåSvalbardTidslinje: Tidslinje<Boolean>,
+    ) {
+        val harDeltBostedIFinnmarkOgOppholdsadressePåSvalbardISammePeriode =
+            erDeltBostedIFinnmarkEllerNordTromsTidslinje
+                .kombinerMed(erOppholdsadressePåSvalbardTidslinje) { erDeltBostedIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
+                    erDeltBostedIFinnmarkEllerNordTroms == true && erOppholdsadressePåSvalbard == true
+                }.tilPerioder()
+                .any { it.verdi == true }
+
+        if (harDeltBostedIFinnmarkOgOppholdsadressePåSvalbardISammePeriode) {
+            throw Feil("Kan ikke behandle ${behandling.opprettetÅrsak.visningsnavn} automatisk, fordi barn har delt bosted i Finnmark/Nord-Troms og oppholdsadresse på Svalbard")
+        }
+
+        val harOppholdsadresseUtenBostedsadresse =
+            erOppholdsadressePåSvalbardTidslinje
+                .kombinerMed(erBosattINorgeTidslinje) { erOppholdsadressePåSvalbard, harBostedsadresseINorge ->
+                    erOppholdsadressePåSvalbard == true && harBostedsadresseINorge != true
+                }.tilPerioder()
+                .any { it.verdi == true }
+
+        if (harOppholdsadresseUtenBostedsadresse) {
+            throw Feil("Kan ikke behandle ${behandling.opprettetÅrsak.visningsnavn} automatisk, fordi person har oppholdsadresse på Svalbard, men ikke bostedsadresse i Norge")
+        }
+    }
+
+    private fun kombinerNyeOgGamleVilkårResultater(
+        nyeBosattIRiketVilkårResultaterTidslinje: Tidslinje<VilkårResultat>,
+        eksisterendeBosattIRiketVilkårResultaterTidslinje: Tidslinje<VilkårResultat>,
+    ): Collection<VilkårResultat> =
+        nyeBosattIRiketVilkårResultaterTidslinje
+            .kombinerMed(eksisterendeBosattIRiketVilkårResultaterTidslinje) { nytt, gammelt -> nytt ?: gammelt }
+            .tilPerioderIkkeNull()
+            .map {
+                it.verdi.copy(
+                    periodeFom = it.fom,
+                    periodeTom = it.tom,
+                )
+            }
 }

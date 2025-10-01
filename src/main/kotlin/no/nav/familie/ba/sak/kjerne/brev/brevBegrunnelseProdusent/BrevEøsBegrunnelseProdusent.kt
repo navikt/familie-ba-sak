@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.begrunnelseSkalTriggesForOpphørFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserPerPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.KompetanseForVedtaksperiode
 
 fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
     vedtaksperiode: VedtaksperiodeMedBegrunnelser,
@@ -24,48 +25,28 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
     skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse: Boolean,
 ): List<EØSBegrunnelseData> {
     val sanityBegrunnelse = hentSanityBegrunnelse(grunnlag)
+
     val personerGjeldendeForBegrunnelse =
         vedtaksperiode
-            .hentGyldigeBegrunnelserPerPerson(
-                grunnlag,
-            ).mapNotNull { (person, begrunnelserPåPerson) -> person.takeIf { this in begrunnelserPåPerson } }
-    val periodegrunnlagForPersonerIBegrunnelse =
-        begrunnelsesGrunnlagPerPerson.filter { (person, _) -> person in personerGjeldendeForBegrunnelse }
+            .hentGyldigeBegrunnelserPerPerson(grunnlag)
+            .mapNotNull { (person, begrunnelserPåPerson) -> person.takeIf { this in begrunnelserPåPerson } }
 
     val gjelderSøker = personerGjeldendeForBegrunnelse.any { it.type == PersonType.SØKER }
     val begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling = (sanityBegrunnelse.begrunnelseSkalTriggesForOpphørFraForrigeBehandling()) && gjelderSøker
+
     val kompetanser =
-        when (sanityBegrunnelse.periodeResultat) {
-            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING,
-            SanityPeriodeResultat.INGEN_ENDRING,
-            ->
-                hentRelevanteKompetanserVedInnvilgetEllerIngenEndring(
-                    periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
-                )
+        hentKompetanserForPeriodeResultat(
+            periodeResultat = sanityBegrunnelse.periodeResultat,
+            personerGjeldendeForBegrunnelse = personerGjeldendeForBegrunnelse,
+            begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling = begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling,
+            begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+        )
 
-            SanityPeriodeResultat.IKKE_INNVILGET,
-            SanityPeriodeResultat.REDUKSJON,
-            ->
-                hentRelevanteKompetanserVedIkkeInnvilgetEllerReduksjon(
-                    begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling = begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling,
-                    begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
-                    periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
-                )
+    val målform =
+        grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform
+            .tilSanityFormat()
 
-            SanityPeriodeResultat.IKKE_RELEVANT ->
-                hentRelevanteKompetanserVedInnvilgetEllerIngenEndring(
-                    periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
-                ) +
-                    hentRelevanteKompetanserVedIkkeInnvilgetEllerReduksjon(
-                        begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling = begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling,
-                        begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
-                        periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
-                    )
-
-            else -> throw Feil("Feltet 'periodeResultat' er ikke satt for begrunnelse fra sanity '${sanityBegrunnelse.apiNavn}'.")
-        }
-
-    return if (kompetanser.isEmpty() && sanityBegrunnelse.periodeResultat == SanityPeriodeResultat.IKKE_INNVILGET) {
+    if (kompetanser.isEmpty() && sanityBegrunnelse.periodeResultat == SanityPeriodeResultat.IKKE_INNVILGET) {
         val barnasFødselsdatoer =
             sanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
                 grunnlag = grunnlag,
@@ -75,50 +56,96 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
                 vedtaksperiode = vedtaksperiode,
             )
 
-        listOf(
+        return listOf(
             EØSBegrunnelseDataUtenKompetanse(
                 vedtakBegrunnelseType = this.vedtakBegrunnelseType,
                 apiNavn = sanityBegrunnelse.apiNavn,
                 barnasFodselsdatoer = barnasFødselsdatoer.sorted().map { it.tilKortString() }.slåSammen(),
                 antallBarn = barnasFødselsdatoer.size,
-                maalform =
-                    grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform
-                        .tilSanityFormat(),
+                maalform = målform,
                 gjelderSoker = gjelderSøker,
             ),
         )
-    } else {
-        kompetanser.mapNotNull { kompetanse ->
-            val barnIBegrunnelseOgIKompetanse =
-                kompetanse.barnAktører.mapNotNull { barnAktør ->
-                    if (begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling) {
-                        begrunnelsesGrunnlagPerPerson.keys.find { it.aktør == barnAktør }
-                    } else {
-                        personerGjeldendeForBegrunnelse.find { it.aktør == barnAktør }
-                    }
-                }
+    }
+    return kompetanser.mapNotNull { kompetanse ->
+        val barnIBegrunnelseOgIKompetanse =
+            finnBarnIBegrunnelseOgKompetanse(
+                kompetanse = kompetanse,
+                personerGjeldendeForBegrunnelse = personerGjeldendeForBegrunnelse,
+                begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling = begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling,
+                begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+            )
 
-            if (barnIBegrunnelseOgIKompetanse.isNotEmpty()) {
-                EØSBegrunnelseDataMedKompetanse(
-                    vedtakBegrunnelseType = vedtakBegrunnelseType,
-                    apiNavn = sanityBegrunnelse.apiNavn,
-                    annenForeldersAktivitet = kompetanse.annenForeldersAktivitet,
-                    annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland?.tilLandNavn(landkoder)?.navn,
-                    barnetsBostedsland = kompetanse.barnetsBostedsland.tilLandNavn(landkoder).navn,
-                    barnasFodselsdatoer = barnIBegrunnelseOgIKompetanse.map { it.fødselsdato.tilKortString() }.slåSammen(),
-                    antallBarn = barnIBegrunnelseOgIKompetanse.size,
-                    maalform =
-                        grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform
-                            .tilSanityFormat(),
-                    sokersAktivitet = kompetanse.søkersAktivitet,
-                    sokersAktivitetsland = kompetanse.søkersAktivitetsland.tilLandNavn(landkoder).navn,
-                    gjelderSoker = gjelderSøker,
-                    erAnnenForelderOmfattetAvNorskLovgivning = if (skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse) kompetanse.erAnnenForelderOmfattetAvNorskLovgivning else false,
-                )
-            } else {
-                null
-            }
+        if (barnIBegrunnelseOgIKompetanse.isEmpty()) return@mapNotNull null
+
+        EØSBegrunnelseDataMedKompetanse(
+            vedtakBegrunnelseType = vedtakBegrunnelseType,
+            apiNavn = sanityBegrunnelse.apiNavn,
+            annenForeldersAktivitet = kompetanse.annenForeldersAktivitet,
+            annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland?.tilLandNavn(landkoder)?.navn,
+            barnetsBostedsland = kompetanse.barnetsBostedsland.tilLandNavn(landkoder).navn,
+            barnasFodselsdatoer = barnIBegrunnelseOgIKompetanse.map { it.fødselsdato.tilKortString() }.slåSammen(),
+            antallBarn = barnIBegrunnelseOgIKompetanse.size,
+            maalform = målform,
+            sokersAktivitet = kompetanse.søkersAktivitet,
+            sokersAktivitetsland = kompetanse.søkersAktivitetsland.tilLandNavn(landkoder).navn,
+            gjelderSoker = gjelderSøker,
+            erAnnenForelderOmfattetAvNorskLovgivning = if (skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse) kompetanse.erAnnenForelderOmfattetAvNorskLovgivning else false,
+        )
+    }
+}
+
+private fun finnBarnIBegrunnelseOgKompetanse(
+    kompetanse: KompetanseForVedtaksperiode,
+    personerGjeldendeForBegrunnelse: List<Person>,
+    begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling: Boolean,
+    begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
+): List<Person> =
+    kompetanse.barnAktører.mapNotNull { barnAktør ->
+        if (begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling) {
+            begrunnelsesGrunnlagPerPerson.keys.find { it.aktør == barnAktør }
+        } else {
+            personerGjeldendeForBegrunnelse.find { it.aktør == barnAktør }
         }
+    }
+
+private fun hentKompetanserForPeriodeResultat(
+    periodeResultat: SanityPeriodeResultat?,
+    personerGjeldendeForBegrunnelse: List<Person>,
+    begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling: Boolean,
+    begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
+): List<KompetanseForVedtaksperiode> {
+    val periodegrunnlagForPersonerIBegrunnelse =
+        begrunnelsesGrunnlagPerPerson.filter { (person, _) -> person in personerGjeldendeForBegrunnelse }
+
+    return when (periodeResultat) {
+        SanityPeriodeResultat.INNVILGET_ELLER_ØKNING,
+        SanityPeriodeResultat.INGEN_ENDRING,
+        ->
+            hentRelevanteKompetanserVedInnvilgetEllerIngenEndring(
+                periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
+            )
+
+        SanityPeriodeResultat.IKKE_INNVILGET,
+        SanityPeriodeResultat.REDUKSJON,
+        ->
+            hentRelevanteKompetanserVedIkkeInnvilgetEllerReduksjon(
+                begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling = begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling,
+                begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+                periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
+            )
+
+        SanityPeriodeResultat.IKKE_RELEVANT ->
+            hentRelevanteKompetanserVedInnvilgetEllerIngenEndring(
+                periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
+            ) +
+                hentRelevanteKompetanserVedIkkeInnvilgetEllerReduksjon(
+                    begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling = begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling,
+                    begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+                    periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
+                )
+
+        else -> throw Feil("Feltet 'periode'")
     }
 }
 
