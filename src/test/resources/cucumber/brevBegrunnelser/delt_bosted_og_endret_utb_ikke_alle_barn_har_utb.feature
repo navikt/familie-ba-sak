@@ -182,8 +182,8 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
 
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.01.2023 til 28.02.2023
       | Begrunnelse                                                                            | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
-      | ENDRET_UTBETALING_ETTERBETALT_UTVIDET_DEL_FRA_AVTALETIDSPUNKT_SØKT_FOR_PRAKTISERT_DELT | STANDARD |               | 14.12.10             | 1           | desember 2022                        |         | 0     | 13.04.23         | SØKER_FÅR_UTVIDET       |                             |
       | INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_AVTALETIDSPUNKT                                   | STANDARD |               | 14.12.10             | 1           | desember 2022                        |         | 0     |                  | SØKER_FÅR_UTVIDET       |                             |
+      | ENDRET_UTBETALING_ETTERBETALT_UTVIDET_DEL_FRA_AVTALETIDSPUNKT_SØKT_FOR_PRAKTISERT_DELT | STANDARD |               | 14.12.10             | 1           | desember 2022                        |         | 0     | 13.04.23         | SØKER_FÅR_UTVIDET       |                             |
 
   Scenario: Endret utbetaling, delt bosted, søker får kun etterbetalt utvidet
     Gitt følgende fagsaker
@@ -289,8 +289,8 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.05.2024 til 31.05.2024
       | Begrunnelse                                                             | Type     | Gjelder søker | Barnas fødselsdatoer           | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | INNVILGET_DELT_FRA_SKRIFTLIG_AVTALE_HAR_SØKT_FOR_PRAKTISERT_DELT_BOSTED | STANDARD |               | 26.09.11, 03.06.14 og 18.12.18 | 3           | april 2024                           |         | 0     |                  | SØKER_FÅR_UTVIDET       |                             |
-      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALT_UTVIDET_NY        | STANDARD |               | 26.09.11, 03.06.14 og 18.12.18 | 3           | april 2024                           |         | 0     | 15.05.24         | SØKER_FÅR_UTVIDET       |                             |
       | INNVILGET_BOR_ALENE_MED_BARN                                            | STANDARD | Ja            | 26.09.11, 03.06.14 og 18.12.18 | 3           | april 2024                           |         | 1 258 |                  | SØKER_FÅR_UTVIDET       |                             |
+      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALT_UTVIDET_NY        | STANDARD |               | 26.09.11, 03.06.14 og 18.12.18 | 3           | april 2024                           |         | 0     | 15.05.24         | SØKER_FÅR_UTVIDET       |                             |
 
   Scenario: Skal bare inkludere barn som er påvirket av delt bosted endret utbetalingsandel i periode
 

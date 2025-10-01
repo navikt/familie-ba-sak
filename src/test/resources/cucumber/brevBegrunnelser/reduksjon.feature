@@ -206,8 +206,8 @@ Egenskap: Brevbegrunnelser ved reduksjon
 
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.02.2023 til 28.02.2023
       | Begrunnelse                                          | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
-      | INNVILGET_ENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED | STANDARD | Nei           | 09.06.09             | 1           | januar 2023                          | NB      | 1 054 |
       | REDUKSJON_AVTALE_FAST_BOSTED                         | STANDARD | Nei           | 07.08.11             | 1           | januar 2023                          | NB      | 0     |
+      | INNVILGET_ENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED | STANDARD | Nei           | 09.06.09             | 1           | januar 2023                          | NB      | 1 054 |
 
   Scenario: Skal ikke flette inn barn som tidligere har opphørt i reduksjonstekst
     Gitt følgende fagsaker

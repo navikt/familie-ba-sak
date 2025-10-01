@@ -127,8 +127,8 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
 
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.06.2023 til 30.06.2023
       | Begrunnelse                  | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | INNVILGET_BOR_HOS_SØKER      | Nei           | 02.02.15             | 1           | mai 2023                             | NB      | 1 083 |                  | SØKER_HAR_IKKE_RETT     |
       | REDUKSJON_AVTALE_FAST_BOSTED | Nei           | 07.09.19             | 1           | mai 2023                             | NB      | 862   |                  | SØKER_HAR_IKKE_RETT     |
+      | INNVILGET_BOR_HOS_SØKER      | Nei           | 02.02.15             | 1           | mai 2023                             | NB      | 1 083 |                  | SØKER_HAR_IKKE_RETT     |
 
 
   Scenario:Endret for 1 av 2 - Skal kun flette inn barnet som det er utbetaling for når det andre barnet etterbetales

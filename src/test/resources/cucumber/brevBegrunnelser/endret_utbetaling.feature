@@ -337,8 +337,8 @@ Egenskap: Brevbegrunnelse ved endret utbetaling
 
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.07.2019 til 28.02.2023
       | Begrunnelse                                                  | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | ENDRET_UTBETALING_SELVSTENDIG_RETT_ETTERBETALING_UTVIDET_DEL | STANDARD | Nei           | 23.06.15             | 1           | juni 2019                            | 0     | 17.11.19         | SØKER_FÅR_UTVIDET       |
       | INNVILGET_SKILT                                              | STANDARD | Ja            | 23.06.15             | 1           | juni 2019                            | 1 054 |                  | SØKER_FÅR_UTVIDET       |
+      | ENDRET_UTBETALING_SELVSTENDIG_RETT_ETTERBETALING_UTVIDET_DEL | STANDARD | Nei           | 23.06.15             | 1           | juni 2019                            | 0     | 17.11.19         | SØKER_FÅR_UTVIDET       |
 
   Scenario: Skal kun flette inn barn som har utbetaling i begrunnelse for utvidet dersom søker har ett barn med utbetaling og ett barn som ikke har utbetaling pga allerede utbetalt
     Gitt følgende fagsaker
