@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.ba.sak.task.dto.AktørId
@@ -40,6 +41,7 @@ class PreutfyllBosattIRiketService(
     fun preutfyllBosattIRiket(
         vilkårsvurdering: Vilkårsvurdering,
         identerVilkårSkalPreutfyllesFor: List<String>? = null,
+        cutOffFomDato: LocalDate? = null,
     ) {
         val behandling = vilkårsvurdering.behandling
         val identer =
@@ -70,9 +72,20 @@ class PreutfyllBosattIRiketService(
                         behandling = behandling,
                     )
 
-                if (bosattIRiketVilkårResultat.isNotEmpty()) {
+                val nyeBosattIRiketVilkårResultater =
+                    if (cutOffFomDato != null) {
+                        val eksisterendeBosattIRiketVilkårResultater = personResultat.vilkårResultater.filter { it.vilkårType == BOSATT_I_RIKET }
+                        kombinerNyeOgGamleVilkårResultater(
+                            nyeBosattIRiketVilkårResultaterTidslinje = bosattIRiketVilkårResultat.tilTidslinje().beskjærFraOgMed(cutOffFomDato),
+                            eksisterendeBosattIRiketVilkårResultaterTidslinje = eksisterendeBosattIRiketVilkårResultater.tilTidslinje(),
+                        )
+                    } else {
+                        bosattIRiketVilkårResultat
+                    }
+
+                if (nyeBosattIRiketVilkårResultater.isNotEmpty()) {
                     personResultat.vilkårResultater.removeIf { it.vilkårType == BOSATT_I_RIKET }
-                    personResultat.vilkårResultater.addAll(bosattIRiketVilkårResultat)
+                    personResultat.vilkårResultater.addAll(nyeBosattIRiketVilkårResultater)
                 }
             }
     }
@@ -289,4 +302,18 @@ class PreutfyllBosattIRiketService(
             throw Feil("Kan ikke behandle ${behandling.opprettetÅrsak.visningsnavn} automatisk, fordi person har oppholdsadresse på Svalbard, men ikke bostedsadresse i Norge")
         }
     }
+
+    private fun kombinerNyeOgGamleVilkårResultater(
+        nyeBosattIRiketVilkårResultaterTidslinje: Tidslinje<VilkårResultat>,
+        eksisterendeBosattIRiketVilkårResultaterTidslinje: Tidslinje<VilkårResultat>,
+    ): Collection<VilkårResultat> =
+        nyeBosattIRiketVilkårResultaterTidslinje
+            .kombinerMed(eksisterendeBosattIRiketVilkårResultaterTidslinje) { nytt, gammelt -> nytt ?: gammelt }
+            .tilPerioderIkkeNull()
+            .map {
+                it.verdi.copy(
+                    periodeFom = it.fom,
+                    periodeTom = it.tom,
+                )
+            }
 }
