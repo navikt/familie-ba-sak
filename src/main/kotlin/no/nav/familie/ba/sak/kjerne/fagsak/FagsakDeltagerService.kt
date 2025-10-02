@@ -42,23 +42,23 @@ class FagsakDeltagerService(
         val personInfoMedRelasjoner = hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør) ?: return emptyList()
 
         // Finner alle fagsaker relatert til aktør og finner ut hvem som står som eier. Dette kan være aktør selv, en forelder eller en person som ikke har en direkte relasjon.
-        val assosierteFagsakDeltagere = hentFagsakDeltakereSomEierFagsakerAssosiertMedAktør(aktør, personInfoMedRelasjoner)
+        val assosierteFagsakDeltagere = hentFagsakDeltagereSomEierFagsakerAssosiertMedAktør(aktør, personInfoMedRelasjoner)
 
-        // Legger til fagsak deltaker for hver fagsak hvor aktør selv står som eier, eller en default fagsak deltaker dersom aktør ikke eier noen fagsak.
-        val fagsakDeltakerPerFagsakAktørEierEllerFagsakDeltakerUtenFagsak =
-            hentFagsakDeltakerPerFagsakAktørEierEllerFagsakDeltakerUtenFagsak(
+        // Legger til fagsak deltager for hver fagsak hvor aktør selv står som eier, eller en default fagsak deltager dersom aktør ikke eier noen fagsak.
+        val fagsakDeltagerPerFagsakAktørEierEllerFagsakDeltagerUtenFagsak =
+            hentFagsakDeltagerPerFagsakAktørEierEllerFagsakDeltagerUtenFagsak(
                 aktør = aktør,
                 personInfoBase = personInfoMedRelasjoner,
                 assosierteFagsakDeltagere = assosierteFagsakDeltagere,
                 // Setter rolle til barn dersom aktør er barn, ellers ukjent da vi ikke kan vite om aktør har barn/er forelder.
                 rolle = if (personInfoMedRelasjoner.erBarn()) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
             )
-        assosierteFagsakDeltagere.addAll(fagsakDeltakerPerFagsakAktørEierEllerFagsakDeltakerUtenFagsak)
+        assosierteFagsakDeltagere.addAll(fagsakDeltagerPerFagsakAktørEierEllerFagsakDeltagerUtenFagsak)
 
         if (personInfoMedRelasjoner.erBarn()) {
             // Legger til foreldre som fagsak deltagere dersom de ikke allerede er lagt til
-            val forelderFagsakDeltakereSomMangler = hentForelderFagsakDeltagereSomMangler(personInfoMedRelasjoner, assosierteFagsakDeltagere)
-            assosierteFagsakDeltagere.addAll(forelderFagsakDeltakereSomMangler)
+            val forelderFagsakDeltagereSomMangler = hentForelderFagsakDeltagereSomMangler(personInfoMedRelasjoner, assosierteFagsakDeltagere)
+            assosierteFagsakDeltagere.addAll(forelderFagsakDeltagereSomMangler)
         }
 
         val fagsakDeltagereMedEgenAnsattStatus = settEgenAnsattStatusPåFagsakDeltagere(assosierteFagsakDeltagere)
@@ -68,7 +68,7 @@ class FagsakDeltagerService(
 
     private fun PersonInfo.erBarn(): Boolean = Period.between(this.fødselsdato, LocalDate.now()).years < 18
 
-    private fun hentFagsakDeltakerPerFagsakAktørEierEllerFagsakDeltakerUtenFagsak(
+    private fun hentFagsakDeltagerPerFagsakAktørEierEllerFagsakDeltagerUtenFagsak(
         aktør: Aktør,
         personInfoBase: PersonInfoBase,
         assosierteFagsakDeltagere: List<RestFagsakDeltager>,
@@ -91,11 +91,11 @@ class FagsakDeltagerService(
 
     private fun hentForelderFagsakDeltagereSomMangler(
         personInfo: PersonInfo,
-        assosierteFagsakDeltakere: MutableList<RestFagsakDeltager>,
+        assosierteFagsakDeltagere: MutableList<RestFagsakDeltager>,
     ): List<RestFagsakDeltager> =
         personInfo.forelderBarnRelasjon
             .filter { relasjon ->
-                assosierteFagsakDeltakere.none { it.ident == relasjon.aktør.aktivFødselsnummer() } && (
+                assosierteFagsakDeltagere.none { it.ident == relasjon.aktør.aktivFødselsnummer() } && (
                     relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR ||
                         relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MOR ||
                         relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
@@ -105,10 +105,10 @@ class FagsakDeltagerService(
                 if (maskertPerson != null) {
                     return@flatMap listOf(hentMaskertPersonVedManglendeTilgang(relasjon.aktør)!!)
                 }
-                hentFagsakDeltakerPerFagsakAktørEierEllerFagsakDeltakerUtenFagsak(
+                hentFagsakDeltagerPerFagsakAktørEierEllerFagsakDeltagerUtenFagsak(
                     aktør = relasjon.aktør,
                     personInfoBase = relasjon,
-                    assosierteFagsakDeltagere = assosierteFagsakDeltakere,
+                    assosierteFagsakDeltagere = assosierteFagsakDeltagere,
                     rolle = FagsakDeltagerRolle.FORELDER,
                 )
             }
@@ -124,7 +124,7 @@ class FagsakDeltagerService(
         }
     }
 
-    private fun hentFagsakDeltakereSomEierFagsakerAssosiertMedAktør(
+    private fun hentFagsakDeltagereSomEierFagsakerAssosiertMedAktør(
         aktør: Aktør,
         personInfoMedRelasjoner: PersonInfo,
     ): MutableList<RestFagsakDeltager> {
