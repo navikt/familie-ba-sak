@@ -116,6 +116,6 @@ Egenskap: Avslagperioder med flere barn
       | 01.09.2024 | 28.02.2025 |                      | AVSLAG_EØS_ARBEIDER_MER_ENN_25_PROSENT_I_ANNET_EØS_LAND |            |
       | 01.04.2043 |            |                      |                                                         |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.09.2024 til 28.02.2025
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.09.2024 til 28.02.2025
       | Begrunnelse                                             | Type | Barnas fødselsdatoer | Antall barn | Gjelder søker | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | AVSLAG_EØS_ARBEIDER_MER_ENN_25_PROSENT_I_ANNET_EØS_LAND | EØS  | 21.01.22             | 1           | Ja            |                  |                           |                       |                                |                     |

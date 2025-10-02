@@ -60,7 +60,7 @@ Egenskap: Brevbegrunnelser med utvidet barnetrygd
       | Fra dato   | Til dato   | Standardbegrunnelser                                      |
       | 01.09.2021 | 31.12.2021 | INNVILGET_OVERGANG_EØS_TIL_NASJONAL_NORSK_NORDISK_FAMILIE |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.09.2021 til 31.12.2021
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.09.2021 til 31.12.2021
       | Begrunnelse                                               | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
       | INNVILGET_OVERGANG_EØS_TIL_NASJONAL_NORSK_NORDISK_FAMILIE | Ja            | 10.12.16             | 1           | august 2021                          | NB      | 2 708 |                  | SØKER_FÅR_UTVIDET       |
 
@@ -94,6 +94,6 @@ Egenskap: Brevbegrunnelser med utvidet barnetrygd
       | Fra dato   | Til dato   | Standardbegrunnelser                                          |
       | 01.04.2023 | 30.06.2023 | INNVILGET_ANNEN_FORELDER_IKKE_SØKT_DELT_BARNETRYGD_ENKELTBARN |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.04.2023 til 30.06.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.04.2023 til 30.06.2023
       | Begrunnelse                                                   | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
       | INNVILGET_ANNEN_FORELDER_IKKE_SØKT_DELT_BARNETRYGD_ENKELTBARN | Nei           | 10.12.16             | 1           | mars 2023                            | NB      | 1 083 |                  | SØKER_FÅR_UTVIDET       |

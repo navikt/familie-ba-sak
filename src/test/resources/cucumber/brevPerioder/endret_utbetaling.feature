@@ -333,6 +333,6 @@ Egenskap: Brevperioder: Endret utbetaling
       | Fra dato   | Til dato   | Standardbegrunnelser                    | Eøsbegrunnelser | Fritekster |
       | 01.05.2025 | 30.09.2036 | ENDRET_UTBETALING_OPPHØR_ENDRE_MOTTAKER |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.05.2025 til 30.09.2036
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.05.2025 til 30.09.2036
       | Begrunnelse                             | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | ENDRET_UTBETALING_OPPHØR_ENDRE_MOTTAKER | STANDARD |               | 08.04.24             | 1           | april 2025                           |         | 0     | 26.02.24         |                         |                             |

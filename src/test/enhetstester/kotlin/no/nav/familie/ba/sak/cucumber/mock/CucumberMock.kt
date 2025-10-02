@@ -657,6 +657,9 @@ class CucumberMock(
             taskRepository = taskRepository,
             satskjøringRepository = mockk(),
             envService = mockk(),
+            featureToggleService = featureToggleService,
+            finnmarkstilleggKjøringRepository = mockk(),
+            svalbardtilleggKjøringRepository = mockk(),
         )
 
     val stegService =

@@ -58,7 +58,7 @@ Egenskap: Brevbegrunnelser ved opphør for EØS.
       | 01.02.2020 |          |                      | AVSLAG_EØS_IKKE_ANSVAR_FOR_BARN |            |
       | 01.08.2020 |          |                      | OPPHØR_EØS_STANDARD             |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.08.2020 til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.08.2020 til -
       | Begrunnelse         | Type | Barnas fødselsdatoer | Antall barn | Gjelder søker | Målform |
       | OPPHØR_EØS_STANDARD | EØS  | 25.06.20             | 1           | Ja            | NB      |
 
@@ -183,7 +183,7 @@ Egenskap: Brevbegrunnelser ved opphør for EØS.
       | 01.02.2024 |          |                      | OPPHØR_EØS_STANDARD |            |
 
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.02.2024 til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.02.2024 til -
       | Begrunnelse         | Type | Barnas fødselsdatoer | Antall barn | Målform | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland | Gjelder søker |
       | OPPHØR_EØS_STANDARD | EØS  | 24.03.22             | 1           |         |                  |                           |                       |                                |                     | Ja            |
 
@@ -362,6 +362,6 @@ Egenskap: Brevbegrunnelser ved opphør for EØS.
       | Fra dato   | Til dato | Standardbegrunnelser | Eøsbegrunnelser     | Fritekster |
       | 01.07.2025 |          |                      | OPPHØR_EØS_STANDARD |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.07.2025 til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.07.2025 til -
       | Begrunnelse         | Type | Barnas fødselsdatoer | Antall barn | Gjelder søker |
       | OPPHØR_EØS_STANDARD | EØS  | 14.04.08 og 15.05.10 | 2           | Ja            |

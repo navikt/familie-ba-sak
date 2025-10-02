@@ -90,10 +90,10 @@ Egenskap: Brevbegrunnelser for reduksjon ved forskjellige tidspunkt
       | 01.09.2022 | 30.11.2022 | REDUKSJON_FLYTTET_BARN |
       | 01.12.2022 | 28.02.2023 | REDUKSJON_FLYTTET_BARN |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.09.2022 til 30.11.2022
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.09.2022 til 30.11.2022
       | Begrunnelse            | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
       | REDUKSJON_FLYTTET_BARN | Nei           | 19.04.06             | 1           | august 2022                          | NB      | 0     |                  | SØKER_HAR_IKKE_RETT     |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.12.2022 til 28.02.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.12.2022 til 28.02.2023
       | Begrunnelse            | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
       | REDUKSJON_FLYTTET_BARN | Nei           | 01.10.07             | 1           | november 2022                        | NB      | 0     |                  | SØKER_HAR_IKKE_RETT     |

@@ -46,7 +46,7 @@ Egenskap: Brevbegrunnelser ved opphør
       | Fra dato   | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |
       | 01.03.2023 |          | OPPHØR_UTVANDRET     |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.03.2023 til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.03.2023 til -
       | Begrunnelse      | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | OPPHØR_UTVANDRET | STANDARD | Ja            | 17.04.17             | 0           | februar 2023                         | NB      | 0     |
 
@@ -77,7 +77,7 @@ Egenskap: Brevbegrunnelser ved opphør
       | Fra dato   | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |
       | 01.03.2023 |          | OPPHØR_UTVANDRET     |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.03.2023 til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.03.2023 til -
       | Begrunnelse      | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | OPPHØR_UTVANDRET | STANDARD | Ja            | 16.04.17 og 17.04.17 | 1           | februar 2023                         | NB      | 0     |
 
@@ -157,7 +157,7 @@ Egenskap: Brevbegrunnelser ved opphør
       | Fra dato   | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |
       | 01.08.2023 |          | OPPHØR_UTVANDRET     |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.08.2023 til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.08.2023 til -
       | Begrunnelse      | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | OPPHØR_UTVANDRET | STANDARD | Ja            | 06.03.12 og 21.12.16 | 0           | juli 2023                            | NB      | 0     |
 
@@ -227,7 +227,7 @@ Egenskap: Brevbegrunnelser ved opphør
       | Fra dato   | Til dato   | Standardbegrunnelser       | Eøsbegrunnelser | Fritekster |
       | 01.05.2022 | 31.08.2022 | OPPHØR_IKKE_BOSATT_I_NORGE |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.05.2022 til 31.08.2022
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.05.2022 til 31.08.2022
       | Begrunnelse                | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | OPPHØR_IKKE_BOSATT_I_NORGE | STANDARD | Ja            | 04.05.06             | 1           | april 2022                           | NB      | 0     |
 
@@ -295,7 +295,7 @@ Egenskap: Brevbegrunnelser ved opphør
       |            |          | AVSLAG_IKKE_DOKUMENTERT_BOSATT_I_NORGE |                 |            |
       | 01.02.2022 |          | OPPHØR_VURDERING_IKKE_BOSATT_I_NORGE   |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.02.2022 til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.02.2022 til -
       | Begrunnelse                          | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | OPPHØR_VURDERING_IKKE_BOSATT_I_NORGE | STANDARD | Ja            | 25.12.18             | 0           | januar 2022                          | NB      | 0     |
 
@@ -369,11 +369,11 @@ Egenskap: Brevbegrunnelser ved opphør
       |            |          | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                 |            |
       | 01.01.2024 |          | OPPHØR_IKKE_OPPHOLDSTILLATELSE                    |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode - til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode - til -
       | Begrunnelse                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Nei           | 06.06.17             | 1           |                                      | NB      | 0     |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.01.2024 til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.01.2024 til -
       | Begrunnelse                    | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | OPPHØR_IKKE_OPPHOLDSTILLATELSE | STANDARD | Ja            | 08.12.23             | 1           | desember 2023                        | NB      | 0     |
 
