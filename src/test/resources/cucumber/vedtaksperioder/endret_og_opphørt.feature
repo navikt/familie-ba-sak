@@ -112,7 +112,7 @@ Egenskap: Vedtaksperioder ved behandlingsresultat endret og opphørt
       | 01.08.2019 | 31.03.2023 |                      | INNVILGET_SEKUNDÆRLAND_STANDARD, INNVILGET_TILLEGGSTEKST_UTBETALINGSTABELL |            |
       | 01.04.2023 |            |                      | OPPHØR_EØS_STANDARD                                                        |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.08.2019 til 31.03.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.08.2019 til 31.03.2023
       | Begrunnelse                               | Type | Barnas fødselsdatoer | Antall barn | Målform | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland | Gjelder søker |
       | INNVILGET_SEKUNDÆRLAND_STANDARD           | EØS  | 30.05.10             | 1           | NB      | Arbeider         | I_ARBEID                  | Norge                 | Polen                          | Polen               | Nei           |
       | INNVILGET_TILLEGGSTEKST_UTBETALINGSTABELL | EØS  | 30.05.10             | 1           | NB      | Arbeider         | I_ARBEID                  | Norge                 | Polen                          | Polen               | Nei           |

@@ -96,10 +96,10 @@ Egenskap: Brevbegrunnelser for endret utbetaling med etterbetaling tre år tilba
       | 01.02.2023 | 28.02.2023 |                                                                                 |                 |            |
       | 01.03.2023 |            |                                                                                 |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.02.2020 til 31.05.2020
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.02.2020 til 31.05.2020
       | Begrunnelse                                                                     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet     |
       | ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID_KUN_UTVIDET_DEL_UTBETALING | Ja            |                      | 0           | januar 2020                          | NB      | 1 581 | 30.06.23         | SØKER_HAR_RETT_MEN_FÅR_IKKE |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.06.2020 til 30.06.2022
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.06.2020 til 30.06.2022
       | Begrunnelse                                                   | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
       | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR_KUN_UTVIDET_DEL | Ja            | 13.02.05 og 06.11.10 | 2           | mai 2020                             | NB      | 2 635 | 30.06.23         | SØKER_FÅR_UTVIDET       |

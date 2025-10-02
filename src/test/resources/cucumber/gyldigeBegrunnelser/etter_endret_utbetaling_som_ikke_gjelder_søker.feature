@@ -68,7 +68,7 @@ Egenskap: Etter endret utbetaling som ikke gjelder søker
       | 01.09.2024 | 31.10.2028 |                                                                     |                 |            |
       | 01.11.2028 |            |                                                                     |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.08.2024 til 31.08.2024
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.08.2024 til 31.08.2024
       | Begrunnelse                                                         | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TREDJELANDSBORGER | STANDARD | Nei           | 08.11.10             | 1           | juli 2024                            |         | 1 510 | 10.11.24         |                         |                             |
 
@@ -177,7 +177,7 @@ Egenskap: Etter endret utbetaling som ikke gjelder søker
       | Fra dato   | Til dato   | Standardbegrunnelser                              | Eøsbegrunnelser | Fritekster |
       | 01.09.2024 | 31.12.2024 | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.09.2024 til 31.12.2024
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.09.2024 til 31.12.2024
       | Begrunnelse                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER | STANDARD |               | 28.07.16 og 19.05.20 | 2           | august 2024                          |         | 3 532 | 12.12.24         |                         |                             |
 
@@ -275,6 +275,6 @@ Egenskap: Etter endret utbetaling som ikke gjelder søker
       | Fra dato   | Til dato   | Standardbegrunnelser                              | Eøsbegrunnelser | Fritekster |
       | 01.08.2024 | 31.08.2024 | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.08.2024 til 31.08.2024
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.08.2024 til 31.08.2024
       | Begrunnelse                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER | STANDARD |               | 14.05.08             | 1           | juli 2024                            |         | 1 510 | 26.11.24         |                         |                             |

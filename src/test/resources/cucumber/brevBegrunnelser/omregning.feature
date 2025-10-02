@@ -67,7 +67,7 @@ Egenskap: Brevbegrunnelser ved omregningsbehandlinger
       | Fra dato   | Til dato   | Standardbegrunnelser             | Eøsbegrunnelser | Fritekster |
       | 01.10.2023 | 30.09.2027 | REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.10.2023 til 30.09.2027
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.10.2023 til 30.09.2027
       | Begrunnelse                      | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
       | REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK | Nei           | 11.10.05             | 1           | september 2023                       | NB      | 0     |                  | SØKER_HAR_IKKE_RETT     |
 
@@ -138,6 +138,6 @@ Egenskap: Brevbegrunnelser ved omregningsbehandlinger
       | Fra dato   | Til dato   | Standardbegrunnelser             | Eøsbegrunnelser | Fritekster |
       | 01.10.2023 | 30.09.2027 | REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.10.2023 til 30.09.2027
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.10.2023 til 30.09.2027
       | Begrunnelse                      | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
       | REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK | Nei           | 11.10.05             | 1           | september 2023                       | NB      | 0     |                  | SØKER_HAR_IKKE_RETT     |

@@ -469,8 +469,8 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     /**
      * Mulige verdier: | Begrunnelse | Type | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Avtale tidspunkt delt bosted | Søkers rett til utvidet |
      */
-    @Så("forvent følgende brevbegrunnelser for behandling {} i periode {} til {}")
-    fun `forvent følgende brevbegrunnelser for behandling i periode`(
+    @Så("forvent følgende brevbegrunnelser i rekkefølge for behandling {} i periode {} til {}")
+    fun `forvent følgende brevbegrunnelser i rekkefølge for behandling i periode`(
         behandlingId: Long,
         periodeFom: String,
         periodeTom: String,
@@ -482,9 +482,12 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         val grunnlagForBegrunnelse = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
 
         val vedtaksperiodeMedBegrunnelser =
-            vedtaksperioderMedBegrunnelser.find {
+            vedtaksperioderMedBegrunnelser.filter {
                 it.fom == parseNullableDato(periodeFom) && it.tom == parseNullableDato(periodeTom)
-            } ?: throw Feil(
+            }
+
+        if (vedtaksperioderMedBegrunnelser.isEmpty()) {
+            throw Feil(
                 "Forventet å finne en vedtaksperiode med Fom: $periodeFom og Tom: $periodeTom. \n" +
                     "Faktiske vedtaksperioder var \n${
                         vedtaksperioderMedBegrunnelser.joinToString("\n") {
@@ -492,19 +495,22 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
                         }
                     }",
             )
+        }
 
-        val faktiskeBegrunnelser: List<BegrunnelseMedData> =
-            vedtaksperiodeMedBegrunnelser
-                .lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER, mockFeatureToggleService().isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE))!!
-                .begrunnelser
-                .filterIsInstance<BegrunnelseMedData>()
+        val faktiskeBegrunnelser =
+            vedtaksperiodeMedBegrunnelser.flatMap { vedtaksperiodeMedBegrunnelser ->
+                vedtaksperiodeMedBegrunnelser
+                    .lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER, mockFeatureToggleService().isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE))!!
+                    .begrunnelser
+                    .filterIsInstance<BegrunnelseMedData>()
+            }
 
         val forvendtedeBegrunnelser = parseBegrunnelser(dataTable)
 
-        assertThat(faktiskeBegrunnelser.sortedBy { it.apiNavn })
+        assertThat(faktiskeBegrunnelser)
             .usingRecursiveComparison()
             .ignoringFields("vedtakBegrunnelseType")
-            .isEqualTo(forvendtedeBegrunnelser.sortedBy { it.apiNavn })
+            .isEqualTo(forvendtedeBegrunnelser)
     }
 
     /**

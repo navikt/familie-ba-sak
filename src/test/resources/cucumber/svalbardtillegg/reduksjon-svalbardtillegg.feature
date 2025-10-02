@@ -67,7 +67,7 @@ Egenskap: Reduksjon på svalbardtillegg
       | Fra dato   | Til dato   | Standardbegrunnelser      | Eøsbegrunnelser | Fritekster |
       | 01.09.2025 | 31.05.2029 | REDUKSJON_SVALBARDTILLEGG |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.09.2025 til 31.05.2029
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.09.2025 til 31.05.2029
       | Begrunnelse               | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | REDUKSJON_SVALBARDTILLEGG | STANDARD | Ja            |                      | 0           | august 2025                          |         | 1 968 |                  | SØKER_HAR_IKKE_RETT     |                             |
 
