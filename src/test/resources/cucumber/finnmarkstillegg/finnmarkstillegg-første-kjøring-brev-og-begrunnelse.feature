@@ -40,10 +40,10 @@ Egenskap: Finnmarkstillegg autovedtak første kjøring - brev og begrunnelse
       | 2       | 1            | 01.05.2025 | 31.12.2042 | 1968  | 100     | ORDINÆR_BARNETRYGD |
 
     Og med adressekommuner
-      | AktørId | Fra dato   | Til dato | Kommunenummer | Adressetype     |
-      | 1       | 01.01.2000 |          | 0301          | Bostedsadresse  |
-      | 2       | 01.01.2025 |          | 0301          | Bostedsadresse  |
-      | 1, 2    | 01.05.2025 |          | 5601          | Oppholdsadresse |
+      | AktørId | Fra dato   | Til dato | Kommunenummer | Adressetype    |
+      | 1       | 01.01.2000 |          | 0301          | Bostedsadresse |
+      | 2       | 01.01.2025 |          | 0301          | Bostedsadresse |
+      | 1, 2    | 01.05.2025 |          | 5601          | Bostedsadresse |
 
     Når vi lager automatisk behandling med id 2 på fagsak 1 på grunn av finnmarkstillegg
 

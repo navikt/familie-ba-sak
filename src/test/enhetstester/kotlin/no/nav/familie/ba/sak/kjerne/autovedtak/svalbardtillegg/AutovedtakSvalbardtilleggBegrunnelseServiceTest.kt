@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_BRUKE_ADRESSEHENDELSELØYPE_SVALBARDTILLEGG
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
@@ -83,6 +84,7 @@ class AutovedtakSvalbardtilleggBegrunnelseServiceTest {
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id) } returns forrigeBehandling
         every { beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id) } returns forrigeAndeler
         every { beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandling.id) } returns nåværendeAndeler
+        every { featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_SVALBARDTILLEGG) } returns false
 
         // Act && Assert
         val feilmelding =
@@ -126,6 +128,7 @@ class AutovedtakSvalbardtilleggBegrunnelseServiceTest {
         every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns vedtaksperiode
         every { vedtakService.hentAktivForBehandlingThrows(behandling.id) } returns mockk()
         every { vedtaksperiodeHentOgPersisterService.lagre(capture(oppdaterteVedtaksperioderSlot)) } answers { firstArg() }
+        every { featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_SVALBARDTILLEGG) } returns false
 
         // Act
         autovedtakSvalbardtilleggBegrunnelseService.begrunnAutovedtakForSvalbardtillegg(behandling)
@@ -133,7 +136,7 @@ class AutovedtakSvalbardtilleggBegrunnelseServiceTest {
         val oppdaterteVedtaksperioder = oppdaterteVedtaksperioderSlot.captured
 
         assertThat(oppdaterteVedtaksperioder.size).isEqualTo(1)
-        assertThat(oppdaterteVedtaksperioder[0].begrunnelser.map { it.standardbegrunnelse }[0]).isEqualTo(Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG)
+        assertThat(oppdaterteVedtaksperioder[0].begrunnelser.map { it.standardbegrunnelse }[0]).isEqualTo(Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG_UTEN_DATO)
     }
 
     @Test
@@ -182,6 +185,7 @@ class AutovedtakSvalbardtilleggBegrunnelseServiceTest {
         every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns vedtaksperiode
         every { vedtakService.hentAktivForBehandlingThrows(behandling.id) } returns mockk()
         every { vedtaksperiodeHentOgPersisterService.lagre(capture(oppdaterteVedtaksperioderSlot)) } answers { firstArg() }
+        every { featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_SVALBARDTILLEGG) } returns false
 
         // Act
         autovedtakSvalbardtilleggBegrunnelseService.begrunnAutovedtakForSvalbardtillegg(behandling)
@@ -238,6 +242,7 @@ class AutovedtakSvalbardtilleggBegrunnelseServiceTest {
         every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns vedtaksperiode
         every { vedtakService.hentAktivForBehandlingThrows(behandling.id) } returns mockk()
         every { vedtaksperiodeHentOgPersisterService.lagre(capture(oppdaterteVedtaksperioderSlot)) } answers { firstArg() }
+        every { featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_SVALBARDTILLEGG) } returns false
 
         // Act
         autovedtakSvalbardtilleggBegrunnelseService.begrunnAutovedtakForSvalbardtillegg(behandling)
@@ -248,7 +253,7 @@ class AutovedtakSvalbardtilleggBegrunnelseServiceTest {
         assertThat(oppdaterteVedtaksperioder[0].begrunnelser.map { it.standardbegrunnelse })
             .contains(
                 Standardbegrunnelse.REDUKSJON_SVALBARDTILLEGG,
-                Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG,
+                Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG_UTEN_DATO,
             )
     }
 }
