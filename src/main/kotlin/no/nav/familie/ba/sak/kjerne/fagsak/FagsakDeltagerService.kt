@@ -34,31 +34,32 @@ class FagsakDeltagerService(
     fun hentFagsakDeltagere(personIdent: String): List<RestFagsakDeltager> {
         val aktør = personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(personIdent) ?: return emptyList()
 
-        val maskertPersonVedManglendeTiltak = hentMaskertPersonVedManglendeTilgang(aktør)
-        if (maskertPersonVedManglendeTiltak != null) {
-            return listOf(maskertPersonVedManglendeTiltak)
+        val maskertFagsakDeltager = hentMaskertPersonVedManglendeTilgang(aktør)
+        if (maskertFagsakDeltager != null) {
+            return listOf(maskertFagsakDeltager)
         }
 
-        val personInfoMedRelasjoner = hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør) ?: return emptyList()
+        val personInfoForAktør = hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør) ?: return emptyList()
 
-        // Finner alle fagsaker relatert til aktør og finner ut hvem som står som eier. Dette kan være aktør selv, en forelder eller en person som ikke har en direkte relasjon.
-        val assosierteFagsakDeltagere = hentFagsakDeltagereSomEierFagsakerAssosiertMedAktør(aktør, personInfoMedRelasjoner)
+        val assosierteFagsakDeltagere = mutableListOf<RestFagsakDeltager>()
 
-        // Legger til fagsak deltager for hver fagsak hvor aktør selv står som eier, eller en default fagsak deltager dersom aktør ikke eier noen fagsak.
-        val fagsakDeltagerPerFagsakAktørEierEllerFagsakDeltagerUtenFagsak =
-            hentFagsakDeltagerPerFagsakAktørEierEllerFagsakDeltagerUtenFagsak(
+        // Legger til alle fagsak deltakere som eier fagsaker relatert til aktør. Dette kan være aktør selv, en forelder eller en person som ikke har en direkte relasjon.
+        assosierteFagsakDeltagere.addAll(hentFagsakDeltagereSomEierFagsakerAssosiertMedAktør(aktør, personInfoForAktør))
+
+        // Legger til fagsak deltagere for hver fagsak aktør selv står som eier, eller en default fagsak deltager dersom aktør ikke eier noen fagsak.
+        assosierteFagsakDeltagere.addAll(
+            hentFagsakDeltagerPerFagsakAktørEierEllerDefaultUtenFagsak(
                 aktør = aktør,
-                personInfoBase = personInfoMedRelasjoner,
+                personInfoBase = personInfoForAktør,
                 assosierteFagsakDeltagere = assosierteFagsakDeltagere,
                 // Setter rolle til barn dersom aktør er barn, ellers ukjent da vi ikke kan vite om aktør har barn/er forelder.
-                rolle = if (personInfoMedRelasjoner.erBarn()) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
-            )
-        assosierteFagsakDeltagere.addAll(fagsakDeltagerPerFagsakAktørEierEllerFagsakDeltagerUtenFagsak)
+                rolle = if (personInfoForAktør.erBarn()) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
+            ),
+        )
 
-        if (personInfoMedRelasjoner.erBarn()) {
+        if (personInfoForAktør.erBarn()) {
             // Legger til foreldre som fagsak deltagere dersom de ikke allerede er lagt til
-            val forelderFagsakDeltagereSomMangler = hentForelderFagsakDeltagereSomMangler(personInfoMedRelasjoner, assosierteFagsakDeltagere)
-            assosierteFagsakDeltagere.addAll(forelderFagsakDeltagereSomMangler)
+            assosierteFagsakDeltagere.addAll(hentForelderFagsakDeltagereSomMangler(personInfoForAktør, assosierteFagsakDeltagere))
         }
 
         val fagsakDeltagereMedEgenAnsattStatus = settEgenAnsattStatusPåFagsakDeltagere(assosierteFagsakDeltagere)
@@ -68,7 +69,7 @@ class FagsakDeltagerService(
 
     private fun PersonInfo.erBarn(): Boolean = Period.between(this.fødselsdato, LocalDate.now()).years < 18
 
-    private fun hentFagsakDeltagerPerFagsakAktørEierEllerFagsakDeltagerUtenFagsak(
+    private fun hentFagsakDeltagerPerFagsakAktørEierEllerDefaultUtenFagsak(
         aktør: Aktør,
         personInfoBase: PersonInfoBase,
         assosierteFagsakDeltagere: List<RestFagsakDeltager>,
@@ -105,7 +106,7 @@ class FagsakDeltagerService(
                 if (maskertPerson != null) {
                     return@flatMap listOf(hentMaskertPersonVedManglendeTilgang(relasjon.aktør)!!)
                 }
-                hentFagsakDeltagerPerFagsakAktørEierEllerFagsakDeltagerUtenFagsak(
+                hentFagsakDeltagerPerFagsakAktørEierEllerDefaultUtenFagsak(
                     aktør = relasjon.aktør,
                     personInfoBase = relasjon,
                     assosierteFagsakDeltagere = assosierteFagsakDeltagere,
@@ -126,24 +127,24 @@ class FagsakDeltagerService(
 
     private fun hentFagsakDeltagereSomEierFagsakerAssosiertMedAktør(
         aktør: Aktør,
-        personInfoMedRelasjoner: PersonInfo,
-    ): MutableList<RestFagsakDeltager> {
-        val assosierteFagsakDeltagerMap = mutableMapOf<Long, RestFagsakDeltager>()
-
-        personRepository.findByAktør(aktør).forEach { person: Person ->
-            if (!person.personopplysningGrunnlag.aktiv) {
-                return@forEach
-            }
-            val behandling = behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
-            if (!behandling.aktiv || behandling.fagsak.arkivert || assosierteFagsakDeltagerMap.containsKey(behandling.fagsak.id)) {
-                return@forEach
-            }
-
-            assosierteFagsakDeltagerMap[behandling.fagsak.id] = hentFagsakEier(behandling.fagsak, aktør, personInfoMedRelasjoner)
-        }
-
-        return assosierteFagsakDeltagerMap.values.toMutableList()
-    }
+        personInfoForAktør: PersonInfo,
+    ): Collection<RestFagsakDeltager> =
+        personRepository
+            .findByAktør(aktør)
+            .filter { it.personopplysningGrunnlag.aktiv }
+            .fold(mutableMapOf<Long, RestFagsakDeltager>()) { fagsakDeltagerMap, person: Person ->
+                val behandling = behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
+                if (!behandling.aktiv || behandling.fagsak.arkivert || fagsakDeltagerMap.containsKey(behandling.fagsak.id)) {
+                    return@fold fagsakDeltagerMap
+                }
+                fagsakDeltagerMap[behandling.fagsak.id] =
+                    hentFagsakEier(
+                        fagsak = behandling.fagsak,
+                        aktør = aktør,
+                        personInfoMedRelasjoner = personInfoForAktør,
+                    )
+                fagsakDeltagerMap
+            }.values
 
     private fun hentFagsakEier(
         fagsak: Fagsak,
@@ -239,7 +240,7 @@ class FagsakDeltagerService(
         }
     }
 
-    fun oppgiFagsakdeltagere(
+    fun oppgiFagsakDeltagere(
         aktør: Aktør,
         barnasAktørId: List<Aktør>,
     ): List<RestFagsakDeltager> {

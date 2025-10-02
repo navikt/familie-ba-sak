@@ -47,7 +47,7 @@ class FagsakDeltagerController(
                 val aktør = personidentService.hentAktør(restSøkParam.personIdent)
                 val barnsAktørId = personidentService.hentAktørIder(restSøkParam.barnasIdenter)
 
-                fagsakDeltagerService.oppgiFagsakdeltagere(aktør, barnsAktørId)
+                fagsakDeltagerService.oppgiFagsakDeltagere(aktør, barnsAktørId)
             }.fold(
                 onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                 onFailure = {
