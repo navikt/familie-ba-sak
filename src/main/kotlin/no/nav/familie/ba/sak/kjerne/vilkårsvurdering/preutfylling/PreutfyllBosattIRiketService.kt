@@ -111,28 +111,10 @@ class PreutfyllBosattIRiketService(
             )
         }
 
-        val erBosattIFinnmarkEllerNordTromsTidslinje =
-            erBostedsadresseIFinnmarkEllerNordTromsTidslinje.kombinerMed(erDeltBostedIFinnmarkEllerNordTromsTidslinje) { erBostedsadresseIFinnmarkEllerNordTroms, erDeltBostedIFinnmarkEllerNordTroms ->
-                erBostedsadresseIFinnmarkEllerNordTroms == true || erDeltBostedIFinnmarkEllerNordTroms == true
-            }
-
         val erNordiskStatsborgerOgBosattINorgeTidslinje =
             erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeTidslinje) { erNordiskStatsborger, erBosattINorge ->
-                erNordiskStatsborger == true && erBosattINorge == true
-            }
-
-        val erBosattOgHarNordiskStatsborgerskapTidslinje =
-            erNordiskStatsborgerOgBosattINorgeTidslinje.kombinerMed(erBosattIFinnmarkEllerNordTromsTidslinje, erOppholdsadressePåSvalbardTidslinje) { erNordiskStatsborgerOgBosattINorge, erBosattIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
-                if (erNordiskStatsborgerOgBosattINorge == true) {
-                    val utdypendeVilkårsvurderinger =
-                        if (erOppholdsadressePåSvalbard == true) {
-                            listOf(BOSATT_PÅ_SVALBARD)
-                        } else if (erBosattIFinnmarkEllerNordTroms == true) {
-                            listOf(BOSATT_I_FINNMARK_NORD_TROMS)
-                        } else {
-                            emptyList()
-                        }
-                    OppfyltDelvilkår(begrunnelse = "- Norsk/nordisk statsborgerskap", utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger)
+                if (erNordiskStatsborger == true && erBosattINorge == true) {
+                    OppfyltDelvilkår(begrunnelse = "- Norsk/nordisk statsborgerskap")
                 } else {
                     IkkeOppfyltDelvilkår
                 }
@@ -140,15 +122,33 @@ class PreutfyllBosattIRiketService(
 
         val erØvrigeKravForBosattIRiketOppfyltTidslinje = lagErØvrigeKravForBosattIRiketOppfyltTidslinje(erBosattINorgeTidslinje, personResultat)
 
+        val erBosattIFinnmarkEllerNordTromsTidslinje =
+            erBostedsadresseIFinnmarkEllerNordTromsTidslinje.kombinerMed(erDeltBostedIFinnmarkEllerNordTromsTidslinje) { erBostedsadresseIFinnmarkEllerNordTroms, erDeltBostedIFinnmarkEllerNordTroms ->
+                erBostedsadresseIFinnmarkEllerNordTroms == true || erDeltBostedIFinnmarkEllerNordTroms == true
+            }
+
         val førsteBosattINorgeDato = erBosattINorgeTidslinje.filtrer { it == true }.startsTidspunkt
 
         val erBosattIRiketTidslinje =
-            erBosattOgHarNordiskStatsborgerskapTidslinje
+            erNordiskStatsborgerOgBosattINorgeTidslinje
                 .kombinerMed(erØvrigeKravForBosattIRiketOppfyltTidslinje) { erNordiskOgBosatt, erØvrigeKravOppfylt ->
                     when {
                         erNordiskOgBosatt is OppfyltDelvilkår -> erNordiskOgBosatt
                         erØvrigeKravOppfylt is OppfyltDelvilkår -> erØvrigeKravOppfylt
                         else -> IkkeOppfyltDelvilkår
+                    }
+                }.kombinerMed(erBosattIFinnmarkEllerNordTromsTidslinje, erOppholdsadressePåSvalbardTidslinje) { erBosattIRiket, erBosattIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
+                    when (erBosattIRiket) {
+                        is OppfyltDelvilkår -> {
+                            val utdypendeVilkårsvurderinger =
+                                when {
+                                    erOppholdsadressePåSvalbard == true -> listOf(BOSATT_PÅ_SVALBARD)
+                                    erBosattIFinnmarkEllerNordTroms == true -> listOf(BOSATT_I_FINNMARK_NORD_TROMS)
+                                    else -> emptyList()
+                                }
+                            erBosattIRiket.copy(utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger)
+                        }
+                        else -> erBosattIRiket
                     }
                 }.beskjærFraOgMed(maxOf(fødselsdatoForBeskjæring, førsteBosattINorgeDato))
 
