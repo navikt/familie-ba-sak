@@ -4,10 +4,17 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggTask
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøring
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggTask
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøring
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.dto.AutobrevOpphørSmåbarnstilleggDTO
@@ -34,6 +41,9 @@ class OpprettTaskService(
     private val taskRepository: TaskRepositoryWrapper,
     private val satskjøringRepository: SatskjøringRepository,
     private val envService: EnvService,
+    private val featureToggleService: FeatureToggleService,
+    private val finnmarkstilleggKjøringRepository: FinnmarkstilleggKjøringRepository,
+    private val svalbardtilleggKjøringRepository: SvalbardtilleggKjøringRepository,
 ) {
     fun opprettOppgaveTask(
         behandlingId: Long,
@@ -180,12 +190,14 @@ class OpprettTaskService(
                                 this["fagsakId"] = fagsakId.toString()
                             },
                     ).apply {
-                        if (envService.erProd()) {
+                        if (envService.erProd() && featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG)) {
                             medTriggerTid(LocalDateTime.now().plusHours(1))
                         }
                     },
                 )
             }
+
+            finnmarkstilleggKjøringRepository.save(FinnmarkstilleggKjøring(fagsakId = fagsakId))
         }
     }
 
@@ -204,12 +216,14 @@ class OpprettTaskService(
                                 this["fagsakId"] = fagsakId.toString()
                             },
                     ).apply {
-                        if (envService.erProd()) {
+                        if (envService.erProd() && featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_ADRESSEHENDELSELØYPE_SVALBARDTILLEGG)) {
                             medTriggerTid(LocalDateTime.now().plusHours(1))
                         }
                     },
                 )
             }
+
+            svalbardtilleggKjøringRepository.save(SvalbardtilleggKjøring(fagsakId = fagsakId))
         }
     }
 
