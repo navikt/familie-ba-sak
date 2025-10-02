@@ -171,7 +171,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
 
             // Assert
             verify(exactly = 1) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(setOf(behandling1.fagsak.id)) }
-            verify(exactly = 1) { finnmarkstilleggKjøringRepository.saveAll(listOf(FinnmarkstilleggKjøring(fagsakId = behandling1.fagsak.id), FinnmarkstilleggKjøring(fagsakId = behandling2.fagsak.id))) }
+            verify(exactly = 1) { finnmarkstilleggKjøringRepository.saveAll(listOf(FinnmarkstilleggKjøring(fagsakId = behandling2.fagsak.id))) }
         }
 
         @Test
