@@ -30,7 +30,6 @@ Egenskap: Finnmarkstillegg autovedtak første kjøring - brev og begrunnelse
     Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                        | Fra dato   | Til dato   | Resultat |
       | 1       | BOSATT_I_RIKET, LOVLIG_OPPHOLD                | 01.01.2025 |            | OPPFYLT  |
-
       | 2       | UNDER_18_ÅR                                   | 01.01.2025 | 31.12.2042 | OPPFYLT  |
       | 2       | GIFT_PARTNERSKAP                              | 01.01.2025 |            | OPPFYLT  |
       | 2       | BOSATT_I_RIKET, BOR_MED_SØKER, LOVLIG_OPPHOLD | 01.01.2025 |            | OPPFYLT  |
@@ -40,11 +39,11 @@ Egenskap: Finnmarkstillegg autovedtak første kjøring - brev og begrunnelse
       | 2       | 1            | 01.02.2025 | 30.04.2025 | 1766  | 100     | ORDINÆR_BARNETRYGD |
       | 2       | 1            | 01.05.2025 | 31.12.2042 | 1968  | 100     | ORDINÆR_BARNETRYGD |
 
-    Og med bostedskommuner
-      | AktørId | Fra dato   | Til dato | Kommunenummer |
-      | 1       | 01.01.2000 |          | 0301          |
-      | 2       | 01.01.2025 |          | 0301          |
-      | 1, 2    | 01.05.2025 |          | 5601          |
+    Og med adressekommuner
+      | AktørId | Fra dato   | Til dato | Kommunenummer | Adressetype     |
+      | 1       | 01.01.2000 |          | 0301          | Bostedsadresse  |
+      | 2       | 01.01.2025 |          | 0301          | Bostedsadresse  |
+      | 1, 2    | 01.05.2025 |          | 5601          | Oppholdsadresse |
 
     Når vi lager automatisk behandling med id 2 på fagsak 1 på grunn av finnmarkstillegg
 

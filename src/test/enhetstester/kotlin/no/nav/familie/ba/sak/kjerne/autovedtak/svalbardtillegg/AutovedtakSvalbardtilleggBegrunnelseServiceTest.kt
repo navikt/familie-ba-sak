@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -32,6 +33,7 @@ class AutovedtakSvalbardtilleggBegrunnelseServiceTest {
     private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     private val vedtakService = mockk<VedtakService>()
     private val vedtaksperiodeHentOgPersisterService = mockk<VedtaksperiodeHentOgPersisterService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val autovedtakSvalbardtilleggBegrunnelseService =
         AutovedtakSvalbardtilleggBegrunnelseService(
@@ -40,6 +42,7 @@ class AutovedtakSvalbardtilleggBegrunnelseServiceTest {
             vedtaksperiodeService = vedtaksperiodeService,
             vedtakService = vedtakService,
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
+            featureToggleService = featureToggleService,
         )
 
     private val fagsak = defaultFagsak()

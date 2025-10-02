@@ -39,7 +39,7 @@ Egenskap: Finnmarkstillegg autovedtak
       | 2       | 1            | 01.02.2025 | 30.04.2025 | 1766  | 100     | ORDINÆR_BARNETRYGD |
       | 2       | 1            | 01.05.2025 | 31.12.2042 | 1968  | 100     | ORDINÆR_BARNETRYGD |
 
-    Og med bostedskommuner
+    Og med adressekommuner
       | AktørId | Fra dato   | Til dato | Kommunenummer |
       | 1       | 01.01.2000 |          | 0301          |
       | 2       | 01.01.2025 |          | 0301          |
@@ -66,13 +66,13 @@ Egenskap: Finnmarkstillegg autovedtak
       | 2       | 2            | 01.10.2025 | 31.12.2042 | 500   | 100     | FINNMARKSTILLEGG   |
 
     Så forvent følgende vedtaksperioder for behandling 2
-      | Fra dato   | Til dato   | Vedtaksperiodetype | Begrunnelser                        |
-      | 01.09.2025 | 30.09.2025 | Utbetaling         |                                     |
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Begrunnelser               |
+      | 01.09.2025 | 30.09.2025 | Utbetaling         |                            |
       | 01.10.2025 | 31.12.2042 | Utbetaling         | INNVILGET_FINNMARKSTILLEGG |
-      | 01.01.2043 |            | Opphør             |                                     |
+      | 01.01.2043 |            | Opphør             |                            |
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.10.2025 til 31.12.2042
-      | Begrunnelse                         | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
+      | Begrunnelse                | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | INNVILGET_FINNMARKSTILLEGG | STANDARD | Ja            | 01.01.25             | 1           | september 2025                       |         | 2 468 |                  | SØKER_HAR_IKKE_RETT     |                             |
 
     Så forvent at brevmal AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG er brukt for behandling 2
@@ -100,7 +100,7 @@ Egenskap: Finnmarkstillegg autovedtak
       | 2       | 1            | 01.05.2025 | 31.12.2042 | 1968  | 100     | ORDINÆR_BARNETRYGD |
       | 2       | 1            | 01.10.2025 | 31.12.2042 | 500   | 100     | FINNMARKSTILLEGG   |
 
-    Og med bostedskommuner
+    Og med adressekommuner
       | AktørId | Fra dato   | Til dato | Kommunenummer |
       | 1       | 01.01.2000 |          | 0301          |
       | 2       | 01.01.2025 |          | 0301          |
@@ -162,7 +162,7 @@ Egenskap: Finnmarkstillegg autovedtak
       | 2       | 1            | 01.05.2025 | 31.12.2042 | 1968  | 100     | ORDINÆR_BARNETRYGD |
       | 2       | 1            | 01.10.2025 | 31.12.2042 | 500   | 100     | FINNMARKSTILLEGG   |
 
-    Og med bostedskommuner
+    Og med adressekommuner
       | AktørId | Fra dato   | Til dato | Kommunenummer |
       | 1       | 01.01.2000 |          | 0301          |
       | 2       | 01.01.2025 |          | 0301          |
@@ -219,7 +219,7 @@ Egenskap: Finnmarkstillegg autovedtak
       | 2       | 1            | 01.05.2025 | 31.12.2042 | 1968  | 100     | ORDINÆR_BARNETRYGD |
       | 2       | 1            | 01.10.2025 | 31.12.2042 | 500   | 100     | FINNMARKSTILLEGG   |
 
-    Og med bostedskommuner
+    Og med adressekommuner
       | AktørId | Fra dato   | Til dato | Kommunenummer |
       | 1       | 01.01.2000 |          | 0301          |
       | 2       | 01.01.2025 |          | 0301          |
