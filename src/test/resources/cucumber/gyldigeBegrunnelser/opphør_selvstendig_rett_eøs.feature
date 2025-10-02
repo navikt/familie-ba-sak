@@ -65,6 +65,6 @@ Egenskap: Gyldige begrunnelser selvstendig rett opphør fra start
       | Fra dato   | Til dato | Standardbegrunnelser | Eøsbegrunnelser                          | Fritekster |
       | 01.10.2023 |          |                      | OPPHOR_SELVSTENDIG_RETT_OPPHOR_FRA_START |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.10.2023 til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.10.2023 til -
       | Begrunnelse                              | Type | Barnas fødselsdatoer | Antall barn | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland | Gjelder søker |
       | OPPHOR_SELVSTENDIG_RETT_OPPHOR_FRA_START | EØS  | 13.11.07             | 1           | INAKTIV          | ARBEIDER                  | Belgia                | Norge                          | Belgia              | Ja           |

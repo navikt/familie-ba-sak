@@ -188,6 +188,6 @@ Egenskap: Gyldige begrunnelser for etter endret utbetaling, en mor med ett barn
       | Fra dato   | Til dato   | Standardbegrunnelser                 | Eøsbegrunnelser | Fritekster |
       | 01.12.2024 | 30.04.2025 | INNVILGET_HELE_FAMILIEN_TRYGDEAVTALE |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.12.2024 til 30.04.2025
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.12.2024 til 30.04.2025
       | Begrunnelse                          | Type     | Gjelder søker | Barnas fødselsdatoer                     | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | INNVILGET_HELE_FAMILIEN_TRYGDEAVTALE | STANDARD |               | 27.07.16, 15.01.19, 07.07.20 og 28.06.23 | 4           | november 2024                        |         | 7 064 |                  |                         |                             |

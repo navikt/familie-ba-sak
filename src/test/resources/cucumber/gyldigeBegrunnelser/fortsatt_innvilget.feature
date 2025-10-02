@@ -436,6 +436,6 @@ Egenskap: Gyldige begrunnelser for fortsatt innvilget
       | Fra dato | Til dato | Standardbegrunnelser           | Eøsbegrunnelser | Fritekster |
       |          |          | FORTSATT_INNVILGET_SATSENDRING |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode - til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode - til -
       | Begrunnelse                    | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søkers rett til utvidet |
       | FORTSATT_INNVILGET_SATSENDRING | STANDARD | Ja            | 05.04.15 og 26.06.17 | 2           |                                      | NB      | 3 936  |                         |

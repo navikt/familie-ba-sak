@@ -62,11 +62,11 @@ Egenskap: Brevbegrunnelse ved endret utbetaling
       | 01.05.2022 | 31.05.2022 | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING |                 |            |
       | 01.06.2022 |            |                                                         |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.03.2022 til 30.04.2022
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.03.2022 til 30.04.2022
       | Begrunnelse                                             | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING | STANDARD | Nei           | 16.06.16             | 1           | februar 2022                         | NB      | 1 676 | 02.02.22         | SØKER_FÅR_UTVIDET       | 02.02.22                    |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.05.2022 til 31.05.2022
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.05.2022 til 31.05.2022
       | Begrunnelse                                             | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING | STANDARD | Nei           | 16.06.16             | 1           | april 2022                           | NB      | 1 676 | 02.02.22         | SØKER_FÅR_UTVIDET       | 02.02.22                    |
       | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING | STANDARD | Nei           | 15.06.12             | 1           | april 2022                           | NB      | 1 054 | 04.04.22         | SØKER_FÅR_UTVIDET       | 04.04.22                    |
@@ -183,7 +183,7 @@ Egenskap: Brevbegrunnelse ved endret utbetaling
       | 01.05.2033 | 30.11.2035 |                                                                     |                 |            |
       | 01.12.2035 |            |                                                                     |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.12.2023 til 31.12.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.12.2023 til 31.12.2023
       | Begrunnelse                                                         | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_UTBETALING_FØR_SOKNAD_NY | STANDARD | Nei           | 07.05.15 og 03.12.17 | 2           | november 2023                        | NB      | 2 620 | 06.12.23         |                         |                             |
 
@@ -275,11 +275,11 @@ Egenskap: Brevbegrunnelse ved endret utbetaling
       | UTBETALING      | oktober 2023 | til desember 2023 | 1766  | 1                          | 13.04.21             | du                     |
       | UTBETALING      | januar 2024  | til mars 2027     | 3532  | 2                          | 13.04.21 og 22.12.22 | du                     |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.10.2023 til 31.12.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.10.2023 til 31.12.2023
       | Begrunnelse                                 | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | INNVILGET_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER | STANDARD | Ja            | 13.04.21             | 1           | september 2023                       | NB      | 1 766 |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.01.2024 til 31.03.2027
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.01.2024 til 31.03.2027
       | Begrunnelse                            | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt |
       | ETTER_ENDRET_UTBETALING_ENDRE_MOTTAKER | STANDARD | Nei           | 22.12.22             | 1           | desember 2023                        | NB      | 1 766 | 14.12.23         |
 
@@ -335,10 +335,10 @@ Egenskap: Brevbegrunnelse ved endret utbetaling
       | Brevperiodetype | Fra dato  | Til dato         | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
       | UTBETALING      | juli 2019 | til februar 2023 | 1054  | 1                          | 23.06.15            | du                     |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.07.2019 til 28.02.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.07.2019 til 28.02.2023
       | Begrunnelse                                                  | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | ENDRET_UTBETALING_SELVSTENDIG_RETT_ETTERBETALING_UTVIDET_DEL | STANDARD | Nei           | 23.06.15             | 1           | juni 2019                            | 0     | 17.11.19         | SØKER_FÅR_UTVIDET       |
       | INNVILGET_SKILT                                              | STANDARD | Ja            | 23.06.15             | 1           | juni 2019                            | 1 054 |                  | SØKER_FÅR_UTVIDET       |
+      | ENDRET_UTBETALING_SELVSTENDIG_RETT_ETTERBETALING_UTVIDET_DEL | STANDARD | Nei           | 23.06.15             | 1           | juni 2019                            | 0     | 17.11.19         | SØKER_FÅR_UTVIDET       |
 
   Scenario: Skal kun flette inn barn som har utbetaling i begrunnelse for utvidet dersom søker har ett barn med utbetaling og ett barn som ikke har utbetaling pga allerede utbetalt
     Gitt følgende fagsaker
@@ -398,7 +398,7 @@ Egenskap: Brevbegrunnelse ved endret utbetaling
       | Brevperiodetype | Fra dato  | Til dato         | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
       | UTBETALING      | juli 2019 | til februar 2023 | 2108  | 1                          | 23.06.16            | du                     |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.07.2019 til 28.02.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.07.2019 til 28.02.2023
       | Begrunnelse     | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp | Søkers rett til utvidet |
       | INNVILGET_SKILT | STANDARD | Ja            | 23.06.16             | 1           | juni 2019                            | 2 108 | SØKER_FÅR_UTVIDET       |
 
@@ -609,6 +609,6 @@ Scenario: : Endret utbetaling begrunnelser som har tema EØS skal trekke inn kom
       | Fra dato   | Til dato   | Standardbegrunnelser | Eøsbegrunnelser                                              | Fritekster |
       | 01.07.2022 | 31.12.2022 |                      | ENDRET_UTBETALING_ETTERBETALING_UTVIDET_EØS_INGEN_UTBETALING |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.07.2022 til 31.12.2022
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.07.2022 til 31.12.2022
       | Begrunnelse                                                  | Type | Barnas fødselsdatoer | Antall barn | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland | Gjelder søker |
       | ENDRET_UTBETALING_ETTERBETALING_UTVIDET_EØS_INGEN_UTBETALING | EØS  | 14.02.21             | 1           | I_ARBEID         | ARBEIDER                  | Danmark               | Norge                          | Danmark             | Nei           |

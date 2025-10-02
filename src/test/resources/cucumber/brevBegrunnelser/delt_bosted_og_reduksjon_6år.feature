@@ -115,6 +115,6 @@ Egenskap: Innvilget delt bosted og reduksjon pga barn 6 år i samme periode
       | 01.05.2033 | 30.11.2035 |                                                      |                 |            |
       | 01.12.2035 |            |                                                      |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.12.2023 til 31.12.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.12.2023 til 31.12.2023
       | Begrunnelse                                          | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
       | INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_AVTALETIDSPUNKT | Nei           | 07.05.15 og 03.12.17 | 2           | november 2023                        | NB      | 2 620 |                  | SØKER_HAR_IKKE_RETT     |
