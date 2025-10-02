@@ -3,7 +3,7 @@ query($identer: [ID!]!){
         code
         ident
         person {
-            bostedsadresse(historikk: false) {
+            bostedsadresse(historikk: true) {
                 gyldigFraOgMed
                 gyldigTilOgMed
                 vegadresse {
@@ -16,7 +16,7 @@ query($identer: [ID!]!){
                     bostedskommune
                 }
             }
-            deltBosted(historikk: false) {
+            deltBosted(historikk: true) {
                 startdatoForKontrakt
                 sluttdatoForKontrakt
                 vegadresse {
@@ -29,10 +29,16 @@ query($identer: [ID!]!){
                     bostedskommune
                 }
             }
-            oppholdsadresse(historikk: false) {
+            oppholdsadresse(historikk: true) {
                 gyldigFraOgMed
                 gyldigTilOgMed
                 oppholdAnnetSted
+                vegadresse {
+                    kommunenummer
+                }
+                matrikkeladresse {
+                    kommunenummer
+                }
             }
         }
     }
