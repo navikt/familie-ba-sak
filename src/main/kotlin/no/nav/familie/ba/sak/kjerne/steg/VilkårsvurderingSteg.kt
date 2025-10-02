@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.Vilkårsvurderi
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.valider18ÅrsVilkårEksistererFraFødselsdato
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerBarnasVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIkkeBlandetRegelverk
@@ -78,6 +79,10 @@ class VilkårsvurderingSteg(
 
             if (behandling.erFinnmarkstillegg()) {
                 validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(this)
+            }
+
+            if (behandling.erSvalbardtillegg()) {
+                validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(this)
             }
         }
     }
