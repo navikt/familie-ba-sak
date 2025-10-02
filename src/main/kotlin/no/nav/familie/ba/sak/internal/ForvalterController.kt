@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnma
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggTaskOppretter
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -98,6 +99,7 @@ class ForvalterController(
     private val personidentRepository: PersonidentRepository,
     private val autovedtakFinnmarkstilleggTaskOppretter: AutovedtakFinnmarkstilleggTaskOppretter,
     private val envService: EnvService,
+    private val autovedtakSvalbardtilleggTaskOppretter: AutovedtakSvalbardtilleggTaskOppretter,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -592,6 +594,27 @@ class ForvalterController(
         }
 
         opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(fagsakIder)
+
+        return ResponseEntity.ok("Tasker for autovedtak av Svalbardtillegg opprettet")
+    }
+
+    @PostMapping("/opprett-tasker-for-autovedtak-svalbardtillegg/{antallBehandlinger}")
+    @Operation(
+        summary = "Oppretter tasker for autovedtak av Svalbardtillegg",
+    )
+    fun opprettTaskerForAutovedtakSvalbardtillegg(
+        @PathVariable antallBehandlinger: Int,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett task for autovedtak av Svalbardtillegg",
+        )
+
+        if (!featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOVEDTAK_SVALBARDTILLEGG)) {
+            throw Feil("Toggle for å opprette tasker for autovedtak av Svalbardtillegg er skrudd av")
+        }
+
+        autovedtakSvalbardtilleggTaskOppretter.opprettTasker(antallBehandlinger)
 
         return ResponseEntity.ok("Tasker for autovedtak av Svalbardtillegg opprettet")
     }
