@@ -57,10 +57,7 @@ class FakePersonopplysningerService(
     }
 
     override fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
-        // Er fødselsnummer gyldig
         validerFødselsnummer(aktør.aktivFødselsnummer())
-
-        // Sjekk om personen er lagt til som "ikke funnet"
         sjekkPersonIkkeFunnet(aktør.aktivFødselsnummer())
 
         return personInfo[aktør.aktivFødselsnummer()] ?: personInfo.getValue(INTEGRASJONER_FNR)

@@ -67,28 +67,40 @@ class FagsakDeltagerService(
         return fagsakDeltagereMedEgenAnsattStatus
     }
 
-    private fun PersonInfo.erBarn(): Boolean = Period.between(this.fødselsdato, LocalDate.now()).years < 18
-
     private fun hentFagsakDeltagerPerFagsakAktørEierEllerDefaultUtenFagsak(
         aktør: Aktør,
         personInfoBase: PersonInfoBase,
         assosierteFagsakDeltagere: List<RestFagsakDeltager>,
         rolle: FagsakDeltagerRolle,
-    ) = fagsakRepository
-        .finnFagsakerForAktør(aktør)
-        .ifEmpty { listOf(null) }
-        .filter { fagsak -> fagsak == null || !assosierteFagsakDeltagere.map { it.fagsakId }.contains(fagsak.id) }
-        .map {
-            RestFagsakDeltager(
-                navn = personInfoBase.navn,
-                ident = aktør.aktivFødselsnummer(),
-                rolle = rolle,
-                kjønn = personInfoBase.kjønn,
-                fagsakId = it?.id,
-                fagsakType = it?.type,
-                adressebeskyttelseGradering = personInfoBase.adressebeskyttelseGradering,
+    ): List<RestFagsakDeltager> {
+        val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør)
+        if (fagsaker.isEmpty()) {
+            return listOf(
+                RestFagsakDeltager(
+                    navn = personInfoBase.navn,
+                    ident = aktør.aktivFødselsnummer(),
+                    rolle = rolle,
+                    kjønn = personInfoBase.kjønn,
+                    fagsakId = null,
+                    fagsakType = null,
+                    adressebeskyttelseGradering = personInfoBase.adressebeskyttelseGradering,
+                ),
             )
         }
+        return fagsaker
+            .filter { fagsak -> !assosierteFagsakDeltagere.map { it.fagsakId }.contains(fagsak.id) }
+            .map {
+                RestFagsakDeltager(
+                    navn = personInfoBase.navn,
+                    ident = aktør.aktivFødselsnummer(),
+                    rolle = rolle,
+                    kjønn = personInfoBase.kjønn,
+                    fagsakId = it.id,
+                    fagsakType = it.type,
+                    adressebeskyttelseGradering = personInfoBase.adressebeskyttelseGradering,
+                )
+            }
+    }
 
     private fun hentForelderFagsakDeltagereSomMangler(
         personInfo: PersonInfo,
@@ -96,15 +108,15 @@ class FagsakDeltagerService(
     ): List<RestFagsakDeltager> =
         personInfo.forelderBarnRelasjon
             .filter { relasjon ->
-                assosierteFagsakDeltagere.none { it.ident == relasjon.aktør.aktivFødselsnummer() } && (
-                    relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR ||
-                        relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MOR ||
-                        relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
-                )
+                assosierteFagsakDeltagere.none { it.ident == relasjon.aktør.aktivFødselsnummer() }
+            }.filter { relasjon ->
+                relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR ||
+                    relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MOR ||
+                    relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
             }.flatMap { relasjon ->
                 val maskertPerson = hentMaskertPersonVedManglendeTilgang(relasjon.aktør)
                 if (maskertPerson != null) {
-                    return@flatMap listOf(hentMaskertPersonVedManglendeTilgang(relasjon.aktør)!!)
+                    return@flatMap listOf(maskertPerson.copy(rolle = FagsakDeltagerRolle.FORELDER))
                 }
                 hentFagsakDeltagerPerFagsakAktørEierEllerDefaultUtenFagsak(
                     aktør = relasjon.aktør,

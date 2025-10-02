@@ -16,6 +16,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import java.time.LocalDate
+import java.time.Period
 
 interface PersonInfoBase {
     val fødselsdato: LocalDate?
@@ -42,7 +43,9 @@ data class PersonInfo(
     val dødsfall: DødsfallData? = null,
     val kontaktinformasjonForDoedsbo: PdlKontaktinformasjonForDødsbo? = null,
     override val erEgenAnsatt: Boolean? = null,
-) : PersonInfoBase
+) : PersonInfoBase {
+    fun erBarn(): Boolean = Period.between(fødselsdato, LocalDate.now()).years < 18
+}
 
 fun List<Bostedsadresse>.filtrerUtKunNorskeBostedsadresser() = this.filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
 
