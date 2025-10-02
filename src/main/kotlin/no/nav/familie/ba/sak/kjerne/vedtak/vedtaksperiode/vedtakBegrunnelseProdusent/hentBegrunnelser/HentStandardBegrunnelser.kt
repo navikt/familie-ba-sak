@@ -240,7 +240,13 @@ private fun SanityBegrunnelse.erGjeldendeForSvalbardtillegg(
 
     val harKravPåSvalbardtilleggForrigePeriode = begrunnelseGrunnlag.sjekkOmHarHravPåSvalbardtilleggForrigePeriode()
     val harKravPåSvalbardtilleggDennePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåSvalbardtilleggDennePeriode()
-    val erSvalbardtilleggIForrigeBehandlingPeriode = begrunnelseGrunnlag.sjekkOmharKravPåSvalbardtilleggIForrigeBehandlingPeriode()
+    val erSvalbardtilleggIForrigeBehandlingPeriode =
+        // For innvilgete perioder ønsker vi å ha med alle barna det ble utbetalt for. For f.eks. Reduksjon ønsker vi kun å begrunne for personen som ikke oppfyller kravet
+        if (this.periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING) {
+            begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.FINNMARKSTILLEGG } == true
+        } else {
+            begrunnelseGrunnlag.sjekkOmharKravPåSvalbardtilleggIForrigeBehandlingPeriode()
+        }
 
     val erEndringISvalbardtilleggFraForrigeBehandling = erSvalbardtilleggIForrigeBehandlingPeriode != harKravPåSvalbardtilleggDennePeriode
 
