@@ -14,10 +14,16 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTids
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.lagForskjøvetTidslinjeForOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -101,7 +107,7 @@ fun validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig(
 ) = vilkårsvurdering.personResultater.forEach { personResultat ->
     val person = søkerOgBarn.find { it.aktør == personResultat.aktør }
     val vilkårResultater = personResultat.vilkårResultater
-    val bosattIRiketVilkår = vilkårResultater.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+    val bosattIRiketVilkår = vilkårResultater.filter { it.vilkårType == BOSATT_I_RIKET }
 
     bosattIRiketVilkår.forEach { vilkår ->
         val finnmarkOgSvalbardSattISammePeriode =
@@ -115,6 +121,39 @@ fun validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig(
             )
         }
     }
+}
+
+fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering: Vilkårsvurdering) {
+    val søkersPersonResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() } ?: return
+
+    val søkerBosattIFinnmarkTidslinje =
+        søkersPersonResultat.vilkårResultater
+            .filter { it.vilkårType == BOSATT_I_RIKET && UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS in it.utdypendeVilkårsvurderinger }
+            .lagForskjøvetTidslinjeForOppfylteVilkår(BOSATT_I_RIKET)
+
+    vilkårsvurdering
+        .personResultater
+        .filterNot { it.erSøkersResultater() }
+        .forEach { personResultat ->
+            val barnBosattIFinnmarkTidslinje =
+                personResultat.vilkårResultater
+                    .filter { it.vilkårType == BOSATT_I_RIKET && UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS in it.utdypendeVilkårsvurderinger }
+                    .lagForskjøvetTidslinjeForOppfylteVilkår(BOSATT_I_RIKET)
+
+            val barnDeltBostedTidslinje =
+                personResultat.vilkårResultater
+                    .filter { it.vilkårType == Vilkår.BOR_MED_SØKER && (it.utdypendeVilkårsvurderinger.contains(DELT_BOSTED) || it.utdypendeVilkårsvurderinger.contains(DELT_BOSTED_SKAL_IKKE_DELES)) }
+                    .lagForskjøvetTidslinjeForOppfylteVilkår(Vilkår.BOR_MED_SØKER)
+
+            val finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerIFinnmark =
+                søkerBosattIFinnmarkTidslinje.kombinerMed(barnBosattIFinnmarkTidslinje, barnDeltBostedTidslinje) { søkerBosattIFinnmark, barnBosattIFinnmark, barnDeltBosted ->
+                    søkerBosattIFinnmark != null && barnBosattIFinnmark == null && barnDeltBosted != null
+                }
+
+            if (finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerIFinnmark.tilPerioder().any { it.verdi == true }) {
+                logger.warn("For fagsak ${vilkårsvurdering.behandling.fagsak.id} finnes det perioder der søker bor i finnmark samtidig som et barn med delt bosted ikke bor i finnmark.")
+            }
+        }
 }
 
 fun validerResultatBegrunnelse(restVilkårResultat: RestVilkårResultat) {
