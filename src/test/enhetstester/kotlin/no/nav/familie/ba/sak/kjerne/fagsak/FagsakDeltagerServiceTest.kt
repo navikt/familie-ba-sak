@@ -51,7 +51,7 @@ class FagsakDeltagerServiceTest {
         every { personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(ident) } returns null
 
         // Act
-        val resultat = fagsakDeltagerService.hentFagsakDeltager(ident)
+        val resultat = fagsakDeltagerService.hentFagsakDeltagere(ident)
 
         // Assert
         assertThat(resultat).isEmpty()
@@ -71,7 +71,7 @@ class FagsakDeltagerServiceTest {
             )
 
         // Act
-        val resultat = fagsakDeltagerService.hentFagsakDeltager(barnIdent)
+        val resultat = fagsakDeltagerService.hentFagsakDeltagere(barnIdent)
 
         // Assert
         assertThat(resultat).hasSize(1)
@@ -94,7 +94,7 @@ class FagsakDeltagerServiceTest {
         every { integrasjonClient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
 
         // Act
-        val resultat = fagsakDeltagerService.hentFagsakDeltager(ident)
+        val resultat = fagsakDeltagerService.hentFagsakDeltagere(ident)
 
         // Assert
         assertThat(resultat).hasSize(1)
@@ -139,7 +139,7 @@ class FagsakDeltagerServiceTest {
         every { fagsakRepository.finnFagsakerForAktør(match { it in aktører }) } returns emptyList()
 
         // Act
-        val resultat = fagsakDeltagerService.hentFagsakDeltager(barnIdent)
+        val resultat = fagsakDeltagerService.hentFagsakDeltagere(barnIdent)
 
         // Assert
         assertThat(resultat).hasSize(3)
@@ -182,7 +182,7 @@ class FagsakDeltagerServiceTest {
         } returns mapOf(barnIdent to false, morIdent to true) // Far utelates
 
         // Act
-        val resultat = fagsakDeltagerService.hentFagsakDeltager(barnIdent)
+        val resultat = fagsakDeltagerService.hentFagsakDeltagere(barnIdent)
 
         // Assert
         assertThat(resultat.single { it.ident == barnIdent }.erEgenAnsatt).isFalse()

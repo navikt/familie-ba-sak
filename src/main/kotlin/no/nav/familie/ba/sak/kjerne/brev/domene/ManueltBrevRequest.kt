@@ -280,7 +280,7 @@ fun ManueltBrevRequest.tilBrev(
                             InnhenteOpplysningerData.Flettefelter(
                                 navn = mottakerNavn,
                                 fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
-                                organisasjonsnummer = if (erOrgNr(mottakerIdent)) mottakerIdent else null,
+                                organisasjonsnummer = orgNrEllerNull(mottakerIdent),
                                 gjelder = this.vedrørende?.navn,
                                 dokumentliste = this.multiselectVerdier,
                             ),
@@ -306,7 +306,7 @@ fun ManueltBrevRequest.tilBrev(
                             InformasjonsbrevInnhenteOpplysningerKlageData.Flettefelter(
                                 navn = mottakerNavn,
                                 fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
-                                organisasjonsnummer = if (erOrgNr(mottakerIdent)) mottakerIdent else null,
+                                organisasjonsnummer = orgNrEllerNull(mottakerIdent),
                                 gjelder = this.vedrørende?.navn,
                             ),
                     ),
@@ -326,7 +326,7 @@ fun ManueltBrevRequest.tilBrev(
                             UtbetalingEtterKAVedtakData.Flettefelter(
                                 navn = mottakerNavn,
                                 fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
-                                organisasjonsnummer = if (erOrgNr(mottakerIdent)) mottakerIdent else null,
+                                organisasjonsnummer = orgNrEllerNull(mottakerIdent),
                                 gjelder = this.vedrørende?.navn,
                             ),
                         fritekst = this.fritekstAvsnitt,
@@ -399,26 +399,26 @@ fun ManueltBrevRequest.tilBrev(
                     ),
             )
 
-        Brevmal.VARSEL_OM_REVURDERING_SAMBOER ->
+        Brevmal.VARSEL_OM_REVURDERING_SAMBOER -> {
             if (this.datoAvtale == null) {
                 throw FunksjonellFeil(
                     frontendFeilmelding = "Du må sette dato for samboerskap for å sende dette brevet.",
                     melding = "Dato er ikke satt for brevtype 'varsel om revurdering samboer'",
                 )
-            } else {
-                VarselOmRevurderingSamboerBrev(
-                    data =
-                        VarselOmRevurderingSamboerData(
-                            delmalData = VarselOmRevurderingSamboerData.DelmalData(signatur = signaturDelmal),
-                            flettefelter =
-                                VarselOmRevurderingSamboerData.Flettefelter(
-                                    navn = mottakerNavn,
-                                    fodselsnummer = mottakerIdent,
-                                    datoAvtale = LocalDate.parse(this.datoAvtale).tilDagMånedÅr(),
-                                ),
-                        ),
-                )
             }
+            VarselOmRevurderingSamboerBrev(
+                data =
+                    VarselOmRevurderingSamboerData(
+                        delmalData = VarselOmRevurderingSamboerData.DelmalData(signatur = signaturDelmal),
+                        flettefelter =
+                            VarselOmRevurderingSamboerData.Flettefelter(
+                                navn = mottakerNavn,
+                                fodselsnummer = mottakerIdent,
+                                datoAvtale = LocalDate.parse(this.datoAvtale).tilDagMånedÅr(),
+                            ),
+                    ),
+            )
+        }
 
         Brevmal.VARSEL_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_SØKT ->
             VarselbrevMedÅrsakerOgBarn(
@@ -437,12 +437,7 @@ fun ManueltBrevRequest.tilBrev(
                 fodselsnummer = mottakerIdent,
                 enhet = this.enhetNavn(),
                 mal = Brevmal.SVARTIDSBREV,
-                erEøsBehandling =
-                    if (this.behandlingKategori == null) {
-                        throw Feil("Trenger å vite om behandling er EØS for å sende ut svartidsbrev.")
-                    } else {
-                        this.behandlingKategori == BehandlingKategori.EØS
-                    },
+                erEøsBehandling = erEøsBehandling(behandlingKategori),
                 saksbehandlerNavn = saksbehandlerNavn,
             )
 
@@ -472,7 +467,7 @@ fun ManueltBrevRequest.tilBrev(
                         melding = "Antall uker svarfrist er ikke satt",
                         frontendFeilmelding = "Antall uker svarfrist er ikke satt",
                     ),
-                organisasjonsnummer = if (erOrgNr(mottakerIdent)) mottakerIdent else null,
+                organisasjonsnummer = orgNrEllerNull(mottakerIdent),
                 gjelder = this.vedrørende?.navn,
                 saksbehandlerNavn = saksbehandlerNavn,
             )
@@ -637,3 +632,12 @@ private fun List<LocalDate>?.tilFormaterteFødselsdager() =
         )
 
 private fun erOrgNr(ident: String): Boolean = ident.length == 9 && ident.all { it.isDigit() }
+
+private fun orgNrEllerNull(ident: String): String? = if (erOrgNr(ident)) ident else null
+
+private fun erEøsBehandling(behandlingKategori: BehandlingKategori?): Boolean =
+    when (behandlingKategori) {
+        null -> throw Feil("Trenger å vite om behandling er EØS for å sende ut svartidsbrev.")
+        BehandlingKategori.EØS -> true
+        BehandlingKategori.NASJONAL -> false
+    }
