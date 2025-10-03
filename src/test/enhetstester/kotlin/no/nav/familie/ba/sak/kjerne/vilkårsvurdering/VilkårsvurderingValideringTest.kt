@@ -264,7 +264,7 @@ class VilkårsvurderingValideringTest {
     }
 
     @Nested
-    inner class ValiderAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerITilleggssone {
+    inner class ValiderAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark {
         @Test
         fun `skal logge fagsak id hvis barn har delt bosted og ikke bor med søker i Finnmark`() {
             // Arrange
@@ -326,67 +326,7 @@ class VilkårsvurderingValideringTest {
         }
 
         @Test
-        fun `skal logge fagsak id hvis barn har delt bosted og ikke bor med søker på Svalbard`() {
-            // Arrange
-            val listAppender = ListAppender<ILoggingEvent>().apply { start() }
-            val logger = LoggerFactory.getLogger("VilkårsvurderingValidering.kt") as Logger
-            logger.addAppender(listAppender)
-
-            val søker = lagPerson(type = PersonType.SØKER)
-            val barn = lagPerson(type = PersonType.BARN)
-
-            val vilkårsvurdering =
-                lagVilkårsvurdering {
-                    setOf(
-                        lagPersonResultat(
-                            vilkårsvurdering = it,
-                            aktør = søker.aktør,
-                            lagVilkårResultater = {
-                                setOf(
-                                    lagVilkårResultat(
-                                        vilkårType = BOSATT_I_RIKET,
-                                        utdypendeVilkårsvurderinger = listOf(BOSATT_PÅ_SVALBARD),
-                                        periodeFom = LocalDate.of(2025, 1, 1),
-                                        periodeTom = LocalDate.of(2025, 6, 1),
-                                    ),
-                                )
-                            },
-                        ),
-                        lagPersonResultat(
-                            vilkårsvurdering = it,
-                            aktør = barn.aktør,
-                            lagVilkårResultater = {
-                                setOf(
-                                    lagVilkårResultat(
-                                        vilkårType = UNDER_18_ÅR,
-                                        periodeFom = barn.fødselsdato,
-                                        periodeTom = barn.fødselsdato.plusYears(18),
-                                    ),
-                                    lagVilkårResultat(
-                                        vilkårType = BOR_MED_SØKER,
-                                        utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
-                                        periodeFom = LocalDate.of(2025, 1, 1),
-                                        periodeTom = LocalDate.of(2025, 6, 1),
-                                    ),
-                                )
-                            },
-                        ),
-                    )
-                }
-
-            // Act
-            validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)
-
-            // Assert
-            assertThat(listAppender.list.single().level).isEqualTo(Level.WARN)
-            assertThat(listAppender.list.single().message).isEqualTo(
-                "For fagsak ${vilkårsvurdering.behandling.fagsak.id} finnes det perioder der søker er " +
-                    "BOSATT_PÅ_SVALBARD samtidig som et barn med delt bosted ikke er BOSATT_PÅ_SVALBARD.",
-            )
-        }
-
-        @Test
-        fun `skal ikke logge fagsak id hvis barn har delt bosted og ikke bor med søker i Finnmark eller på Svalbard i forskjellig periode`() {
+        fun `skal ikke logge fagsak id hvis barn har delt bosted og ikke bor med søker i Finnmark i forskjellig periode`() {
             // Arrange
             val listAppender = ListAppender<ILoggingEvent>().apply { start() }
             val logger = LoggerFactory.getLogger("VilkårsvurderingValidering.kt") as Logger
@@ -409,12 +349,6 @@ class VilkårsvurderingValideringTest {
                                         periodeFom = LocalDate.of(2025, 1, 1),
                                         periodeTom = LocalDate.of(2025, 2, 1),
                                     ),
-                                    lagVilkårResultat(
-                                        vilkårType = BOSATT_I_RIKET,
-                                        utdypendeVilkårsvurderinger = listOf(BOSATT_PÅ_SVALBARD),
-                                        periodeFom = LocalDate.of(2025, 3, 1),
-                                        periodeTom = LocalDate.of(2025, 4, 1),
-                                    ),
                                 )
                             },
                         ),
@@ -431,8 +365,8 @@ class VilkårsvurderingValideringTest {
                                     lagVilkårResultat(
                                         vilkårType = BOR_MED_SØKER,
                                         utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
-                                        periodeFom = LocalDate.of(2025, 5, 1),
-                                        periodeTom = LocalDate.of(2025, 6, 1),
+                                        periodeFom = LocalDate.of(2025, 3, 1),
+                                        periodeTom = LocalDate.of(2025, 4, 1),
                                     ),
                                 )
                             },
@@ -442,7 +376,6 @@ class VilkårsvurderingValideringTest {
 
             // Act
             validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering)
-            validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)
 
             // Assert
             assertThat(listAppender.list).isEmpty()
@@ -525,6 +458,205 @@ class VilkårsvurderingValideringTest {
             assertThat(listAppender.list.single().message).isEqualTo(
                 "For fagsak ${vilkårsvurdering.behandling.fagsak.id} finnes det perioder der søker er " +
                     "BOSATT_I_FINNMARK_NORD_TROMS samtidig som et barn med delt bosted ikke er BOSATT_I_FINNMARK_NORD_TROMS.",
+            )
+        }
+    }
+
+    @Nested
+    inner class ValiderAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard {
+        @Test
+        fun `skal logge fagsak id hvis barn har delt bosted og ikke bor med søker på Svalbard`() {
+            // Arrange
+            val listAppender = ListAppender<ILoggingEvent>().apply { start() }
+            val logger = LoggerFactory.getLogger("VilkårsvurderingValidering.kt") as Logger
+            logger.addAppender(listAppender)
+
+            val søker = lagPerson(type = PersonType.SØKER)
+            val barn = lagPerson(type = PersonType.BARN)
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering {
+                    setOf(
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = søker.aktør,
+                            lagVilkårResultater = {
+                                setOf(
+                                    lagVilkårResultat(
+                                        vilkårType = BOSATT_I_RIKET,
+                                        utdypendeVilkårsvurderinger = listOf(BOSATT_PÅ_SVALBARD),
+                                        periodeFom = LocalDate.of(2025, 1, 1),
+                                        periodeTom = LocalDate.of(2025, 6, 1),
+                                    ),
+                                )
+                            },
+                        ),
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = barn.aktør,
+                            lagVilkårResultater = {
+                                setOf(
+                                    lagVilkårResultat(
+                                        vilkårType = UNDER_18_ÅR,
+                                        periodeFom = barn.fødselsdato,
+                                        periodeTom = barn.fødselsdato.plusYears(18),
+                                    ),
+                                    lagVilkårResultat(
+                                        vilkårType = BOR_MED_SØKER,
+                                        utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
+                                        periodeFom = LocalDate.of(2025, 1, 1),
+                                        periodeTom = LocalDate.of(2025, 6, 1),
+                                    ),
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            // Act
+            validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)
+
+            // Assert
+            assertThat(listAppender.list.single().level).isEqualTo(Level.WARN)
+            assertThat(listAppender.list.single().message).isEqualTo(
+                "For fagsak ${vilkårsvurdering.behandling.fagsak.id} finnes det perioder der søker er " +
+                    "BOSATT_PÅ_SVALBARD samtidig som et barn med delt bosted ikke er BOSATT_PÅ_SVALBARD.",
+            )
+        }
+
+        @Test
+        fun `skal ikke logge fagsak id hvis barn har delt bosted og ikke bor med søker på Svalbard i forskjellig periode`() {
+            // Arrange
+            val listAppender = ListAppender<ILoggingEvent>().apply { start() }
+            val logger = LoggerFactory.getLogger("VilkårsvurderingValidering.kt") as Logger
+            logger.addAppender(listAppender)
+
+            val søker = lagPerson(type = PersonType.SØKER)
+            val barn = lagPerson(type = PersonType.BARN)
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering {
+                    setOf(
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = søker.aktør,
+                            lagVilkårResultater = {
+                                setOf(
+                                    lagVilkårResultat(
+                                        vilkårType = BOSATT_I_RIKET,
+                                        utdypendeVilkårsvurderinger = listOf(BOSATT_PÅ_SVALBARD),
+                                        periodeFom = LocalDate.of(2025, 1, 1),
+                                        periodeTom = LocalDate.of(2025, 2, 1),
+                                    ),
+                                )
+                            },
+                        ),
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = barn.aktør,
+                            lagVilkårResultater = {
+                                setOf(
+                                    lagVilkårResultat(
+                                        vilkårType = UNDER_18_ÅR,
+                                        periodeFom = barn.fødselsdato,
+                                        periodeTom = barn.fødselsdato.plusYears(18),
+                                    ),
+                                    lagVilkårResultat(
+                                        vilkårType = BOR_MED_SØKER,
+                                        utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
+                                        periodeFom = LocalDate.of(2025, 3, 1),
+                                        periodeTom = LocalDate.of(2025, 4, 1),
+                                    ),
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            // Act
+            validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)
+
+            // Assert
+            assertThat(listAppender.list).isEmpty()
+        }
+
+        @Test
+        fun `skal bare logge fagsak id én gang hvis flere barn har delt bosted og ikke bor med søker på Svalbard`() {
+            // Arrange
+            val listAppender = ListAppender<ILoggingEvent>().apply { start() }
+            val logger = LoggerFactory.getLogger("VilkårsvurderingValidering.kt") as Logger
+            logger.addAppender(listAppender)
+
+            val søker = lagPerson(type = PersonType.SØKER)
+            val barn1 = lagPerson(type = PersonType.BARN)
+            val barn2 = lagPerson(type = PersonType.BARN)
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering {
+                    setOf(
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = søker.aktør,
+                            lagVilkårResultater = {
+                                setOf(
+                                    lagVilkårResultat(
+                                        vilkårType = BOSATT_I_RIKET,
+                                        utdypendeVilkårsvurderinger = listOf(BOSATT_PÅ_SVALBARD),
+                                        periodeFom = LocalDate.of(2025, 1, 1),
+                                        periodeTom = LocalDate.of(2025, 6, 1),
+                                    ),
+                                )
+                            },
+                        ),
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = barn1.aktør,
+                            lagVilkårResultater = {
+                                setOf(
+                                    lagVilkårResultat(
+                                        vilkårType = UNDER_18_ÅR,
+                                        periodeFom = barn1.fødselsdato,
+                                        periodeTom = barn1.fødselsdato.plusYears(18),
+                                    ),
+                                    lagVilkårResultat(
+                                        vilkårType = BOR_MED_SØKER,
+                                        utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
+                                        periodeFom = LocalDate.of(2025, 1, 1),
+                                        periodeTom = LocalDate.of(2025, 6, 1),
+                                    ),
+                                )
+                            },
+                        ),
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = barn2.aktør,
+                            lagVilkårResultater = {
+                                setOf(
+                                    lagVilkårResultat(
+                                        vilkårType = UNDER_18_ÅR,
+                                        periodeFom = barn2.fødselsdato,
+                                        periodeTom = barn2.fødselsdato.plusYears(18),
+                                    ),
+                                    lagVilkårResultat(
+                                        vilkårType = BOR_MED_SØKER,
+                                        utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
+                                        periodeFom = LocalDate.of(2025, 1, 1),
+                                        periodeTom = LocalDate.of(2025, 6, 1),
+                                    ),
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            // Act
+            validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)
+
+            // Assert
+            assertThat(listAppender.list.single().level).isEqualTo(Level.WARN)
+            assertThat(listAppender.list.single().message).isEqualTo(
+                "For fagsak ${vilkårsvurdering.behandling.fagsak.id} finnes det perioder der søker er " +
+                    "BOSATT_PÅ_SVALBARD samtidig som et barn med delt bosted ikke er BOSATT_PÅ_SVALBARD.",
             )
         }
     }
