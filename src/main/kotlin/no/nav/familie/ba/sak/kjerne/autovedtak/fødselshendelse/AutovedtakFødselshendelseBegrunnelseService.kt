@@ -89,7 +89,7 @@ class AutovedtakFødselshendelseBegrunnelseService(
             if (harSvalbardtilleggNesteMåned) {
                 begrunnelser +=
                     Vedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_AUTOVEDTAK_FØDSEL_SVALBARDTILLEGG,
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG_UTEN_DATO,
                         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                     )
             }

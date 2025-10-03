@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggBegrunnelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggBegrunnelseService
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.EksternBehandlingRelasjonService
@@ -594,6 +595,16 @@ class CucumberMock(
 
     val autovedtakFinnmarkstilleggBegrunnelseService =
         AutovedtakFinnmarkstilleggBegrunnelseService(
+            vedtaksperiodeService = vedtaksperiodeService,
+            vedtakService = vedtakService,
+            beregningService = beregningService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
+            featureToggleService = featureToggleService,
+        )
+
+    val autovedtakSvalbardtilleggBegrunnelseService =
+        AutovedtakSvalbardtilleggBegrunnelseService(
             vedtaksperiodeService = vedtaksperiodeService,
             vedtakService = vedtakService,
             beregningService = beregningService,
