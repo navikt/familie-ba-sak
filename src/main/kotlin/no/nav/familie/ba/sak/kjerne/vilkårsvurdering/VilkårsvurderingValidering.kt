@@ -145,29 +145,31 @@ private fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerITilleggss
             .filter { it.vilkårType == BOSATT_I_RIKET && utdypendeVilkårsvurdering in it.utdypendeVilkårsvurderinger }
             .lagForskjøvetTidslinjeForOppfylteVilkår(BOSATT_I_RIKET)
 
-    vilkårsvurdering
-        .personResultater
-        .filterNot { it.erSøkersResultater() }
-        .forEach { personResultat ->
-            val barnBosattITilleggssoneTidslinje =
-                personResultat.vilkårResultater
-                    .filter { it.vilkårType == BOSATT_I_RIKET && utdypendeVilkårsvurdering in it.utdypendeVilkårsvurderinger }
-                    .lagForskjøvetTidslinjeForOppfylteVilkår(BOSATT_I_RIKET)
+    val finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerITilleggssone =
+        vilkårsvurdering
+            .personResultater
+            .filterNot { it.erSøkersResultater() }
+            .any { personResultat ->
+                val barnBosattITilleggssoneTidslinje =
+                    personResultat.vilkårResultater
+                        .filter { it.vilkårType == BOSATT_I_RIKET && utdypendeVilkårsvurdering in it.utdypendeVilkårsvurderinger }
+                        .lagForskjøvetTidslinjeForOppfylteVilkår(BOSATT_I_RIKET)
 
-            val barnDeltBostedTidslinje =
-                personResultat.vilkårResultater
-                    .filter { it.vilkårType == BOR_MED_SØKER && (DELT_BOSTED in it.utdypendeVilkårsvurderinger || DELT_BOSTED_SKAL_IKKE_DELES in it.utdypendeVilkårsvurderinger) }
-                    .lagForskjøvetTidslinjeForOppfylteVilkår(BOR_MED_SØKER)
+                val barnDeltBostedTidslinje =
+                    personResultat.vilkårResultater
+                        .filter { it.vilkårType == BOR_MED_SØKER && (DELT_BOSTED in it.utdypendeVilkårsvurderinger || DELT_BOSTED_SKAL_IKKE_DELES in it.utdypendeVilkårsvurderinger) }
+                        .lagForskjøvetTidslinjeForOppfylteVilkår(BOR_MED_SØKER)
 
-            val finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerITilleggssone =
-                søkerBosattITilleggssoneTidslinje.kombinerMed(barnBosattITilleggssoneTidslinje, barnDeltBostedTidslinje) { søkerBosattITilleggssone, barnBosattITilleggssone, barnDeltBosted ->
-                    søkerBosattITilleggssone != null && barnBosattITilleggssone == null && barnDeltBosted != null
-                }
-
-            if (finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerITilleggssone.tilPerioder().any { it.verdi == true }) {
-                logger.warn("For fagsak ${vilkårsvurdering.behandling.fagsak.id} finnes det perioder der søker er $utdypendeVilkårsvurdering samtidig som et barn med delt bosted ikke er $utdypendeVilkårsvurdering.")
+                søkerBosattITilleggssoneTidslinje
+                    .kombinerMed(barnBosattITilleggssoneTidslinje, barnDeltBostedTidslinje) { søkerBosattITilleggssone, barnBosattITilleggssone, barnDeltBosted ->
+                        søkerBosattITilleggssone != null && barnBosattITilleggssone == null && barnDeltBosted != null
+                    }.tilPerioder()
+                    .any { it.verdi == true }
             }
-        }
+
+    if (finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerITilleggssone) {
+        logger.warn("For fagsak ${vilkårsvurdering.behandling.fagsak.id} finnes det perioder der søker er $utdypendeVilkårsvurdering samtidig som et barn med delt bosted ikke er $utdypendeVilkårsvurdering.")
+    }
 }
 
 fun validerResultatBegrunnelse(restVilkårResultat: RestVilkårResultat) {
