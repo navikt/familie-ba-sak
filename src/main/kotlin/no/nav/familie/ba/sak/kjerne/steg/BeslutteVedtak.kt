@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
+import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningBrevService
@@ -63,20 +64,23 @@ class BeslutteVedtak(
     private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
     private val tilbakekrevingsvedtakMotregningBrevService: TilbakekrevingsvedtakMotregningBrevService,
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
-    override fun utførStegOgAngiNeste(
+    override fun preValiderSteg(
         behandling: Behandling,
-        data: RestBeslutningPåVedtak,
-    ): StegType {
+        stegService: StegService?,
+    ) {
         if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
             throw FunksjonellFeil("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
-        } else if (behandling.status == BehandlingStatus.AVSLUTTET) {
+        }
+        if (behandling.status == BehandlingStatus.AVSLUTTET) {
             throw FunksjonellFeil("Behandlingen er allerede avsluttet")
-        } else if (behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV && !featureToggleService.isEnabled(FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV, behandling.id)) {
+        }
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV && !featureToggleService.isEnabled(FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV, behandling.id)) {
             throw FunksjonellFeil(
                 melding = "Årsak ${BehandlingÅrsak.KORREKSJON_VEDTAKSBREV.visningsnavn} og toggle ${FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV.navn} false",
                 frontendFeilmelding = "Du har ikke tilgang til å beslutte for denne behandlingen. Ta kontakt med teamet dersom dette ikke stemmer.",
             )
-        } else if (behandling.erTekniskEndring() &&
+        }
+        if (behandling.erTekniskEndring() &&
             !featureToggleService.isEnabled(
                 FeatureToggle.TEKNISK_ENDRING,
                 behandling.id,
@@ -86,23 +90,21 @@ class BeslutteVedtak(
                 "Du har ikke tilgang til å beslutte en behandling med årsak=${behandling.opprettetÅrsak.visningsnavn}. Ta kontakt med teamet dersom dette ikke stemmer.",
             )
         }
+    }
 
+    override fun utførStegOgAngiNeste(
+        behandling: Behandling,
+        data: RestBeslutningPåVedtak,
+    ): StegType {
         validerBrevmottakere(BehandlingId(behandling.id), data.beslutning.erGodkjent())
 
-        val feilutbetaling by lazy { simuleringService.hentFeilutbetaling(behandlingId = behandling.id) }
-        val erÅpenTilbakekrevingPåFagsak by lazy { tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id) }
-        val tilbakekrevingsvalg by lazy { tilbakekrevingService.hentTilbakekrevingsvalg(behandling.id) }
-
         val behandlingSkalAutomatiskBesluttes = automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)
-
-        val beslutter = if (behandlingSkalAutomatiskBesluttes) SikkerhetContext.SYSTEM_NAVN else saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
-        val beslutterId = if (behandlingSkalAutomatiskBesluttes) SikkerhetContext.SYSTEM_FORKORTELSE else SikkerhetContext.hentSaksbehandler()
 
         val totrinnskontroll =
             totrinnskontrollService.besluttTotrinnskontroll(
                 behandling = behandling,
-                beslutter = beslutter,
-                beslutterId = beslutterId,
+                beslutter = bestemBeslutter(behandlingSkalAutomatiskBesluttes),
+                beslutterId = bestemBeslutterId(behandlingSkalAutomatiskBesluttes),
                 beslutning = data.beslutning,
                 kontrollerteSider = data.kontrollerteSider,
             )
@@ -114,92 +116,9 @@ class BeslutteVedtak(
         )
 
         return if (data.beslutning.erGodkjent()) {
-            if (!erÅpenTilbakekrevingPåFagsak) {
-                validerErTilbakekrevingHvisFeilutbetaling(feilutbetaling, tilbakekrevingsvalg)
-            }
-
-            val vedtak =
-                vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-                    ?: throw Feil("Fant ikke aktivt vedtak på behandling ${behandling.id}")
-
-            tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandling.id)?.let {
-                opprettJournalførTilbakekrevingsvedtakMotregningBrevTask(behandling)
-            }
-
-            vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
-
-            tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandling.id)?.let {
-                tilbakekrevingsvedtakMotregningBrevService.opprettOgLagreTilbakekrevingsvedtakMotregningPdf(behandling.id)
-            }
-
-            val nesteSteg = sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling)
-
-            when (nesteSteg) {
-                StegType.IVERKSETT_MOT_OPPDRAG -> {
-                    opprettTaskIverksettMotOppdrag(behandling, vedtak)
-                }
-
-                StegType.JOURNALFØR_VEDTAKSBREV -> {
-                    if (!behandling.erBehandlingMedVedtaksbrevutsending()) {
-                        throw Feil("Prøvde å opprette vedtaksbrev for behandling som ikke skal sende ut vedtaksbrev.")
-                    }
-
-                    if (featureToggleService.isEnabled(FeatureToggle.STONADSSTATISTIKK_FORTSATT_INNVILGET)) {
-                        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET &&
-                            behandling.kategori == BehandlingKategori.EØS
-                        ) {
-                            val nyTaskV2 = PubliserVedtakV2Task.opprettTask(behandling.fagsak.aktør.aktivFødselsnummer(), behandling.id)
-                            taskRepository.save(nyTaskV2)
-                        }
-                    }
-
-                    opprettJournalførVedtaksbrevTask(behandling, vedtak)
-                }
-
-                StegType.FERDIGSTILLE_BEHANDLING -> {
-                    if (behandling.type == BehandlingType.TEKNISK_ENDRING || behandling.erManuellMigreringForEndreMigreringsdato()) {
-                        opprettFerdigstillBehandlingTask(behandling)
-                    } else {
-                        throw Feil("Neste steg 'ferdigstille behandling' er ikke implementert på 'beslutte vedtak'-steg")
-                    }
-                }
-
-                else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på 'beslutte vedtak'-steg")
-            }
-            nesteSteg
+            håndterGodkjentVedtak(behandling)
         } else {
-            val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id) ?: throw Feil("Fant ikke vilkårsvurdering på behandling")
-            val kopiertVilkårsVurdering = vilkårsvurdering.kopier(inkluderAndreVurderinger = true)
-            vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = kopiertVilkårsVurdering)
-
-            behandlingService.opprettOgInitierNyttVedtakForBehandling(
-                behandling = behandling,
-                kopierVedtakBegrunnelser = true,
-            )
-
-            val behandleUnderkjentVedtakTask =
-                OpprettOppgaveTask.opprettTask(
-                    behandlingId = behandling.id,
-                    oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
-                    tilordnetRessurs = totrinnskontroll.saksbehandlerId,
-                    fristForFerdigstillelse = LocalDate.now(),
-                )
-            taskRepository.save(behandleUnderkjentVedtakTask)
-
-            StegType.SEND_TIL_BESLUTTER
-        }
-    }
-
-    private fun validerErTilbakekrevingHvisFeilutbetaling(
-        feilutbetaling: BigDecimal,
-        tilbakekrevingsvalg: Tilbakekrevingsvalg?,
-    ) {
-        if (feilutbetaling != BigDecimal.ZERO && tilbakekrevingsvalg == null) {
-            throw FunksjonellFeil("Det er en feilutbetaling som saksbehandler ikke har tatt stilling til. Saken må underkjennes og sendes tilbake til saksbehandler for ny vurdering.")
-        }
-
-        if (feilutbetaling == BigDecimal.ZERO && tilbakekrevingsvalg in listOf(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL, Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK, Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)) {
-            throw FunksjonellFeil("Det er valgt å opprette tilbakekrevingssak men det er ikke lenger feilutbetalt beløp. Behandlingen må underkjennes, og saksbehandler må gå tilbake til behandlingsresultatet og trykke neste og fullføre behandlingen på nytt.")
+            håndterUnderkjentVedtak(behandling = behandling, totrinnskontroll = totrinnskontroll)
         }
     }
 
@@ -208,6 +127,108 @@ class BeslutteVedtak(
     }
 
     override fun stegType(): StegType = StegType.BESLUTTE_VEDTAK
+
+    private fun bestemBeslutter(behandlingSkalAutomatiskBesluttes: Boolean): String = if (behandlingSkalAutomatiskBesluttes) SikkerhetContext.SYSTEM_NAVN else saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
+
+    private fun bestemBeslutterId(behandlingSkalAutomatiskBesluttes: Boolean): String = if (behandlingSkalAutomatiskBesluttes) SikkerhetContext.SYSTEM_FORKORTELSE else SikkerhetContext.hentSaksbehandler()
+
+    private fun håndterGodkjentVedtak(behandling: Behandling): StegType {
+        val erÅpenTilbakekrevingPåFagsak = tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)
+        if (!erÅpenTilbakekrevingPåFagsak) {
+            validerErTilbakekrevingHvisFeilutbetaling(behandling.id)
+        }
+
+        val vedtak =
+            vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+                ?: throw Feil("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+
+        tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandling.id)?.let {
+            opprettJournalførTilbakekrevingsvedtakMotregningBrevTask(behandling)
+            tilbakekrevingsvedtakMotregningBrevService.opprettOgLagreTilbakekrevingsvedtakMotregningPdf(behandling.id)
+        }
+
+        vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
+
+        val nesteSteg = sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling)
+
+        when (nesteSteg) {
+            StegType.IVERKSETT_MOT_OPPDRAG -> {
+                opprettTaskIverksettMotOppdrag(behandling, vedtak)
+            }
+
+            StegType.JOURNALFØR_VEDTAKSBREV -> {
+                if (!behandling.erBehandlingMedVedtaksbrevutsending()) {
+                    throw Feil("Prøvde å opprette vedtaksbrev for behandling som ikke skal sende ut vedtaksbrev.")
+                }
+
+                publiserStønadsstatistikkVedFortsattInnvilgetEØS(behandling)
+
+                opprettJournalførVedtaksbrevTask(behandling, vedtak)
+            }
+
+            StegType.FERDIGSTILLE_BEHANDLING -> {
+                if (behandling.type == BehandlingType.TEKNISK_ENDRING || behandling.erManuellMigreringForEndreMigreringsdato()) {
+                    opprettFerdigstillBehandlingTask(behandling)
+                } else {
+                    throw Feil("Neste steg 'ferdigstille behandling' er ikke implementert på 'beslutte vedtak'-steg")
+                }
+            }
+
+            else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på 'beslutte vedtak'-steg")
+        }
+        return nesteSteg
+    }
+
+    private fun håndterUnderkjentVedtak(
+        behandling: Behandling,
+        totrinnskontroll: Totrinnskontroll,
+    ): StegType {
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id) ?: throw Feil("Fant ikke vilkårsvurdering på behandling")
+        val kopiertVilkårsVurdering = vilkårsvurdering.kopier(inkluderAndreVurderinger = true)
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = kopiertVilkårsVurdering)
+
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(
+            behandling = behandling,
+            kopierVedtakBegrunnelser = true,
+        )
+
+        val behandleUnderkjentVedtakTask =
+            OpprettOppgaveTask.opprettTask(
+                behandlingId = behandling.id,
+                oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
+                tilordnetRessurs = totrinnskontroll.saksbehandlerId,
+                fristForFerdigstillelse = LocalDate.now(),
+            )
+        taskRepository.save(behandleUnderkjentVedtakTask)
+
+        return StegType.SEND_TIL_BESLUTTER
+    }
+
+    private fun publiserStønadsstatistikkVedFortsattInnvilgetEØS(behandling: Behandling) {
+        if (featureToggleService.isEnabled(FeatureToggle.STONADSSTATISTIKK_FORTSATT_INNVILGET)) {
+            if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET &&
+                behandling.kategori == BehandlingKategori.EØS
+            ) {
+                val nyTaskV2 = PubliserVedtakV2Task.opprettTask(behandling.fagsak.aktør.aktivFødselsnummer(), behandling.id)
+                taskRepository.save(nyTaskV2)
+            }
+        }
+    }
+
+    private fun validerErTilbakekrevingHvisFeilutbetaling(
+        behandlingId: Long,
+    ) {
+        val feilutbetaling = simuleringService.hentFeilutbetaling(behandlingId = behandlingId)
+        val tilbakekrevingsvalg = tilbakekrevingService.hentTilbakekrevingsvalg(behandlingId = behandlingId)
+
+        if (feilutbetaling != BigDecimal.ZERO && tilbakekrevingsvalg == null) {
+            throw FunksjonellFeil("Det er en feilutbetaling som saksbehandler ikke har tatt stilling til. Saken må underkjennes og sendes tilbake til saksbehandler for ny vurdering.")
+        }
+
+        if (feilutbetaling == BigDecimal.ZERO && tilbakekrevingsvalg in listOf(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL, Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK, Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)) {
+            throw FunksjonellFeil("Det er valgt å opprette tilbakekrevingssak men det er ikke lenger feilutbetalt beløp. Behandlingen må underkjennes, og saksbehandler må gå tilbake til behandlingsresultatet og trykke neste og fullføre behandlingen på nytt.")
+        }
+    }
 
     private fun sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling: Behandling): StegType {
         val endringerIUtbetaling = beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling)
