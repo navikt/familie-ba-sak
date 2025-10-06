@@ -105,7 +105,7 @@ class DeltBostedTest {
                 }
 
             // Assert
-            assertThat(feil.message).isEqualTo("Vegadresse, matrikkeladresse og ukjent bosted har verdi null ved mapping fra bostedadresse")
+            assertThat(feil.message).isEqualTo("Vegadresse, matrikkeladresse og ukjent bosted har verdi null ved mapping fra delt bosted")
         }
 
         @Test
