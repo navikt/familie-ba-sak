@@ -55,7 +55,6 @@ class PersongrunnlagService(
     private val loggService: LoggService,
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val integrasjonClient: IntegrasjonClient,
     private val kodeverkService: KodeverkService,
 ) {
     fun mapTilRestPersonMedStatsborgerskapLand(
@@ -382,6 +381,35 @@ class PersongrunnlagService(
 
         secureLogger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter persongrunnlag $personopplysningGrunnlag")
         return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+    }
+
+    fun oppdaterAdresserPåPersoner(
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+    ) {
+        personopplysningGrunnlag.personer.forEach { person ->
+            val aktør = person.aktør
+            val personinfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+
+            person.bostedsadresser =
+                personinfo.bostedsadresser
+                    .filtrerUtKunNorskeBostedsadresser()
+                    .map {
+                        GrBostedsadresse.fraBostedsadresse(
+                            bostedsadresse = it,
+                            person = person,
+                            poststed = it.poststed(),
+                        )
+                    }.toMutableList()
+            person.oppholdsadresser =
+                personinfo.oppholdsadresser
+                    .map {
+                        GrOppholdsadresse.fraOppholdsadresse(
+                            oppholdsadresse = it,
+                            person = person,
+                            poststed = it.poststed(),
+                        )
+                    }.toMutableList()
+        }
     }
 
     fun hentSøkersMålform(behandlingId: Long) = hentSøkerOgBarnPåBehandlingThrows(behandlingId).søker().målform
