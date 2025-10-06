@@ -116,6 +116,7 @@ class PdlRestClient(
                     adressebeskyttelseGradering = it.adressebeskyttelse.firstOrNull()?.gradering,
                     bostedsadresser = it.bostedsadresse,
                     oppholdsadresser = it.oppholdsadresse,
+                    deltBosted = it.deltBosted,
                     statsborgerskap = it.statsborgerskap,
                     opphold = it.opphold,
                     sivilstander = it.sivilstand,
