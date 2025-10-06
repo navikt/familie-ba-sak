@@ -30,17 +30,9 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.lagForskjøvetTidslinjeForOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.prosessering.error.RekjørSenereException
 import no.nav.familie.tidslinje.Tidslinje
-import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
@@ -192,7 +184,6 @@ object BehandlingsresultatValideringUtils {
     fun validerFinnmarkstilleggBehandling(
         andelerNåværendeBehandling: Collection<AndelTilkjentYtelse>,
         andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
-        vilkårsvurdering: Vilkårsvurdering,
         inneværendeMåned: YearMonth,
     ) {
         validerAtDetIkkeHarVærtEndringIUtbetalingUtenomYtelseType(
@@ -208,8 +199,6 @@ object BehandlingsresultatValideringUtils {
             ytelseType = YtelseType.FINNMARKSTILLEGG,
             inneværendeMåned = inneværendeMåned,
         )
-
-        validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering)
     }
 
     fun validerSvalbardtilleggBehandling(
@@ -230,39 +219,6 @@ object BehandlingsresultatValideringUtils {
             ytelseType = YtelseType.SVALBARDTILLEGG,
             inneværendeMåned = inneværendeMåned,
         )
-    }
-
-    private fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering: Vilkårsvurdering) {
-        val søkersPersonResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() } ?: return
-
-        val søkerBosattIFinnmarkTidslinje =
-            søkersPersonResultat.vilkårResultater
-                .filter { it.vilkårType == BOSATT_I_RIKET && BOSATT_I_FINNMARK_NORD_TROMS in it.utdypendeVilkårsvurderinger }
-                .lagForskjøvetTidslinjeForOppfylteVilkår(BOSATT_I_RIKET)
-
-        vilkårsvurdering
-            .personResultater
-            .filterNot { it.erSøkersResultater() }
-            .forEach { personResultat ->
-                val barnBosattIFinnmarkTidslinje =
-                    personResultat.vilkårResultater
-                        .filter { it.vilkårType == BOSATT_I_RIKET && BOSATT_I_FINNMARK_NORD_TROMS in it.utdypendeVilkårsvurderinger }
-                        .lagForskjøvetTidslinjeForOppfylteVilkår(BOSATT_I_RIKET)
-
-                val barnDeltBostedTidslinje =
-                    personResultat.vilkårResultater
-                        .filter { it.vilkårType == Vilkår.BOR_MED_SØKER && (it.utdypendeVilkårsvurderinger.contains(DELT_BOSTED) || it.utdypendeVilkårsvurderinger.contains(DELT_BOSTED_SKAL_IKKE_DELES)) }
-                        .lagForskjøvetTidslinjeForOppfylteVilkår(Vilkår.BOR_MED_SØKER)
-
-                val finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerIFinnmark =
-                    søkerBosattIFinnmarkTidslinje.kombinerMed(barnBosattIFinnmarkTidslinje, barnDeltBostedTidslinje) { søkerBosattIFinnmark, barnBosattIFinnmark, barnDeltBosted ->
-                        søkerBosattIFinnmark != null && barnBosattIFinnmark == null && barnDeltBosted != null
-                    }
-
-                if (finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerIFinnmark.tilPerioder().any { it.verdi == true }) {
-                    logger.warn("For fagsak ${vilkårsvurdering.behandling.fagsak.id} finnes det perioder der søker bor i finnmark samtidig som et barn med delt bosted ikke bor i finnmark.")
-                }
-            }
     }
 
     private fun validerAtDetIkkeHarVærtEndringIUtbetalingUtenomYtelseType(
