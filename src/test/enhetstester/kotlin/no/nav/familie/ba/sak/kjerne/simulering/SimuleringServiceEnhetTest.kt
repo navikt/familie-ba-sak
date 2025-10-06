@@ -4,7 +4,10 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
+import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
@@ -29,6 +32,7 @@ import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -79,15 +83,15 @@ internal class SimuleringServiceEnhetTest {
             // etterbetaling 4 KR pga. avrundingsfeil. 1 KR per barn i hver periode.
             val posteringer =
                 listOf(
-                    mockVedtakSimuleringPostering(fom = februar2023, beløp = 2, betalingType = BetalingType.DEBIT),
-                    mockVedtakSimuleringPostering(fom = februar2023, beløp = -2, betalingType = BetalingType.KREDIT),
-                    mockVedtakSimuleringPostering(fom = februar2023, beløp = 2, betalingType = BetalingType.DEBIT),
-                    mockVedtakSimuleringPostering(beløp = 2, betalingType = BetalingType.DEBIT),
-                    mockVedtakSimuleringPostering(beløp = -2, betalingType = BetalingType.KREDIT),
-                    mockVedtakSimuleringPostering(beløp = 2, betalingType = BetalingType.DEBIT),
+                    lagØkonomiSimuleringPostering(fom = februar2023, beløp = 2, betalingType = BetalingType.DEBIT),
+                    lagØkonomiSimuleringPostering(fom = februar2023, beløp = -2, betalingType = BetalingType.KREDIT),
+                    lagØkonomiSimuleringPostering(fom = februar2023, beløp = 2, betalingType = BetalingType.DEBIT),
+                    lagØkonomiSimuleringPostering(beløp = 2, betalingType = BetalingType.DEBIT),
+                    lagØkonomiSimuleringPostering(beløp = -2, betalingType = BetalingType.KREDIT),
+                    lagØkonomiSimuleringPostering(beløp = 2, betalingType = BetalingType.DEBIT),
                 )
             val simuleringMottaker =
-                listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
+                listOf(lagØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
 
             every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
             every { persongrunnlagService.hentSøkerOgBarnPåBehandling(behandling.id) } returns
@@ -123,13 +127,13 @@ internal class SimuleringServiceEnhetTest {
             // feilutbetaling 1 KR per barn i hver periode
             val posteringer =
                 listOf(
-                    mockVedtakSimuleringPostering(
+                    lagØkonomiSimuleringPostering(
                         fom = fom,
                         tom = tom,
                         beløp = 2,
                         posteringType = PosteringType.FEILUTBETALING,
                     ),
-                    mockVedtakSimuleringPostering(
+                    lagØkonomiSimuleringPostering(
                         fom = fom2,
                         tom = tom2,
                         beløp = 2,
@@ -138,7 +142,7 @@ internal class SimuleringServiceEnhetTest {
                 )
 
             val simuleringMottaker =
-                listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
+                listOf(lagØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
 
             every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
             every { persongrunnlagService.hentSøkerOgBarnPåBehandling(behandling.id) } returns
@@ -169,12 +173,12 @@ internal class SimuleringServiceEnhetTest {
             // etterbetaling 200 KR
             val posteringer =
                 listOf(
-                    mockVedtakSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT),
-                    mockVedtakSimuleringPostering(beløp = -200, betalingType = BetalingType.KREDIT),
-                    mockVedtakSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT),
+                    lagØkonomiSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT, fom = LocalDate.of(2023, 1, 1), tom = LocalDate.of(2023, 1, 1)),
+                    lagØkonomiSimuleringPostering(beløp = -200, betalingType = BetalingType.KREDIT, fom = LocalDate.of(2023, 1, 1), tom = LocalDate.of(2023, 1, 1)),
+                    lagØkonomiSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT, fom = LocalDate.of(2023, 1, 1), tom = LocalDate.of(2023, 1, 1)),
                 )
             val simuleringMottaker =
-                listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
+                listOf(lagØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
 
             every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
             every { persongrunnlagService.hentSøkerOgBarnPåBehandling(behandling.id) } returns
@@ -227,16 +231,16 @@ internal class SimuleringServiceEnhetTest {
             // etterbetaling 200 KR
             val posteringer =
                 listOf(
-                    mockVedtakSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT),
-                    mockVedtakSimuleringPostering(beløp = -200, betalingType = BetalingType.KREDIT),
-                    mockVedtakSimuleringPostering(
+                    lagØkonomiSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT),
+                    lagØkonomiSimuleringPostering(beløp = -200, betalingType = BetalingType.KREDIT),
+                    lagØkonomiSimuleringPostering(
                         beløp = 200,
                         betalingType = BetalingType.DEBIT,
                         fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT,
                     ),
                 )
             val simuleringMottaker =
-                listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
+                listOf(lagØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
 
             every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
 
@@ -265,12 +269,12 @@ internal class SimuleringServiceEnhetTest {
             // etterbetaling 200 KR
             val posteringer =
                 listOf(
-                    mockVedtakSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT),
-                    mockVedtakSimuleringPostering(beløp = -200, betalingType = BetalingType.KREDIT),
-                    mockVedtakSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT),
+                    lagØkonomiSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT),
+                    lagØkonomiSimuleringPostering(beløp = -200, betalingType = BetalingType.KREDIT),
+                    lagØkonomiSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT),
                 )
             val simuleringMottaker =
-                listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
+                listOf(lagØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
 
             every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
 
@@ -299,34 +303,4 @@ internal class SimuleringServiceEnhetTest {
             assertThrows<Feil> { simuleringService.harMigreringsbehandlingManuellePosteringer(behandling) }
         }
     }
-
-    private fun mockØkonomiSimuleringMottaker(
-        id: Long = 0,
-        mottakerNummer: String? = randomFnr(),
-        mottakerType: MottakerType = MottakerType.BRUKER,
-        behandling: Behandling = mockk(relaxed = true),
-        økonomiSimuleringPostering: List<ØkonomiSimuleringPostering> = listOf(mockVedtakSimuleringPostering()),
-    ) = ØkonomiSimuleringMottaker(id, mottakerNummer, mottakerType, behandling, økonomiSimuleringPostering)
-
-    private fun mockVedtakSimuleringPostering(
-        økonomiSimuleringMottaker: ØkonomiSimuleringMottaker = mockk(relaxed = true),
-        beløp: Int = 0,
-        fagOmrådeKode: FagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-        fom: LocalDate = LocalDate.of(2023, 1, 1),
-        tom: LocalDate = LocalDate.of(2023, 1, 1),
-        betalingType: BetalingType = BetalingType.DEBIT,
-        posteringType: PosteringType = PosteringType.YTELSE,
-        forfallsdato: LocalDate = LocalDate.of(2023, 1, 1),
-        utenInntrekk: Boolean = false,
-    ) = ØkonomiSimuleringPostering(
-        økonomiSimuleringMottaker = økonomiSimuleringMottaker,
-        fagOmrådeKode = fagOmrådeKode,
-        fom = fom,
-        tom = tom,
-        betalingType = betalingType,
-        beløp = beløp.toBigDecimal(),
-        posteringType = posteringType,
-        forfallsdato = forfallsdato,
-        utenInntrekk = utenInntrekk,
-    )
 }
