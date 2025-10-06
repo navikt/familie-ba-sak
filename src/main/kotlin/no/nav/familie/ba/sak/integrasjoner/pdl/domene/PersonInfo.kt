@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
@@ -37,6 +38,7 @@ data class PersonInfo(
     override val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
     val bostedsadresser: List<Bostedsadresse> = emptyList(),
     val oppholdsadresser: List<Oppholdsadresse> = emptyList(),
+    val deltBosted: List<DeltBosted> = emptyList(),
     val sivilstander: List<Sivilstand> = emptyList(),
     val opphold: List<Opphold>? = emptyList(),
     val statsborgerskap: List<Statsborgerskap>? = emptyList(),

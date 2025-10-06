@@ -54,6 +54,31 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
             bostedskommune
         }
     }
+
+    deltBosted(historikk: true) {
+        startdatoForKontrakt
+        sluttdatoForKontrakt
+        vegadresse {
+            matrikkelId
+            husnummer
+            husbokstav
+            bruksenhetsnummer
+            adressenavn
+            kommunenummer
+            tilleggsnavn
+            postnummer
+        }
+        matrikkeladresse {
+            matrikkelId
+            bruksenhetsnummer
+            tilleggsnavn
+            postnummer
+            kommunenummer
+        }
+        ukjentBosted {
+            bostedskommune
+        }
+    }
     oppholdsadresse(historikk: true) {
         gyldigFraOgMed
         gyldigTilOgMed
