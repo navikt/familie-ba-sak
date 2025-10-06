@@ -422,6 +422,15 @@ class PersongrunnlagService(
                             poststed = it.poststed(),
                         )
                     }.toMutableList()
+            person.deltBosted =
+                personinfo.deltBosted
+                    .map {
+                        GrDeltBosted.fraDeltBosted(
+                            deltBosted = it,
+                            person = person,
+                            poststed = it.poststed(),
+                        )
+                    }.toMutableList()
         }
     }
 
