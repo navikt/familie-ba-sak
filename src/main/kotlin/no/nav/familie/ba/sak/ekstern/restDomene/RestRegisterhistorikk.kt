@@ -10,6 +10,7 @@ data class RestRegisterhistorikk(
     val oppholdstillatelse: List<RestRegisteropplysning>? = emptyList(),
     val statsborgerskap: List<RestRegisteropplysning>? = emptyList(),
     val bostedsadresse: List<RestRegisteropplysning>? = emptyList(),
+    val deltBosted: List<RestRegisteropplysning>? = emptyList(),
     val oppholdsadresse: List<RestRegisteropplysning>? = emptyList(),
     val dødsboadresse: List<RestRegisteropplysning>? = emptyList(),
 )
@@ -21,6 +22,7 @@ fun Person.tilRestRegisterhistorikk() =
         statsborgerskap = statsborgerskap.map { it.tilRestRegisteropplysning() },
         bostedsadresse = this.bostedsadresser.map { it.tilRestRegisteropplysning() }.fyllInnTomDatoer(),
         oppholdsadresse = this.oppholdsadresser.map { it.tilRestRegisteropplysning() }.fyllInnTomDatoer(),
+        deltBosted = this.deltBosted.map { it.tilRestRegisteropplysning() }.fyllInnTomDatoer(),
         sivilstand = this.sivilstander.map { it.tilRestRegisteropplysning() },
         dødsboadresse = if (this.dødsfall == null) emptyList() else listOf(this.dødsfall!!.tilRestRegisteropplysning()),
     )

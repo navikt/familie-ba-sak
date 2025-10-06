@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrDeltBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
@@ -76,6 +77,9 @@ data class Person(
     @Fetch(value = FetchMode.SUBSELECT)
     var oppholdsadresser: MutableList<GrOppholdsadresse> = mutableListOf(),
     @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+    @Fetch(value = FetchMode.SUBSELECT)
+    var deltBosted: MutableList<GrDeltBosted> = mutableListOf(),
+    @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     // Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
     @Fetch(value = FetchMode.SUBSELECT)
     var statsborgerskap: MutableList<GrStatsborgerskap> = mutableListOf(),
@@ -100,6 +104,7 @@ data class Person(
             personopplysningGrunnlag = nyttPersonopplysningGrunnlag,
             bostedsadresser = mutableListOf(),
             oppholdsadresser = mutableListOf(),
+            deltBosted = mutableListOf(),
             statsborgerskap = mutableListOf(),
             opphold = mutableListOf(),
             arbeidsforhold = mutableListOf(),
@@ -113,6 +118,11 @@ data class Person(
             it.oppholdsadresser.addAll(
                 oppholdsadresser.map { grBostedsadresse ->
                     grBostedsadresse.tilKopiForNyPerson(it)
+                },
+            )
+            it.deltBosted.addAll(
+                deltBosted.map { grDeltBosted ->
+                    grDeltBosted.tilKopiForNyPerson(it)
                 },
             )
             it.statsborgerskap.addAll(
