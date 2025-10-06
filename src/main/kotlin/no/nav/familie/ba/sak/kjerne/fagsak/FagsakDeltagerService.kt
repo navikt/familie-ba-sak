@@ -17,8 +17,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROL
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpStatusCodeException
-import java.time.LocalDate
-import java.time.Period
 
 @Service
 class FagsakDeltagerService(
