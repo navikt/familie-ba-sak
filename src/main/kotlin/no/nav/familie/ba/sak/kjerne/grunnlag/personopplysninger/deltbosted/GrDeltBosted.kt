@@ -81,7 +81,7 @@ abstract class GrDeltBosted(
                 deltBosted.vegadresse != null -> fraVegadresse(deltBosted.vegadresse!!, poststed)
                 deltBosted.matrikkeladresse != null -> fraMatrikkeladresse(deltBosted.matrikkeladresse!!, poststed)
                 deltBosted.ukjentBosted != null -> fraUkjentBosted(deltBosted.ukjentBosted!!)
-                else -> throw Feil("Vegadresse, matrikkeladresse og ukjent bosted har verdi null ved mapping fra bostedadresse")
+                else -> throw Feil("Vegadresse, matrikkeladresse og ukjent bosted har verdi null ved mapping fra delt bosted")
             }.also {
                 it.person = person
                 it.periode = DatoIntervallEntitet(deltBosted.startdatoForKontrakt, deltBosted.sluttdatoForKontrakt)
