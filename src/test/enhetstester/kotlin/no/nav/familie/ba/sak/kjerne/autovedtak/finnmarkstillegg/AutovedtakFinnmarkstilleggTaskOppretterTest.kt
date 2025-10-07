@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -24,7 +26,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import java.time.LocalDate
@@ -244,6 +246,10 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
 
         @Test
         fun `skal håndtere behandling uten persongrunnlag`() {
+            val logger = LoggerFactory.getLogger(AutovedtakFinnmarkstilleggTaskOppretter::class.java) as Logger
+            val listAppender = ListAppender<ILoggingEvent>().apply { start() }
+            logger.addAppender(listAppender)
+
             // Arrange
             every {
                 fagsakRepository.finnLøpendeFagsakerForFinnmarkstilleggKjøring(any())
@@ -257,12 +263,14 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
                 persongrunnlagService.hentAktivForBehandlinger(listOf(behandling1.id))
             } returns emptyMap()
 
-            // Act & assert
-            val exception =
-                assertThrows<Feil> {
-                    autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(1000)
-                }
-            assertThat(exception).hasMessageContaining("Forventet personopplysningsgrunnlag for behandling ${behandling1.id} ikke funnet.")
+            // Act
+            autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(1000)
+
+            // Assert
+            assertThat(listAppender.list).anySatisfy {
+                assertThat(it.level.toString()).isEqualTo("ERROR")
+                assertThat(it.formattedMessage).isEqualTo("Forventet personopplysningsgrunnlag for behandling ${behandling1.id} ikke funnet.")
+            }
         }
 
         @Test
