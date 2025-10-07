@@ -73,14 +73,10 @@ class AutovedtakFinnmarkstilleggTaskOppretter(
                             .keys
                     }
 
-            logger.info("Fant ${personerSomBorIFinnmarkEllerNordTroms.size} med adresse i Finnmark eller Nord-Troms")
-
             val fagsakerDerMinstEnAktørBorIFinnmarkEllerNordTroms =
                 fagsakerMedPersonidenter
                     .filterValues { personerSomBorIFinnmarkEllerNordTroms.intersect(it).isNotEmpty() }
                     .keys
-
-            logger.info("Fant ${fagsakerDerMinstEnAktørBorIFinnmarkEllerNordTroms.size} fagsaker der minst én person har adresse i Finnmark eller Nord-Troms")
 
             val fagsakIderSomIkkeSkalOpprettesTaskFor = fagsakIder - fagsakerDerMinstEnAktørBorIFinnmarkEllerNordTroms
             finnmarkstilleggKjøringService.lagreFinnmarkstilleggkjøringer(fagsakIderSomIkkeSkalOpprettesTaskFor)
@@ -92,6 +88,8 @@ class AutovedtakFinnmarkstilleggTaskOppretter(
             logger.info("Opprettet ${fagsakerDerMinstEnAktørBorIFinnmarkEllerNordTroms.size} tasker for autovedtak finnmarkstillegg")
 
             antallBehandlingerStartet += fagsakerDerMinstEnAktørBorIFinnmarkEllerNordTroms.size
+
+            logger.info("Totalt opprettet $antallBehandlingerStartet/$antallFagsaker tasker for autovedtak finnmarkstillegg")
 
             if (++startSide >= page.totalPages) {
                 break
