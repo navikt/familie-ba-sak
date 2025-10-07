@@ -117,7 +117,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
     @BeforeEach
     fun setup() {
         every { finnmarkstilleggKjøringRepository.saveAll(any<List<FinnmarkstilleggKjøring>>()) } returnsArgument 0
-        every { opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(any()) } returns mockk()
+        every { opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(any()) } returns mockk()
     }
 
     @Nested
@@ -172,7 +172,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
             autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(1000)
 
             // Assert
-            verify(exactly = 1) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(setOf(behandling1.fagsak.id)) }
+            verify(exactly = 1) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(behandling1.fagsak.id) }
             verify(exactly = 1) { finnmarkstilleggKjøringRepository.saveAll(listOf(FinnmarkstilleggKjøring(fagsakId = behandling2.fagsak.id))) }
         }
 
@@ -217,7 +217,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
             autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(1000)
 
             // Assert
-            verify(exactly = 1) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(emptySet()) }
+            verify(exactly = 0) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(any()) }
             verify(exactly = 1) { finnmarkstilleggKjøringRepository.saveAll(listOf(FinnmarkstilleggKjøring(fagsakId = eøsBehandling1.fagsak.id), FinnmarkstilleggKjøring(fagsakId = eøsBehandling2.fagsak.id))) }
         }
 
@@ -241,7 +241,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
 
             // Assert
             verify(exactly = 0) { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) }
-            verify(exactly = 1) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(emptySet()) }
+            verify(exactly = 0) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(any()) }
         }
 
         @Test

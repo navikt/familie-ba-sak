@@ -193,15 +193,6 @@ class OpprettTaskService(
     }
 
     @Transactional
-    fun opprettAutovedtakFinnmarkstilleggTasker(
-        fagsakIder: Collection<Long>,
-    ) {
-        fagsakIder.forEach { fagsakId ->
-            opprettAutovedtakFinnmarkstilleggTask(fagsakId)
-        }
-    }
-
-    @Transactional
     fun opprettAutovedtakSvalbardtilleggTasker(
         fagsakIder: Collection<Long>,
     ) {

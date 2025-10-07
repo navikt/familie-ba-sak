@@ -551,7 +551,9 @@ class ForvalterController(
             throw Feil("Dette endepunktet skal ikke brukes i prod")
         }
 
-        opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(fagsakIder)
+        fagsakIder.forEach { fagsakId ->
+            opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(fagsakId)
+        }
 
         return ResponseEntity.ok("Tasker for autovedtak av Finnmarkstillegg opprettet")
     }
