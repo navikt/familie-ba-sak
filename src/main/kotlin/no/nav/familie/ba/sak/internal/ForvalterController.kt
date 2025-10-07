@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.ba.sak.task.DeaktiverMinsideTask
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
@@ -100,6 +101,7 @@ class ForvalterController(
     private val autovedtakFinnmarkstilleggTaskOppretter: AutovedtakFinnmarkstilleggTaskOppretter,
     private val envService: EnvService,
     private val autovedtakSvalbardtilleggTaskOppretter: AutovedtakSvalbardtilleggTaskOppretter,
+    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -696,5 +698,17 @@ class ForvalterController(
                 }
 
         return ResponseEntity.ok(institusjonerSomSkalHaFinnmarkstillegg)
+    }
+
+    @PostMapping("/send-behandlingsstatistikk-til-dvh")
+    fun sendBehandlingsstatistikkTilDvh(
+        @RequestBody behandlingId: Long,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Sende behandlingsstatistikk for behandling til Datavarehus",
+        )
+        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandlingId)
+        return ResponseEntity.ok("Sendt behandlingsstatistikk for behandling $behandlingId til Datavarehus")
     }
 }
