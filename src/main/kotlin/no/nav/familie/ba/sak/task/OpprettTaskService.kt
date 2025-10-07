@@ -168,11 +168,28 @@ class OpprettTaskService(
         }
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettAutovedtakFinnmarkstilleggTask(
         fagsakId: Long,
     ) {
-        opprettAutovedtakFinnmarkstilleggTasker(setOf(fagsakId))
+        overstyrTaskMedNyCallId(IdUtils.generateId()) {
+            taskRepository.save(
+                Task(
+                    type = AutovedtakFinnmarkstilleggTask.TASK_STEP_TYPE,
+                    payload = fagsakId.toString(),
+                    properties =
+                        Properties().apply {
+                            this["fagsakId"] = fagsakId.toString()
+                        },
+                ).apply {
+                    if (envService.erProd() && featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG)) {
+                        medTriggerTid(LocalDateTime.now().plusHours(1))
+                    }
+                },
+            )
+        }
+
+        finnmarkstilleggKjøringRepository.save(FinnmarkstilleggKjøring(fagsakId = fagsakId))
     }
 
     @Transactional
@@ -180,24 +197,7 @@ class OpprettTaskService(
         fagsakIder: Collection<Long>,
     ) {
         fagsakIder.forEach { fagsakId ->
-            overstyrTaskMedNyCallId(IdUtils.generateId()) {
-                taskRepository.save(
-                    Task(
-                        type = AutovedtakFinnmarkstilleggTask.TASK_STEP_TYPE,
-                        payload = fagsakId.toString(),
-                        properties =
-                            Properties().apply {
-                                this["fagsakId"] = fagsakId.toString()
-                            },
-                    ).apply {
-                        if (envService.erProd() && featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG)) {
-                            medTriggerTid(LocalDateTime.now().plusHours(1))
-                        }
-                    },
-                )
-            }
-
-            finnmarkstilleggKjøringRepository.save(FinnmarkstilleggKjøring(fagsakId = fagsakId))
+            opprettAutovedtakFinnmarkstilleggTask(fagsakId)
         }
     }
 
