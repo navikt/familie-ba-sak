@@ -398,7 +398,7 @@ class PersongrunnlagService(
 
     fun oppdaterAdresserPåPersoner(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-    ) {
+    ): PersonopplysningGrunnlag {
         personopplysningGrunnlag.personer.forEach { person ->
             val aktør = person.aktør
             val personinfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
@@ -432,6 +432,8 @@ class PersongrunnlagService(
                         )
                     }.toMutableList()
         }
+
+        return personopplysningGrunnlag
     }
 
     fun hentSøkersMålform(behandlingId: Long) = hentSøkerOgBarnPåBehandlingThrows(behandlingId).søker().målform

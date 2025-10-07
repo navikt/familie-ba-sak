@@ -136,8 +136,9 @@ class FakePersonopplysningerService(
         fun leggTilPersonInfo(
             fødselsdato: LocalDate,
             egendefinertMock: PersonInfo? = null,
+            personIdent: String? = null,
         ): String {
-            val personIdent = randomFnr(fødselsdato)
+            val personIdent = personIdent ?: randomFnr(fødselsdato)
             personInfo[personIdent] = egendefinertMock ?: PersonInfo(
                 fødselsdato = fødselsdato,
                 bostedsadresser = mutableListOf(bostedsadresse),

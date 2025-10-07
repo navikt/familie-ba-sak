@@ -1,6 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
+import no.nav.familie.ba.sak.datagenerator.lagDeltBosted
+import no.nav.familie.ba.sak.datagenerator.lagOppholdsadresse
+import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
@@ -17,6 +21,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrVegadresseDeltBosted
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrVegadresseOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.defaultBostedsadresseHistorikk
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -24,19 +31,16 @@ import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 class PersongrunnlagIntegrationTest(
-    @Autowired
-    private val persongrunnlagService: PersongrunnlagService,
-    @Autowired
-    private val personidentService: PersonidentService,
-    @Autowired
-    private val fagsakService: FagsakService,
-    @Autowired
-    private val behandlingService: BehandlingService,
+    @Autowired private val persongrunnlagService: PersongrunnlagService,
+    @Autowired private val personidentService: PersonidentService,
+    @Autowired private val fagsakService: FagsakService,
+    @Autowired private val behandlingService: BehandlingService,
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Skal lagre dødsfall på person når person er død`() {
@@ -251,6 +255,87 @@ class PersongrunnlagIntegrationTest(
 
         personopplysningGrunnlag.personer.forEach {
             assertEquals(defaultBostedsadresseHistorikk(it.fødselsdato).size, it.bostedsadresser.size)
+        }
+    }
+
+    @Nested
+    inner class OppdaterAdresserPåPersonerTest {
+        @Test
+        fun `Skal oppdatere adresser på personer med det nyeste fra PDL`() {
+            val søkerfødselsdato = randomSøkerFødselsdato()
+            val fødselsnrMor =
+                leggTilPersonInfo(
+                    søkerfødselsdato,
+                    PersonInfo(
+                        fødselsdato = LocalDate.of(1990, 1, 1),
+                        bostedsadresser = emptyList(),
+                    ),
+                )
+            val morAktør = personidentService.hentOgLagreAktør(fødselsnrMor, true)
+
+            val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morAktør.aktivFødselsnummer()))
+            val behandling =
+                behandlingService.opprettBehandling(
+                    NyBehandling(
+                        skalBehandlesAutomatisk = true,
+                        søkersIdent = morAktør.aktivFødselsnummer(),
+                        behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                        kategori = BehandlingKategori.NASJONAL,
+                        underkategori = BehandlingUnderkategori.ORDINÆR,
+                        fagsakId = fagsak.data!!.id,
+                    ),
+                )
+
+            val personopplysningGrunnlag =
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = morAktør,
+                    barnFraInneværendeBehandling = emptyList(),
+                    behandling = behandling,
+                    målform = Målform.NB,
+                )
+
+            val søker = personopplysningGrunnlag.personer.single { it.type == PersonType.SØKER }
+            assertThat(søker.bostedsadresser).isEmpty()
+            assertThat(søker.oppholdsadresser).isEmpty()
+            assertThat(søker.deltBosted).isEmpty()
+
+            leggTilPersonInfo(
+                søkerfødselsdato,
+                PersonInfo(
+                    fødselsdato = LocalDate.of(1990, 1, 1),
+                    bostedsadresser =
+                        listOf(
+                            lagBostedsadresse(
+                                vegadresse = lagVegadresse(kommunenummer = "9601"),
+                            ),
+                        ),
+                    oppholdsadresser =
+                        listOf(
+                            lagOppholdsadresse(
+                                vegadresse = lagVegadresse(kommunenummer = "9601"),
+                            ),
+                        ),
+                    deltBosted =
+                        listOf(
+                            lagDeltBosted(
+                                vegadresse = lagVegadresse(kommunenummer = "9601"),
+                            ),
+                        ),
+                ),
+                personIdent = fødselsnrMor,
+            )
+
+            val oppdatertPersonopplysningGrunnlag = persongrunnlagService.oppdaterAdresserPåPersoner(personopplysningGrunnlag)
+            val søkerOppdatert = oppdatertPersonopplysningGrunnlag.personer.single { it.type == PersonType.SØKER }
+
+            val bostedsadresseForSøker = søkerOppdatert.bostedsadresser.single() as GrVegadresseBostedsadresse
+            val oppholdsadresseForSøker = søkerOppdatert.oppholdsadresser.single() as GrVegadresseOppholdsadresse
+            val deltBostedForSøker = søkerOppdatert.deltBosted.single() as GrVegadresseDeltBosted
+
+            assertThat(bostedsadresseForSøker.kommunenummer).isEqualTo("9601")
+            assertThat(oppholdsadresseForSøker.kommunenummer).isEqualTo("9601")
+            assertThat(deltBostedForSøker.kommunenummer).isEqualTo("9601")
         }
     }
 }
