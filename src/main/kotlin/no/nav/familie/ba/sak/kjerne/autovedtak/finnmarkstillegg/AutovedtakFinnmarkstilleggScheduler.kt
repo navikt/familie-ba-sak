@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringScheduler.Companion.CRON_HVERT_10_MIN_UKEDAG
+import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ContextClosedEvent
 import org.springframework.scheduling.annotation.Scheduled
@@ -18,13 +19,16 @@ class AutovedtakFinnmarkstilleggScheduler(
     @Volatile
     private var isShuttingDown = false
 
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     @Scheduled(cron = CRON_HVERT_10_MIN_UKEDAG)
     fun kjørAutovedtakFinnmarkstillegg() {
         if (isShuttingDown || !leaderClientService.isLeader()) {
             return
         }
         if (featureToggleService.isEnabled(AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG)) {
-            autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(1000)
+            logger.info("Starter kjøring av autovedtak finnmarkstillegg")
+            autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(100)
         }
     }
 
