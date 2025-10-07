@@ -36,7 +36,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
         @Test
         fun `skal finne alle perioder for alle personer som ikke er markert med 'Bosatt på Svalbard' men har oppholdsadresse på Svalbard`() {
             // Arrange
-            val bosattPåSvalbardPeriode = DatoIntervallEntitet(fom = LocalDate.of(2024, 8, 15), tom = null)
+            val bosattPåSvalbardPeriode = DatoIntervallEntitet(fom = LocalDate.of(2025, 9, 1), tom = null)
 
             val søker =
                 lagPerson(type = PersonType.SØKER).also {
@@ -139,7 +139,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
         @Test
         fun `skal returnere tom liste dersom alle perioder for alle personer med oppholdsadresse på Svalbard har blitt markert med "Bosatt på Svalbard"`() {
             // Arrange
-            val bosattPåSvalbardPeriode = DatoIntervallEntitet(fom = LocalDate.of(2024, 8, 15), tom = null)
+            val bosattPåSvalbardPeriode = DatoIntervallEntitet(fom = LocalDate.of(2025, 9, 1), tom = null)
 
             val søker =
                 lagPerson(type = PersonType.SØKER).also {
@@ -236,6 +236,111 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
             assertThat(manglendeSvalbardmerking).hasSize(0)
         }
 
+        @Test
+        fun `skal beskjære perioder som begynner før første september 2025 slik at fom er første september 2025`() {
+            // Arrange
+            val bosattPåSvalbardPeriode = DatoIntervallEntitet(fom = LocalDate.of(2025, 8, 31), tom = null)
+
+            val søker =
+                lagPerson(type = PersonType.SØKER).also {
+                    it.oppholdsadresser =
+                        mutableListOf(
+                            lagGrVegadresseOppholdsadresse(
+                                kommunenummer = SvalbardKommune.SVALBARD.kommunenummer,
+                                periode = bosattPåSvalbardPeriode,
+                            ),
+                        )
+                }
+
+            val barn1 =
+                lagPerson(type = PersonType.BARN).also {
+                    it.oppholdsadresser =
+                        mutableListOf(
+                            lagGrMatrikkelOppholdsadresse(
+                                kommunenummer = SvalbardKommune.SVALBARD.kommunenummer,
+                                periode = bosattPåSvalbardPeriode,
+                            ),
+                        )
+                }
+
+            val barn2 =
+                lagPerson(type = PersonType.BARN).also {
+                    it.oppholdsadresser =
+                        mutableListOf(
+                            lagGrUtenlandskOppholdsadresse(
+                                oppholdAnnetSted = OppholdAnnetSted.PAA_SVALBARD,
+                                periode = bosattPåSvalbardPeriode,
+                            ),
+                        )
+                }
+
+            val barn3 =
+                lagPerson(type = PersonType.BARN).also {
+                    it.oppholdsadresser =
+                        mutableListOf(
+                            lagGrUkjentAdresseOppholdsadresse(
+                                oppholdAnnetSted = OppholdAnnetSted.PAA_SVALBARD,
+                                periode = bosattPåSvalbardPeriode,
+                            ),
+                        )
+                }
+            val behandling = lagBehandling()
+            val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerPersonIdent = søker.aktør.aktivFødselsnummer(), barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer(), barn3.aktør.aktivFødselsnummer()))
+            val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+            val personResultater =
+                setOf(
+                    lagPersonResultat(
+                        vilkårsvurdering = vilkårsvurdering,
+                        aktør = søker.aktør,
+                        lagVilkårResultater = { personResultat ->
+                            setOf(
+                                lagBosattIRiketVilkårForPersonResultat(personResultat = personResultat, behandling = behandling, periode = bosattPåSvalbardPeriode),
+                            )
+                        },
+                    ),
+                    lagPersonResultat(
+                        vilkårsvurdering = vilkårsvurdering,
+                        aktør = barn1.aktør,
+                        lagVilkårResultater = { personResultat ->
+                            setOf(
+                                lagBosattIRiketVilkårForPersonResultat(personResultat = personResultat, behandling = behandling, periode = bosattPåSvalbardPeriode),
+                            )
+                        },
+                    ),
+                    lagPersonResultat(
+                        vilkårsvurdering = vilkårsvurdering,
+                        aktør = barn2.aktør,
+                        lagVilkårResultater = { personResultat ->
+                            setOf(
+                                lagBosattIRiketVilkårForPersonResultat(personResultat = personResultat, behandling = behandling, periode = bosattPåSvalbardPeriode),
+                            )
+                        },
+                    ),
+                    lagPersonResultat(
+                        vilkårsvurdering = vilkårsvurdering,
+                        aktør = barn3.aktør,
+                        lagVilkårResultater = { personResultat ->
+                            setOf(
+                                lagBosattIRiketVilkårForPersonResultat(personResultat = personResultat, behandling = behandling, periode = bosattPåSvalbardPeriode),
+                            )
+                        },
+                    ),
+                )
+
+            val personer = listOf(søker, barn1, barn2, barn3)
+
+            // Act
+            val manglendeSvalbardmerking = personer.tilManglendeSvalbardmerkingPerioder(personResultater = personResultater)
+
+            // Assert
+            assertThat(manglendeSvalbardmerking).hasSize(4)
+            assertThat(manglendeSvalbardmerking).allSatisfy {
+                assertThat(it.manglendeFinnmarkSvalbardMerkingPerioder).hasSize(1)
+                assertThat(it.manglendeFinnmarkSvalbardMerkingPerioder.first().fom).isEqualTo(LocalDate.of(2025, 9, 1))
+                assertThat(it.manglendeFinnmarkSvalbardMerkingPerioder.first().tom).isNull()
+            }
+        }
+
         private fun lagBosattIRiketVilkårForPersonResultat(
             personResultat: PersonResultat,
             behandling: Behandling,
@@ -259,7 +364,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
         @Test
         fun `skal finne alle perioder for alle personer som ikke er markert med 'Bosatt på Svalbard' men har oppholdsadresse på Svalbard`() {
             // Arrange
-            val forretningsadresseIFinnmarkEllerNordTromsPeriode = Gyldighetsperiode(fom = LocalDate.of(2024, 8, 15), tom = null)
+            val forretningsadresseIFinnmarkEllerNordTromsPeriode = Gyldighetsperiode(fom = LocalDate.of(2025, 9, 1), tom = null)
 
             val samhandlerInfo =
                 SamhandlerInfo(
@@ -278,8 +383,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                         ),
                 )
 
-            val barn =
-                lagPerson(type = PersonType.BARN)
+            val barn = lagPerson(type = PersonType.BARN)
 
             val behandling = lagBehandling()
             val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerPersonIdent = barn.aktør.aktivFødselsnummer(), barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()))
@@ -304,14 +408,14 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
             assertThat(manglendeFinnmarkmerking).isNotNull
             assertThat(manglendeFinnmarkmerking?.manglendeFinnmarkSvalbardMerkingPerioder).hasSize(1)
             val manglendePeriode = manglendeFinnmarkmerking?.manglendeFinnmarkSvalbardMerkingPerioder?.single()
-            assertThat(manglendePeriode?.fom).isEqualTo(LocalDate.of(2024, 8, 15))
+            assertThat(manglendePeriode?.fom).isEqualTo(LocalDate.of(2025, 9, 1))
             assertThat(manglendePeriode?.tom).isNull()
         }
 
         @Test
         fun `skal returnere tom liste dersom alle perioder for alle personer med oppholdsadresse på Svalbard har blitt markert med "Bosatt på Svalbard"`() {
             // Arrange
-            val forretningsadresseIFinnmarkEllerNordTromsPeriode = Gyldighetsperiode(fom = LocalDate.of(2024, 8, 15), tom = null)
+            val forretningsadresseIFinnmarkEllerNordTromsPeriode = Gyldighetsperiode(fom = LocalDate.of(2025, 9, 1), tom = null)
 
             val samhandlerInfo =
                 SamhandlerInfo(
@@ -354,6 +458,55 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
 
             // Assert
             assertThat(manglendeFinnmarkmerking).isNull()
+        }
+
+        @Test
+        fun `skal beskjære perioder som begynner før første september 2025 slik at fom er første september 2025`() {
+            // Arrange
+            val forretningsadresseIFinnmarkEllerNordTromsPeriode = Gyldighetsperiode(fom = LocalDate.of(2025, 8, 31), tom = null)
+
+            val samhandlerInfo =
+                SamhandlerInfo(
+                    tssEksternId = "123",
+                    navn = "Testinstitusjon",
+                    adresser =
+                        listOf(
+                            SamhandlerAdresse(
+                                adresselinjer = listOf(""),
+                                postNr = "",
+                                postSted = "",
+                                adresseType = "",
+                                kommunenummer = KommunerIFinnmarkOgNordTroms.KARASJOK.kommunenummer,
+                                gyldighetsperiode = forretningsadresseIFinnmarkEllerNordTromsPeriode,
+                            ),
+                        ),
+                )
+
+            val barn = lagPerson(type = PersonType.BARN)
+
+            val behandling = lagBehandling()
+            val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerPersonIdent = barn.aktør.aktivFødselsnummer(), barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()))
+            val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+            val personResultater =
+                setOf(
+                    lagPersonResultat(
+                        vilkårsvurdering = vilkårsvurdering,
+                        aktør = barn.aktør,
+                        lagVilkårResultater = { personResultat ->
+                            setOf(
+                                lagBosattIRiketVilkårForPersonResultat(personResultat = personResultat, behandling = behandling, periode = DatoIntervallEntitet(fom = forretningsadresseIFinnmarkEllerNordTromsPeriode.fom)),
+                            )
+                        },
+                    ),
+                )
+
+            // Act
+            val manglendeFinnmarkmerking = samhandlerInfo.tilManglendeFinnmarkmerkingPerioder(personResultater = personResultater)
+
+            // Assert
+            assertThat(manglendeFinnmarkmerking?.manglendeFinnmarkSvalbardMerkingPerioder).hasSize(1)
+            assertThat(manglendeFinnmarkmerking?.manglendeFinnmarkSvalbardMerkingPerioder?.first()?.fom).isEqualTo(LocalDate.of(2025, 9, 1))
+            assertThat(manglendeFinnmarkmerking?.manglendeFinnmarkSvalbardMerkingPerioder?.first()?.tom).isNull()
         }
 
         private fun lagBosattIRiketVilkårForPersonResultat(
