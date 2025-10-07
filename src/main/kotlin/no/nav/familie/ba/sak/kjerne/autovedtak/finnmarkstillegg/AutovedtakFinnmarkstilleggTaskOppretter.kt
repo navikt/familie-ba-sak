@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
-import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøring
-import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -18,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 class AutovedtakFinnmarkstilleggTaskOppretter(
     private val fagsakRepository: FagsakRepository,
     private val opprettTaskService: OpprettTaskService,
-    private val finnmarkstilleggKjøringRepository: FinnmarkstilleggKjøringRepository,
+    private val finnmarkstilleggKjøringService: FinnmarkstilleggKjøringService,
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val pdlRestClient: SystemOnlyPdlRestClient,
@@ -85,7 +83,7 @@ class AutovedtakFinnmarkstilleggTaskOppretter(
             logger.info("Fant ${fagsakerDerMinstEnAktørBorIFinnmarkEllerNordTroms.size} fagsaker der minst én person har adresse i Finnmark eller Nord-Troms")
 
             val fagsakIderSomIkkeSkalOpprettesTaskFor = fagsakIder - fagsakerDerMinstEnAktørBorIFinnmarkEllerNordTroms
-            finnmarkstilleggKjøringRepository.saveAll(fagsakIderSomIkkeSkalOpprettesTaskFor.map { FinnmarkstilleggKjøring(fagsakId = it) })
+            finnmarkstilleggKjøringService.lagreFinnmarkstilleggkjøringer(fagsakIderSomIkkeSkalOpprettesTaskFor)
 
             fagsakerDerMinstEnAktørBorIFinnmarkEllerNordTroms.forEach { fagsakId ->
                 opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(fagsakId)

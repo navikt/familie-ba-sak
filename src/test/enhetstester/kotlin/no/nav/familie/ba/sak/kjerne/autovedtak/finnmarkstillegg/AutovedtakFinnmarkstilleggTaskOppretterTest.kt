@@ -43,7 +43,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
         AutovedtakFinnmarkstilleggTaskOppretter(
             fagsakRepository = fagsakRepository,
             opprettTaskService = opprettTaskService,
-            finnmarkstilleggKjøringRepository = finnmarkstilleggKjøringRepository,
+            finnmarkstilleggKjøringService = FinnmarkstilleggKjøringService(finnmarkstilleggKjøringRepository),
             persongrunnlagService = persongrunnlagService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             pdlRestClient = pdlRestClient,
