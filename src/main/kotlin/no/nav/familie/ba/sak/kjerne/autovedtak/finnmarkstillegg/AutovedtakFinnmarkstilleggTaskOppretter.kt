@@ -49,14 +49,18 @@ class AutovedtakFinnmarkstilleggTaskOppretter(
             logger.info("Hentet personopplysningsgrunnlag for ${grunnlagForIverksatteBehandlinger.size} behandlinger")
 
             val fagsakerMedPersonidenter =
-                sistIverksatteBehandlingerUtenEøs.associate { behandling ->
-                    val grunnlag = grunnlagForIverksatteBehandlinger[behandling.id]
-                    if (grunnlag == null) {
-                        throw Feil("Forventet personopplysningsgrunnlag for behandling ${behandling.id} ikke funnet.")
+                sistIverksatteBehandlingerUtenEøs
+                    .filter { behandling ->
+                        val grunnlag = grunnlagForIverksatteBehandlinger[behandling.id]
+                        if (grunnlag == null) {
+                            logger.error("Forventet personopplysningsgrunnlag for behandling ${behandling.id} ikke funnet.")
+                        }
+                        grunnlag != null
+                    }.associate { behandling ->
+                        val grunnlag = grunnlagForIverksatteBehandlinger[behandling.id]!!
+                        val fødselsnummer = grunnlag.personer.map { person -> person.aktør.aktivFødselsnummer() }
+                        behandling.fagsak.id to fødselsnummer
                     }
-                    val fødselsnummer = grunnlag.personer.map { person -> person.aktør.aktivFødselsnummer() }
-                    behandling.fagsak.id to fødselsnummer
-                }
 
             val personerSomBorIFinnmarkEllerNordTroms =
                 fagsakerMedPersonidenter.values
