@@ -87,7 +87,9 @@ class AutovedtakFinnmarkstilleggTaskOppretter(
             val fagsakIderSomIkkeSkalOpprettesTaskFor = fagsakIder - fagsakerDerMinstEnAktørBorIFinnmarkEllerNordTroms
             finnmarkstilleggKjøringRepository.saveAll(fagsakIderSomIkkeSkalOpprettesTaskFor.map { FinnmarkstilleggKjøring(fagsakId = it) })
 
-            opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(fagsakerDerMinstEnAktørBorIFinnmarkEllerNordTroms)
+            fagsakerDerMinstEnAktørBorIFinnmarkEllerNordTroms.forEach { fagsakId ->
+                opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(fagsakId)
+            }
 
             logger.info("Opprettet ${fagsakerDerMinstEnAktørBorIFinnmarkEllerNordTroms.size} tasker for autovedtak finnmarkstillegg")
 
