@@ -21,6 +21,11 @@ data class Adresse(
     val ukjentBosted: UkjentBosted? = null,
     val oppholdAnnetSted: OppholdAnnetSted? = null,
 ) {
+    /**
+     * Dette kan oppstå ved dårlig datakvalitet.
+     */
+    fun erFomOgTomNull() = gyldigFraOgMed == null && gyldigTilOgMed == null
+
     fun overlapperMedDato(dato: LocalDate): Boolean {
         val harGyldigFraOgMed = gyldigFraOgMed == null || gyldigFraOgMed.isSameOrBefore(dato)
         val harGyldigTilOgMed = gyldigTilOgMed == null || gyldigTilOgMed.isSameOrAfter(dato)

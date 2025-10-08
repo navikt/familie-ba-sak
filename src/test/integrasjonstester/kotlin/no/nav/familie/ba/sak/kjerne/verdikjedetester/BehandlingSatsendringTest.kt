@@ -153,6 +153,7 @@ class BehandlingSatsendringTest(
                             mutableListOf(
                                 Bostedsadresse(
                                     angittFlyttedato = LocalDate.now().minusYears(10),
+                                    gyldigFraOgMed = LocalDate.now().minusYears(10),
                                     gyldigTilOgMed = null,
                                     matrikkeladresse = matrikkeladresse,
                                 ),
@@ -169,6 +170,7 @@ class BehandlingSatsendringTest(
                             mutableListOf(
                                 Bostedsadresse(
                                     angittFlyttedato = LocalDate.now().minusYears(6),
+                                    gyldigFraOgMed = LocalDate.now().minusYears(6),
                                     gyldigTilOgMed = null,
                                     matrikkeladresse = matrikkeladresse,
                                 ),

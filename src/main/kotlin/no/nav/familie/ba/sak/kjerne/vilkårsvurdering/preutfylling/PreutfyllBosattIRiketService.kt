@@ -290,6 +290,7 @@ class PreutfyllBosattIRiketService(
         operator: (Adresse) -> Boolean,
     ): Tidslinje<Boolean> =
         adresser
+            .filter { !it.erFomOgTomNull() }
             .sortedBy { it.gyldigFraOgMed }
             .windowed(size = 2, step = 1, partialWindows = true) {
                 val denne = it.first()

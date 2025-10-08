@@ -168,6 +168,48 @@ class PreutfyllBosattIRiketServiceTest {
     }
 
     @Test
+    fun `skal filterer bort adresser hvor fom og tom er null`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+        val bostedsadresser =
+            Adresser(
+                bostedsadresser =
+                    listOf(
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.of(1980, 1, 1),
+                            gyldigTilOgMed = null,
+                            vegadresse = lagVegadresse(1L),
+                        ),
+                        Adresse(
+                            gyldigFraOgMed = null,
+                            gyldigTilOgMed = null,
+                            vegadresse = lagVegadresse(2L),
+                        ),
+                    ),
+                delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
+            )
+
+        // Act
+        val vilkårResultat =
+            preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
+                personResultat = personResultat,
+                adresserForPerson = bostedsadresser,
+                behandling = behandling,
+            )
+
+        // Assert
+        assertThat(vilkårResultat).hasSize(1)
+        assertThat(vilkårResultat.first().resultat).isEqualTo(Resultat.OPPFYLT)
+    }
+
+    @Test
     fun `skal ikke gi oppfylt i siste periode hvis den er under 12 mnd og søker ikke planlegger å bo i Norge neste 12`() {
         // Arrange
         val behandling = lagBehandling()
