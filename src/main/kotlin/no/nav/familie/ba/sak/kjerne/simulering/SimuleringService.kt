@@ -113,7 +113,7 @@ class SimuleringService(
 
         val simulering = hentSimuleringPåBehandling(behandlingId)
         val restSimulering =
-            vedtakSimuleringMottakereTilRestSimulering(
+            vedtakSimuleringMottakereTilSimulering(
                 økonomiSimuleringMottakere = simulering,
             )
 
@@ -160,12 +160,12 @@ class SimuleringService(
     }
 
     fun hentEtterbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal =
-        vedtakSimuleringMottakereTilRestSimulering(
+        vedtakSimuleringMottakereTilSimulering(
             økonomiSimuleringMottakere = økonomiSimuleringMottakere,
         ).etterbetaling
 
     fun hentFeilutbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal =
-        vedtakSimuleringMottakereTilRestSimulering(
+        vedtakSimuleringMottakereTilSimulering(
             økonomiSimuleringMottakere,
         ).feilutbetaling
 
@@ -247,7 +247,7 @@ class SimuleringService(
             .associate { behandling ->
                 val økonomiSimuleringMottakere = økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id)
                 behandling.fagsak.id to
-                    vedtakSimuleringMottakereTilRestSimulering(
+                    vedtakSimuleringMottakereTilSimulering(
                         økonomiSimuleringMottakere = økonomiSimuleringMottakere,
                     )
             }

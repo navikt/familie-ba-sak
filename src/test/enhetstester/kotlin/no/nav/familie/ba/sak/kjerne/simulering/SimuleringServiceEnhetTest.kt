@@ -361,7 +361,7 @@ internal class SimuleringServiceEnhetTest {
             every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns økonomiSimuleringMottakere
 
             val simulering =
-                vedtakSimuleringMottakereTilRestSimulering(
+                vedtakSimuleringMottakereTilSimulering(
                     økonomiSimuleringMottakere = økonomiSimuleringMottakere,
                 )
 
@@ -431,7 +431,7 @@ internal class SimuleringServiceEnhetTest {
             every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns økonomiSimuleringMottakere
 
             val simulering =
-                vedtakSimuleringMottakereTilRestSimulering(
+                vedtakSimuleringMottakereTilSimulering(
                     økonomiSimuleringMottakere = økonomiSimuleringMottakere,
                 )
 

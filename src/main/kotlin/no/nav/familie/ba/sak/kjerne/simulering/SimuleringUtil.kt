@@ -24,7 +24,7 @@ fun filterBortUrelevanteVedtakSimuleringPosteringer(
         )
     }
 
-fun vedtakSimuleringMottakereTilRestSimulering(
+fun vedtakSimuleringMottakereTilSimulering(
     økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
 ): Simulering {
     val perioder =

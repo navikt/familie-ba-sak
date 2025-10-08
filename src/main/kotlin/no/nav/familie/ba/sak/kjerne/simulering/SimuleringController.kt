@@ -32,7 +32,7 @@ class SimuleringController(
         val overlappendeAvregningAndreFagsaker = avregningService.hentOverlappendePerioderMedAndreFagsaker(behandlingId)
 
         val simulering =
-            vedtakSimuleringMottakereTilRestSimulering( // TODO denne må renames
+            vedtakSimuleringMottakereTilSimulering( // TODO denne må renames
                 økonomiSimuleringMottakere = vedtakSimuleringMottaker,
             )
 
