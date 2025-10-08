@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
-import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
+import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringDto
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -23,7 +23,7 @@ class SimuleringController(
     @GetMapping(path = ["/{behandlingId}/simulering"])
     fun hentSimulering(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<RestSimulering>> {
+    ): ResponseEntity<Ressurs<SimuleringDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
         // TODO: burde dette skje i vedtakSimuleringMottakereTilRestSimulering? Alternativt burde feil- og etterbetalinger hentes ut her og fores inn
@@ -39,7 +39,7 @@ class SimuleringController(
         val etterBetalingEllerFeilutbetalingIAnnenFagsak = simuleringService.hentOverlappendeFeilOgEtterbetalingerFraAndreFagsakerForSøker(behandlingId, simulering)
         val overlappendePerioderMedAndreFagsaker = (overlappendeAvregningAndreFagsaker + etterBetalingEllerFeilutbetalingIAnnenFagsak).distinct()
 
-        val restSimulering = simulering.tilRestSimulering(avregningsperioder, overlappendePerioderMedAndreFagsaker)
+        val restSimulering = simulering.tilSimuleringDto(avregningsperioder, overlappendePerioderMedAndreFagsaker)
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }
 }
