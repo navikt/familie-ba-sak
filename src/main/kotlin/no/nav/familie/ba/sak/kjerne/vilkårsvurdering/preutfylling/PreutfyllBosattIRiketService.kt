@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -96,11 +97,11 @@ class PreutfyllBosattIRiketService(
         adresserForPerson: Adresser,
         behandling: Behandling,
     ): Set<VilkårResultat> {
-        val erBosattINorgeTidslinje = lagTidslinjeForAdresser(adresserForPerson.bostedsadresser) { it.erINorge() }
+        val erBosattINorgeTidslinje = lagTidslinjeForAdresser(adresserForPerson.bostedsadresser, personResultat) { it.erINorge() }
         val erNordiskStatsborgerTidslinje = pdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat)
-        val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresserForPerson)
-        val erDeltBostedIFinnmarkEllerNordTromsTidslinje = lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresserForPerson)
-        val erOppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje(adresserForPerson)
+        val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
+        val erDeltBostedIFinnmarkEllerNordTromsTidslinje = lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
+        val erOppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje(adresserForPerson, personResultat)
 
         if (behandling.erFinnmarksEllerSvalbardtillegg()) {
             validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
@@ -123,8 +124,13 @@ class PreutfyllBosattIRiketService(
         val erØvrigeKravForBosattIRiketOppfyltTidslinje = lagErØvrigeKravForBosattIRiketOppfyltTidslinje(erBosattINorgeTidslinje, personResultat)
 
         val erBosattIFinnmarkEllerNordTromsTidslinje =
-            erBostedsadresseIFinnmarkEllerNordTromsTidslinje.kombinerMed(erDeltBostedIFinnmarkEllerNordTromsTidslinje) { erBostedsadresseIFinnmarkEllerNordTroms, erDeltBostedIFinnmarkEllerNordTroms ->
-                erBostedsadresseIFinnmarkEllerNordTroms == true || erDeltBostedIFinnmarkEllerNordTroms == true
+            try {
+                erBostedsadresseIFinnmarkEllerNordTromsTidslinje.kombinerMed(erDeltBostedIFinnmarkEllerNordTromsTidslinje) { erBostedsadresseIFinnmarkEllerNordTroms, erDeltBostedIFinnmarkEllerNordTroms ->
+                    erBostedsadresseIFinnmarkEllerNordTroms == true || erDeltBostedIFinnmarkEllerNordTroms == true
+                }
+            } catch (e: IllegalStateException) {
+                secureLogger.error("Feil med kombinering av bostedsadresse og delt bosted for person med aktørId ${personResultat.aktør.aktørId} for adresser $adresserForPerson", e)
+                throw e
             }
 
         val førsteBosattINorgeDato = erBosattINorgeTidslinje.filtrer { it == true }.startsTidspunkt
@@ -148,6 +154,7 @@ class PreutfyllBosattIRiketService(
                                 }
                             erBosattIRiket.copy(utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger)
                         }
+
                         else -> erBosattIRiket
                     }
                 }.beskjærFraOgMed(maxOf(fødselsdatoForBeskjæring, førsteBosattINorgeDato))
@@ -249,30 +256,48 @@ class PreutfyllBosattIRiketService(
         return erBosattINorgePeriode.omfatter(fødselsdato)
     }
 
-    private fun lagErBosattINorgeTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser) { it.erINorge() }
+    private fun lagErBosattINorgeTidslinje(
+        adresser: Adresser,
+        personResultat: PersonResultat,
+    ): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser, personResultat) { it.erINorge() }
 
-    private fun lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser) { it.erIFinnmarkEllerNordTroms() }
+    private fun lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(
+        adresser: Adresser,
+        personResultat: PersonResultat,
+    ): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser, personResultat) { it.erIFinnmarkEllerNordTroms() }
 
-    private fun lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.delteBosteder) { it.erIFinnmarkEllerNordTroms() }
+    private fun lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(
+        adresser: Adresser,
+        personResultat: PersonResultat,
+    ): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.delteBosteder, personResultat) { it.erIFinnmarkEllerNordTroms() }
 
-    private fun lagErOppholdsadresserPåSvalbardTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.oppholdsadresse) { it.erPåSvalbard() }
+    private fun lagErOppholdsadresserPåSvalbardTidslinje(
+        adresser: Adresser,
+        personResultat: PersonResultat,
+    ): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.oppholdsadresse, personResultat) { it.erPåSvalbard() }
 
     private fun lagTidslinjeForAdresser(
         adresser: List<Adresse>,
+        personResultat: PersonResultat,
         operator: (Adresse) -> Boolean,
     ): Tidslinje<Boolean> =
-        adresser
-            .sortedBy { it.gyldigFraOgMed }
-            .windowed(size = 2, step = 1, partialWindows = true) {
-                val denne = it.first()
-                val neste = it.getOrNull(1)
+        try {
+            adresser
+                .sortedBy { it.gyldigFraOgMed }
+                .windowed(size = 2, step = 1, partialWindows = true) {
+                    val denne = it.first()
+                    val neste = it.getOrNull(1)
 
-                Periode(
-                    verdi = operator(denne),
-                    fom = denne.gyldigFraOgMed,
-                    tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
-                )
-            }.tilTidslinje()
+                    Periode(
+                        verdi = operator(denne),
+                        fom = denne.gyldigFraOgMed,
+                        tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
+                    )
+                }.tilTidslinje()
+        } catch (e: IllegalStateException) {
+            secureLogger.error("Feil ved oppretting av tidslinjer for adresser $adresser for person med aktørId ${personResultat.aktør.aktørId}", e)
+            throw e
+        }
 
     private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
         behandling: Behandling,
