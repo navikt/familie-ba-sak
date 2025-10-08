@@ -31,6 +31,7 @@ import org.springframework.test.context.ActiveProfiles
     "mock-unleash",
     "mock-system-only-integrasjon-client",
     "fake-integrasjon-client",
+    "fake-valutakurs-rest-client",
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
