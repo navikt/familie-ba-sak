@@ -10,12 +10,10 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasj
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClientMock
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.mock.FamilieIntegrasjonerTilgangskontrollMock
 import no.nav.familie.ba.sak.mock.LocalDateServiceTestConfig
 import no.nav.familie.ba.sak.mock.TilbakekrevingKlientTestConfig
-import no.nav.familie.ba.sak.mock.ØkonomiTestConfig
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.TaskRepositoryTestConfig
 import org.junit.jupiter.api.BeforeEach
@@ -34,9 +32,6 @@ abstract class AbstractMockkSpringRunner {
 
     @Autowired
     private lateinit var mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
-
-    @Autowired
-    private lateinit var mockØkonomiKlient: ØkonomiKlient
 
     @Autowired
     private lateinit var mockTilbakekrevingKlient: TilbakekrevingKlient
@@ -85,10 +80,6 @@ abstract class AbstractMockkSpringRunner {
         FamilieIntegrasjonerTilgangskontrollMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(
             mockFamilieIntegrasjonerTilgangskontrollClient,
         )
-
-        if (isMockKMock(mockØkonomiKlient)) {
-            ØkonomiTestConfig.clearØkonomiMocks(mockØkonomiKlient)
-        }
 
         if (isMockKMock(mockTilbakekrevingKlient)) {
             TilbakekrevingKlientTestConfig.clearTilbakekrevingKlientMocks(mockTilbakekrevingKlient)
