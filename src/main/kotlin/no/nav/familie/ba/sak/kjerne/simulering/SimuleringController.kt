@@ -26,18 +26,18 @@ class SimuleringController(
     ): ResponseEntity<Ressurs<SimuleringDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
-        // TODO: burde dette skje i vedtakSimuleringMottakereTilRestSimulering? Alternativt burde feil- og etterbetalinger hentes ut her og fores inn
-        val avregningsperioder = avregningService.hentPerioderMedAvregning(behandlingId)
-
-        val overlappendeAvregningAndreFagsaker = avregningService.hentOverlappendePerioderMedAndreFagsaker(behandlingId)
 
         val simulering =
-            vedtakSimuleringMottakereTilSimulering( // TODO denne må renames
+            vedtakSimuleringMottakereTilSimulering(
                 økonomiSimuleringMottakere = vedtakSimuleringMottaker,
             )
 
+        val overlappendeAvregningAndreFagsaker = avregningService.hentOverlappendePerioderMedAndreFagsaker(behandlingId)
         val etterBetalingEllerFeilutbetalingIAnnenFagsak = simuleringService.hentOverlappendeFeilOgEtterbetalingerFraAndreFagsakerForSøker(behandlingId, simulering)
+
         val overlappendePerioderMedAndreFagsaker = (overlappendeAvregningAndreFagsaker + etterBetalingEllerFeilutbetalingIAnnenFagsak).distinct()
+
+        val avregningsperioder = avregningService.hentPerioderMedAvregning(behandlingId)
 
         val restSimulering = simulering.tilSimuleringDto(avregningsperioder, overlappendePerioderMedAndreFagsaker)
         return ResponseEntity.ok(Ressurs.success(restSimulering))
