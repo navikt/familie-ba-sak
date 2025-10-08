@@ -72,18 +72,18 @@ fun hentAutomatiskVedtaksbrevtype(
         BehandlingÅrsak.OMREGNING_18ÅR,
         BehandlingÅrsak.SMÅBARNSTILLEGG,
         BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG,
-        -> Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
+        -> Brevmal.AUTOVEDTAK_ENDRING
 
         BehandlingÅrsak.FINNMARKSTILLEGG ->
             if (skalBrukeAutovedtakEndringsbrevForFinnmarkstillegg) {
-                Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
+                Brevmal.AUTOVEDTAK_ENDRING
             } else {
                 Brevmal.AUTOVEDTAK_FINNMARKSTILLEGG
             }
 
         BehandlingÅrsak.SVALBARDTILLEGG ->
             if (skalBrukeAutovedtakEndringsbrevForSvalbardtillegg) {
-                Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
+                Brevmal.AUTOVEDTAK_ENDRING
             } else {
                 Brevmal.AUTOVEDTAK_SVALBARDTILLEGG
             }
