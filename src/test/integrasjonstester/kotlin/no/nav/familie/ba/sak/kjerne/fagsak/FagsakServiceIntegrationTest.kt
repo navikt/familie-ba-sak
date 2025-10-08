@@ -422,8 +422,7 @@ class FagsakServiceIntegrationTest(
 
         // Assert
         assertEquals(2, fagsakerMedSøkerSomDeltaker.size)
-        assertEquals(fagsakHvorPersonErBarn, fagsakerMedSøkerSomDeltaker.first())
-        assertEquals(fagsakHvorPersonErSøker, fagsakerMedSøkerSomDeltaker.last())
+        assertThat(fagsakerMedSøkerSomDeltaker).containsExactlyInAnyOrderElementsOf(listOf(fagsakHvorPersonErBarn, fagsakHvorPersonErSøker))
     }
 
     @Test
