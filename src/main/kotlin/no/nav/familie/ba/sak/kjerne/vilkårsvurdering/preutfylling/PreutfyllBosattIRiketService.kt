@@ -256,7 +256,10 @@ class PreutfyllBosattIRiketService(
         return erBosattINorgePeriode.omfatter(fødselsdato)
     }
 
-    // private fun lagErBosattINorgeTidslinje(adresser: Adresser): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser ) { it.erINorge() }
+    private fun lagErBosattINorgeTidslinje(
+        adresser: Adresser,
+        personResultat: PersonResultat,
+    ): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser, personResultat) { it.erINorge() }
 
     private fun lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(
         adresser: Adresser,
