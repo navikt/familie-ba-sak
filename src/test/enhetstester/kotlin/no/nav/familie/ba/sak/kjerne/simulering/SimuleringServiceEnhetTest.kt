@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringPostering
-import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
@@ -18,27 +17,24 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottakerRepository
-import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
-import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
-import org.hamcrest.MatcherAssert.assertThat
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.LocalDate
-import org.hamcrest.CoreMatchers.`is` as Is
 
 internal class SimuleringServiceEnhetTest {
     private val økonomiKlient: ØkonomiKlient = mockk()
@@ -50,6 +46,7 @@ internal class SimuleringServiceEnhetTest {
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator = mockk()
     private val tilkjentYtelseRepository: TilkjentYtelseRepository = mockk()
+    private val fagsakService: FagsakService = mockk()
 
     private val simuleringService: SimuleringService =
         SimuleringService(
@@ -62,6 +59,7 @@ internal class SimuleringServiceEnhetTest {
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             persongrunnlagService = persongrunnlagService,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
+            fagsakService = fagsakService,
         )
 
     val februar2023 = LocalDate.of(2023, 2, 1)
@@ -103,7 +101,7 @@ internal class SimuleringServiceEnhetTest {
             val behandlingHarAvvikInnenforBeløpsgrenser =
                 simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
 
-            assertThat(behandlingHarAvvikInnenforBeløpsgrenser, Is(true))
+            assertThat(behandlingHarAvvikInnenforBeløpsgrenser).isTrue
         }
 
         @ParameterizedTest
@@ -154,7 +152,7 @@ internal class SimuleringServiceEnhetTest {
             val behandlingHarAvvikInnenforBeløpsgrenser =
                 simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
 
-            assertThat(behandlingHarAvvikInnenforBeløpsgrenser, Is(true))
+            assertThat(behandlingHarAvvikInnenforBeløpsgrenser).isTrue
         }
 
         @ParameterizedTest
@@ -190,7 +188,7 @@ internal class SimuleringServiceEnhetTest {
             val behandlingHarAvvikInnenforBeløpsgrenser =
                 simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
 
-            assertThat(behandlingHarAvvikInnenforBeløpsgrenser, Is(false))
+            assertThat(behandlingHarAvvikInnenforBeløpsgrenser).isFalse
         }
 
         @ParameterizedTest
@@ -247,7 +245,7 @@ internal class SimuleringServiceEnhetTest {
             val behandlingHarManuellePosteringerFørMars2023 =
                 simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
 
-            assertThat(behandlingHarManuellePosteringerFørMars2023, Is(true))
+            assertThat(behandlingHarManuellePosteringerFørMars2023).isTrue
         }
 
         @ParameterizedTest
@@ -281,7 +279,7 @@ internal class SimuleringServiceEnhetTest {
             val behandlingHarManuellePosteringerFørMars2023 =
                 simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
 
-            assertThat(behandlingHarManuellePosteringerFørMars2023, Is(false))
+            assertThat(behandlingHarManuellePosteringerFørMars2023).isFalse
         }
 
         @ParameterizedTest
@@ -301,6 +299,147 @@ internal class SimuleringServiceEnhetTest {
                 )
 
             assertThrows<Feil> { simuleringService.harMigreringsbehandlingManuellePosteringer(behandling) }
+        }
+    }
+
+    @Nested
+    inner class HentEtterOgFeilUtbetalingerIAndreFagsakerTest {
+        @ParameterizedTest
+        @EnumSource(
+            value = PosteringType::class,
+            mode = EnumSource.Mode.INCLUDE,
+            names = ["FEILUTBETALING", "YTELSE"], // ytelse gjør at det blir etterbetaling i annen fagsak
+        )
+        fun `hentEtterOgFeilUtbetalingerIAndreFagsaker henter etterbetalinger fra andre fagsaker`(posteringType: PosteringType) {
+            // Arrange
+            val fagsak = lagFagsak(id = 0, type = FagsakType.INSTITUSJON)
+            val annenFagsak = lagFagsak(id = 1, type = FagsakType.INSTITUSJON)
+
+            val behandling = lagBehandling(id = 0, fagsak = fagsak)
+            val annenBehandling = lagBehandling(id = 1, fagsak = annenFagsak)
+
+            every { behandlingHentOgPersisterService.hent(0) } returns behandling
+            every { behandlingHentOgPersisterService.hent(1) } returns annenBehandling
+
+            every { fagsakService.hentAlleFagsakerForAktør(any()) } returns listOf(fagsak, annenFagsak)
+
+            every { beregningService.hentSisteBehandlingSomErKommetTilGodkjennStegEllerLengre(1) } returns annenBehandling
+
+            val økonomiSimuleringPosteringAnnenFagsak =
+                lagØkonomiSimuleringPostering(
+                    beløp = 1510,
+                    posteringType = posteringType,
+                    fom = LocalDate.now().minusYears(1),
+                )
+
+            val økonomiSimuleringMottakereAnnenBehandling =
+                listOf(
+                    lagØkonomiSimuleringMottaker(
+                        id = 0,
+                        behandling = annenBehandling,
+                        økonomiSimuleringPostering = listOf(økonomiSimuleringPosteringAnnenFagsak),
+                    ),
+                )
+
+            val økonomiSimuleringPostering =
+                lagØkonomiSimuleringPostering(
+                    beløp = 200,
+                    posteringType = PosteringType.FEILUTBETALING,
+                    fom = LocalDate.now().minusMonths(1),
+                )
+
+            val økonomiSimuleringMottakere =
+                listOf(
+                    lagØkonomiSimuleringMottaker(
+                        id = 1,
+                        behandling = behandling,
+                        økonomiSimuleringPostering = listOf(økonomiSimuleringPostering),
+                    ),
+                )
+
+            every { økonomiSimuleringMottakerRepository.findByBehandlingId(annenBehandling.id) } returns økonomiSimuleringMottakereAnnenBehandling
+            every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns økonomiSimuleringMottakere
+
+            val simulering =
+                vedtakSimuleringMottakereTilRestSimulering(
+                    økonomiSimuleringMottakere = økonomiSimuleringMottakere,
+                )
+
+            // Act
+            val overlappendeFeilOgEtterBetalingerFraAndreFagsaker = simuleringService.hentOverlappendeFeilOgEtterbetalingerFraAndreFagsakerForSøker(behandling.id, simulering)
+
+            // Assert
+            val faktiskeFagsakerViVarslerPå = overlappendeFeilOgEtterBetalingerFraAndreFagsaker.firstOrNull()?.fagsaker
+            assertThat(faktiskeFagsakerViVarslerPå).contains(annenFagsak.id)
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = PosteringType::class,
+            mode = EnumSource.Mode.INCLUDE,
+            names = ["FEILUTBETALING", "YTELSE"], // ytelse gjør at det blir etterbetaling i annen fagsak
+        )
+        fun `hentEtterOgFeilUtbetalingerIAndreFagsaker henter ingen perioder fra andre fagsaker hvis det ikke er overlapp`(posteringType: PosteringType) {
+            // Arrange
+            val fagsak = lagFagsak(id = 0, type = FagsakType.INSTITUSJON)
+            val annenFagsak = lagFagsak(id = 1, type = FagsakType.INSTITUSJON)
+
+            val behandling = lagBehandling(id = 0, fagsak = fagsak)
+            val annenBehandling = lagBehandling(id = 1, fagsak = annenFagsak)
+
+            every { behandlingHentOgPersisterService.hent(0) } returns behandling
+            every { behandlingHentOgPersisterService.hent(1) } returns annenBehandling
+
+            every { fagsakService.hentAlleFagsakerForAktør(any()) } returns listOf(fagsak, annenFagsak)
+
+            every { beregningService.hentSisteBehandlingSomErKommetTilGodkjennStegEllerLengre(1) } returns annenBehandling
+
+            val økonomiSimuleringPosteringAnnenFagsak =
+                lagØkonomiSimuleringPostering(
+                    beløp = 1510,
+                    posteringType = posteringType,
+                    fom = LocalDate.now().minusYears(1),
+                    tom = LocalDate.now().minusMonths(6),
+                )
+
+            val økonomiSimuleringMottakereAnnenBehandling =
+                listOf(
+                    lagØkonomiSimuleringMottaker(
+                        id = 0,
+                        behandling = annenBehandling,
+                        økonomiSimuleringPostering = listOf(økonomiSimuleringPosteringAnnenFagsak),
+                    ),
+                )
+
+            val økonomiSimuleringPostering =
+                lagØkonomiSimuleringPostering(
+                    beløp = 200,
+                    posteringType = PosteringType.FEILUTBETALING,
+                    fom = LocalDate.now().minusMonths(5),
+                )
+
+            val økonomiSimuleringMottakere =
+                listOf(
+                    lagØkonomiSimuleringMottaker(
+                        id = 1,
+                        behandling = behandling,
+                        økonomiSimuleringPostering = listOf(økonomiSimuleringPostering),
+                    ),
+                )
+
+            every { økonomiSimuleringMottakerRepository.findByBehandlingId(annenBehandling.id) } returns økonomiSimuleringMottakereAnnenBehandling
+            every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns økonomiSimuleringMottakere
+
+            val simulering =
+                vedtakSimuleringMottakereTilRestSimulering(
+                    økonomiSimuleringMottakere = økonomiSimuleringMottakere,
+                )
+
+            // Act
+            val overlappendeFeilOgEtterBetalingerFraAndreFagsaker = simuleringService.hentOverlappendeFeilOgEtterbetalingerFraAndreFagsakerForSøker(behandling.id, simulering)
+
+            // Assert
+            assertThat(overlappendeFeilOgEtterBetalingerFraAndreFagsaker).isEmpty()
         }
     }
 }

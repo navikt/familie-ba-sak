@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.simulering.domene
 
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.tilTidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -31,6 +33,11 @@ data class Simulering(
             avregningsperioder = avregningsperioder,
             overlappendePerioderMedAndreFagsaker = overlappendePerioderMedAndreFagsaker,
         )
+
+    fun perioderTilTidslinje() =
+        perioder
+            .map { periode -> Periode(fom = periode.fom, tom = periode.tom, verdi = periode) }
+            .tilTidslinje()
 }
 
 data class SimuleringsPeriode(
