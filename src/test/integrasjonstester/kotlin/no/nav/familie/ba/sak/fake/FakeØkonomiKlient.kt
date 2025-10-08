@@ -1,12 +1,11 @@
-package no.nav.familie.ba.sak.mock
+package no.nav.familie.ba.sak.fake
 
-import io.mockk.clearMocks
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
@@ -14,42 +13,31 @@ import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import no.nav.familie.kontrakter.felles.simulering.SimulertPostering
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
+import org.springframework.web.client.RestOperations
 import java.time.LocalDate
 
-@TestConfiguration
-class ØkonomiTestConfig {
-    @Bean
-    @Profile("mock-økonomi")
-    @Primary
-    fun mockØkonomiKlient(): ØkonomiKlient {
-        val økonomiKlient: ØkonomiKlient = mockk()
+class FakeØkonomiKlient(
+    restOperations: RestOperations,
+) : ØkonomiKlient(familieOppdragUri = "http://familie-oppdrag-fake-uri", restOperations = restOperations) {
+    override fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): String = "Utbetalingsoppdrag iverksatt"
 
-        clearØkonomiMocks(økonomiKlient)
+    override fun hentStatus(oppdragId: OppdragId): OppdragStatus = OppdragStatus.KVITTERT_OK
 
-        return økonomiKlient
-    }
+    override fun hentSimulering(utbetalingsoppdrag: Utbetalingsoppdrag): DetaljertSimuleringResultat = simuleringsresultater[utbetalingsoppdrag.saksnummer] ?: DetaljertSimuleringResultat(simuleringsMottakere)
 
     companion object {
-        fun clearØkonomiMocks(økonomiKlient: ØkonomiKlient) {
-            clearMocks(økonomiKlient)
+        val simuleringsresultater = mutableMapOf<String, DetaljertSimuleringResultat>()
 
-            val iverksettRespons = "Mocksvar fra Økonomi-klient"
-            every { økonomiKlient.iverksettOppdrag(any()) } returns iverksettRespons
-
-            val hentStatusRespons = OppdragStatus.KVITTERT_OK
-
-            every { økonomiKlient.hentStatus(any()) } returns hentStatusRespons
-
-            every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
+        fun leggTilSimuleringResultat(
+            fagsakId: String,
+            simuleringResultat: DetaljertSimuleringResultat,
+        ) {
+            simuleringsresultater[fagsakId] = simuleringResultat
         }
     }
 }
 
-val simulertPosteringMock =
+val simuleringsPosteringer =
     listOf(
         SimulertPostering(
             fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
@@ -174,10 +162,10 @@ val simulertPosteringMock =
         ),
     )
 
-val simuleringMottakerMock =
+val simuleringsMottakere =
     listOf(
         SimuleringMottaker(
-            simulertPostering = simulertPosteringMock,
+            simulertPostering = simuleringsPosteringer,
             mottakerType = MottakerType.BRUKER,
             mottakerNummer = "12345678910",
         ),
