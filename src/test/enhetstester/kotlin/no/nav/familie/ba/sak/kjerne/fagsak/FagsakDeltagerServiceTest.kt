@@ -2,6 +2,11 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.datagenerator.lagAktør
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -13,13 +18,16 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.brev.domene.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 class FagsakDeltagerServiceTest {
@@ -188,5 +196,75 @@ class FagsakDeltagerServiceTest {
         assertThat(resultat.single { it.ident == barnIdent }.erEgenAnsatt).isFalse()
         assertThat(resultat.single { it.ident == morIdent }.erEgenAnsatt).isTrue()
         assertThat(resultat.single { it.ident == farIdent }.erEgenAnsatt).isNull()
+    }
+
+    @Test
+    fun `skal omgjøre alle exceptions unntat Funksjonell feil til Feil`() {
+        // Arrange
+        val personInfo = PersonInfo(LocalDate.now())
+        val person = lagPerson()
+        val behandling = lagBehandling()
+
+        every {
+            personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer("a")
+        } returns person.aktør
+        every {
+            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør)
+        } returns null
+        every {
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør)
+        } returns personInfo
+        every {
+            personRepository.findByAktør(person.aktør)
+        } returns listOf(person)
+        every {
+            behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
+        } returns behandling
+        every {
+            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(any())
+        } returns null
+        every {
+            personopplysningerService.hentPersoninfoEnkel(any())
+        } throws Exception("Feil ved henting av personinfo")
+
+        // Act og Assert
+
+        val feil = assertThrows<Feil> { fagsakDeltagerService.hentFagsakDeltagere("a") }
+        assertThat { feil.message == "Feil ved henting av person fra PDL" }
+    }
+
+    @Test
+    fun `skal ikke omgjøre Funksjonell feil til Feil`() {
+        // Arrange
+        val personInfo = PersonInfo(LocalDate.now())
+        val person = lagPerson()
+        val behandling = lagBehandling()
+
+        every {
+            personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer("a")
+        } returns person.aktør
+        every {
+            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør)
+        } returns null
+        every {
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør)
+        } returns personInfo
+        every {
+            personRepository.findByAktør(person.aktør)
+        } returns listOf(person)
+        every {
+            behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
+        } returns behandling
+        every {
+            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(any())
+        } returns null
+        every {
+            personopplysningerService.hentPersoninfoEnkel(any())
+        } throws FunksjonellFeil("Feil ved henting av personinfo")
+
+        // Act og Assert
+
+        val funksjonellFeil = assertThrows<FunksjonellFeil> { fagsakDeltagerService.hentFagsakDeltagere("a") }
+        assertThat { funksjonellFeil.message == "Feil ved henting av person fra PDL" }
     }
 }

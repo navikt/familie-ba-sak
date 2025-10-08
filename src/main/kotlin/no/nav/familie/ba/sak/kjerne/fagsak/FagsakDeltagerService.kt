@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
@@ -211,8 +212,12 @@ class FagsakDeltagerService(
                     adressebeskyttelseGradering = it.adressebeskyttelseGradering,
                 )
             },
-            onFailure = {
-                throw Feil("Feil ved henting av person fra PDL", throwable = it)
+            onFailure = { exception ->
+                when (exception) {
+                    // Kaster funksjonell feil videre, ellers kaster vi Feil
+                    is FunksjonellFeil -> throw exception
+                    else -> throw Feil("Feil ved henting av person fra PDL", throwable = exception)
+                }
             },
         )
     }
