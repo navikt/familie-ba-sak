@@ -120,8 +120,8 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
 
             every { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) } returns
                 listOf(
-                    FagsakIdBehandlingIdOgKategori(fagsak1.id, behandling1.id, BehandlingKategori.NASJONAL),
-                    FagsakIdBehandlingIdOgKategori(fagsak2.id, behandling2.id, BehandlingKategori.NASJONAL),
+                    FagsakIdBehandlingIdOgKategori(fagsak1.id, behandling1.id, BehandlingKategori.NASJONAL.name),
+                    FagsakIdBehandlingIdOgKategori(fagsak2.id, behandling2.id, BehandlingKategori.NASJONAL.name),
                 )
 
             every {
@@ -195,7 +195,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                     1,
                 )
 
-            every { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) } returns listOf(FagsakIdBehandlingIdOgKategori(fagsak1.id, behandling1.id, BehandlingKategori.NASJONAL))
+            every { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) } returns listOf(FagsakIdBehandlingIdOgKategori(fagsak1.id, behandling1.id, BehandlingKategori.NASJONAL.name))
 
             every { persongrunnlagService.hentAktivForBehandlinger(listOf(behandling1.id)) } returns mapOf(behandling1.id to persongrunnlag1)
 
@@ -265,8 +265,8 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
 
             every { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) } returns
                 listOf(
-                    FagsakIdBehandlingIdOgKategori(fagsak1.id, eøsBehandling1.id, BehandlingKategori.EØS),
-                    FagsakIdBehandlingIdOgKategori(fagsak2.id, eøsBehandling2.id, BehandlingKategori.EØS),
+                    FagsakIdBehandlingIdOgKategori(fagsak1.id, eøsBehandling1.id, BehandlingKategori.EØS.name),
+                    FagsakIdBehandlingIdOgKategori(fagsak2.id, eøsBehandling2.id, BehandlingKategori.EØS.name),
                 )
 
             every {
@@ -337,8 +337,8 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
 
             every { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) } returns
                 listOf(
-                    FagsakIdBehandlingIdOgKategori(fagsak1.id, behandling1.id, BehandlingKategori.NASJONAL),
-                    FagsakIdBehandlingIdOgKategori(fagsak2.id, behandling2.id, BehandlingKategori.NASJONAL),
+                    FagsakIdBehandlingIdOgKategori(fagsak1.id, behandling1.id, BehandlingKategori.NASJONAL.name),
+                    FagsakIdBehandlingIdOgKategori(fagsak2.id, behandling2.id, BehandlingKategori.NASJONAL.name),
                 )
 
             every { persongrunnlagService.hentAktivForBehandlinger(listOf(behandling1.id, behandling2.id)) } returns mapOf(behandling1.id to persongrunnlag1)

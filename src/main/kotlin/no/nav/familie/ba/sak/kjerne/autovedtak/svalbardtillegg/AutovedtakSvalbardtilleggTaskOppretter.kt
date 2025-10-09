@@ -33,7 +33,7 @@ class AutovedtakSvalbardtilleggTaskOppretter(
         logger.info("Hentet ${fagsakIder.size} fagsaker for vurdering av autovedtak Svalbardtillegg")
 
         val iverksatteBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder)
-        val sistIverksatteBehandlingerUtenEøs = iverksatteBehandlinger.filter { it.kategori != BehandlingKategori.EØS }
+        val sistIverksatteBehandlingerUtenEøs = iverksatteBehandlinger.filter { it.kategori != BehandlingKategori.EØS.name }
 
         logger.info("Av ${iverksatteBehandlinger.size} iverksatte behandlinger er ${sistIverksatteBehandlingerUtenEøs.size} nasjonal")
 
@@ -78,6 +78,6 @@ class AutovedtakSvalbardtilleggTaskOppretter(
         svalbardtilleggKjøringRepository.saveAll(fagsakIderSomIkkeSkalOpprettesTaskFor.map { SvalbardtilleggKjøring(fagsakId = it) })
 
         opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(fagsakerDerMinstEnAktørBorPåSvalbard)
-        logger.info("Totalt opprettet $fagsakerDerMinstEnAktørBorPåSvalbard/$antallFagsaker tasker for autovedtak Svalbardtillegg")
+        logger.info("Totalt opprettet ${fagsakerDerMinstEnAktørBorPåSvalbard.size}/$antallFagsaker tasker for autovedtak Svalbardtillegg")
     }
 }

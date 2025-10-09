@@ -137,7 +137,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     data class FagsakIdBehandlingIdOgKategori(
         val fagsakId: Long,
         val behandlingId: Long,
-        val kategori: BehandlingKategori,
+        val kategori: String,
     )
 
     @Query(
