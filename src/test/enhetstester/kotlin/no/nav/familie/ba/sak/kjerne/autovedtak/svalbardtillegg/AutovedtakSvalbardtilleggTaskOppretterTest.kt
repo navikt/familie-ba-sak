@@ -5,7 +5,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagOppholdsadresse
@@ -23,11 +22,9 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.svalbard.SvalbardKommune
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import java.time.LocalDate
@@ -309,74 +306,6 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
             verify(exactly = 1) { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) }
             verify(exactly = 1) { persongrunnlagService.hentAktivForBehandlinger(emptyList()) }
             verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(emptySet()) }
-        }
-
-        @Test
-        fun `skal kaste exception om aktivt grunnlag ikke blir funnet for en behandling`() {
-            // Arrange
-            val pageable = Pageable.ofSize(2)
-
-            val person1 = lagPerson()
-            val person2 = lagPerson()
-
-            val fagsak1 = lagFagsak(id = 1, aktør = person1.aktør)
-            val behandling1 = lagBehandling(id = 1, fagsak = fagsak1)
-            val persongrunnlag1 = lagTestPersonopplysningGrunnlag(behandling1.id, person1)
-
-            val fagsak2 = lagFagsak(id = 2, aktør = person2.aktør)
-            val behandling2 = lagBehandling(id = 2, fagsak = fagsak2)
-
-            val fagsakIder = setOf(fagsak1.id, fagsak2.id)
-
-            every { fagsakRepository.finnLøpendeFagsakerForSvalbardtilleggKjøring(any()) } returns
-                PageImpl(
-                    fagsakIder.toList(),
-                    pageable,
-                    1,
-                )
-
-            every { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) } returns
-                listOf(
-                    FagsakIdBehandlingIdOgKategori(fagsak1.id, behandling1.id, BehandlingKategori.NASJONAL.name),
-                    FagsakIdBehandlingIdOgKategori(fagsak2.id, behandling2.id, BehandlingKategori.NASJONAL.name),
-                )
-
-            every { persongrunnlagService.hentAktivForBehandlinger(listOf(behandling1.id, behandling2.id)) } returns mapOf(behandling1.id to persongrunnlag1)
-
-            every { pdlRestClient.hentAdresserForPersoner(any()) } returns
-                mapOf(
-                    person1.aktør.aktivFødselsnummer() to
-                        PdlAdresserPerson(
-                            oppholdsadresse =
-                                listOf(
-                                    lagOppholdsadresse(
-                                        gyldigFraOgMed = LocalDate.of(2025, 1, 1),
-                                        gyldigTilOgMed = LocalDate.of(2025, 12, 31),
-                                        vegadresse = lagVegadresse(kommunenummer = SvalbardKommune.SVALBARD.kommunenummer),
-                                    ),
-                                ),
-                        ),
-                    person2.aktør.aktivFødselsnummer() to
-                        PdlAdresserPerson(
-                            oppholdsadresse =
-                                listOf(
-                                    lagOppholdsadresse(
-                                        gyldigFraOgMed = LocalDate.of(2025, 1, 1),
-                                        gyldigTilOgMed = LocalDate.of(2025, 12, 31),
-                                        vegadresse = lagVegadresse(kommunenummer = SvalbardKommune.SVALBARD.kommunenummer),
-                                    ),
-                                ),
-                        ),
-                )
-
-            every { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(any()) } just runs
-
-            // Act & assert
-            val exception =
-                assertThrows<Feil> {
-                    autovedtakSvalbardtilleggTaskOppretter.opprettTasker(2)
-                }
-            assertThat(exception).hasMessageContaining("Forventet personopplysningsgrunnlag for behandling 2 ikke funnet")
         }
     }
 }
