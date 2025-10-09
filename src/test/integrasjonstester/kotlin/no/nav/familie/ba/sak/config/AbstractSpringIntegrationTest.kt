@@ -31,6 +31,7 @@ import org.springframework.test.context.ActiveProfiles
     "fake-integrasjon-client",
     "fake-valutakurs-rest-client",
     "fake-økonomi-klient",
+    "fake-env-service",
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")

@@ -1,12 +1,8 @@
 package no.nav.familie.ba.sak.fake
 
 import no.nav.familie.ba.sak.common.EnvService
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Primary
 import org.springframework.core.env.Environment
 
-@TestConfiguration
-@Primary
 class FakeEnvService(
     environment: Environment,
 ) : EnvService(environment) {

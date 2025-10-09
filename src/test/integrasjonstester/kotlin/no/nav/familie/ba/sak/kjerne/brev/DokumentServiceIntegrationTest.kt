@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
-import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAktør
@@ -11,6 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
+import no.nav.familie.ba.sak.fake.FakeBrevKlient
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonClient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -82,7 +82,7 @@ class DokumentServiceIntegrationTest(
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired
-    private val brevKlient: BrevKlient,
+    private val fakeBrevKlient: FakeBrevKlient,
     @Autowired
     private val dokumentGenereringService: DokumentGenereringService,
     @Autowired
@@ -334,17 +334,13 @@ class DokumentServiceIntegrationTest(
         assertThat(fakeIntegrasjonClient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
         assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
         assertEquals("institusjonsbarnets navn", manueltBrevRequest.vedrørende?.navn)
-        verify {
-            brevKlient.genererBrev(
-                "bokmaal",
-                match {
-                    it.mal == Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON &&
-                        it.data.flettefelter.gjelder!!
-                            .first() == "institusjonsbarnets navn" &&
-                        it.data.flettefelter.organisasjonsnummer!!
-                            .first() == orgNummer
-                },
-            )
+        val genererteBrev = fakeBrevKlient.genererteBrev
+        assertThat(fakeBrevKlient.genererteBrev).anyMatch {
+            it.mal == Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON &&
+                it.data.flettefelter.gjelder!!
+                    .first() == "institusjonsbarnets navn" &&
+                it.data.flettefelter.organisasjonsnummer!!
+                    .first() == orgNummer
         }
     }
 
