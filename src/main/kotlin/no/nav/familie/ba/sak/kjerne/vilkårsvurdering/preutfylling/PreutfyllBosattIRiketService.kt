@@ -278,7 +278,12 @@ class PreutfyllBosattIRiketService(
 
     private fun lagErOppholdsadresserPåSvalbardTidslinje(
         adresser: Adresser,
-    ): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.oppholdsadresse) { it.erPåSvalbard() }
+    ): Tidslinje<Boolean> {
+        if (adresser.oppholdsadresse.isEmpty()) {
+            return tomTidslinje<Boolean>()
+        }
+        return lagTidslinjeForAdresser(adresser.oppholdsadresse) { it.erPåSvalbard() }
+    }
 
     private fun lagTidslinjeForAdresser(
         adresser: List<Adresse>,
