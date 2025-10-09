@@ -33,7 +33,15 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
-@ActiveProfiles("postgres", "integrasjonstest", "testcontainers", "mock-pdl", "mock-ident-client", "mock-oauth", "mock-brev-klient")
+@ActiveProfiles(
+    "postgres",
+    "integrasjonstest",
+    "testcontainers",
+    "mock-pdl",
+    "mock-rest-template-config",
+    "mock-ident-client",
+    "mock-brev-klient",
+)
 class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
     // Trenger fast port for at klienten i ba-sak kan kalle wiremock'en
     private val wireMockServer = WireMockServer(28085)
