@@ -37,8 +37,6 @@ class AvregningService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val clockProvider: ClockProvider,
     private val featureToggleService: FeatureToggleService,
-    private val fagsakService: FagsakService,
-    private val beregningService: BeregningService,
 ) {
     fun behandlingHarPerioderSomAvregnes(behandlingId: Long): Boolean = hentPerioderMedAvregning(behandlingId).isNotEmpty()
 
@@ -102,42 +100,6 @@ class AvregningService(
                     null
                 }
             }
-
-    fun hentOverlappendePerioderMedAndreFagsaker(behandlingId: Long): List<OverlappendePerioderMedAndreFagsaker> {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-
-        val fagsaker =
-            when (behandling.fagsak.type) {
-                SKJERMET_BARN, INSTITUSJON, BARN_ENSLIG_MINDREÅRIG -> fagsakService.hentAlleFagsakerForAktør(behandling.fagsak.aktør).filter { it.id != behandling.fagsak.id }
-                else -> return emptyList()
-            }
-
-        if (fagsaker.isEmpty()) return emptyList()
-
-        val barnsAndelerFraAndreBehandlinger =
-            beregningService
-                .hentRelevanteTilkjentYtelserForBarn(behandling.fagsak.aktør, behandling.fagsak.id)
-                .flatMap { it.andelerTilkjentYtelse }
-                .filter { it.aktør == behandling.fagsak.aktør }
-
-        val tidslinjeMedOverlapp =
-            lagErOver100ProsentUtbetalingPåYtelseTidslinje(
-                andeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id),
-                barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger,
-            ).tilPerioderIkkeNull().filter { it.verdi.erOver100Prosent }
-
-        return tidslinjeMedOverlapp.map {
-            OverlappendePerioderMedAndreFagsaker(
-                fom = it.fom!!,
-                tom = it.tom!!,
-                fagsaker =
-                    it.verdi.behandlingIds
-                        .distinct()
-                        .filter { behandlingId != it }
-                        .map { behandlingHentOgPersisterService.hent(it).fagsak.id },
-            )
-        }
-    }
 }
 
 data class EtterbetalingOgFeilutbetaling(

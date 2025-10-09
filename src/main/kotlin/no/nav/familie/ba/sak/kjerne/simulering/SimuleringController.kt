@@ -32,14 +32,11 @@ class SimuleringController(
                 økonomiSimuleringMottakere = vedtakSimuleringMottaker,
             )
 
-        val overlappendeAvregningAndreFagsaker = avregningService.hentOverlappendePerioderMedAndreFagsaker(behandlingId)
-        val etterBetalingEllerFeilutbetalingIAnnenFagsak = simuleringService.hentOverlappendeFeilOgEtterbetalingerFraAndreFagsakerForSøker(behandlingId, simulering)
-
-        val overlappendePerioderMedAndreFagsaker = (overlappendeAvregningAndreFagsaker + etterBetalingEllerFeilutbetalingIAnnenFagsak).distinct()
+        val overlappendePerioderMedAndreFagsaker = simuleringService.hentOverlappendeFeilOgEtterbetalingerFraAndreFagsakerForSøker(behandlingId, simulering)
 
         val avregningsperioder = avregningService.hentPerioderMedAvregning(behandlingId)
 
-        val restSimulering = simulering.tilSimuleringDto(avregningsperioder, overlappendePerioderMedAndreFagsaker)
-        return ResponseEntity.ok(Ressurs.success(restSimulering))
+        val simuleringDto = simulering.tilSimuleringDto(avregningsperioder, overlappendePerioderMedAndreFagsaker)
+        return ResponseEntity.ok(Ressurs.success(simuleringDto))
     }
 }
