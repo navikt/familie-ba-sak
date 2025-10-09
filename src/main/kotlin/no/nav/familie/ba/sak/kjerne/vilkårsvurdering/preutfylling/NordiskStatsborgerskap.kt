@@ -11,7 +11,7 @@ import no.nav.familie.tidslinje.utvidelser.kombiner
 fun PdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
     val statsborgerskapGruppertPåNavn =
         this
-            .hentStatsborgerskap(personResultat.aktør, historikk = true)
+            .hentStatsborgerskap(personResultat.aktør, historikk = false)
             .groupBy { it.land }
 
     return statsborgerskapGruppertPåNavn.values
