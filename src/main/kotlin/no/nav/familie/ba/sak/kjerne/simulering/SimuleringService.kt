@@ -230,14 +230,9 @@ class SimuleringService(
     fun hentFagsakTilSimuleringFraAndreFagsakerForSøker(behandlingId: Long): Map<Long, Simulering> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val fagsakerForSøker =
-            when (behandling.fagsak.type) {
-                SKJERMET_BARN, INSTITUSJON, BARN_ENSLIG_MINDREÅRIG ->
-                    fagsakService
-                        .hentAlleFagsakerForAktør(behandling.fagsak.aktør)
-                        .filter { it.id != behandling.fagsak.id }
-
-                else -> return emptyMap()
-            }
+            fagsakService
+                .hentAlleFagsakerForAktør(behandling.fagsak.aktør)
+                .filter { it.id != behandling.fagsak.id }
 
         val sisteBehandlingerSomErGodkjentForFagsaker =
             fagsakerForSøker
