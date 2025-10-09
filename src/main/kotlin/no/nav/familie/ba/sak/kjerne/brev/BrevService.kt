@@ -23,7 +23,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.BrevBegrunnelseFeil
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakFinnmarkstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtFørsteBarn
@@ -233,8 +233,8 @@ class BrevService(
                     etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
                 )
 
-            Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG ->
-                Autovedtak6og18årOgSmåbarnstillegg(
+            Brevmal.AUTOVEDTAK_ENDRING ->
+                AutovedtakEndring(
                     vedtakFellesfelter = vedtakFellesfelter,
                 )
 

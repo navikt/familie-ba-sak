@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringSvar
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring.Companion.hentAktivSatsendringstidspunkt
@@ -41,7 +40,6 @@ import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 class BehandlingSatsendringTest(
-    @Autowired private val mockLocalDateService: LocalDateService,
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -60,8 +58,6 @@ class BehandlingSatsendringTest(
         // returnerer. Det vi ønsker er at den sist tillagte satsendringen ikke kommer med slik at selve
         // satsendringen som skal kjøres senere faktisk utgjør en endring (slik at behandlingsresultatet blir ENDRET).
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2023, 2, 1)
-
-        every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
     }
 
     @AfterEach
