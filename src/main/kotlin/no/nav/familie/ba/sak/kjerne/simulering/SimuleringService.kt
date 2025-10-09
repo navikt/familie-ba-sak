@@ -111,16 +111,16 @@ class SimuleringService(
             behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK ||
                 behandling.status == BehandlingStatus.AVSLUTTET
 
-        val simulering = hentSimuleringPåBehandling(behandlingId)
-        val restSimulering =
+        val simuleringMottakere = hentSimuleringPåBehandling(behandlingId)
+        val simulering =
             vedtakSimuleringMottakereTilSimulering(
-                økonomiSimuleringMottakere = simulering,
+                økonomiSimuleringMottakere = simuleringMottakere,
             )
 
-        return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)) {
+        return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(simulering)) {
             oppdaterSimuleringPåBehandling(behandling)
         } else {
-            simulering
+            simuleringMottakere
         }
     }
 
