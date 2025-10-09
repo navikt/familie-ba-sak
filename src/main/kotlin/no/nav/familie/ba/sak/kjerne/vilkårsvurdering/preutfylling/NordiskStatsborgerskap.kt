@@ -12,6 +12,7 @@ fun PdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat: PersonResulta
     val statsborgerskapGruppertPåNavn =
         this
             .hentStatsborgerskap(personResultat.aktør, historikk = true)
+            .distinct()
             .groupBy { it.land }
 
     return statsborgerskapGruppertPåNavn.values

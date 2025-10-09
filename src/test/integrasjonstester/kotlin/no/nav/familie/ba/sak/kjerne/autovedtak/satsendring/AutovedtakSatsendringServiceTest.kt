@@ -5,7 +5,6 @@ import io.mockk.just
 import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.unmockkObject
-import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
@@ -49,7 +48,6 @@ import java.time.YearMonth
 
 class AutovedtakSatsendringServiceTest(
     @Autowired private val jdbcTemplate: JdbcTemplate,
-    @Autowired private val mockLocalDateService: LocalDateService,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingService: BehandlingService,
     @Autowired private val behandlingRepository: BehandlingRepository,
@@ -80,7 +78,6 @@ class AutovedtakSatsendringServiceTest(
         // satsendringen som skal kjøres senere faktisk utgjør en endring (slik at behandlingsresultatet blir ENDRET).
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2023, 2, 1)
 
-        every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
         fagsak = opprettLøpendeFagsak()
         aktørBarn = personidentService.hentOgLagreAktør(randomFnr(), true)
     }

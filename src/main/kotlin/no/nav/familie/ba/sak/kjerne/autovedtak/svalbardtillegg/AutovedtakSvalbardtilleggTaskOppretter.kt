@@ -28,8 +28,6 @@ class AutovedtakSvalbardtilleggTaskOppretter(
         val fagsakIder =
             fagsakRepository.finnLøpendeFagsakerForSvalbardtilleggKjøring(Pageable.ofSize(antallFagsaker)).toSet()
 
-        svalbardtilleggKjøringRepository.saveAll(fagsakIder.map { SvalbardtilleggKjøring(fagsakId = it) })
-
         val iverksatteBehandlinger =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder).values
 
@@ -65,6 +63,9 @@ class AutovedtakSvalbardtilleggTaskOppretter(
             fagsakerMedPersonidenter
                 .filterValues { personerSomBorPåSvalbard.intersect(it).isNotEmpty() }
                 .keys
+
+        val fagsakIderSomIkkeSkalOpprettesTaskFor = fagsakIder - fagsakerDerMinstEnAktørBorPåSvalbard
+        svalbardtilleggKjøringRepository.saveAll(fagsakIderSomIkkeSkalOpprettesTaskFor.map { SvalbardtilleggKjøring(fagsakId = it) })
 
         opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(fagsakerDerMinstEnAktørBorPåSvalbard)
     }

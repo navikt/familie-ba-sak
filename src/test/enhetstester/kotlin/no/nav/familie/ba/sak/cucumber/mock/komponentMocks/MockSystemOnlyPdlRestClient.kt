@@ -51,6 +51,7 @@ fun mockSystemOnlyPdlRestClient(
                     PdlAdresserPerson(
                         bostedsadresse = listOf(Bostedsadresse(gyldigFraOgMed = fødselsdato, vegadresse = vegadresseIOslo)),
                         deltBosted = eksisterendeAdresser?.deltBosted ?: emptyList(),
+                        oppholdsadresse = eksisterendeAdresser?.oppholdsadresse ?: emptyList(),
                     )
                 } else {
                     eksisterendeAdresser

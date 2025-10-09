@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonIkkeFunnet
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
@@ -202,13 +204,13 @@ class FagsakDeltagerServiceIntegrationTest(
             RegistrerPersongrunnlagDTO(ident = søker2Fnr, barnasIdenter = listOf(barn1Fnr)),
         )
 
-        val søkeresultat1 = fagsakDeltagerService.hentFagsakDeltager(søker1Fnr)
+        val søkeresultat1 = fagsakDeltagerService.hentFagsakDeltagere(søker1Fnr)
         assertEquals(1, søkeresultat1.size)
         assertEquals(Kjønn.KVINNE, søkeresultat1[0].kjønn)
         assertEquals("søker1", søkeresultat1[0].navn)
         assertEquals(fagsak0.data!!.id, søkeresultat1[0].fagsakId)
 
-        val søkeresultat2 = fagsakDeltagerService.hentFagsakDeltager(barn1Fnr)
+        val søkeresultat2 = fagsakDeltagerService.hentFagsakDeltagere(barn1Fnr)
         assertEquals(3, søkeresultat2.size)
         var matching = 0
         søkeresultat2.forEach {
@@ -224,7 +226,7 @@ class FagsakDeltagerServiceIntegrationTest(
         assertEquals(11, matching)
         assertEquals(1, søkeresultat2.filter { it.ident == barn1Fnr }.size)
 
-        val søkeresultat3 = fagsakDeltagerService.hentFagsakDeltager(barn2Fnr)
+        val søkeresultat3 = fagsakDeltagerService.hentFagsakDeltagere(barn2Fnr)
         assertEquals(3, søkeresultat3.size)
         assertEquals(1, søkeresultat3.filter { it.ident == barn2Fnr }.size)
         assertNull(søkeresultat3.find { it.ident == barn2Fnr }!!.fagsakId)
@@ -276,7 +278,7 @@ class FagsakDeltagerServiceIntegrationTest(
             fagsakService.hentFagsakPåPerson(søker1Aktør).also { it?.arkivert = true }!!,
         )
 
-        val søkeresultat1 = fagsakDeltagerService.hentFagsakDeltager(søker1Fnr)
+        val søkeresultat1 = fagsakDeltagerService.hentFagsakDeltagere(søker1Fnr)
 
         assertEquals(1, søkeresultat1.size)
         assertNull(søkeresultat1.first().fagsakId)
@@ -301,7 +303,7 @@ class FagsakDeltagerServiceIntegrationTest(
             fagsakService.hentFagsakPåPerson(søker1Aktør).also { it?.arkivert = true }!!,
         )
 
-        val søkeresultat1 = fagsakDeltagerService.hentFagsakDeltager(søker1Fnr)
+        val søkeresultat1 = fagsakDeltagerService.hentFagsakDeltagere(søker1Fnr)
 
         assertEquals(1, søkeresultat1.size)
         assertNull(søkeresultat1.first().fagsakId)
@@ -317,20 +319,23 @@ class FagsakDeltagerServiceIntegrationTest(
                 IdentInformasjon("122334343", gruppe = "AKTOERID", historisk = false),
             ),
         )
-        assertThat(fagsakDeltagerService.hentFagsakDeltager(fnr)).hasSize(0)
+        assertThat(fagsakDeltagerService.hentFagsakDeltagere(fnr)).hasSize(0)
     }
 
     // Satte XX for at dette testet skal kjøre sist.
     @Test
     fun `XX Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
+        val aktør = lagAktør()
+
         every {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
+            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer()))
         } answers {
             throw HttpServerErrorException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "[PdlRestClient][Feil ved oppslag på person: Fant ikke person]",
             )
         }
-        assertEquals(emptyList<RestFagsakDeltager>(), fagsakDeltagerService.hentFagsakDeltager(randomFnr()))
+        leggTilPersonIkkeFunnet(aktør.aktivFødselsnummer())
+        assertEquals(emptyList<RestFagsakDeltager>(), fagsakDeltagerService.hentFagsakDeltagere(aktør.aktivFødselsnummer()))
     }
 }

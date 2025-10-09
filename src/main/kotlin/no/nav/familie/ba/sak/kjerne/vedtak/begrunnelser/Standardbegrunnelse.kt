@@ -509,7 +509,7 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetFinnmarkstilleggUtenDato"
     },
-    INNVILGET_AUTOVEDTAK_FØDSEL_SVALBARDTILLEGG {
+    INNVILGET_SVALBARDTILLEGG_UTEN_DATO {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetSvalbardtilleggUtenDato"
     },

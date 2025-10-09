@@ -2,25 +2,18 @@ package no.nav.familie.ba.sak.config
 
 import io.mockk.isMockKMock
 import io.mockk.unmockkAll
-import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.fake.FakeEfSakRestClient
 import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClientMock
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.mock.FamilieIntegrasjonerTilgangskontrollMock
-import no.nav.familie.ba.sak.mock.LocalDateServiceTestConfig
 import no.nav.familie.ba.sak.mock.TilbakekrevingKlientTestConfig
-import no.nav.familie.ba.sak.mock.ValutakursRestClientMock
-import no.nav.familie.ba.sak.mock.ØkonomiTestConfig
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.TaskRepositoryTestConfig
-import no.nav.familie.valutakurs.ValutakursRestClient
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,22 +29,10 @@ abstract class AbstractMockkSpringRunner {
     private lateinit var efSakRestClient: EfSakRestClient
 
     @Autowired
-    private lateinit var mockIntegrasjonClient: IntegrasjonClient
-
-    @Autowired
     private lateinit var mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
 
     @Autowired
-    private lateinit var mockValutakursRestClient: ValutakursRestClient
-
-    @Autowired
-    private lateinit var mockØkonomiKlient: ØkonomiKlient
-
-    @Autowired
     private lateinit var mockTilbakekrevingKlient: TilbakekrevingKlient
-
-    @Autowired
-    private lateinit var mockLocalDateService: LocalDateService
 
     @Autowired
     private lateinit var mockInfotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
@@ -95,20 +76,8 @@ abstract class AbstractMockkSpringRunner {
             mockFamilieIntegrasjonerTilgangskontrollClient,
         )
 
-        if (isMockKMock(mockValutakursRestClient)) {
-            ValutakursRestClientMock.clearValutakursRestClient(mockValutakursRestClient)
-        }
-
-        if (isMockKMock(mockØkonomiKlient)) {
-            ØkonomiTestConfig.clearØkonomiMocks(mockØkonomiKlient)
-        }
-
         if (isMockKMock(mockTilbakekrevingKlient)) {
             TilbakekrevingKlientTestConfig.clearTilbakekrevingKlientMocks(mockTilbakekrevingKlient)
-        }
-
-        if (isMockKMock(mockLocalDateService)) {
-            LocalDateServiceTestConfig.clearLocalDateServiceMocks(mockLocalDateService)
         }
 
         if (isMockKMock(mockInfotrygdBarnetrygdClient)) {

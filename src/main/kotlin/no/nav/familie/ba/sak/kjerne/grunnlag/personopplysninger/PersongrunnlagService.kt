@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.SKJERMET_BARN
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrDeltBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
@@ -35,6 +36,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 import org.slf4j.LoggerFactory
@@ -55,7 +57,6 @@ class PersongrunnlagService(
     private val loggService: LoggService,
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val integrasjonClient: IntegrasjonClient,
     private val kodeverkService: KodeverkService,
 ) {
     fun mapTilRestPersonMedStatsborgerskapLand(
@@ -286,6 +287,8 @@ class PersongrunnlagService(
 
     private fun Bostedsadresse.poststed(): String? = kodeverkService.hentPoststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
 
+    private fun DeltBosted.poststed(): String? = kodeverkService.hentPoststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
+
     private fun Oppholdsadresse.poststed(): String? = kodeverkService.hentPoststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
 
     private fun hentPerson(
@@ -309,7 +312,7 @@ class PersongrunnlagService(
             fødselsdato = personinfo.fødselsdato,
             aktør = aktør,
             navn = personinfo.navn ?: "",
-            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
+            kjønn = personinfo.kjønn,
             målform = målform,
         ).also { person ->
             person.opphold =
@@ -329,6 +332,15 @@ class PersongrunnlagService(
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
+                            person = person,
+                            poststed = it.poststed(),
+                        )
+                    }.toMutableList()
+            person.deltBosted =
+                personinfo.deltBosted
+                    .map {
+                        GrDeltBosted.fraDeltBosted(
+                            deltBosted = it,
                             person = person,
                             poststed = it.poststed(),
                         )
@@ -382,6 +394,46 @@ class PersongrunnlagService(
 
         secureLogger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter persongrunnlag $personopplysningGrunnlag")
         return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+    }
+
+    fun oppdaterAdresserPåPersoner(
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+    ): PersonopplysningGrunnlag {
+        personopplysningGrunnlag.personer.forEach { person ->
+            val aktør = person.aktør
+            val personinfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+
+            person.bostedsadresser =
+                personinfo.bostedsadresser
+                    .filtrerUtKunNorskeBostedsadresser()
+                    .map {
+                        GrBostedsadresse.fraBostedsadresse(
+                            bostedsadresse = it,
+                            person = person,
+                            poststed = it.poststed(),
+                        )
+                    }.toMutableList()
+            person.oppholdsadresser =
+                personinfo.oppholdsadresser
+                    .map {
+                        GrOppholdsadresse.fraOppholdsadresse(
+                            oppholdsadresse = it,
+                            person = person,
+                            poststed = it.poststed(),
+                        )
+                    }.toMutableList()
+            person.deltBosted =
+                personinfo.deltBosted
+                    .map {
+                        GrDeltBosted.fraDeltBosted(
+                            deltBosted = it,
+                            person = person,
+                            poststed = it.poststed(),
+                        )
+                    }.toMutableList()
+        }
+
+        return personopplysningGrunnlag
     }
 
     fun hentSøkersMålform(behandlingId: Long) = hentSøkerOgBarnPåBehandlingThrows(behandlingId).søker().målform

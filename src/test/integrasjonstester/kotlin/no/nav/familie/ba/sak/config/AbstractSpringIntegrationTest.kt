@@ -14,7 +14,6 @@ import org.springframework.test.context.ActiveProfiles
     "postgres",
     "integrasjonstest",
     "testcontainers",
-    "mock-økonomi",
     "mock-pdl",
     "mock-pdl-client",
     "mock-ident-client",
@@ -31,6 +30,8 @@ import org.springframework.test.context.ActiveProfiles
     "mock-unleash",
     "mock-system-only-integrasjon-client",
     "fake-integrasjon-client",
+    "fake-valutakurs-rest-client",
+    "fake-økonomi-klient",
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")

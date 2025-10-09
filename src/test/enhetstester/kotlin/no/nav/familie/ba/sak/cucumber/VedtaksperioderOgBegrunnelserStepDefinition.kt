@@ -25,11 +25,13 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockAutovedtakFinnmarkstilleggService
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockAutovedtakSvalbardtilleggService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.FinnmarkstilleggData
+import no.nav.familie.ba.sak.kjerne.autovedtak.SvalbardtilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -592,8 +594,8 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
      *
      * Adressetype kan være "Bostedsadresse" eller "Delt bosted"
      */
-    @Og("med bostedskommuner")
-    fun `med bostedskommuner`(dataTable: DataTable) {
+    @Og("med adressekommuner")
+    fun `med adressekommuner`(dataTable: DataTable) {
         adresser.putAll(parseAdresser(dataTable, persongrunnlag))
     }
 
@@ -607,6 +609,18 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
             fagsakId = fagsakId,
             nyBehanldingId = finnmarkstilleggBehandlingId,
         ).kjørBehandling(FinnmarkstilleggData(fagsakId))
+    }
+
+    @Når("vi lager automatisk behandling med id {} på fagsak {} på grunn av svalbardtillegg")
+    fun `kjør behandling svalbardtillegg på fagsak med behandlingsid`(
+        svalbardtilleggBehandlingId: Long,
+        fagsakId: Long,
+    ) {
+        mockAutovedtakSvalbardtilleggService(
+            dataFraCucumber = this,
+            fagsakId = fagsakId,
+            nyBehanldingId = svalbardtilleggBehandlingId,
+        ).kjørBehandling(SvalbardtilleggData(fagsakId))
     }
 
     @Så("forvent at brevmal {} er brukt for behandling {}")

@@ -3,18 +3,18 @@ package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
 
-data class Autovedtak6og18årOgSmåbarnstillegg(
-    override val mal: Brevmal = Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
-    override val data: Autovedtak6Og18ÅrData,
+data class AutovedtakEndring(
+    override val mal: Brevmal = Brevmal.AUTOVEDTAK_ENDRING,
+    override val data: AutovedtakEndringData,
 ) : Vedtaksbrev {
     constructor(
         vedtakFellesfelter: VedtakFellesfelter,
     ) :
         this(
             data =
-                Autovedtak6Og18ÅrData(
+                AutovedtakEndringData(
                     delmalData =
-                        Autovedtak6Og18ÅrData.Delmaler(
+                        AutovedtakEndringData.Delmaler(
                             hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
                             autoUnderskrift =
                                 AutoUnderskrift(
@@ -31,7 +31,7 @@ data class Autovedtak6og18årOgSmåbarnstillegg(
         )
 }
 
-data class Autovedtak6Og18ÅrData(
+data class AutovedtakEndringData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokumentImpl,
     override val perioder: List<BrevPeriode>,

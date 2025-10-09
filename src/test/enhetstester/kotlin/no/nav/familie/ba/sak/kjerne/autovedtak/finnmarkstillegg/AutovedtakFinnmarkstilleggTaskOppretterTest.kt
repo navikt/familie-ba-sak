@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -24,7 +26,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import java.time.LocalDate
@@ -41,7 +43,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
         AutovedtakFinnmarkstilleggTaskOppretter(
             fagsakRepository = fagsakRepository,
             opprettTaskService = opprettTaskService,
-            finnmarkstilleggKjøringRepository = finnmarkstilleggKjøringRepository,
+            finnmarkstilleggKjøringService = FinnmarkstilleggKjøringService(finnmarkstilleggKjøringRepository),
             persongrunnlagService = persongrunnlagService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             pdlRestClient = pdlRestClient,
@@ -115,7 +117,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
     @BeforeEach
     fun setup() {
         every { finnmarkstilleggKjøringRepository.saveAll(any<List<FinnmarkstilleggKjøring>>()) } returnsArgument 0
-        every { opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(any()) } returns mockk()
+        every { opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(any()) } returns mockk()
     }
 
     @Nested
@@ -170,8 +172,8 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
             autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(1000)
 
             // Assert
-            verify(exactly = 1) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(setOf(behandling1.fagsak.id)) }
-            verify(exactly = 1) { finnmarkstilleggKjøringRepository.saveAll(listOf(FinnmarkstilleggKjøring(fagsakId = behandling1.fagsak.id), FinnmarkstilleggKjøring(fagsakId = behandling2.fagsak.id))) }
+            verify(exactly = 1) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(behandling1.fagsak.id) }
+            verify(exactly = 1) { finnmarkstilleggKjøringRepository.saveAll(listOf(FinnmarkstilleggKjøring(fagsakId = behandling2.fagsak.id))) }
         }
 
         @Test
@@ -215,7 +217,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
             autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(1000)
 
             // Assert
-            verify(exactly = 1) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(emptySet()) }
+            verify(exactly = 0) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(any()) }
             verify(exactly = 1) { finnmarkstilleggKjøringRepository.saveAll(listOf(FinnmarkstilleggKjøring(fagsakId = eøsBehandling1.fagsak.id), FinnmarkstilleggKjøring(fagsakId = eøsBehandling2.fagsak.id))) }
         }
 
@@ -239,11 +241,15 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
 
             // Assert
             verify(exactly = 0) { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) }
-            verify(exactly = 1) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(emptySet()) }
+            verify(exactly = 0) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(any()) }
         }
 
         @Test
         fun `skal håndtere behandling uten persongrunnlag`() {
+            val logger = LoggerFactory.getLogger(AutovedtakFinnmarkstilleggTaskOppretter::class.java) as Logger
+            val listAppender = ListAppender<ILoggingEvent>().apply { start() }
+            logger.addAppender(listAppender)
+
             // Arrange
             every {
                 fagsakRepository.finnLøpendeFagsakerForFinnmarkstilleggKjøring(any())
@@ -257,12 +263,14 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
                 persongrunnlagService.hentAktivForBehandlinger(listOf(behandling1.id))
             } returns emptyMap()
 
-            // Act & assert
-            val exception =
-                assertThrows<Feil> {
-                    autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(1000)
-                }
-            assertThat(exception).hasMessageContaining("Forventet personopplysningsgrunnlag for behandling ${behandling1.id} ikke funnet.")
+            // Act
+            autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(1000)
+
+            // Assert
+            assertThat(listAppender.list).anySatisfy {
+                assertThat(it.level.toString()).isEqualTo("ERROR")
+                assertThat(it.formattedMessage).isEqualTo("Forventet personopplysningsgrunnlag for behandling ${behandling1.id} ikke funnet.")
+            }
         }
 
         @Test

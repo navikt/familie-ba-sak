@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.validation.Valid
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
@@ -18,14 +19,17 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinjeService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeDto
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggTaskOppretter
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggTaskOppretter
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.ba.sak.task.DeaktiverMinsideTask
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
@@ -94,6 +98,10 @@ class ForvalterController(
     private val hentAlleIdenterTilPsysTask: HentAlleIdenterTilPsysTask,
     private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
     private val personidentRepository: PersonidentRepository,
+    private val autovedtakFinnmarkstilleggTaskOppretter: AutovedtakFinnmarkstilleggTaskOppretter,
+    private val envService: EnvService,
+    private val autovedtakSvalbardtilleggTaskOppretter: AutovedtakSvalbardtilleggTaskOppretter,
+    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -541,11 +549,34 @@ class ForvalterController(
             handling = "Opprett task for autovedtak av Finnmarkstillegg",
         )
 
+        if (envService.erProd()) {
+            throw Feil("Dette endepunktet skal ikke brukes i prod")
+        }
+
+        fagsakIder.forEach { fagsakId ->
+            opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(fagsakId)
+        }
+
+        return ResponseEntity.ok("Tasker for autovedtak av Finnmarkstillegg opprettet")
+    }
+
+    @PostMapping("/opprett-tasker-for-autovedtak-finnmarkstillegg/{antallBehandlinger}")
+    @Operation(
+        summary = "Oppretter tasker for autovedtak av Finnmarkstillegg",
+    )
+    fun opprettTaskerForAutovedtakFinnmarkstillegg(
+        @PathVariable antallBehandlinger: Int,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett task for autovedtak av Finnmarkstillegg",
+        )
+
         if (!featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG)) {
             throw Feil("Toggle for å opprette tasker for autovedtak av Finnmarkstillegg er skrudd av")
         }
 
-        opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(fagsakIder)
+        autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(antallBehandlinger)
 
         return ResponseEntity.ok("Tasker for autovedtak av Finnmarkstillegg opprettet")
     }
@@ -562,11 +593,32 @@ class ForvalterController(
             handling = "Opprett task for autovedtak av Svalbardtillegg",
         )
 
+        if (envService.erProd()) {
+            throw Feil("Dette endepunktet skal ikke brukes i prod")
+        }
+
+        opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(fagsakIder)
+
+        return ResponseEntity.ok("Tasker for autovedtak av Svalbardtillegg opprettet")
+    }
+
+    @PostMapping("/opprett-tasker-for-autovedtak-svalbardtillegg/{antallBehandlinger}")
+    @Operation(
+        summary = "Oppretter tasker for autovedtak av Svalbardtillegg",
+    )
+    fun opprettTaskerForAutovedtakSvalbardtillegg(
+        @PathVariable antallBehandlinger: Int,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett task for autovedtak av Svalbardtillegg",
+        )
+
         if (!featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOVEDTAK_SVALBARDTILLEGG)) {
             throw Feil("Toggle for å opprette tasker for autovedtak av Svalbardtillegg er skrudd av")
         }
 
-        opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(fagsakIder)
+        autovedtakSvalbardtilleggTaskOppretter.opprettTasker(antallBehandlinger)
 
         return ResponseEntity.ok("Tasker for autovedtak av Svalbardtillegg opprettet")
     }
@@ -646,5 +698,17 @@ class ForvalterController(
                 }
 
         return ResponseEntity.ok(institusjonerSomSkalHaFinnmarkstillegg)
+    }
+
+    @PostMapping("/send-behandlingsstatistikk-til-dvh")
+    fun sendBehandlingsstatistikkTilDvh(
+        @RequestBody behandlingId: Long,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Sende behandlingsstatistikk for behandling til Datavarehus",
+        )
+        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandlingId)
+        return ResponseEntity.ok("Sendt behandlingsstatistikk for behandling $behandlingId til Datavarehus")
     }
 }
