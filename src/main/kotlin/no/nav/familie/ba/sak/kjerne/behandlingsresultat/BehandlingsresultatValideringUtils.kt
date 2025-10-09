@@ -31,8 +31,10 @@ import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.error.RekjørSenereException
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.tilPeriodeVerdi
 import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
@@ -239,6 +241,9 @@ object BehandlingsresultatValideringUtils {
                 .any { it.verdi == true }
 
         if (erEndringIUtbetaling) {
+            secureLogger.info(objectMapper.writeValueAsString(andelerUtenomYtelseTypeDenneBehandling.joinToString(",", "(", ")", transform = { " fom: " + it.stønadFom.toString() + " tom: " + it.stønadTom.toString() + " aktør: " + it.aktør.aktivFødselsnummer() + " type " + it.type + " beløp: " + it.kalkulertUtbetalingsbeløp })))
+            secureLogger.info(objectMapper.writeValueAsString(andelerUtenomYtelseTypeForrigeBehandling.joinToString(",", "(", ")", transform = { " fom: " + it.stønadFom.toString() + " tom: " + it.stønadTom.toString() + " aktør: " + it.aktør.aktivFødselsnummer() + " type " + it.type + " beløp: " + it.kalkulertUtbetalingsbeløp })))
+
             throw Feil("Det er oppdaget forskjell i utbetaling utenom $ytelseType andeler. Dette kan ikke skje i en behandling der årsak er $behandlingÅrsak, og den automatiske kjøring stoppes derfor.")
         }
     }
