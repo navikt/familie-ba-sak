@@ -75,7 +75,7 @@ Egenskap: Finnmarkstillegg autovedtak
       | Begrunnelse                | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | INNVILGET_FINNMARKSTILLEGG | STANDARD | Ja            | 01.01.25             | 1           | september 2025                       |         | 2 468 |                  | SØKER_HAR_IKKE_RETT     |                             |
 
-    Så forvent at brevmal AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG er brukt for behandling 2
+    Så forvent at brevmal AUTOVEDTAK_ENDRING er brukt for behandling 2
 
 
   Scenario: Skal oppdatere vilkårresultater og opphøre andeler når autovedtak finnmarkstillegg kjøres og man ikke lenger bor i finnmark
