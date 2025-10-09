@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import io.mockk.every
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
@@ -9,10 +8,11 @@ import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.fake.FakeØkonomiKlient
+import no.nav.familie.ba.sak.fake.FakeØkonomiKlient.Companion.leggTilSimuleringResultat
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -89,7 +89,7 @@ class StegServiceIntegrationTest(
     @Autowired
     private val brevmalService: BrevmalService,
     @Autowired
-    private val økonomiKlient: ØkonomiKlient,
+    private val fakeØkonomiKlient: FakeØkonomiKlient,
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Skal sette default-verdier på gift-vilkår for barn`() {
@@ -402,6 +402,8 @@ class StegServiceIntegrationTest(
 
         val barnasIdenter = listOf(barnFnr)
 
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+
         val simulertPosteringMock =
             listOf(
                 SimulertPostering(
@@ -426,7 +428,7 @@ class StegServiceIntegrationTest(
                 ),
             )
 
-        every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
+        leggTilSimuleringResultat(fagsak.id.toString(), DetaljertSimuleringResultat(simuleringMottakerMock))
 
         kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
@@ -443,7 +445,6 @@ class StegServiceIntegrationTest(
         )
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling =
             stegService.håndterNyBehandling(
                 NyBehandling(
@@ -517,6 +518,8 @@ class StegServiceIntegrationTest(
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnasIdenter = listOf(barnFnr)
 
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+
         val simulertPosteringMock =
             listOf(
                 SimulertPostering(
@@ -541,7 +544,7 @@ class StegServiceIntegrationTest(
                 ),
             )
 
-        every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
+        leggTilSimuleringResultat(fagsak.id.toString(), DetaljertSimuleringResultat(simuleringMottakerMock))
 
         kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
@@ -558,7 +561,6 @@ class StegServiceIntegrationTest(
         )
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling =
             stegService.håndterNyBehandling(
                 NyBehandling(
@@ -632,6 +634,8 @@ class StegServiceIntegrationTest(
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnasIdenter = listOf(barnFnr)
 
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+
         val simulertPosteringMock =
             listOf(
                 SimulertPostering(
@@ -656,7 +660,7 @@ class StegServiceIntegrationTest(
                 ),
             )
 
-        every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
+        leggTilSimuleringResultat(fagsak.id.toString(), DetaljertSimuleringResultat(simuleringMottakerMock))
 
         kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
@@ -673,7 +677,6 @@ class StegServiceIntegrationTest(
         )
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling =
             stegService.håndterNyBehandling(
                 NyBehandling(
@@ -738,6 +741,8 @@ class StegServiceIntegrationTest(
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnasIdenter = listOf(barnFnr)
 
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+
         val simulertPosteringMock =
             listOf(
                 SimulertPostering(
@@ -762,9 +767,8 @@ class StegServiceIntegrationTest(
                 ),
             )
 
-        every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
+        leggTilSimuleringResultat(fagsak.id.toString(), DetaljertSimuleringResultat(simuleringMottakerMock))
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val migreringsdato = LocalDate.now().minusMonths(6)
         val behandling =
             stegService.håndterNyBehandling(
@@ -849,6 +853,8 @@ class StegServiceIntegrationTest(
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnasIdenter = listOf(barnFnr)
 
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+
         val simulertPosteringMock =
             listOf(
                 SimulertPostering(
@@ -873,9 +879,8 @@ class StegServiceIntegrationTest(
                 ),
             )
 
-        every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
+        leggTilSimuleringResultat(fagsak.id.toString(), DetaljertSimuleringResultat(simuleringMottakerMock))
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val migreringsdato = LocalDate.now().minusMonths(6)
         val behandling =
             stegService.håndterNyBehandling(
@@ -974,6 +979,9 @@ class StegServiceIntegrationTest(
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
 
         val barnasIdenter = listOf(barnFnr)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+
         val simulertPosteringMock =
             listOf(
                 SimulertPostering(
@@ -998,9 +1006,8 @@ class StegServiceIntegrationTest(
                 ),
             )
 
-        every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
+        leggTilSimuleringResultat(fagsak.id.toString(), DetaljertSimuleringResultat(simuleringMottakerMock))
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val migreringsdato = LocalDate.now().minusMonths(6)
         val behandling =
             stegService.håndterNyBehandling(
@@ -1100,6 +1107,8 @@ class StegServiceIntegrationTest(
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnasIdenter = listOf(barnFnr)
 
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+
         val simulertPosteringMock =
             listOf(
                 SimulertPostering(
@@ -1124,7 +1133,7 @@ class StegServiceIntegrationTest(
                 ),
             )
 
-        every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
+        leggTilSimuleringResultat(fagsak.id.toString(), DetaljertSimuleringResultat(simuleringMottakerMock))
 
         kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
@@ -1140,7 +1149,6 @@ class StegServiceIntegrationTest(
             vilkårInnvilgetFom = LocalDate.now().minusMonths(4),
         )
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val migreringsdato = LocalDate.now().minusMonths(6)
         val behandling =
             stegService.håndterNyBehandling(

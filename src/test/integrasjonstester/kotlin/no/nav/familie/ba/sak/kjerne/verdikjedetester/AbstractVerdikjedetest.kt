@@ -31,7 +31,6 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
     "mock-localdate-service",
     "mock-tilbakekreving-klient",
     "mock-brev-klient",
-    "mock-økonomi",
     "mock-infotrygd-feed",
     "mock-ef-client",
     "mock-rest-template-config",
@@ -42,6 +41,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
     "mock-infotrygd-barnetrygd",
     "fake-integrasjon-client",
     "fake-valutakurs-rest-client",
+    "fake-økonomi-klient",
 )
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
 @Tag("verdikjedetest")
