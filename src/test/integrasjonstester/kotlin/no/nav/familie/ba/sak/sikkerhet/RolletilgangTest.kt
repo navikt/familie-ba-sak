@@ -29,7 +29,7 @@ import org.springframework.web.client.postForEntity
     "mock-pdl",
     "mock-ident-client",
     "mock-infotrygd-barnetrygd",
-    "mock-tilbakekreving-klient",
+    "fake-tilbakekreving-klient",
     "mock-brev-klient",
     "mock-økonomi",
     "mock-infotrygd-feed",
