@@ -199,7 +199,7 @@ class FagsakDeltagerServiceTest {
     }
 
     @Test
-    fun `skal omgjøre alle exceptions unntat Funksjonell feil til Feil`() {
+    fun `skal omgjøre alle exceptions unntatt Funksjonell feil til Feil`() {
         // Arrange
         val personInfo = PersonInfo(LocalDate.now())
         val person = lagPerson()
