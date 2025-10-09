@@ -27,7 +27,6 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
     "postgres",
     "integrasjonstest",
     "testcontainers",
-    "mock-oauth",
     "mock-localdate-service",
     "mock-tilbakekreving-klient",
     "mock-brev-klient",

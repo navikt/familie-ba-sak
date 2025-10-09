@@ -23,7 +23,6 @@ import org.springframework.test.context.ActiveProfiles
     "mock-tilbakekreving-klient",
     "mock-brev-klient",
     "mock-infotrygd-feed",
-    "mock-oauth",
     "mock-rest-template-config",
     "mock-localdate-service",
     "mock-sanity-client",
