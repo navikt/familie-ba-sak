@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregl
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -57,19 +57,19 @@ class FiltreringsregelForFlereBarnTest {
     val personopplysningGrunnlagRepositoryMock = mockk<PersonopplysningGrunnlagRepository>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     val personidentService = mockk<PersonidentService>()
-    val localDateServiceMock = mockk<LocalDateService>()
     val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>(relaxed = true)
     val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     val tilkjentYtelseValideringServiceMock = mockk<TilkjentYtelseValideringService>()
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
+    var clockProvider = TestClockProvider()
     val filtreringsreglerService =
         FiltreringsreglerService(
             personopplysningerService = personopplysningerServiceMock,
             personidentService = personidentService,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepositoryMock,
-            localDateService = localDateServiceMock,
+            clockProvider = clockProvider,
             fødselshendelsefiltreringResultatRepository = fødselshendelsefiltreringResultatRepository,
             behandlingService = behandlingServiceMock,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -147,7 +147,7 @@ class FiltreringsregelForFlereBarnTest {
 
         every { personopplysningerServiceMock.harVerge(gyldigAktør) } returns VergeResponse(harVerge = false)
 
-        every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(15)
+        clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(LocalDate.now().withDayOfMonth(15))
 
         every { personidentService.hentAktør(gyldigAktør.aktivFødselsnummer()) } returns gyldigAktør
 
@@ -249,7 +249,7 @@ class FiltreringsregelForFlereBarnTest {
 
         every { personopplysningerServiceMock.harVerge(gyldigAktør) } returns VergeResponse(harVerge = false)
 
-        every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(20)
+        clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(LocalDate.now().withDayOfMonth(20))
 
         every { personidentService.hentAktør(gyldigAktør.aktivFødselsnummer()) } returns gyldigAktør
         every {

@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import io.mockk.every
-import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -35,15 +33,11 @@ class FødselshendelseFørstegangsbehandlingTest(
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val mockLocalDateService: LocalDateService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn født november 2021 og behandles desember 2021 uten utbetalinger`() {
-        // Behandler desember 2021 for å få med automatisk begrunnelse av satsendring januar 2022
-        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
-
         val scenario =
             RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),

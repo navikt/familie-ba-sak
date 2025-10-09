@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregl
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -39,7 +39,7 @@ class FiltreringsreglerService(
     private val personidentService: PersonidentService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val localDateService: LocalDateService,
+    private val clockProvider: ClockProvider,
     private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
     private val behandlingService: BehandlingService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -130,7 +130,7 @@ class FiltreringsreglerService(
                 morLever = !personopplysningGrunnlag.søker.erDød(),
                 barnaLever = barnaFraHendelse.none { it.erDød() },
                 morHarVerge = personopplysningerService.harVerge(morsAktørId).harVerge,
-                dagensDato = localDateService.now(),
+                dagensDato = LocalDate.now(clockProvider.get()),
                 erFagsakenMigrertEtterBarnFødt =
                     erSakenMigrertEtterBarnFødt(
                         barnaFraHendelse,
