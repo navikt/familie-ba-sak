@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -31,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.error.RekjørSenereException
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.utvidelser.outerJoin
@@ -239,6 +241,9 @@ object BehandlingsresultatValideringUtils {
                 .any { it.verdi == true }
 
         if (erEndringIUtbetaling) {
+            secureLogger.info(objectMapper.writeValueAsString(andelerUtenomYtelseTypeDenneBehandling))
+            secureLogger.info(objectMapper.writeValueAsString(andelerUtenomYtelseTypeForrigeBehandling))
+
             throw Feil("Det er oppdaget forskjell i utbetaling utenom $ytelseType andeler. Dette kan ikke skje i en behandling der årsak er $behandlingÅrsak, og den automatiske kjøring stoppes derfor.")
         }
     }
