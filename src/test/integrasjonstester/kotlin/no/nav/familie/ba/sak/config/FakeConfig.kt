@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.config
 
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonClient
+import no.nav.familie.ba.sak.fake.FakeTilbakekrevingKlient
 import no.nav.familie.ba.sak.fake.FakeValutakursRestClient
 import no.nav.familie.ba.sak.fake.FakeØkonomiKlient
 import org.springframework.boot.test.context.TestConfiguration
@@ -25,4 +26,9 @@ class FakeConfig {
     @Primary
     @Profile("fake-økonomi-klient")
     fun fakeØkonomiKlient(restOperations: RestOperations): FakeØkonomiKlient = FakeØkonomiKlient(restOperations)
+
+    @Bean
+    @Primary
+    @Profile("fake-tilbakekreving-klient")
+    fun fakeTilbakekrevingKlient(restOperations: RestOperations): FakeTilbakekrevingKlient = FakeTilbakekrevingKlient(restOperations)
 }
