@@ -97,7 +97,7 @@ class PreutfyllBosattIRiketService(
         adresserForPerson: Adresser,
         behandling: Behandling,
     ): Set<VilkårResultat> {
-        val erBosattINorgeTidslinje = lagTidslinjeForAdresser(adresserForPerson.bostedsadresser) { it.erINorge() }
+        val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(adresserForPerson)
         val erNordiskStatsborgerTidslinje = pdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat)
         val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresserForPerson)
         val erDeltBostedIFinnmarkEllerNordTromsTidslinje = lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresserForPerson)
