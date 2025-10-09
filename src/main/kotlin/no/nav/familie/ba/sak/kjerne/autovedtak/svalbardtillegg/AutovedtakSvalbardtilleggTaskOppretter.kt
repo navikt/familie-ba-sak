@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøringRepository
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
@@ -20,7 +20,7 @@ class AutovedtakSvalbardtilleggTaskOppretter(
     private val opprettTaskService: OpprettTaskService,
     private val svalbardtilleggKjøringRepository: SvalbardtilleggKjøringRepository,
     private val persongrunnlagService: PersongrunnlagService,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val behandlingRepository: BehandlingRepository,
     private val pdlRestClient: SystemOnlyPdlRestClient,
 ) {
     @Transactional
@@ -28,22 +28,20 @@ class AutovedtakSvalbardtilleggTaskOppretter(
         val fagsakIder =
             fagsakRepository.finnLøpendeFagsakerForSvalbardtilleggKjøring(Pageable.ofSize(antallFagsaker)).toSet()
 
-        val iverksatteBehandlinger =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder).values
-
+        val iverksatteBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder)
         val sistIverksatteBehandlingerUtenEøs = iverksatteBehandlinger.filter { it.kategori != BehandlingKategori.EØS }
 
         val grunnlagForIverksatteBehandlinger =
-            persongrunnlagService.hentAktivForBehandlinger(sistIverksatteBehandlingerUtenEøs.map { it.id })
+            persongrunnlagService.hentAktivForBehandlinger(sistIverksatteBehandlingerUtenEøs.map { it.behandlingId })
 
         val fagsakerMedPersonidenter =
             sistIverksatteBehandlingerUtenEøs.associate { behandling ->
-                val grunnlag = grunnlagForIverksatteBehandlinger[behandling.id]
+                val grunnlag = grunnlagForIverksatteBehandlinger[behandling.behandlingId]
                 if (grunnlag == null) {
-                    throw Feil("Forventet personopplysningsgrunnlag for behandling ${behandling.id} ikke funnet")
+                    throw Feil("Forventet personopplysningsgrunnlag for behandling ${behandling.behandlingId} ikke funnet")
                 }
                 val fødselsnummer = grunnlag.personer.map { person -> person.aktør.aktivFødselsnummer() }
-                behandling.fagsak.id to fødselsnummer
+                behandling.fagsakId to fødselsnummer
             }
 
         val personerSomBorPåSvalbard =

@@ -16,8 +16,9 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøringRepository
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository.FagsakIdBehandlingIdOgKategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -36,7 +37,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
     private val opprettTaskService = mockk<OpprettTaskService>()
     private val svalbardtilleggKjøringRepository = mockk<SvalbardtilleggKjøringRepository>()
     private val persongrunnlagService = mockk<PersongrunnlagService>()
-    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val behandlingRepository = mockk<BehandlingRepository>()
     private val pdlRestClient = mockk<SystemOnlyPdlRestClient>()
 
     private val autovedtakSvalbardtilleggTaskOppretter =
@@ -45,7 +46,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
             opprettTaskService = opprettTaskService,
             svalbardtilleggKjøringRepository = svalbardtilleggKjøringRepository,
             persongrunnlagService = persongrunnlagService,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            behandlingRepository = behandlingRepository,
             pdlRestClient = pdlRestClient,
         )
 
@@ -70,8 +71,8 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                 )
 
             every {
-                behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder)
-            } returns emptyMap()
+                behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder)
+            } returns emptyList()
 
             every {
                 persongrunnlagService.hentAktivForBehandlinger(emptyList())
@@ -86,7 +87,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
 
             // Assert
             verify(exactly = 1) { svalbardtilleggKjøringRepository.saveAll(emptyList()) }
-            verify(exactly = 1) { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder) }
+            verify(exactly = 1) { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) }
             verify(exactly = 1) { persongrunnlagService.hentAktivForBehandlinger(any()) }
             verify(exactly = 0) { pdlRestClient.hentAdresserForPersoner(any()) }
             verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(emptySet()) }
@@ -117,10 +118,10 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                     1,
                 )
 
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder) } returns
-                mapOf(
-                    fagsak1.id to behandling1,
-                    fagsak2.id to behandling2,
+            every { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) } returns
+                listOf(
+                    FagsakIdBehandlingIdOgKategori(fagsak1.id, behandling1.id, BehandlingKategori.NASJONAL),
+                    FagsakIdBehandlingIdOgKategori(fagsak2.id, behandling2.id, BehandlingKategori.NASJONAL),
                 )
 
             every {
@@ -165,7 +166,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
 
             // Assert
             verify(exactly = 1) { svalbardtilleggKjøringRepository.saveAll(any<List<SvalbardtilleggKjøring>>()) }
-            verify(exactly = 1) { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder) }
+            verify(exactly = 1) { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) }
             verify(exactly = 1) { persongrunnlagService.hentAktivForBehandlinger(listOf(behandling1.id, behandling2.id)) }
             verify(exactly = 1) { pdlRestClient.hentAdresserForPersoner(any()) }
             verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(fagsakIder) }
@@ -194,7 +195,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                     1,
                 )
 
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder) } returns mapOf(fagsak1.id to behandling1)
+            every { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) } returns listOf(FagsakIdBehandlingIdOgKategori(fagsak1.id, behandling1.id, BehandlingKategori.NASJONAL))
 
             every { persongrunnlagService.hentAktivForBehandlinger(listOf(behandling1.id)) } returns mapOf(behandling1.id to persongrunnlag1)
 
@@ -231,7 +232,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
 
             // Assert
             verify(exactly = 1) { svalbardtilleggKjøringRepository.saveAll(any<List<SvalbardtilleggKjøring>>()) }
-            verify(exactly = 1) { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder) }
+            verify(exactly = 1) { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) }
             verify(exactly = 1) { persongrunnlagService.hentAktivForBehandlinger(listOf(behandling1.id)) }
             verify(exactly = 1) { pdlRestClient.hentAdresserForPersoner(any()) }
             verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(setOf(fagsak1.id)) }
@@ -262,10 +263,10 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                     1,
                 )
 
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder) } returns
-                mapOf(
-                    fagsak1.id to eøsBehandling1,
-                    fagsak2.id to eøsBehandling2,
+            every { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) } returns
+                listOf(
+                    FagsakIdBehandlingIdOgKategori(fagsak1.id, eøsBehandling1.id, BehandlingKategori.EØS),
+                    FagsakIdBehandlingIdOgKategori(fagsak2.id, eøsBehandling2.id, BehandlingKategori.EØS),
                 )
 
             every {
@@ -305,7 +306,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
 
             // Assert
             verify(exactly = 1) { svalbardtilleggKjøringRepository.saveAll(any<List<SvalbardtilleggKjøring>>()) }
-            verify(exactly = 1) { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder) }
+            verify(exactly = 1) { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) }
             verify(exactly = 1) { persongrunnlagService.hentAktivForBehandlinger(emptyList()) }
             verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(emptySet()) }
         }
@@ -334,7 +335,11 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                     1,
                 )
 
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder) } returns mapOf(fagsak1.id to behandling1, fagsak2.id to behandling2)
+            every { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) } returns
+                listOf(
+                    FagsakIdBehandlingIdOgKategori(fagsak1.id, behandling1.id, BehandlingKategori.NASJONAL),
+                    FagsakIdBehandlingIdOgKategori(fagsak2.id, behandling2.id, BehandlingKategori.NASJONAL),
+                )
 
             every { persongrunnlagService.hentAktivForBehandlinger(listOf(behandling1.id, behandling2.id)) } returns mapOf(behandling1.id to persongrunnlag1)
 
