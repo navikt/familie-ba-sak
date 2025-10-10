@@ -7,8 +7,14 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrDeltBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import java.time.LocalDate
@@ -50,6 +56,46 @@ fun tilfeldigSøker(
     kjønn = kjønn,
     målform = Målform.NB,
 ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTANDTYPE.UGIFT, person = this)) }
+
+fun lagPerson(
+    id: Long = 0,
+    type: PersonType = PersonType.SØKER,
+    fødselsdato: LocalDate = LocalDate.now().minusYears(19),
+    navn: String = PersonType.SØKER.name,
+    kjønn: Kjønn = Kjønn.KVINNE,
+    målform: Målform = Målform.NB,
+    personopplysningGrunnlag: PersonopplysningGrunnlag,
+    aktør: Aktør = lagAktør(),
+    bostedsadresser: (person: Person) -> List<GrBostedsadresse> = { listOf() },
+    oppholdsadresser: (person: Person) -> List<GrOppholdsadresse> = { listOf() },
+    deltBosted: (person: Person) -> List<GrDeltBosted> = { listOf() },
+    statsborgerskap: (person: Person) -> List<GrStatsborgerskap> = { listOf() },
+    opphold: (person: Person) -> List<GrOpphold> = { listOf() },
+    arbeidsforhold: (person: Person) -> List<GrArbeidsforhold> = { listOf() },
+    sivilstander: (person: Person) -> List<GrSivilstand> = { listOf() },
+    dødsfall: Dødsfall? = null,
+): Person {
+    val person =
+        Person(
+            id = id,
+            type = type,
+            fødselsdato = fødselsdato,
+            navn = navn,
+            kjønn = kjønn,
+            målform = målform,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            aktør = aktør,
+            dødsfall = dødsfall,
+        )
+    person.bostedsadresser.addAll(bostedsadresser(person))
+    person.oppholdsadresser.addAll(oppholdsadresser(person))
+    person.deltBosted.addAll(deltBosted(person))
+    person.statsborgerskap.addAll(statsborgerskap(person))
+    person.opphold.addAll(opphold(person))
+    person.arbeidsforhold.addAll(arbeidsforhold(person))
+    person.sivilstander.addAll(sivilstander(person))
+    return person
+}
 
 fun lagPerson(
     personIdent: PersonIdent = PersonIdent(randomFnr()),
