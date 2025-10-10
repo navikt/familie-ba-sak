@@ -31,16 +31,10 @@ import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
-import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
 
-@Service
-@Profile("mock-pdl")
-@Primary
 class FakePersonopplysningerService(
     pdlRestClient: PdlRestClient,
     systemOnlyPdlRestClient: SystemOnlyPdlRestClient,

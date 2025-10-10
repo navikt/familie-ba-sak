@@ -12,17 +12,11 @@ import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
-import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
-import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
 
-@Service
-@Profile("mock-pdl-client")
-@Primary
-class MockPdlRestClient(
+class FakePdlRestClient(
     restOperations: RestOperations,
     personidentService: PersonidentService,
 ) : SystemOnlyPdlRestClient(

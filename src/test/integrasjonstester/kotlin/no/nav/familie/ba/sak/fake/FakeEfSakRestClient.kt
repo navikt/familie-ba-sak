@@ -4,16 +4,10 @@ import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
-import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
-import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
 
-@Service
-@Profile("mock-ef-client")
-@Primary
 class FakeEfSakRestClient(
     restOperations: RestOperations,
 ) : EfSakRestClient(

@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.fake.FakePdlRestClient.Companion.leggTilBostedsadresseIPDL
+import no.nav.familie.ba.sak.fake.FakePdlRestClient.Companion.leggTilOppholdsadresseIPDL
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilBostedsadresserIPersonInfo
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilRelasjonIPersonInfo
-import no.nav.familie.ba.sak.fake.MockPdlRestClient.Companion.leggTilBostedsadresseIPDL
-import no.nav.familie.ba.sak.fake.MockPdlRestClient.Companion.leggTilOppholdsadresseIPDL
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse

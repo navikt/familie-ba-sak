@@ -1,20 +1,19 @@
-package no.nav.familie.ba.sak.config
+package no.nav.familie.ba.sak.fake
 
-import io.mockk.mockk
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
-import org.springframework.stereotype.Service
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.unleash.UnleashService
 
-@Service
-@Primary
-@Profile("mock-unleash")
-class MockFeatureToggleService :
-    FeatureToggleService(
-        unleashService = mockk(),
-        behandlingHentOgPersisterService = mockk(),
-        arbeidsfordelingPåBehandlingRepository = mockk(),
+class FakeFeatureToggleService(
+    unleashService: UnleashService,
+    behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
+) : FeatureToggleService(
+        unleashService = unleashService,
+        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+        arbeidsfordelingPåBehandlingRepository = arbeidsfordelingPåBehandlingRepository,
     ) {
     override fun isEnabled(toggleId: String): Boolean {
         val mockUnleashServiceAnswer = System.getProperty("mockFeatureToggleAnswer")?.toBoolean() ?: true
