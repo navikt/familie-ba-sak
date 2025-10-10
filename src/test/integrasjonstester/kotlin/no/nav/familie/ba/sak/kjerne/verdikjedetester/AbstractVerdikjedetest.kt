@@ -41,6 +41,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
     "fake-integrasjon-client",
     "fake-valutakurs-rest-client",
     "fake-økonomi-klient",
+    "fake-task-repository",
 )
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
 @Tag("verdikjedetest")

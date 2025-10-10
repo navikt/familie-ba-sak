@@ -10,7 +10,7 @@ fun main(args: Array<String>) {
 
     val springBuilder =
         SpringApplicationBuilder(ApplicationConfig::class.java).profiles(
-            "mock-økonomi",
+            "fake-økonomi-klient",
             "mock-infotrygd-feed",
             "fake-tilbakekreving-klient",
             "task-scheduling",

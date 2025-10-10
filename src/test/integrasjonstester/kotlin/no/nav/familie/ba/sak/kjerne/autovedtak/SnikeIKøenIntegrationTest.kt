@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak
 
-import io.mockk.verify
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
+import no.nav.familie.ba.sak.fake.tilKonkretTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService.Companion.BEHANDLING_FERDIG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -22,15 +22,17 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForRevurderingÅrligKontroll
+import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
+import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask.Companion.opprettTaskJournalførVedtaksbrev
+import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.error.RekjørSenereException
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -38,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.Properties
 
 @ActiveProfiles("snike-i-koen-test-config")
 class SnikeIKøenIntegrationTest(
@@ -60,7 +63,7 @@ class SnikeIKøenIntegrationTest(
     @Autowired
     private val behandlingRepository: BehandlingRepository,
     @Autowired
-    private val taskRepository: TaskRepositoryWrapper,
+    private val fakeTaskRepositoryWrapper: FakeTaskRepositoryWrapper,
     @Autowired
     private val journalførVedtaksbrevTask: JournalførVedtaksbrevTask,
     @Autowired
@@ -97,7 +100,8 @@ class SnikeIKøenIntegrationTest(
             loggRepository.hentLoggForBehandling(åpenBehandling.id).maxBy { it.id }.type,
         )
 
-        fullførTasks()
+        val omregningBehandling = behandlingRepository.finnBehandlinger(åpenBehandling.fagsak.id).single { it.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR }
+        fullførTasksForBehandling(omregningBehandling)
 
         val åpenBehandlingEtterAutomatiskOmregning = behandlingRepository.finnBehandling(åpenBehandling.id)
 
@@ -138,20 +142,14 @@ class SnikeIKøenIntegrationTest(
             førstegangKjørt = tid6DagerSiden.minusDays(1),
         )
 
-        val opprettedeTasks = mutableListOf<Task>()
-        verify {
-            taskRepository.save(capture(opprettedeTasks))
-        }
-        val opprettOppgaveTaskDTO = objectMapper.readValue(opprettedeTasks.last().payload, OpprettOppgaveTaskDTO::class.java)
+        val lagredeTaskerAvType =
+            fakeTaskRepositoryWrapper
+                .hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE)
+                .tilKonkretTask<OpprettOppgaveTaskDTO>()
 
-        assertEquals(
-            Oppgavetype.VurderLivshendelse,
-            opprettOppgaveTaskDTO.oppgavetype,
-        )
-        assertEquals(
-            ManuellOppgaveType.ÅPEN_BEHANDLING,
-            opprettOppgaveTaskDTO.manuellOppgaveType,
-        )
+        val lagretTask = lagredeTaskerAvType.singleOrNull { it.behandlingId == åpenBehandling.id && it.oppgavetype == Oppgavetype.VurderLivshendelse && it.manuellOppgaveType == ManuellOppgaveType.ÅPEN_BEHANDLING }
+
+        assertThat(lagretTask).isNotNull()
     }
 
     private fun fullførFørstegangsbehandlingOgKjørRevurderingTilSteg(stegType: StegType): Behandling {
@@ -164,28 +162,29 @@ class SnikeIKøenIntegrationTest(
         return kjørRevurderingTilSteg(stegType, fagsak.id, søkerFnr, barnasIdenter)
     }
 
-    private fun fullførTasks() {
-        val opprettedeTasks = mutableListOf<Task>()
-
-        for (i in 0..2) {
-            verify {
-                taskRepository.save(capture(opprettedeTasks))
-            }
-            val nesteTask = opprettedeTasks.last()
-            when (nesteTask.type) {
-                JournalførVedtaksbrevTask.TASK_STEP_TYPE -> {
-                    journalførVedtaksbrevTask.doTask(nesteTask)
-                }
-
-                DistribuerDokumentTask.TASK_STEP_TYPE -> {
-                    distribuerDokumentTask.doTask(nesteTask)
-                }
-
-                FerdigstillBehandlingTask.TASK_STEP_TYPE -> {
-                    ferdigstillBehandlingTask.doTask(nesteTask)
-                }
-            }
-        }
+    private fun fullførTasksForBehandling(behandling: Behandling) {
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+        journalførVedtaksbrevTask.doTask(opprettTaskJournalførVedtaksbrev(personIdent = behandling.fagsak.aktør.aktivFødselsnummer(), behandling.id, vedtakId = vedtak!!.id))
+        distribuerDokumentTask.doTask(
+            DistribuerDokumentTask.opprettDistribuerDokumentTask(
+                distribuerDokumentDTO =
+                    DistribuerDokumentDTO(
+                        fagsakId = behandling.fagsak.id,
+                        behandlingId = behandling.id,
+                        journalpostId = "",
+                        brevmal = brevmalService.hentBrevmal(behandling),
+                        erManueltSendt = false,
+                        manuellAdresseInfo = null,
+                    ),
+                properties = Properties(),
+            ),
+        )
+        ferdigstillBehandlingTask.doTask(
+            FerdigstillBehandlingTask.opprettTask(
+                søkerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+                behandlingsId = behandling.id,
+            ),
+        )
     }
 
     private fun kjørFørstegangsbehandling(

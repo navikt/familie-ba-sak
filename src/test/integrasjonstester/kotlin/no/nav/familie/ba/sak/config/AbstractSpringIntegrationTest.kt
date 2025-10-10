@@ -18,7 +18,6 @@ import org.springframework.test.context.ActiveProfiles
     "mock-pdl-client",
     "mock-ident-client",
     "mock-ef-client",
-    "mock-task-repository",
     "mock-infotrygd-barnetrygd",
     "fake-tilbakekreving-klient",
     "mock-brev-klient",
@@ -32,6 +31,7 @@ import org.springframework.test.context.ActiveProfiles
     "fake-valutakurs-rest-client",
     "fake-økonomi-klient",
     "fake-env-service",
+    "fake-task-repository",
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")

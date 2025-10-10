@@ -31,7 +31,7 @@ import org.springframework.web.client.postForEntity
     "mock-infotrygd-barnetrygd",
     "fake-tilbakekreving-klient",
     "mock-brev-klient",
-    "mock-økonomi",
+    "fake-økonomi-klient",
     "mock-infotrygd-feed",
     "mock-rest-template-config",
     "mock-task-repository",

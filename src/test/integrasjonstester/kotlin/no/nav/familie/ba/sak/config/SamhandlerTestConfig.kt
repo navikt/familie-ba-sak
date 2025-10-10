@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Profile
 @TestConfiguration
 class SamhandlerTestConfig {
     @Bean
-    @Profile("mock-økonomi")
+    @Profile("fake-økonomi-klient")
     @Primary
     fun mockSamhandlerKlient(): SamhandlerKlient {
         val mockSamhandlerKlient: SamhandlerKlient = mockk()
