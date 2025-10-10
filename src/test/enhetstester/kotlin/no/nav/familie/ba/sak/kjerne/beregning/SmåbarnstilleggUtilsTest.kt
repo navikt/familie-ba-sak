@@ -100,6 +100,52 @@ class SmåbarnstilleggUtilsTest {
     }
 
     @Test
+    fun `Skal bare ta hensyn til ordinære andeler ved generering av tidslinje for barn med rett`() {
+        val barn = lagPerson(fødselsdato = LocalDate.now().minusYears(4), type = PersonType.BARN)
+
+        val brytningstidspunkt = LocalDate.now().minusYears(3)
+
+        val barnasAndeler =
+            listOf(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                    fom = barn.fødselsdato.plusMonths(1).toYearMonth(),
+                    tom = brytningstidspunkt.toYearMonth(),
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    person = barn,
+                    prosent = BigDecimal.ZERO,
+                ),
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                    fom = barn.fødselsdato.plusMonths(1).toYearMonth(),
+                    tom = brytningstidspunkt.toYearMonth(),
+                    ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    person = barn,
+                    prosent = BigDecimal.ZERO,
+                ),
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                    fom = brytningstidspunkt.plusMonths(1).toYearMonth(),
+                    tom = YearMonth.now(),
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    person = barn,
+                ),
+            )
+
+        val generertePerioder =
+            lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
+                barnasAndeler = barnasAndeler,
+                barnasAktørerOgFødselsdatoer = listOf(Pair(barn.aktør, barn.fødselsdato)),
+            ).tilPerioder().sortedBy { it.fom }
+
+        assertEquals(2, generertePerioder.size)
+        assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), generertePerioder.first().fom?.toYearMonth())
+        assertEquals(brytningstidspunkt.toYearMonth(), generertePerioder.first().tom?.toYearMonth())
+        assertEquals(BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING, generertePerioder.first().verdi)
+
+        assertEquals(brytningstidspunkt.plusMonths(1).toYearMonth(), generertePerioder.last().fom?.toYearMonth())
+        assertEquals(barn.fødselsdato.plusYears(3).toYearMonth(), generertePerioder.last().tom?.toYearMonth())
+        assertEquals(BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING, generertePerioder.last().verdi)
+    }
+
+    @Test
     fun `Skal generere tidslinje for barn med rett til småbarnstillegg med riktig utbetalings-info når det er flere barn`() {
         val barn1 = lagPerson(fødselsdato = LocalDate.now().minusYears(4), type = PersonType.BARN)
         val barn2 = lagPerson(fødselsdato = LocalDate.now().minusYears(6), type = PersonType.BARN)
