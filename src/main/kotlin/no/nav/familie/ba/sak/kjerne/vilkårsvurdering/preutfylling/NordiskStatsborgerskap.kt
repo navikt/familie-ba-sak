@@ -10,10 +10,14 @@ import no.nav.familie.tidslinje.utvidelser.kombiner
 
 fun PdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
     val statsborgerskapGruppertPåNavn =
-        this
-            .hentStatsborgerskap(personResultat.aktør, historikk = true)
-            .distinct()
+        hentStatsborgerskap(personResultat.aktør, historikk = true)
             .groupBy { it.land }
+            .mapValues { (_, perLand) ->
+                val unikeStatsborgerskapInnslag = perLand.distinct()
+                val innslagMedDato = unikeStatsborgerskapInnslag.filter { it.gyldigFraOgMed != null || it.gyldigTilOgMed != null }
+
+                innslagMedDato.ifEmpty { unikeStatsborgerskapInnslag }
+            }
 
     return statsborgerskapGruppertPåNavn.values
         .map { statsborgerskapSammeLand ->
