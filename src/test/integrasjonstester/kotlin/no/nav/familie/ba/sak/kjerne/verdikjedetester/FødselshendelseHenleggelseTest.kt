@@ -4,8 +4,10 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -137,6 +139,19 @@ class FødselshendelseHenleggelseTest(
                         etternavn = "Søker",
                         bostedsadresser =
                             listOf(
+                                lagBostedsadresse(
+                                    angittFlyttedato = now().minusYears(10),
+                                    gyldigFraOgMed = TIDENES_MORGEN,
+                                    gyldigTilOgMed = null,
+                                    matrikkeladresse =
+                                        Matrikkeladresse(
+                                            matrikkelId = 123L,
+                                            bruksenhetsnummer = "H301",
+                                            tilleggsnavn = "navn",
+                                            postnummer = "0202",
+                                            kommunenummer = "2231",
+                                        ),
+                                ),
                                 Bostedsadresse(
                                     angittFlyttedato = null,
                                     gyldigTilOgMed = null,
