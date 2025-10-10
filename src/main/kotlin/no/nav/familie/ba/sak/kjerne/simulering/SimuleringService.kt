@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.simulering
 import io.micrometer.core.instrument.Metrics
 import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
@@ -13,8 +15,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
+import no.nav.familie.ba.sak.kjerne.simulering.domene.OverlappendePerioderMedAndreFagsaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.Simulering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
@@ -26,6 +30,10 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
+import no.nav.familie.tidslinje.tomTidslinje
+import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -42,6 +50,7 @@ class SimuleringService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val fagsakService: FagsakService,
 ) {
     private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
 
@@ -99,16 +108,16 @@ class SimuleringService(
             behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK ||
                 behandling.status == BehandlingStatus.AVSLUTTET
 
-        val simulering = hentSimuleringPåBehandling(behandlingId)
-        val restSimulering =
-            vedtakSimuleringMottakereTilRestSimulering(
-                økonomiSimuleringMottakere = simulering,
+        val simuleringMottakere = hentSimuleringPåBehandling(behandlingId)
+        val simulering =
+            vedtakSimuleringMottakereTilSimulering(
+                økonomiSimuleringMottakere = simuleringMottakere,
             )
 
-        return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)) {
+        return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(simulering)) {
             oppdaterSimuleringPåBehandling(behandling)
         } else {
-            simulering
+            simuleringMottakere
         }
     }
 
@@ -148,12 +157,12 @@ class SimuleringService(
     }
 
     fun hentEtterbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal =
-        vedtakSimuleringMottakereTilRestSimulering(
+        vedtakSimuleringMottakereTilSimulering(
             økonomiSimuleringMottakere = økonomiSimuleringMottakere,
         ).etterbetaling
 
     fun hentFeilutbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal =
-        vedtakSimuleringMottakereTilRestSimulering(
+        vedtakSimuleringMottakereTilSimulering(
             økonomiSimuleringMottakere,
         ).feilutbetaling
 
@@ -172,6 +181,68 @@ class SimuleringService(
         return filterBortUrelevanteVedtakSimuleringPosteringer(hentSimuleringPåBehandling(behandling.id))
             .flatMap { it.økonomiSimuleringPostering }
             .any { it.erManuellPostering }
+    }
+
+    fun hentOverlappendeFeilOgEtterbetalingerFraAndreFagsakerForSøker(
+        behandlingId: Long,
+        simulering: Simulering,
+    ): List<OverlappendePerioderMedAndreFagsaker> {
+        val simuleringerForAndreFagsaker = hentFagsakTilSimuleringFraAndreFagsakerForSøker(behandlingId)
+        val simuleringTidslinjeAndreFagsaker =
+            simuleringerForAndreFagsaker.mapValues { (_, simulering) ->
+                simulering.perioderTilTidslinje()
+            }
+
+        val andreFagsakerMedFeilEllerEtterbetalingerTidslinje =
+            simuleringTidslinjeAndreFagsaker.entries.fold(tomTidslinje<List<Long>>()) { acc, (fagsakId, simuleringTidslinje) ->
+                acc.kombinerMed(simuleringTidslinje) { fagsakerSomHarFeilEllerEtterbetalingIPeriode, simuleringsPeriodeSomSkalVurderes ->
+                    if (simuleringsPeriodeSomSkalVurderes != null &&
+                        (simuleringsPeriodeSomSkalVurderes.etterbetaling > BigDecimal.ZERO || simuleringsPeriodeSomSkalVurderes.feilutbetaling > BigDecimal.ZERO)
+                    ) {
+                        (fagsakerSomHarFeilEllerEtterbetalingIPeriode ?: emptyList()) + listOf(fagsakId)
+                    } else {
+                        fagsakerSomHarFeilEllerEtterbetalingIPeriode
+                    }
+                }
+            }
+
+        val fagsakerMedFeilEllerEtterbetalingSomOverlapperMedFeilEllerEtterbetalingIFagsakTidslinje =
+            simulering
+                .perioderTilTidslinje()
+                .kombinerMed(andreFagsakerMedFeilEllerEtterbetalingerTidslinje) { simuleringsPeriode, andreFagsakerMedFeilEllerEtterbetaling ->
+                    if (simuleringsPeriode != null &&
+                        (simuleringsPeriode.etterbetaling > BigDecimal.ZERO || simuleringsPeriode.feilutbetaling > BigDecimal.ZERO)
+                    ) {
+                        andreFagsakerMedFeilEllerEtterbetaling
+                    } else {
+                        null
+                    }
+                }.filtrerIkkeNull()
+
+        return fagsakerMedFeilEllerEtterbetalingSomOverlapperMedFeilEllerEtterbetalingIFagsakTidslinje.tilPerioderIkkeNull().map { periodeMedFagsaker ->
+            OverlappendePerioderMedAndreFagsaker(fom = periodeMedFagsaker.fom ?: TIDENES_MORGEN, tom = periodeMedFagsaker.tom ?: TIDENES_ENDE, fagsaker = periodeMedFagsaker.verdi)
+        }
+    }
+
+    fun hentFagsakTilSimuleringFraAndreFagsakerForSøker(behandlingId: Long): Map<Long, Simulering> {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val fagsakerForSøker =
+            fagsakService
+                .hentAlleFagsakerForAktør(behandling.fagsak.aktør)
+                .filter { it.id != behandling.fagsak.id }
+
+        val sisteBehandlingerSomErGodkjentForFagsaker =
+            fagsakerForSøker
+                .mapNotNull { fagsak -> beregningService.hentSisteBehandlingSomErKommetTilGodkjennStegEllerLengre(fagsak.id) }
+
+        return sisteBehandlingerSomErGodkjentForFagsaker
+            .associate { behandling ->
+                val økonomiSimuleringMottakere = økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id)
+                behandling.fagsak.id to
+                    vedtakSimuleringMottakereTilSimulering(
+                        økonomiSimuleringMottakere = økonomiSimuleringMottakere,
+                    )
+            }
     }
 
     private fun sjekkOmBehandlingHarEtterbetalingInnenforBeløpsgrenser(

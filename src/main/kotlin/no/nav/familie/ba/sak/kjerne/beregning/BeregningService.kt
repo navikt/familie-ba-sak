@@ -81,25 +81,7 @@ class BeregningService(
 
         return andreFagsaker
             .mapNotNull { fagsak ->
-                val behandlingSomLiggerTilGodkjenning =
-                    behandlingRepository
-                        .finnBehandlingerSomLiggerTilGodkjenning(
-                            fagsakId = fagsak.id,
-                        ).singleOrNull()
-
-                if (behandlingSomLiggerTilGodkjenning != null) {
-                    behandlingSomLiggerTilGodkjenning
-                } else {
-                    val godkjenteBehandlingerSomIkkeErIverksattEnda =
-                        behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id).singleOrNull()
-                    if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) {
-                        godkjenteBehandlingerSomIkkeErIverksattEnda
-                    } else {
-                        val sisteVedtatteBehandling =
-                            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
-                        sisteVedtatteBehandling
-                    }
-                }
+                hentSisteBehandlingSomErKommetTilGodkjennStegEllerLengre(fagsak.id)
             }.map {
                 hentTilkjentYtelseForBehandling(behandlingId = it.id)
             }.filter {
@@ -110,6 +92,11 @@ class BeregningService(
                     .contains(barnAktør)
             }.map { it }
     }
+
+    fun hentSisteBehandlingSomErKommetTilGodkjennStegEllerLengre(fagsakId: Long): Behandling? =
+        behandlingRepository.finnBehandlingerSomLiggerTilGodkjenning(fagsakId = fagsakId).singleOrNull()
+            ?: behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsakId).singleOrNull()
+            ?: behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
 
     fun erEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling: Behandling): Boolean = hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
 
