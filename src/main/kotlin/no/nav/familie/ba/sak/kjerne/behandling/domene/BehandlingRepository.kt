@@ -119,18 +119,26 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun finnSisteIverksatteBehandlingForFagsaker(fagsakIder: Collection<Long>): List<Behandling>
 
     @Query(
-        """SELECT DISTINCT ON(b.fk_fagsak_id) b.id
+        """SELECT DISTINCT ON(b.fk_fagsak_id) b.id, b.fk_fagsak_id, b.kategori
             FROM behandling b
                      INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
                      INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
-            WHERE f.id = :fagsakId
+            WHERE f.id in :fagsakIder
               AND ty.utbetalingsoppdrag IS NOT NULL
               AND f.arkivert = false
               AND b.status = 'AVSLUTTET'
             ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC""",
         nativeQuery = true,
     )
-    fun finnIdForSisteIverksatteBehandling(fagsakId: Long): Long?
+    fun finnSisteIverksatteBehandlingForFagsakerAndKategori(
+        fagsakIder: Collection<Long>,
+    ): List<FagsakIdBehandlingIdOgKategori>
+
+    data class FagsakIdBehandlingIdOgKategori(
+        val fagsakId: Long,
+        val behandlingId: Long,
+        val kategori: String,
+    )
 
     @Query(
         """
