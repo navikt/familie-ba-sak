@@ -303,20 +303,20 @@ class PreutfyllBosattIRiketService(
                     val denne = it.first()
                     val neste = it.getOrNull(1)
 
-                Periode(
-                    verdi = operator(denne),
-                    fom = denne.gyldigFraOgMed,
-                    tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
-                )
-            }.tilTidslinje()
-    } catch (e: IllegalStateException) {
+                    Periode(
+                        verdi = operator(denne),
+                        fom = denne.gyldigFraOgMed,
+                        tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
+                    )
+                }.tilTidslinje()
+        } catch (e: IllegalStateException) {
             secureLogger.error("Feil ved oppretting av tidslinjer for $adressetype med adresser $adresser for person med aktørId ${personResultat.aktør.aktørId}", e)
             throw e
         } catch (e: IllegalArgumentException) {
             secureLogger.error("Feil ved oppretting av tidslinjer for $adressetype med adresser $adresser for person med aktørId ${personResultat.aktør.aktørId}", e)
             throw e
         }
-}
+    }
 
     private fun filtrereUgyldigeAdresser(adresser: List<Adresse>): List<Adresse> =
         adresser
