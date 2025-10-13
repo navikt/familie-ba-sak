@@ -187,16 +187,52 @@ class VilkårsvurderingValideringTest {
     @Nested
     inner class Valider18ÅrsVilkårEksistererFraFødselsdato {
         @Test
-        fun `skal kaste feil hvis barn ikke har 18-års vilkår vurdert fra fødselsdato`() {
+        fun `skal ikke kaste feil hvis person ikke er barn`() {
+            // Arrange
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = lagBehandling())
+            val søker = lagPersonEnkel(PersonType.SØKER)
+
+            // Act & assert
+            assertDoesNotThrow {
+                valider18ÅrsVilkårEksistererFraFødselsdato(
+                    vilkårsvurdering = vilkårsvurdering,
+                    søkerOgBarn = listOf(søker),
+                    behandling = lagBehandling(),
+                )
+            }
+        }
+
+        @Test
+        fun `skal ikke kaste feil hvis barn har 18-års vilkår vurdert fra fødselsdato`() {
+            // Arrange
             val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
             val barn = lagPersonEnkel(PersonType.BARN)
             val personResultatBarn = byggPersonResultatForPersonEnkel(barn, Regelverk.NASJONALE_REGLER, vilkårsvurdering)
 
-            personResultatBarn.vilkårResultater.first { it.vilkårType == UNDER_18_ÅR }.periodeFom =
-                barn.fødselsdato.minusDays(1)
+            vilkårsvurdering.personResultater = setOf(personResultatBarn)
+
+            // Act & assert
+            assertDoesNotThrow {
+                valider18ÅrsVilkårEksistererFraFødselsdato(
+                    vilkårsvurdering = vilkårsvurdering,
+                    søkerOgBarn = listOf(barn),
+                    behandling = lagBehandling(),
+                )
+            }
+        }
+
+        @Test
+        fun `skal kaste feil hvis barn ikke har 18-års vilkår vurdert fra fødselsdato`() {
+            // Arrange
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = lagBehandling())
+            val barn = lagPersonEnkel(PersonType.BARN)
+            val personResultatBarn = byggPersonResultatForPersonEnkel(barn, Regelverk.NASJONALE_REGLER, vilkårsvurdering)
+
+            personResultatBarn.vilkårResultater.first { it.vilkårType == UNDER_18_ÅR }.periodeFom = barn.fødselsdato.minusDays(1)
 
             vilkårsvurdering.personResultater = setOf(personResultatBarn)
 
+            // Act & assert
             assertThrows<FunksjonellFeil> {
                 valider18ÅrsVilkårEksistererFraFødselsdato(
                     vilkårsvurdering = vilkårsvurdering,
@@ -207,20 +243,21 @@ class VilkårsvurderingValideringTest {
         }
 
         @ParameterizedTest
-        @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING"])
-        fun `skal ikke kaste feil for satsendring og månedlig valutajustering selv om barn ikke har 18-års vilkår vurdert fra fødselsdato`(
+        @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG"])
+        fun `skal ikke kaste feil for gitte behandlingsårsaker selv om barn ikke har 18-års vilkår vurdert fra fødselsdato`(
             årsak: BehandlingÅrsak,
         ) {
+            // Arrange
             val behandling = lagBehandling(årsak = årsak)
-            val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
             val barn = lagPersonEnkel(PersonType.BARN)
             val personResultatBarn = byggPersonResultatForPersonEnkel(barn, Regelverk.NASJONALE_REGLER, vilkårsvurdering)
 
-            personResultatBarn.vilkårResultater.first { it.vilkårType == UNDER_18_ÅR }.periodeFom =
-                barn.fødselsdato.minusDays(1)
+            personResultatBarn.vilkårResultater.first { it.vilkårType == UNDER_18_ÅR }.periodeFom = barn.fødselsdato.minusDays(1)
 
             vilkårsvurdering.personResultater = setOf(personResultatBarn)
 
+            // Act & assert
             assertDoesNotThrow {
                 valider18ÅrsVilkårEksistererFraFødselsdato(
                     vilkårsvurdering = vilkårsvurdering,
