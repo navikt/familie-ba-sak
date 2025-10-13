@@ -52,11 +52,6 @@ class VelgFagsystemIntegrasjonTest(
                 emptyList<Stønad>(),
             ),
         )
-//        every { fakeInfotrygdBarnetrygdClient.hentStønader(any(), any(), any()) } returns
-//            InfotrygdSøkResponse(
-//                listOf(Stønad(opphørtFom = "012020")),
-//                emptyList(),
-//            ) andThen InfotrygdSøkResponse(emptyList(), emptyList())
 
         val (fagsystemRegelVurdering, faktiskFagsystemUtfall) = velgFagSystemService.velgFagsystem(nyBehandling)
         assertEquals(FagsystemRegelVurdering.SEND_TIL_INFOTRYGD, fagsystemRegelVurdering)
