@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.fake.FakeBrevKlient
 import no.nav.familie.ba.sak.fake.FakeEfSakRestClient
 import no.nav.familie.ba.sak.fake.FakeEnvService
 import no.nav.familie.ba.sak.fake.FakeFeatureToggleService
+import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonClient
 import no.nav.familie.ba.sak.fake.FakeLeaderClientService
 import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
@@ -128,4 +129,9 @@ class FakeConfig {
     @Primary
     @Profile("mock-sanity-client")
     fun fakeSanityKlient() = FakeSanityKlient()
+
+    @Bean
+    @Primary
+    @Profile("mock-infotrygd-barnetrygd")
+    fun fakeInfotrygdBarnetrygdClient(restOperations: RestOperations): FakeInfotrygdBarnetrygdClient = FakeInfotrygdBarnetrygdClient(restOperations)
 }
