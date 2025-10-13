@@ -82,15 +82,27 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
                 } &&
             dennePerioden.erOrdinæreVilkårInnvilget()
 
-    fun sjekkOmHarHravPåSvalbardtilleggForrigePeriode() =
-        forrigePeriode?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true ||
+    fun sjekkOmHarKravPåSvalbardtilleggForrigePeriode(vedtaksperiode: VedtaksperiodeMedBegrunnelser): Boolean {
+        val startdatoForSvalbardtillegg =
+            SatsService
+                .hentAllesatser()
+                .filter { it.type == SatsType.SVALBARDTILLEGG }
+                .minOfOrNull { it.gyldigFom } ?: LocalDate.MAX
+
+        if (vedtaksperiode.fom == null || vedtaksperiode.fom.isSameOrBefore(startdatoForSvalbardtillegg)) {
+            return false
+        }
+
+        return forrigePeriode?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true ||
             forrigePeriode
                 ?.vilkårResultater
                 ?.any {
                     it.vilkårType == Vilkår.BOSATT_I_RIKET &&
-                        it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
+                        it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD) &&
+                        (it.tom == null || it.tom >= startdatoForSvalbardtillegg)
                 } == true &&
             forrigePeriode?.erOrdinæreVilkårInnvilget() == true
+    }
 
     companion object {
         fun opprett(
