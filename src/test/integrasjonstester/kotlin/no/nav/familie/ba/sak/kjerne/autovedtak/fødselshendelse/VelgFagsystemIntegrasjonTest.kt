@@ -1,12 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
-import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
+import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.settPersonInfoStatsborgerskap
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -14,10 +15,12 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import org.apache.kafka.shaded.com.google.protobuf.LazyStringArrayList.emptyList
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import kotlin.collections.emptyList
 
 class VelgFagsystemIntegrasjonTest(
     @Autowired val stegService: StegService,
@@ -25,27 +28,35 @@ class VelgFagsystemIntegrasjonTest(
     @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     @Autowired val velgFagSystemService: VelgFagSystemService,
     @Autowired val infotrygdService: InfotrygdService,
-    @Autowired val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    @Autowired val fakeInfotrygdBarnetrygdClient: FakeInfotrygdBarnetrygdClient,
+    @Autowired val pdlIdentRestClient: PdlIdentRestClient,
 ) : AbstractSpringIntegrationTest() {
-    val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
-
     @Test
     fun `sjekk om mor har løpende utbetalinger i infotrygd`() {
-        every { infotrygdService.harLøpendeSakIInfotrygd(any(), any()) } returns true andThen false
-
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+        fakeInfotrygdBarnetrygdClient.leggTilLøpendeSakIInfotrygd(søkerFnr, emptyList(), true)
         assertEquals(true, velgFagSystemService.morEllerBarnHarLøpendeSakIInfotrygd(søkerFnr, emptyList()))
     }
 
     @Test
     fun `skal IKKE velge ba-sak når mor har stønadhistorikk i Infotrygd`() {
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(søkerFnr))
         val fagsystemUtfall = FagsystemUtfall.SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER
 
-        every { infotrygdBarnetrygdClient.hentStønader(any(), any(), any()) } returns
-            InfotrygdSøkResponse(
+        fakeInfotrygdBarnetrygdClient.leggTilStønaderIInfotrygd(
+            søkerFnr,
+            emptyList(),
+            InfotrygdSøkResponse<Stønad>(
                 listOf(Stønad(opphørtFom = "012020")),
-                emptyList(),
-            ) andThen InfotrygdSøkResponse(emptyList(), emptyList())
+                emptyList<Stønad>(),
+            ),
+        )
+//        every { fakeInfotrygdBarnetrygdClient.hentStønader(any(), any(), any()) } returns
+//            InfotrygdSøkResponse(
+//                listOf(Stønad(opphørtFom = "012020")),
+//                emptyList(),
+//            ) andThen InfotrygdSøkResponse(emptyList(), emptyList())
 
         val (fagsystemRegelVurdering, faktiskFagsystemUtfall) = velgFagSystemService.velgFagsystem(nyBehandling)
         assertEquals(FagsystemRegelVurdering.SEND_TIL_INFOTRYGD, fagsystemRegelVurdering)
@@ -54,6 +65,7 @@ class VelgFagsystemIntegrasjonTest(
 
     @Test
     fun `skal IKKE velge ba-sak når mor er EØS borger`() {
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(søkerFnr))
 
         settPersonInfoStatsborgerskap(
@@ -72,7 +84,9 @@ class VelgFagsystemIntegrasjonTest(
 
     @Test
     fun `skal velge ba-sak når mor er tredjelandsborger`() {
-        val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(søkerFnr))
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+        val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val fagsystemUtfall = FagsystemUtfall.STØTTET_I_BA_SAK
 
         settPersonInfoStatsborgerskap(
