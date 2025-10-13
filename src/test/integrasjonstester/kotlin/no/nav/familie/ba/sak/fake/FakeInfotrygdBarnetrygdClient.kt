@@ -16,6 +16,7 @@ class FakeInfotrygdBarnetrygdClient(
     val løpendeSakerIInfotrygd = mutableMapOf<Pair<String, List<String>>, Boolean>()
     val stønaderIInfotrygd = mutableMapOf<Pair<String, List<String>>, InfotrygdSøkResponse<Stønad>>()
     val barnerygdTilPensjon = mutableMapOf<String, BarnetrygdTilPensjonResponse>()
+    val åpneSakerIInfotrygd = mutableMapOf<Pair<String, List<String>>, Boolean>()
 
     override fun harLøpendeSakIInfotrygd(
         søkersIdenter: List<String>,
@@ -44,7 +45,7 @@ class FakeInfotrygdBarnetrygdClient(
     override fun harÅpenSakIInfotrygd(
         søkersIdenter: List<String>,
         barnasIdenter: List<String>,
-    ): Boolean = false
+    ): Boolean = åpneSakerIInfotrygd[Pair(søkersIdenter.first(), barnasIdenter)] ?: false
 
     override fun harNyligSendtBrevFor(
         søkersIdenter: List<String>,
@@ -77,5 +78,13 @@ class FakeInfotrygdBarnetrygdClient(
         barnetrygdTilPensjonResponse: BarnetrygdTilPensjonResponse,
     ) {
         barnerygdTilPensjon[søkersIdent] = barnetrygdTilPensjonResponse
+    }
+
+    fun leggTilÅpenSakIInfotrygd(
+        søkersIdent: String,
+        barnasIdenter: List<String>,
+        harÅpenSakIInfotrygd: Boolean,
+    ) {
+        åpneSakerIInfotrygd[Pair(søkersIdent, barnasIdenter)] = harÅpenSakIInfotrygd
     }
 }
