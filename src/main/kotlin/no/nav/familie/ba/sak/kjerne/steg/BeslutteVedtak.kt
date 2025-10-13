@@ -205,13 +205,11 @@ class BeslutteVedtak(
     }
 
     private fun publiserStønadsstatistikkVedFortsattInnvilgetEØS(behandling: Behandling) {
-        if (featureToggleService.isEnabled(FeatureToggle.STONADSSTATISTIKK_FORTSATT_INNVILGET)) {
-            if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET &&
-                behandling.kategori == BehandlingKategori.EØS
-            ) {
-                val nyTaskV2 = PubliserVedtakV2Task.opprettTask(behandling.fagsak.aktør.aktivFødselsnummer(), behandling.id)
-                taskRepository.save(nyTaskV2)
-            }
+        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET &&
+            behandling.kategori == BehandlingKategori.EØS
+        ) {
+            val nyTaskV2 = PubliserVedtakV2Task.opprettTask(behandling.fagsak.aktør.aktivFødselsnummer(), behandling.id)
+            taskRepository.save(nyTaskV2)
         }
     }
 

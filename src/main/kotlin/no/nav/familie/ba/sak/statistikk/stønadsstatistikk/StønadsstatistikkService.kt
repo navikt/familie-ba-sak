@@ -73,16 +73,14 @@ class StønadsstatistikkService(
 
         val tidspunktVedtak = datoVedtak
         val sisteIverksatteBehandlingId =
-            if (featureToggleService.isEnabled(FeatureToggle.STONADSSTATISTIKK_FORTSATT_INNVILGET)) {
-                val behandlingHarUtbetalingsoppdrag = tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) != null
-                if (behandlingHarUtbetalingsoppdrag) {
-                    null
-                } else {
-                    behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.id.toString()
+            (tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) != null)
+                .let { behandlingHarUtbetalingsoppdrag ->
+                    if (behandlingHarUtbetalingsoppdrag) {
+                        null
+                    } else {
+                        behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.id.toString()
+                    }
                 }
-            } else {
-                null
-            }
 
         return VedtakDVHV2(
             fagsakId = behandling.fagsak.id.toString(),
