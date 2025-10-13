@@ -26,6 +26,10 @@ data class Adresse(
      */
     fun erFomOgTomNull() = gyldigFraOgMed == null && gyldigTilOgMed == null
 
+    fun erFomOgTomSamme() = gyldigFraOgMed == gyldigTilOgMed
+
+    fun erFomEtterTom() = gyldigFraOgMed != null && gyldigTilOgMed != null && gyldigFraOgMed.isAfter(gyldigTilOgMed)
+
     fun overlapperMedDato(dato: LocalDate): Boolean {
         val harGyldigFraOgMed = gyldigFraOgMed == null || gyldigFraOgMed.isSameOrBefore(dato)
         val harGyldigTilOgMed = gyldigTilOgMed == null || gyldigTilOgMed.isSameOrAfter(dato)

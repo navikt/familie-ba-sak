@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
@@ -296,28 +295,37 @@ class PreutfyllBosattIRiketService(
         personResultat: PersonResultat,
         adressetype: String,
         operator: (Adresse) -> Boolean,
-    ): Tidslinje<Boolean> =
+    ): Tidslinje<Boolean> {
         try {
-            adresser
-                .filter { !it.erFomOgTomNull() }
-                .sortedBy { it.gyldigFraOgMed }
+            val filtrerteAdresser = filtrereUgyldigeAdresser(adresser)
+            return filtrerteAdresser
                 .windowed(size = 2, step = 1, partialWindows = true) {
                     val denne = it.first()
                     val neste = it.getOrNull(1)
 
-                    Periode(
-                        verdi = operator(denne),
-                        fom = denne.gyldigFraOgMed,
-                        tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
-                    )
-                }.tilTidslinje()
-        } catch (e: IllegalStateException) {
+                Periode(
+                    verdi = operator(denne),
+                    fom = denne.gyldigFraOgMed,
+                    tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
+                )
+            }.tilTidslinje()
+    } catch (e: IllegalStateException) {
             secureLogger.error("Feil ved oppretting av tidslinjer for $adressetype med adresser $adresser for person med aktørId ${personResultat.aktør.aktørId}", e)
             throw e
         } catch (e: IllegalArgumentException) {
             secureLogger.error("Feil ved oppretting av tidslinjer for $adressetype med adresser $adresser for person med aktørId ${personResultat.aktør.aktørId}", e)
             throw e
         }
+}
+
+    private fun filtrereUgyldigeAdresser(adresser: List<Adresse>): List<Adresse> =
+        adresser
+            .filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
+            .groupBy { it.gyldigFraOgMed to it.gyldigTilOgMed }
+            .values
+            .map { likePerioder ->
+                likePerioder.find { it.erIFinnmarkEllerNordTroms() } ?: likePerioder.first()
+            }.sortedBy { it.gyldigFraOgMed }
 }
 
 private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
