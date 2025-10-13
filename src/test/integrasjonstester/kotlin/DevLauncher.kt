@@ -11,7 +11,7 @@ object DevLauncher {
                 .profiles(
                     "dev",
                     "mock-brev-klient",
-                    "mock-økonomi",
+                    "fake-økonomi-klient",
                     "mock-infotrygd-feed",
                     "mock-infotrygd-barnetrygd",
                     "mock-pdl",
