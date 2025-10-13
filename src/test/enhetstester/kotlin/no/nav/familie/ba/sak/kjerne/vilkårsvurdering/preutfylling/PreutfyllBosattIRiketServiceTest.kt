@@ -950,7 +950,7 @@ class PreutfyllBosattIRiketServiceTest {
     fun `skal oppfylle vilkår hvis barn har to delt bosted-adresser med lik fom og tom i Finnmark`() {
         // Arrange
         val behandling = lagBehandling()
-        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barnasFødselsdatoer = listOf(LocalDate.now().minusMonths(2)), søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barnasFødselsdatoer = listOf(LocalDate.now().minusYears(3)), søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
         val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
@@ -997,6 +997,61 @@ class PreutfyllBosattIRiketServiceTest {
 
         // Assert
         assertThat(vilkårResultat).isNotEmpty
+        assertThat(vilkårResultat).allSatisfy {
+            assertThat(it.utdypendeVilkårsvurderinger).contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
+        }
+    }
+
+    @Test
+    fun `skal prioritere adresse i Finnmark ved like perioder og automatisk sette bosatt i finnmark i utdypendevilkårsvurdering`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barnasFødselsdatoer = listOf(LocalDate.now().minusYears(3)), søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+        every { pdlRestClient.hentStatsborgerskap(any(), historikk = true) } returns
+            listOf(
+                Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
+            )
+
+        val periodeFom = LocalDate.now().minusYears(2)
+        val periodeTom = null
+
+        val adresseFinnmark =
+            Adresse(
+                gyldigFraOgMed = periodeFom,
+                gyldigTilOgMed = periodeTom,
+                vegadresse = lagVegadresse(kommunenummer = "5601"),
+            )
+
+        val adresseOslo =
+            Adresse(
+                gyldigFraOgMed = periodeFom,
+                gyldigTilOgMed = periodeTom,
+                vegadresse = lagVegadresse(kommunenummer = "0301"),
+            )
+
+        val bostedsadresser =
+            Adresser(
+                bostedsadresser = listOf(adresseOslo, adresseFinnmark),
+                delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
+            )
+
+        // Act
+        val vilkårResultat =
+            preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
+                personResultat = personResultat,
+                adresserForPerson = bostedsadresser,
+                behandling = behandling,
+            )
+
+        // Assert
+        assertThat(vilkårResultat).hasSize(1)
+        assertThat(vilkårResultat.single().periodeFom).isEqualTo(periodeFom)
+        assertThat(vilkårResultat.single().periodeTom).isNull()
         assertThat(vilkårResultat).allSatisfy {
             assertThat(it.utdypendeVilkårsvurderinger).contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
         }
