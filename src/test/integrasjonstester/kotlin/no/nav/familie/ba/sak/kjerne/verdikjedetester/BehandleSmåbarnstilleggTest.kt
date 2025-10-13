@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.fake.FakeEfSakRestClient
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
-import no.nav.familie.ba.sak.fake.tilKonkretTask
+import no.nav.familie.ba.sak.fake.tilPayload
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -364,7 +364,7 @@ class BehandleSmåbarnstilleggTest(
                 ).size,
         )
 
-        val lagredeOpprettOppgaveTasks = fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilKonkretTask<OpprettOppgaveTaskDTO>()
+        val lagredeOpprettOppgaveTasks = fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilPayload<OpprettOppgaveTaskDTO>()
 
         val lagretOpprettOppgave = lagredeOpprettOppgaveTasks.singleOrNull { it.behandlingId == aktivBehandling.id && it.beskrivelse == "Småbarnstillegg: endring i overgangsstønad må behandles manuelt" && it.manuellOppgaveType == ManuellOppgaveType.SMÅBARNSTILLEGG }
         assertThat(lagretOpprettOppgave).isNotNull

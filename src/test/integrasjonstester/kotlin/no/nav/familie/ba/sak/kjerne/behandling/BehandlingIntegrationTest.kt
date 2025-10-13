@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
-import no.nav.familie.ba.sak.fake.tilKonkretTask
+import no.nav.familie.ba.sak.fake.tilPayload
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -212,7 +212,7 @@ class BehandlingIntegrationTest(
         val lagredeTaskerAvType =
             fakeTaskRepositoryWrapper
                 .hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE)
-                .tilKonkretTask<OpprettOppgaveTaskDTO>()
+                .tilPayload<OpprettOppgaveTaskDTO>()
 
         val lagretTask = lagredeTaskerAvType.singleOrNull { it.behandlingId == behandling.id && it.oppgavetype == Oppgavetype.BehandleSak }
 
@@ -251,7 +251,7 @@ class BehandlingIntegrationTest(
         val lagredeTaskerAvType =
             fakeTaskRepositoryWrapper
                 .hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE)
-                .tilKonkretTask<OpprettOppgaveTaskDTO>()
+                .tilPayload<OpprettOppgaveTaskDTO>()
 
         val lagretTask = lagredeTaskerAvType.singleOrNull { it.behandlingId == behandling.id && it.oppgavetype == Oppgavetype.BehandleSak }
 

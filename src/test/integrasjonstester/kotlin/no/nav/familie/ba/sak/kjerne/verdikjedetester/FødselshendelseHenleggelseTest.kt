@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
-import no.nav.familie.ba.sak.fake.tilKonkretTask
+import no.nav.familie.ba.sak.fake.tilPayload
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -117,7 +117,7 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
         val lagredeTaskerAvType =
-            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilKonkretTask<OpprettOppgaveTaskDTO>()
+            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilPayload<OpprettOppgaveTaskDTO>()
 
         val lagretTask =
             lagredeTaskerAvType
@@ -224,7 +224,7 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
         val lagredeTaskerAvType =
-            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilKonkretTask<OpprettOppgaveTaskDTO>()
+            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilPayload<OpprettOppgaveTaskDTO>()
 
         val lagretTask =
             lagredeTaskerAvType
@@ -270,7 +270,7 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
         val lagredeTaskerAvType =
-            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilKonkretTask<OpprettOppgaveTaskDTO>()
+            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilPayload<OpprettOppgaveTaskDTO>()
 
         val lagretTask =
             lagredeTaskerAvType
@@ -378,7 +378,7 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, revurdering?.steg)
 
         val lagredeTaskerAvType =
-            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilKonkretTask<OpprettOppgaveTaskDTO>()
+            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilPayload<OpprettOppgaveTaskDTO>()
 
         val lagretTask =
             lagredeTaskerAvType
@@ -459,7 +459,7 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, revurdering?.steg)
 
         val lagredeTaskerAvType =
-            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilKonkretTask<OpprettOppgaveTaskDTO>()
+            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilPayload<OpprettOppgaveTaskDTO>()
 
         val lagretTask =
             lagredeTaskerAvType
@@ -529,7 +529,7 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling.steg)
 
         val lagredeTaskerAvType =
-            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilKonkretTask<OpprettOppgaveTaskDTO>()
+            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilPayload<OpprettOppgaveTaskDTO>()
 
         val lagretTask =
             lagredeTaskerAvType

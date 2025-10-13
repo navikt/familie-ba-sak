@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
-import no.nav.familie.ba.sak.fake.tilKonkretTask
+import no.nav.familie.ba.sak.fake.tilPayload
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragStartTask
@@ -32,7 +32,7 @@ class KonsistensavstemmingSchedulerTest(
         val lagredeTaskerAvType =
             fakeTaskRepositoryWrapper
                 .hentLagredeTaskerAvType(KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE)
-                .tilKonkretTask<KonsistensavstemmingStartTaskDTO>()
+                .tilPayload<KonsistensavstemmingStartTaskDTO>()
 
         val lagretTask = lagredeTaskerAvType.singleOrNull { it.batchId == nyBatch.id }
 
@@ -53,7 +53,7 @@ class KonsistensavstemmingSchedulerTest(
         val lagredeTaskerAvType =
             fakeTaskRepositoryWrapper
                 .hentLagredeTaskerAvType(KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE)
-                .tilKonkretTask<KonsistensavstemmingStartTaskDTO>()
+                .tilPayload<KonsistensavstemmingStartTaskDTO>()
 
         val lagretTask = lagredeTaskerAvType.singleOrNull { it.batchId == nyBatch.id }
 
@@ -75,7 +75,7 @@ class KonsistensavstemmingSchedulerTest(
         val lagredeTaskerAvType =
             fakeTaskRepositoryWrapper
                 .hentLagredeTaskerAvType(KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE)
-                .tilKonkretTask<KonsistensavstemmingStartTaskDTO>()
+                .tilPayload<KonsistensavstemmingStartTaskDTO>()
 
         val lagretTask = lagredeTaskerAvType.singleOrNull { it.batchId == nyBatch.id }
 

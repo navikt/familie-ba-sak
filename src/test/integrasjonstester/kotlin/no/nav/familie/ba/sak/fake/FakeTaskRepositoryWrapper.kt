@@ -17,11 +17,11 @@ class FakeTaskRepositoryWrapper(
         return task
     }
 
-    override fun findAll(): Iterable<Task> = emptyList()
+    override fun findAll(): Iterable<Task> = lagredeTasker
 
-    override fun findByStatus(status: Status): List<Task> = emptyList()
+    override fun findByStatus(status: Status): List<Task> = lagredeTasker.filter { it.status === status }
 
     fun hentLagredeTaskerAvType(type: String): List<Task> = this.lagredeTasker.filter { it.type == type }
 }
 
-inline fun <reified T> List<Task>.tilKonkretTask(): List<T> = this.map { objectMapper.readValue(it.payload) }
+inline fun <reified T> List<Task>.tilPayload(): List<T> = this.map { objectMapper.readValue(it.payload) }

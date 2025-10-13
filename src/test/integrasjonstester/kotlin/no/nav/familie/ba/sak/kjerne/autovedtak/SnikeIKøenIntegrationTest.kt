@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
-import no.nav.familie.ba.sak.fake.tilKonkretTask
+import no.nav.familie.ba.sak.fake.tilPayload
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService.Companion.BEHANDLING_FERDIG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -145,7 +145,7 @@ class SnikeIKøenIntegrationTest(
         val lagredeTaskerAvType =
             fakeTaskRepositoryWrapper
                 .hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE)
-                .tilKonkretTask<OpprettOppgaveTaskDTO>()
+                .tilPayload<OpprettOppgaveTaskDTO>()
 
         val lagretTask = lagredeTaskerAvType.singleOrNull { it.behandlingId == åpenBehandling.id && it.oppgavetype == Oppgavetype.VurderLivshendelse && it.manuellOppgaveType == ManuellOppgaveType.ÅPEN_BEHANDLING }
 
@@ -164,7 +164,13 @@ class SnikeIKøenIntegrationTest(
 
     private fun fullførTasksForBehandling(behandling: Behandling) {
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-        journalførVedtaksbrevTask.doTask(opprettTaskJournalførVedtaksbrev(personIdent = behandling.fagsak.aktør.aktivFødselsnummer(), behandling.id, vedtakId = vedtak!!.id))
+        journalførVedtaksbrevTask.doTask(
+            opprettTaskJournalførVedtaksbrev(
+                personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+                behandlingId = behandling.id,
+                vedtakId = vedtak!!.id,
+            ),
+        )
         distribuerDokumentTask.doTask(
             DistribuerDokumentTask.opprettDistribuerDokumentTask(
                 distribuerDokumentDTO =
