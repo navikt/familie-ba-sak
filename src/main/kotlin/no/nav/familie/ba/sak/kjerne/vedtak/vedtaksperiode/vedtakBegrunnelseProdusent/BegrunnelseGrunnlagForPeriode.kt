@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent
 
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -29,14 +31,19 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
                 .any {
                     it.vilkårType == Vilkår.BOSATT_I_RIKET &&
                         it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
-                } && dennePerioden.erOrdinæreVilkårInnvilget()
+                } &&
+            dennePerioden.erOrdinæreVilkårInnvilget()
 
-    fun sjekkOmHarKravPåFinnmarkstilleggForrigePeriode(): Boolean {
+    fun sjekkOmHarKravPåFinnmarkstilleggForrigePeriode(vedtaksperiode: VedtaksperiodeMedBegrunnelser): Boolean {
         val startdatoForFinnmarkstillegg =
             SatsService
                 .hentAllesatser()
                 .filter { it.type == SatsType.FINNMARKSTILLEGG }
                 .minOfOrNull { it.gyldigFom } ?: LocalDate.MAX
+
+        if (vedtaksperiode.fom == null || vedtaksperiode.fom.isSameOrBefore(startdatoForFinnmarkstillegg)) {
+            return false
+        }
 
         return forrigePeriode?.andeler?.any { it.type == YtelseType.FINNMARKSTILLEGG } == true ||
             forrigePeriode
@@ -45,7 +52,8 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
                     it.vilkårType == Vilkår.BOSATT_I_RIKET &&
                         it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS) &&
                         (it.tom == null || it.tom >= startdatoForFinnmarkstillegg)
-                } == true && forrigePeriode?.erOrdinæreVilkårInnvilget() == true
+                } == true &&
+            forrigePeriode?.erOrdinæreVilkårInnvilget() == true
     }
 
     fun sjekkOmharKravPåSvalbardtilleggIForrigeBehandlingPeriode(): Boolean {
@@ -71,7 +79,8 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
                 .any {
                     it.vilkårType == Vilkår.BOSATT_I_RIKET &&
                         it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
-                } && dennePerioden.erOrdinæreVilkårInnvilget()
+                } &&
+            dennePerioden.erOrdinæreVilkårInnvilget()
 
     fun sjekkOmHarHravPåSvalbardtilleggForrigePeriode() =
         forrigePeriode?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true ||
@@ -80,7 +89,8 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
                 ?.any {
                     it.vilkårType == Vilkår.BOSATT_I_RIKET &&
                         it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
-                } == true && forrigePeriode?.erOrdinæreVilkårInnvilget() == true
+                } == true &&
+            forrigePeriode?.erOrdinæreVilkårInnvilget() == true
 
     companion object {
         fun opprett(

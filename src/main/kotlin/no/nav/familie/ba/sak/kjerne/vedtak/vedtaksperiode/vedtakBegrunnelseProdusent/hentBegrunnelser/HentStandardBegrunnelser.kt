@@ -107,7 +107,7 @@ internal fun hentStandardBegrunnelser(
 
     val filtrertPåFinnmarkstillegg =
         relevanteBegrunnelser.filterValues { begrunnelse ->
-            begrunnelse.erGjeldendeForFinnmarkstillegg(begrunnelseGrunnlag)
+            begrunnelse.erGjeldendeForFinnmarkstillegg(begrunnelseGrunnlag, vedtaksperiode)
         }
 
     val filtrertPåSvalbardtillegg =
@@ -205,10 +205,11 @@ private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(
 
 private fun SanityBegrunnelse.erGjeldendeForFinnmarkstillegg(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
+    vedtaksperiode: VedtaksperiodeMedBegrunnelser,
 ): Boolean {
     if (!this.gjelderFinnmarkstillegg) return false
 
-    val harKravPåFinnmarkstilleggForrigePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåFinnmarkstilleggForrigePeriode()
+    val harKravPåFinnmarkstilleggForrigePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåFinnmarkstilleggForrigePeriode(vedtaksperiode)
     val harKravPåFinnmarkstilleggDennePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåFinnmarkstilleggDennePeriode()
 
     val harFinnmarkstilleggIForrigeBehandlingPeriode =
