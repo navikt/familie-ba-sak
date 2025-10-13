@@ -70,9 +70,9 @@ class VilkårsvurderingValideringTest {
             }
         }
 
-        @ParameterizedTest
+        @ParameterizedTest(name = "skal ikke kaste feil hvis søker vurderes etter nasjonal og minst ett barn etter EØS om det er av årsak {0}")
         @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG"])
-        fun `skal ikke kaste feil hvis søker vurderes etter nasjonal og minst ett barn etter EØS om der er satsendring`(
+        fun `skal ikke kaste feil hvis søker vurderes etter nasjonal og minst ett barn etter EØS om årsak er en av typene`(
             behandlingÅrsak: BehandlingÅrsak,
         ) {
             val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
