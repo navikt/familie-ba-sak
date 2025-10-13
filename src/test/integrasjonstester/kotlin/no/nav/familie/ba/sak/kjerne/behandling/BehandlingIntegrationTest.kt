@@ -3,12 +3,10 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
@@ -21,6 +19,8 @@ import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
 import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
+import no.nav.familie.ba.sak.fake.tilPayload
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -56,6 +56,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
+import no.nav.familie.ba.sak.task.OpprettOppgaveTask
+import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
@@ -102,7 +105,7 @@ class BehandlingIntegrationTest(
     @Autowired
     private val personidentService: PersonidentService,
     @Autowired
-    private val taskRepository: TaskRepositoryWrapper,
+    private val fakeTaskRepositoryWrapper: FakeTaskRepositoryWrapper,
 ) : AbstractSpringIntegrationTest() {
     @BeforeEach
     fun førHverTest() {
@@ -204,11 +207,16 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
 
-        verify(exactly = 1) {
-            taskRepository.save(any())
-        }
+        val lagredeTaskerAvType =
+            fakeTaskRepositoryWrapper
+                .hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE)
+                .tilPayload<OpprettOppgaveTaskDTO>()
+
+        val lagretTask = lagredeTaskerAvType.singleOrNull { it.behandlingId == behandling.id && it.oppgavetype == Oppgavetype.BehandleSak }
+
+        assertThat(lagretTask).isNotNull
     }
 
     @Test
@@ -227,21 +235,27 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        behandlingService.opprettBehandling(
-            NyBehandling(
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                søkersIdent = fnr,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                skalBehandlesAutomatisk = true,
-                søknadMottattDato = LocalDate.now(),
-                fagsakId = fagsak.id,
-            ),
-        )
+        val behandling =
+            behandlingService.opprettBehandling(
+                NyBehandling(
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    søkersIdent = fnr,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    skalBehandlesAutomatisk = true,
+                    søknadMottattDato = LocalDate.now(),
+                    fagsakId = fagsak.id,
+                ),
+            )
 
-        verify(exactly = 0) {
-            taskRepository.save(any())
-        }
+        val lagredeTaskerAvType =
+            fakeTaskRepositoryWrapper
+                .hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE)
+                .tilPayload<OpprettOppgaveTaskDTO>()
+
+        val lagretTask = lagredeTaskerAvType.singleOrNull { it.behandlingId == behandling.id && it.oppgavetype == Oppgavetype.BehandleSak }
+
+        assertThat(lagretTask).isNull()
     }
 
     @Test
