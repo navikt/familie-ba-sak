@@ -1,16 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg
 
 import jakarta.transaction.Transactional
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøringRepository
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
@@ -20,31 +20,41 @@ class AutovedtakSvalbardtilleggTaskOppretter(
     private val opprettTaskService: OpprettTaskService,
     private val svalbardtilleggKjøringRepository: SvalbardtilleggKjøringRepository,
     private val persongrunnlagService: PersongrunnlagService,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val behandlingRepository: BehandlingRepository,
     private val pdlRestClient: SystemOnlyPdlRestClient,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     @Transactional
     fun opprettTasker(antallFagsaker: Int) {
         val fagsakIder =
             fagsakRepository.finnLøpendeFagsakerForSvalbardtilleggKjøring(Pageable.ofSize(antallFagsaker)).toSet()
 
-        val iverksatteBehandlinger =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksattForFagsaker(fagsakIder).values
+        logger.info("Hentet ${fagsakIder.size} fagsaker for vurdering av autovedtak Svalbardtillegg")
 
-        val sistIverksatteBehandlingerUtenEøs = iverksatteBehandlinger.filter { it.kategori != BehandlingKategori.EØS }
+        val iverksatteBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder)
+        val sistIverksatteBehandlingerUtenEøs = iverksatteBehandlinger.filter { it.kategori != BehandlingKategori.EØS.name }
+
+        logger.info("Av ${iverksatteBehandlinger.size} iverksatte behandlinger er ${sistIverksatteBehandlingerUtenEøs.size} nasjonal")
 
         val grunnlagForIverksatteBehandlinger =
-            persongrunnlagService.hentAktivForBehandlinger(sistIverksatteBehandlingerUtenEøs.map { it.id })
+            persongrunnlagService.hentAktivForBehandlinger(sistIverksatteBehandlingerUtenEøs.map { it.behandlingId })
+
+        logger.info("Hentet personopplysningsgrunnlag for ${grunnlagForIverksatteBehandlinger.size} behandlinger")
 
         val fagsakerMedPersonidenter =
-            sistIverksatteBehandlingerUtenEøs.associate { behandling ->
-                val grunnlag = grunnlagForIverksatteBehandlinger[behandling.id]
-                if (grunnlag == null) {
-                    throw Feil("Forventet personopplysningsgrunnlag for behandling ${behandling.id} ikke funnet")
+            sistIverksatteBehandlingerUtenEøs
+                .filter { behandling ->
+                    val grunnlag = grunnlagForIverksatteBehandlinger[behandling.behandlingId]
+                    if (grunnlag == null) {
+                        logger.error("Forventet personopplysningsgrunnlag for behandling ${behandling.behandlingId} ikke funnet.")
+                    }
+                    grunnlag != null
+                }.associate { behandling ->
+                    val grunnlag = grunnlagForIverksatteBehandlinger[behandling.behandlingId]!!
+                    val fødselsnummer = grunnlag.personer.map { person -> person.aktør.aktivFødselsnummer() }
+                    behandling.fagsakId to fødselsnummer
                 }
-                val fødselsnummer = grunnlag.personer.map { person -> person.aktør.aktivFødselsnummer() }
-                behandling.fagsak.id to fødselsnummer
-            }
 
         val personerSomBorPåSvalbard =
             fagsakerMedPersonidenter.values
@@ -68,5 +78,6 @@ class AutovedtakSvalbardtilleggTaskOppretter(
         svalbardtilleggKjøringRepository.saveAll(fagsakIderSomIkkeSkalOpprettesTaskFor.map { SvalbardtilleggKjøring(fagsakId = it) })
 
         opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(fagsakerDerMinstEnAktørBorPåSvalbard)
+        logger.info("Totalt opprettet ${fagsakerDerMinstEnAktørBorPåSvalbard.size}/$antallFagsaker tasker for autovedtak Svalbardtillegg")
     }
 }
