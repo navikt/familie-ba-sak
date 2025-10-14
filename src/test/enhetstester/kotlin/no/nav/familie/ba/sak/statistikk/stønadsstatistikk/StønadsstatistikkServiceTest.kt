@@ -111,7 +111,6 @@ internal class StønadsstatistikkServiceTest {
         every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any()) } returns "DK"
-        every { featureToggleService.isEnabled(FeatureToggle.STONADSSTATISTIKK_FORTSATT_INNVILGET) } returns true
         every { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(any()) } returns null
     }
 
