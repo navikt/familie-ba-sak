@@ -1,13 +1,10 @@
 package no.nav.familie.ba.sak.config
 
-import io.mockk.isMockKMock
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.fake.FakeEfSakRestClient
 import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClientMock
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.mock.FamilieIntegrasjonerTilgangskontrollMock
 import org.junit.jupiter.api.BeforeEach
@@ -26,9 +23,6 @@ abstract class AbstractMockkSpringRunner {
 
     @Autowired
     private lateinit var mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
-
-    @Autowired
-    private lateinit var mockInfotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
 
     /**
      * Cachemanagere
@@ -62,10 +56,6 @@ abstract class AbstractMockkSpringRunner {
         FamilieIntegrasjonerTilgangskontrollMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(
             mockFamilieIntegrasjonerTilgangskontrollClient,
         )
-
-        if (isMockKMock(mockInfotrygdBarnetrygdClient)) {
-            InfotrygdBarnetrygdClientMock.clearInfotrygdBarnetrygdMocks(mockInfotrygdBarnetrygdClient)
-        }
 
         MDC.put("callId", "${this::class.java.simpleName}-${UUID.randomUUID()}")
     }

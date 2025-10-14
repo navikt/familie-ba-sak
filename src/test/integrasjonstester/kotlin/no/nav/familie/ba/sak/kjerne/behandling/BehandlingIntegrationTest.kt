@@ -17,10 +17,10 @@ import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
+import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
 import no.nav.familie.ba.sak.fake.tilPayload
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -101,7 +101,7 @@ class BehandlingIntegrationTest(
     @Autowired
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     @Autowired
-    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    private val fakeInfotrygdBarnetrygdClient: FakeInfotrygdBarnetrygdClient,
     @Autowired
     private val personidentService: PersonidentService,
     @Autowired
@@ -163,7 +163,7 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
 
-        every { infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(listOf(fnr)) } returns true
+        fakeInfotrygdBarnetrygdClient.leggTilÅpenSakIInfotrygd(fnr, emptyList(), true)
 
         assertThatThrownBy { behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak)) }
             .hasMessageContaining("sak i Infotrygd")
@@ -174,7 +174,7 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
 
-        every { infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(listOf(fnr)) } returns true
+        fakeInfotrygdBarnetrygdClient.leggTilLøpendeSakIInfotrygd(fnr, emptyList(), true)
 
         assertThatThrownBy { behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak)) }
             .hasMessageContaining("sak i Infotrygd")
