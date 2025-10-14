@@ -70,8 +70,11 @@ class VilkårsvurderingValideringTest {
             }
         }
 
-        @Test
-        fun `skal ikke kaste feil hvis søker vurderes etter nasjonal og minst ett barn etter EØS om der er satsendring`() {
+        @ParameterizedTest(name = "skal ikke kaste feil hvis søker vurderes etter nasjonal og minst ett barn etter EØS om det er av årsak {0}")
+        @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG"])
+        fun `skal ikke kaste feil hvis søker vurderes etter nasjonal og minst ett barn etter EØS om årsak er en av typene`(
+            behandlingÅrsak: BehandlingÅrsak,
+        ) {
             val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
             val søker = lagPersonEnkel(PersonType.SØKER)
             val barn1 = lagPersonEnkel(PersonType.BARN)
@@ -91,7 +94,7 @@ class VilkårsvurderingValideringTest {
                 validerIkkeBlandetRegelverk(
                     vilkårsvurdering = vilkårsvurdering,
                     søkerOgBarn = listOf(søker, barn1, barn2),
-                    behandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING),
+                    behandling = lagBehandling(årsak = behandlingÅrsak),
                 )
             }
         }

@@ -3,11 +3,12 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import io.mockk.verify
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
+import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
+import no.nav.familie.ba.sak.fake.tilPayload
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -34,13 +35,15 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
+import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
 import no.nav.familie.ba.sak.util.ordinærSatsNesteMånedTilTester
 import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -50,7 +53,6 @@ import java.time.LocalDate
 import java.time.LocalDate.now
 
 class FødselshendelseHenleggelseTest(
-    @Autowired private val opprettTaskService: OpprettTaskService,
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -62,6 +64,7 @@ class FødselshendelseHenleggelseTest(
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val utvidetBehandlingService: UtvidetBehandlingService,
     @Autowired private val brevmalService: BrevmalService,
+    @Autowired private val fakeTaskRepositoryWrapper: FakeTaskRepositoryWrapper,
 ) : AbstractVerdikjedetest() {
     @BeforeEach
     fun førHverTest() {
@@ -113,13 +116,14 @@ class FødselshendelseHenleggelseTest(
         assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
-        verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
-                behandlingId = behandling!!.id,
-                beskrivelse = "Fødselshendelse: Mor er under 18 år.",
-                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
-            )
-        }
+        val lagredeTaskerAvType =
+            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilPayload<OpprettOppgaveTaskDTO>()
+
+        val lagretTask =
+            lagredeTaskerAvType
+                .singleOrNull { it.behandlingId == behandling!!.id && it.beskrivelse == "Fødselshendelse: Mor er under 18 år." && it.manuellOppgaveType == ManuellOppgaveType.FØDSELSHENDELSE }
+
+        assertThat(lagretTask).isNotNull
 
         val fagsak =
             familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id).data
@@ -219,13 +223,14 @@ class FødselshendelseHenleggelseTest(
         assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
-        verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
-                behandlingId = behandling!!.id,
-                beskrivelse = "Fødselshendelse: Mor har flere bostedsadresser uten fra- og med dato",
-                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
-            )
-        }
+        val lagredeTaskerAvType =
+            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilPayload<OpprettOppgaveTaskDTO>()
+
+        val lagretTask =
+            lagredeTaskerAvType
+                .singleOrNull { it.behandlingId == behandling!!.id && it.beskrivelse == "Fødselshendelse: Mor har flere bostedsadresser uten fra- og med dato" && it.manuellOppgaveType == ManuellOppgaveType.FØDSELSHENDELSE }
+
+        assertThat(lagretTask).isNotNull
     }
 
     @Test
@@ -264,16 +269,21 @@ class FødselshendelseHenleggelseTest(
         assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
-        verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
-                behandlingId = behandling!!.id,
-                beskrivelse = "Fødselshendelse: Barnet (fødselsdato: ${
-                    LocalDate.parse(scenario.barna.first().fødselsdato)
-                        .tilKortString()
-                }) er ikke bosatt med mor.",
-                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
-            )
-        }
+        val lagredeTaskerAvType =
+            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilPayload<OpprettOppgaveTaskDTO>()
+
+        val lagretTask =
+            lagredeTaskerAvType
+                .singleOrNull {
+                    it.behandlingId == behandling!!.id &&
+                        it.beskrivelse == "Fødselshendelse: Barnet (fødselsdato: ${
+                            LocalDate.parse(scenario.barna.first().fødselsdato)
+                                .tilKortString()
+                        }) er ikke bosatt med mor." &&
+                        it.manuellOppgaveType == ManuellOppgaveType.FØDSELSHENDELSE
+                }
+
+        assertThat(lagretTask).isNotNull
 
         val fagsak =
             familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id).data
@@ -367,13 +377,18 @@ class FødselshendelseHenleggelseTest(
         assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, revurdering?.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, revurdering?.steg)
 
-        verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
-                behandlingId = revurdering!!.id,
-                beskrivelse = "Fødselshendelse: Mor mottar utvidet barnetrygd.",
-                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
-            )
-        }
+        val lagredeTaskerAvType =
+            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilPayload<OpprettOppgaveTaskDTO>()
+
+        val lagretTask =
+            lagredeTaskerAvType
+                .singleOrNull {
+                    it.behandlingId == revurdering!!.id &&
+                        it.beskrivelse == "Fødselshendelse: Mor mottar utvidet barnetrygd." &&
+                        it.manuellOppgaveType == ManuellOppgaveType.FØDSELSHENDELSE
+                }
+
+        assertThat(lagretTask).isNotNull
     }
 
     @Test
@@ -443,13 +458,18 @@ class FødselshendelseHenleggelseTest(
         assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, revurdering?.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, revurdering?.steg)
 
-        verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
-                behandlingId = revurdering!!.id,
-                beskrivelse = "Fødselshendelse: Mor har EØS-barnetrygd",
-                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
-            )
-        }
+        val lagredeTaskerAvType =
+            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilPayload<OpprettOppgaveTaskDTO>()
+
+        val lagretTask =
+            lagredeTaskerAvType
+                .singleOrNull {
+                    it.behandlingId == revurdering!!.id &&
+                        it.beskrivelse == "Fødselshendelse: Mor har EØS-barnetrygd" &&
+                        it.manuellOppgaveType == ManuellOppgaveType.FØDSELSHENDELSE
+                }
+
+        assertThat(lagretTask).isNotNull
     }
 
     @Test
@@ -508,13 +528,18 @@ class FødselshendelseHenleggelseTest(
         assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling.steg)
 
-        verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
-                behandlingId = behandling.id,
-                beskrivelse = "Fødselshendelse: ${VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN.beskrivelse}",
-                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
-            )
-        }
+        val lagredeTaskerAvType =
+            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilPayload<OpprettOppgaveTaskDTO>()
+
+        val lagretTask =
+            lagredeTaskerAvType
+                .singleOrNull {
+                    it.behandlingId == behandling.id &&
+                        it.beskrivelse == "Fødselshendelse: ${VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN.beskrivelse}" &&
+                        it.manuellOppgaveType == ManuellOppgaveType.FØDSELSHENDELSE
+                }
+
+        assertThat(lagretTask).isNotNull
     }
 
     private fun oppdaterBehandlingOgRegelverkTilEøs(behandling: Behandling) {
