@@ -39,6 +39,11 @@ query($identer: [ID!]!){
                 matrikkeladresse {
                     kommunenummer
                 }
+                folkeregistermetadata {
+                    opphoerstidspunkt
+                    kilde
+                    aarsak
+                }
             }
         }
     }
