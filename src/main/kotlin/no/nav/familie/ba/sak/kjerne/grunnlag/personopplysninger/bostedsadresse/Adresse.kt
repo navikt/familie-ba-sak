@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.kontrakter.ba.finnmarkstillegg.kommuneErIFinnmarkEllerNordTroms
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
+import no.nav.familie.kontrakter.felles.personopplysning.Folkeregistermetadata
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
@@ -20,6 +21,7 @@ data class Adresse(
     val matrikkeladresse: Matrikkeladresse? = null,
     val ukjentBosted: UkjentBosted? = null,
     val oppholdAnnetSted: OppholdAnnetSted? = null,
+    val folkeregistermetadata: Folkeregistermetadata? = null,
 ) {
     /**
      * Dette kan oppstå ved dårlig datakvalitet.
@@ -29,6 +31,8 @@ data class Adresse(
     fun erFomOgTomSamme() = gyldigFraOgMed == gyldigTilOgMed
 
     fun erFomEtterTom() = gyldigFraOgMed != null && gyldigTilOgMed != null && gyldigFraOgMed.isAfter(gyldigTilOgMed)
+
+    fun erOpphørt() = folkeregistermetadata?.opphoerstidspunkt != null
 
     fun overlapperMedDato(dato: LocalDate): Boolean {
         val harGyldigFraOgMed = gyldigFraOgMed == null || gyldigFraOgMed.isSameOrBefore(dato)
@@ -82,6 +86,7 @@ data class Adresse(
                 vegadresse = oppholdsadresse.vegadresse,
                 matrikkeladresse = oppholdsadresse.matrikkeladresse,
                 oppholdAnnetSted = OppholdAnnetSted.parse(oppholdsadresse.oppholdAnnetSted),
+                folkeregistermetadata = oppholdsadresse.folkeregistermetadata,
             )
     }
 }

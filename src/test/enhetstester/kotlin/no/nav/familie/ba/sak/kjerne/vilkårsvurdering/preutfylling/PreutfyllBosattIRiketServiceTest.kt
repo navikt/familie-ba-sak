@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Folkeregistermetadata
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 import org.assertj.core.api.Assertions.assertThat
@@ -816,6 +817,49 @@ class PreutfyllBosattIRiketServiceTest {
 
         // Assert
         assertThat(vilkårResultat).anySatisfy {
+            assertThat(it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)).isTrue()
+        }
+    }
+
+    @Test
+    fun `Skal filtrere bort oppholdsadresser som har fått opphørttidspunkt`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barnasFødselsdatoer = listOf(LocalDate.now().minusMonths(2)), søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+        every { pdlRestClient.hentStatsborgerskap(any(), historikk = true) } returns
+            listOf(
+                Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
+            )
+
+        val bostedsadresser =
+            Adresser(
+                bostedsadresser = emptyList(),
+                delteBosteder = emptyList(),
+                oppholdsadresse =
+                    listOf(
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusMonths(13),
+                            vegadresse = lagVegadresse(matrikkelId = 12345L, kommunenummer = "2100"),
+                            folkeregistermetadata = Folkeregistermetadata(opphoerstidspunkt = LocalDate.now(), kilde = "kilde", aarsak = "aarsak"),
+                        ),
+                    ),
+            )
+
+        // Act
+        val vilkårResultat =
+            preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
+                personResultat = personResultat,
+                fødselsdatoForBeskjæring = LocalDate.now().minusYears(4),
+                adresserForPerson = bostedsadresser,
+                behandling = behandling,
+            )
+
+        // Assert
+        assertThat(vilkårResultat).noneSatisfy {
             assertThat(it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)).isTrue()
         }
     }
