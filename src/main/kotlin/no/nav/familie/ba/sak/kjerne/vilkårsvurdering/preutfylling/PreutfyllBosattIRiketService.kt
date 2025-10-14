@@ -321,6 +321,7 @@ class PreutfyllBosattIRiketService(
     private fun filtrereUgyldigeAdresser(adresser: List<Adresse>): List<Adresse> =
         adresser
             .filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
+            .filterNot { it.erOpphørt() }
             .groupBy { it.gyldigFraOgMed to it.gyldigTilOgMed }
             .values
             .map { likePerioder ->
