@@ -231,10 +231,12 @@ class PreutfyllBosattIRiketService(
                 if (eksisterendeVilkårResultat == null) {
                     return@kombinerMed null
                 }
+                val utdypendeVilkårsvurderingUtenFinnmarkOgSvalbardtillegg = eksisterendeVilkårResultat.utdypendeVilkårsvurderinger.filter { it != BOSATT_I_FINNMARK_NORD_TROMS && it != BOSATT_PÅ_SVALBARD }
                 if (finnmarkEllerSvalbardtillegg == null) {
-                    return@kombinerMed eksisterendeVilkårResultat
+                    return@kombinerMed eksisterendeVilkårResultat.copy(utdypendeVilkårsvurderinger = utdypendeVilkårsvurderingUtenFinnmarkOgSvalbardtillegg)
                 }
-                eksisterendeVilkårResultat.copy(utdypendeVilkårsvurderinger = finnmarkEllerSvalbardtillegg, begrunnelse = PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
+                val utdypendeVilkårsvurderingMedFinnmarkOgSvalbardtillegg = utdypendeVilkårsvurderingUtenFinnmarkOgSvalbardtillegg.plus(finnmarkEllerSvalbardtillegg)
+                eksisterendeVilkårResultat.copy(utdypendeVilkårsvurderinger = utdypendeVilkårsvurderingMedFinnmarkOgSvalbardtillegg, begrunnelse = PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
             }.tilPerioderIkkeNull()
             .map {
                 it.verdi.copy(
