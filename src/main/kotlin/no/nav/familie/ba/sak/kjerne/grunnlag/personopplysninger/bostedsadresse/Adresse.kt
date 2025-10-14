@@ -68,6 +68,7 @@ data class Adresse(
                 vegadresse = bostedsadresse.vegadresse,
                 matrikkeladresse = bostedsadresse.matrikkeladresse,
                 ukjentBosted = bostedsadresse.ukjentBosted,
+                folkeregistermetadata = bostedsadresse.folkeregistermetadata,
             )
 
         fun opprettFra(deltBosted: DeltBosted) =
@@ -77,6 +78,7 @@ data class Adresse(
                 vegadresse = deltBosted.vegadresse,
                 matrikkeladresse = deltBosted.matrikkeladresse,
                 ukjentBosted = deltBosted.ukjentBosted,
+                folkeregistermetadata = deltBosted.folkeregistermetadata,
             )
 
         fun opprettFra(oppholdsadresse: Oppholdsadresse): Adresse =
