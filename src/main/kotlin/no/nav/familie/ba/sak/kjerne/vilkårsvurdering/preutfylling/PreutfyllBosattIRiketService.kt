@@ -340,7 +340,11 @@ class PreutfyllBosattIRiketService(
                     likePerioder.find { it.erIFinnmarkEllerNordTroms() } ?: likePerioder.first()
                 }.sortedBy { it.gyldigFraOgMed }
 
-        return filtrert
+        return forskyvTomHvisDenErLikNesteTom(filtrert)
+    }
+
+    private fun forskyvTomHvisDenErLikNesteTom(adresser: List<Adresse>): List<Adresse> =
+        adresser
             .windowed(size = 2, step = 1, partialWindows = true)
             .map { adresser ->
                 val denne = adresser.first()
@@ -355,7 +359,6 @@ class PreutfyllBosattIRiketService(
                     denne
                 }
             }
-    }
 }
 
 private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(

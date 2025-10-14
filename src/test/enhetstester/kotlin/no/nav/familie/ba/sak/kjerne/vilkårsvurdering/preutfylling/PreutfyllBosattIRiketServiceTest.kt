@@ -1157,16 +1157,19 @@ class PreutfyllBosattIRiketServiceTest {
                 Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
 
+        val dato1 = LocalDate.now().minusYears(3)
+        val dato2 = LocalDate.now().minusYears(1)
+
         val adresse1 =
             Adresse(
-                gyldigFraOgMed = LocalDate.now().minusYears(3),
-                gyldigTilOgMed = LocalDate.now().minusYears(1),
+                gyldigFraOgMed = dato1,
+                gyldigTilOgMed = dato2,
                 vegadresse = lagVegadresse(kommunenummer = "5601"),
             )
 
         val adresse2 =
             Adresse(
-                gyldigFraOgMed = LocalDate.now().minusYears(1),
+                gyldigFraOgMed = dato2,
                 gyldigTilOgMed = null,
                 vegadresse = lagVegadresse(kommunenummer = "0301"),
             )
@@ -1190,12 +1193,12 @@ class PreutfyllBosattIRiketServiceTest {
         assertThat(vilkårResultat).hasSize(2)
 
         val førstePeriode = vilkårResultat.first()
-        assertThat(førstePeriode.periodeFom).isEqualTo(LocalDate.now().minusYears(3))
-        assertThat(førstePeriode.periodeTom).isEqualTo(LocalDate.now().minusYears(1).minusDays(1))
+        assertThat(førstePeriode.periodeFom).isEqualTo(dato1)
+        assertThat(førstePeriode.periodeTom).isEqualTo(dato2.minusDays(1))
 
         val andrePeriode = vilkårResultat.last()
 
-        assertThat(andrePeriode.periodeFom).isEqualTo(LocalDate.now().minusYears(1))
+        assertThat(andrePeriode.periodeFom).isEqualTo(dato2)
         assertThat(andrePeriode.periodeTom).isNull()
     }
 
