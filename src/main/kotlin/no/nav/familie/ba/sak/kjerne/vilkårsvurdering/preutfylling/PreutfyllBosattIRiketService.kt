@@ -104,17 +104,28 @@ class PreutfyllBosattIRiketService(
         val erDeltBostedIFinnmarkEllerNordTromsTidslinje = lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erOppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje(adresserForPerson, personResultat)
 
+        val erBosattINorgeEllerPåSvalbardTidslinje =
+            erBosattINorgeTidslinje
+                .kombinerMed(erOppholdsadressePåSvalbardTidslinje) { bosattINorge, bosattPåSvalbard ->
+                    when {
+                        bosattINorge == true || bosattPåSvalbard == true -> true
+                        bosattINorge == false && bosattPåSvalbard == false -> false
+                        else -> null
+                    }
+                }.tilPerioderIkkeNull()
+                .tilTidslinje()
+
         if (behandling.erFinnmarksEllerSvalbardtillegg()) {
             validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
                 behandling = behandling,
-                erBosattINorgeTidslinje = erBosattINorgeTidslinje,
+                erBosattINorgeEllerPåSvalbardTidslinje = erBosattINorgeEllerPåSvalbardTidslinje,
                 erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
                 erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
             )
         }
 
         val erNordiskStatsborgerOgBosattINorgeTidslinje =
-            erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeTidslinje) { erNordiskStatsborger, erBosattINorge ->
+            erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeEllerPåSvalbardTidslinje) { erNordiskStatsborger, erBosattINorge ->
                 if (erNordiskStatsborger == true && erBosattINorge == true) {
                     OppfyltDelvilkår(begrunnelse = "- Norsk/nordisk statsborgerskap")
                 } else {
@@ -122,14 +133,14 @@ class PreutfyllBosattIRiketService(
                 }
             }
 
-        val erØvrigeKravForBosattIRiketOppfyltTidslinje = lagErØvrigeKravForBosattIRiketOppfyltTidslinje(erBosattINorgeTidslinje, personResultat)
+        val erØvrigeKravForBosattIRiketOppfyltTidslinje = lagErØvrigeKravForBosattIRiketOppfyltTidslinje(erBosattINorgeEllerPåSvalbardTidslinje, personResultat)
 
         val erBosattIFinnmarkEllerNordTromsTidslinje =
             erBostedsadresseIFinnmarkEllerNordTromsTidslinje.kombinerMed(erDeltBostedIFinnmarkEllerNordTromsTidslinje) { erBostedsadresseIFinnmarkEllerNordTroms, erDeltBostedIFinnmarkEllerNordTroms ->
                 erBostedsadresseIFinnmarkEllerNordTroms == true || erDeltBostedIFinnmarkEllerNordTroms == true
             }
 
-        val førsteBosattINorgeDato = erBosattINorgeTidslinje.filtrer { it == true }.startsTidspunkt
+        val førsteBosattINorgeDato = erBosattINorgeEllerPåSvalbardTidslinje.filtrer { it == true }.startsTidspunkt
 
         val erBosattIRiketTidslinje =
             erNordiskStatsborgerOgBosattINorgeTidslinje
@@ -180,10 +191,10 @@ class PreutfyllBosattIRiketService(
     }
 
     private fun lagErØvrigeKravForBosattIRiketOppfyltTidslinje(
-        erBosattINorgeTidslinje: Tidslinje<Boolean>,
+        erBosattINorgeEllerPåSvalbardTidslinje: Tidslinje<Boolean>,
         personResultat: PersonResultat,
     ): Tidslinje<Delvilkår> =
-        erBosattINorgeTidslinje
+        erBosattINorgeEllerPåSvalbardTidslinje
             .tilPerioder()
             .map { erBosattINorgePeriode ->
                 Periode(
@@ -330,7 +341,7 @@ class PreutfyllBosattIRiketService(
 
 private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
     behandling: Behandling,
-    erBosattINorgeTidslinje: Tidslinje<Boolean>,
+    erBosattINorgeEllerPåSvalbardTidslinje: Tidslinje<Boolean>,
     erDeltBostedIFinnmarkEllerNordTromsTidslinje: Tidslinje<Boolean>,
     erOppholdsadressePåSvalbardTidslinje: Tidslinje<Boolean>,
 ) {
@@ -347,7 +358,7 @@ private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandling
 
     val harOppholdsadresseUtenBostedsadresse =
         erOppholdsadressePåSvalbardTidslinje
-            .kombinerMed(erBosattINorgeTidslinje) { erOppholdsadressePåSvalbard, harBostedsadresseINorge ->
+            .kombinerMed(erBosattINorgeEllerPåSvalbardTidslinje) { erOppholdsadressePåSvalbard, harBostedsadresseINorge ->
                 erOppholdsadressePåSvalbard == true && harBostedsadresseINorge != true
             }.tilPerioder()
             .any { it.verdi == true }

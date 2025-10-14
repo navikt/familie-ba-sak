@@ -779,6 +779,48 @@ class PreutfyllBosattIRiketServiceTest {
     }
 
     @Test
+    fun `Skal automatisk sette bosatt på svalbard i utdypendevilkårsvurdering dersom vegadresse er på svalbard selv uten bostedsadresse`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barnasFødselsdatoer = listOf(LocalDate.now().minusMonths(2)), søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+        every { pdlRestClient.hentStatsborgerskap(any(), historikk = true) } returns
+            listOf(
+                Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
+            )
+
+        val bostedsadresser =
+            Adresser(
+                bostedsadresser = emptyList(),
+                delteBosteder = emptyList(),
+                oppholdsadresse =
+                    listOf(
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusMonths(13),
+                            vegadresse = lagVegadresse(matrikkelId = 12345L, kommunenummer = "2100"),
+                        ),
+                    ),
+            )
+
+        // Act
+        val vilkårResultat =
+            preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
+                personResultat = personResultat,
+                fødselsdatoForBeskjæring = LocalDate.now().minusYears(4),
+                adresserForPerson = bostedsadresser,
+                behandling = behandling,
+            )
+
+        // Assert
+        assertThat(vilkårResultat).anySatisfy {
+            assertThat(it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)).isTrue()
+        }
+    }
+
+    @Test
     fun `Skal automatisk sette bosatt i finnmark i utdypendevilkårsvurdering dersom matrikkeladresse er i en av de relevante kommunene`() {
         // Arrange
         val behandling = lagBehandling()
