@@ -329,15 +329,36 @@ class PreutfyllBosattIRiketService(
         }
     }
 
-    private fun filtrereUgyldigeAdresser(adresser: List<Adresse>): List<Adresse> =
+    private fun filtrereUgyldigeAdresser(adresser: List<Adresse>): List<Adresse> {
+        val filtrert =
+            adresser
+                .filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
+                .filterNot { it.erOpphørt() }
+                .groupBy { it.gyldigFraOgMed to it.gyldigTilOgMed }
+                .values
+                .map { likePerioder ->
+                    likePerioder.find { it.erIFinnmarkEllerNordTroms() } ?: likePerioder.first()
+                }.sortedBy { it.gyldigFraOgMed }
+
+        return forskyvTomHvisDenErLikNesteTom(filtrert)
+    }
+
+    private fun forskyvTomHvisDenErLikNesteTom(adresser: List<Adresse>): List<Adresse> =
         adresser
-            .filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
-            .filterNot { it.erOpphørt() }
-            .groupBy { it.gyldigFraOgMed to it.gyldigTilOgMed }
-            .values
-            .map { likePerioder ->
-                likePerioder.find { it.erIFinnmarkEllerNordTroms() } ?: likePerioder.first()
-            }.sortedBy { it.gyldigFraOgMed }
+            .windowed(size = 2, step = 1, partialWindows = true)
+            .map { adresser ->
+                val denne = adresser.first()
+                val neste = adresser.getOrNull(1)
+
+                if (denne.gyldigTilOgMed != null &&
+                    neste != null &&
+                    denne.gyldigTilOgMed == neste.gyldigFraOgMed
+                ) {
+                    denne.copy(gyldigTilOgMed = denne.gyldigTilOgMed.minusDays(1))
+                } else {
+                    denne
+                }
+            }
 }
 
 private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(

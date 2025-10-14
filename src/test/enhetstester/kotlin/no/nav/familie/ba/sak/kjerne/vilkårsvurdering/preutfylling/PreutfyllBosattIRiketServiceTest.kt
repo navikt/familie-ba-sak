@@ -1144,6 +1144,65 @@ class PreutfyllBosattIRiketServiceTest {
     }
 
     @Test
+    fun `skal justere tom-dato hvis den er lik fom-dato på neste adresse`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barnasFødselsdatoer = listOf(LocalDate.now().minusYears(3)), søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+        every { pdlRestClient.hentStatsborgerskap(any(), historikk = true) } returns
+            listOf(
+                Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
+            )
+
+        val dato1 = LocalDate.now().minusYears(3)
+        val dato2 = LocalDate.now().minusYears(1)
+
+        val adresse1 =
+            Adresse(
+                gyldigFraOgMed = dato1,
+                gyldigTilOgMed = dato2,
+                vegadresse = lagVegadresse(kommunenummer = "5601"),
+            )
+
+        val adresse2 =
+            Adresse(
+                gyldigFraOgMed = dato2,
+                gyldigTilOgMed = null,
+                vegadresse = lagVegadresse(kommunenummer = "0301"),
+            )
+
+        val bostedsadresser =
+            Adresser(
+                bostedsadresser = listOf(adresse1, adresse2),
+                delteBosteder = emptyList(),
+                oppholdsadresse = emptyList(),
+            )
+
+        // Act
+        val vilkårResultat =
+            preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
+                personResultat = personResultat,
+                adresserForPerson = bostedsadresser,
+                behandling = behandling,
+            )
+
+        // Assert
+        assertThat(vilkårResultat).hasSize(2)
+
+        val førstePeriode = vilkårResultat.first()
+        assertThat(førstePeriode.periodeFom).isEqualTo(dato1)
+        assertThat(førstePeriode.periodeTom).isEqualTo(dato2.minusDays(1))
+
+        val andrePeriode = vilkårResultat.last()
+
+        assertThat(andrePeriode.periodeFom).isEqualTo(dato2)
+        assertThat(andrePeriode.periodeTom).isNull()
+    }
+
+    @Test
     fun `Skal automatisk sette bosatt på svalbard i utdypendevilkårsvurdering dersom vilkår er oppfylt basert på øvrige vilkår`() {
         // Arrange
         val behandling = lagBehandling()
