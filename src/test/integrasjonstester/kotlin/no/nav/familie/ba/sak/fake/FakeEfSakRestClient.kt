@@ -39,8 +39,4 @@ class FakeEfSakRestClient(
     ) {
         eksternePerioderResponeMap[personIdent] = eksternePerioderResponse
     }
-
-    fun reset() {
-        eksternePerioderResponeMap.clear()
-    }
 }
