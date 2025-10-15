@@ -29,6 +29,11 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
     bostedsadresse(historikk: false) {
         angittFlyttedato
         gyldigTilOgMed
+        folkeregistermetadata {
+            opphoerstidspunkt
+            kilde
+            aarsak
+        }
         vegadresse {
             matrikkelId
             husnummer
