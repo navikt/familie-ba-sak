@@ -24,7 +24,7 @@ class AutovedtakSvalbardtilleggScheduler(
         }
 
         if (featureToggleService.isEnabled(FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_SVALBARDSTILLEGG)) {
-            autovedtakSvalbardtilleggTaskOppretter.opprettTasker(3000)
+            autovedtakSvalbardtilleggTaskOppretter.opprettTasker(6000)
         }
     }
 
