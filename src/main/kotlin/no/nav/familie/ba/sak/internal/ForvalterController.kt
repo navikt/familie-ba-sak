@@ -593,10 +593,6 @@ class ForvalterController(
             handling = "Opprett task for autovedtak av Svalbardtillegg",
         )
 
-        if (envService.erProd()) {
-            throw Feil("Dette endepunktet skal ikke brukes i prod")
-        }
-
         opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(fagsakIder)
 
         return ResponseEntity.ok("Tasker for autovedtak av Svalbardtillegg opprettet")
