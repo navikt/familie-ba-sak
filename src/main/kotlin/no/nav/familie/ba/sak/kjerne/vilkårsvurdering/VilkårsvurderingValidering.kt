@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -87,7 +86,7 @@ fun valider18ÅrsVilkårEksistererFraFødselsdato(
     vilkårsvurdering.personResultater.forEach { personResultat ->
         val person = søkerOgBarn.find { it.aktør == personResultat.aktør }
         if (person?.type == PersonType.BARN && !personResultat.vilkårResultater.finnesUnder18VilkårFraFødselsdato(person.fødselsdato)) {
-            if (behandling.erSatsendringEllerMånedligValutajustering() || behandling.opprettetÅrsak.erOmregningsårsak()) {
+            if (behandling.erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() || behandling.opprettetÅrsak.erOmregningsårsak()) {
                 secureLogger.warn(
                     "Fødselsdato ${person.fødselsdato} ulik fom ${
                         personResultat.vilkårResultater.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }
