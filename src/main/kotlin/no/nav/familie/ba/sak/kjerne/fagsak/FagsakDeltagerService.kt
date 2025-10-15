@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
@@ -15,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpStatusCodeException
@@ -30,6 +32,8 @@ class FagsakDeltagerService(
     private val fagsakService: FagsakService,
     private val integrasjonClient: IntegrasjonClient,
 ) {
+    private val logger = LoggerFactory.getLogger(FagsakDeltagerService::class.java)
+
     fun hentFagsakDeltagere(personIdent: String): List<RestFagsakDeltager> {
         val aktør = personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(personIdent) ?: return emptyList()
 
@@ -148,12 +152,17 @@ class FagsakDeltagerService(
                 if (!behandling.aktiv || behandling.fagsak.arkivert || fagsakDeltagerMap.containsKey(behandling.fagsak.id)) {
                     return@fold fagsakDeltagerMap
                 }
-                fagsakDeltagerMap[behandling.fagsak.id] =
+
+                val fagsakEier =
                     hentFagsakEier(
                         fagsak = behandling.fagsak,
                         aktør = aktør,
                         personInfoMedRelasjoner = personInfoForAktør,
                     )
+                if (fagsakEier != null) {
+                    fagsakDeltagerMap[behandling.fagsak.id] = fagsakEier
+                }
+
                 fagsakDeltagerMap
             }.values
 
@@ -161,7 +170,7 @@ class FagsakDeltagerService(
         fagsak: Fagsak,
         aktør: Aktør,
         personInfoMedRelasjoner: PersonInfo,
-    ): RestFagsakDeltager {
+    ): RestFagsakDeltager? {
         if (fagsak.aktør == aktør) {
             return RestFagsakDeltager(
                 navn = personInfoMedRelasjoner.navn,
@@ -214,7 +223,11 @@ class FagsakDeltagerService(
             },
             onFailure = { exception ->
                 when (exception) {
-                    // Kaster funksjonell feil videre, ellers kaster vi Feil
+                    is PdlPersonKanIkkeBehandlesIFagsystem -> {
+                        // Filtrerer midlertidig bort personer som ikke kan behandles i fagsystem, som personer med falsk ident NAV-26495. Bør fikses i NAV-26549
+                        logger.warn("Filtrerer bort eier av en fagsak som ikke kan behandles i fagsystem pga ${exception.årsak}")
+                        null
+                    }
                     is FunksjonellFeil -> throw exception
                     else -> throw Feil("Feil ved henting av person fra PDL", throwable = exception)
                 }
