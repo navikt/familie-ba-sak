@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.somBoolskTidslinje
@@ -334,7 +335,7 @@ class TilpassKompetanserTilRegelverkTest {
     }
 
     @Test
-    fun `skal sette tom på kompetanse til uendelig dersom tom på tidslinje er lik eller senere nåværende måned`() {
+    fun `skal sette tom på kompetanse til uendelig dersom tom på tidslinje er senere enn nåværende måned`() {
         val inneværendeMåned = YearMonth.of(2024, 12)
         val sep2024 = sep(2024)
 
@@ -374,9 +375,41 @@ class TilpassKompetanserTilRegelverkTest {
     }
 
     @Test
-    fun `skal ikke generere kompetanser hvis eøs-regelverk er frem i tid`() {
+    fun `skal sette tom på kompetanse til inneværende måned dersom man går over til nasjonal inneværende måned`() {
+        val inneværendeMåned = YearMonth.of(2024, 11)
+        val sep2024 = sep(2024)
+
+        val kompetanser =
+            KompetanseBuilder(sep2024)
+                .medKompetanse("---", barn1, barn2)
+                .byggKompetanser()
+
+        val barnasRegelverkResultatTidslinjer =
+            mapOf(
+                barn1.aktør to "EE ".tilRegelverkResultatTidslinje(sep2024),
+                barn2.aktør to "EE ".tilRegelverkResultatTidslinje(sep2024),
+            )
+
+        val faktiskeKompetanser =
+            tilpassKompetanserTilRegelverk(
+                gjeldendeKompetanser = kompetanser,
+                barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
+                endredeUtbetalingPerioderSomKreverKompetanseTidlinjer = emptyMap(),
+                inneværendeMåned = inneværendeMåned,
+            )
+
+        val forventedeKompetanser =
+            KompetanseBuilder(sep2024)
+                .medKompetanse("--", barn1, barn2)
+                .byggKompetanser()
+
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
+    fun `skal ikke generere kompetanser hvis eøs-regelverk er lengre frem i tid enn neste måned`() {
         val barnaRegelverkTidslinjer =
-            mapOf(barn1.aktør to "EEE".tilRegelverkResultatTidslinje(jan(2025)))
+            mapOf(barn1.aktør to "EEE".tilRegelverkResultatTidslinje(feb(2025)))
 
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(

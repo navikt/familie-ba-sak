@@ -141,7 +141,7 @@ fun tilpassKompetanserTilRegelverk(
                 kompetanse?.copy(erAnnenForelderOmfattetAvNorskLovgivning = annenForelderOmfattet ?: false)
             }
         }.mapValues { (_, tidslinje) ->
-            tidslinje.forlengFremtidTilUendelig(tidspunktForUendelighet = inneværendeMåned.sisteDagIInneværendeMåned())
+            tidslinje.forlengFremtidTilUendelig(tidspunktForUendelighet = inneværendeMåned.plusMonths(1).sisteDagIInneværendeMåned())
         }.tilSkjemaer()
 }
 
