@@ -266,19 +266,26 @@ class PreutfyllBosattIRiketService(
     private fun lagErBosattINorgeTidslinje(
         adresser: Adresser,
         personResultat: PersonResultat,
-    ): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser, personResultat, "Bostedadresse") { it.erINorge() }
+    ): Tidslinje<Boolean> {
+        val filtrerteAdresser = filtrereUgyldigeAdresser(adresser.bostedsadresser)
+        return lagTidslinjeForAdresser(filtrerteAdresser, personResultat, "Bostedadresse") { it.erINorge() }
+    }
 
     private fun lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(
         adresser: Adresser,
         personResultat: PersonResultat,
-    ): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser, personResultat, "Bostedadresse") { it.erIFinnmarkEllerNordTroms() }
+    ): Tidslinje<Boolean> {
+        val filtrerteAdresser = filtrereUgyldigeAdresser(adresser.bostedsadresser)
+        return lagTidslinjeForAdresser(filtrerteAdresser, personResultat, "Bostedadresse") { it.erIFinnmarkEllerNordTroms() }
+    }
 
     private fun lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(
         adresser: Adresser,
         personResultat: PersonResultat,
     ): Tidslinje<Boolean> {
+        val filtrerteAdresser = filtrereUgyldigeAdresser(adresser.delteBosteder)
         val tidslinjer =
-            adresser.delteBosteder.map { adresse ->
+            filtrerteAdresser.map { adresse ->
                 lagTidslinjeForAdresser(listOf(adresse), personResultat, "Delt bostedadresse") { it.erIFinnmarkEllerNordTroms() }
             }
 
@@ -298,7 +305,9 @@ class PreutfyllBosattIRiketService(
         if (adresser.oppholdsadresse.isEmpty()) {
             return tomTidslinje<Boolean>()
         }
-        return lagTidslinjeForAdresser(adresser.oppholdsadresse, personResultat, "Oppholdsadresse") { it.erPåSvalbard() }
+        val filtrerteAdresser = filtrereUgyldigeOppholdsadresser(adresser.oppholdsadresse)
+
+        return lagTidslinjeForAdresser(filtrerteAdresser, personResultat, "Oppholdsadresse") { it.erPåSvalbard() }
     }
 
     private fun lagTidslinjeForAdresser(
@@ -308,8 +317,7 @@ class PreutfyllBosattIRiketService(
         operator: (Adresse) -> Boolean,
     ): Tidslinje<Boolean> {
         try {
-            val filtrerteAdresser = filtrereUgyldigeAdresser(adresser)
-            return filtrerteAdresser
+            return adresser
                 .windowed(size = 2, step = 1, partialWindows = true) {
                     val denne = it.first()
                     val neste = it.getOrNull(1)
@@ -338,6 +346,20 @@ class PreutfyllBosattIRiketService(
                 .values
                 .map { likePerioder ->
                     likePerioder.find { it.erIFinnmarkEllerNordTroms() } ?: likePerioder.first()
+                }.sortedBy { it.gyldigFraOgMed }
+
+        return forskyvTomHvisDenErLikNesteTom(filtrert)
+    }
+
+    private fun filtrereUgyldigeOppholdsadresser(adresser: List<Adresse>): List<Adresse> {
+        val filtrert =
+            adresser
+                .filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
+                .filterNot { it.erOpphørt() }
+                .groupBy { it.gyldigFraOgMed to it.gyldigTilOgMed }
+                .values
+                .map { likePerioder ->
+                    likePerioder.find { it.erPåSvalbard() } ?: likePerioder.first()
                 }.sortedBy { it.gyldigFraOgMed }
 
         return forskyvTomHvisDenErLikNesteTom(filtrert)
