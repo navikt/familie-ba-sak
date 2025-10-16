@@ -179,7 +179,7 @@ spec:
       memory: 4096Mi
     requests:
       memory: 4096Mi
-      cpu: 250m
+      cpu: 886m
   ingresses:
     - https://familie-ba-sak.intern.nav.no
   secureLogs:
