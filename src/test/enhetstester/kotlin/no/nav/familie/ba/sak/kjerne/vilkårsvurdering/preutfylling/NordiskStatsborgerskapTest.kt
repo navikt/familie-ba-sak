@@ -6,6 +6,7 @@ import io.mockk.spyk
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.kontrakter.felles.personopplysning.Folkeregistermetadata
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.assertj.core.api.Assertions.assertThat
@@ -74,5 +75,39 @@ class NordiskStatsborgerskapTest {
 
         val statsborgerskapTidslinje = pdlRestClientSpyk.lagErNordiskStatsborgerTidslinje(personResultat)
         assertThat(statsborgerskapTidslinje.tilPerioder().single().fom).isEqualTo(LocalDate.of(2020, 1, 1))
+    }
+
+    @Test
+    fun `Statsborgerskap med opphørstidspunkt skal filtreres bort `() {
+        val pdlRestClient = PdlRestClient(URI("test"), mockk(), mockk())
+        val pdlRestClientSpyk = spyk(pdlRestClient)
+        val aktør = lagAktør()
+        val personResultat = mockk<PersonResultat>()
+
+        val gyldigFraOgMed = LocalDate.now().minusYears(5)
+
+        val statsborgerskap1 =
+            Statsborgerskap(
+                land = "NOR",
+                gyldigFraOgMed = gyldigFraOgMed,
+                gyldigTilOgMed = null,
+                bekreftelsesdato = null,
+                folkeregistermetadata = Folkeregistermetadata(opphoerstidspunkt = null, kilde = null, aarsak = null),
+            )
+
+        val statsborgerskap2 =
+            Statsborgerskap(
+                land = "AL",
+                gyldigFraOgMed = gyldigFraOgMed,
+                gyldigTilOgMed = null,
+                bekreftelsesdato = null,
+                folkeregistermetadata = Folkeregistermetadata(opphoerstidspunkt = LocalDate.now().minusYears(1), kilde = null, aarsak = null),
+            )
+
+        every { pdlRestClientSpyk.hentStatsborgerskap(any(), any()) } returns listOf(statsborgerskap1, statsborgerskap2)
+        every { personResultat.aktør } returns aktør
+
+        val statsborgerskapTidslinje = pdlRestClientSpyk.lagErNordiskStatsborgerTidslinje(personResultat)
+        assertThat(statsborgerskapTidslinje.tilPerioder().single().fom).isEqualTo(gyldigFraOgMed)
     }
 }
