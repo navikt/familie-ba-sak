@@ -5,6 +5,8 @@ import io.micrometer.core.instrument.MultiGauge
 import io.micrometer.core.instrument.Tags
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.LeaderClientService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import org.slf4j.LoggerFactory
@@ -19,6 +21,7 @@ class TeamStatistikkService(
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
     private val leaderClientService: LeaderClientService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     val utbetalingerPerMånedGauge =
         MultiGauge.builder("UtbetalingerPerMaanedGauge").register(Metrics.globalRegistry)
@@ -31,9 +34,13 @@ class TeamStatistikkService(
     val tidSidenOpprettelseåpneBehandlingerPerMånedGauge =
         MultiGauge.builder("TidSidenOpprettelseAapneBehandlingerPerMaanedGauge").register(Metrics.globalRegistry)
 
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     @Scheduled(initialDelay = FEM_MINUTTER_VENTETID_FØR_OPPDATERING_FØRSTE_GANG, fixedRate = OPPDATERING_HVER_DAG)
     fun utbetalinger() {
+        if (!featureToggleService.isEnabled(FeatureToggle.TUNGTKJØRENDE_GRAFANA_STATISTIKK, false)) return
         if (!erLeader()) return
+        logger.info("Genererer statistikk for utbetalinger")
 
         val månederMedTotalUtbetaling =
             listOf<YearMonth>(
@@ -55,11 +62,13 @@ class TeamStatistikkService(
             }
 
         utbetalingerPerMånedGauge.register(rows)
+        logger.info("Genererer statistikk for utbetalinger er ferdig")
     }
 
     @Scheduled(initialDelay = FEM_MINUTTER_VENTETID_FØR_OPPDATERING_FØRSTE_GANG, fixedRate = OPPDATERING_HVER_DAG)
     fun antallFagsaker() {
         if (!erLeader()) return
+        logger.info("Genererer statistikk for antall fagsaker")
 
         val antallFagsaker = fagsakRepository.finnAntallFagsakerTotalt()
 
@@ -75,11 +84,13 @@ class TeamStatistikkService(
             )
 
         antallFagsakerPerMånedGauge.register(rows)
+        logger.info("Genererer statistikk for antall fagsaker er ferdig")
     }
 
     @Scheduled(initialDelay = FEM_MINUTTER_VENTETID_FØR_OPPDATERING_FØRSTE_GANG, fixedRate = OPPDATERING_HVER_DAG)
     fun løpendeFagsaker() {
         if (!erLeader()) return
+        logger.info("Genererer statistikk for løpende fagsaker")
 
         val løpendeFagsaker = fagsakRepository.finnAntallFagsakerLøpende()
 
@@ -95,6 +106,7 @@ class TeamStatistikkService(
             )
 
         løpendeFagsakerPerMånedGauge.register(rows)
+        logger.info("Genererer statistikk for løpende fagsaker er ferdig")
     }
 
     @Scheduled(initialDelay = FEM_MINUTTER_VENTETID_FØR_OPPDATERING_FØRSTE_GANG, fixedRate = OPPDATERING_HVER_DAG)
@@ -119,7 +131,10 @@ class TeamStatistikkService(
 
     @Scheduled(initialDelay = FEM_MINUTTER_VENTETID_FØR_OPPDATERING_FØRSTE_GANG, fixedRate = OPPDATERING_HVER_DAG)
     fun tidFraOpprettelsePåÅpneBehandlinger() {
+        if (!featureToggleService.isEnabled(FeatureToggle.TUNGTKJØRENDE_GRAFANA_STATISTIKK, false)) return
         if (!erLeader()) return
+
+        logger.info("Genererer statistikk for tid siden opprettelse på åpne behandlinger")
 
         val opprettelsestidspunktPååpneBehandlinger = behandlingRepository.finnOpprettelsestidspunktPåÅpneBehandlinger()
         val diffPåÅpneBehandlinger =
@@ -155,6 +170,7 @@ class TeamStatistikkService(
             )
 
         tidSidenOpprettelseåpneBehandlingerPerMånedGauge.register(rows)
+        logger.info("Genererer statistikk for tid siden opprettelse på åpne behandlinger er ferdig")
     }
 
     @Scheduled(cron = "0 0 14 * * *")
