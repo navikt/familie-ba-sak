@@ -37,6 +37,9 @@ enum class FeatureToggle(
     // Kjører satsendring lørdag
     SATSENDRING_LØRDAG("familie-ba-sak.satsendring-lordag"),
 
+    // Populerer antall satsendringer kjørt i grafana. Nyttig å ha på når man kjører satsendring
+    SATSENDRING_GRAFANA_STATISTIKK("familie-ba-sak.satsendring-grafana-statistikk"),
+
     BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING("familie-ba-sak.ulovfestet-motregning"),
 
     // Tillatter behandling av klage
@@ -73,4 +76,7 @@ enum class FeatureToggle(
     SKAL_BRUKE_ADRESSEHENDELSELØYPE_SVALBARDTILLEGG("familie-ba-sak.skal-bruke-adressehendelseloype-for-svalbardtillegg"),
 
     VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR("familie-ba-sak.valider-endring-av-preutfylte-vilkaar"),
+
+    // Toggle for å kunne skru av tungtkjørende statistikk for grafana når man f.eks. kjører autovedtak som satsendring/finnmarkstillegg
+    TUNGTKJØRENDE_GRAFANA_STATISTIKK("familie-ba-sak.generer-grafana-statistikk"),
 }
