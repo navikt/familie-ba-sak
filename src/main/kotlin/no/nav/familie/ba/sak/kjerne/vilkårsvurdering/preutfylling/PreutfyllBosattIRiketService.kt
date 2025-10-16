@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -39,6 +41,7 @@ class PreutfyllBosattIRiketService(
     private val pdlRestClient: SystemOnlyPdlRestClient,
     private val søknadService: SøknadService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun preutfyllBosattIRiket(
         vilkårsvurdering: Vilkårsvurdering,
@@ -67,7 +70,7 @@ class PreutfyllBosattIRiketService(
                 val adresserForPerson = Adresser.opprettFra(adresser[personResultat.aktør.aktivFødselsnummer()])
 
                 val nyeBosattIRiketVilkårResultater =
-                    if (behandling.erFinnmarksEllerSvalbardtillegg()) {
+                    if (behandling.erFinnmarksEllerSvalbardtillegg() && featureToggleService.isEnabled(FeatureToggle.NY_PREUTFYLLING_FOR_BOSATT_I_RIKET_VILKÅR_VED_AUTOVEDTAK_FINNMARK_SVALBARD)) {
                         genererBosattIRiketVilkårResultatForFinnmarkOgSvalbardtillegg(
                             personResultat = personResultat,
                             adresserForPerson = adresserForPerson,
