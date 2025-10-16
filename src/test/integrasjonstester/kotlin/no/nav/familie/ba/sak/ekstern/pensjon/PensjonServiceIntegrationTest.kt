@@ -1,15 +1,13 @@
 package no.nav.familie.ba.sak.ekstern.pensjon
 
-import io.mockk.every
-import io.mockk.slot
-import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.datagenerator.årMnd
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.fake.FakeEnvService
+import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -18,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -30,34 +27,24 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.YearMonth
 
-class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
+class PensjonServiceIntegrationTest(
     @Autowired
-    lateinit var fagsakRepository: FagsakRepository
-
+    private val personidentService: PersonidentService,
     @Autowired
-    lateinit var personidentService: PersonidentService
-
+    private val behandlingService: BehandlingService,
     @Autowired
-    lateinit var behandlingService: BehandlingService
-
+    private val fagsakService: FagsakService,
     @Autowired
-    lateinit var fagsakService: FagsakService
-
+    private val pensjonService: PensjonService,
     @Autowired
-    lateinit var pensjonService: PensjonService
-
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     @Autowired
-    lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
-
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired
-    lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
-
+    private val fakeInfotrygdBarnetrygdClient: FakeInfotrygdBarnetrygdClient,
     @Autowired
-    lateinit var infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
-
-    @Autowired
-    lateinit var envService: EnvService
-
+    private val envService: FakeEnvService,
+) : AbstractSpringIntegrationTest() {
     @Test
     fun `skal finne en relaterte fagsaker per barn`() {
         val søker = tilfeldigPerson()
@@ -115,6 +102,7 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val infotrygdStønadTom = årMnd("2022-09")
 
         mockInfotrygdBarnetrygdResponse(
+            søkerAktør,
             barnAktør,
             stønadFom = infotrygdStønadFom,
             stønadTom = infotrygdStønadTom,
@@ -137,7 +125,7 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val søker = tilfeldigPerson()
         val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
 
-        mockInfotrygdBarnetrygdResponse(søkerAktør, YearMonth.now(), YearMonth.of(999999999, 12))
+        mockInfotrygdBarnetrygdResponse(søker = søkerAktør, stønadFom = YearMonth.now(), stønadTom = YearMonth.of(999999999, 12))
 
         val barnetrygdTilPensjon = pensjonService.hentBarnetrygd(søkerAktør.aktivFødselsnummer(), LocalDate.of(2023, 1, 1))
         assertThat(barnetrygdTilPensjon).hasSize(1)
@@ -191,21 +179,23 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
     }
 
     private fun mockInfotrygdBarnetrygdResponse(
-        person: Aktør,
+        søker: Aktør,
+        barn: Aktør? = null,
         stønadFom: YearMonth = YearMonth.now(),
         stønadTom: YearMonth = YearMonth.now(),
     ) {
-        every { envService.erPreprod() } returns false
-        val identFraRequest = slot<String>()
-        every { infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(capture(identFraRequest), any()) } answers {
+        envService.setErPreprod(false)
+
+        fakeInfotrygdBarnetrygdClient.leggTilBarnetrygdTilPensjon(
+            søker.aktivFødselsnummer(),
             BarnetrygdTilPensjonResponse(
                 fagsaker =
                     listOf(
                         BarnetrygdTilPensjon(
-                            identFraRequest.captured,
+                            søker.aktivFødselsnummer(),
                             listOf(
                                 BarnetrygdPeriode(
-                                    personIdent = person.aktivFødselsnummer(),
+                                    personIdent = barn?.aktivFødselsnummer() ?: søker.aktivFødselsnummer(),
                                     delingsprosentYtelse = YtelseProsent.FULL,
                                     ytelseTypeEkstern = YtelseTypeEkstern.ORDINÆR_BARNETRYGD,
                                     utbetaltPerMnd = 1054,
@@ -217,7 +207,7 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
                             ),
                         ),
                     ),
-            )
-        }
+            ),
+        )
     }
 }

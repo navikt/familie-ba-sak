@@ -47,7 +47,7 @@ class SettPåVentController(
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Sett behandling på vent",
+            handling = "Oppdater ventefrist og/eller venteårsak på behandling",
         )
         settPåVentService.oppdaterSettBehandlingPåVent(behandlingId, restSettPåVent.frist, restSettPåVent.årsak)
 
@@ -61,7 +61,7 @@ class SettPåVentController(
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Sett behandling på vent",
+            handling = "Gjenoppta behandling som har vært satt på vent",
         )
         settPåVentService.gjenopptaBehandling(behandlingId)
 

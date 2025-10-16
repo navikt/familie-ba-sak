@@ -50,13 +50,16 @@ fun VedtaksperiodeMedBegrunnelser.hentBegrunnelser(
     skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse: Boolean,
 ): List<BrevBegrunnelse> {
     val standardbegrunnelser =
-        this.begrunnelser.map { it.standardbegrunnelse }.toSet().flatMap {
-            it.lagBrevBegrunnelse(
-                this,
-                grunnlagForBegrunnelse,
-                begrunnelsesGrunnlagPerPerson,
-            )
-        }
+        this.begrunnelser
+            .map { it.standardbegrunnelse }
+            .toSet()
+            .flatMap {
+                it.lagBrevBegrunnelse(
+                    this,
+                    grunnlagForBegrunnelse,
+                    begrunnelsesGrunnlagPerPerson,
+                )
+            }.sorted()
 
     val eøsBegrunnelser =
         this.eøsBegrunnelser.map { it.begrunnelse }.toSet().flatMap {

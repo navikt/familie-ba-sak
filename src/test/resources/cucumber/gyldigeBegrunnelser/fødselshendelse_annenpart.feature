@@ -53,6 +53,6 @@ Egenskap: Fødselshendelse hvor det hentes inn persongrunnlag for ANNENPART
       | Brevperiodetype | Fra dato      | Til dato           | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
       | UTBETALING      | november 2023 | til september 2029 | 1766  | 1                          | 18.10.23            | du                     |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.11.2023 til 30.09.2029
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.11.2023 til 30.09.2029
       | Begrunnelse                                  | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE | STANDARD |               | 18.10.23             | 1           | oktober 2023                         |         | 1 766 |                  |                         |                             |

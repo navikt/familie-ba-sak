@@ -23,10 +23,11 @@ import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.BrevBegrunnelseFeil
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakFinnmarkstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtFørsteBarn
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakSvalbardtillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Avslag
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -232,8 +233,8 @@ class BrevService(
                     etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
                 )
 
-            Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG ->
-                Autovedtak6og18årOgSmåbarnstillegg(
+            Brevmal.AUTOVEDTAK_ENDRING ->
+                AutovedtakEndring(
                     vedtakFellesfelter = vedtakFellesfelter,
                 )
 
@@ -251,6 +252,11 @@ class BrevService(
 
             Brevmal.AUTOVEDTAK_FINNMARKSTILLEGG ->
                 AutovedtakFinnmarkstillegg(
+                    vedtakFellesfelter = vedtakFellesfelter,
+                )
+
+            Brevmal.AUTOVEDTAK_SVALBARDTILLEGG ->
+                AutovedtakSvalbardtillegg(
                     vedtakFellesfelter = vedtakFellesfelter,
                 )
 

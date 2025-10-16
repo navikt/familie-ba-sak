@@ -17,6 +17,75 @@ import java.time.LocalDate
 
 class AdresseTest {
     @Nested
+    inner class ErFomOgTomNull {
+        @Test
+        fun `skal returnere true når fom og tom er null`() {
+            // Arrange
+            val adresse =
+                lagAdresse(
+                    gyldigFraOgMed = null,
+                    gyldigTilOgMed = null,
+                )
+
+            // Act
+            val erFomOgTomNull = adresse.erFomOgTomNull()
+
+            // Assert
+            assertThat(erFomOgTomNull).isTrue()
+        }
+
+        @Test
+        fun `skal returnere false når fom er null men tom ikke er null`() {
+            // Arrange
+            val adresse =
+                lagAdresse(
+                    gyldigFraOgMed = null,
+                    gyldigTilOgMed = LocalDate.now(),
+                )
+
+            // Act
+            val erFomOgTomNull = adresse.erFomOgTomNull()
+
+            // Assert
+            assertThat(erFomOgTomNull).isFalse()
+        }
+
+        @Test
+        fun `skal returnere false når fom ikke er null men tom er null`() {
+            // Arrange
+            val adresse =
+                lagAdresse(
+                    gyldigFraOgMed = LocalDate.now(),
+                    gyldigTilOgMed = null,
+                )
+
+            // Act
+            val erFomOgTomNull = adresse.erFomOgTomNull()
+
+            // Assert
+            assertThat(erFomOgTomNull).isFalse()
+        }
+
+        @Test
+        fun `skal returnere false når hverken fom eller tom er null`() {
+            // Arrange
+            val dagensDato = LocalDate.now()
+
+            val adresse =
+                lagAdresse(
+                    gyldigFraOgMed = dagensDato,
+                    gyldigTilOgMed = dagensDato,
+                )
+
+            // Act
+            val erFomOgTomNull = adresse.erFomOgTomNull()
+
+            // Assert
+            assertThat(erFomOgTomNull).isFalse()
+        }
+    }
+
+    @Nested
     inner class OverlapperMedDato {
         @Test
         fun `skal returnere true hvis adresse hverken har en fra og med dato eller en til og med dato`() {

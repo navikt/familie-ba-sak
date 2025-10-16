@@ -233,7 +233,6 @@ class BeslutteVedtakTest {
 
             every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
             every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
-            every { featureToggleService.isEnabled(FeatureToggle.STONADSSTATISTIKK_FORTSATT_INNVILGET) } returns true
 
             mockkObject(JournalførVedtaksbrevTask.Companion)
             every {
@@ -304,7 +303,6 @@ class BeslutteVedtakTest {
             val behandling = lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
             behandling.status = BehandlingStatus.FATTER_VEDTAK
             behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
-            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
 
             every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
             mockkObject(FerdigstillOppgaver.Companion)
@@ -314,7 +312,7 @@ class BeslutteVedtakTest {
                     payload = "",
                 )
 
-            assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
+            assertThrows<FunksjonellFeil> { beslutteVedtak.preValiderSteg(behandling) }
         }
 
         @Test
@@ -324,7 +322,6 @@ class BeslutteVedtakTest {
             val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
             behandling.status = BehandlingStatus.FATTER_VEDTAK
             behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
-            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
 
             every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
             mockkObject(FerdigstillOppgaver.Companion)
@@ -334,7 +331,7 @@ class BeslutteVedtakTest {
                     payload = "",
                 )
 
-            assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
+            assertThrows<FunksjonellFeil> { beslutteVedtak.preValiderSteg(behandling) }
         }
 
         @Test

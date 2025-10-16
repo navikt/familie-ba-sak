@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.fake.MockLeaderClientService
+import no.nav.familie.ba.sak.fake.FakeLeaderClientService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakController
@@ -42,7 +42,7 @@ class SaksstatistikkTest(
     @Autowired
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     @Autowired
-    private val mockLeaderClientService: MockLeaderClientService,
+    private val fakeLeaderClientService: FakeLeaderClientService,
 ) : AbstractSpringIntegrationTest() {
     private lateinit var saksstatistikkScheduler: SaksstatistikkScheduler
 
@@ -56,7 +56,7 @@ class SaksstatistikkTest(
             SaksstatistikkScheduler(
                 saksstatistikkMellomlagringRepository = saksstatistikkMellomlagringRepository,
                 kafkaProducer = kafkaProducer,
-                leaderClientService = mockLeaderClientService,
+                leaderClientService = fakeLeaderClientService,
             )
     }
 

@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.validation.Valid
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
@@ -19,16 +19,17 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinjeService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeDto
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggTaskOppretter
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
-import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask
-import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.FinnPersonerSomBorPåSvalbardIFagsakerTask
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggTaskOppretter
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.ba.sak.task.DeaktiverMinsideTask
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
@@ -47,7 +48,6 @@ import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsis
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
 import no.nav.familie.kontrakter.ba.finnmarkstillegg.kommuneErIFinnmarkEllerNordTroms
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -72,7 +72,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import kotlin.concurrent.thread
-import kotlin.time.measureTimedValue
 
 @RestController
 @RequestMapping("/api/forvalter")
@@ -99,6 +98,10 @@ class ForvalterController(
     private val hentAlleIdenterTilPsysTask: HentAlleIdenterTilPsysTask,
     private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
     private val personidentRepository: PersonidentRepository,
+    private val autovedtakFinnmarkstilleggTaskOppretter: AutovedtakFinnmarkstilleggTaskOppretter,
+    private val envService: EnvService,
+    private val autovedtakSvalbardtilleggTaskOppretter: AutovedtakSvalbardtilleggTaskOppretter,
+    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -206,7 +209,7 @@ class ForvalterController(
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "hente data til test",
+            handling = "Hente begrunnelsetest",
         )
 
         return testVerktøyService
@@ -221,7 +224,7 @@ class ForvalterController(
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "hente data til test",
+            handling = "Hente vedtaksperiodertest",
         )
 
         return testVerktøyService
@@ -351,7 +354,7 @@ class ForvalterController(
         )
 
         taskService.save(OpprettInternKonsistensavstemmingTaskerTask.opprettTask(maksAntallTasker))
-        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+        return ResponseEntity.ok(Ressurs.success("Intern konsistensavstemming startet"))
     }
 
     @PostMapping("/valutajustering/{fagsakId}/juster-valuta")
@@ -380,7 +383,7 @@ class ForvalterController(
         )
 
         månedligValutajusteringScheduler.lagMånedligValutajusteringTask(triggerTid = LocalDateTime.now())
-        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+        return ResponseEntity.ok(Ressurs.success("Valutajustering for alle sekundærlandsaker i gjeldende måned startet"))
     }
 
     @DeleteMapping("/slett-alle-kompetanser-for-behandling/{behandlingId}")
@@ -422,7 +425,7 @@ class ForvalterController(
         val oppdaterLøpendeFlaggTask = Task(type = OppdaterLøpendeFlagg.TASK_STEP_TYPE, payload = "")
         taskRepository.save(oppdaterLøpendeFlaggTask)
         logger.info("Opprettet oppdaterLøpendeFlaggTask")
-        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+        return ResponseEntity.ok(Ressurs.success("Task for oppdatering av løpende flagg startet"))
     }
 
     @PostMapping("/henlegg-autovedtak-og-sett-behandling-tilbake-paa-vent")
@@ -441,7 +444,7 @@ class ForvalterController(
             val hennleggAutovedtakTask = HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask.opprettTask(behandlingId)
             taskRepository.save(hennleggAutovedtakTask)
         }
-        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+        return ResponseEntity.ok(Ressurs.success("Task for henleggelse av autovedtak startet"))
     }
 
     @GetMapping("/stonadstatistikk-utbetalingsperioder/{behandlingId}")
@@ -451,7 +454,7 @@ class ForvalterController(
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "hente data til test",
+            handling = "Hente utbetalingsperioder til datavarehus for behandling",
         )
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
@@ -466,7 +469,7 @@ class ForvalterController(
     ): ResponseEntity<List<String>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "hente data til test",
+            handling = "Hente alle identer som sendes til pensjon",
         )
 
         return ResponseEntity.ok(hentAlleIdenterTilPsysTask.hentAlleIdenterMedBarnetrygd(aar.toInt(), UUID.randomUUID()))
@@ -482,7 +485,7 @@ class ForvalterController(
     ): ResponseEntity<Long> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "hente data til test",
+            handling = "Hente fagsakId for journalpost",
         )
 
         val opprettetTask = taskRepository.save(LogFagsakIdForJournalpostTask.opprettTask(journalpostId))
@@ -500,7 +503,7 @@ class ForvalterController(
     ): ResponseEntity<Long> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "hente data til test",
+            handling = "Hente journalpostId for fagsak",
         )
 
         val opprettetTask = taskRepository.save(LogJournalpostIdForFagsakTask.opprettTask(fagsakId))
@@ -518,33 +521,6 @@ class ForvalterController(
         )
 
         return ResponseEntity.ok(utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId).map { it.tilUtbetalingsperioder() })
-    }
-
-    @PostMapping("/finn-og-patch-andeler-tilkjent-ytelse-i-fagsaker-med-avvik")
-    @Operation(
-        summary = "Finner og patcher andeler tilkjent ytelse i fagsaker med avvik i konsistensavstemming",
-        description =
-            "Bruker Utbetalingtidslinjer til å sammenligne andelerTilkjentYtelse med faktiske utbetalingsperioder oversendt til Oppdrag." +
-                "Finner vi forskjeller mellom en andel og en utbetalingsperiode slettes den originale andelen og erstattes av en korrigert andel.",
-    )
-    fun finnOgPatchAndelerTilkjentYtelseIFagsakerMedAvvik(
-        @RequestBody finnOgPatchAndelerRequestDto: FinnOgPatchAndelerRequestDto,
-    ): ResponseEntity<List<Pair<Long, List<AndelTilkjentYtelseKorreksjonDto>?>>> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Finne og patche andeler tilkjent ytelse i fagsaker med avvik i konsistensavstemming",
-        )
-        if (!featureToggleService.isEnabled(FeatureToggle.SKAL_FINNE_OG_PATCHE_ANDELER_I_FAGAKER_MED_AVVIK, false)) {
-            throw FunksjonellFeil("Kan ikke finne og patche andeler. Toggelen ${FeatureToggle.SKAL_FINNE_OG_PATCHE_ANDELER_I_FAGAKER_MED_AVVIK} er skrudd av")
-        }
-
-        return ResponseEntity.ok(
-            forvalterService.finnOgPatchAndelerTilkjentYtelseIFagsakerMedAvvik(
-                fagsaker = finnOgPatchAndelerRequestDto.fagsaker,
-                korrigerAndelerFraOgMedDato = finnOgPatchAndelerRequestDto.korrigerAndelerFraOgMedDato,
-                dryRun = finnOgPatchAndelerRequestDto.dryRun,
-            ),
-        )
     }
 
     @GetMapping("/start-portefoljejustering-task")
@@ -573,11 +549,34 @@ class ForvalterController(
             handling = "Opprett task for autovedtak av Finnmarkstillegg",
         )
 
+        if (envService.erProd()) {
+            throw Feil("Dette endepunktet skal ikke brukes i prod")
+        }
+
+        fagsakIder.forEach { fagsakId ->
+            opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(fagsakId)
+        }
+
+        return ResponseEntity.ok("Tasker for autovedtak av Finnmarkstillegg opprettet")
+    }
+
+    @PostMapping("/opprett-tasker-for-autovedtak-finnmarkstillegg/{antallBehandlinger}")
+    @Operation(
+        summary = "Oppretter tasker for autovedtak av Finnmarkstillegg",
+    )
+    fun opprettTaskerForAutovedtakFinnmarkstillegg(
+        @PathVariable antallBehandlinger: Int,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett task for autovedtak av Finnmarkstillegg",
+        )
+
         if (!featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG)) {
             throw Feil("Toggle for å opprette tasker for autovedtak av Finnmarkstillegg er skrudd av")
         }
 
-        opprettTaskService.opprettAutovedtakFinnmarkstilleggTasker(fagsakIder)
+        autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(antallBehandlinger)
 
         return ResponseEntity.ok("Tasker for autovedtak av Finnmarkstillegg opprettet")
     }
@@ -594,11 +593,28 @@ class ForvalterController(
             handling = "Opprett task for autovedtak av Svalbardtillegg",
         )
 
+        opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(fagsakIder)
+
+        return ResponseEntity.ok("Tasker for autovedtak av Svalbardtillegg opprettet")
+    }
+
+    @PostMapping("/opprett-tasker-for-autovedtak-svalbardtillegg/{antallBehandlinger}")
+    @Operation(
+        summary = "Oppretter tasker for autovedtak av Svalbardtillegg",
+    )
+    fun opprettTaskerForAutovedtakSvalbardtillegg(
+        @PathVariable antallBehandlinger: Int,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett task for autovedtak av Svalbardtillegg",
+        )
+
         if (!featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOVEDTAK_SVALBARDTILLEGG)) {
             throw Feil("Toggle for å opprette tasker for autovedtak av Svalbardtillegg er skrudd av")
         }
 
-        opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(fagsakIder)
+        autovedtakSvalbardtilleggTaskOppretter.opprettTasker(antallBehandlinger)
 
         return ResponseEntity.ok("Tasker for autovedtak av Svalbardtillegg opprettet")
     }
@@ -641,96 +657,6 @@ class ForvalterController(
         return ResponseEntity.ok("Task for deaktivering av minside for ident opprettet")
     }
 
-    @PostMapping("/opprett-tasker-som-finner-personer-som-bor-i-finnmark-nord-troms-eller-paa-svalbard")
-    @Operation(
-        summary = "Oppretter tasker som finner personer med bostedsadresse eller delt bosted i Finnmark/Nord-Troms eller oppholdsadresse på Svalbard",
-    )
-    fun opprettTaskerSomFinnerPersonerMedOppholdsadressePåSvalbard(
-        @RequestParam dryRun: Boolean = true,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Opprett tasker som finner personer med bostedsadresse eller delt bosted i Finnmark/Nord-Troms eller oppholdsadresse på Svalbard",
-        )
-
-        val (antallTasker, tid) =
-            measureTimedValue {
-                val chunksMedIdenter =
-                    fagsakService
-                        .finnIdenterForLøpendeFagsaker()
-                        .also { logger.info("Hentet ${it.size} identer for løpende fagsaker") }
-                        .chunked(10000)
-
-                logger.info("Lagde ${chunksMedIdenter.size} chunks á 10 000 identer")
-
-                chunksMedIdenter
-                    .onEachIndexed { index, identer ->
-                        val task =
-                            FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask
-                                .opprettTask(identer)
-                                .medTriggerTid(LocalDateTime.now().plusSeconds(index * 5L))
-
-                        if (!dryRun) taskService.save(task)
-
-                        if (index % 10 == 0) {
-                            logger.info("Opprettet og lagret task $index/${chunksMedIdenter.size}")
-                        }
-                    }.size
-            }
-
-        logger.info("Brukte ${tid.inWholeSeconds} sekunder på å opprette $antallTasker tasker for å finne personer som bor i Finnmark, Nord-Troms eller på Svalbard")
-
-        return ResponseEntity.ok("Brukte ${tid.inWholeSeconds} sekunder på å opprette $antallTasker tasker")
-    }
-
-    @PostMapping("/opprett-tasker-som-finner-fagsaker-for-personer-med-oppholdsadresse-paa-svalbard")
-    @Operation(summary = "Oppretter tasker som finner fagsaker for personer med oppholdsadresse på Svalbard")
-    fun opprettTaskerSomFinnerFagsakerMedPersonerMedOppholdsadressePåSvalbard(
-        @RequestParam dryRun: Boolean = true,
-        @RequestParam antallFagsaker: Int = Int.MAX_VALUE,
-        @RequestParam minutterMellomHverTask: Long = 1,
-        @RequestParam chunkSize: Int = 250,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Opprett tasker som finner fagsaker med personer med oppholdsadresse på Svalbard",
-        )
-
-        if (chunkSize > 250) {
-            throw Feil("chunkSize kan ikke være større enn 250")
-        }
-
-        val (antallTasker, tid) =
-            measureTimedValue {
-                val chunksMedFagsakIder =
-                    fagsakService
-                        .hentIdPåLøpendeFagsaker()
-                        .also { logger.info("Hentet ${it.size} fagsaker for løpende fagsaker") }
-                        .take(antallFagsaker)
-                        .chunked(chunkSize)
-
-                logger.info("Lagde ${chunksMedFagsakIder.size} chunks á $chunkSize fagsaker")
-
-                chunksMedFagsakIder
-                    .onEachIndexed { index, fagsakIder ->
-                        val task =
-                            FinnPersonerSomBorPåSvalbardIFagsakerTask
-                                .opprettTask(fagsakIder)
-                                .medTriggerTid(LocalDateTime.now().plusMinutes(index * minutterMellomHverTask))
-
-                        if (!dryRun) taskService.save(task)
-
-                        if (index % 10 == 0) {
-                            logger.info("Opprettet og lagret task $index/${chunksMedFagsakIder.size}")
-                        }
-                    }.size
-            }
-
-        logger.info("Brukte ${tid.inWholeMilliseconds} ms på å opprette $antallTasker tasker for å finne personer som bor i Finnmark, Nord-Troms eller på Svalbard")
-
-        return ResponseEntity.ok("Brukte ${tid.inWholeSeconds} sekunder på å opprette $antallTasker tasker")
-    }
-
     @PostMapping("/sjekk-om-personer-i-fagsak-har-utbetalinger-som-overstiger-100-prosent")
     fun sjekkOmPersonerIFagsakHarUtbetalingerSomOverstiger100Prosent(
         @RequestBody fagsakIder: List<Long>,
@@ -742,30 +668,6 @@ class ForvalterController(
 
         forvalterService.sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(fagsakIder)
         return ResponseEntity.ok("Sjekket om fagsaker har utbetalinger som overstiger 100 prosent")
-    }
-
-    @PostMapping("/rekjor-feilede-tasker-med-type-finnFagsakerForPersonerSomBorPaaSvalbard")
-    fun rekjørFeiledeTaskerMedTypeFinnFagsakerForPersonerSomBorPåSvalbard(
-        @RequestParam minutterMellomHverTask: Long = 1,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Rekjør feilede task med type finnFagsakerForPersonerSomBorPåSvalbard",
-        )
-
-        val tasker =
-            taskRepository
-                .findByStatus(Status.FEILET)
-                .filter { it.type == FinnPersonerSomBorPåSvalbardIFagsakerTask.TASK_STEP_TYPE }
-                .onEachIndexed { index, task ->
-                    taskService.save(
-                        task
-                            .copy(status = Status.KLAR_TIL_PLUKK)
-                            .medTriggerTid(LocalDateTime.now().plusMinutes(index * minutterMellomHverTask)),
-                    )
-                }
-
-        return ResponseEntity.ok("Rekjørte ${tasker.size} feilede tasker med type finnFagsakerForPersonerSomBorPåSvalbard")
     }
 
     @GetMapping("/identifiser-institusjoner-med-finnmarkstillegg")
@@ -794,23 +696,15 @@ class ForvalterController(
         return ResponseEntity.ok(institusjonerSomSkalHaFinnmarkstillegg)
     }
 
-    @PostMapping("/opprett-finn-personer-som-bor-paa-svalbard-i-fagsaker-task")
-    fun opprettPersonerSomBorPåSvalbardIFagsakerTask(
-        @RequestBody fagsakIder: List<Long>,
+    @PostMapping("/send-behandlingsstatistikk-til-dvh")
+    fun sendBehandlingsstatistikkTilDvh(
+        @RequestBody behandlingId: Long,
     ): ResponseEntity<String> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Finn personer som bor på Svalbard i fagsaker",
+            handling = "Sende behandlingsstatistikk for behandling til Datavarehus",
         )
-
-        taskService.save(FinnPersonerSomBorPåSvalbardIFagsakerTask.opprettTask(fagsakIder))
-
-        return ResponseEntity.ok("Opprettet task for å finne personer som bor på Svalbard i ${fagsakIder.size} fagsaker")
+        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandlingId)
+        return ResponseEntity.ok("Sendt behandlingsstatistikk for behandling $behandlingId til Datavarehus")
     }
 }
-
-data class FinnOgPatchAndelerRequestDto(
-    val fagsaker: Set<Long>,
-    val korrigerAndelerFraOgMedDato: LocalDate = LocalDate.of(2025, 2, 1),
-    val dryRun: Boolean = true,
-)

@@ -51,7 +51,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | Fra dato   | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |
       | 01.04.2023 |          | AVSLAG_BOR_HOS_SØKER |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.04.2023 til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.04.2023 til -
       | Begrunnelse          | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
       | AVSLAG_BOR_HOS_SØKER | STANDARD | Nei           | 13.01.17             | 1           | mars 2023                            | NB      | 0     |                  | SØKER_HAR_IKKE_RETT     |
 
@@ -153,7 +153,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | Fra dato | Til dato | Standardbegrunnelser                                                                                                                     | Eøsbegrunnelser | Fritekster |
       |          |          | AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED, AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED, AVSLAG_BOR_IKKE_FAST_MED_BARNET, AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode - til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode - til -
       | Begrunnelse                       | Type     | Gjelder søker | Barnas fødselsdatoer           | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søkers rett til utvidet |
       | AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED | STANDARD | Nei           | 28.07.12, 24.06.14 og 09.05.18 | 3           |                                      | NB      | 0     |                         |
       | AVSLAG_BOR_IKKE_FAST_MED_BARNET   | STANDARD | Ja            | 28.07.12, 24.06.14 og 09.05.18 | 0           |                                      | NB      | 0     |                         |
@@ -193,7 +193,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | Fra dato | Til dato | Standardbegrunnelser                              | Eøsbegrunnelser | Fritekster |
       |          |          | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode - til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode - til -
       | Begrunnelse                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Beløp |
       | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Ja            | 07.08.20             | 0           | 0     |
 
@@ -233,7 +233,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | Fra dato | Til dato | Standardbegrunnelser                              | Eøsbegrunnelser | Fritekster |
       |          |          | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode - til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode - til -
       | Begrunnelse                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Beløp |
       | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Ja            | 07.08.20             | 1           | 0     |
 
@@ -291,11 +291,11 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 01.10.2023 |          | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                 |            |
       | 01.12.2023 |          | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.10.2023 til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.10.2023 til -
       | Begrunnelse                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Ja            | 16.02.13 og 02.08.16 | 0           | september 2023                       | NB      | 0     |                  |                         |                             |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.12.2023 til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.12.2023 til -
       | Begrunnelse                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Nei           | 16.02.13 og 02.08.16 | 2           | november 2023                        | NB      | 0     |                  |                         |                             |
 
@@ -341,7 +341,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 01.02.2023 | 28.02.2023 | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE |                 |            |
 
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.02.2023 til 28.02.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.02.2023 til 28.02.2023
       | Begrunnelse                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp |
       | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE | STANDARD | Ja            | 09.01.12             | 0           | januar 2023                          | 0     |
 
@@ -387,7 +387,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 01.02.2023 | 28.02.2023 | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE |                 |            |
 
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.02.2023 til 28.02.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.02.2023 til 28.02.2023
       | Begrunnelse                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp |
       | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE | STANDARD | Ja            | 09.01.12             | 0           | januar 2023                          | 0     |
 
@@ -447,7 +447,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 01.02.2023 | 28.02.2023 | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE |                 |            |
 
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.02.2023 til 28.02.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.02.2023 til 28.02.2023
       | Begrunnelse                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp |
       | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE | STANDARD | Ja            | 09.01.12             | 0           | januar 2023                          | 1 054 |
 
@@ -503,11 +503,11 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | INGEN_UTBETALING | april 2023    | "til og med oktober 2023 " | 0     | 0                          |                     | du                     |
       | INGEN_UTBETALING | november 2023 |                            | 0     | 0                          |                     | du                     |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.04.2023 til 31.10.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.04.2023 til 31.10.2023
       | Begrunnelse                  | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | AVSLAG_FORELDRENE_BOR_SAMMEN | STANDARD | Nei           | 21.01.16             | 1           | mars 2023                            | NB      | 0     |                  |                         |                             |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.11.2023 til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.11.2023 til -
       | Begrunnelse                 | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | AVSLAG_BARN_HAR_FAST_BOSTED | STANDARD | Nei           | 21.01.16             | 1           | oktober 2023                         | NB      | 0     |                  |                         |                             |
 
@@ -579,11 +579,11 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 01.06.2020 |          |                      | AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN |            |
       | 01.12.2021 |          |                      | AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.06.2020 til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.06.2020 til -
       | Begrunnelse                                   | Type | Gjelder søker | Barnas fødselsdatoer | Antall barn | Målform | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN | EØS  | Nei           | 05.05.17 og 09.05.19 | 2           | nb      |                  |                           |                       |                                |                     |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.12.2021 til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.12.2021 til -
       | Begrunnelse                                   | Type | Gjelder søker | Barnas fødselsdatoer | Antall barn | Målform | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN | EØS  | Nei           | 10.11.21             | 1           | nb      |                  |                           |                       |                                |                     |
 
@@ -664,6 +664,6 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | Fra dato | Til dato | Standardbegrunnelser            | Eøsbegrunnelser | Fritekster |
       |          |          | AVSLAG_BOR_IKKE_FAST_MED_BARNET |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode - til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode - til -
       | Begrunnelse                     | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | AVSLAG_BOR_IKKE_FAST_MED_BARNET | STANDARD | Ja            | 10.02.08             | 0           |                                      |         | 0     |                  |                         |                             |

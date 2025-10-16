@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.MultiGauge
 import io.micrometer.core.instrument.Tags
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.log.mdc.MDCConstants
@@ -17,6 +19,7 @@ import java.util.concurrent.TimeUnit
 class SatsendringStatistikk(
     private val fagsakRepository: FagsakRepository,
     private val satskjøringRepository: SatskjøringRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
     val satsendringGauge =
         MultiGauge.builder("satsendring").register(Metrics.globalRegistry)
@@ -27,6 +30,8 @@ class SatsendringStatistikk(
         initialDelay = 5,
     )
     fun antallSatsendringerKjørt() {
+        if (!featureToggleService.isEnabled(FeatureToggle.SATSENDRING_GRAFANA_STATISTIKK, false)) return
+
         try {
             MDC.put(MDCConstants.MDC_CALL_ID, UUID.randomUUID().toString())
             logger.info("Kjører statistikk satsendring")

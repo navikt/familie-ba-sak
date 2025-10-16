@@ -69,7 +69,7 @@ class KafkaAivenConfig(
     fun kafkaObjectMapper(): ObjectMapper = objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
     private fun producerConfigs(): Map<String, Any> {
-        val kafkaBrokers = System.getenv("KAFKA_BROKERS") ?: "http://localhost:9092"
+        val kafkaBrokers = System.getenv("KAFKA_BROKERS") ?: LOCAL_KAFKA_BROKER
         val producerConfigs =
             mutableMapOf(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers,
@@ -88,7 +88,7 @@ class KafkaAivenConfig(
     }
 
     fun consumerConfigs(): Map<String, Any> {
-        val kafkaBrokers = System.getenv("KAFKA_BROKERS") ?: "http://localhost:9092"
+        val kafkaBrokers = System.getenv("KAFKA_BROKERS") ?: LOCAL_KAFKA_BROKER
         val consumerConfigs =
             mutableMapOf(
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers,
@@ -105,7 +105,7 @@ class KafkaAivenConfig(
     }
 
     private fun consumerConfigsLatestAvro(): Map<String, Any> {
-        val kafkaBrokers = System.getenv("KAFKA_BROKERS") ?: "http://localhost:9092"
+        val kafkaBrokers = System.getenv("KAFKA_BROKERS") ?: LOCAL_KAFKA_BROKER
         val schemaRegisty = System.getenv("KAFKA_SCHEMA_REGISTRY") ?: "http://localhost:9093"
         val schemaRegistryUser = System.getenv("KAFKA_SCHEMA_REGISTRY_USER") ?: "mangler i pod"
         val schemaRegistryPassword = System.getenv("KAFKA_SCHEMA_REGISTRY_PASSWORD") ?: "mangler i pod"
@@ -145,5 +145,9 @@ class KafkaAivenConfig(
             SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG to kafkaCredstorePassword,
             SslConfigs.SSL_KEY_PASSWORD_CONFIG to kafkaCredstorePassword,
         )
+    }
+
+    companion object {
+        const val LOCAL_KAFKA_BROKER = "http://localhost:9092"
     }
 }

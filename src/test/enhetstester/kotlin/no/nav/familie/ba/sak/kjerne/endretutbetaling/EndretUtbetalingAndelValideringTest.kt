@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
@@ -19,11 +20,15 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.finnDeltBostedPerioderForPerson
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerDeltBosted
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerTomDato
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerUtbetalingMotÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -483,11 +488,11 @@ class EndretUtbetalingAndelValideringTest {
                 ),
             )
 
-        val deltBostedPerioder = finnDeltBostedPerioder(person = barn, vilkårsvurdering = vilkårsvurdering)
+        val deltBostedPerioder = finnDeltBostedPerioderForPerson(person = barn, vilkårsvurdering = vilkårsvurdering)
 
         assertTrue(deltBostedPerioder.size == 1)
-        assertEquals(fom.plusMonths(1).førsteDagIInneværendeMåned(), deltBostedPerioder.single().fom)
-        assertEquals(tom.sisteDagIMåned(), deltBostedPerioder.single().tom)
+        assertEquals(fom.plusMonths(1).førsteDagIInneværendeMåned().toYearMonth(), deltBostedPerioder.single().fom)
+        assertEquals(tom.sisteDagIMåned().toYearMonth(), deltBostedPerioder.single().tom)
     }
 
     @Test
@@ -568,17 +573,17 @@ class EndretUtbetalingAndelValideringTest {
                 ),
             )
 
-        val deltBostedPerioder = finnDeltBostedPerioder(person = barn, vilkårsvurdering = vilkårsvurdering)
+        val deltBostedPerioder = finnDeltBostedPerioderForPerson(person = barn, vilkårsvurdering = vilkårsvurdering)
 
         assertTrue(deltBostedPerioder.size == 2)
 
         val førstePeriode = deltBostedPerioder.get(0)
         val andrePeriode = deltBostedPerioder.get(1)
 
-        assertEquals(fom1.plusMonths(1).førsteDagIInneværendeMåned(), førstePeriode.fom)
-        assertEquals(tom1.sisteDagIMåned(), førstePeriode.tom)
-        assertEquals(fom2.plusMonths(1).førsteDagIInneværendeMåned(), andrePeriode.fom)
-        assertEquals(tom2.sisteDagIMåned(), andrePeriode.tom)
+        assertEquals(fom1.plusMonths(1).førsteDagIInneværendeMåned().toYearMonth(), førstePeriode.fom)
+        assertEquals(tom1.sisteDagIMåned().toYearMonth(), førstePeriode.tom)
+        assertEquals(fom2.plusMonths(1).førsteDagIInneværendeMåned().toYearMonth(), andrePeriode.fom)
+        assertEquals(tom2.sisteDagIMåned().toYearMonth(), andrePeriode.tom)
     }
 
     @Test
@@ -659,11 +664,11 @@ class EndretUtbetalingAndelValideringTest {
                 ),
             )
 
-        val deltBostedPerioder = finnDeltBostedPerioder(person = søker, vilkårsvurdering = vilkårsvurdering)
+        val deltBostedPerioder = finnDeltBostedPerioderForPerson(person = søker, vilkårsvurdering = vilkårsvurdering)
 
         assertTrue(deltBostedPerioder.size == 1)
-        assertEquals(fomBarn2.plusMonths(1).førsteDagIInneværendeMåned(), deltBostedPerioder.single().fom)
-        assertEquals(tomBarn1.sisteDagIMåned(), deltBostedPerioder.single().tom)
+        assertEquals(fomBarn2.plusMonths(1).førsteDagIInneværendeMåned().toYearMonth(), deltBostedPerioder.single().fom)
+        assertEquals(tomBarn1.sisteDagIMåned().toYearMonth(), deltBostedPerioder.single().tom)
     }
 
     @Test
@@ -744,11 +749,11 @@ class EndretUtbetalingAndelValideringTest {
                 ),
             )
 
-        val deltBostedPerioder = finnDeltBostedPerioder(person = søker, vilkårsvurdering = vilkårsvurdering)
+        val deltBostedPerioder = finnDeltBostedPerioderForPerson(person = søker, vilkårsvurdering = vilkårsvurdering)
 
         assertTrue(deltBostedPerioder.size == 1)
-        assertEquals(fomBarn2.plusMonths(1).førsteDagIInneværendeMåned(), deltBostedPerioder.single().fom)
-        assertEquals(tomBarn1.sisteDagIMåned(), deltBostedPerioder.single().tom)
+        assertEquals(fomBarn2.plusMonths(1).førsteDagIInneværendeMåned().toYearMonth(), deltBostedPerioder.single().fom)
+        assertEquals(tomBarn1.sisteDagIMåned().toYearMonth(), deltBostedPerioder.single().tom)
     }
 
     @Test
@@ -776,7 +781,7 @@ class EndretUtbetalingAndelValideringTest {
                 ),
             )
 
-        val deltBostedPerioder = finnDeltBostedPerioder(person = barn1, vilkårsvurdering = vilkårsvurdering)
+        val deltBostedPerioder = finnDeltBostedPerioderForPerson(person = barn1, vilkårsvurdering = vilkårsvurdering)
 
         assertTrue(deltBostedPerioder.isEmpty())
     }

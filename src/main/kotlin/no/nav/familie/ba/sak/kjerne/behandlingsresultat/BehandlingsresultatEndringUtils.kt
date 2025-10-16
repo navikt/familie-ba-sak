@@ -56,76 +56,49 @@ object BehandlingsresultatEndringUtils {
 
         val endringerForRelevantePersoner =
             relevantePersoner.any { aktør ->
-                val nåværendePersonResultatForPerson = nåværendePersonResultat.filter { it.aktør == aktør }.toSet()
-                val forrigePersonResultatForPerson = forrigePersonResultat.filter { it.aktør == aktør }.toSet()
-
-                val nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør }
-                val forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør }
-
-                val nåværendeEndretAndelerForPerson = nåværendeEndretAndeler.filter { it.personer.any { person -> person.aktør == aktør } }
-                val forrigeEndretAndelerForPerson = forrigeEndretAndeler.filter { it.personer.any { person -> person.aktør == aktør } }
-
-                val nåværendeKompetanserForPerson = nåværendeKompetanser.filter { it.barnAktører.contains(aktør) }
-                val forrigeKompetanserForPerson = forrigeKompetanser.filter { it.barnAktører.contains(aktør) }
-
-                val nåværendeUtenlandskPeriodebeløpForPerson = nåværendeUtenlandskPeriodebeløp.filter { it.barnAktører.contains(aktør) }
-                val forrigeUtenlandskPeriodebeløpForPerson = forrigeUtenlandskPeriodebeløp.filter { it.barnAktører.contains(aktør) }
-
-                val personIBehandling = personerIBehandling.singleOrNull { it.aktør == aktør }
-                val personIForrigeBehandling = personerIForrigeBehandling.singleOrNull { it.aktør == aktør }
-
-                val opphørstidspunktForBehandling =
-                    nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
-                        forrigeAndelerIBehandling = forrigeAndeler,
-                        nåværendeEndretAndelerIBehandling = nåværendeEndretAndeler,
-                        endretAndelerForForrigeBehandling = forrigeEndretAndeler,
+                val erEndringIBeløpForPerson =
+                    erEndringIBeløpForPerson(
+                        aktør = aktør,
+                        nåværendeAndeler = nåværendeAndeler,
+                        forrigeAndeler = forrigeAndeler,
+                        nåværendeEndretAndeler = nåværendeEndretAndeler,
+                        forrigeEndretAndeler = forrigeEndretAndeler,
+                        erFremstiltKravForPerson = personerFremstiltKravFor.contains(aktør),
+                        nåMåned = nåMåned,
                     )
 
-                val erEndringIBeløpForPerson =
-                    opphørstidspunktForBehandling?.let {
-                        erEndringIBeløpForPerson(
-                            nåværendeAndelerForPerson = nåværendeAndelerForPerson,
-                            forrigeAndelerForPerson = forrigeAndelerForPerson,
-                            opphørstidspunktForBehandling = opphørstidspunktForBehandling,
-                            erFremstiltKravForPerson = personerFremstiltKravFor.contains(aktør),
-                            nåMåned = nåMåned,
-                        )
-                    } ?: false // false hvis verken forrige eller nåværende behandling har andeler
-
-                val tidligsteRelevanteFomDatoForPersonIVilkårsvurdering =
-                    if (erEndringIBeløpForPerson) {
-                        TIDENES_MORGEN.toYearMonth()
-                    } else {
-                        nåværendeAndelerForPerson.minOfOrNull { it.stønadFom }?.minusMonths(1) ?: TIDENES_MORGEN.toYearMonth()
-                    }
-
                 val erEndringIVilkårsvurderingForPerson =
-                    !behandling.erFinnmarksTilleggEllerSvalbardtillegg() &&
+                    !behandling.erFinnmarksEllerSvalbardtillegg() &&
                         erEndringIVilkårsvurderingForPerson(
-                            tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = tidligsteRelevanteFomDatoForPersonIVilkårsvurdering,
-                            nåværendePersonResultaterForPerson = nåværendePersonResultatForPerson,
-                            forrigePersonResultaterForPerson = forrigePersonResultatForPerson,
-                            personIBehandling = personIBehandling,
-                            personIForrigeBehandling = personIForrigeBehandling,
+                            aktør = aktør,
+                            nåværendePersonResultat = nåværendePersonResultat,
+                            forrigePersonResultat = forrigePersonResultat,
+                            nåværendeAndeler = nåværendeAndeler,
+                            personerIBehandling = personerIBehandling,
+                            personerIForrigeBehandling = personerIForrigeBehandling,
+                            erEndringIBeløpForPerson = erEndringIBeløpForPerson,
                             featureToggleService = featureToggleService,
                         )
 
                 val erEndringIKompetanseForPerson =
                     erEndringIKompetanseForPerson(
-                        nåværendeKompetanserForPerson = nåværendeKompetanserForPerson,
-                        forrigeKompetanserForPerson = forrigeKompetanserForPerson,
+                        aktør = aktør,
+                        nåværendeKompetanser = nåværendeKompetanser,
+                        forrigeKompetanser = forrigeKompetanser,
                     )
 
                 val erEndringIUtenlandskPeriodebeløpForPerson =
                     erEndringIUtenlandskPeriodebeløpForPerson(
-                        nåværendeUtenlandskPeriodebeløpForPerson = nåværendeUtenlandskPeriodebeløpForPerson,
-                        forrigeUtenlandskPeriodebeløpForPerson = forrigeUtenlandskPeriodebeløpForPerson,
+                        aktør = aktør,
+                        nåværendeUtenlandskPeriodebeløp = nåværendeUtenlandskPeriodebeløp,
+                        forrigeUtenlandskPeriodebeløp = forrigeUtenlandskPeriodebeløp,
                     )
 
                 val erEndringIEndretUtbetalingAndelerForPerson =
                     erEndringIEndretUtbetalingAndelerForPerson(
-                        nåværendeEndretAndelerForPerson = nåværendeEndretAndelerForPerson,
-                        forrigeEndretAndelerForPerson = forrigeEndretAndelerForPerson,
+                        aktør = aktør,
+                        nåværendeEndretAndeler = nåværendeEndretAndeler,
+                        forrigeEndretAndeler = forrigeEndretAndeler,
                     )
 
                 val erMinstEnEndringForPerson =
@@ -136,23 +109,18 @@ object BehandlingsresultatEndringUtils {
                         erEndringIEndretUtbetalingAndelerForPerson
 
                 if (erMinstEnEndringForPerson) {
-                    logger.info(
-                        "Endringer: " +
-                            "erEndringIBeløp=$erEndringIBeløpForPerson for aktør ${aktør.aktørId}," +
-                            "erEndringIKompetanse=$erEndringIKompetanseForPerson for aktør ${aktør.aktørId}, " +
-                            "erEndringIUtenlandskPeriodebeløpForPerson=$erEndringIUtenlandskPeriodebeløpForPerson for aktør ${aktør.aktørId}," +
-                            "erEndringIVilkårsvurdering=$erEndringIVilkårsvurderingForPerson for aktør ${aktør.aktørId}, " +
-                            "erEndringIEndretUtbetalingAndeler=$erEndringIEndretUtbetalingAndelerForPerson for aktør ${aktør.aktørId}",
-                    )
-
-                    val endredeAndelTilkjentYtelseForPerson = if (erEndringIBeløpForPerson) "nye AndelerTilkjentYtelse for aktør ${aktør.aktørId}: $nåværendeAndeler , " else ""
-                    val endredeKompetanserForPerson = if (erEndringIKompetanseForPerson) "nye kompetanser for aktør ${aktør.aktørId}: $nåværendeKompetanser ," else ""
-                    val endredeUtenlandskPeriodebeløpForPerson = if (erEndringIUtenlandskPeriodebeløpForPerson) "nye utenlandsk periodebeløp for aktør ${aktør.aktørId}: $nåværendeUtenlandskPeriodebeløp ," else ""
-                    val endredeVilkårsvurderingerForPerson = if (erEndringIVilkårsvurderingForPerson) "nye personresultater for aktør ${aktør.aktørId}: $nåværendePersonResultat ," else ""
-                    val endredeEndretUtbetalingAndelerForPerson = if (erEndringIEndretUtbetalingAndelerForPerson) "nye endretUtbetalingAndeler for aktør ${aktør.aktørId}: $nåværendeEndretAndeler" else ""
-
-                    secureLogger.info(
-                        "Endringer: $endredeAndelTilkjentYtelseForPerson $endredeKompetanserForPerson $endredeUtenlandskPeriodebeløpForPerson $endredeVilkårsvurderingerForPerson $endredeEndretUtbetalingAndelerForPerson",
+                    loggEndringerVedEndringForPerson(
+                        erEndringIBeløpForPerson = erEndringIBeløpForPerson,
+                        erEndringIKompetanseForPerson = erEndringIKompetanseForPerson,
+                        erEndringIUtenlandskPeriodebeløpForPerson = erEndringIUtenlandskPeriodebeløpForPerson,
+                        erEndringIVilkårsvurderingForPerson = erEndringIVilkårsvurderingForPerson,
+                        erEndringIEndretUtbetalingAndelerForPerson = erEndringIEndretUtbetalingAndelerForPerson,
+                        aktør = aktør,
+                        nåværendeAndeler = nåværendeAndeler,
+                        nåværendeKompetanser = nåværendeKompetanser,
+                        nåværendeUtenlandskPeriodebeløp = nåværendeUtenlandskPeriodebeløp,
+                        nåværendePersonResultat = nåværendePersonResultat,
+                        nåværendeEndretAndeler = nåværendeEndretAndeler,
                     )
                 }
 
@@ -162,14 +130,63 @@ object BehandlingsresultatEndringUtils {
         return if (endringerForRelevantePersoner) Endringsresultat.ENDRING else Endringsresultat.INGEN_ENDRING
     }
 
+    private fun loggEndringerVedEndringForPerson(
+        erEndringIBeløpForPerson: Boolean,
+        erEndringIKompetanseForPerson: Boolean,
+        erEndringIUtenlandskPeriodebeløpForPerson: Boolean,
+        erEndringIVilkårsvurderingForPerson: Boolean,
+        erEndringIEndretUtbetalingAndelerForPerson: Boolean,
+        aktør: Aktør,
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
+        nåværendeKompetanser: List<Kompetanse>,
+        nåværendeUtenlandskPeriodebeløp: List<UtenlandskPeriodebeløp>,
+        nåværendePersonResultat: Set<PersonResultat>,
+        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
+    ) {
+        logger.info(
+            "Endringer: " +
+                "erEndringIBeløp=$erEndringIBeløpForPerson for aktør ${aktør.aktørId}," +
+                "erEndringIKompetanse=$erEndringIKompetanseForPerson for aktør ${aktør.aktørId}, " +
+                "erEndringIUtenlandskPeriodebeløpForPerson=$erEndringIUtenlandskPeriodebeløpForPerson for aktør ${aktør.aktørId}," +
+                "erEndringIVilkårsvurdering=$erEndringIVilkårsvurderingForPerson for aktør ${aktør.aktørId}, " +
+                "erEndringIEndretUtbetalingAndeler=$erEndringIEndretUtbetalingAndelerForPerson for aktør ${aktør.aktørId}",
+        )
+
+        val endredeAndelTilkjentYtelseForPerson = if (erEndringIBeløpForPerson) "nye AndelerTilkjentYtelse for aktør ${aktør.aktørId}: $nåværendeAndeler , " else ""
+        val endredeKompetanserForPerson = if (erEndringIKompetanseForPerson) "nye kompetanser for aktør ${aktør.aktørId}: $nåværendeKompetanser ," else ""
+        val endredeUtenlandskPeriodebeløpForPerson = if (erEndringIUtenlandskPeriodebeløpForPerson) "nye utenlandsk periodebeløp for aktør ${aktør.aktørId}: $nåværendeUtenlandskPeriodebeløp ," else ""
+        val endredeVilkårsvurderingerForPerson = if (erEndringIVilkårsvurderingForPerson) "nye personresultater for aktør ${aktør.aktørId}: $nåværendePersonResultat ," else ""
+        val endredeEndretUtbetalingAndelerForPerson = if (erEndringIEndretUtbetalingAndelerForPerson) "nye endretUtbetalingAndeler for aktør ${aktør.aktørId}: $nåværendeEndretAndeler" else ""
+
+        secureLogger.info(
+            "Endringer: $endredeAndelTilkjentYtelseForPerson $endredeKompetanserForPerson $endredeUtenlandskPeriodebeløpForPerson $endredeVilkårsvurderingerForPerson $endredeEndretUtbetalingAndelerForPerson",
+        )
+    }
+
     // NB: For personer fremstilt krav for tar vi ikke hensyn til alle endringer i beløp i denne funksjonen
     internal fun erEndringIBeløpForPerson(
-        nåværendeAndelerForPerson: List<AndelTilkjentYtelse>,
-        forrigeAndelerForPerson: List<AndelTilkjentYtelse>,
+        aktør: Aktør,
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
+        forrigeAndeler: List<AndelTilkjentYtelse>,
+        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
+        forrigeEndretAndeler: List<EndretUtbetalingAndel>,
         erFremstiltKravForPerson: Boolean,
-        opphørstidspunktForBehandling: YearMonth,
         nåMåned: YearMonth,
     ): Boolean {
+        val opphørstidspunktForBehandling =
+            nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                forrigeAndelerIBehandling = forrigeAndeler,
+                nåværendeEndretAndelerIBehandling = nåværendeEndretAndeler,
+                endretAndelerForForrigeBehandling = forrigeEndretAndeler,
+            )
+
+        if (opphørstidspunktForBehandling == null) {
+            return false // Verken forrige eller nåværende behandling har andeler
+        }
+
+        val nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør }
+        val forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør }
+
         val ytelseTyperForPerson = (nåværendeAndelerForPerson.map { it.type } + forrigeAndelerForPerson.map { it.type }).distinct()
 
         return ytelseTyperForPerson.any { ytelseType ->
@@ -229,9 +246,13 @@ private fun Tidslinje<Boolean>.fjernPerioderEtterOpphørsdato(opphørstidspunkt:
 private fun Tidslinje<Boolean>.fjernPerioderLengreEnnEnMånedFramITid(nåMåned: YearMonth) = this.beskjærTilOgMed(nåMåned.nesteMåned().sisteDagIInneværendeMåned())
 
 internal fun erEndringIKompetanseForPerson(
-    nåværendeKompetanserForPerson: List<Kompetanse>,
-    forrigeKompetanserForPerson: List<Kompetanse>,
+    aktør: Aktør,
+    nåværendeKompetanser: List<Kompetanse>,
+    forrigeKompetanser: List<Kompetanse>,
 ): Boolean {
+    val nåværendeKompetanserForPerson = nåværendeKompetanser.filter { it.barnAktører.contains(aktør) }
+    val forrigeKompetanserForPerson = forrigeKompetanser.filter { it.barnAktører.contains(aktør) }
+
     val endringIKompetanseTidslinje =
         EndringIKompetanseUtil.lagEndringIKompetanseForPersonTidslinje(
             nåværendeKompetanserForPerson = nåværendeKompetanserForPerson,
@@ -242,9 +263,13 @@ internal fun erEndringIKompetanseForPerson(
 }
 
 internal fun erEndringIUtenlandskPeriodebeløpForPerson(
-    nåværendeUtenlandskPeriodebeløpForPerson: List<UtenlandskPeriodebeløp>,
-    forrigeUtenlandskPeriodebeløpForPerson: List<UtenlandskPeriodebeløp>,
+    aktør: Aktør,
+    nåværendeUtenlandskPeriodebeløp: List<UtenlandskPeriodebeløp>,
+    forrigeUtenlandskPeriodebeløp: List<UtenlandskPeriodebeløp>,
 ): Boolean {
+    val nåværendeUtenlandskPeriodebeløpForPerson = nåværendeUtenlandskPeriodebeløp.filter { it.barnAktører.contains(aktør) }
+    val forrigeUtenlandskPeriodebeløpForPerson = forrigeUtenlandskPeriodebeløp.filter { it.barnAktører.contains(aktør) }
+
     val endringIUtenlandskPeriodebeløpTidslinje =
         EndringIUtenlandskPeriodebeløpUtil.lagEndringIUtenlandskPeriodebeløpForPersonTidslinje(
             nåværendeUtenlandskPeriodebeløpForPerson = nåværendeUtenlandskPeriodebeløpForPerson,
@@ -255,18 +280,32 @@ internal fun erEndringIUtenlandskPeriodebeløpForPerson(
 }
 
 internal fun erEndringIVilkårsvurderingForPerson(
-    nåværendePersonResultaterForPerson: Set<PersonResultat>,
-    forrigePersonResultaterForPerson: Set<PersonResultat>,
-    personIBehandling: Person?,
-    personIForrigeBehandling: Person?,
-    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering: YearMonth,
+    aktør: Aktør,
+    nåværendePersonResultat: Set<PersonResultat>,
+    forrigePersonResultat: Set<PersonResultat>,
+    nåværendeAndeler: List<AndelTilkjentYtelse>,
+    personerIBehandling: Set<Person>,
+    personerIForrigeBehandling: Set<Person>,
     featureToggleService: FeatureToggleService,
+    erEndringIBeløpForPerson: Boolean,
 ): Boolean {
+    val tidligsteRelevanteFomDatoForPersonIVilkårsvurdering =
+        if (erEndringIBeløpForPerson) {
+            TIDENES_MORGEN.toYearMonth()
+        } else {
+            nåværendeAndeler.filter { it.aktør == aktør }.minOfOrNull { it.stønadFom }?.minusMonths(1) ?: TIDENES_MORGEN.toYearMonth()
+        }
+
+    val nåværendePersonResultatForPerson = nåværendePersonResultat.singleOrNull { it.aktør == aktør }
+    val forrigePersonResultatForPerson = forrigePersonResultat.singleOrNull { it.aktør == aktør }
+    val personIBehandling = personerIBehandling.singleOrNull { it.aktør == aktør }
+    val personIForrigeBehandling = personerIForrigeBehandling.singleOrNull { it.aktør == aktør }
+
     val endringIVilkårsvurderingTidslinje =
         EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
             tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = tidligsteRelevanteFomDatoForPersonIVilkårsvurdering,
-            nåværendePersonResultaterForPerson = nåværendePersonResultaterForPerson,
-            forrigePersonResultater = forrigePersonResultaterForPerson,
+            nåværendePersonResultaterForPerson = nåværendePersonResultatForPerson,
+            forrigePersonResultater = forrigePersonResultatForPerson,
             personIBehandling = personIBehandling,
             personIForrigeBehandling = personIForrigeBehandling,
             featureToggleService = featureToggleService,
@@ -276,9 +315,13 @@ internal fun erEndringIVilkårsvurderingForPerson(
 }
 
 internal fun erEndringIEndretUtbetalingAndelerForPerson(
-    nåværendeEndretAndelerForPerson: List<EndretUtbetalingAndel>,
-    forrigeEndretAndelerForPerson: List<EndretUtbetalingAndel>,
+    aktør: Aktør,
+    nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
+    forrigeEndretAndeler: List<EndretUtbetalingAndel>,
 ): Boolean {
+    val nåværendeEndretAndelerForPerson = nåværendeEndretAndeler.filter { it.personer.any { person -> person.aktør == aktør } }
+    val forrigeEndretAndelerForPerson = forrigeEndretAndeler.filter { it.personer.any { person -> person.aktør == aktør } }
+
     val endringIEndretUtbetalingAndelTidslinje =
         EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUbetalingAndelPerPersonTidslinje(
             nåværendeEndretAndelerForPerson = nåværendeEndretAndelerForPerson,

@@ -29,7 +29,7 @@ class AutovedtakSvalbardtilleggSchedulerTest {
     inner class KjørAutovedtakSvalbardtillegg {
         @BeforeEach
         fun setup() {
-            every { featureToggleService.isEnabled(FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_SVALBARDSTILLEGG) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_SVALBARDSTILLEGG, true) } returns true
             every { leaderClientService.isLeader() } returns true
             every { autovedtakSvalbardtilleggTaskOppretter.opprettTasker(any()) } just runs
         }
@@ -37,13 +37,13 @@ class AutovedtakSvalbardtilleggSchedulerTest {
         @Test
         fun `skal ikke opprette tasks når feature toggle er disabled`() {
             // Arrange
-            every { featureToggleService.isEnabled(FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_SVALBARDSTILLEGG) } returns false
+            every { featureToggleService.isEnabled(FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_SVALBARDSTILLEGG, true) } returns false
 
             // Act
             autovedtakSvalbardtilleggScheduler.kjørAutovedtakSvalbardtillegg()
 
             // Assert
-            verify(exactly = 1) { leaderClientService.isLeader() }
+            verify(exactly = 2) { leaderClientService.isLeader() }
             verify(exactly = 0) { autovedtakSvalbardtilleggTaskOppretter.opprettTasker(any()) }
         }
 
@@ -56,7 +56,7 @@ class AutovedtakSvalbardtilleggSchedulerTest {
             autovedtakSvalbardtilleggScheduler.kjørAutovedtakSvalbardtillegg()
 
             // Assert
-            verify(exactly = 0) { leaderClientService.isLeader() }
+            verify(exactly = 1) { leaderClientService.isLeader() }
             verify(exactly = 0) { autovedtakSvalbardtilleggTaskOppretter.opprettTasker(any()) }
         }
 
@@ -69,7 +69,7 @@ class AutovedtakSvalbardtilleggSchedulerTest {
             autovedtakSvalbardtilleggScheduler.kjørAutovedtakSvalbardtillegg()
 
             // Assert
-            verify(exactly = 1) { leaderClientService.isLeader() }
+            verify(exactly = 2) { leaderClientService.isLeader() }
             verify(exactly = 0) { autovedtakSvalbardtilleggTaskOppretter.opprettTasker(any()) }
         }
 
@@ -79,7 +79,7 @@ class AutovedtakSvalbardtilleggSchedulerTest {
             autovedtakSvalbardtilleggScheduler.kjørAutovedtakSvalbardtillegg()
 
             // Assert
-            verify(exactly = 1) { leaderClientService.isLeader() }
+            verify(exactly = 2) { leaderClientService.isLeader() }
             verify(exactly = 1) { autovedtakSvalbardtilleggTaskOppretter.opprettTasker(any()) }
         }
     }

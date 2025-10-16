@@ -5,6 +5,11 @@ query($ident: ID!, $historikk: Boolean!) {
             land
             gyldigFraOgMed
             gyldigTilOgMed
+            folkeregistermetadata {
+                opphoerstidspunkt
+                kilde
+                aarsak
+            }
         }
     }
 }

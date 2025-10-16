@@ -12,7 +12,14 @@ import org.springframework.test.context.ActiveProfiles
 import java.util.Arrays
 import java.util.UUID
 
-@ActiveProfiles("postgres", "integrasjonstest", "testcontainers", "mock-pdl", "mock-ident-client", "mock-oauth", "mock-brev-klient")
+@ActiveProfiles(
+    "postgres",
+    "integrasjonstest",
+    "testcontainers",
+    "mock-pdl",
+    "mock-ident-client",
+    "mock-brev-klient",
+)
 class PensjonControllerTest : WebSpringAuthTestRunner() {
     @Test
     fun `Verifiser at pensjon-endepunkt - bestillPersonerMedBarnetrygdForGittÅrPåKafka - for henting av identer med barnetrygd - returnerer en gyldig UUID som string`() {

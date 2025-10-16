@@ -49,7 +49,7 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
       | Fra dato   | Til dato   | Standardbegrunnelser      | Eøsbegrunnelser | Fritekster |
       | 01.12.2022 | 28.02.2023 | INNVILGET_BOSATT_I_RIKTET |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.12.2022 til 28.02.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.12.2022 til 28.02.2023
       | Begrunnelse               | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
       | INNVILGET_BOSATT_I_RIKTET | Ja            | 02.02.15 og 07.09.19 | 2           | november 2022                        | NB      | 2 730 |                  | SØKER_HAR_IKKE_RETT     |
 
@@ -84,7 +84,7 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
       | Fra dato   | Til dato   | Standardbegrunnelser      | Eøsbegrunnelser | Fritekster |
       | 01.12.2022 | 28.02.2023 | INNVILGET_BOSATT_I_RIKTET |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.12.2022 til 28.02.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.12.2022 til 28.02.2023
       | Begrunnelse               | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
       | INNVILGET_BOSATT_I_RIKTET | Nei           | 07.09.19             | 1           | november 2022                        | NB      | 1 676 |                  | SØKER_HAR_IKKE_RETT     |
 
@@ -121,14 +121,14 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
       | 01.12.2022 | 28.02.2023 | INNVILGET_BOR_HOS_SØKER                               |                 |            |
       | 01.06.2023 | 30.06.2023 | INNVILGET_BOR_HOS_SØKER, REDUKSJON_AVTALE_FAST_BOSTED |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.12.2022 til 28.02.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.12.2022 til 28.02.2023
       | Begrunnelse             | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
       | INNVILGET_BOR_HOS_SØKER | Nei           | 07.09.19             | 1           | november 2022                        | NB      | 1 676 |                  | SØKER_HAR_IKKE_RETT     |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.06.2023 til 30.06.2023
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.06.2023 til 30.06.2023
       | Begrunnelse                  | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | INNVILGET_BOR_HOS_SØKER      | Nei           | 02.02.15             | 1           | mai 2023                             | NB      | 1 083 |                  | SØKER_HAR_IKKE_RETT     |
       | REDUKSJON_AVTALE_FAST_BOSTED | Nei           | 07.09.19             | 1           | mai 2023                             | NB      | 862   |                  | SØKER_HAR_IKKE_RETT     |
+      | INNVILGET_BOR_HOS_SØKER      | Nei           | 02.02.15             | 1           | mai 2023                             | NB      | 1 083 |                  | SØKER_HAR_IKKE_RETT     |
 
 
   Scenario:Endret for 1 av 2 - Skal kun flette inn barnet som det er utbetaling for når det andre barnet etterbetales
@@ -169,7 +169,7 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
       | Fra dato   | Til dato   | Standardbegrunnelser    | Eøsbegrunnelser | Fritekster |
       | 01.10.2019 | 31.08.2020 | INNVILGET_BOR_HOS_SØKER |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.10.2019 til 31.08.2020
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.10.2019 til 31.08.2020
       | Begrunnelse             | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
       | INNVILGET_BOR_HOS_SØKER | Nei           | 07.09.19             | 1           | september 2019                       | NB      | 1 054 |                  | SØKER_HAR_IKKE_RETT     |
 

@@ -3,11 +3,11 @@ package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 enum class VedtakBegrunnelseType(
     val sorteringsrekkefølge: Int,
 ) {
+    REDUKSJON(1),
+    INSTITUSJON_REDUKSJON(1),
     INNVILGET(2),
     EØS_INNVILGET(2),
     INSTITUSJON_INNVILGET(2),
-    REDUKSJON(1),
-    INSTITUSJON_REDUKSJON(1),
     EØS_REDUKSJON(1),
     AVSLAG(3),
     EØS_AVSLAG(3),

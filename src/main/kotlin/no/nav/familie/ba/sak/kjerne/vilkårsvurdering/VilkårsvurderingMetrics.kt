@@ -80,9 +80,7 @@ class VilkårsvurderingMetrics(
     }
 
     fun tellMetrikker(vilkårsvurdering: Vilkårsvurdering) {
-        val personer =
-            persongrunnlagService.hentSøkerOgBarnPåBehandling(vilkårsvurdering.behandling.id)
-                ?: throw Feil("Finner ikke aktivt persongrunnlag ved telling av metrikker")
+        val personer = hentSøkerOgBarnPåBehandling(behandlingId = vilkårsvurdering.behandling.id)
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
             val person =
@@ -141,9 +139,7 @@ class VilkårsvurderingMetrics(
         vilkårsvurdering: Vilkårsvurdering,
         vilkår: Vilkår,
     ): List<Pair<PersonEnkel, VilkårResultat?>> {
-        val personer =
-            persongrunnlagService.hentSøkerOgBarnPåBehandling(vilkårsvurdering.behandling.id)
-                ?: throw Feil("Finner ikke aktivt persongrunnlag ved telling av metrikker")
+        val personer = hentSøkerOgBarnPåBehandling(behandlingId = vilkårsvurdering.behandling.id)
 
         return personer.map { person ->
             val personResultat =
@@ -164,9 +160,7 @@ class VilkårsvurderingMetrics(
                 ?.vilkårsvurdering
                 ?.behandling
                 ?.id!!
-        val personer =
-            persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
-                ?: throw Feil("Finner ikke aktivt persongrunnlag ved telling av metrikker")
+        val personer = hentSøkerOgBarnPåBehandling(behandlingId = behandlingId)
 
         val person =
             personer.firstOrNull { it.aktør == vilkårResultat.personResultat?.aktør }
@@ -178,6 +172,10 @@ class VilkårsvurderingMetrics(
             vilkårsvurderingFørsteUtfall[person.type]?.get(årsak)?.increment()
         }
     }
+
+    private fun hentSøkerOgBarnPåBehandling(behandlingId: Long): List<PersonEnkel> =
+        persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
+            ?: throw Feil("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
     companion object {
         private val logger = LoggerFactory.getLogger(VilkårsvurderingMetrics::class.java)

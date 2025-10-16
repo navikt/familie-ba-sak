@@ -51,9 +51,9 @@ spec:
             envVarPrefix: DB
         flags:
           - name: cloudsql.enable_pgaudit
-            value: "true"
+            value: "on"
           - name: pgaudit.log
-            value: "write"
+            value: "write,ddl,role"
           - name: "pgaudit.log_parameter"
             value: "on"
   azure:
@@ -179,7 +179,7 @@ spec:
       memory: 4096Mi
     requests:
       memory: 4096Mi
-      cpu: 250m
+      cpu: 886m
   ingresses:
     - https://familie-ba-sak.intern.nav.no
   secureLogs:

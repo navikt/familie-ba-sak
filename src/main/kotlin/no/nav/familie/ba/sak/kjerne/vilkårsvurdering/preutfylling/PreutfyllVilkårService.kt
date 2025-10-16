@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class PreutfyllVilkårService(
@@ -27,13 +28,24 @@ class PreutfyllVilkårService(
         }
     }
 
-    fun preutfyllBosattIRiket(
+    fun preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(
         vilkårsvurdering: Vilkårsvurdering,
-        identerVilkårSkalPreutfyllesFor: List<String>? = null,
+        cutOffFomDato: LocalDate,
     ) {
-        if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR)) {
-            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, identerVilkårSkalPreutfyllesFor)
-        }
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(
+            vilkårsvurdering = vilkårsvurdering,
+            cutOffFomDato = cutOffFomDato,
+        )
+    }
+
+    fun preutfyllBosattIRiketForFødselshendelseBehandlinger(
+        vilkårsvurdering: Vilkårsvurdering,
+        identerVilkårSkalPreutfyllesFor: List<String>?,
+    ) {
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(
+            vilkårsvurdering = vilkårsvurdering,
+            identerVilkårSkalPreutfyllesFor = identerVilkårSkalPreutfyllesFor,
+        )
     }
 
     companion object {

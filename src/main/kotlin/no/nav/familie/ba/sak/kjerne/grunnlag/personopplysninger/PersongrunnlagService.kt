@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
@@ -23,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.SKJERMET_BARN
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrDeltBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 import org.slf4j.LoggerFactory
@@ -55,7 +56,6 @@ class PersongrunnlagService(
     private val loggService: LoggService,
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val integrasjonClient: IntegrasjonClient,
     private val kodeverkService: KodeverkService,
 ) {
     fun mapTilRestPersonMedStatsborgerskapLand(
@@ -286,6 +286,8 @@ class PersongrunnlagService(
 
     private fun Bostedsadresse.poststed(): String? = kodeverkService.hentPoststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
 
+    private fun DeltBosted.poststed(): String? = kodeverkService.hentPoststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
+
     private fun Oppholdsadresse.poststed(): String? = kodeverkService.hentPoststed(vegadresse?.postnummer ?: matrikkeladresse?.postnummer)
 
     private fun hentPerson(
@@ -309,13 +311,14 @@ class PersongrunnlagService(
             fødselsdato = personinfo.fødselsdato,
             aktør = aktør,
             navn = personinfo.navn ?: "",
-            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
+            kjønn = personinfo.kjønn,
             målform = målform,
         ).also { person ->
             person.opphold =
                 personinfo.opphold?.map { GrOpphold.fraOpphold(it, person) }?.toMutableList() ?: mutableListOf()
             person.bostedsadresser =
                 personinfo.bostedsadresser
+                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
                     .filtrerUtKunNorskeBostedsadresser()
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
@@ -326,9 +329,20 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.oppholdsadresser =
                 personinfo.oppholdsadresser
+                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
+                            person = person,
+                            poststed = it.poststed(),
+                        )
+                    }.toMutableList()
+            person.deltBosted =
+                personinfo.deltBosted
+                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
+                    .map {
+                        GrDeltBosted.fraDeltBosted(
+                            deltBosted = it,
                             person = person,
                             poststed = it.poststed(),
                         )
@@ -382,6 +396,49 @@ class PersongrunnlagService(
 
         secureLogger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter persongrunnlag $personopplysningGrunnlag")
         return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+    }
+
+    fun oppdaterAdresserPåPersoner(
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+    ): PersonopplysningGrunnlag {
+        personopplysningGrunnlag.personer.forEach { person ->
+            val aktør = person.aktør
+            val personinfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+
+            person.bostedsadresser =
+                personinfo.bostedsadresser
+                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
+                    .filtrerUtKunNorskeBostedsadresser()
+                    .map {
+                        GrBostedsadresse.fraBostedsadresse(
+                            bostedsadresse = it,
+                            person = person,
+                            poststed = it.poststed(),
+                        )
+                    }.toMutableList()
+            person.oppholdsadresser =
+                personinfo.oppholdsadresser
+                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
+                    .map {
+                        GrOppholdsadresse.fraOppholdsadresse(
+                            oppholdsadresse = it,
+                            person = person,
+                            poststed = it.poststed(),
+                        )
+                    }.toMutableList()
+            person.deltBosted =
+                personinfo.deltBosted
+                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
+                    .map {
+                        GrDeltBosted.fraDeltBosted(
+                            deltBosted = it,
+                            person = person,
+                            poststed = it.poststed(),
+                        )
+                    }.toMutableList()
+        }
+
+        return personopplysningGrunnlag
     }
 
     fun hentSøkersMålform(behandlingId: Long) = hentSøkerOgBarnPåBehandlingThrows(behandlingId).søker().målform

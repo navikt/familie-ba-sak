@@ -162,6 +162,6 @@ Egenskap: Gyldige begrunnelser for hendelser
       | 01.07.2026 | 30.06.2038 |                                          |                 |            |
       | 01.07.2038 |            |                                          |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.01.2024 til 30.06.2026
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.01.2024 til 30.06.2026
       | Begrunnelse                              | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | REDUKSJON_BARN_DØDE_SAMME_MÅNED_SOM_FØDT | STANDARD | false         | 05.12.23             | 1           | desember 2023                        | NB      | 0     |

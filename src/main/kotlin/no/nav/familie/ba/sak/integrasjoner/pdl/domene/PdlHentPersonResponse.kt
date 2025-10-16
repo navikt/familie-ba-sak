@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.logger
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
 import no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
@@ -28,6 +29,7 @@ data class PdlPersonData(
     val sivilstand: List<Sivilstand> = emptyList(),
     val bostedsadresse: List<Bostedsadresse>,
     val oppholdsadresse: List<Oppholdsadresse> = emptyList(),
+    val deltBosted: List<DeltBosted> = emptyList(),
     val opphold: List<Opphold> = emptyList(),
     val statsborgerskap: List<Statsborgerskap> = emptyList(),
     val doedsfall: List<PdlDødsfallResponse> = emptyList(),

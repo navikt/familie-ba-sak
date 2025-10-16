@@ -9,12 +9,12 @@ fun main(args: Array<String>) {
             "dev",
             "postgres",
             "mock-brev-klient",
-            "mock-økonomi",
+            "fake-økonomi-klient",
             "mock-infotrygd-feed",
             "mock-infotrygd-barnetrygd",
             "mock-pdl",
             "mock-ident-client",
-            "mock-tilbakekreving-klient",
+            "fake-tilbakekreving-klient",
             "task-scheduling",
         )
 

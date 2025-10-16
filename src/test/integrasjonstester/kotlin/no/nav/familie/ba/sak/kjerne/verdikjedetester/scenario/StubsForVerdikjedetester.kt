@@ -16,8 +16,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FolkeregisteridentifikatorStatus
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FolkeregisteridentifikatorType
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFødselsDato
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentIdenterResponse
@@ -58,6 +58,7 @@ fun stubScenario(scenario: RestScenario) {
         stubHentOppholdstillatelse(it)
     }
     stubHentBostedsadresserOgDeltBostedForPerson(scenario)
+    stubHenthentBostedsadresseDeltBostedOgOppholdsadresseForPerson(scenario)
     stubHentPerson(scenario)
     stubHentArbeidsforhold(scenario.søker.ident)
 }
@@ -182,7 +183,49 @@ private fun stubHentBostedsadresserOgDeltBostedForPerson(restScenario: RestScena
                                     ident = person.ident,
                                     code = "ok",
                                     person =
-                                        PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                                        PdlAdresserPerson(
+                                            bostedsadresse = person.bostedsadresser,
+                                            deltBosted = emptyList(),
+                                        ),
+                                )
+                            },
+                    ),
+                errors = null,
+                extensions = null,
+            )
+
+        stubFor(
+            post(urlEqualTo("/rest/api/pdl/graphql"))
+                .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody), true, true))
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(response)),
+                ),
+        )
+    }
+}
+
+private fun stubHenthentBostedsadresseDeltBostedOgOppholdsadresseForPerson(restScenario: RestScenario) {
+    genererAlleKombinasjoner(restScenario.barna + restScenario.søker).forEach { personer ->
+        val pdlRequestBody =
+            PdlPersonBolkRequest(
+                variables = PdlPersonBolkRequestVariables(personer.map { it.ident }),
+                query = hentGraphqlQuery("bostedsadresse-delt-bosted-oppholdsadresse"),
+            )
+
+        val response =
+            PdlBolkResponse(
+                data =
+                    PersonBolk(
+                        personBolk =
+                            personer.map { person ->
+                                PersonDataBolk(
+                                    ident = person.ident,
+                                    code = "ok",
+                                    person =
+                                        PdlAdresserPerson(
                                             bostedsadresse = person.bostedsadresser,
                                             deltBosted = emptyList(),
                                         ),

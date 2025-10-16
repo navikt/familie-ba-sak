@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SvalbardtilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.REVURDERING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SVALBARDTILLEGG
@@ -58,6 +59,8 @@ class AutovedtakSvalbardtilleggService(
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandlingsdata.fagsakId)
                 ?: return false
 
+        if (sisteIverksatteBehandling.kategori == BehandlingKategori.EØS) return false
+
         val sisteIverksatteBehandlingHarSvalbardtilleggAndeler =
             beregningService
                 .hentTilkjentYtelseForBehandling(sisteIverksatteBehandling.id)
@@ -71,7 +74,7 @@ class AutovedtakSvalbardtilleggService(
                 .map { it.aktør.aktivFødselsnummer() }
                 .let { identer ->
                     pdlRestClient
-                        .hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(identer)
+                        .hentAdresserForPersoner(identer)
                         .mapValues { Adresser.opprettFra(it.value) }
                         .any { it.value.harAdresserSomErRelevantForSvalbardtillegg() }
                 }

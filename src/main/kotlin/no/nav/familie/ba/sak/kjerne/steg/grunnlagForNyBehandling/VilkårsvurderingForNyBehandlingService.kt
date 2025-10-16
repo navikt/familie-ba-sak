@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_PREUTFYLLE_BOSATT_I_RIKET_I_FØDSELSHENDELSER
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -31,6 +31,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilk
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+
+private val PREUTFYLLING_BOSATT_I_RIKET_CUT_OFF_FOM_DATO_FINNMARKS_OG_SVALBARDTILLEGG = LocalDate.of(2025, 9, 1)
 
 @Service
 class VilkårsvurderingForNyBehandlingService(
@@ -164,8 +166,11 @@ class VilkårsvurderingForNyBehandlingService(
                     nyBehandling = inneværendeBehandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                 ).also {
-                    if (inneværendeBehandling.erFinnmarksTilleggEllerSvalbardtillegg()) {
-                        preutfyllVilkårService.preutfyllBosattIRiket(it)
+                    if (inneværendeBehandling.erFinnmarksEllerSvalbardtillegg()) {
+                        preutfyllVilkårService.preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(
+                            vilkårsvurdering = it,
+                            cutOffFomDato = PREUTFYLLING_BOSATT_I_RIKET_CUT_OFF_FOM_DATO_FINNMARKS_OG_SVALBARDTILLEGG,
+                        )
                     }
                 }
 
@@ -203,7 +208,7 @@ class VilkårsvurderingForNyBehandlingService(
 
         if (!behandling.skalBehandlesAutomatisk) {
             preutfyllVilkårService.preutfyllVilkår(vilkårsvurdering = initiellVilkårsvurdering)
-        } else if (behandling.opprettetÅrsak == FØDSELSHENDELSE && featureToggleService.isEnabled(SKAL_GENERERE_FINNMARKSTILLEGG)) {
+        } else if (behandling.opprettetÅrsak == FØDSELSHENDELSE && featureToggleService.isEnabled(SKAL_PREUTFYLLE_BOSATT_I_RIKET_I_FØDSELSHENDELSER)) {
             val identerVilkårSkalPreutfyllesFor =
                 barnSomSkalVurderesIFødselshendelse?.let {
                     if (behandling.type == FØRSTEGANGSBEHANDLING) {
@@ -213,7 +218,7 @@ class VilkårsvurderingForNyBehandlingService(
                     }
                 }
             try {
-                preutfyllVilkårService.preutfyllBosattIRiket(
+                preutfyllVilkårService.preutfyllBosattIRiketForFødselshendelseBehandlinger(
                     vilkårsvurdering = initiellVilkårsvurdering,
                     identerVilkårSkalPreutfyllesFor = identerVilkårSkalPreutfyllesFor,
                 )

@@ -107,12 +107,12 @@ internal fun hentStandardBegrunnelser(
 
     val filtrertPåFinnmarkstillegg =
         relevanteBegrunnelser.filterValues { begrunnelse ->
-            begrunnelse.erGjeldendeForFinnmarkstillegg(begrunnelseGrunnlag)
+            begrunnelse.erGjeldendeForFinnmarkstillegg(begrunnelseGrunnlag, vedtaksperiode)
         }
 
     val filtrertPåSvalbardtillegg =
         relevanteBegrunnelser.filterValues { begrunnelse ->
-            begrunnelse.erGjeldendeForSvalbardtillegg(begrunnelseGrunnlag)
+            begrunnelse.erGjeldendeForSvalbardtillegg(begrunnelseGrunnlag, vedtaksperiode)
         }
 
     val filtrertPåUtgjørendeVilkårOgEndretUtbetalingAndelIForrigePeriode =
@@ -205,20 +205,28 @@ private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(
 
 private fun SanityBegrunnelse.erGjeldendeForFinnmarkstillegg(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
+    vedtaksperiode: VedtaksperiodeMedBegrunnelser,
 ): Boolean {
     if (!this.gjelderFinnmarkstillegg) return false
 
-    val harKravPåFinnmarkstilleggForrigePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåFinnmarkstilleggForrigePeriode()
+    val harKravPåFinnmarkstilleggForrigePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåFinnmarkstilleggForrigePeriode(vedtaksperiode)
     val harKravPåFinnmarkstilleggDennePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåFinnmarkstilleggDennePeriode()
 
-    val erFinnmarkstilleggIForrigeBehandlingPeriode = begrunnelseGrunnlag.sjekkOmharKravPåFinnmarkstilleggIForrigeBehandlingPeriode()
-    val erEndringIFinnmarkstilleggFraForrigeBehandling = erFinnmarkstilleggIForrigeBehandlingPeriode != harKravPåFinnmarkstilleggDennePeriode
+    val harFinnmarkstilleggIForrigeBehandlingPeriode =
+        // For innvilgete perioder ønsker vi å ha med alle barna det ble utbetalt for. For f.eks. Reduksjon ønsker vi kun å begrunne for personen som ikke oppfyller kravet
+        if (this.periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING) {
+            begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.FINNMARKSTILLEGG } == true
+        } else {
+            begrunnelseGrunnlag.sjekkOmharKravPåFinnmarkstilleggIForrigeBehandlingPeriode()
+        }
+
+    val erEndringIFinnmarkstilleggFraForrigeBehandling = harFinnmarkstilleggIForrigeBehandlingPeriode != harKravPåFinnmarkstilleggDennePeriode
 
     val begrunnelseMatcherPeriodeResultat =
         this.matcherPerioderesultat(
             harKravPåFinnmarkstilleggForrigePeriode,
             harKravPåFinnmarkstilleggDennePeriode,
-            erFinnmarkstilleggIForrigeBehandlingPeriode,
+            harFinnmarkstilleggIForrigeBehandlingPeriode,
         )
 
     val erEndringIFinnmarkstillegg = harKravPåFinnmarkstilleggForrigePeriode != harKravPåFinnmarkstilleggDennePeriode
@@ -228,12 +236,19 @@ private fun SanityBegrunnelse.erGjeldendeForFinnmarkstillegg(
 
 private fun SanityBegrunnelse.erGjeldendeForSvalbardtillegg(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
+    vedtaksperiode: VedtaksperiodeMedBegrunnelser,
 ): Boolean {
     if (!this.gjelderSvalbardtillegg) return false
 
-    val harKravPåSvalbardtilleggForrigePeriode = begrunnelseGrunnlag.sjekkOmHarHravPåSvalbardtilleggForrigePeriode()
+    val harKravPåSvalbardtilleggForrigePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåSvalbardtilleggForrigePeriode(vedtaksperiode)
     val harKravPåSvalbardtilleggDennePeriode = begrunnelseGrunnlag.sjekkOmHarKravPåSvalbardtilleggDennePeriode()
-    val erSvalbardtilleggIForrigeBehandlingPeriode = begrunnelseGrunnlag.sjekkOmharKravPåSvalbardtilleggIForrigeBehandlingPeriode()
+    val erSvalbardtilleggIForrigeBehandlingPeriode =
+        // For innvilgete perioder ønsker vi å ha med alle barna det ble utbetalt for. For f.eks. Reduksjon ønsker vi kun å begrunne for personen som ikke oppfyller kravet
+        if (this.periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING) {
+            begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true
+        } else {
+            begrunnelseGrunnlag.sjekkOmharKravPåSvalbardtilleggIForrigeBehandlingPeriode()
+        }
 
     val erEndringISvalbardtilleggFraForrigeBehandling = erSvalbardtilleggIForrigeBehandlingPeriode != harKravPåSvalbardtilleggDennePeriode
 
@@ -302,7 +317,7 @@ fun ISanityBegrunnelse.erGjeldendeForOpphørFraForrigeBehandling(begrunnelseGrun
     val begrunnelsenGjelderVilkårIkkeLengerOppfylt = this.erLikVilkårOgUtdypendeVilkårIPeriode(ikkeOppfylteVilkårDenneBehandlingen.filter { it.vilkårType in vilkårMistetSidenForrigeBehandling })
 
     val dennePeriodenErFørsteVedtaksperiodePåFagsak =
-        begrunnelseGrunnlag.forrigePeriode == null || begrunnelseGrunnlag.forrigePeriode!!.andeler.firstOrNull() == null
+        begrunnelseGrunnlag.forrigePeriode == null || begrunnelseGrunnlag.forrigePeriode.andeler.firstOrNull() == null
 
     return (begrunnelseGjelderMistedeVilkår || begrunnelsenGjelderVilkårIkkeLengerOppfylt) && dennePeriodenErFørsteVedtaksperiodePåFagsak
 }

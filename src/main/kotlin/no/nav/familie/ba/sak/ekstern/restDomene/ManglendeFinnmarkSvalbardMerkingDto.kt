@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.common.Utils.tilEtterfølgendePar
+import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -18,6 +19,8 @@ import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.time.LocalDate
+
+private val cutOffTomDatoForVisningAvManglendeMerkinger = LocalDate.of(2025, 10, 1)
 
 data class ManglendeFinnmarkSvalbardMerkingDto(
     val ident: String,
@@ -74,6 +77,7 @@ private fun <T> finnPerioderMedManglendeMerking(
         .kombinerMed(beskjærtFinnmarkEllerSvalbardTidslinje) { bosattIRiketVilkår, finnmarkEllerSvalbard ->
             finnmarkEllerSvalbard != null && bosattIRiketVilkår != null && !bosattIRiketVilkår.utdypendeVilkårsvurderinger.contains(utdypendeVilkårsvurdering)
         }.tilPerioderIkkeNull()
+        .filter { it.tom == null || it.tom!!.isSameOrAfter(cutOffTomDatoForVisningAvManglendeMerkinger) }
         .filter { it.verdi }
         .map { ManglendeFinnmarkSvalbardMerkingPeriodeDto(fom = it.fom, tom = it.tom) }
 }

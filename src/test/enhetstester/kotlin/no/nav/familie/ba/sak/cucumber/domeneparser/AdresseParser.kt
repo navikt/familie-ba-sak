@@ -7,16 +7,17 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag.AKTØR_ID
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørId
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørIdListe
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
+import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 
 fun parseAdresser(
     dataTable: DataTable,
     persongrunnlag: Map<Long, PersonopplysningGrunnlag>,
-): Map<String, PdlBostedsadresseDeltBostedOppholdsadressePerson> =
+): Map<String, PdlAdresserPerson> =
     dataTable
         .asMaps()
         .flatMap {
@@ -25,17 +26,19 @@ fun parseAdresser(
             }
         }.groupBy { parseAktørId(it) }
         .map { (aktørId, rader) ->
-            val (bostedsadresseRader, deltBostedRader) =
-                rader.partition { rad ->
-                    val adressetype = parseValgfriString(ADRESSETYPE, rad) ?: "Bostedsadresse"
-                    if (adressetype !in setOf("Bostedsadresse", "Delt bosted")) {
-                        throw Feil("Adressetype må være 'Bostedsadresse' eller 'Delt bosted'")
-                    }
-                    adressetype == "Bostedsadresse"
-                }
+
+            val adresserPerType = rader.groupBy { parseValgfriString(ADRESSETYPE, it) ?: "Bostedsadresse" }
+
+            if (adresserPerType.keys.any { key -> key !in setOf("Bostedsadresse", "Delt bosted", "Oppholdsadresse") }) {
+                throw Feil("Adressetype må være 'Bostedsadresse', 'Oppholdsadresse' eller 'Delt bosted'")
+            }
+
+            val bostedsadresseRad = adresserPerType["Bostedsadresse"].orEmpty()
+            val oppholdsadresseRad = adresserPerType["Oppholdsadresse"].orEmpty()
+            val deltBostedRad = adresserPerType["Delt bosted"].orEmpty()
 
             val bostedsadresser =
-                bostedsadresseRader.map { rad ->
+                bostedsadresseRad.map { rad ->
                     val fraDato = parseDato(Domenebegrep.FRA_DATO, rad)
                     val tilDato = parseValgfriDato(Domenebegrep.TIL_DATO, rad)
                     val kommunenummer = parseString(KOMMUNENUMMER, rad)
@@ -57,8 +60,31 @@ fun parseAdresser(
                     )
                 }
 
+            val oppholdsadresser =
+                oppholdsadresseRad.map { rad ->
+                    val fraDato = parseDato(Domenebegrep.FRA_DATO, rad)
+                    val tilDato = parseValgfriDato(Domenebegrep.TIL_DATO, rad)
+                    val kommunenummer = parseString(KOMMUNENUMMER, rad)
+
+                    Oppholdsadresse(
+                        gyldigFraOgMed = fraDato,
+                        gyldigTilOgMed = tilDato,
+                        vegadresse =
+                            Vegadresse(
+                                matrikkelId = null,
+                                husnummer = null,
+                                husbokstav = null,
+                                bruksenhetsnummer = null,
+                                adressenavn = null,
+                                kommunenummer = kommunenummer,
+                                tilleggsnavn = null,
+                                postnummer = null,
+                            ),
+                    )
+                }
+
             val deltBosted =
-                deltBostedRader.map { rad ->
+                deltBostedRad.map { rad ->
                     val fraDato = parseDato(Domenebegrep.FRA_DATO, rad)
                     val tilDato = parseValgfriDato(Domenebegrep.TIL_DATO, rad)
                     val kommunenummer = parseString(KOMMUNENUMMER, rad)
@@ -89,8 +115,9 @@ fun parseAdresser(
                     .aktivFødselsnummer()
 
             ident to
-                PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                PdlAdresserPerson(
                     bostedsadresse = bostedsadresser,
                     deltBosted = deltBosted,
+                    oppholdsadresse = oppholdsadresser,
                 )
         }.toMap()
