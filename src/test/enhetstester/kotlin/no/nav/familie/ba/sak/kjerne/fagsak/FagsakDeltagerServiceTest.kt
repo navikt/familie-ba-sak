@@ -4,7 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.datagenerator.lagAktør
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagSystemÅrsak
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -18,10 +19,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.brev.domene.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -266,5 +265,40 @@ class FagsakDeltagerServiceTest {
 
         val funksjonellFeil = assertThrows<FunksjonellFeil> { fagsakDeltagerService.hentFagsakDeltagere("a") }
         assertThat { funksjonellFeil.message == "Feil ved henting av person fra PDL" }
+    }
+
+    @Test
+    fun `Exception av type PdlPersonKanIkkeBehandlesIFagSystemÅrsak skal logges og ikke feile søket`() {
+        // Arrange
+        val personInfo = PersonInfo(LocalDate.now())
+        val person = lagPerson()
+        val behandling = lagBehandling()
+
+        every {
+            personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer("a")
+        } returns person.aktør
+        every {
+            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør)
+        } returns null
+        every {
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør)
+        } returns personInfo
+        every {
+            personRepository.findByAktør(person.aktør)
+        } returns listOf(person)
+        every {
+            behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
+        } returns behandling
+        every {
+            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(any())
+        } returns null
+        every { fagsakRepository.finnFagsakerForAktør(person.aktør) } returns emptyList()
+        every { integrasjonClient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
+        every {
+            personopplysningerService.hentPersoninfoEnkel(any())
+        } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
+
+        // Act og Assert
+        assertThat(fagsakDeltagerService.hentFagsakDeltagere("a")).hasSize(1)
     }
 }
