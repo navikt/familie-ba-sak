@@ -210,7 +210,7 @@ fun Statsborgerskap.erStatsløs() = this.land == StatsborgerskapService.LANDKODE
 
 fun Statsborgerskap.erUkraina() = this.land == "UKR"
 
-fun Statsborgerskap.erOpphør() = this.folkeregistermetadata?.opphoerstidspunkt != null
+fun Statsborgerskap.erOpphørt() = this.folkeregistermetadata?.opphoerstidspunkt != null
 
 /**
  * Norge, Sverige, Finland, Danmark, Island, Grønland, Færøyene og Åland
