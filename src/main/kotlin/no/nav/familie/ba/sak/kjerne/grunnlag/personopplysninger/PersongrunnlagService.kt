@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
@@ -319,6 +318,7 @@ class PersongrunnlagService(
                 personinfo.opphold?.map { GrOpphold.fraOpphold(it, person) }?.toMutableList() ?: mutableListOf()
             person.bostedsadresser =
                 personinfo.bostedsadresser
+                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
                     .filtrerUtKunNorskeBostedsadresser()
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
@@ -329,6 +329,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.oppholdsadresser =
                 personinfo.oppholdsadresser
+                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
@@ -338,6 +339,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.deltBosted =
                 personinfo.deltBosted
+                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
                     .map {
                         GrDeltBosted.fraDeltBosted(
                             deltBosted = it,
@@ -405,6 +407,7 @@ class PersongrunnlagService(
 
             person.bostedsadresser =
                 personinfo.bostedsadresser
+                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
                     .filtrerUtKunNorskeBostedsadresser()
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
@@ -415,6 +418,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.oppholdsadresser =
                 personinfo.oppholdsadresser
+                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
@@ -424,6 +428,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.deltBosted =
                 personinfo.deltBosted
+                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
                     .map {
                         GrDeltBosted.fraDeltBosted(
                             deltBosted = it,

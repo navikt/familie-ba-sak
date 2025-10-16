@@ -348,7 +348,7 @@ class PreutfyllBosattIRiketService(
                     likePerioder.find { it.erIFinnmarkEllerNordTroms() } ?: likePerioder.first()
                 }.sortedBy { it.gyldigFraOgMed }
 
-        return forskyvTomHvisDenErLikNesteTom(filtrert)
+        return forskyvTilOgMedHvisDenErLikNesteFraOgMed(filtrert)
     }
 
     private fun filtrereUgyldigeOppholdsadresser(adresser: List<Adresse>): List<Adresse> {
@@ -362,10 +362,10 @@ class PreutfyllBosattIRiketService(
                     likePerioder.find { it.erPåSvalbard() } ?: likePerioder.first()
                 }.sortedBy { it.gyldigFraOgMed }
 
-        return forskyvTomHvisDenErLikNesteTom(filtrert)
+        return forskyvTilOgMedHvisDenErLikNesteFraOgMed(filtrert)
     }
 
-    private fun forskyvTomHvisDenErLikNesteTom(adresser: List<Adresse>): List<Adresse> =
+    private fun forskyvTilOgMedHvisDenErLikNesteFraOgMed(adresser: List<Adresse>): List<Adresse> =
         adresser
             .windowed(size = 2, step = 1, partialWindows = true)
             .map { adresser ->
