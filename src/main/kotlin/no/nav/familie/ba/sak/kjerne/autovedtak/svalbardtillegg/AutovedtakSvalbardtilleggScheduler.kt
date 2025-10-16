@@ -22,13 +22,12 @@ class AutovedtakSvalbardtilleggScheduler(
 
     @Scheduled(cron = CRON_HVERT_5_MIN_UKEDAG)
     fun kjørAutovedtakSvalbardtillegg() {
-        val isLeader = leaderClientService.isLeader()
-        logger.info("Kjører scheduler for autovedtak Svalbardtillegg. Er leader=$isLeader shuttingDown=$isShuttingDown")
-        if (isShuttingDown || !isLeader) {
+        logger.info("Kjører scheduler for autovedtak Svalbardtillegg. Er leader=${leaderClientService.isLeader()} shuttingDown=$isShuttingDown")
+        if (isShuttingDown || !leaderClientService.isLeader()) {
             return
         }
 
-        if (featureToggleService.isEnabled(FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_SVALBARDSTILLEGG)) {
+        if (featureToggleService.isEnabled(FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_SVALBARDSTILLEGG, true)) {
             autovedtakSvalbardtilleggTaskOppretter.opprettTasker(5000)
         }
     }
