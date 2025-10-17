@@ -60,6 +60,37 @@ class FinnOverlappendePerioderTest {
         assertThat(overlappendePerioder.none { it.fagsaker.contains(4L) }).isTrue()
     }
 
+    @Test
+    fun `finnOverlappendePerioder finner ingen overlappende perioder hvis det ikke er overlapp`() {
+        // Arrange
+        val økonomiSimuleringMottakere =
+            listOf(
+                lagØkonomiSimuleringMottaker(
+                    økonomiSimuleringPostering =
+                        listOf(
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.now().minusYears(1),
+                                tom = LocalDate.now(),
+                                beløp = 100,
+                                fagsakId = 1,
+                            ),
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.now().minusYears(4),
+                                tom = LocalDate.now().minusMonths(13),
+                                beløp = 100,
+                                fagsakId = 4,
+                            ),
+                        ),
+                ),
+            )
+
+        // Act
+        val overlappendePerioder = finnOverlappendePerioder(økonomiSimuleringMottakere = økonomiSimuleringMottakere, 1)
+
+        // Assert
+        assertThat(overlappendePerioder).isEmpty()
+    }
+
     private fun List<OverlappendePerioderMedAndreFagsaker>.finnPeriodeForDato(dato: LocalDate): OverlappendePerioderMedAndreFagsaker? =
         find {
             it.fom <= dato && it.tom >= dato
