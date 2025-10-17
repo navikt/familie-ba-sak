@@ -822,7 +822,7 @@ class PreutfyllBosattIRiketServiceTest {
     }
 
     @Test
-    fun `Skal filtrere bort oppholdsadresser som har fått opphørttidspunkt`() {
+    fun `Skal bare ta hensyn til perioder i svalbard når vi sjekker på oppholdsadresse`() {
         // Arrange
         val behandling = lagBehandling()
         val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barnasFødselsdatoer = listOf(LocalDate.now().minusMonths(2)), søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
@@ -842,9 +842,13 @@ class PreutfyllBosattIRiketServiceTest {
                 oppholdsadresse =
                     listOf(
                         Adresse(
-                            gyldigFraOgMed = LocalDate.now().minusMonths(13),
+                            gyldigFraOgMed = LocalDate.now().minusMonths(12),
                             vegadresse = lagVegadresse(matrikkelId = 12345L, kommunenummer = "2100"),
-                            folkeregistermetadata = Folkeregistermetadata(opphoerstidspunkt = LocalDate.now(), kilde = "kilde", aarsak = "aarsak"),
+                        ),
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusMonths(13),
+                            gyldigTilOgMed = LocalDate.now().minusMonths(3),
+                            vegadresse = lagVegadresse(matrikkelId = 12345L, kommunenummer = "0001"),
                         ),
                     ),
             )
@@ -859,7 +863,7 @@ class PreutfyllBosattIRiketServiceTest {
             )
 
         // Assert
-        assertThat(vilkårResultat).noneSatisfy {
+        assertThat(vilkårResultat).anySatisfy {
             assertThat(it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)).isTrue()
         }
     }

@@ -302,10 +302,13 @@ class PreutfyllBosattIRiketService(
         adresser: Adresser,
         personResultat: PersonResultat,
     ): Tidslinje<Boolean> {
-        if (adresser.oppholdsadresse.isEmpty()) {
-            return tomTidslinje<Boolean>()
+        val adresserPåSvalbard = adresser.oppholdsadresse.filter { it.erPåSvalbard() }
+
+        if (adresserPåSvalbard.isEmpty()) {
+            return tomTidslinje()
         }
-        val filtrerteAdresser = filtrereUgyldigeOppholdsadresser(adresser.oppholdsadresse)
+
+        val filtrerteAdresser = filtrereUgyldigeOppholdsadresser(adresserPåSvalbard)
 
         return lagTidslinjeForAdresser(filtrerteAdresser, personResultat, "Oppholdsadresse") { it.erPåSvalbard() }
     }
@@ -341,7 +344,6 @@ class PreutfyllBosattIRiketService(
         val filtrert =
             adresser
                 .filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
-                .filterNot { it.erOpphørt() }
                 .groupBy { it.gyldigFraOgMed to it.gyldigTilOgMed }
                 .values
                 .map { likePerioder ->
@@ -355,7 +357,6 @@ class PreutfyllBosattIRiketService(
         val filtrert =
             adresser
                 .filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
-                .filterNot { it.erOpphørt() }
                 .groupBy { it.gyldigFraOgMed to it.gyldigTilOgMed }
                 .values
                 .map { likePerioder ->
