@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.AvregningPeriode
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
@@ -36,8 +35,6 @@ class AvregningServiceTest {
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val featureToggleService = mockk<FeatureToggleService>()
-    private val fagsakService = mockk<FagsakService>()
-    private val beregningService = mockk<BeregningService>()
 
     private val avregningService =
         AvregningService(
@@ -45,8 +42,6 @@ class AvregningServiceTest {
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(mar(2025)),
             featureToggleService = featureToggleService,
-            fagsakService = fagsakService,
-            beregningService = beregningService,
         )
 
     @BeforeEach
