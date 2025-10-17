@@ -243,4 +243,5 @@ fun SimulertPostering.tilVedtakSimuleringPostering(økonomiSimuleringMottaker: �
         forfallsdato = this.forfallsdato,
         utenInntrekk = this.utenInntrekk,
         økonomiSimuleringMottaker = økonomiSimuleringMottaker,
+        fagsakId = this.fagsakId?.toLongOrNull(),
     )

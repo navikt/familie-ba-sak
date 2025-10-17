@@ -311,6 +311,7 @@ internal class SimuleringServiceEnhetTest {
         posteringType: PosteringType = PosteringType.YTELSE,
         forfallsdato: LocalDate = LocalDate.of(2023, 1, 1),
         utenInntrekk: Boolean = false,
+        fagsakId: Long = 0L,
     ) = ØkonomiSimuleringPostering(
         økonomiSimuleringMottaker = økonomiSimuleringMottaker,
         fagOmrådeKode = fagOmrådeKode,
@@ -321,5 +322,6 @@ internal class SimuleringServiceEnhetTest {
         posteringType = posteringType,
         forfallsdato = forfallsdato,
         utenInntrekk = utenInntrekk,
+        fagsakId = fagsakId,
     )
 }
