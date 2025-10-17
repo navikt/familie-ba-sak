@@ -318,7 +318,6 @@ class PersongrunnlagService(
                 personinfo.opphold?.map { GrOpphold.fraOpphold(it, person) }?.toMutableList() ?: mutableListOf()
             person.bostedsadresser =
                 personinfo.bostedsadresser
-                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
                     .filtrerUtKunNorskeBostedsadresser()
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
@@ -329,7 +328,6 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.oppholdsadresser =
                 personinfo.oppholdsadresser
-                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
@@ -339,7 +337,6 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.deltBosted =
                 personinfo.deltBosted
-                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
                     .map {
                         GrDeltBosted.fraDeltBosted(
                             deltBosted = it,
@@ -407,7 +404,6 @@ class PersongrunnlagService(
 
             person.bostedsadresser =
                 personinfo.bostedsadresser
-                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
                     .filtrerUtKunNorskeBostedsadresser()
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
@@ -418,7 +414,6 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.oppholdsadresser =
                 personinfo.oppholdsadresser
-                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
@@ -428,7 +423,6 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.deltBosted =
                 personinfo.deltBosted
-                    .filter { it.folkeregistermetadata?.opphoerstidspunkt == null }
                     .map {
                         GrDeltBosted.fraDeltBosted(
                             deltBosted = it,
