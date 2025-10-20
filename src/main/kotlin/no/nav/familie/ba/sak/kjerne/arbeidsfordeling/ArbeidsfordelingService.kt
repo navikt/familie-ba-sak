@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -32,7 +32,7 @@ class ArbeidsfordelingService(
     private val personidentService: PersonidentService,
     private val oppgaveService: OppgaveService,
     private val loggService: LoggService,
-    private val integrasjonClient: IntegrasjonClient,
+    private val integrasjonKlient: IntegrasjonKlient,
     private val personopplysningerService: PersonopplysningerService,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
@@ -55,7 +55,7 @@ class ArbeidsfordelingService(
             arbeidsfordelingPåBehandlingRepository.save(
                 aktivArbeidsfordelingPåBehandling.copy(
                     behandlendeEnhetId = endreBehandlendeEnhet.enhetId,
-                    behandlendeEnhetNavn = integrasjonClient.hentEnhet(endreBehandlendeEnhet.enhetId).navn,
+                    behandlendeEnhetNavn = integrasjonKlient.hentEnhet(endreBehandlendeEnhet.enhetId).navn,
                     manueltOverstyrt = true,
                 ),
             )
@@ -215,7 +215,7 @@ class ArbeidsfordelingService(
 
         val identMedStrengeste = finnPersonMedStrengesteAdressebeskyttelse(personinfoliste)
 
-        return integrasjonClient.hentBehandlendeEnhet(identMedStrengeste ?: søker.ident).singleOrNull()
+        return integrasjonKlient.hentBehandlendeEnhet(identMedStrengeste ?: søker.ident).singleOrNull()
             ?: throw Feil(message = "Fant flere eller ingen enheter på behandling.")
     }
 
@@ -226,7 +226,7 @@ class ArbeidsfordelingService(
         val identMedStrengeste =
             finnPersonMedStrengesteAdressebeskyttelse((barnIdenter + søkerIdent).map { identMedAdressebeskyttelse(it) })
 
-        return integrasjonClient.hentBehandlendeEnhet(identMedStrengeste ?: søkerIdent).singleOrNull()
+        return integrasjonKlient.hentBehandlendeEnhet(identMedStrengeste ?: søkerIdent).singleOrNull()
             ?: throw Feil(message = "Fant flere eller ingen enheter på behandling.")
     }
 

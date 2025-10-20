@@ -3,8 +3,7 @@ package no.nav.familie.ba.sak.fake
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
@@ -40,12 +39,12 @@ class FakePersonopplysningerService(
     pdlRestKlient: PdlRestKlient,
     systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
     familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
-    integrasjonClient: IntegrasjonClient,
+    integrasjonKlient: IntegrasjonKlient,
 ) : PersonopplysningerService(
         pdlRestKlient,
         systemOnlyPdlRestKlient,
         familieIntegrasjonerTilgangskontrollService,
-        integrasjonClient,
+        integrasjonKlient,
     ) {
     init {
         settPersoninfoMedRelasjonerForPredefinerteTestpersoner()

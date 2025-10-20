@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAktør
-import no.nav.familie.ba.sak.fake.FakeIntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
+import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.mock.FamilieIntegrasjonerTilgangskontrollMock.Companion.mockSjekkTilgang
@@ -34,7 +34,7 @@ internal class PersonopplysningerServiceTest(
     @Autowired
     private val mockPersonidentService: PersonidentService,
     @Autowired
-    private val fakeIntegrasjonClient: FakeIntegrasjonClient,
+    private val fakeIntegrasjonKlient: FakeIntegrasjonKlient,
 ) : AbstractSpringIntegrationTest() {
     lateinit var personopplysningerService: PersonopplysningerService
 
@@ -42,14 +42,14 @@ internal class PersonopplysningerServiceTest(
     fun setUp() {
         personopplysningerService =
             PersonopplysningerService(
-                PdlRestClient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate, mockPersonidentService),
-                SystemOnlyPdlRestClient(
+                PdlRestKlient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate, mockPersonidentService),
+                SystemOnlyPdlRestKlient(
                     URI.create(wireMockServer.baseUrl() + "/api"),
                     restTemplate,
                     mockPersonidentService,
                 ),
                 familieIntegrasjonerTilgangskontrollService,
-                fakeIntegrasjonClient,
+                fakeIntegrasjonKlient,
             )
         lagMockForPersoner()
     }
@@ -57,7 +57,7 @@ internal class PersonopplysningerServiceTest(
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
         mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(mapOf(ID_BARN_1 to true, ID_BARN_2 to false))
-        fakeIntegrasjonClient.leggTilEgenansatt(ID_MOR)
+        fakeIntegrasjonKlient.leggTilEgenansatt(ID_MOR)
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(lagAktør(ID_MOR))
 

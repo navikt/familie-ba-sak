@@ -16,7 +16,7 @@ import java.net.URI
 import java.time.LocalDate
 
 @Component
-class SystemOnlyIntegrasjonClient(
+class SystemOnlyIntegrasjonKlient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
     @Qualifier("jwtBearerClientCredentials") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "integrasjon") {

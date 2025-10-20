@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfoBase
@@ -30,7 +30,7 @@ class FagsakDeltagerService(
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val fagsakService: FagsakService,
-    private val integrasjonClient: IntegrasjonClient,
+    private val integrasjonKlient: IntegrasjonKlient,
 ) {
     private val logger = LoggerFactory.getLogger(FagsakDeltagerService::class.java)
 
@@ -260,7 +260,7 @@ class FagsakDeltagerService(
         )
 
     private fun settEgenAnsattStatusPåFagsakDeltagere(fagsakDeltagere: List<RestFagsakDeltager>): List<RestFagsakDeltager> {
-        val egenAnsattPerIdent = integrasjonClient.sjekkErEgenAnsattBulk(fagsakDeltagere.map { it.ident })
+        val egenAnsattPerIdent = integrasjonKlient.sjekkErEgenAnsattBulk(fagsakDeltagere.map { it.ident })
         return fagsakDeltagere.map { fagsakDeltager ->
             fagsakDeltager.copy(
                 erEgenAnsatt = egenAnsattPerIdent.getOrDefault(fagsakDeltager.ident, null),

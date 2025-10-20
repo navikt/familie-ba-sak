@@ -5,7 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -18,12 +18,12 @@ import org.junit.jupiter.api.Test
 
 class SøknadServiceTest {
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService = mockk()
-    private val integrasjonClient: IntegrasjonClient = mockk()
+    private val integrasjonKlient: IntegrasjonKlient = mockk()
     private val søknadMapperLookup: SøknadMapper.Lookup = mockk()
     private val søknadService =
         SøknadService(
             behandlingSøknadsinfoService = behandlingSøknadsinfoService,
-            integrasjonClient = integrasjonClient,
+            integrasjonKlient = integrasjonKlient,
             søknadMapperLookup = søknadMapperLookup,
         )
 
@@ -42,7 +42,7 @@ class SøknadServiceTest {
                 )
 
             every { behandlingSøknadsinfoService.hentJournalpostId(behandling.id) } returns journalpostId
-            every { integrasjonClient.hentVersjonertBarnetrygdSøknad(journalpostId) } returns versjonertBarnetrygdSøknadV9
+            every { integrasjonKlient.hentVersjonertBarnetrygdSøknad(journalpostId) } returns versjonertBarnetrygdSøknadV9
             every { søknadMapperLookup.hentSøknadMapperForVersjon(versjonertBarnetrygdSøknadV9.barnetrygdSøknad.kontraktVersjon) } returns SøknadMapperV9()
 
             // Act

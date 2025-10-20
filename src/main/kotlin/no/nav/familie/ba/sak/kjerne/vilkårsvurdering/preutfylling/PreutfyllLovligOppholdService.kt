@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -29,7 +28,7 @@ import java.time.LocalDate
 class PreutfyllLovligOppholdService(
     private val pdlRestKlient: SystemOnlyPdlRestKlient,
     private val statsborgerskapService: StatsborgerskapService,
-    private val systemOnlyIntegrasjonClient: SystemOnlyIntegrasjonClient,
+    private val systemOnlyIntegrasjonKlient: SystemOnlyIntegrasjonKlient,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
     fun preutfyllLovligOpphold(vilkårsvurdering: Vilkårsvurdering) {
@@ -145,7 +144,7 @@ class PreutfyllLovligOppholdService(
         fomDatoForBeskjæring: LocalDate,
     ): Tidslinje<Boolean> {
         val arbeidsforhold =
-            systemOnlyIntegrasjonClient.hentArbeidsforholdMedSystembruker(
+            systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(
                 ident = personResultat.aktør.aktivFødselsnummer(),
                 ansettelsesperiodeFom = fomDatoForBeskjæring,
             )

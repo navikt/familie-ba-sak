@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.sikkerhet
 
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 @Component
 class SaksbehandlerContext(
     @Value("\${rolle.kode6}") private val kode6GruppeId: String,
-    private val integrasjonClient: IntegrasjonClient,
+    private val integrasjonKlient: IntegrasjonKlient,
 ) {
     private val logger = LoggerFactory.getLogger(SaksbehandlerContext::class.java)
 
@@ -21,7 +21,7 @@ class SaksbehandlerContext(
             val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
 
             return try {
-                val saksbehandler = integrasjonClient.hentSaksbehandler(saksbehandlerIdent)
+                val saksbehandler = integrasjonKlient.hentSaksbehandler(saksbehandlerIdent)
 
                 "${saksbehandler.fornavn} ${saksbehandler.etternavn}".trim()
             } catch (exception: Exception) {

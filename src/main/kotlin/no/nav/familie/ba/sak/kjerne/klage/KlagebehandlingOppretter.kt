@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.TilpassArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -24,7 +24,7 @@ import java.util.UUID
 class KlagebehandlingOppretter(
     private val fagsakService: FagsakService,
     private val klageClient: KlageClient,
-    private val integrasjonClient: IntegrasjonClient,
+    private val integrasjonKlient: IntegrasjonKlient,
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
     private val clockProvider: ClockProvider,
 ) {
@@ -49,7 +49,7 @@ class KlagebehandlingOppretter(
         val fødselsnummer = fagsak.aktør.aktivFødselsnummer()
         val navIdent = NavIdent(SikkerhetContext.hentSaksbehandler())
 
-        val arbeidsfordelingsenheter = integrasjonClient.hentBehandlendeEnhet(fødselsnummer)
+        val arbeidsfordelingsenheter = integrasjonKlient.hentBehandlendeEnhet(fødselsnummer)
 
         if (arbeidsfordelingsenheter.isEmpty()) {
             logger.error("Fant ingen arbeidsfordelingsenheter for aktør. Se SecureLogs for detaljer.")
