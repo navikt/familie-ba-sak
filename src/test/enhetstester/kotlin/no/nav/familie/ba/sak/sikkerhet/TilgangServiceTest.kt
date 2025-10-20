@@ -179,7 +179,7 @@ class TilgangServiceTest {
         mockBrukerContext("A")
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
-        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.antallKallTilSjekkTilgangTilPersoner).isEqualTo(1)
+        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(1)
     }
 
     @Test
@@ -196,7 +196,7 @@ class TilgangServiceTest {
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
         mockBrukerContext("B")
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
-        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.antallKallTilSjekkTilgangTilPersoner).isEqualTo(2)
+        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(2)
     }
 
     @Test
@@ -214,7 +214,7 @@ class TilgangServiceTest {
 
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
-        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.antallKallTilSjekkTilgangTilPersoner).isEqualTo(1)
+        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(1)
     }
 
     @Test
@@ -232,7 +232,7 @@ class TilgangServiceTest {
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
         mockBrukerContext("B")
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
-        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.antallKallTilSjekkTilgangTilPersoner).isEqualTo(2)
+        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(2)
     }
 
     @Test
@@ -320,7 +320,9 @@ class TilgangServiceTest {
             }
         assertThat(rolletilgangskontrollFeil.message).isEqualTo("Saksbehandler A har ikke tilgang til fagsak=${fagsak.id}. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse.")
         assertThat(rolletilgangskontrollFeil.frontendFeilmelding).isEqualTo("Fagsaken inneholder personer som krever ytterligere tilganger. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse.")
-        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.antallKallTilSjekkTilgangTilPersoner).isEqualTo(1)
+        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.kallMotSjekkTilgangTilPersoner)
+            .hasSize(1)
+            .containsOnly(listOf(barnAktør.aktivFødselsnummer(), søkerAktør.aktivFødselsnummer()))
     }
 
     @Test

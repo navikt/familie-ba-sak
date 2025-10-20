@@ -15,10 +15,13 @@ class FakeFamilieIntegrasjonerTilgangskontrollClient(
     restOperations: RestOperations,
 ) : FamilieIntegrasjonerTilgangskontrollClient(URI("dummyURI"), restOperations) {
     private val personIdentTilTilgang = mutableMapOf<String, Tilgang>()
-    var antallKallTilSjekkTilgangTilPersoner = 0
+
+    val kallMotSjekkTilgangTilPersoner: MutableList<List<String>> = mutableListOf()
+
+    fun antallKallTilSjekkTilgangTilPersoner() = kallMotSjekkTilgangTilPersoner.size
 
     override fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
-        antallKallTilSjekkTilgangTilPersoner++
+        kallMotSjekkTilgangTilPersoner.add(personIdenter)
         return personIdenter.map { personIdent ->
             personIdentTilTilgang[personIdent] ?: Tilgang(personIdent, true)
         }
