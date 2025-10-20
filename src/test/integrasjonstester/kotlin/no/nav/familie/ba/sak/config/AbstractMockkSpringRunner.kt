@@ -1,10 +1,5 @@
 package no.nav.familie.ba.sak.config
 
-import io.mockk.unmockkAll
-import no.nav.familie.ba.sak.fake.FakeEfSakRestClient
-import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
-import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,12 +8,6 @@ import org.springframework.cache.CacheManager
 import java.util.UUID
 
 abstract class AbstractMockkSpringRunner {
-    @Autowired
-    private lateinit var pdlIdentRestClient: PdlIdentRestClient
-
-    @Autowired
-    private lateinit var efSakRestClient: EfSakRestClient
-
     /**
      * Cachemanagere
      */
@@ -36,18 +25,10 @@ abstract class AbstractMockkSpringRunner {
     @BeforeEach
     fun reset() {
         clearCaches()
-        clearMocks()
+        setCallIdForLogging()
     }
 
-    private fun clearMocks() {
-        unmockkAll()
-
-        val fakePdlIdentRestClient = pdlIdentRestClient as? FakePdlIdentRestClient
-        fakePdlIdentRestClient?.reset()
-
-        val fakeEfSakRestClient = efSakRestClient as? FakeEfSakRestClient
-        fakeEfSakRestClient?.reset()
-
+    private fun setCallIdForLogging() {
         MDC.put("callId", "${this::class.java.simpleName}-${UUID.randomUUID()}")
     }
 
