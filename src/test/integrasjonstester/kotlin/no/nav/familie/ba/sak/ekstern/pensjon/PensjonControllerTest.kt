@@ -17,7 +17,7 @@ import java.util.UUID
     "integrasjonstest",
     "testcontainers",
     "mock-pdl",
-    "mock-ident-client",
+    "mock-ident-klient",
     "mock-brev-klient",
 )
 class PensjonControllerTest : WebSpringAuthTestRunner() {

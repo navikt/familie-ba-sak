@@ -1,25 +1,25 @@
 package no.nav.familie.ba.sak.config
 
 import no.nav.familie.ba.sak.fake.FakeBrevKlient
-import no.nav.familie.ba.sak.fake.FakeEfSakRestClient
+import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
 import no.nav.familie.ba.sak.fake.FakeEnvService
 import no.nav.familie.ba.sak.fake.FakeFeatureToggleService
-import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.fake.FakeIntegrasjonClient
+import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdKlient
+import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
 import no.nav.familie.ba.sak.fake.FakeLeaderClientService
-import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
-import no.nav.familie.ba.sak.fake.FakePdlRestClient
+import no.nav.familie.ba.sak.fake.FakePdlIdentRestKlient
+import no.nav.familie.ba.sak.fake.FakePdlRestKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService
 import no.nav.familie.ba.sak.fake.FakeSanityKlient
-import no.nav.familie.ba.sak.fake.FakeSystemOnlyIntegrasjonClient
+import no.nav.familie.ba.sak.fake.FakeSystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
 import no.nav.familie.ba.sak.fake.FakeTilbakekrevingKlient
 import no.nav.familie.ba.sak.fake.FakeValutakursRestClient
 import no.nav.familie.ba.sak.fake.FakeØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -37,13 +37,13 @@ import org.springframework.web.client.RestOperations
 class FakeConfig {
     @Bean
     @Primary
-    @Profile("fake-integrasjon-client")
-    fun fakeIntegrasjonClient(restOperations: RestOperations): FakeIntegrasjonClient = FakeIntegrasjonClient(restOperations)
+    @Profile("fake-integrasjon-klient")
+    fun fakeIntegrasjonKlient(restOperations: RestOperations): FakeIntegrasjonKlient = FakeIntegrasjonKlient(restOperations)
 
     @Bean
     @Primary
-    @Profile("fake-valutakurs-rest-client")
-    fun fakeValutakursRestClient(restOperations: RestOperations): FakeValutakursRestClient = FakeValutakursRestClient(restOperations)
+    @Profile("fake-valutakurs-rest-klient")
+    fun fakeValutakursRestKlient(restOperations: RestOperations): FakeValutakursRestClient = FakeValutakursRestClient(restOperations)
 
     @Bean
     @Primary
@@ -81,25 +81,25 @@ class FakeConfig {
 
     @Bean
     @Primary
-    @Profile("mock-pdl-client")
-    fun fakePdlRestClient(
+    @Profile("mock-pdl-klient")
+    fun fakePdlRestKlient(
         restOperations: RestOperations,
         personidentService: PersonidentService,
-    ): FakePdlRestClient =
-        FakePdlRestClient(
+    ): FakePdlRestKlient =
+        FakePdlRestKlient(
             restOperations = restOperations,
             personidentService = personidentService,
         )
 
     @Bean
     @Primary
-    @Profile("mock-system-only-integrasjon-client")
-    fun fakeSystemOnlyIntegrasjonClient(): FakeSystemOnlyIntegrasjonClient = FakeSystemOnlyIntegrasjonClient()
+    @Profile("mock-system-only-integrasjon-klient")
+    fun fakeSystemOnlyIntegrasjonKlient(): FakeSystemOnlyIntegrasjonKlient = FakeSystemOnlyIntegrasjonKlient()
 
     @Bean
     @Primary
-    @Profile("mock-ef-client")
-    fun fakeEfSakRestClient(restOperations: RestOperations): FakeEfSakRestClient = FakeEfSakRestClient(restOperations)
+    @Profile("mock-ef-klient")
+    fun fakeEfSakRestKlient(restOperations: RestOperations): FakeEfSakRestKlient = FakeEfSakRestKlient(restOperations)
 
     @Bean
     @Primary
@@ -108,28 +108,28 @@ class FakeConfig {
 
     @Bean
     @Primary
-    @Profile("mock-ident-client")
-    fun fakePdlIdentRestClient(restOperations: RestOperations): FakePdlIdentRestClient = FakePdlIdentRestClient(restOperations)
+    @Profile("mock-ident-klient")
+    fun fakePdlIdentRestKlient(restOperations: RestOperations): FakePdlIdentRestKlient = FakePdlIdentRestKlient(restOperations)
 
     @Bean
     @Primary
     @Profile("mock-pdl")
     fun fakePersonopplysningerService(
-        pdlRestClient: PdlRestClient,
-        systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
+        pdlRestKlient: PdlRestKlient,
+        systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
         familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
-        integrasjonClient: IntegrasjonClient,
+        integrasjonKlient: IntegrasjonKlient,
     ): FakePersonopplysningerService =
         FakePersonopplysningerService(
-            pdlRestClient = pdlRestClient,
-            systemOnlyPdlRestClient = systemOnlyPdlRestClient,
+            pdlRestKlient = pdlRestKlient,
+            systemOnlyPdlRestKlient = systemOnlyPdlRestKlient,
             familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
-            integrasjonClient = integrasjonClient,
+            integrasjonKlient = integrasjonKlient,
         )
 
     @Bean
     @Primary
-    @Profile("mock-sanity-client")
+    @Profile("mock-sanity-klient")
     fun fakeSanityKlient() = FakeSanityKlient()
 
     @Bean
@@ -140,5 +140,5 @@ class FakeConfig {
     @Bean
     @Primary
     @Profile("mock-infotrygd-barnetrygd")
-    fun fakeInfotrygdBarnetrygdClient(restOperations: RestOperations): FakeInfotrygdBarnetrygdClient = FakeInfotrygdBarnetrygdClient(restOperations)
+    fun fakeInfotrygdBarnetrygdKlient(restOperations: RestOperations): FakeInfotrygdBarnetrygdKlient = FakeInfotrygdBarnetrygdKlient(restOperations)
 }
