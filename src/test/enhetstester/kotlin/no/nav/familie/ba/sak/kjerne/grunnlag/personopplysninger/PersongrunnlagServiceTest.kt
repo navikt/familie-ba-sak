@@ -173,510 +173,135 @@ class PersongrunnlagServiceTest {
         }
 
         @Test
-        fun `skal filtrer bort adresser hvor opphørstidspunktet er satt i metadataen`() {
-            // Arrange
-            val behandling = lagBehandling()
+        fun `registrerManuellDødsfallPåPerson skal kaste feil dersom man registrer dødsfall dato før personen er født`() {
+            val dødsfallsDato = LocalDate.of(2020, 10, 10)
+            val person = lagPerson(fødselsdato = dødsfallsDato.plusMonths(10))
+            val personFnr = person.aktør.aktivFødselsnummer()
+            val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
 
-            val personopplysningGrunnlag = lagPersonopplysningGrunnlag()
-
-            val søker =
-                lagPerson(
-                    type = PersonType.SØKER,
-                    fødselsdato = dagensDato.minusYears(30),
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    bostedsadresser = { listOf(lagGrVegadresse(matrikkelId = 1L)) },
-                    oppholdsadresser = { listOf(lagGrMatrikkelOppholdsadresse(matrikkelId = 1L)) },
-                    deltBosted = { listOf(lagGrMatrikkelDeltBosted(matrikkelId = 1L)) },
-                )
-            personopplysningGrunnlag.personer.add(søker)
-
-            val barn =
-                lagPerson(
-                    type = PersonType.BARN,
-                    fødselsdato = dagensDato.minusYears(2),
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    bostedsadresser = { listOf(lagGrVegadresse(matrikkelId = 1L)) },
-                    oppholdsadresser = { listOf(lagGrMatrikkelOppholdsadresse(matrikkelId = 1L)) },
-                    deltBosted = { listOf(lagGrMatrikkelDeltBosted(matrikkelId = 1L)) },
-                )
-            personopplysningGrunnlag.personer.add(barn)
-
-            val personInfoSøker =
-                lagPersonInfo(
-                    fødselsdato = søker.fødselsdato,
-                    bostedsadresser =
-                        listOf(
-                            lagBostedsadresse(
-                                gyldigFraOgMed = dagensDato.minusYears(10),
-                                gyldigTilOgMed = dagensDato.plusYears(1),
-                                matrikkeladresse = lagMatrikkeladresse(1234L),
-                                folkeregistermetadata = lagFolkeregistermetadata(opphoerstidspunkt = dagensDato),
-                            ),
-                            lagBostedsadresse(
-                                gyldigFraOgMed = dagensDato.minusYears(1),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(9876L),
-                                folkeregistermetadata = null,
-                            ),
-                        ),
-                    oppholdsadresser =
-                        listOf(
-                            lagOppholdsadresse(
-                                gyldigFraOgMed = dagensDato.minusYears(15),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(4321L),
-                                folkeregistermetadata = lagFolkeregistermetadata(opphoerstidspunkt = dagensDato.minusYears(1)),
-                            ),
-                            lagOppholdsadresse(
-                                gyldigFraOgMed = dagensDato.minusYears(2),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(6789L),
-                                folkeregistermetadata = null,
-                            ),
-                        ),
-                    deltBosted =
-                        listOf(
-                            lagDeltBosted(
-                                startdatoForKontrakt = dagensDato.minusYears(30),
-                                sluttdatoForKontrakt = null,
-                                matrikkeladresse = lagMatrikkeladresse(1001L),
-                                folkeregistermetadata = lagFolkeregistermetadata(opphoerstidspunkt = dagensDato.minusYears(1)),
-                            ),
-                            lagDeltBosted(
-                                startdatoForKontrakt = dagensDato.minusYears(25),
-                                sluttdatoForKontrakt = null,
-                                matrikkeladresse = lagMatrikkeladresse(1001L),
-                                folkeregistermetadata = null,
-                            ),
-                        ),
-                )
-
-            val personInfoBarn =
-                lagPersonInfo(
-                    fødselsdato = barn.fødselsdato,
-                    bostedsadresser =
-                        listOf(
-                            lagBostedsadresse(
-                                gyldigFraOgMed = dagensDato.minusYears(2),
-                                gyldigTilOgMed = dagensDato.plusYears(1),
-                                matrikkeladresse = lagMatrikkeladresse(1234L),
-                                folkeregistermetadata = lagFolkeregistermetadata(opphoerstidspunkt = dagensDato),
-                            ),
-                            lagBostedsadresse(
-                                gyldigFraOgMed = dagensDato.minusYears(2),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(9876L),
-                                folkeregistermetadata = null,
-                            ),
-                        ),
-                    oppholdsadresser =
-                        listOf(
-                            lagOppholdsadresse(
-                                gyldigFraOgMed = dagensDato.minusYears(2),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(4321L),
-                                folkeregistermetadata = lagFolkeregistermetadata(opphoerstidspunkt = dagensDato.minusYears(1)),
-                            ),
-                            lagOppholdsadresse(
-                                gyldigFraOgMed = dagensDato.minusYears(1),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(6789L),
-                                folkeregistermetadata = null,
-                            ),
-                        ),
-                    deltBosted =
-                        listOf(
-                            lagDeltBosted(
-                                startdatoForKontrakt = dagensDato.minusYears(1),
-                                sluttdatoForKontrakt = null,
-                                matrikkeladresse = lagMatrikkeladresse(1001L),
-                                folkeregistermetadata = lagFolkeregistermetadata(opphoerstidspunkt = dagensDato.minusYears(1)),
-                            ),
-                            lagDeltBosted(
-                                startdatoForKontrakt = dagensDato.minusMonths(6),
-                                sluttdatoForKontrakt = null,
-                                matrikkeladresse = lagMatrikkeladresse(1001L),
-                                folkeregistermetadata = null,
-                            ),
-                        ),
+            val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(
+                    behandlingId = behandling.id,
+                    personer = arrayOf(person),
                 )
 
             every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
-            every { personopplysningGrunnlagRepository.saveAndFlush(any()) } returnsArgument 0
-            every { personopplysningGrunnlagRepository.save(any()) } returnsArgument 0
-            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns personInfoSøker
-            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn.aktør) } returns personInfoBarn
-            every { kodeverkService.hentPoststed(any()) } returns null
+            every { personidentService.hentAktør(personFnr) } returns person.aktør
 
-            // Act
-            val grunnlag =
-                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-                    aktør = søker.aktør,
-                    barnFraInneværendeBehandling = listOf(barn.aktør),
-                    barnFraForrigeBehandling = listOf(barn.aktør),
-                    behandling = behandling,
-                    målform = Målform.NB,
-                )
-
-            // Assert
-            assertThat(grunnlag.personer).hasSize(2)
-            assertThat(grunnlag.personer).anySatisfy {
-                assertThat(it.aktør).isEqualTo(søker.aktør)
-                assertThat(it.bostedsadresser).hasSize(1)
-                assertThat(it.bostedsadresser).anySatisfy {
-                    assertThat(it.person).isEqualTo(søker)
-                    assertThat(it.periode?.fom).isEqualTo(dagensDato.minusYears(1))
-                    assertThat(it.periode?.tom).isNull()
+            val funksjonellFeil =
+                assertThrows<FunksjonellFeil> {
+                    persongrunnlagService.registrerManuellDødsfallPåPerson(
+                        behandlingId = BehandlingId(behandling.id),
+                        personIdent = PersonIdent(personFnr),
+                        dødsfallDato = dødsfallsDato,
+                        begrunnelse = "test",
+                    )
                 }
-                assertThat(it.oppholdsadresser).hasSize(1)
-                assertThat(it.oppholdsadresser).anySatisfy {
-                    assertThat(it.person).isEqualTo(søker)
-                    assertThat(it.periode?.fom).isEqualTo(dagensDato.minusYears(2))
-                    assertThat(it.periode?.tom).isNull()
-                }
-                assertThat(it.deltBosted).hasSize(1)
-                assertThat(it.deltBosted).anySatisfy {
-                    assertThat(it.person).isEqualTo(søker)
-                    assertThat(it.periode?.fom).isEqualTo(dagensDato.minusYears(25))
-                    assertThat(it.periode?.tom).isNull()
-                }
-            }
-            assertThat(grunnlag.personer).anySatisfy {
-                assertThat(it.aktør).isEqualTo(barn.aktør)
-                assertThat(it.bostedsadresser).hasSize(1)
-                assertThat(it.bostedsadresser).anySatisfy {
-                    assertThat(it.person).isEqualTo(barn)
-                    assertThat(it.periode?.fom).isEqualTo(dagensDato.minusYears(2))
-                    assertThat(it.periode?.tom).isNull()
-                }
-                assertThat(it.oppholdsadresser).hasSize(1)
-                assertThat(it.oppholdsadresser).anySatisfy {
-                    assertThat(it.person).isEqualTo(barn)
-                    assertThat(it.periode?.fom).isEqualTo(dagensDato.minusYears(1))
-                    assertThat(it.periode?.tom).isNull()
-                }
-                assertThat(it.deltBosted).hasSize(1)
-                assertThat(it.deltBosted).anySatisfy {
-                    assertThat(it.person).isEqualTo(barn)
-                    assertThat(it.periode?.fom).isEqualTo(dagensDato.minusMonths(6))
-                    assertThat(it.periode?.tom).isNull()
-                }
-            }
-        }
-    }
 
-    @Test
-    fun `registrerManuellDødsfallPåPerson skal kaste feil dersom man registrer dødsfall dato før personen er født`() {
-        val dødsfallsDato = LocalDate.of(2020, 10, 10)
-        val person = lagPerson(fødselsdato = dødsfallsDato.plusMonths(10))
-        val personFnr = person.aktør.aktivFødselsnummer()
-        val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
-
-        val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(
-                behandlingId = behandling.id,
-                personer = arrayOf(person),
-            )
-
-        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
-        every { personidentService.hentAktør(personFnr) } returns person.aktør
-
-        val funksjonellFeil =
-            assertThrows<FunksjonellFeil> {
-                persongrunnlagService.registrerManuellDødsfallPåPerson(
-                    behandlingId = BehandlingId(behandling.id),
-                    personIdent = PersonIdent(personFnr),
-                    dødsfallDato = dødsfallsDato,
-                    begrunnelse = "test",
-                )
-            }
-
-        assertThat(funksjonellFeil.melding).isEqualTo("Du kan ikke sette dødsfall dato til en dato som er før SØKER sin fødselsdato")
-    }
-
-    @Test
-    fun `registrerManuellDødsfallPåPerson skal kaste feil dersom man registrer dødsfall dato når personen allerede har dødsfallsdato registrert`() {
-        val dødsfallsDato = LocalDate.of(2020, 10, 10)
-        val person =
-            lagPerson(fødselsdato = dødsfallsDato.minusMonths(10)).also {
-                it.dødsfall = Dødsfall(person = it, dødsfallDato = dødsfallsDato)
-            }
-
-        val personFnr = person.aktør.aktivFødselsnummer()
-        val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
-
-        val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(
-                behandlingId = behandling.id,
-                personer = arrayOf(person),
-            )
-
-        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
-        every { personidentService.hentAktør(personFnr) } returns person.aktør
-
-        val funksjonellFeil =
-            assertThrows<FunksjonellFeil> {
-                persongrunnlagService.registrerManuellDødsfallPåPerson(
-                    behandlingId = BehandlingId(behandling.id),
-                    personIdent = PersonIdent(personFnr),
-                    dødsfallDato = dødsfallsDato,
-                    begrunnelse = "test",
-                )
-            }
-
-        assertThat(funksjonellFeil.melding).isEqualTo("Dødsfall dato er allerede registrert på person med navn ${person.navn}")
-    }
-
-    @Test
-    fun `registrerManuellDødsfallPåPerson skal endre på vilkår og logge at manuelt dødsfalldato er registrert`() {
-        val dødsfallsDato = LocalDate.of(2020, 10, 10)
-        val person = lagPerson(fødselsdato = dødsfallsDato.minusMonths(10))
-
-        val personFnr = person.aktør.aktivFødselsnummer()
-        val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
-
-        val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(
-                behandlingId = behandling.id,
-                personer = arrayOf(person),
-            )
-
-        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
-        every { personidentService.hentAktør(personFnr) } returns person.aktør
-        every { loggService.loggManueltRegistrertDødsfallDato(any(), any(), "test") } returns mockk()
-        every { vilkårsvurderingService.oppdaterVilkårVedDødsfall(any(), any(), any()) } just runs
-
-        persongrunnlagService.registrerManuellDødsfallPåPerson(
-            behandlingId = BehandlingId(behandling.id),
-            personIdent = PersonIdent(personFnr),
-            dødsfallDato = dødsfallsDato,
-            begrunnelse = "test",
-        )
-
-        verify(exactly = 1) { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) }
-        verify(exactly = 1) { personidentService.hentAktør(personFnr) }
-        verify(exactly = 1) { loggService.loggManueltRegistrertDødsfallDato(any(), any(), "test") }
-        verify(exactly = 1) { vilkårsvurderingService.oppdaterVilkårVedDødsfall(any(), any(), any()) }
-    }
-
-    @Nested
-    inner class HentAktivForBehandlinger {
-        @Test
-        fun `skal hente aktive grunnlag for behandlinger`() {
-            // Arrange
-            val behandlingId1 = 1L
-            val behandlingId2 = 2L
-            val behandlingIder = setOf(behandlingId1, behandlingId2)
-
-            val grunnlag1 = lagPersonopplysningGrunnlag(behandlingId = behandlingId1)
-            val grunnlag2 = lagPersonopplysningGrunnlag(behandlingId = behandlingId2)
-
-            every { personopplysningGrunnlagRepository.hentAktivForBehandlinger(behandlingIder) } returns listOf(grunnlag1, grunnlag2)
-
-            // Act
-            val aktive = persongrunnlagService.hentAktivForBehandlinger(behandlingIder)
-
-            // Assert
-            assertThat(aktive).hasSize(2)
-            assertThat(aktive).containsKeys(behandlingId1, behandlingId2)
-            assertThat(aktive[behandlingId1]).isEqualTo(grunnlag1)
-            assertThat(aktive[behandlingId2]).isEqualTo(grunnlag2)
+            assertThat(funksjonellFeil.melding).isEqualTo("Du kan ikke sette dødsfall dato til en dato som er før SØKER sin fødselsdato")
         }
 
         @Test
-        fun `skal returner et tomt map hvis en tom collection av behandlingIder blir sendt inn`() {
-            // Arrange
-            val behandlingIder = emptyList<Long>()
+        fun `registrerManuellDødsfallPåPerson skal kaste feil dersom man registrer dødsfall dato når personen allerede har dødsfallsdato registrert`() {
+            val dødsfallsDato = LocalDate.of(2020, 10, 10)
+            val person =
+                lagPerson(fødselsdato = dødsfallsDato.minusMonths(10)).also {
+                    it.dødsfall = Dødsfall(person = it, dødsfallDato = dødsfallsDato)
+                }
 
-            every { personopplysningGrunnlagRepository.hentAktivForBehandlinger(behandlingIder) } returns emptyList()
+            val personFnr = person.aktør.aktivFødselsnummer()
+            val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
 
-            // Act
-            val aktive = persongrunnlagService.hentAktivForBehandlinger(behandlingIder)
+            val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(
+                    behandlingId = behandling.id,
+                    personer = arrayOf(person),
+                )
 
-            // Assert
-            assertThat(aktive).isEmpty()
+            every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
+            every { personidentService.hentAktør(personFnr) } returns person.aktør
+
+            val funksjonellFeil =
+                assertThrows<FunksjonellFeil> {
+                    persongrunnlagService.registrerManuellDødsfallPåPerson(
+                        behandlingId = BehandlingId(behandling.id),
+                        personIdent = PersonIdent(personFnr),
+                        dødsfallDato = dødsfallsDato,
+                        begrunnelse = "test",
+                    )
+                }
+
+            assertThat(funksjonellFeil.melding).isEqualTo("Dødsfall dato er allerede registrert på person med navn ${person.navn}")
         }
-    }
 
-    @Nested
-    inner class OppdaterAdresserPåPersoner {
         @Test
-        fun `skal filtrer bort adresser hvor opphørstidspunktet er satt i metadataen`() {
-            // Arrange
-            val personopplysningGrunnlag = lagPersonopplysningGrunnlag()
+        fun `registrerManuellDødsfallPåPerson skal endre på vilkår og logge at manuelt dødsfalldato er registrert`() {
+            val dødsfallsDato = LocalDate.of(2020, 10, 10)
+            val person = lagPerson(fødselsdato = dødsfallsDato.minusMonths(10))
 
-            val søker =
-                lagPerson(
-                    type = PersonType.SØKER,
-                    fødselsdato = dagensDato.minusYears(30),
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    bostedsadresser = { listOf(lagGrVegadresse(matrikkelId = 1L)) },
-                    oppholdsadresser = { listOf(lagGrMatrikkelOppholdsadresse(matrikkelId = 1L)) },
-                    deltBosted = { listOf(lagGrMatrikkelDeltBosted(matrikkelId = 1L)) },
-                )
-            personopplysningGrunnlag.personer.add(søker)
+            val personFnr = person.aktør.aktivFødselsnummer()
+            val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
 
-            val barn =
-                lagPerson(
-                    type = PersonType.BARN,
-                    fødselsdato = dagensDato.minusYears(2),
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    bostedsadresser = { listOf(lagGrVegadresse(matrikkelId = 1L)) },
-                    oppholdsadresser = { listOf(lagGrMatrikkelOppholdsadresse(matrikkelId = 1L)) },
-                    deltBosted = { listOf(lagGrMatrikkelDeltBosted(matrikkelId = 1L)) },
-                )
-            personopplysningGrunnlag.personer.add(barn)
-
-            val personInfoSøker =
-                lagPersonInfo(
-                    fødselsdato = søker.fødselsdato,
-                    bostedsadresser =
-                        listOf(
-                            lagBostedsadresse(
-                                gyldigFraOgMed = dagensDato.minusYears(10),
-                                gyldigTilOgMed = dagensDato.plusYears(1),
-                                matrikkeladresse = lagMatrikkeladresse(1234L),
-                                folkeregistermetadata = lagFolkeregistermetadata(opphoerstidspunkt = dagensDato),
-                            ),
-                            lagBostedsadresse(
-                                gyldigFraOgMed = dagensDato.minusYears(1),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(9876L),
-                                folkeregistermetadata = null,
-                            ),
-                        ),
-                    oppholdsadresser =
-                        listOf(
-                            lagOppholdsadresse(
-                                gyldigFraOgMed = dagensDato.minusYears(15),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(4321L),
-                                folkeregistermetadata = lagFolkeregistermetadata(opphoerstidspunkt = dagensDato.minusYears(1)),
-                            ),
-                            lagOppholdsadresse(
-                                gyldigFraOgMed = dagensDato.minusYears(2),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(6789L),
-                                folkeregistermetadata = null,
-                            ),
-                        ),
-                    deltBosted =
-                        listOf(
-                            lagDeltBosted(
-                                startdatoForKontrakt = dagensDato.minusYears(30),
-                                sluttdatoForKontrakt = null,
-                                matrikkeladresse = lagMatrikkeladresse(1001L),
-                                folkeregistermetadata = lagFolkeregistermetadata(opphoerstidspunkt = dagensDato.minusYears(1)),
-                            ),
-                            lagDeltBosted(
-                                startdatoForKontrakt = dagensDato.minusYears(25),
-                                sluttdatoForKontrakt = null,
-                                matrikkeladresse = lagMatrikkeladresse(1001L),
-                                folkeregistermetadata = null,
-                            ),
-                        ),
+            val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(
+                    behandlingId = behandling.id,
+                    personer = arrayOf(person),
                 )
 
-            val personInfoBarn =
-                lagPersonInfo(
-                    fødselsdato = barn.fødselsdato,
-                    bostedsadresser =
-                        listOf(
-                            lagBostedsadresse(
-                                gyldigFraOgMed = dagensDato.minusYears(2),
-                                gyldigTilOgMed = dagensDato.plusYears(1),
-                                matrikkeladresse = lagMatrikkeladresse(1234L),
-                                folkeregistermetadata = lagFolkeregistermetadata(opphoerstidspunkt = dagensDato),
-                            ),
-                            lagBostedsadresse(
-                                gyldigFraOgMed = dagensDato.minusYears(2),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(9876L),
-                                folkeregistermetadata = null,
-                            ),
-                        ),
-                    oppholdsadresser =
-                        listOf(
-                            lagOppholdsadresse(
-                                gyldigFraOgMed = dagensDato.minusYears(2),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(4321L),
-                                folkeregistermetadata = lagFolkeregistermetadata(opphoerstidspunkt = dagensDato.minusYears(1)),
-                            ),
-                            lagOppholdsadresse(
-                                gyldigFraOgMed = dagensDato.minusYears(1),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(6789L),
-                                folkeregistermetadata = null,
-                            ),
-                        ),
-                    deltBosted =
-                        listOf(
-                            lagDeltBosted(
-                                startdatoForKontrakt = dagensDato.minusYears(1),
-                                sluttdatoForKontrakt = null,
-                                matrikkeladresse = lagMatrikkeladresse(1001L),
-                                folkeregistermetadata = lagFolkeregistermetadata(opphoerstidspunkt = dagensDato.minusYears(1)),
-                            ),
-                            lagDeltBosted(
-                                startdatoForKontrakt = dagensDato.minusMonths(6),
-                                sluttdatoForKontrakt = null,
-                                matrikkeladresse = lagMatrikkeladresse(1001L),
-                                folkeregistermetadata = null,
-                            ),
-                        ),
-                )
+            every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
+            every { personidentService.hentAktør(personFnr) } returns person.aktør
+            every { loggService.loggManueltRegistrertDødsfallDato(any(), any(), "test") } returns mockk()
+            every { vilkårsvurderingService.oppdaterVilkårVedDødsfall(any(), any(), any()) } just runs
 
-            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns personInfoSøker
-            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn.aktør) } returns personInfoBarn
-            every { kodeverkService.hentPoststed(any()) } returns null
+            persongrunnlagService.registrerManuellDødsfallPåPerson(
+                behandlingId = BehandlingId(behandling.id),
+                personIdent = PersonIdent(personFnr),
+                dødsfallDato = dødsfallsDato,
+                begrunnelse = "test",
+            )
 
-            // Act
-            val oppdatertPersonopplysningGrunnlag = persongrunnlagService.oppdaterAdresserPåPersoner(personopplysningGrunnlag)
+            verify(exactly = 1) { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) }
+            verify(exactly = 1) { personidentService.hentAktør(personFnr) }
+            verify(exactly = 1) { loggService.loggManueltRegistrertDødsfallDato(any(), any(), "test") }
+            verify(exactly = 1) { vilkårsvurderingService.oppdaterVilkårVedDødsfall(any(), any(), any()) }
+        }
 
-            // Assert
-            assertThat(oppdatertPersonopplysningGrunnlag.personer).hasSize(2)
-            assertThat(oppdatertPersonopplysningGrunnlag.personer).anySatisfy {
-                assertThat(it.aktør).isEqualTo(søker.aktør)
-                assertThat(it.bostedsadresser).hasSize(1)
-                assertThat(it.bostedsadresser).anySatisfy {
-                    assertThat(it.person).isEqualTo(søker)
-                    assertThat(it.periode?.fom).isEqualTo(dagensDato.minusYears(1))
-                    assertThat(it.periode?.tom).isNull()
-                }
-                assertThat(it.oppholdsadresser).hasSize(1)
-                assertThat(it.oppholdsadresser).anySatisfy {
-                    assertThat(it.person).isEqualTo(søker)
-                    assertThat(it.periode?.fom).isEqualTo(dagensDato.minusYears(2))
-                    assertThat(it.periode?.tom).isNull()
-                }
-                assertThat(it.deltBosted).hasSize(1)
-                assertThat(it.deltBosted).anySatisfy {
-                    assertThat(it.person).isEqualTo(søker)
-                    assertThat(it.periode?.fom).isEqualTo(dagensDato.minusYears(25))
-                    assertThat(it.periode?.tom).isNull()
-                }
+        @Nested
+        inner class HentAktivForBehandlinger {
+            @Test
+            fun `skal hente aktive grunnlag for behandlinger`() {
+                // Arrange
+                val behandlingId1 = 1L
+                val behandlingId2 = 2L
+                val behandlingIder = setOf(behandlingId1, behandlingId2)
+
+                val grunnlag1 = lagPersonopplysningGrunnlag(behandlingId = behandlingId1)
+                val grunnlag2 = lagPersonopplysningGrunnlag(behandlingId = behandlingId2)
+
+                every { personopplysningGrunnlagRepository.hentAktivForBehandlinger(behandlingIder) } returns listOf(grunnlag1, grunnlag2)
+
+                // Act
+                val aktive = persongrunnlagService.hentAktivForBehandlinger(behandlingIder)
+
+                // Assert
+                assertThat(aktive).hasSize(2)
+                assertThat(aktive).containsKeys(behandlingId1, behandlingId2)
+                assertThat(aktive[behandlingId1]).isEqualTo(grunnlag1)
+                assertThat(aktive[behandlingId2]).isEqualTo(grunnlag2)
             }
-            assertThat(oppdatertPersonopplysningGrunnlag.personer).anySatisfy {
-                assertThat(it.aktør).isEqualTo(barn.aktør)
-                assertThat(it.bostedsadresser).hasSize(1)
-                assertThat(it.bostedsadresser).anySatisfy {
-                    assertThat(it.person).isEqualTo(barn)
-                    assertThat(it.periode?.fom).isEqualTo(dagensDato.minusYears(2))
-                    assertThat(it.periode?.tom).isNull()
-                }
-                assertThat(it.oppholdsadresser).hasSize(1)
-                assertThat(it.oppholdsadresser).anySatisfy {
-                    assertThat(it.person).isEqualTo(barn)
-                    assertThat(it.periode?.fom).isEqualTo(dagensDato.minusYears(1))
-                    assertThat(it.periode?.tom).isNull()
-                }
-                assertThat(it.deltBosted).hasSize(1)
-                assertThat(it.deltBosted).anySatisfy {
-                    assertThat(it.person).isEqualTo(barn)
-                    assertThat(it.periode?.fom).isEqualTo(dagensDato.minusMonths(6))
-                    assertThat(it.periode?.tom).isNull()
-                }
+
+            @Test
+            fun `skal returner et tomt map hvis en tom collection av behandlingIder blir sendt inn`() {
+                // Arrange
+                val behandlingIder = emptyList<Long>()
+
+                every { personopplysningGrunnlagRepository.hentAktivForBehandlinger(behandlingIder) } returns emptyList()
+
+                // Act
+                val aktive = persongrunnlagService.hentAktivForBehandlinger(behandlingIder)
+
+                // Assert
+                assertThat(aktive).isEmpty()
             }
         }
     }
