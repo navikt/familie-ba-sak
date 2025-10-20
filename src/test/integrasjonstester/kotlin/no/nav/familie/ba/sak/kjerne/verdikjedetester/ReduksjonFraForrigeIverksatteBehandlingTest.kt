@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
+import no.nav.familie.ba.sak.fake.FakeEfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -43,7 +43,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val stegService: StegService,
-    @Autowired private val efSakRestClient: EfSakRestClient,
+    @Autowired private val efSakRestClient: FakeEfSakRestClient,
     @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
@@ -134,11 +134,13 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         overgangsstønadPerioder: List<EksternPeriode>,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
-            EksternePerioderResponse(
-                perioder = overgangsstønadPerioder,
-            )
-
+        efSakRestClient.leggTilEksternPeriode(
+            personIdent = personScenario.søker.ident,
+            eksternePerioderResponse =
+                EksternePerioderResponse(
+                    perioder = overgangsstønadPerioder,
+                ),
+        )
         val restBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,
@@ -185,10 +187,13 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
-            EksternePerioderResponse(
-                perioder = emptyList(),
-            )
+        efSakRestClient.leggTilEksternPeriode(
+            personIdent = personScenario.søker.ident,
+            eksternePerioderResponse =
+                EksternePerioderResponse(
+                    perioder = emptyList(),
+                ),
+        )
 
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(

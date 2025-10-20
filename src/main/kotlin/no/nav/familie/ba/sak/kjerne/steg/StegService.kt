@@ -33,7 +33,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -528,8 +527,8 @@ class StegService(
 
             behandlingSteg.preValiderSteg(behandling, this)
             val nesteSteg = utførendeSteg()
-            behandlingSteg.postValiderSteg(behandling)
             val behandlingEtterUtførtSteg = behandlingHentOgPersisterService.hent(behandling.id)
+            behandlingSteg.postValiderSteg(behandlingEtterUtførtSteg)
 
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 

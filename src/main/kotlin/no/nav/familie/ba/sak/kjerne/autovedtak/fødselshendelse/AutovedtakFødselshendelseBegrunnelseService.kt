@@ -80,7 +80,7 @@ class AutovedtakFødselshendelseBegrunnelseService(
             if (harFinnmarkstilleggNesteMåned) {
                 begrunnelser +=
                     Vedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_AUTOVEDTAK_FØDSEL_FINNMARKSTILLEGG,
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG_UTEN_DATO,
                         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                     )
             }
@@ -89,7 +89,7 @@ class AutovedtakFødselshendelseBegrunnelseService(
             if (harSvalbardtilleggNesteMåned) {
                 begrunnelser +=
                     Vedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_AUTOVEDTAK_FØDSEL_SVALBARDTILLEGG,
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG_UTEN_DATO,
                         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                     )
             }

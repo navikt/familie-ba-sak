@@ -4,12 +4,14 @@ import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrMatrikkeladresseDeltBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrMatrikkeladresseOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrUkjentAdresseOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrUtenlandskAdresseOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrVegadresseOppholdsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
+import no.nav.familie.kontrakter.felles.personopplysning.Folkeregistermetadata
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
@@ -72,6 +74,7 @@ fun lagBostedsadresse(
     vegadresse: Vegadresse? = null,
     matrikkeladresse: Matrikkeladresse? = null,
     ukjentBosted: UkjentBosted? = null,
+    folkeregistermetadata: Folkeregistermetadata? = null,
 ) = Bostedsadresse(
     gyldigFraOgMed = gyldigFraOgMed,
     gyldigTilOgMed = gyldigTilOgMed,
@@ -79,6 +82,7 @@ fun lagBostedsadresse(
     vegadresse = vegadresse,
     matrikkeladresse = matrikkeladresse,
     ukjentBosted = ukjentBosted,
+    folkeregistermetadata = folkeregistermetadata,
 )
 
 fun lagDeltBosted(
@@ -87,6 +91,7 @@ fun lagDeltBosted(
     vegadresse: Vegadresse? = null,
     matrikkeladresse: Matrikkeladresse? = null,
     ukjentBosted: UkjentBosted? = null,
+    folkeregistermetadata: Folkeregistermetadata? = null,
 ): DeltBosted =
     DeltBosted(
         startdatoForKontrakt = startdatoForKontrakt,
@@ -94,6 +99,7 @@ fun lagDeltBosted(
         vegadresse = vegadresse,
         matrikkeladresse = matrikkeladresse,
         ukjentBosted = ukjentBosted,
+        folkeregistermetadata = folkeregistermetadata,
     )
 
 fun lagOppholdsadresse(
@@ -103,6 +109,7 @@ fun lagOppholdsadresse(
     vegadresse: Vegadresse? = null,
     matrikkeladresse: Matrikkeladresse? = null,
     utenlandskAdresse: UtenlandskAdresse? = null,
+    folkeregistermetadata: Folkeregistermetadata? = null,
 ) = Oppholdsadresse(
     gyldigFraOgMed = gyldigFraOgMed,
     gyldigTilOgMed = gyldigTilOgMed,
@@ -110,6 +117,7 @@ fun lagOppholdsadresse(
     vegadresse = vegadresse,
     matrikkeladresse = matrikkeladresse,
     utenlandskAdresse = utenlandskAdresse,
+    folkeregistermetadata = folkeregistermetadata,
 )
 
 fun lagVegadresse(
@@ -192,6 +200,23 @@ fun lagGrMatrikkelOppholdsadresse(
     poststed = poststed,
 ).also { it.periode = periode }
 
+fun lagGrMatrikkelDeltBosted(
+    matrikkelId: Long? = null,
+    bruksenhetsnummer: String? = null,
+    kommunenummer: String? = null,
+    tilleggsnavn: String? = null,
+    postnummer: String? = null,
+    periode: DatoIntervallEntitet? = null,
+    poststed: String? = null,
+) = GrMatrikkeladresseDeltBosted(
+    matrikkelId = matrikkelId,
+    bruksenhetsnummer = bruksenhetsnummer,
+    kommunenummer = kommunenummer,
+    tilleggsnavn = tilleggsnavn,
+    postnummer = postnummer,
+    poststed = poststed,
+).also { it.periode = periode }
+
 fun lagGrUtenlandskOppholdsadresse(
     adressenavnNummer: String? = null,
     bygningEtasjeLeilighet: String? = null,
@@ -222,3 +247,13 @@ fun lagGrUkjentAdresseOppholdsadresse(
     it.periode = periode
     it.oppholdAnnetSted = oppholdAnnetSted
 }
+
+fun lagFolkeregistermetadata(
+    opphoerstidspunkt: LocalDate? = null,
+    kilde: String? = null,
+    aarsak: String? = null,
+) = Folkeregistermetadata(
+    opphoerstidspunkt = opphoerstidspunkt,
+    kilde = kilde,
+    aarsak = aarsak,
+)

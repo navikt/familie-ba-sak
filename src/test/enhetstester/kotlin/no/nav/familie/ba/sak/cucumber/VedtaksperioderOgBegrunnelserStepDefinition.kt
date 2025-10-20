@@ -25,11 +25,13 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockAutovedtakFinnmarkstilleggService
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockAutovedtakSvalbardtilleggService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.FinnmarkstilleggData
+import no.nav.familie.ba.sak.kjerne.autovedtak.SvalbardtilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -38,6 +40,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.LANDKODER
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -92,7 +95,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     var uregistrerteBarn = listOf<BarnMedOpplysninger>()
     var dagensDato: LocalDate = LocalDate.now()
     var toggles = mapOf<Long, Map<String, Boolean>>()
-    var adresser = mutableMapOf<String, PdlBostedsadresseDeltBostedOppholdsadressePerson>()
+    var adresser = mutableMapOf<String, PdlAdresserPerson>()
 
     var utvidetVedtaksperiodeMedBegrunnelser = listOf<UtvidetVedtaksperiodeMedBegrunnelser>()
 
@@ -468,8 +471,8 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     /**
      * Mulige verdier: | Begrunnelse | Type | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Avtale tidspunkt delt bosted | Søkers rett til utvidet |
      */
-    @Så("forvent følgende brevbegrunnelser for behandling {} i periode {} til {}")
-    fun `forvent følgende brevbegrunnelser for behandling i periode`(
+    @Så("forvent følgende brevbegrunnelser i rekkefølge for behandling {} i periode {} til {}")
+    fun `forvent følgende brevbegrunnelser i rekkefølge for behandling i periode`(
         behandlingId: Long,
         periodeFom: String,
         periodeTom: String,
@@ -481,9 +484,12 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         val grunnlagForBegrunnelse = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
 
         val vedtaksperiodeMedBegrunnelser =
-            vedtaksperioderMedBegrunnelser.find {
+            vedtaksperioderMedBegrunnelser.filter {
                 it.fom == parseNullableDato(periodeFom) && it.tom == parseNullableDato(periodeTom)
-            } ?: throw Feil(
+            }
+
+        if (vedtaksperioderMedBegrunnelser.isEmpty()) {
+            throw Feil(
                 "Forventet å finne en vedtaksperiode med Fom: $periodeFom og Tom: $periodeTom. \n" +
                     "Faktiske vedtaksperioder var \n${
                         vedtaksperioderMedBegrunnelser.joinToString("\n") {
@@ -491,19 +497,22 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
                         }
                     }",
             )
+        }
 
-        val faktiskeBegrunnelser: List<BegrunnelseMedData> =
-            vedtaksperiodeMedBegrunnelser
-                .lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER, mockFeatureToggleService().isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE))!!
-                .begrunnelser
-                .filterIsInstance<BegrunnelseMedData>()
+        val faktiskeBegrunnelser =
+            vedtaksperiodeMedBegrunnelser.flatMap { vedtaksperiodeMedBegrunnelser ->
+                vedtaksperiodeMedBegrunnelser
+                    .lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER, mockFeatureToggleService().isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE))!!
+                    .begrunnelser
+                    .filterIsInstance<BegrunnelseMedData>()
+            }
 
         val forvendtedeBegrunnelser = parseBegrunnelser(dataTable)
 
-        assertThat(faktiskeBegrunnelser.sortedBy { it.apiNavn })
+        assertThat(faktiskeBegrunnelser)
             .usingRecursiveComparison()
             .ignoringFields("vedtakBegrunnelseType")
-            .isEqualTo(forvendtedeBegrunnelser.sortedBy { it.apiNavn })
+            .isEqualTo(forvendtedeBegrunnelser)
     }
 
     /**
@@ -585,8 +594,8 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
      *
      * Adressetype kan være "Bostedsadresse" eller "Delt bosted"
      */
-    @Og("med bostedskommuner")
-    fun `med bostedskommuner`(dataTable: DataTable) {
+    @Og("med adressekommuner")
+    fun `med adressekommuner`(dataTable: DataTable) {
         adresser.putAll(parseAdresser(dataTable, persongrunnlag))
     }
 
@@ -600,6 +609,29 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
             fagsakId = fagsakId,
             nyBehanldingId = finnmarkstilleggBehandlingId,
         ).kjørBehandling(FinnmarkstilleggData(fagsakId))
+    }
+
+    @Når("vi lager automatisk behandling med id {} på fagsak {} på grunn av svalbardtillegg")
+    fun `kjør behandling svalbardtillegg på fagsak med behandlingsid`(
+        svalbardtilleggBehandlingId: Long,
+        fagsakId: Long,
+    ) {
+        mockAutovedtakSvalbardtilleggService(
+            dataFraCucumber = this,
+            fagsakId = fagsakId,
+            nyBehanldingId = svalbardtilleggBehandlingId,
+        ).kjørBehandling(SvalbardtilleggData(fagsakId))
+    }
+
+    @Så("forvent at brevmal {} er brukt for behandling {}")
+    fun `forvent følgende brevmal for behandling`(
+        forventetBrevmal: Brevmal,
+        behandlingId: Long,
+    ) {
+        val behandling = behandlinger.finnBehandling(behandlingId)
+        val faktiskBrevmal = CucumberMock(this, behandlingId).brevmalService.hentBrevmal(behandling)
+
+        assertThat(faktiskBrevmal).isEqualTo(forventetBrevmal)
     }
 
     @Så("forvent følgende vilkårresultater for behandling {}")

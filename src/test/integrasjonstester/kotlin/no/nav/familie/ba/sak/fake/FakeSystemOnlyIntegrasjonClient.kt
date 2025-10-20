@@ -5,17 +5,11 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Ansettels
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsgiver
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
-import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
-import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import java.net.URI
 import java.time.LocalDate
 
-@Service
-@Profile("mock-system-only-integrasjon-client")
-@Primary
-class MockSystemOnlyIntegrasjonClient :
+class FakeSystemOnlyIntegrasjonClient :
     SystemOnlyIntegrasjonClient(
         integrasjonUri = URI("http://dummy-uri"),
         restOperations = RestTemplate(),

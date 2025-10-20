@@ -51,6 +51,6 @@ Egenskap: Brevbegrunnelser ved endring av utdypende vilkår
       | Fra dato   | Til dato   | Standardbegrunnelser                               | Eøsbegrunnelser | Fritekster |
       | 01.08.2023 | 30.11.2025 | INNVILGET_VURDERING_HELE_FAMILIEN_FRIVILLIG_MEDLEM |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.08.2023 til 30.11.2025
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.08.2023 til 30.11.2025
       | Begrunnelse                                        | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | INNVILGET_VURDERING_HELE_FAMILIEN_FRIVILLIG_MEDLEM | STANDARD | Ja            | 03.12.07 og 21.07.14 | 2           | juli 2023                            | NB      | 2 620 |

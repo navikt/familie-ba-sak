@@ -7,7 +7,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -46,12 +46,13 @@ class FiltreringsreglerServiceTest {
     private val personidentService = mockk<PersonidentService>()
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
-    private val localDateService = mockk<LocalDateService>()
     private val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>()
     private val behandlingService = mockk<BehandlingService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val tilkjentYtelseValideringService = mockk<TilkjentYtelseValideringService>()
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
+
+    private var clockProvider = TestClockProvider()
 
     private val filtreringsreglerService =
         FiltreringsreglerService(
@@ -59,7 +60,7 @@ class FiltreringsreglerServiceTest {
             personidentService = personidentService,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
-            localDateService = localDateService,
+            clockProvider = clockProvider,
             fødselshendelsefiltreringResultatRepository = fødselshendelsefiltreringResultatRepository,
             behandlingService = behandlingService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -513,8 +514,6 @@ class FiltreringsreglerServiceTest {
             )
 
         every { personopplysningerService.harVerge(mor.aktør) } returns VergeResponse(false)
-
-        every { localDateService.now() } returns LocalDate.now()
 
         every {
             tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(

@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
@@ -26,7 +26,7 @@ fun mockSystemOnlyPdlRestClient(
 
                 val eksisterendeAdresser = dataFraCucumber.adresser[ident]
                 if (eksisterendeAdresser == null || eksisterendeAdresser.bostedsadresse.isEmpty()) {
-                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                    PdlAdresserPerson(
                         bostedsadresse = listOf(Bostedsadresse(gyldigFraOgMed = fødselsdato, vegadresse = vegadresseIOslo)),
                         deltBosted = eksisterendeAdresser?.deltBosted ?: emptyList(),
                     )
@@ -36,7 +36,7 @@ fun mockSystemOnlyPdlRestClient(
             }
         }
 
-        every { hentBostedsadresseDeltBostedOgOppholdsadresseForPersoner(any()) } answers {
+        every { hentAdresserForPersoner(any()) } answers {
             val identer = firstArg<List<String>>()
             val vegadresseIOslo = Vegadresse(null, null, null, null, null, "0301", null, null)
             identer.associateWith { ident ->
@@ -48,9 +48,10 @@ fun mockSystemOnlyPdlRestClient(
 
                 val eksisterendeAdresser = dataFraCucumber.adresser[ident]
                 if (eksisterendeAdresser == null || eksisterendeAdresser.bostedsadresse.isEmpty()) {
-                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                    PdlAdresserPerson(
                         bostedsadresse = listOf(Bostedsadresse(gyldigFraOgMed = fødselsdato, vegadresse = vegadresseIOslo)),
                         deltBosted = eksisterendeAdresser?.deltBosted ?: emptyList(),
+                        oppholdsadresse = eksisterendeAdresser?.oppholdsadresse ?: emptyList(),
                     )
                 } else {
                     eksisterendeAdresser

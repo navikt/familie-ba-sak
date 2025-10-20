@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_BRUKE_ADRESSEHENDELSELØYPE_SVALBARDTILLEGG
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.finnInnvilgedeOgReduserteSvalbardtilleggPerioder
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.leggTilBegrunnelseIVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -19,6 +21,7 @@ class AutovedtakSvalbardtilleggBegrunnelseService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun begrunnAutovedtakForSvalbardtillegg(
         behandlingEtterBehandlingsresultat: Behandling,
@@ -29,6 +32,7 @@ class AutovedtakSvalbardtilleggBegrunnelseService(
             )
         val forrigeAndeler = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = sistIverksatteBehandling.id)
         val nåværendeAndeler = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = behandlingEtterBehandlingsresultat.id)
+        val skalBrukeInnvilgetSvalbardtilleggMedDatoBegrunnelse = featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_SVALBARDTILLEGG)
 
         val (innvilgetMånedTidspunkt, redusertMånedTidspunkt) =
             finnInnvilgedeOgReduserteSvalbardtilleggPerioder(
@@ -48,7 +52,7 @@ class AutovedtakSvalbardtilleggBegrunnelseService(
         innvilgetMånedTidspunkt.forEach {
             leggTilBegrunnelseIVedtaksperiode(
                 vedtaksperiodeStartDato = it,
-                standardbegrunnelse = Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG,
+                standardbegrunnelse = if (skalBrukeInnvilgetSvalbardtilleggMedDatoBegrunnelse) Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG else Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG_UTEN_DATO,
                 vedtaksperioder = vedtaksperioder,
             )
         }

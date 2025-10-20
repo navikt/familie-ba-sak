@@ -112,7 +112,7 @@ Egenskap: Gyldige begrunnelser ved delt bosted i vilkår
       | Fra dato   | Til dato   | Standardbegrunnelser                           | Eøsbegrunnelser | Fritekster |
       | 01.01.2025 | 31.07.2026 | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.01.2025 til 31.07.2026
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.01.2025 til 31.07.2026
       | Begrunnelse                                    | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED | STANDARD |               | 29.08.08             | 1           | desember 2024                        |         | 883   | 16.12.24         |                         |                             |
 
@@ -231,6 +231,6 @@ Egenskap: Gyldige begrunnelser ved delt bosted i vilkår
       | Fra dato   | Til dato   | Standardbegrunnelser                           | Eøsbegrunnelser | Fritekster |
       | 01.11.2024 | 30.09.2030 | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.11.2024 til 30.09.2030
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.11.2024 til 30.09.2030
       | Begrunnelse                                    | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
       | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED | STANDARD | Nei           | 27.04.18             | 1           | oktober 2024                         | 883   | 25.10.24         | SØKER_FÅR_UTVIDET       |

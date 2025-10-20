@@ -33,7 +33,7 @@ class FagsakDeltagerController(
         søkParam.valider()
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} søker fagsak")
 
-        val fagsakDeltagere = fagsakDeltagerService.hentFagsakDeltager(søkParam.personIdent)
+        val fagsakDeltagere = fagsakDeltagerService.hentFagsakDeltagere(søkParam.personIdent)
         return ResponseEntity.ok().body(Ressurs.success(fagsakDeltagere))
     }
 
@@ -47,7 +47,7 @@ class FagsakDeltagerController(
                 val aktør = personidentService.hentAktør(restSøkParam.personIdent)
                 val barnsAktørId = personidentService.hentAktørIder(restSøkParam.barnasIdenter)
 
-                fagsakDeltagerService.oppgiFagsakdeltagere(aktør, barnsAktørId)
+                fagsakDeltagerService.oppgiFagsakDeltagere(aktør, barnsAktørId)
             }.fold(
                 onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                 onFailure = {

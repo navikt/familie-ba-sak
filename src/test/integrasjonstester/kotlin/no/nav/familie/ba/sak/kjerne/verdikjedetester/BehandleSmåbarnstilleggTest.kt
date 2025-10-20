@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import io.mockk.verify
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
@@ -12,7 +11,9 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandard
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
+import no.nav.familie.ba.sak.fake.FakeEfSakRestClient
+import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
+import no.nav.familie.ba.sak.fake.tilPayload
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -37,9 +38,10 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
-import no.nav.familie.ba.sak.mock.EfSakRestClientMock
+import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
+import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
 import no.nav.familie.ba.sak.util.ordinærSatsNesteMånedTilTester
 import no.nav.familie.ba.sak.util.sisteSmåbarnstilleggSatsTilTester
 import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
@@ -48,6 +50,7 @@ import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -72,11 +75,12 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val stegService: StegService,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val personidentService: PersonidentService,
-    @Autowired private val efSakRestClient: EfSakRestClient,
+    @Autowired private val efSakRestClient: FakeEfSakRestClient,
     @Autowired private val autovedtakStegService: AutovedtakStegService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val opprettTaskService: OpprettTaskService,
     @Autowired private val brevmalService: BrevmalService,
+    @Autowired private val fakeTaskRepositoryWrapper: FakeTaskRepositoryWrapper,
 ) : AbstractVerdikjedetest() {
     private val barnFødselsdato = LocalDate.now().minusYears(2)
     private val periodeMedFullOvergangsstønadFom = barnFødselsdato.plusYears(1)
@@ -111,18 +115,21 @@ class BehandleSmåbarnstilleggTest(
     }
 
     private fun settOppefSakMockForDeFørste2Testene(søkersIdent: String) {
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
-            EksternePerioderResponse(
-                perioder =
-                    listOf(
-                        EksternPeriode(
-                            personIdent = søkersIdent,
-                            fomDato = periodeMedFullOvergangsstønadFom,
-                            tomDato = barnFødselsdato.plusYears(18),
-                            datakilde = Datakilde.EF,
+        efSakRestClient.leggTilEksternPeriode(
+            personIdent = søkersIdent,
+            eksternePerioderResponse =
+                EksternePerioderResponse(
+                    perioder =
+                        listOf(
+                            EksternPeriode(
+                                personIdent = søkersIdent,
+                                fomDato = periodeMedFullOvergangsstønadFom,
+                                tomDato = barnFødselsdato.plusYears(18),
+                                datakilde = Datakilde.EF,
+                            ),
                         ),
-                    ),
-            )
+                ),
+        )
     }
 
     @Test
@@ -318,28 +325,33 @@ class BehandleSmåbarnstilleggTest(
     @Test
     @Order(3)
     fun `Skal stoppe automatisk behandling som må fortsette manuelt pga tilbakekreving`() {
-        EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
-
+        efSakRestClient.reset()
         val søkersAktør = personidentService.hentAktør(scenario.søker.aktørId)
 
         val periodeOvergangsstønadTom = LocalDate.now().minusMonths(3)
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
-            EksternePerioderResponse(
-                perioder =
-                    listOf(
-                        EksternPeriode(
-                            personIdent = søkersAktør.aktivFødselsnummer(),
-                            fomDato = periodeMedFullOvergangsstønadFom,
-                            tomDato = periodeOvergangsstønadTom,
-                            datakilde = Datakilde.EF,
+        efSakRestClient.leggTilEksternPeriode(
+            personIdent = scenario.søker.ident,
+            eksternePerioderResponse =
+                EksternePerioderResponse(
+                    perioder =
+                        listOf(
+                            EksternPeriode(
+                                personIdent = søkersAktør.aktivFødselsnummer(),
+                                fomDato = periodeMedFullOvergangsstønadFom,
+                                tomDato = periodeOvergangsstønadTom,
+                                datakilde = Datakilde.EF,
+                            ),
                         ),
-                    ),
-            )
+                ),
+        )
+
+        // Act
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
             aktør = søkersAktør,
         )
 
+        // Assert
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
 
@@ -352,13 +364,10 @@ class BehandleSmåbarnstilleggTest(
                 ).size,
         )
 
-        verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
-                behandlingId = aktivBehandling.id,
-                beskrivelse = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt",
-                manuellOppgaveType = ManuellOppgaveType.SMÅBARNSTILLEGG,
-            )
-        }
+        val lagredeOpprettOppgaveTasks = fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilPayload<OpprettOppgaveTaskDTO>()
+
+        val lagretOpprettOppgave = lagredeOpprettOppgaveTasks.singleOrNull { it.behandlingId == aktivBehandling.id && it.beskrivelse == "Småbarnstillegg: endring i overgangsstønad må behandles manuelt" && it.manuellOppgaveType == ManuellOppgaveType.SMÅBARNSTILLEGG }
+        assertThat(lagretOpprettOppgave).isNotNull
 
         assertEquals(StegType.BEHANDLINGSRESULTAT, aktivBehandling.steg)
         assertEquals(BehandlingStatus.UTREDES, aktivBehandling.status)
@@ -378,24 +387,27 @@ class BehandleSmåbarnstilleggTest(
     @Test
     @Order(4)
     fun `Skal automatisk endre småbarnstilleggperioder`() {
-        EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
+        efSakRestClient.reset()
 
         val søkersIdent = scenario.søker.ident
         val søkersAktør = personidentService.hentAktør(søkersIdent)
 
         val periodeOvergangsstønadTom = LocalDate.now()
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
-            EksternePerioderResponse(
-                perioder =
-                    listOf(
-                        EksternPeriode(
-                            personIdent = søkersIdent,
-                            fomDato = periodeMedFullOvergangsstønadFom,
-                            tomDato = periodeOvergangsstønadTom,
-                            datakilde = Datakilde.EF,
+        efSakRestClient.leggTilEksternPeriode(
+            personIdent = søkersIdent,
+            eksternePerioderResponse =
+                EksternePerioderResponse(
+                    perioder =
+                        listOf(
+                            EksternPeriode(
+                                personIdent = søkersIdent,
+                                fomDato = periodeMedFullOvergangsstønadFom,
+                                tomDato = periodeOvergangsstønadTom,
+                                datakilde = Datakilde.EF,
+                            ),
                         ),
-                    ),
-            )
+                ),
+        )
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
             aktør = søkersAktør,

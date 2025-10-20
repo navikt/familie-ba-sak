@@ -52,7 +52,11 @@ import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.time.LocalDate
 import java.time.YearMonth
 
-fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
+fun hentAutomatiskVedtaksbrevtype(
+    behandling: Behandling,
+    skalBrukeAutovedtakEndringsbrevForFinnmarkstillegg: Boolean,
+    skalBrukeAutovedtakEndringsbrevForSvalbardtillegg: Boolean,
+): Brevmal {
     val behandlingÅrsak = behandling.opprettetÅrsak
     val fagsakStatus = behandling.fagsak.status
 
@@ -68,13 +72,21 @@ fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
         BehandlingÅrsak.OMREGNING_18ÅR,
         BehandlingÅrsak.SMÅBARNSTILLEGG,
         BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG,
-        -> Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
+        -> Brevmal.AUTOVEDTAK_ENDRING
 
-        BehandlingÅrsak.FINNMARKSTILLEGG,
-        -> Brevmal.AUTOVEDTAK_FINNMARKSTILLEGG
+        BehandlingÅrsak.FINNMARKSTILLEGG ->
+            if (skalBrukeAutovedtakEndringsbrevForFinnmarkstillegg) {
+                Brevmal.AUTOVEDTAK_ENDRING
+            } else {
+                Brevmal.AUTOVEDTAK_FINNMARKSTILLEGG
+            }
 
-        BehandlingÅrsak.SVALBARDTILLEGG,
-        -> Brevmal.AUTOVEDTAK_SVALBARDTILLEGG
+        BehandlingÅrsak.SVALBARDTILLEGG ->
+            if (skalBrukeAutovedtakEndringsbrevForSvalbardtillegg) {
+                Brevmal.AUTOVEDTAK_ENDRING
+            } else {
+                Brevmal.AUTOVEDTAK_SVALBARDTILLEGG
+            }
 
         else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
     }

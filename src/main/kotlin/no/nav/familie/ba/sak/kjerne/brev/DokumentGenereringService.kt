@@ -36,11 +36,11 @@ class DokumentGenereringService(
     private val organisasjonService: OrganisasjonService,
 ) {
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
-        try {
-            if (!vedtak.behandling.skalBehandlesAutomatisk && vedtak.behandling.steg > StegType.BESLUTTE_VEDTAK) {
-                throw FunksjonellFeil("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter")
-            }
+        if (!vedtak.behandling.skalBehandlesAutomatisk && vedtak.behandling.steg > StegType.BESLUTTE_VEDTAK) {
+            throw FunksjonellFeil("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter")
+        }
 
+        try {
             val sammensattKontrollsak = sammensattKontrollsakService.finnSammensattKontrollsak(vedtak.behandling.id)
 
             val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
@@ -52,9 +52,11 @@ class DokumentGenereringService(
                     else -> brevService.hentVedtaksbrevData(vedtak)
                 }
             return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
-        } catch (feil: Throwable) {
-            if (feil is FunksjonellFeil) throw feil
+        } catch (funksjonellFeil: FunksjonellFeil) {
+            secureLogger.info("Funksjonell feil ved dokumentgenerering av vedtaksbrev i behandling ${vedtak.behandling.id}.")
 
+            throw funksjonellFeil
+        } catch (feil: Throwable) {
             secureLogger.info("Feil ved dokumentgenerering. Genererer hentBegrunnelsetest \n ${testVerktøyService.hentBegrunnelsetest(vedtak.behandling.id)}")
             secureLogger.info("Feil ved dokumentgenerering. Genererer hentVedtaksperioderTest \n ${testVerktøyService.hentVedtaksperioderTest(vedtak.behandling.id)}")
 
@@ -117,12 +119,11 @@ class DokumentGenereringService(
             FagsakType.NORMAL, FagsakType.BARN_ENSLIG_MINDREÅRIG ->
                 personopplysningerService.hentPersoninfoEnkel(fagsak.aktør).navn ?: throw Feil("Klarte ikke hente navn på fagsak.aktør fra pdl")
 
-            FagsakType.INSTITUSJON ->
-                {
-                    val orgnummer = fagsak.institusjon?.orgNummer ?: throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
+            FagsakType.INSTITUSJON -> {
+                val orgnummer = fagsak.institusjon?.orgNummer ?: throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
 
-                    organisasjonService.hentOrganisasjon(orgnummer).navn
-                }
+                organisasjonService.hentOrganisasjon(orgnummer).navn
+            }
 
             FagsakType.SKJERMET_BARN -> {
                 val søkerAktør = fagsak.skjermetBarnSøker?.aktør ?: throw Feil("Fant ikke søker på skjermet barn fagsak id ${fagsak.id}")

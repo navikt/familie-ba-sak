@@ -87,6 +87,6 @@ Egenskap: Brevbegrunnelser ved endring etter opphør
       | 01.04.2024 | 30.04.2024 | REDUKSJON_FLYTTET_BARN |                 |            |
       | 01.05.2024 |            | OPPHØR_UNDER_18_ÅR     |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.05.2024 til -
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.05.2024 til -
       | Begrunnelse        | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | OPPHØR_UNDER_18_ÅR | STANDARD | Nei           | 07.05.06             | 1           | april 2024                           | nb      | 0     |

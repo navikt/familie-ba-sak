@@ -75,9 +75,6 @@ class HentAlleIdenterTilPsysTask(
         return identerFraDB.plus(identerFraInfotrygd).distinct()
     }
 
-    override fun onCompletion(task: Task) {
-    }
-
     companion object {
         fun lagTask(
             år: Int,

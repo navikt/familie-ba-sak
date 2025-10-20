@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.kontrakter.ba.finnmarkstillegg.kommuneErIFinnmarkEllerNordTroms
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
+import no.nav.familie.kontrakter.felles.personopplysning.Folkeregistermetadata
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
@@ -20,7 +21,17 @@ data class Adresse(
     val matrikkeladresse: Matrikkeladresse? = null,
     val ukjentBosted: UkjentBosted? = null,
     val oppholdAnnetSted: OppholdAnnetSted? = null,
+    val folkeregistermetadata: Folkeregistermetadata? = null,
 ) {
+    /**
+     * Dette kan oppstå ved dårlig datakvalitet.
+     */
+    fun erFomOgTomNull() = gyldigFraOgMed == null && gyldigTilOgMed == null
+
+    fun erFomOgTomSamme() = gyldigFraOgMed == gyldigTilOgMed
+
+    fun erFomEtterTom() = gyldigFraOgMed != null && gyldigTilOgMed != null && gyldigFraOgMed.isAfter(gyldigTilOgMed)
+
     fun overlapperMedDato(dato: LocalDate): Boolean {
         val harGyldigFraOgMed = gyldigFraOgMed == null || gyldigFraOgMed.isSameOrBefore(dato)
         val harGyldigTilOgMed = gyldigTilOgMed == null || gyldigTilOgMed.isSameOrAfter(dato)
@@ -55,6 +66,7 @@ data class Adresse(
                 vegadresse = bostedsadresse.vegadresse,
                 matrikkeladresse = bostedsadresse.matrikkeladresse,
                 ukjentBosted = bostedsadresse.ukjentBosted,
+                folkeregistermetadata = bostedsadresse.folkeregistermetadata,
             )
 
         fun opprettFra(deltBosted: DeltBosted) =
@@ -64,6 +76,7 @@ data class Adresse(
                 vegadresse = deltBosted.vegadresse,
                 matrikkeladresse = deltBosted.matrikkeladresse,
                 ukjentBosted = deltBosted.ukjentBosted,
+                folkeregistermetadata = deltBosted.folkeregistermetadata,
             )
 
         fun opprettFra(oppholdsadresse: Oppholdsadresse): Adresse =
@@ -73,6 +86,7 @@ data class Adresse(
                 vegadresse = oppholdsadresse.vegadresse,
                 matrikkeladresse = oppholdsadresse.matrikkeladresse,
                 oppholdAnnetSted = OppholdAnnetSted.parse(oppholdsadresse.oppholdAnnetSted),
+                folkeregistermetadata = oppholdsadresse.folkeregistermetadata,
             )
     }
 }

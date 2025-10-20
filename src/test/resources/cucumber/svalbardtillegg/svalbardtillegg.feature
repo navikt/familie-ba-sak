@@ -87,7 +87,7 @@ Egenskap: Svalbardtillegg
       | Fra dato   | Til dato   | Standardbegrunnelser      | Eøsbegrunnelser | Fritekster |
       | 01.08.2025 | 29.02.2036 | INNVILGET_SVALBARDTILLEGG |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.08.2025 til 29.02.2036
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.08.2025 til 29.02.2036
       | Begrunnelse               | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | INNVILGET_SVALBARDTILLEGG | STANDARD | Ja            | 31.05.18             | 1           | juli 2025                            |         | 4 436 |                  |                         |                             |
 
@@ -175,6 +175,6 @@ Egenskap: Svalbardtillegg
       | Fra dato   | Til dato   | Standardbegrunnelser      | Eøsbegrunnelser | Fritekster |
       | 01.08.2025 | 29.02.2036 | INNVILGET_SVALBARDTILLEGG |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.08.2025 til 29.02.2036
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.08.2025 til 29.02.2036
       | Begrunnelse               | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | INNVILGET_SVALBARDTILLEGG | STANDARD | Ja            | 31.05.18             | 1           | juli 2025                            |         | 4 436 |                  |                         |                             |

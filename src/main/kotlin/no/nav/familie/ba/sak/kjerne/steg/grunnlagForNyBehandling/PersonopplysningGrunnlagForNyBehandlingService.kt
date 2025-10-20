@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -23,11 +22,16 @@ class PersonopplysningGrunnlagForNyBehandlingService(
         søkerIdent: String,
         barnasIdenter: List<String>,
     ) {
-        if (behandling.erSatsendringEllerMånedligValutajustering() || behandling.erFinnmarksTilleggEllerSvalbardtillegg() || behandling.opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING) {
+        if (behandling.erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() || behandling.erTekniskEndring()) {
             if (forrigeBehandlingSomErVedtatt == null) {
                 throw Feil("Vi kan ikke kjøre behandling med årsak ${behandling.opprettetÅrsak} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}")
             }
-            opprettKopiAvPersonopplysningGrunnlag(behandling, forrigeBehandlingSomErVedtatt, søkerIdent)
+
+            if (behandling.erFinnmarksEllerSvalbardtillegg()) {
+                opprettKopiAvPersonopplysningGrunnlagMedNyAdresse(behandling, forrigeBehandlingSomErVedtatt, søkerIdent)
+            } else {
+                opprettKopiAvPersonopplysningGrunnlag(behandling, forrigeBehandlingSomErVedtatt, søkerIdent)
+            }
         } else {
             opprettPersonopplysningGrunnlag(behandling, forrigeBehandlingSomErVedtatt, søkerIdent, barnasIdenter)
         }
@@ -49,6 +53,24 @@ class PersonopplysningGrunnlagForNyBehandlingService(
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
     }
 
+    private fun opprettKopiAvPersonopplysningGrunnlagMedNyAdresse(
+        behandling: Behandling,
+        forrigeBehandlingSomErVedtatt: Behandling,
+        søkerIdent: String,
+    ) {
+        val søkerAktør = personidentService.hentOgLagreAktør(søkerIdent, true)
+
+        val barnaAktør = finnBarnMedTilkjentYtelseIForrigeBehandling(behandling, forrigeBehandlingSomErVedtatt)
+
+        val personopplysningGrunnlag =
+            persongrunnlagService
+                .hentAktivThrows(forrigeBehandlingSomErVedtatt.id)
+                .tilKopiForNyBehandling(behandling, listOf(søkerAktør).plus(barnaAktør))
+
+        persongrunnlagService.oppdaterAdresserPåPersoner(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+    }
+
     private fun opprettPersonopplysningGrunnlag(
         behandling: Behandling,
         forrigeBehandlingSomErVedtatt: Behandling?,
@@ -57,7 +79,6 @@ class PersonopplysningGrunnlagForNyBehandlingService(
     ) {
         val aktør = personidentService.hentOgLagreAktør(søkerIdent, true)
         val barnaAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
-
         val målform =
             forrigeBehandlingSomErVedtatt
                 ?.let { persongrunnlagService.hentSøkersMålform(behandlingId = it.id) }

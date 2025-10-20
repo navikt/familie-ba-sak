@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggBegrunnelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggBegrunnelseService
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.EksternBehandlingRelasjonService
@@ -38,10 +39,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatStegValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterTilkjentYtelseService
@@ -62,6 +64,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.småbarnstillegg.SmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.steg.BeslutteVedtak
 import no.nav.familie.ba.sak.kjerne.steg.FerdigstillBehandling
 import no.nav.familie.ba.sak.kjerne.steg.IverksettMotOppdrag
@@ -154,6 +157,7 @@ class CucumberMock(
             togglesForBehandling.forEach { (toggleId, isEnabled) ->
                 val featureToggle = FeatureToggle.entries.find { it.navn == toggleId } ?: throw Feil("$toggleId does not exist")
                 every { featureToggleService.isEnabled(featureToggle, behandlingId) } returns isEnabled
+                every { featureToggleService.isEnabled(featureToggle) } returns isEnabled
             }
         }
     }
@@ -404,27 +408,37 @@ class CucumberMock(
             featureToggleService = mockFeatureToggleService(),
         )
 
-    val småbarnstilleggService = SmåbarnstilleggService(beregningService)
+    val småbarnstilleggService =
+        SmåbarnstilleggService(
+            beregningService = beregningService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+        )
+
+    val behandlingsresultatStegValideringService =
+        BehandlingsresultatStegValideringService(
+            beregningService = beregningService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            vilkårService = vilkårService,
+            kompetanseRepository = kompetanseRepository,
+            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+            valutakursRepository = valutakursRepository,
+            clockProvider = clockProvider,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+        )
 
     val behandlingsresultatSteg =
         BehandlingsresultatSteg(
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             behandlingService = behandlingService,
             simuleringService = simuleringService,
             vedtakService = vedtakService,
             vedtaksperiodeService = vedtaksperiodeService,
             behandlingsresultatService = behandlingsresultatService,
-            vilkårService = vilkårService,
             persongrunnlagService = persongrunnlagService,
             beregningService = beregningService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
-            valutakursRepository = valutakursRepository,
-            clockProvider = clockProvider,
-            kompetanseRepository = kompetanseRepository,
             småbarnstilleggService = småbarnstilleggService,
             tilbakestillBehandlingService = tilbakestillBehandlingService,
+            behandlingsresultatstegValideringService = behandlingsresultatStegValideringService,
         )
 
     val saksbehandlerContext = SaksbehandlerContext("", mockk())
@@ -586,6 +600,17 @@ class CucumberMock(
             beregningService = beregningService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
+            featureToggleService = featureToggleService,
+        )
+
+    val autovedtakSvalbardtilleggBegrunnelseService =
+        AutovedtakSvalbardtilleggBegrunnelseService(
+            vedtaksperiodeService = vedtaksperiodeService,
+            vedtakService = vedtakService,
+            beregningService = beregningService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
+            featureToggleService = featureToggleService,
         )
 
     val vilkårsvurderingSteg =
@@ -643,6 +668,9 @@ class CucumberMock(
             taskRepository = taskRepository,
             satskjøringRepository = mockk(),
             envService = mockk(),
+            featureToggleService = featureToggleService,
+            finnmarkstilleggKjøringRepository = mockk(),
+            svalbardtilleggKjøringRepository = mockk(),
         )
 
     val stegService =
@@ -702,8 +730,16 @@ class CucumberMock(
             stegService = stegService,
             småbarnstilleggService = småbarnstilleggService,
         )
+
+    val brevmalService =
+        BrevmalService(
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            featureToggleService = featureToggleService,
+        )
+
     val iverksettMotOppdragTask = IverksettMotOppdragTask(stegService, behandlingHentOgPersisterService, taskRepository)
     val ferdigstillBehandlingTask = FerdigstillBehandlingTask(stegService = stegService, behandlingHentOgPersisterService = behandlingHentOgPersisterService)
+
     val statusFraOppdragTask = StatusFraOppdragTask(stegService, behandlingHentOgPersisterService, taskRepository, featureToggleService)
 
     val taskservices = listOf(iverksettMotOppdragTask, ferdigstillBehandlingTask, statusFraOppdragTask)

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.erTilogMed3ÅrTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
@@ -31,11 +32,11 @@ fun lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
     barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
 ): Tidslinje<BarnSinRettTilSmåbarnstillegg> {
-    val barnasAndelerTidslinjer =
-        barnasAndeler.groupBy { it.aktør }.mapValues { it.value.tilTidslinje() }
+    val barnasOrdinæreAndelerTidslinjer =
+        barnasAndeler.filter { it.type == YtelseType.ORDINÆR_BARNETRYGD }.groupBy { it.aktør }.mapValues { it.value.tilTidslinje() }
 
     val barnasAndelerUnder3ÅrTidslinje =
-        barnasAndelerTidslinjer.map { (barnAktør, barnTidslinje) ->
+        barnasOrdinæreAndelerTidslinjer.map { (barnAktør, barnTidslinje) ->
             val barnetsFødselsdato =
                 barnasAktørerOgFødselsdatoer.find { it.first == barnAktør }?.second
                     ?: throw Feil("Kan ikke beregne småbarnstillegg for et barn som ikke har fødselsdato.")

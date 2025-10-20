@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.fake.FakePdlRestClient.Companion.leggTilBostedsadresseIPDL
+import no.nav.familie.ba.sak.fake.FakePdlRestClient.Companion.leggTilOppholdsadresseIPDL
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilBostedsadresserIPersonInfo
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilRelasjonIPersonInfo
-import no.nav.familie.ba.sak.fake.MockPdlRestClient.Companion.leggTilBostedsadresseIPDL
-import no.nav.familie.ba.sak.fake.MockPdlRestClient.Companion.leggTilOppholdsadresseIPDL
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -21,9 +21,9 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse.INNVILGET_AUTOVEDTAK_FØDSEL_FINNMARKSTILLEGG
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse.INNVILGET_AUTOVEDTAK_FØDSEL_SVALBARDTILLEGG
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG_UTEN_DATO
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG_UTEN_DATO
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
@@ -131,7 +131,7 @@ class FødselshendelseTest(
         val vedtaksperioder = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandling.id)
         assertThat(vedtaksperioder.single().begrunnelser).anySatisfy {
             assertThat { it.standardbegrunnelse == Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE.toString() }
-            assertThat { it.standardbegrunnelse == INNVILGET_AUTOVEDTAK_FØDSEL_FINNMARKSTILLEGG.toString() }
+            assertThat { it.standardbegrunnelse == INNVILGET_FINNMARKSTILLEGG_UTEN_DATO.toString() }
         }
     }
 
@@ -217,7 +217,7 @@ class FødselshendelseTest(
         val vedtaksperioder = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandling.id)
         assertThat(vedtaksperioder.single().begrunnelser).anySatisfy {
             assertThat { it.standardbegrunnelse == INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN.toString() }
-            assertThat { it.standardbegrunnelse == INNVILGET_AUTOVEDTAK_FØDSEL_FINNMARKSTILLEGG.toString() }
+            assertThat { it.standardbegrunnelse == INNVILGET_FINNMARKSTILLEGG_UTEN_DATO.toString() }
         }
     }
 
@@ -287,7 +287,7 @@ class FødselshendelseTest(
         val vedtaksperioder = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandling.id)
         assertThat(vedtaksperioder.single().begrunnelser).anySatisfy {
             assertThat { it.standardbegrunnelse == Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE.toString() }
-            assertThat { it.standardbegrunnelse == INNVILGET_AUTOVEDTAK_FØDSEL_SVALBARDTILLEGG.toString() }
+            assertThat { it.standardbegrunnelse == INNVILGET_SVALBARDTILLEGG_UTEN_DATO.toString() }
         }
     }
 
@@ -384,7 +384,7 @@ class FødselshendelseTest(
         val vedtaksperioder = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandling.id)
         assertThat(vedtaksperioder.single().begrunnelser).anySatisfy {
             assertThat { it.standardbegrunnelse == INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN.toString() }
-            assertThat { it.standardbegrunnelse == INNVILGET_AUTOVEDTAK_FØDSEL_SVALBARDTILLEGG.toString() }
+            assertThat { it.standardbegrunnelse == INNVILGET_SVALBARDTILLEGG_UTEN_DATO.toString() }
         }
     }
 }

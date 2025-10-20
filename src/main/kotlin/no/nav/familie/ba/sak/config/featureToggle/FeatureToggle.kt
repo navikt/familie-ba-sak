@@ -11,7 +11,6 @@ enum class FeatureToggle(
     KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ENKELT_SAK("familie-ba-sak.kan-kjore-autmatisk-valutajustering-behandling-for-enkelt-sak"),
     KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER("familie-ba-sak.kan-opprette-og-endre-sammensatte-kontrollsaker"),
     SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA("familie-ba-sak.infotrygd-replika-sak-aktiv"),
-    STONADSSTATISTIKK_FORTSATT_INNVILGET("familie-ba-sak.stonadsstatistikk-fortsatt-innvilget"),
     SLÅ_SAMMEN_FINNMARK_ELLER_SVALBARD("familie-ba-sak.sla-sammen-finnmark-eller-svalbard"),
 
     KAN_OPPRETTE_REVURDERING_MED_ÅRSAK_IVERKSETTE_KA_VEDTAK("familie-ba-sak.kan-opprette-revurdering-med-aarsak-iverksette-ka-vedtak"),
@@ -37,6 +36,9 @@ enum class FeatureToggle(
 
     // Kjører satsendring lørdag
     SATSENDRING_LØRDAG("familie-ba-sak.satsendring-lordag"),
+
+    // Populerer antall satsendringer kjørt i grafana. Nyttig å ha på når man kjører satsendring
+    SATSENDRING_GRAFANA_STATISTIKK("familie-ba-sak.satsendring-grafana-statistikk"),
 
     BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING("familie-ba-sak.ulovfestet-motregning"),
 
@@ -67,8 +69,14 @@ enum class FeatureToggle(
 
     KAN_KJØRE_AUTOVEDTAK_SVALBARDTILLEGG("familie-ba-sak.kan-kjoere-autovedtak-svalbardtillegg"),
 
-    // NAV-26038
-    BRUK_NY_LOGIKK_FOR_AA_FINNE_ENHET_FOR_OPPRETTING_AV_KLAGEBEHANDLING("familie-ba-sak.bruk-ny-logikk-for-aa-finne-enhet-for-oppretting-av-klagebehandling"),
+    SKAL_PREUTFYLLE_BOSATT_I_RIKET_I_FØDSELSHENDELSER("familie-ba-sak.skal-preutfylle-bosatt-i-riket-i-foedselshendelse"),
+
+    SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG("familie-ba-sak.skal-bruke-adressehendelseloype-for-finnmarkstillegg"),
+
+    SKAL_BRUKE_ADRESSEHENDELSELØYPE_SVALBARDTILLEGG("familie-ba-sak.skal-bruke-adressehendelseloype-for-svalbardtillegg"),
 
     VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR("familie-ba-sak.valider-endring-av-preutfylte-vilkaar"),
+
+    // Toggle for å kunne skru av tungtkjørende statistikk for grafana når man f.eks. kjører autovedtak som satsendring/finnmarkstillegg
+    TUNGTKJØRENDE_GRAFANA_STATISTIKK("familie-ba-sak.generer-grafana-statistikk"),
 }

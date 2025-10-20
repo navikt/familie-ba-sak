@@ -10,9 +10,9 @@ fun main(args: Array<String>) {
 
     val springBuilder =
         SpringApplicationBuilder(ApplicationConfig::class.java).profiles(
-            "mock-økonomi",
+            "fake-økonomi-klient",
             "mock-infotrygd-feed",
-            "mock-tilbakekreving-klient",
+            "fake-tilbakekreving-klient",
             "task-scheduling",
             "mock-infotrygd-barnetrygd",
             "mock-leader-client",
@@ -26,7 +26,7 @@ fun main(args: Array<String>) {
         settClientIdOgSecret()
     }
 
-    springBuilder.run(* args)
+    springBuilder.run(*args)
 }
 
 private fun settClientIdOgSecret() {

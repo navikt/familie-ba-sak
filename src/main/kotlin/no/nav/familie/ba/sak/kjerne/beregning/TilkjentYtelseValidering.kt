@@ -71,8 +71,8 @@ fun hentBarnasAndeler(
  */
 object TilkjentYtelseValidering {
     internal fun validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
-        andelerFraForrigeBehandling: List<AndelTilkjentYtelse>,
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        andelerFraForrigeBehandling: Collection<AndelTilkjentYtelse>,
+        andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
     ) {
         val andelerGruppert = andelerTilkjentYtelse.tilTidslinjerPerAktørOgType()
         val forrigeAndelerGruppert = andelerFraForrigeBehandling.tilTidslinjerPerAktørOgType()

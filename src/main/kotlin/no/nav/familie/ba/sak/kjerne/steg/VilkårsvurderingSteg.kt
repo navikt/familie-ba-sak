@@ -15,10 +15,14 @@ import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTi
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.valider18ÅrsVilkårEksistererFraFødselsdato
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerBarnasVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIkkeBlandetRegelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIngenVilkårSattEtterSøkersDød
 import org.springframework.stereotype.Service
@@ -72,6 +76,14 @@ class VilkårsvurderingSteg(
                 søkerOgBarn = søkerOgBarn,
                 vilkårsvurdering = this,
             )
+
+            if (behandling.erFinnmarkstillegg()) {
+                validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(this)
+            }
+
+            if (behandling.erSvalbardtillegg()) {
+                validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(this)
+            }
         }
     }
 
@@ -124,6 +136,15 @@ class VilkårsvurderingSteg(
         )
 
         return hentNesteStegForNormalFlyt(behandling)
+    }
+
+    override fun postValiderSteg(behandling: Behandling) {
+        if (behandling.type != BehandlingType.TEKNISK_ENDRING && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
+            val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandlingId = behandling.id)
+            val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id)
+
+            validerBarnasVilkår(søkerOgBarn.barn(), vilkårsvurdering)
+        }
     }
 
     override fun stegType(): StegType = StegType.VILKÅRSVURDERING

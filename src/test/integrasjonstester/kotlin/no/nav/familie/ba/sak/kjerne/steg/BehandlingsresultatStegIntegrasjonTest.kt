@@ -14,7 +14,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class BehandlingsresultatStegTest(
+class BehandlingsresultatStegIntegrasjonTest(
     @Autowired private val stegService: StegService,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val persongrunnlagService: PersongrunnlagService,

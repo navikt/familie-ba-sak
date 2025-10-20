@@ -91,6 +91,6 @@ Egenskap: EØS-Primærlandsbegrunnelser for innvilget eller økning skal dukke o
       | Fra dato   | Til dato   | Standardbegrunnelser | Eøsbegrunnelser                                | Fritekster |
       | 01.04.2024 | 30.04.2025 |                      | INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_STANDARD |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.04.2024 til 30.04.2025
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.04.2024 til 30.04.2025
       | Begrunnelse                                    | Type | Barnas fødselsdatoer | Antall barn | Målform | Annen forelders aktivitetsland | Barnets bostedsland | Søkers aktivitetsland | Annen forelders aktivitet | Søkers aktivitet | Gjelder søker |
       | INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_STANDARD | EØS  | 14.02.21             | 1           | NB      | Norge                          | Danmark             | Danmark               | ARBEIDER                  | INAKTIV          | Nei           |
