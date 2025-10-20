@@ -28,7 +28,7 @@ class KlagebehandlingOppretterTest {
     private val dagensDato = LocalDate.of(2025, 8, 25)
 
     private val fagsakService = mockk<FagsakService>()
-    private val klageClient = mockk<KlageClient>()
+    private val klageKlient = mockk<KlageKlient>()
     private val integrasjonKlient = mockk<IntegrasjonKlient>()
     private val tilpassArbeidsfordelingService = mockk<TilpassArbeidsfordelingService>()
     private val clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(dagensDato)
@@ -36,7 +36,7 @@ class KlagebehandlingOppretterTest {
     private val klagebehandlingOppretter =
         KlagebehandlingOppretter(
             fagsakService,
-            klageClient,
+            klageKlient,
             integrasjonKlient,
             tilpassArbeidsfordelingService,
             clockProvider,
@@ -105,8 +105,8 @@ class KlagebehandlingOppretterTest {
             val opprettKlageRequest = slot<OpprettKlagebehandlingRequest>()
 
             every { fagsakService.hentPåFagsakId(fagsak.id) } returns fagsak
-            every { klageClient.opprettKlage(capture(opprettKlageRequest)) } returns klagebehandlingId
             every { integrasjonKlient.hentBehandlendeEnhet(fagsak.aktør.aktivFødselsnummer()) } returns listOf(arbeidsfordelingsenhet)
+            every { klageKlient.opprettKlage(capture(opprettKlageRequest)) } returns klagebehandlingId
             every { tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(arbeidsfordelingsenhet, any()) } returns arbeidsfordelingsenhet
 
             // Act
@@ -132,8 +132,8 @@ class KlagebehandlingOppretterTest {
 
             val opprettKlageRequest = slot<OpprettKlagebehandlingRequest>()
 
-            every { klageClient.opprettKlage(capture(opprettKlageRequest)) } returns klagebehandlingId
             every { integrasjonKlient.hentBehandlendeEnhet(fagsak.aktør.aktivFødselsnummer()) } returns listOf(arbeidsfordelingsenhet)
+            every { klageKlient.opprettKlage(capture(opprettKlageRequest)) } returns klagebehandlingId
             every { tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(arbeidsfordelingsenhet, any()) } returns arbeidsfordelingsenhet
 
             // Act
@@ -160,8 +160,8 @@ class KlagebehandlingOppretterTest {
 
             val opprettKlageRequest = slot<OpprettKlagebehandlingRequest>()
 
-            every { klageClient.opprettKlage(capture(opprettKlageRequest)) } returns klagebehandlingId
             every { integrasjonKlient.hentBehandlendeEnhet(fagsak.aktør.aktivFødselsnummer()) } returns listOf(arbeidsfordelingsenhet)
+            every { klageKlient.opprettKlage(capture(opprettKlageRequest)) } returns klagebehandlingId
             every { tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(arbeidsfordelingsenhet, any()) } returns tilpassetArbeidsfordelingsenhet
 
             // Act

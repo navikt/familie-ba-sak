@@ -23,7 +23,7 @@ import java.util.UUID
 @Component
 class KlagebehandlingOppretter(
     private val fagsakService: FagsakService,
-    private val klageClient: KlageClient,
+    private val klageKlient: KlageKlient,
     private val integrasjonKlient: IntegrasjonKlient,
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
     private val clockProvider: ClockProvider,
@@ -69,7 +69,7 @@ class KlagebehandlingOppretter(
                 navIdent,
             )
 
-        return klageClient.opprettKlage(
+        return klageKlient.opprettKlage(
             OpprettKlagebehandlingRequest(
                 ident = fødselsnummer,
                 stønadstype = Stønadstype.BARNETRYGD,
