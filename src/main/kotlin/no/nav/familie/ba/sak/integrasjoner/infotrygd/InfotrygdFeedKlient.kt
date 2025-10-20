@@ -19,14 +19,14 @@ import java.io.IOException
 import java.net.URI
 
 @Component
-class InfotrygdFeedClient(
-    @Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") private val clientUri: URI,
+class InfotrygdFeedKlient(
+    @Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") private val klientUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "infotrygd_feed") {
     fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) =
         try {
             sendFeedTilInfotrygd(
-                URI.create("$clientUri/barnetrygd/v1/feed/foedselsmelding"),
+                URI.create("$klientUri/barnetrygd/v1/feed/foedselsmelding"),
                 infotrygdFødselhendelsesFeedDto,
             )
         } catch (e: Exception) {
@@ -35,7 +35,7 @@ class InfotrygdFeedClient(
 
     fun sendVedtakFeedTilInfotrygd(infotrygdVedtakFeedDto: InfotrygdVedtakFeedDto) {
         try {
-            sendFeedTilInfotrygd(URI.create("$clientUri/barnetrygd/v1/feed/vedtaksmelding"), infotrygdVedtakFeedDto)
+            sendFeedTilInfotrygd(URI.create("$klientUri/barnetrygd/v1/feed/vedtaksmelding"), infotrygdVedtakFeedDto)
         } catch (e: Exception) {
             loggOgKastException(e)
         }
@@ -44,7 +44,7 @@ class InfotrygdFeedClient(
     fun sendStartBehandlingTilInfotrygd(startBehandlingDto: StartBehandlingDto) {
         try {
             sendFeedTilInfotrygd(
-                URI.create("$clientUri/barnetrygd/v1/feed/startbehandlingsmelding"),
+                URI.create("$klientUri/barnetrygd/v1/feed/startbehandlingsmelding"),
                 startBehandlingDto,
             )
         } catch (e: Exception) {
@@ -75,6 +75,6 @@ class InfotrygdFeedClient(
     }
 
     companion object {
-        private val logger: Logger = LoggerFactory.getLogger(InfotrygdFeedClient::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(InfotrygdFeedKlient::class.java)
     }
 }
