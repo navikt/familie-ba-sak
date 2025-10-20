@@ -48,8 +48,4 @@ class FakePdlIdentRestClient(
     ) {
         identMap[personIdent] = identInformasjon
     }
-
-    fun reset() {
-        identMap.clear()
-    }
 }

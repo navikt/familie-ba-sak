@@ -325,7 +325,6 @@ class BehandleSmåbarnstilleggTest(
     @Test
     @Order(3)
     fun `Skal stoppe automatisk behandling som må fortsette manuelt pga tilbakekreving`() {
-        efSakRestClient.reset()
         val søkersAktør = personidentService.hentAktør(scenario.søker.aktørId)
 
         val periodeOvergangsstønadTom = LocalDate.now().minusMonths(3)
@@ -387,8 +386,6 @@ class BehandleSmåbarnstilleggTest(
     @Test
     @Order(4)
     fun `Skal automatisk endre småbarnstilleggperioder`() {
-        efSakRestClient.reset()
-
         val søkersIdent = scenario.søker.ident
         val søkersAktør = personidentService.hentAktør(søkersIdent)
 
