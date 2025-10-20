@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøringRepository
@@ -37,7 +37,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
     private val finnmarkstilleggKjøringRepository = mockk<FinnmarkstilleggKjøringRepository>()
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val pdlRestClient = mockk<SystemOnlyPdlRestClient>()
+    private val pdlRestKlient = mockk<SystemOnlyPdlRestKlient>()
 
     private val autovedtakFinnmarkstilleggTaskOppretter =
         AutovedtakFinnmarkstilleggTaskOppretter(
@@ -46,7 +46,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
             finnmarkstilleggKjøringService = FinnmarkstilleggKjøringService(finnmarkstilleggKjøringRepository),
             persongrunnlagService = persongrunnlagService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            pdlRestClient = pdlRestClient,
+            pdlRestKlient = pdlRestKlient,
         )
 
     private val søker1 = lagPerson()
@@ -156,7 +156,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
                 )
 
             every {
-                pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(
+                pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(
                     listOf(
                         søker1.aktør.aktivFødselsnummer(),
                         søker2.aktør.aktivFødselsnummer(),
@@ -201,7 +201,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
             } returns emptyMap()
 
             every {
-                pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(
+                pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(
                     listOf(
                         søker1.aktør.aktivFødselsnummer(),
                         søker2.aktør.aktivFødselsnummer(),
@@ -240,7 +240,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
             autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(1000)
 
             // Assert
-            verify(exactly = 0) { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) }
+            verify(exactly = 0) { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(any()) }
             verify(exactly = 0) { opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(any()) }
         }
 
@@ -298,7 +298,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
                 persongrunnlagService.hentAktivForBehandlinger(behandlinger.map { it.id })
             } returns grunnlag.associate { it.behandlingId to it }
 
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+            every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 assertThat(firstArg<List<String>>()).hasSize(1000)
                 emptyMap()
             }
@@ -307,7 +307,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
             autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(1000)
 
             // Assert
-            verify(exactly = 5) { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) }
+            verify(exactly = 5) { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(any()) }
         }
     }
 }

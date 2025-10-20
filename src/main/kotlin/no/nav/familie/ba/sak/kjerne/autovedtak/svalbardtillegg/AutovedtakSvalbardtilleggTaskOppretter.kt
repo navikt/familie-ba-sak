@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg
 
 import jakarta.transaction.Transactional
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -21,7 +21,7 @@ class AutovedtakSvalbardtilleggTaskOppretter(
     private val svalbardtilleggKjøringRepository: SvalbardtilleggKjøringRepository,
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlingRepository: BehandlingRepository,
-    private val pdlRestClient: SystemOnlyPdlRestClient,
+    private val pdlRestKlient: SystemOnlyPdlRestKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -62,7 +62,7 @@ class AutovedtakSvalbardtilleggTaskOppretter(
                 .distinct()
                 .chunked(1000)
                 .flatMap { personer ->
-                    pdlRestClient
+                    pdlRestKlient
                         .hentAdresserForPersoner(personer)
                         .mapValues { Adresser.opprettFra(it.value) }
                         .filterValues { it.harAdresserSomErRelevantForSvalbardtillegg() }

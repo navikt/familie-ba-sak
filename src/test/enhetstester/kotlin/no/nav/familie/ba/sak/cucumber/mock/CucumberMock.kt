@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigrerin
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingSøknadsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
-import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockSystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockSystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockTilbakekrevingsvedtakMotregningRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategiForValutakurserRepository
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
@@ -150,7 +150,7 @@ class CucumberMock(
     val behandlingMigreringsinfoRepository = mockBehandlingMigreringsinfoRepository()
     val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
     val behandlingSøknadsinfoRepository = mockBehandlingSøknadsinfoRepository()
-    val systemOnlyPdlRestClient = mockSystemOnlyPdlRestClient(dataFraCucumber)
+    val systemOnlyPdlRestKlient = mockSystemOnlyPdlRestKlient(dataFraCucumber)
 
     init {
         dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
@@ -556,7 +556,7 @@ class CucumberMock(
 
     val preutfyllBosattIRiketService =
         PreutfyllBosattIRiketService(
-            pdlRestClient = systemOnlyPdlRestClient,
+            pdlRestKlient = systemOnlyPdlRestKlient,
             søknadService = mockk(),
             persongrunnlagService = persongrunnlagService,
         )

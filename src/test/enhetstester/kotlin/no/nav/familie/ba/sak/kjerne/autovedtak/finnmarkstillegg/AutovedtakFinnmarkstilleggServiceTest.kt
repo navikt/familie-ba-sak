@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.FinnmarkstilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -40,7 +40,7 @@ class AutovedtakFinnmarkstilleggServiceTest {
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val beregningService = mockk<BeregningService>()
     private val fagsakService = mockk<FagsakService>()
-    private val pdlRestClient = mockk<SystemOnlyPdlRestClient>()
+    private val pdlRestKlient = mockk<SystemOnlyPdlRestKlient>()
     private val simuleringService = mockk<SimuleringService>()
     private val autovedtakFinnmarkstilleggBegrunnelseService = mockk<AutovedtakFinnmarkstilleggBegrunnelseService>()
 
@@ -50,7 +50,7 @@ class AutovedtakFinnmarkstilleggServiceTest {
             persongrunnlagService = persongrunnlagService,
             beregningService = beregningService,
             fagsakService = fagsakService,
-            pdlRestClient = pdlRestClient,
+            pdlRestKlient = pdlRestKlient,
             simuleringService = simuleringService,
             autovedtakFinnmarkstilleggBegrunnelseService = autovedtakFinnmarkstilleggBegrunnelseService,
             autovedtakService = mockk(),
@@ -144,7 +144,7 @@ class AutovedtakFinnmarkstilleggServiceTest {
                     )
                 }
 
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
+            every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
                     søkerIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
                     barnIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
@@ -160,7 +160,7 @@ class AutovedtakFinnmarkstilleggServiceTest {
         @Test
         fun `skal returnere false når ingen av personene bor i tilleggssone`() {
             // Arrange
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
+            every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
                     søkerIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
                     barnIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
@@ -176,7 +176,7 @@ class AutovedtakFinnmarkstilleggServiceTest {
         @Test
         fun `skal returnere true når minst en person bor i tilleggssone`() {
             // Arrange
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
+            every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
                     søkerIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseIFinnmark), deltBosted = emptyList()),
                     barnIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),

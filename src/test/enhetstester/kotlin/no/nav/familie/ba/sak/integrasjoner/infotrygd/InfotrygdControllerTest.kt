@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.clearAllCaches
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.mock.FamilieIntegrasjonerTilgangskontrollMock.Companion.mockSjekkTilgang
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
@@ -23,7 +23,7 @@ import org.springframework.http.HttpStatus
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InfotrygdControllerTest {
-    private val systemOnlyPdlRestClient = mockk<SystemOnlyPdlRestClient>()
+    private val systemOnlyPdlRestKlient = mockk<SystemOnlyPdlRestKlient>()
     private val cacheManager = spyk(ConcurrentMapCacheManager())
     private val familieIntegrasjonerTilgangskontrollClient = mockk<FamilieIntegrasjonerTilgangskontrollClient>()
 
@@ -71,6 +71,7 @@ class InfotrygdControllerTest {
         every { personidentService.hentAktør(fnr) } returns lagAktør(fnr)
         familieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(false)
         every { systemOnlyPdlRestClient.hentAdressebeskyttelse(any()) } returns
+        every { systemOnlyPdlRestKlient.hentAdressebeskyttelse(any()) } returns
             listOf(Adressebeskyttelse(ADRESSEBESKYTTELSEGRADERING.FORTROLIG))
 
         val respons = infotrygdController.hentInfotrygdsakerForSøker(Personident(fnr))

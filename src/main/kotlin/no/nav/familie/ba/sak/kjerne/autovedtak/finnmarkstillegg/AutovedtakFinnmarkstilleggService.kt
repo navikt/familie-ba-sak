@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
@@ -40,7 +40,7 @@ class AutovedtakFinnmarkstilleggService(
     private val taskService: TaskService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val pdlRestClient: SystemOnlyPdlRestClient,
+    private val pdlRestKlient: SystemOnlyPdlRestKlient,
     private val behandlingService: BehandlingService,
     private val beregningService: BeregningService,
     private val simuleringService: SimuleringService,
@@ -73,7 +73,7 @@ class AutovedtakFinnmarkstilleggService(
                 .personer
                 .map { it.aktør.aktivFødselsnummer() }
                 .let { identer ->
-                    pdlRestClient
+                    pdlRestKlient
                         .hentBostedsadresseOgDeltBostedForPersoner(identer)
                         .mapValues { Adresser.opprettFra(it.value) }
                         .any { it.value.harAdresserSomErRelevantForFinnmarkstillegg() }
