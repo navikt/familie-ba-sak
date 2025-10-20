@@ -1,14 +1,10 @@
 package no.nav.familie.ba.sak.config
 
 import io.mockk.unmockkAll
-import no.nav.familie.ba.sak.fake.FakeEfSakRestClient
-import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
-import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
 import no.nav.familie.ba.sak.fake.FakePdlIdentRestKlient
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestKlient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestKlient
 import no.nav.familie.ba.sak.mock.FamilieIntegrasjonerTilgangskontrollMock
 import org.junit.jupiter.api.BeforeEach
@@ -26,7 +22,7 @@ abstract class AbstractMockkSpringRunner {
     private lateinit var efSakRestKlient: EfSakRestKlient
 
     @Autowired
-    private lateinit var mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
+    private lateinit var mockFamilieIntegrasjonerTilgangskontrollKlient: FamilieIntegrasjonerTilgangskontrollKlient
 
     /**
      * Cachemanagere
@@ -57,8 +53,8 @@ abstract class AbstractMockkSpringRunner {
         val fakeEfSakRestKlient = efSakRestKlient as? FakeEfSakRestKlient
         fakeEfSakRestKlient?.reset()
 
-        FamilieIntegrasjonerTilgangskontrollMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(
-            mockFamilieIntegrasjonerTilgangskontrollClient,
+        FamilieIntegrasjonerTilgangskontrollMock.clearMockFamilieIntegrasjonerTilgangskontrollKlient(
+            mockFamilieIntegrasjonerTilgangskontrollKlient,
         )
 
         MDC.put("callId", "${this::class.java.simpleName}-${UUID.randomUUID()}")

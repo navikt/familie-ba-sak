@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class FamilieIntegrasjonerTilgangskontrollService(
-    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
+    private val familieIntegrasjonerTilgangskontrollKlient: FamilieIntegrasjonerTilgangskontrollKlient,
     private val cacheManager: CacheManager,
     private val systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
 ) {
@@ -34,7 +34,7 @@ class FamilieIntegrasjonerTilgangskontrollService(
 
     fun sjekkTilgangTilPersoner(personIdenter: List<String>): Map<String, Tilgang> =
         cacheManager.hentCacheForSaksbehandler("sjekkTilgangTilPersoner", personIdenter) {
-            familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(it).associateBy { it.personIdent }
+            familieIntegrasjonerTilgangskontrollKlient.sjekkTilgangTilPersoner(it).associateBy { it.personIdent }
         }
 
     fun hentIdenterMedStrengtFortroligAdressebeskyttelse(personIdenter: List<String>): List<String> {
