@@ -5,15 +5,12 @@ import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClientMock
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.mock.EfSakRestClientMock
-import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.mock.LocalDateServiceTestConfig
 import no.nav.familie.ba.sak.mock.TilbakekrevingKlientTestConfig
 import no.nav.familie.ba.sak.mock.ValutakursRestClientMock
@@ -31,12 +28,6 @@ import java.util.UUID
 abstract class AbstractMockkSpringRunner {
     @Autowired
     private lateinit var pdlIdentRestClient: PdlIdentRestClient
-
-    @Autowired
-    private lateinit var mockIntegrasjonClient: IntegrasjonClient
-
-    @Autowired
-    private lateinit var mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
 
     @Autowired
     private lateinit var mockEfSakRestClient: EfSakRestClient
@@ -87,10 +78,6 @@ abstract class AbstractMockkSpringRunner {
 
         val fakePdlIdentRestClient = pdlIdentRestClient as? FakePdlIdentRestClient
         fakePdlIdentRestClient?.reset()
-
-        FakeFamilieIntegrasjonerTilgangskontrollClient.clearMockFamilieIntegrasjonerTilgangskontrollClient(
-            mockFamilieIntegrasjonerTilgangskontrollClient,
-        )
 
         if (isMockKMock(mockEfSakRestClient)) {
             EfSakRestClientMock.clearEfSakRestMocks(mockEfSakRestClient)

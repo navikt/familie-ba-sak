@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.sikkerhet
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.common.clearAllCaches
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
@@ -13,7 +12,6 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -23,9 +21,10 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
-import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollClient.Companion.mockSjekkTilgang
+import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import no.nav.familie.log.mdc.MDCConstants
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -34,10 +33,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.slf4j.MDC
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
+import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 
 class TilgangServiceTest {
-    private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val fagsakService: FagsakService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
@@ -46,9 +45,11 @@ class TilgangServiceTest {
     private val kode7Gruppe = "kode7"
     private val rolleConfig = RolleConfig("", "", "", FORVALTER_ROLLE = "", KODE6 = kode6Gruppe, KODE7 = kode7Gruppe)
     private val auditLogger = AuditLogger("familie-ba-sak")
+    private val fakeFamilieIntegrasjonerTilgangskontrollClient = FakeFamilieIntegrasjonerTilgangskontrollClient(RestTemplate())
+
     private val familieIntegrasjonerTilgangskontrollService =
         FamilieIntegrasjonerTilgangskontrollService(
-            mockFamilieIntegrasjonerTilgangskontrollClient,
+            fakeFamilieIntegrasjonerTilgangskontrollClient,
             cacheManager,
             mockk(),
         )
@@ -91,7 +92,15 @@ class TilgangServiceTest {
 
     @Test
     internal fun `skal kaste RolleTilgangskontrollFeil dersom saksbehandler ikke har tilgang til person eller dets barn`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(harTilgang = false, begrunnelse = "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse")
+        fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
+            listOf(
+                Tilgang(
+                    aktør.aktivFødselsnummer(),
+                    false,
+                    "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse",
+                ),
+            ),
+        )
 
         val rolleTilgangskontrollFeil =
             assertThrows<RolleTilgangskontrollFeil> {
@@ -107,14 +116,29 @@ class TilgangServiceTest {
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til person og dets barn`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
+        fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
+            listOf(
+                Tilgang(
+                    aktør.aktivFødselsnummer(),
+                    true,
+                ),
+            ),
+        )
 
         tilgangService.validerTilgangTilPersoner(listOf(aktør.aktivFødselsnummer()), AuditLoggerEvent.ACCESS)
     }
 
     @Test
     internal fun `skal kaste RolleTilgangskontrollFeil dersom saksbehandler ikke har tilgang til behandling`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(harTilgang = false, begrunnelse = "NAV-ansatt")
+        fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
+            listOf(
+                Tilgang(
+                    aktør.aktivFødselsnummer(),
+                    false,
+                    "NAV-ansatt",
+                ),
+            ),
+        )
 
         val rolleTilgangskontrollFeil =
             assertThrows<RolleTilgangskontrollFeil> {
@@ -129,63 +153,86 @@ class TilgangServiceTest {
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til behandling`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
+        fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
+            listOf(
+                Tilgang(
+                    aktør.aktivFødselsnummer(),
+                    true,
+                ),
+            ),
+        )
 
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
     }
 
     @Test
     internal fun `validerTilgangTilPersoner - hvis samme saksbehandler kaller skal den ha cachet`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
+        fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
+            listOf(
+                Tilgang(
+                    aktør.aktivFødselsnummer(),
+                    true,
+                ),
+            ),
+        )
 
         mockBrukerContext("A")
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
-        verify(exactly = 1) {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
-        }
+        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.antallKallTilSjekkTilgangTilPersoner).isEqualTo(1)
     }
 
     @Test
     internal fun `validerTilgangTilPersoner - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
-
+        fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
+            listOf(
+                Tilgang(
+                    aktør.aktivFødselsnummer(),
+                    true,
+                ),
+            ),
+        )
         mockBrukerContext("A")
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
         mockBrukerContext("B")
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
-
-        verify(exactly = 2) {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
-        }
+        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.antallKallTilSjekkTilgangTilPersoner).isEqualTo(2)
     }
 
     @Test
     internal fun `validerTilgangTilBehandling - hvis samme saksbehandler kaller skal den ha cachet`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
+        fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
+            listOf(
+                Tilgang(
+                    aktør.aktivFødselsnummer(),
+                    true,
+                ),
+            ),
+        )
 
         mockBrukerContext("A")
 
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
-
-        verify(exactly = 1) {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
-        }
+        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.antallKallTilSjekkTilgangTilPersoner).isEqualTo(1)
     }
 
     @Test
     internal fun `validerTilgangTilBehandling - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
+        fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
+            listOf(
+                Tilgang(
+                    aktør.aktivFødselsnummer(),
+                    true,
+                ),
+            ),
+        )
 
         mockBrukerContext("A")
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
         mockBrukerContext("B")
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
-
-        verify(exactly = 2) {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
-        }
+        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.antallKallTilSjekkTilgangTilPersoner).isEqualTo(2)
     }
 
     @Test
@@ -213,7 +260,16 @@ class TilgangServiceTest {
                 ),
             ),
         )
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(harTilgang = false, begrunnelse = "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse")
+        fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
+            listOf(
+                Tilgang(
+                    søkerAktør.aktivFødselsnummer(),
+                    false,
+                    "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse",
+                ),
+            ),
+        )
+
         mockBrukerContext("A")
 
         // Act & Assert
@@ -242,9 +298,16 @@ class TilgangServiceTest {
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsak.id) }.returns(
             emptyList<PersonEnkel>().toSet(),
         )
-        val slot = mutableListOf<List<String>>()
 
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(harTilgang = false, begrunnelse = "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse", slot = slot)
+        fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
+            listOf(
+                Tilgang(
+                    søkerAktør.aktivFødselsnummer(),
+                    false,
+                    "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse",
+                ),
+            ),
+        )
         mockBrukerContext("A")
 
         // Act & Assert
@@ -257,7 +320,7 @@ class TilgangServiceTest {
             }
         assertThat(rolletilgangskontrollFeil.message).isEqualTo("Saksbehandler A har ikke tilgang til fagsak=${fagsak.id}. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse.")
         assertThat(rolletilgangskontrollFeil.frontendFeilmelding).isEqualTo("Fagsaken inneholder personer som krever ytterligere tilganger. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse.")
-        assertThat(slot).hasSize(1).containsOnly(listOf(barnAktør.aktivFødselsnummer(), søkerAktør.aktivFødselsnummer()))
+        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.antallKallTilSjekkTilgangTilPersoner).isEqualTo(1)
     }
 
     @Test
@@ -265,7 +328,13 @@ class TilgangServiceTest {
         val fnr = randomFnr()
         val fnr2 = randomFnr()
         val fnr3 = randomFnr()
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(mapOf(fnr to true, fnr2 to false, fnr3 to true))
+        fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
+            listOf(
+                Tilgang(fnr, true),
+                Tilgang(fnr2, false),
+                Tilgang(fnr3, true),
+            ),
+        )
         assertThrows<RolleTilgangskontrollFeil> {
             tilgangService.validerTilgangTilPersoner(
                 listOf(fnr, fnr2, fnr3),

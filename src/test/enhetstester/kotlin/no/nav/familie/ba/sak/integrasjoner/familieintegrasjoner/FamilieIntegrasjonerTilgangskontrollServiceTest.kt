@@ -3,15 +3,17 @@ package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.clearAllCaches
-import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollClient.Companion.mockSjekkTilgang
+import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.util.BrukerContextUtil.testWithBrukerContext
+import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
+import org.springframework.web.client.RestTemplate
 
 class FamilieIntegrasjonerTilgangskontrollServiceTest {
-    private val client = mockk<FamilieIntegrasjonerTilgangskontrollClient>()
+    private val client = FakeFamilieIntegrasjonerTilgangskontrollClient(RestTemplate())
 
     private val cacheManager = ConcurrentMapCacheManager()
 
@@ -21,44 +23,45 @@ class FamilieIntegrasjonerTilgangskontrollServiceTest {
 
     @BeforeEach
     fun setUp() {
-        slot.clear()
+        client.reset()
         cacheManager.clearAllCaches()
     }
 
     @Test
     fun `har tilgang skal cacheas`() {
-        client.mockSjekkTilgang(true, slot)
-
+        client.leggTilPersonIdentTilTilgang(listOf(Tilgang("1", true)))
         assertThat(testWithBrukerContext { service.sjekkTilgangTilPerson("1") }.harTilgang).isTrue
+        client.reset()
+        client.leggTilPersonIdentTilTilgang(listOf(Tilgang("1", false)))
         assertThat(testWithBrukerContext { service.sjekkTilgangTilPerson("1") }.harTilgang).isTrue
-        verify(exactly = 1) { client.sjekkTilgangTilPersoner(any()) }
     }
 
     @Test
-    fun `har ikke tilgang skal cacheas`() {
-        client.mockSjekkTilgang(false, slot)
-
+    fun `har ikke tilgang skal caches`() {
+        client.leggTilPersonIdentTilTilgang(listOf(Tilgang("1", false)))
         assertThat(testWithBrukerContext { service.sjekkTilgangTilPerson("1") }.harTilgang).isFalse
+        client.reset()
+        client.leggTilPersonIdentTilTilgang(listOf(Tilgang("1", true)))
         assertThat(testWithBrukerContext { service.sjekkTilgangTilPerson("1") }.harTilgang).isFalse
-        verify(exactly = 1) { client.sjekkTilgangTilPersoner(any()) }
     }
 
     @Test
-    fun `cachear per saksbehandlere`() {
-        client.mockSjekkTilgang(false, slot)
+    fun `cacher per saksbehandlere`() {
+        client.leggTilPersonIdentTilTilgang(listOf(Tilgang("1", false)))
 
         // Systemcontext
         service.sjekkTilgangTilPerson("1")
         val kall1 = testWithBrukerContext("saksbehandler1") { service.sjekkTilgangTilPerson("1") }
+        client.reset()
+        client.leggTilPersonIdentTilTilgang(listOf(Tilgang("1", true)))
         val kall2 = testWithBrukerContext("saksbehandler2") { service.sjekkTilgangTilPerson("1") }
         assertThat(kall1.harTilgang).isFalse
-        assertThat(kall2.harTilgang).isFalse
-        verify(exactly = 3) { client.sjekkTilgangTilPersoner(any()) }
+        assertThat(kall2.harTilgang).isTrue
     }
 
     @Test
     fun `tilgangskontrollerer unike identer`() {
-        client.mockSjekkTilgang(false, slot)
+        client.leggTilPersonIdentTilTilgang(listOf(Tilgang("1", false)))
 
         testWithBrukerContext("saksbehandler1") { service.sjekkTilgangTilPersoner(listOf("1", "1")) }
 
@@ -67,8 +70,8 @@ class FamilieIntegrasjonerTilgangskontrollServiceTest {
 
     @Test
     fun `skal ikke hente identer som allerede finnes i cachen`() {
-        val tilgang = mapOf("1" to false, "2" to true, "3" to false)
-        client.mockSjekkTilgang(tilgang, slot)
+        val tilgang = listOf(Tilgang("1", false), Tilgang("2", true), Tilgang("3", false))
+        client.leggTilPersonIdentTilTilgang(tilgang)
 
         testWithBrukerContext { service.sjekkTilgangTilPerson("1") }
         val sjekkTilgangTilPersoner = testWithBrukerContext { service.sjekkTilgangTilPersoner(listOf("2", "1", "3")) }
@@ -77,10 +80,10 @@ class FamilieIntegrasjonerTilgangskontrollServiceTest {
 
         assertThat(sjekkTilgangTilPersoner.all { it.key == it.value.personIdent })
         assertThat(sjekkTilgangTilPersoner.map { it.key to it.value.harTilgang }).containsExactlyInAnyOrderElementsOf(
-            tilgang.entries.map { Pair(it.key, it.value) }.toList(),
+            tilgang.map { tilgang -> Pair(tilgang.personIdent, tilgang.harTilgang) }.toList(),
         )
 
-        verify(exactly = 2) { client.sjekkTilgangTilPersoner(any()) }
+        assertThat(client.antallKallTilSjekkTilgangTilPersoner).isEqualTo(2)
 
         val forventetFørsteKall = listOf("1")
         val forventetAndreKall = listOf("2", "3")

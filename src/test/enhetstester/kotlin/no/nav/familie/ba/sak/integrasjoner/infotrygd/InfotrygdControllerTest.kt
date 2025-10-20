@@ -5,27 +5,28 @@ import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.familie.ba.sak.common.clearAllCaches
 import no.nav.familie.ba.sak.datagenerator.lagAktør
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollClient.Companion.mockSjekkTilgang
+import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
+import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.http.HttpStatus
+import org.springframework.web.client.RestTemplate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InfotrygdControllerTest {
     private val systemOnlyPdlRestClient = mockk<SystemOnlyPdlRestClient>()
     private val cacheManager = spyk(ConcurrentMapCacheManager())
-    private val familieIntegrasjonerTilgangskontrollClient = mockk<FamilieIntegrasjonerTilgangskontrollClient>()
+    private val familieIntegrasjonerTilgangskontrollClient = FakeFamilieIntegrasjonerTilgangskontrollClient(RestTemplate())
 
     private val familieIntegrasjonerTilgangskontrollService = FamilieIntegrasjonerTilgangskontrollService(familieIntegrasjonerTilgangskontrollClient, cacheManager, systemOnlyPdlRestClient)
 
@@ -44,7 +45,7 @@ class InfotrygdControllerTest {
         val fnr = "12345678910"
 
         every { personidentService.hentAktør(fnr) } returns lagAktør(fnr)
-        familieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
+        familieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(listOf(Tilgang(fnr, true)))
         every {
             infotrygdBarnetrygdClient.hentSaker(
                 any(),
@@ -69,7 +70,8 @@ class InfotrygdControllerTest {
         val fnr = "12345678910"
 
         every { personidentService.hentAktør(fnr) } returns lagAktør(fnr)
-        familieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(false)
+        familieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(listOf(Tilgang(fnr, false)))
+
         every { systemOnlyPdlRestClient.hentAdressebeskyttelse(any()) } returns
             listOf(Adressebeskyttelse(ADRESSEBESKYTTELSEGRADERING.FORTROLIG))
 

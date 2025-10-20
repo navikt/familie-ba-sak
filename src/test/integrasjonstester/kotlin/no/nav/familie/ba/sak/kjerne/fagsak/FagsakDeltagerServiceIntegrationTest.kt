@@ -320,7 +320,6 @@ class FagsakDeltagerServiceIntegrationTest(
         assertThat(fagsakDeltagerService.hentFagsakDeltager(fnr)).hasSize(0)
     }
 
-    // Satte XX for at dette testet skal kjøre sist.
     @Test
     fun `XX Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
         every {
