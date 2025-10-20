@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.familie.ba.sak.common.clearAllCaches
 import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.util.BrukerContextUtil.testWithBrukerContext
@@ -18,8 +17,6 @@ class FamilieIntegrasjonerTilgangskontrollServiceTest {
     private val cacheManager = ConcurrentMapCacheManager()
 
     private val service = FamilieIntegrasjonerTilgangskontrollService(fakeFamilieIntegrasjonerTilgangskontrollClient, cacheManager, mockk())
-
-    private val slot = mutableListOf<List<String>>()
 
     @BeforeEach
     fun setUp() {

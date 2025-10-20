@@ -170,7 +170,7 @@ class TilgangServiceTest {
         fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
             listOf(
                 Tilgang(
-                    aktør.aktivFødselsnummer(),
+                    olaIdent,
                     true,
                 ),
             ),
@@ -187,7 +187,7 @@ class TilgangServiceTest {
         fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
             listOf(
                 Tilgang(
-                    aktør.aktivFødselsnummer(),
+                    olaIdent,
                     true,
                 ),
             ),

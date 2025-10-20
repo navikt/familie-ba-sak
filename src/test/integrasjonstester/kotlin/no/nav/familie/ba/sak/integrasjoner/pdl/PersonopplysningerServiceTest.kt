@@ -99,6 +99,11 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal filtrere bort relasjoner med opphørte folkreregisteridenter eller uten fødselsdato`() {
+        fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
+            emptyList(),
+            godkjennDefault = true,
+        )
+
         val personInfo =
             personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
                 lagAktør(

@@ -17,20 +17,23 @@ class FakeFamilieIntegrasjonerTilgangskontrollClient(
     private val personIdentTilTilgang = mutableMapOf<String, Tilgang>()
 
     val kallMotSjekkTilgangTilPersoner: MutableList<List<String>> = mutableListOf()
+    var godkjennByDefault: Boolean = true
 
     fun antallKallTilSjekkTilgangTilPersoner() = kallMotSjekkTilgangTilPersoner.size
 
     override fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
         kallMotSjekkTilgangTilPersoner.add(personIdenter)
         return personIdenter.map { personIdent ->
-            personIdentTilTilgang[personIdent] ?: Tilgang(personIdent, true)
+            personIdentTilTilgang[personIdent] ?: Tilgang(personIdent, godkjennByDefault)
         }
     }
 
     fun leggTilPersonIdentTilTilgang(
         personIdentTilHarTilgang: List<Tilgang>,
+        godkjennDefault: Boolean = true,
     ) {
         personIdentTilTilgang.putAll(personIdentTilHarTilgang.associate { tilgang -> tilgang.personIdent to tilgang })
+        godkjennByDefault = godkjennDefault
     }
 
     fun reset() = personIdentTilTilgang.clear()
