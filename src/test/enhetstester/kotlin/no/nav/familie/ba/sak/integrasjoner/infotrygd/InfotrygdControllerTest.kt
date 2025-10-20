@@ -29,10 +29,10 @@ class InfotrygdControllerTest {
 
     private val familieIntegrasjonerTilgangskontrollService = FamilieIntegrasjonerTilgangskontrollService(familieIntegrasjonerTilgangskontrollKlient, cacheManager, systemOnlyPdlRestKlient)
 
-    private val infotrygdBarnetrygdClient = mockk<InfotrygdBarnetrygdClient>()
+    private val infotrygdBarnetrygdKlient = mockk<InfotrygdBarnetrygdKlient>()
     private val personidentService = mockk<PersonidentService>()
-    private val infotrygdService: InfotrygdService = InfotrygdService(infotrygdBarnetrygdClient, familieIntegrasjonerTilgangskontrollService, personidentService)
-    private val infotrygdController = InfotrygdController(infotrygdBarnetrygdClient, personidentService, infotrygdService)
+    private val infotrygdService: InfotrygdService = InfotrygdService(infotrygdBarnetrygdKlient, familieIntegrasjonerTilgangskontrollService, personidentService)
+    private val infotrygdController = InfotrygdController(infotrygdBarnetrygdKlient, personidentService, infotrygdService)
 
     @BeforeEach
     fun setUp() {
@@ -46,7 +46,7 @@ class InfotrygdControllerTest {
         every { personidentService.hentAktør(fnr) } returns lagAktør(fnr)
         familieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(true)
         every {
-            infotrygdBarnetrygdClient.hentSaker(
+            infotrygdBarnetrygdKlient.hentSaker(
                 any(),
                 any(),
             )
