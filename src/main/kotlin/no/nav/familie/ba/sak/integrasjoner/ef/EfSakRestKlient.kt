@@ -14,7 +14,7 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @Component
-class EfSakRestClient(
+class EfSakRestKlient(
     @Value("\${FAMILIE_EF_SAK_API_URL}") private val efSakBaseUrl: URI,
     @Qualifier("jwtBearer") restTemplate: RestOperations,
 ) : AbstractRestClient(restTemplate, "ef-sak") {

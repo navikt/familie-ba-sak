@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
+import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
+import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestKlient
 import no.nav.familie.ba.sak.mock.FamilieIntegrasjonerTilgangskontrollMock
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.MDC
@@ -19,7 +21,7 @@ abstract class AbstractMockkSpringRunner {
     private lateinit var pdlIdentRestClient: PdlIdentRestClient
 
     @Autowired
-    private lateinit var efSakRestClient: EfSakRestClient
+    private lateinit var efSakRestKlient: EfSakRestKlient
 
     @Autowired
     private lateinit var mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
@@ -50,8 +52,8 @@ abstract class AbstractMockkSpringRunner {
         val fakePdlIdentRestClient = pdlIdentRestClient as? FakePdlIdentRestClient
         fakePdlIdentRestClient?.reset()
 
-        val fakeEfSakRestClient = efSakRestClient as? FakeEfSakRestClient
-        fakeEfSakRestClient?.reset()
+        val fakeEfSakRestKlient = efSakRestKlient as? FakeEfSakRestKlient
+        fakeEfSakRestKlient?.reset()
 
         FamilieIntegrasjonerTilgangskontrollMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(
             mockFamilieIntegrasjonerTilgangskontrollClient,
