@@ -63,8 +63,8 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
                 .filter { it.type == SatsType.SVALBARDTILLEGG }
                 .minOfOrNull { it.gyldigFom } ?: LocalDate.MAX
 
-        return forrigePeriode?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true ||
-            forrigePeriode
+        return sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true ||
+            sammePeriodeForrigeBehandling
                 ?.vilkårResultater
                 ?.any {
                     it.vilkårType == Vilkår.BOSATT_I_RIKET &&
