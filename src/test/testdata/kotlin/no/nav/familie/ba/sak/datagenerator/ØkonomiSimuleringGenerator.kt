@@ -28,6 +28,7 @@ fun lagØkonomiSimuleringPostering(
     posteringType: PosteringType = PosteringType.YTELSE,
     forfallsdato: LocalDate = LocalDate.now().minusMonths(1),
     utenInntrekk: Boolean = false,
+    fagsakId: Long = 0,
 ) = ØkonomiSimuleringPostering(
     økonomiSimuleringMottaker = økonomiSimuleringMottaker,
     fagOmrådeKode = fagOmrådeKode,
@@ -38,4 +39,5 @@ fun lagØkonomiSimuleringPostering(
     posteringType = posteringType,
     forfallsdato = forfallsdato,
     utenInntrekk = utenInntrekk,
+    fagsakId = fagsakId,
 )
