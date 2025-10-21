@@ -30,7 +30,7 @@ class SimuleringController(
         val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
         val avregningsperioder = avregningService.hentPerioderMedAvregning(behandlingId)
 
-        val fagsakId = behandlingRepository.finnFagsakIderForBehandlinger(listOf(behandlingId)).single()
+        val fagsakId = behandlingRepository.finnBehandling(behandlingId).fagsak.id
         val overlappendePerioder = finnOverlappendePerioder(vedtakSimuleringMottaker, fagsakId)
 
         val simulering =

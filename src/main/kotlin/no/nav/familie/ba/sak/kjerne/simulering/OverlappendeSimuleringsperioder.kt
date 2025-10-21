@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.kjerne.simulering.domene.OverlappendePerioderMedAndreFagsaker
@@ -17,10 +18,8 @@ fun finnOverlappendePerioder(
     val fagsakPerioder =
         økonomiSimuleringMottakere.flatMap { mottaker ->
             mottaker.økonomiSimuleringPostering.mapNotNull { postering ->
-                if (postering.fagsakId == null) {
-                    null
-                } else {
-                    Periode(postering.fagsakId, postering.fom, postering.tom)
+                postering.fagsakId?.let {
+                    Periode(it, postering.fom, postering.tom)
                 }
             }
         }
@@ -32,11 +31,7 @@ fun finnOverlappendePerioder(
             .values
             .fold(tomTidslinje<List<Long>>()) { kombinertTidslinje, tidslinje ->
                 kombinertTidslinje.kombinerMed(tidslinje) { kombinert, annen ->
-                    if (annen != null) {
-                        (kombinert ?: emptyList()) + annen
-                    } else {
-                        kombinert
-                    }
+                    kombinert.orEmpty() + listOfNotNull(annen)
                 }
             }
     return kombinertTidslinje
@@ -45,8 +40,8 @@ fun finnOverlappendePerioder(
         .filter { it.verdi?.contains(fagsakId) == true } // Må overlappe med fagsakIden som er sendt inn
         .map { periode ->
             OverlappendePerioderMedAndreFagsaker(
-                fom = periode.fom ?: TIDENES_MORGEN,
-                tom = periode.tom ?: TIDENES_ENDE,
+                fom = periode.fom ?: throw Feil("ØkonomiSimuleringPostering for fagsaker ${periode.verdi} skal ikke kunne ha null som fom-verdi"),
+                tom = periode.tom ?: throw Feil("ØkonomiSimuleringPostering for fagsaker ${periode.verdi} skal ikke kunne ha null som fom-verdi"),
                 fagsaker = periode.verdi!!.filterNot { it == fagsakId },
             )
         }
