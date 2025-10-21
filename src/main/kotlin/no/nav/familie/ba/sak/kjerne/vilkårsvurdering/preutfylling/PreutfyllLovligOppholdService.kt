@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
@@ -26,14 +26,14 @@ import java.time.LocalDate
 
 @Service
 class PreutfyllLovligOppholdService(
-    private val pdlRestClient: SystemOnlyPdlRestClient,
+    private val pdlRestKlient: SystemOnlyPdlRestKlient,
     private val statsborgerskapService: StatsborgerskapService,
-    private val systemOnlyIntegrasjonClient: SystemOnlyIntegrasjonClient,
+    private val systemOnlyIntegrasjonKlient: SystemOnlyIntegrasjonKlient,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
     fun preutfyllLovligOpphold(vilkårsvurdering: Vilkårsvurdering) {
         val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
-        val bostedsadresser = pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer)
+        val bostedsadresser = pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(identer)
         val søkersResultater = vilkårsvurdering.personResultater.first { it.erSøkersResultater() }
 
         val bostedsadresserSøker = bostedsadresser[søkersResultater.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
@@ -57,7 +57,7 @@ class PreutfyllLovligOppholdService(
         erEØSBorgerOgHarArbeidsforholdTidslinje: Tidslinje<Boolean>,
         bostedsadresserForPerson: List<Bostedsadresse>,
     ): Set<VilkårResultat> {
-        val erNordiskStatsborgerTidslinje = pdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat)
+        val erNordiskStatsborgerTidslinje = pdlRestKlient.lagErNordiskStatsborgerTidslinje(personResultat)
 
         val fomDatoForBeskjæring = finnFomDatoForBeskjæring(personResultat, personResultat.vilkårsvurdering, bostedsadresserForPerson) ?: PRAKTISK_TIDLIGSTE_DAG
 
@@ -122,7 +122,7 @@ class PreutfyllLovligOppholdService(
             }
 
     private fun lagErEØSBorgerTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
-        val statsborgerskap = pdlRestClient.hentStatsborgerskap(personResultat.aktør, historikk = true)
+        val statsborgerskap = pdlRestKlient.hentStatsborgerskap(personResultat.aktør, historikk = true)
 
         return statsborgerskap
             .windowed(size = 2, step = 1, partialWindows = true) {
@@ -144,7 +144,7 @@ class PreutfyllLovligOppholdService(
         fomDatoForBeskjæring: LocalDate,
     ): Tidslinje<Boolean> {
         val arbeidsforhold =
-            systemOnlyIntegrasjonClient.hentArbeidsforholdMedSystembruker(
+            systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(
                 ident = personResultat.aktør.aktivFødselsnummer(),
                 ansettelsesperiodeFom = fomDatoForBeskjæring,
             )
@@ -161,7 +161,7 @@ class PreutfyllLovligOppholdService(
     }
 
     private fun lagHarOppholdstillatelseTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
-        val oppholdstillatelse = pdlRestClient.hentOppholdstillatelse(personResultat.aktør, historikk = true)
+        val oppholdstillatelse = pdlRestKlient.hentOppholdstillatelse(personResultat.aktør, historikk = true)
 
         return oppholdstillatelse
             .filter { it.type == OPPHOLDSTILLATELSE.PERMANENT || it.type == OPPHOLDSTILLATELSE.MIDLERTIDIG }

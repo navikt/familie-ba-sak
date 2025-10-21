@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -21,17 +21,17 @@ import org.springframework.stereotype.Service
 
 @Service
 class PersonopplysningerService(
-    private val pdlRestClient: PdlRestClient,
-    private val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
+    private val pdlRestKlient: PdlRestKlient,
+    private val systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
-    private val integrasjonClient: IntegrasjonClient,
+    private val integrasjonKlient: IntegrasjonKlient,
 ) {
     fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
         val personinfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<Aktør, FORELDERBARNRELASJONROLLE>>()
         val relasjonsidenter = personinfo.forelderBarnRelasjon.mapNotNull { it.aktør.aktivFødselsnummer() }
         val tilgangPerIdent = familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(relasjonsidenter)
-        val egenAnsattPerIdent = integrasjonClient.sjekkErEgenAnsattBulk(listOf(aktør.aktivFødselsnummer()) + relasjonsidenter)
+        val egenAnsattPerIdent = integrasjonKlient.sjekkErEgenAnsattBulk(listOf(aktør.aktivFødselsnummer()) + relasjonsidenter)
         val forelderBarnRelasjon =
             personinfo.forelderBarnRelasjon
                 .mapNotNull {
@@ -80,30 +80,30 @@ class PersonopplysningerService(
     private fun hentPersoninfoMedQuery(
         aktør: Aktør,
         personInfoQuery: PersonInfoQuery,
-    ): PersonInfo = pdlRestClient.hentPerson(aktør, personInfoQuery)
+    ): PersonInfo = pdlRestKlient.hentPerson(aktør, personInfoQuery)
 
     fun hentVergeData(aktør: Aktør): VergeData = VergeData(harVerge = harVerge(aktør).harVerge)
 
     fun harVerge(aktør: Aktør): VergeResponse {
         val harVerge =
-            pdlRestClient
+            pdlRestKlient
                 .hentVergemaalEllerFremtidsfullmakt(aktør)
                 .any { it.type != "stadfestetFremtidsfullmakt" }
 
         return VergeResponse(harVerge)
     }
 
-    fun hentGjeldendeStatsborgerskap(aktør: Aktør): Statsborgerskap = pdlRestClient.hentStatsborgerskap(aktør).firstOrNull() ?: UKJENT_STATSBORGERSKAP
+    fun hentGjeldendeStatsborgerskap(aktør: Aktør): Statsborgerskap = pdlRestKlient.hentStatsborgerskap(aktør).firstOrNull() ?: UKJENT_STATSBORGERSKAP
 
     fun hentGjeldendeOpphold(aktør: Aktør): Opphold =
-        pdlRestClient.hentOppholdstillatelse(aktør).firstOrNull()
+        pdlRestKlient.hentOppholdstillatelse(aktør).firstOrNull()
             ?: throw Feil(
                 message = "Bruker mangler opphold",
                 frontendFeilmelding = "Person (${aktør.aktivFødselsnummer()}) mangler opphold.",
             )
 
     fun hentLandkodeAlpha2UtenlandskBostedsadresse(aktør: Aktør): String {
-        val landkode = pdlRestClient.hentUtenlandskBostedsadresse(aktør)?.landkode
+        val landkode = pdlRestKlient.hentUtenlandskBostedsadresse(aktør)?.landkode
 
         if (landkode.isNullOrEmpty()) return UKJENT_LANDKODE
 
@@ -118,7 +118,7 @@ class PersonopplysningerService(
         }
     }
 
-    fun hentAdressebeskyttelseSomSystembruker(aktør: Aktør): ADRESSEBESKYTTELSEGRADERING = systemOnlyPdlRestClient.hentAdressebeskyttelse(aktør).tilAdressebeskyttelse()
+    fun hentAdressebeskyttelseSomSystembruker(aktør: Aktør): ADRESSEBESKYTTELSEGRADERING = systemOnlyPdlRestKlient.hentAdressebeskyttelse(aktør).tilAdressebeskyttelse()
 
     companion object {
         const val UKJENT_LANDKODE = "ZZ"

@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingMedOverstyrendeResultater
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -23,9 +23,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class PreutfyllBorHosSøkerServiceTest {
-    private val pdlRestClient: SystemOnlyPdlRestClient = mockk(relaxed = true)
+    private val pdlRestKlient: SystemOnlyPdlRestKlient = mockk(relaxed = true)
     private val persongrunnlagService: PersongrunnlagService = mockk(relaxed = true)
-    private val preutfyllBorHosSøkerService: PreutfyllBorHosSøkerService = PreutfyllBorHosSøkerService(pdlRestClient, persongrunnlagService)
+    private val preutfyllBorHosSøkerService: PreutfyllBorHosSøkerService = PreutfyllBorHosSøkerService(pdlRestKlient, persongrunnlagService)
 
     @Test
     fun `skal preutfylle bor fast hos søker vilkår til oppfylt om barn bor på samme adresse som søker`() {
@@ -42,7 +42,7 @@ class PreutfyllBorHosSøkerServiceTest {
 
         val nåDato = LocalDate.now()
 
-        every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+        every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
             val identer = firstArg<List<String>>()
             identer.associateWith {
                 PdlAdresserPerson(
@@ -97,7 +97,7 @@ class PreutfyllBorHosSøkerServiceTest {
 
         val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
 
-        every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer) } returns
+        every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(identer) } returns
             identer.associateWith { ident ->
                 if (ident == aktørSøker.aktivFødselsnummer()) {
                     PdlAdresserPerson(
@@ -156,7 +156,7 @@ class PreutfyllBorHosSøkerServiceTest {
 
         val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
 
-        every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer) } returns
+        every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(identer) } returns
             identer.associateWith { ident ->
                 if (ident == aktørSøker.aktivFødselsnummer()) {
                     PdlAdresserPerson(
@@ -226,7 +226,7 @@ class PreutfyllBorHosSøkerServiceTest {
 
         val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
 
-        every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer) } returns
+        every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(identer) } returns
             identer.associateWith { ident ->
                 if (ident == aktørSøker.aktivFødselsnummer()) {
                     PdlAdresserPerson(
@@ -299,7 +299,7 @@ class PreutfyllBorHosSøkerServiceTest {
                 overstyrendeVilkårResultater = emptyMap(),
             )
 
-        every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+        every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
             val identer = firstArg<List<String>>()
             identer.associateWith {
                 PdlAdresserPerson(

@@ -27,7 +27,7 @@ import org.springframework.web.client.postForEntity
     "integrasjonstest",
     "testcontainers",
     "mock-pdl",
-    "mock-ident-client",
+    "mock-ident-klient",
     "mock-infotrygd-barnetrygd",
     "fake-tilbakekreving-klient",
     "mock-brev-klient",

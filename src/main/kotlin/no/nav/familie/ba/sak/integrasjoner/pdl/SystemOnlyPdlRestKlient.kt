@@ -21,11 +21,11 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @Service
-class SystemOnlyPdlRestClient(
+class SystemOnlyPdlRestKlient(
     @Value("\${PDL_URL}") pdlBaseUrl: URI,
     @Qualifier("jwtBearerClientCredentials") override val restTemplate: RestOperations,
     override val personidentService: PersonidentService,
-) : PdlRestClient(pdlBaseUrl, restTemplate, personidentService) {
+) : PdlRestKlient(pdlBaseUrl, restTemplate, personidentService) {
     @Cacheable("adressebeskyttelse", cacheManager = "shortCache")
     fun hentAdressebeskyttelse(aktør: Aktør): List<Adressebeskyttelse> {
         val pdlPersonRequest =

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class UtgåendeJournalføringService(
-    private val integrasjonClient: IntegrasjonClient,
+    private val integrasjonKlient: IntegrasjonKlient,
 ) {
     fun journalførManueltBrev(
         fnr: String,
@@ -66,7 +66,7 @@ class UtgåendeJournalføringService(
         val journalpostId =
             try {
                 val journalpost =
-                    integrasjonClient.journalførDokument(
+                    integrasjonKlient.journalførDokument(
                         ArkiverDokumentRequest(
                             fnr = fnr,
                             avsenderMottaker = avsenderMottaker,
@@ -107,7 +107,7 @@ class UtgåendeJournalføringService(
         eksternReferanseId: String,
         fnr: String,
     ): String =
-        integrasjonClient
+        integrasjonKlient
             .hentJournalposterForBruker(
                 JournalposterForBrukerRequest(
                     brukerId = Bruker(id = fnr, type = BrukerIdType.FNR),

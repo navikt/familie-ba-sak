@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.task.LogJournalpostIdForFagsakTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.kontrakter.felles.BrukerIdType
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service
     maxAntallFeil = 1,
 )
 class LogJournalpostIdForFagsakTask(
-    val integrasjonClient: IntegrasjonClient,
+    val integrasjonKlient: IntegrasjonKlient,
     val fagsakRepository: FagsakRepository,
 ) : AsyncTaskStep {
     @WithSpan
@@ -43,7 +43,7 @@ class LogJournalpostIdForFagsakTask(
                 antall = 50,
             )
 
-        val journalpostIder = integrasjonClient.hentJournalposterForBruker(request).map { it.journalpostId }
+        val journalpostIder = integrasjonKlient.hentJournalposterForBruker(request).map { it.journalpostId }
 
         secureLogger.info(
             "Fant følgende journalposter for fagsak $fagsakId $journalpostIder",

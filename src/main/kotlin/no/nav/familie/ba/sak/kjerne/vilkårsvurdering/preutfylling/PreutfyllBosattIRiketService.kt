@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
@@ -36,7 +36,7 @@ import java.time.temporal.ChronoUnit
 
 @Service
 class PreutfyllBosattIRiketService(
-    private val pdlRestClient: SystemOnlyPdlRestClient,
+    private val pdlRestKlient: SystemOnlyPdlRestKlient,
     private val søknadService: SøknadService,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
@@ -52,7 +52,7 @@ class PreutfyllBosattIRiketService(
                 .map { it.aktør.aktivFødselsnummer() }
                 .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
 
-        val adresser = pdlRestClient.hentAdresserForPersoner(identer)
+        val adresser = pdlRestKlient.hentAdresserForPersoner(identer)
 
         vilkårsvurdering
             .personResultater
@@ -99,7 +99,7 @@ class PreutfyllBosattIRiketService(
         behandling: Behandling,
     ): Set<VilkårResultat> {
         val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(adresserForPerson, personResultat)
-        val erNordiskStatsborgerTidslinje = pdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat)
+        val erNordiskStatsborgerTidslinje = pdlRestKlient.lagErNordiskStatsborgerTidslinje(personResultat)
         val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erDeltBostedIFinnmarkEllerNordTromsTidslinje = lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erOppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje(adresserForPerson, personResultat)
@@ -186,7 +186,7 @@ class PreutfyllBosattIRiketService(
     }
 
     private fun hentErUkrainskStatsborger(aktør: Aktør): Boolean {
-        val statsborgerskap = pdlRestClient.hentStatsborgerskap(aktør)
+        val statsborgerskap = pdlRestKlient.hentStatsborgerskap(aktør)
         return statsborgerskap.any { it.erUkraina() }
     }
 

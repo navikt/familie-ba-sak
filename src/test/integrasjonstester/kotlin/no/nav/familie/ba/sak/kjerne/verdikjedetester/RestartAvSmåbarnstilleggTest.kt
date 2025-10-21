@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandard
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.fake.FakeEfSakRestClient
+import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
@@ -58,7 +58,7 @@ class RestartAvSmåbarnstilleggTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val efSakRestClient: FakeEfSakRestClient,
+    @Autowired private val efSakRestKlient: FakeEfSakRestKlient,
     @Autowired private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val autovedtakSatsendringService: AutovedtakSatsendringService,
@@ -290,7 +290,7 @@ class RestartAvSmåbarnstilleggTest(
         personScenario: RestScenario,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-        efSakRestClient.leggTilEksternPeriode(
+        efSakRestKlient.leggTilEksternPeriode(
             personScenario.søker.ident,
             EksternePerioderResponse(
                 perioder = emptyList(),
@@ -346,7 +346,7 @@ class RestartAvSmåbarnstilleggTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        efSakRestClient.leggTilEksternPeriode(
+        efSakRestKlient.leggTilEksternPeriode(
             personIdent = personScenario.søker.ident,
             eksternePerioderResponse =
                 EksternePerioderResponse(
@@ -425,7 +425,7 @@ class RestartAvSmåbarnstilleggTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        efSakRestClient.leggTilEksternPeriode(
+        efSakRestKlient.leggTilEksternPeriode(
             personScenario.søker.ident,
             EksternePerioderResponse(
                 perioder =

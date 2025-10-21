@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.fake
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -36,15 +36,15 @@ import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
 
 class FakePersonopplysningerService(
-    pdlRestClient: PdlRestClient,
-    systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
+    pdlRestKlient: PdlRestKlient,
+    systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
     familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
-    integrasjonClient: IntegrasjonClient,
+    integrasjonKlient: IntegrasjonKlient,
 ) : PersonopplysningerService(
-        pdlRestClient,
-        systemOnlyPdlRestClient,
+        pdlRestKlient,
+        systemOnlyPdlRestKlient,
         familieIntegrasjonerTilgangskontrollService,
-        integrasjonClient,
+        integrasjonKlient,
     ) {
     init {
         settPersoninfoMedRelasjonerForPredefinerteTestpersoner()

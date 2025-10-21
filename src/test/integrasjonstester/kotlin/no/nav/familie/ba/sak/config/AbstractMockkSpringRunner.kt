@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.config
 
 import io.mockk.unmockkAll
-import no.nav.familie.ba.sak.fake.FakeEfSakRestClient
-import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
-import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
+import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
+import no.nav.familie.ba.sak.fake.FakePdlIdentRestKlient
+import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestKlient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollKlient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestKlient
 import no.nav.familie.ba.sak.mock.FamilieIntegrasjonerTilgangskontrollMock
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.MDC
@@ -16,13 +16,13 @@ import java.util.UUID
 
 abstract class AbstractMockkSpringRunner {
     @Autowired
-    private lateinit var pdlIdentRestClient: PdlIdentRestClient
+    private lateinit var pdlIdentRestKlient: PdlIdentRestKlient
 
     @Autowired
-    private lateinit var efSakRestClient: EfSakRestClient
+    private lateinit var efSakRestKlient: EfSakRestKlient
 
     @Autowired
-    private lateinit var mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
+    private lateinit var mockFamilieIntegrasjonerTilgangskontrollKlient: FamilieIntegrasjonerTilgangskontrollKlient
 
     /**
      * Cachemanagere
@@ -47,14 +47,14 @@ abstract class AbstractMockkSpringRunner {
     private fun clearMocks() {
         unmockkAll()
 
-        val fakePdlIdentRestClient = pdlIdentRestClient as? FakePdlIdentRestClient
-        fakePdlIdentRestClient?.reset()
+        val fakePdlIdentRestKlient = pdlIdentRestKlient as? FakePdlIdentRestKlient
+        fakePdlIdentRestKlient?.reset()
 
-        val fakeEfSakRestClient = efSakRestClient as? FakeEfSakRestClient
-        fakeEfSakRestClient?.reset()
+        val fakeEfSakRestKlient = efSakRestKlient as? FakeEfSakRestKlient
+        fakeEfSakRestKlient?.reset()
 
-        FamilieIntegrasjonerTilgangskontrollMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(
-            mockFamilieIntegrasjonerTilgangskontrollClient,
+        FamilieIntegrasjonerTilgangskontrollMock.clearMockFamilieIntegrasjonerTilgangskontrollKlient(
+            mockFamilieIntegrasjonerTilgangskontrollKlient,
         )
 
         MDC.put("callId", "${this::class.java.simpleName}-${UUID.randomUUID()}")

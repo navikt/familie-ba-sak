@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 
 class FamilieIntegrasjonerTilgangskontrollServiceTest {
-    private val client = mockk<FamilieIntegrasjonerTilgangskontrollClient>()
+    private val klient = mockk<FamilieIntegrasjonerTilgangskontrollKlient>()
 
     private val cacheManager = ConcurrentMapCacheManager()
 
-    private val service = FamilieIntegrasjonerTilgangskontrollService(client, cacheManager, mockk())
+    private val service = FamilieIntegrasjonerTilgangskontrollService(klient, cacheManager, mockk())
 
     private val slot = mutableListOf<List<String>>()
 
@@ -27,25 +27,25 @@ class FamilieIntegrasjonerTilgangskontrollServiceTest {
 
     @Test
     fun `har tilgang skal cacheas`() {
-        client.mockSjekkTilgang(true, slot)
+        klient.mockSjekkTilgang(true, slot)
 
         assertThat(testWithBrukerContext { service.sjekkTilgangTilPerson("1") }.harTilgang).isTrue
         assertThat(testWithBrukerContext { service.sjekkTilgangTilPerson("1") }.harTilgang).isTrue
-        verify(exactly = 1) { client.sjekkTilgangTilPersoner(any()) }
+        verify(exactly = 1) { klient.sjekkTilgangTilPersoner(any()) }
     }
 
     @Test
     fun `har ikke tilgang skal cacheas`() {
-        client.mockSjekkTilgang(false, slot)
+        klient.mockSjekkTilgang(false, slot)
 
         assertThat(testWithBrukerContext { service.sjekkTilgangTilPerson("1") }.harTilgang).isFalse
         assertThat(testWithBrukerContext { service.sjekkTilgangTilPerson("1") }.harTilgang).isFalse
-        verify(exactly = 1) { client.sjekkTilgangTilPersoner(any()) }
+        verify(exactly = 1) { klient.sjekkTilgangTilPersoner(any()) }
     }
 
     @Test
     fun `cachear per saksbehandlere`() {
-        client.mockSjekkTilgang(false, slot)
+        klient.mockSjekkTilgang(false, slot)
 
         // Systemcontext
         service.sjekkTilgangTilPerson("1")
@@ -53,22 +53,22 @@ class FamilieIntegrasjonerTilgangskontrollServiceTest {
         val kall2 = testWithBrukerContext("saksbehandler2") { service.sjekkTilgangTilPerson("1") }
         assertThat(kall1.harTilgang).isFalse
         assertThat(kall2.harTilgang).isFalse
-        verify(exactly = 3) { client.sjekkTilgangTilPersoner(any()) }
+        verify(exactly = 3) { klient.sjekkTilgangTilPersoner(any()) }
     }
 
     @Test
     fun `tilgangskontrollerer unike identer`() {
-        client.mockSjekkTilgang(false, slot)
+        klient.mockSjekkTilgang(false, slot)
 
         testWithBrukerContext("saksbehandler1") { service.sjekkTilgangTilPersoner(listOf("1", "1")) }
 
-        verify(exactly = 1) { client.sjekkTilgangTilPersoner(listOf("1")) }
+        verify(exactly = 1) { klient.sjekkTilgangTilPersoner(listOf("1")) }
     }
 
     @Test
     fun `skal ikke hente identer som allerede finnes i cachen`() {
         val tilgang = mapOf("1" to false, "2" to true, "3" to false)
-        client.mockSjekkTilgang(tilgang, slot)
+        klient.mockSjekkTilgang(tilgang, slot)
 
         testWithBrukerContext { service.sjekkTilgangTilPerson("1") }
         val sjekkTilgangTilPersoner = testWithBrukerContext { service.sjekkTilgangTilPersoner(listOf("2", "1", "3")) }
@@ -80,7 +80,7 @@ class FamilieIntegrasjonerTilgangskontrollServiceTest {
             tilgang.entries.map { Pair(it.key, it.value) }.toList(),
         )
 
-        verify(exactly = 2) { client.sjekkTilgangTilPersoner(any()) }
+        verify(exactly = 2) { klient.sjekkTilgangTilPersoner(any()) }
 
         val forventetFørsteKall = listOf("1")
         val forventetAndreKall = listOf("2", "3")

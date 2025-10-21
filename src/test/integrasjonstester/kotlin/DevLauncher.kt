@@ -15,7 +15,7 @@ object DevLauncher {
                     "mock-infotrygd-feed",
                     "mock-infotrygd-barnetrygd",
                     "mock-pdl",
-                    "mock-ident-client",
+                    "mock-ident-klient",
                     "fake-tilbakekreving-klient",
                     "task-scheduling",
                 )

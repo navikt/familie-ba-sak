@@ -4,7 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.fake.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollKlient
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -16,28 +16,28 @@ import org.springframework.context.annotation.Profile
 class FamilieIntegrasjonerTilgangskontrollMock {
     @Bean
     @Primary
-    fun mockFamilieIntegrasjonerTilgangskontrollClient(): FamilieIntegrasjonerTilgangskontrollClient {
-        val mockFamilieIntegrasjonerTilgangskontrollClient =
-            mockk<FamilieIntegrasjonerTilgangskontrollClient>(relaxed = false)
+    fun mockFamilieIntegrasjonerTilgangskontrollKlient(): FamilieIntegrasjonerTilgangskontrollKlient {
+        val mockFamilieIntegrasjonerTilgangskontrollKlient =
+            mockk<FamilieIntegrasjonerTilgangskontrollKlient>(relaxed = false)
 
-        clearMockFamilieIntegrasjonerTilgangskontrollClient(mockFamilieIntegrasjonerTilgangskontrollClient)
+        clearMockFamilieIntegrasjonerTilgangskontrollKlient(mockFamilieIntegrasjonerTilgangskontrollKlient)
 
-        return mockFamilieIntegrasjonerTilgangskontrollClient
+        return mockFamilieIntegrasjonerTilgangskontrollKlient
     }
 
     companion object {
-        fun clearMockFamilieIntegrasjonerTilgangskontrollClient(mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient) {
-            clearMocks(mockFamilieIntegrasjonerTilgangskontrollClient)
+        fun clearMockFamilieIntegrasjonerTilgangskontrollKlient(mockFamilieIntegrasjonerTilgangskontrollKlient: FamilieIntegrasjonerTilgangskontrollKlient) {
+            clearMocks(mockFamilieIntegrasjonerTilgangskontrollKlient)
 
             every {
-                mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
+                mockFamilieIntegrasjonerTilgangskontrollKlient.sjekkTilgangTilPersoner(any())
             } answers {
                 val identer = firstArg<List<String>>()
                 identer.map { Tilgang(personIdent = it, harTilgang = it != BARN_DET_IKKE_GIS_TILGANG_TIL_FNR) }
             }
         }
 
-        fun FamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(
+        fun FamilieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(
             map: Map<String, Boolean>,
             slot: MutableList<List<String>> = mutableListOf(),
         ) {
@@ -47,7 +47,7 @@ class FamilieIntegrasjonerTilgangskontrollMock {
             }
         }
 
-        fun FamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(
+        fun FamilieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(
             harTilgang: Boolean = false,
             slot: MutableList<List<String>> = mutableListOf(),
             begrunnelse: String? = null,

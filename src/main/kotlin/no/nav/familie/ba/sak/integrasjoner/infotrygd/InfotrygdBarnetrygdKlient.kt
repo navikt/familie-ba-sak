@@ -26,15 +26,15 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @Component
-class InfotrygdBarnetrygdClient(
-    @Value("\${FAMILIE_BA_INFOTRYGD_API_URL}") private val clientUri: URI,
+class InfotrygdBarnetrygdKlient(
+    @Value("\${FAMILIE_BA_INFOTRYGD_API_URL}") private val klientUri: URI,
     @Qualifier("jwtBearerMedLangTimeout") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "infotrygd") {
     fun harLøpendeSakIInfotrygd(
         søkersIdenter: List<String>,
         barnasIdenter: List<String> = emptyList(),
     ): Boolean {
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/lopende-barnetrygd")
+        val uri = URI.create("$klientUri/infotrygd/barnetrygd/lopende-barnetrygd")
 
         val request = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
 
@@ -50,7 +50,7 @@ class InfotrygdBarnetrygdClient(
         søkersIdenter: List<String>,
         barnasIdenter: List<String> = emptyList(),
     ): Boolean {
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/aapen-sak")
+        val uri = URI.create("$klientUri/infotrygd/barnetrygd/aapen-sak")
 
         val request = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
 
@@ -66,7 +66,7 @@ class InfotrygdBarnetrygdClient(
         søkersIdenter: List<String>,
         barnasIdenter: List<String> = emptyList(),
     ): InfotrygdSøkResponse<Sak> {
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/saker")
+        val uri = URI.create("$klientUri/infotrygd/barnetrygd/saker")
 
         return try {
             postForEntity(uri, InfotrygdSøkRequest(søkersIdenter, barnasIdenter))
@@ -86,7 +86,7 @@ class InfotrygdBarnetrygdClient(
         barnasIdenter: List<String>,
         historikk: Boolean = false,
     ): InfotrygdSøkResponse<Stønad> {
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/stonad?historikk=$historikk")
+        val uri = URI.create("$klientUri/infotrygd/barnetrygd/stonad?historikk=$historikk")
 
         return try {
             postForEntity(uri, InfotrygdSøkRequest(søkersIdenter, barnasIdenter))
@@ -115,7 +115,7 @@ class InfotrygdBarnetrygdClient(
         personIdent: String,
         fraDato: YearMonth,
     ): BisysUtvidetBarnetrygdResponse {
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet")
+        val uri = URI.create("$klientUri/infotrygd/barnetrygd/utvidet")
         val body = HentUtvidetBarnetrygdRequest(personIdent, fraDato)
         return try {
             postForEntity(uri, body)
@@ -129,7 +129,7 @@ class InfotrygdBarnetrygdClient(
         personIdent: String,
         fraDato: LocalDate,
     ): BarnetrygdTilPensjonResponse {
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/pensjon")
+        val uri = URI.create("$klientUri/infotrygd/barnetrygd/pensjon")
         val body = BarnetrygdTilPensjonRequest(personIdent, fraDato)
         return try {
             postForEntity(uri, body)
@@ -145,7 +145,7 @@ class InfotrygdBarnetrygdClient(
         backoff = Backoff(delayExpression = RETRY_BACKOFF_3_MIN),
     )
     fun hentPersonerMedBarnetrygdTilPensjon(år: Int): List<String> {
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/pensjon?aar=$år")
+        val uri = URI.create("$klientUri/infotrygd/barnetrygd/pensjon?aar=$år")
         return try {
             getForEntity(uri)
         } catch (ex: Exception) {
@@ -158,7 +158,7 @@ class InfotrygdBarnetrygdClient(
         søkersIdenter: List<String>,
         brevkoder: List<InfotrygdBrevkode>,
     ): SendtBrevResponse {
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/brev")
+        val uri = URI.create("$klientUri/infotrygd/barnetrygd/brev")
         return try {
             postForEntity(
                 uri,
@@ -213,7 +213,7 @@ class InfotrygdBarnetrygdClient(
 
     companion object {
         const val RETRY_BACKOFF_3_MIN = "\${retry.backoff.delay:180000}"
-        private val logger: Logger = LoggerFactory.getLogger(InfotrygdBarnetrygdClient::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(InfotrygdBarnetrygdKlient::class.java)
     }
 }
 

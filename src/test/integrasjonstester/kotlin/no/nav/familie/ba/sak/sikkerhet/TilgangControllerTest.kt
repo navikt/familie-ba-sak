@@ -4,11 +4,10 @@ import io.mockk.every
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
-import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,7 +17,7 @@ class TilgangControllerTest(
     @Autowired
     private val tilgangController: TilgangController,
     @Autowired
-    private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
+    private val mockFamilieIntegrasjonerTilgangskontrollKlient: FamilieIntegrasjonerTilgangskontrollKlient,
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun testHarTilgangTilKode6Person() {
@@ -29,7 +28,7 @@ class TilgangControllerTest(
                 PersonInfo(fødselsdato = fødselsdato, adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG),
             )
         every {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(fnr))
+            mockFamilieIntegrasjonerTilgangskontrollKlient.sjekkTilgangTilPersoner(listOf(fnr))
         } answers { firstArg<List<String>>().map { Tilgang(it, true) } }
 
         val response = tilgangController.hentTilgangOgDiskresjonskode(TilgangRequestDTO(fnr))

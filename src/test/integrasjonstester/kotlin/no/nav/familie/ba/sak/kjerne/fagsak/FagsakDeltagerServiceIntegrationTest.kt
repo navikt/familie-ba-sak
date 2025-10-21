@@ -6,11 +6,10 @@ import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
-import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
-import no.nav.familie.ba.sak.fake.FakePersonopplysningerService
+import no.nav.familie.ba.sak.fake.FakePdlIdentRestKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonIkkeFunnet
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -50,9 +49,9 @@ class FagsakDeltagerServiceIntegrationTest(
     @Autowired
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     @Autowired
-    private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
+    private val mockFamilieIntegrasjonerTilgangskontrollKlient: FamilieIntegrasjonerTilgangskontrollKlient,
     @Autowired
-    private val fakePdlIdentRestClient: FakePdlIdentRestClient,
+    private val fakePdlIdentRestKlient: FakePdlIdentRestKlient,
 ) : AbstractSpringIntegrationTest() {
     /*
         This is a complicated test against following family relationship:
@@ -312,7 +311,7 @@ class FagsakDeltagerServiceIntegrationTest(
     @Test
     fun `Skal returnere tom liste ved søk hvis ident ikke har aktiv fødselsnummer`() {
         val fnr = randomFnr()
-        fakePdlIdentRestClient.leggTilIdent(
+        fakePdlIdentRestKlient.leggTilIdent(
             fnr,
             listOf(
                 IdentInformasjon("npid", gruppe = "NPID", historisk = false),
@@ -328,11 +327,11 @@ class FagsakDeltagerServiceIntegrationTest(
         val aktør = lagAktør()
 
         every {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer()))
+            mockFamilieIntegrasjonerTilgangskontrollKlient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer()))
         } answers {
             throw HttpServerErrorException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "[PdlRestClient][Feil ved oppslag på person: Fant ikke person]",
+                "[PdlRestKlient][Feil ved oppslag på person: Fant ikke person]",
             )
         }
         leggTilPersonIkkeFunnet(aktør.aktivFødselsnummer())

@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
-import no.nav.familie.ba.sak.fake.FakeIntegrasjonClient
+import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -70,7 +70,7 @@ class SøknadGrunnlagTest(
     @Autowired
     private val brevmalService: BrevmalService,
     @Autowired
-    private val fakeIntegrasjonClient: FakeIntegrasjonClient,
+    private val fakeIntegrasjonKlient: FakeIntegrasjonKlient,
     @Autowired
     private val personopplysningerService: PersonopplysningerService,
 ) : AbstractSpringIntegrationTest() {
@@ -348,7 +348,7 @@ class SøknadGrunnlagTest(
 
         val journalpostIdSøknad = "123456789"
 
-        fakeIntegrasjonClient.leggTilVersjonertBarnetrygdSøknad(
+        fakeIntegrasjonKlient.leggTilVersjonertBarnetrygdSøknad(
             journalpostIdSøknad,
             VersjonertBarnetrygdSøknadV9(
                 barnetrygdSøknad =

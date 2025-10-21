@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedKlient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.StartBehandlingDto
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -21,12 +21,12 @@ import java.util.Properties
     beskrivelse = "Send startbehandling til Infotrygd feed.",
 )
 class SendStartBehandlingTilInfotrygdTask(
-    private val infotrygdFeedClient: InfotrygdFeedClient,
+    private val infotrygdFeedKlient: InfotrygdFeedKlient,
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
         val startBehandlingDto = objectMapper.readValue(task.payload, StartBehandlingDto::class.java)
-        infotrygdFeedClient.sendStartBehandlingTilInfotrygd(startBehandlingDto)
+        infotrygdFeedKlient.sendStartBehandlingTilInfotrygd(startBehandlingDto)
     }
 
     companion object {

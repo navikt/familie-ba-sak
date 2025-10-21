@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -37,7 +37,7 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import java.time.LocalDate
 
 class TilgangServiceTest {
-    private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient = mockk()
+    private val mockFamilieIntegrasjonerTilgangskontrollKlient: FamilieIntegrasjonerTilgangskontrollKlient = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val fagsakService: FagsakService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
@@ -48,7 +48,7 @@ class TilgangServiceTest {
     private val auditLogger = AuditLogger("familie-ba-sak")
     private val familieIntegrasjonerTilgangskontrollService =
         FamilieIntegrasjonerTilgangskontrollService(
-            mockFamilieIntegrasjonerTilgangskontrollClient,
+            mockFamilieIntegrasjonerTilgangskontrollKlient,
             cacheManager,
             mockk(),
         )
@@ -91,7 +91,7 @@ class TilgangServiceTest {
 
     @Test
     internal fun `skal kaste RolleTilgangskontrollFeil dersom saksbehandler ikke har tilgang til person eller dets barn`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(harTilgang = false, begrunnelse = "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse")
+        mockFamilieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(harTilgang = false, begrunnelse = "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse")
 
         val rolleTilgangskontrollFeil =
             assertThrows<RolleTilgangskontrollFeil> {
@@ -107,14 +107,14 @@ class TilgangServiceTest {
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til person og dets barn`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
+        mockFamilieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(true)
 
         tilgangService.validerTilgangTilPersoner(listOf(aktør.aktivFødselsnummer()), AuditLoggerEvent.ACCESS)
     }
 
     @Test
     internal fun `skal kaste RolleTilgangskontrollFeil dersom saksbehandler ikke har tilgang til behandling`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(harTilgang = false, begrunnelse = "NAV-ansatt")
+        mockFamilieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(harTilgang = false, begrunnelse = "NAV-ansatt")
 
         val rolleTilgangskontrollFeil =
             assertThrows<RolleTilgangskontrollFeil> {
@@ -129,26 +129,26 @@ class TilgangServiceTest {
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til behandling`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
+        mockFamilieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(true)
 
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
     }
 
     @Test
     internal fun `validerTilgangTilPersoner - hvis samme saksbehandler kaller skal den ha cachet`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
+        mockFamilieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(true)
 
         mockBrukerContext("A")
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
         verify(exactly = 1) {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
+            mockFamilieIntegrasjonerTilgangskontrollKlient.sjekkTilgangTilPersoner(any())
         }
     }
 
     @Test
     internal fun `validerTilgangTilPersoner - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
+        mockFamilieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(true)
 
         mockBrukerContext("A")
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
@@ -156,13 +156,13 @@ class TilgangServiceTest {
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
 
         verify(exactly = 2) {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
+            mockFamilieIntegrasjonerTilgangskontrollKlient.sjekkTilgangTilPersoner(any())
         }
     }
 
     @Test
     internal fun `validerTilgangTilBehandling - hvis samme saksbehandler kaller skal den ha cachet`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
+        mockFamilieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(true)
 
         mockBrukerContext("A")
 
@@ -170,13 +170,13 @@ class TilgangServiceTest {
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
 
         verify(exactly = 1) {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
+            mockFamilieIntegrasjonerTilgangskontrollKlient.sjekkTilgangTilPersoner(any())
         }
     }
 
     @Test
     internal fun `validerTilgangTilBehandling - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
+        mockFamilieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(true)
 
         mockBrukerContext("A")
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
@@ -184,7 +184,7 @@ class TilgangServiceTest {
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
 
         verify(exactly = 2) {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
+            mockFamilieIntegrasjonerTilgangskontrollKlient.sjekkTilgangTilPersoner(any())
         }
     }
 
@@ -213,7 +213,7 @@ class TilgangServiceTest {
                 ),
             ),
         )
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(harTilgang = false, begrunnelse = "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse")
+        mockFamilieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(harTilgang = false, begrunnelse = "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse")
         mockBrukerContext("A")
 
         // Act & Assert
@@ -244,7 +244,7 @@ class TilgangServiceTest {
         )
         val slot = mutableListOf<List<String>>()
 
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(harTilgang = false, begrunnelse = "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse", slot = slot)
+        mockFamilieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(harTilgang = false, begrunnelse = "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse", slot = slot)
         mockBrukerContext("A")
 
         // Act & Assert
@@ -265,7 +265,7 @@ class TilgangServiceTest {
         val fnr = randomFnr()
         val fnr2 = randomFnr()
         val fnr3 = randomFnr()
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(mapOf(fnr to true, fnr2 to false, fnr3 to true))
+        mockFamilieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(mapOf(fnr to true, fnr2 to false, fnr3 to true))
         assertThrows<RolleTilgangskontrollFeil> {
             tilgangService.validerTilgangTilPersoner(
                 listOf(fnr, fnr2, fnr3),
