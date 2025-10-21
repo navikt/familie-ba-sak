@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.fake.FakeIntegrasjonClient
+import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilRelasjonIPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -37,7 +37,7 @@ class ArbeidsfordelingIntegrationTest(
     @Autowired
     private val arbeidsfordelingService: ArbeidsfordelingService,
     @Autowired
-    private val fakeIntegrasjonClient: FakeIntegrasjonClient,
+    private val fakeIntegrasjonKlient: FakeIntegrasjonKlient,
     @Autowired
     private val oppgaveService: OppgaveService,
 ) : AbstractSpringIntegrationTest() {
@@ -45,7 +45,7 @@ class ArbeidsfordelingIntegrationTest(
     fun `Skal fastsette behandlende enhet ved opprettelse av behandling`() {
         // Arrange
         val søkerFnr = mockSøker()
-        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+        fakeIntegrasjonKlient.leggTilBehandlendeEnhet(
             søkerFnr,
             listOf(IKKE_FORTROLIG_ENHET),
         )
@@ -70,11 +70,11 @@ class ArbeidsfordelingIntegrationTest(
         // Arrange
         val søkerFnr = mockSøker()
         val ikkeFortreligBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.UGRADERT)
-        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+        fakeIntegrasjonKlient.leggTilBehandlendeEnhet(
             søkerFnr,
             listOf(IKKE_FORTROLIG_ENHET),
         )
-        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+        fakeIntegrasjonKlient.leggTilBehandlendeEnhet(
             ikkeFortreligBarnFnr,
             listOf(IKKE_FORTROLIG_ENHET),
         )
@@ -116,11 +116,11 @@ class ArbeidsfordelingIntegrationTest(
         // Arrange
         val søkerFnr = mockSøker()
         val fortroligBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.FORTROLIG)
-        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+        fakeIntegrasjonKlient.leggTilBehandlendeEnhet(
             søkerFnr,
             listOf(IKKE_FORTROLIG_ENHET),
         )
-        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+        fakeIntegrasjonKlient.leggTilBehandlendeEnhet(
             fortroligBarnFnr,
             listOf(FORTROLIG_ENHET),
         )
@@ -160,15 +160,15 @@ class ArbeidsfordelingIntegrationTest(
         val søkerFnr = mockSøker()
         val ugradertBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.UGRADERT)
         val fortroligBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.FORTROLIG)
-        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+        fakeIntegrasjonKlient.leggTilBehandlendeEnhet(
             søkerFnr,
             listOf(IKKE_FORTROLIG_ENHET),
         )
-        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+        fakeIntegrasjonKlient.leggTilBehandlendeEnhet(
             ugradertBarnFnr,
             listOf(IKKE_FORTROLIG_ENHET),
         )
-        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+        fakeIntegrasjonKlient.leggTilBehandlendeEnhet(
             fortroligBarnFnr,
             listOf(FORTROLIG_ENHET),
         )
@@ -232,7 +232,7 @@ class ArbeidsfordelingIntegrationTest(
         // Arrange
         val søkerFnr = mockSøker()
         val ugradertBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.UGRADERT)
-        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+        fakeIntegrasjonKlient.leggTilBehandlendeEnhet(
             søkerFnr,
             listOf(IKKE_FORTROLIG_ENHET),
         )
@@ -279,11 +279,11 @@ class ArbeidsfordelingIntegrationTest(
         // Arrange
         val søkerFnr = mockSøker()
         val fortroligBarnFnr = mockBarnMedRelasjonOgGradering(søkerFnr, ADRESSEBESKYTTELSEGRADERING.FORTROLIG)
-        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+        fakeIntegrasjonKlient.leggTilBehandlendeEnhet(
             søkerFnr,
             listOf(IKKE_FORTROLIG_ENHET),
         )
-        fakeIntegrasjonClient.leggTilBehandlendeEnhet(
+        fakeIntegrasjonKlient.leggTilBehandlendeEnhet(
             fortroligBarnFnr,
             listOf(FORTROLIG_ENHET),
         )

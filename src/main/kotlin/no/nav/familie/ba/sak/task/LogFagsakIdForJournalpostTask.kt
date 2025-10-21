@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.task.LogFagsakIdForJournalpostTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service
     maxAntallFeil = 1,
 )
 class LogFagsakIdForJournalpostTask(
-    val integrasjonClient: IntegrasjonClient,
+    val integrasjonKlient: IntegrasjonKlient,
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
@@ -28,7 +28,7 @@ class LogFagsakIdForJournalpostTask(
 
         secureLogger.info("Henter journalpost m/ id $journalpostId for oppslag av fagsak id")
 
-        val journalpost = integrasjonClient.hentJournalpost(journalpostId)
+        val journalpost = integrasjonKlient.hentJournalpost(journalpostId)
 
         journalpost.sak?.let { secureLogger.info(it.convertDataClassToJson()) } ?: throw Feil("Fant ikke fagsak informasjon i journalpost $journalpostId")
     }

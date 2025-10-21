@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
-import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
+import no.nav.familie.ba.sak.fake.FakePdlIdentRestKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonIkkeFunnet
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.RegistrerPersongrunnlagDTO
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType.SAK
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -46,7 +45,7 @@ class FagsakDeltagerServiceIntegrationTest(
     @Autowired
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     @Autowired
-    private val fakePdlIdentRestClient: FakePdlIdentRestClient,
+    private val fakePdlIdentRestKlient: FakePdlIdentRestKlient,
 ) : AbstractSpringIntegrationTest() {
     /*
         This is a complicated test against following family relationship:
@@ -306,7 +305,7 @@ class FagsakDeltagerServiceIntegrationTest(
     @Test
     fun `Skal returnere tom liste ved søk hvis ident ikke har aktiv fødselsnummer`() {
         val fnr = randomFnr()
-        fakePdlIdentRestClient.leggTilIdent(
+        fakePdlIdentRestKlient.leggTilIdent(
             fnr,
             listOf(
                 IdentInformasjon("npid", gruppe = "NPID", historisk = false),
@@ -317,7 +316,7 @@ class FagsakDeltagerServiceIntegrationTest(
     }
 
     @Test
-    fun `XX Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
+    fun `Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
         val aktør = lagAktør()
 
         leggTilPersonIkkeFunnet(aktør.aktivFødselsnummer())

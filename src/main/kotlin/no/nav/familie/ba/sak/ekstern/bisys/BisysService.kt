@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.ekstern.bisys
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -18,7 +18,7 @@ import kotlin.collections.filter
 @Service
 class BisysService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    private val infotrygdBarnetrygdKlient: InfotrygdBarnetrygdKlient,
     private val fagsakRepository: FagsakRepository,
     private val personidentService: PersonidentService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
@@ -73,7 +73,7 @@ class BisysService(
         fraDato: LocalDate,
     ): List<UtvidetBarnetrygdPeriode> =
         personidentService.hentAlleFødselsnummerForEnAktør(aktør).flatMap {
-            infotrygdBarnetrygdClient.hentUtvidetBarnetrygd(it, fraDato.toYearMonth()).perioder
+            infotrygdBarnetrygdKlient.hentUtvidetBarnetrygd(it, fraDato.toYearMonth()).perioder
         }
 
     private fun hentBisysPerioderFraBaSak(

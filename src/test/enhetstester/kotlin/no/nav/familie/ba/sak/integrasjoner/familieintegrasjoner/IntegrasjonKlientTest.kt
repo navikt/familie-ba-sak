@@ -17,18 +17,18 @@ import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
-class IntegrasjonClientTest {
+class IntegrasjonKlientTest {
     private val mockedRestOperations: RestOperations = mockk()
     private val restOperations: RestOperations = RestTemplateBuilder().build()
     private val baseUri = URI("http://localhost:8080")
     private lateinit var wiremockServerItem: WireMockServer
-    private lateinit var integrasjonClient: IntegrasjonClient
+    private lateinit var integrasjonKlient: IntegrasjonKlient
 
     @BeforeEach
     fun initClass() {
         wiremockServerItem = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
         wiremockServerItem.start()
-        integrasjonClient = IntegrasjonClient(URI.create(wiremockServerItem.baseUrl()), restOperations)
+        integrasjonKlient = IntegrasjonKlient(URI.create(wiremockServerItem.baseUrl()), restOperations)
     }
 
     @Test
@@ -43,7 +43,7 @@ class IntegrasjonClientTest {
         )
 
         // Act
-        val enheter = integrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent)
+        val enheter = integrasjonKlient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent)
 
         // Assert
         assertThat(enheter).hasSize(2)
@@ -67,7 +67,7 @@ class IntegrasjonClientTest {
         )
 
         // Act
-        val tilgangsstyrteJournalposter = integrasjonClient.hentTilgangsstyrteJournalposterForBruker(JournalposterForBrukerRequest(brukerId = Bruker(id = "12345678910", type = BrukerIdType.FNR), antall = 100, tema = listOf(Tema.BAR)))
+        val tilgangsstyrteJournalposter = integrasjonKlient.hentTilgangsstyrteJournalposterForBruker(JournalposterForBrukerRequest(brukerId = Bruker(id = "12345678910", type = BrukerIdType.FNR), antall = 100, tema = listOf(Tema.BAR)))
 
         // Assert
         assertThat(tilgangsstyrteJournalposter).hasSize(1)

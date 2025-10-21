@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAktør
-import no.nav.familie.ba.sak.fake.FakeIntegrasjonClient
+import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollClient
+import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollKlient
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
@@ -29,13 +29,13 @@ internal class PersonopplysningerServiceTest(
     @Qualifier("jwtBearer")
     private val restTemplate: RestOperations,
     @Autowired
-    private val fakeFamilieIntegrasjonerTilgangskontrollClient: FakeFamilieIntegrasjonerTilgangskontrollClient,
+    private val fakeFamilieIntegrasjonerTilgangskontrollKlient: FakeFamilieIntegrasjonerTilgangskontrollKlient,
     @Autowired
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     @Autowired
     private val mockPersonidentService: PersonidentService,
     @Autowired
-    private val fakeIntegrasjonClient: FakeIntegrasjonClient,
+    private val fakeIntegrasjonKlient: FakeIntegrasjonKlient,
 ) : AbstractSpringIntegrationTest() {
     lateinit var personopplysningerService: PersonopplysningerService
 
@@ -43,32 +43,32 @@ internal class PersonopplysningerServiceTest(
     fun setUp() {
         personopplysningerService =
             PersonopplysningerService(
-                PdlRestClient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate, mockPersonidentService),
-                SystemOnlyPdlRestClient(
+                PdlRestKlient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate, mockPersonidentService),
+                SystemOnlyPdlRestKlient(
                     URI.create(wireMockServer.baseUrl() + "/api"),
                     restTemplate,
                     mockPersonidentService,
                 ),
                 familieIntegrasjonerTilgangskontrollService,
-                fakeIntegrasjonClient,
+                fakeIntegrasjonKlient,
             )
         lagMockForPersoner()
     }
 
     @AfterEach
     fun tearDown() {
-        fakeFamilieIntegrasjonerTilgangskontrollClient.reset()
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.reset()
     }
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
-        fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
             listOf(
                 Tilgang(ID_BARN_1, true),
                 Tilgang(ID_BARN_2, false),
             ),
         )
-        fakeIntegrasjonClient.leggTilEgenansatt(ID_MOR)
+        fakeIntegrasjonKlient.leggTilEgenansatt(ID_MOR)
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(lagAktør(ID_MOR))
 
@@ -84,7 +84,7 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal returnere riktig personinfo for død person`() {
-        fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
             listOf(
                 Tilgang(ID_BARN_1, true),
                 Tilgang(ID_BARN_2, false),
@@ -105,7 +105,7 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal filtrere bort relasjoner med opphørte folkreregisteridenter eller uten fødselsdato`() {
-        fakeFamilieIntegrasjonerTilgangskontrollClient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
             emptyList(),
             godkjennDefault = true,
         )

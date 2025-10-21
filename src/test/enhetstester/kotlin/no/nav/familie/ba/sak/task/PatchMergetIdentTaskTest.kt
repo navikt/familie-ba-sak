@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
@@ -31,7 +31,7 @@ import java.time.temporal.ChronoUnit
 
 class PatchMergetIdentTaskTest {
     private val persongrunnlagService = mockk<PersongrunnlagService>()
-    private val pdlIdentRestClient = mockk<PdlIdentRestClient>()
+    private val pdlIdentRestKlient = mockk<PdlIdentRestKlient>()
     private val personidentService = mockk<PersonidentService>(relaxed = true)
     private val aktørIdRepository = mockk<AktørIdRepository>(relaxed = true)
     private val aktørMergeLoggRepository = mockk<AktørMergeLoggRepository>(relaxed = true)
@@ -40,7 +40,7 @@ class PatchMergetIdentTaskTest {
     private val task =
         PatchMergetIdentTask(
             persongrunnlagService = persongrunnlagService,
-            pdlIdentRestClient = pdlIdentRestClient,
+            pdlIdentRestKlient = pdlIdentRestKlient,
             personidentService = personidentService,
             aktørIdRepository = aktørIdRepository,
             aktørMergeLoggRepository = aktørMergeLoggRepository,
@@ -69,7 +69,7 @@ class PatchMergetIdentTaskTest {
             )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
-        every { pdlIdentRestClient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns
+        every { pdlIdentRestKlient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns
             listOf(
                 IdentInformasjon(gammelAktør.aktørId, true, "AKTORID"),
                 IdentInformasjon(gammelAktør.aktivFødselsnummer(), true, "FOLKEREGISTERIDENT"),
@@ -120,7 +120,7 @@ class PatchMergetIdentTaskTest {
             )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
-        every { pdlIdentRestClient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns emptyList()
+        every { pdlIdentRestKlient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns emptyList()
 
         assertThrows<Feil> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
             assertThat(it.message).isEqualTo("Ident som skal patches finnes ikke som historisk ident av ny ident")
@@ -138,7 +138,7 @@ class PatchMergetIdentTaskTest {
             )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
-        every { pdlIdentRestClient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns
+        every { pdlIdentRestKlient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns
             listOf(
                 IdentInformasjon(nyAktør.aktørId, false, "AKTORID"),
                 IdentInformasjon(nyAktør.aktivFødselsnummer(), false, "FOLKEREGISTERIDENT"),
@@ -162,7 +162,7 @@ class PatchMergetIdentTaskTest {
             )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
-        every { pdlIdentRestClient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns
+        every { pdlIdentRestKlient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns
             listOf(
                 IdentInformasjon(nyAktør.aktørId, false, "AKTORID"),
                 IdentInformasjon(nyAktør.aktivFødselsnummer(), false, "FOLKEREGISTERIDENT"),
@@ -195,7 +195,7 @@ class PatchMergetIdentTaskTest {
             )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
-        every { pdlIdentRestClient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns
+        every { pdlIdentRestKlient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns
             listOf(
                 IdentInformasjon(søkerAktør.aktørId, true, "AKTORID"),
                 IdentInformasjon(søkerAktør.aktivFødselsnummer(), true, "FOLKEREGISTERIDENT"),

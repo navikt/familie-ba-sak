@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.mock
 
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollKlient
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Primary
@@ -11,9 +11,9 @@ import java.net.URI
 @TestConfiguration
 @Primary
 @Profile("dev", "postgres")
-class FakeFamilieIntegrasjonerTilgangskontrollClient(
+class FakeFamilieIntegrasjonerTilgangskontrollKlient(
     restOperations: RestOperations,
-) : FamilieIntegrasjonerTilgangskontrollClient(URI("dummyURI"), restOperations) {
+) : FamilieIntegrasjonerTilgangskontrollKlient(URI("dummyURI"), restOperations) {
     private val personIdentTilTilgang = mutableMapOf<String, Tilgang>()
 
     private val kallMotSjekkTilgangTilPersoner: MutableList<List<String>> = mutableListOf()
@@ -22,18 +22,14 @@ class FakeFamilieIntegrasjonerTilgangskontrollClient(
     /**
      * Henter antall ganger sjekkTilgangTilPersoner er blitt kalt.
      * Erstatter mockk sin verify() {}
-     *
-     * OBS! Reseter kall i etterkant så hvis man vil hente ut flere ganger på rad vil denne feile.
      */
-    fun antallKallTilSjekkTilgangTilPersoner(): Int = kallMotSjekkTilgangTilPersoner.size.also { this.reset() } // Reseter i etterkant for å gjøre det mindre skummelt å glemme å resete selv
+    fun antallKallTilSjekkTilgangTilPersoner(): Int = kallMotSjekkTilgangTilPersoner.size
 
     /**
      * Henter hvilke identer som det har blitt sjekket tilgang for.
      * Erstatter mockk sin slot()-funksjonalitet
-     *
-     * OBS! Reseter kall i etterkant så hvis man vil hente ut flere ganger på rad vil denne feile.
      */
-    fun hentKallMotSjekkTilgangTilPersoner(): MutableList<List<String>> = kallMotSjekkTilgangTilPersoner.also { this.reset() } // Reseter i etterkant for å gjøre det mindre skummelt å glemme å resete selv
+    fun hentKallMotSjekkTilgangTilPersoner(): MutableList<List<String>> = kallMotSjekkTilgangTilPersoner
 
     override fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
         kallMotSjekkTilgangTilPersoner.add(personIdenter)

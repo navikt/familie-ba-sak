@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandard
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.fake.FakeEfSakRestClient
+import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
 import no.nav.familie.ba.sak.fake.tilPayload
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
@@ -75,7 +75,7 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val stegService: StegService,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val personidentService: PersonidentService,
-    @Autowired private val efSakRestClient: FakeEfSakRestClient,
+    @Autowired private val efSakRestKlient: FakeEfSakRestKlient,
     @Autowired private val autovedtakStegService: AutovedtakStegService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val opprettTaskService: OpprettTaskService,
@@ -115,7 +115,7 @@ class BehandleSmåbarnstilleggTest(
     }
 
     private fun settOppefSakMockForDeFørste2Testene(søkersIdent: String) {
-        efSakRestClient.leggTilEksternPeriode(
+        efSakRestKlient.leggTilEksternPeriode(
             personIdent = søkersIdent,
             eksternePerioderResponse =
                 EksternePerioderResponse(
@@ -325,11 +325,11 @@ class BehandleSmåbarnstilleggTest(
     @Test
     @Order(3)
     fun `Skal stoppe automatisk behandling som må fortsette manuelt pga tilbakekreving`() {
-        efSakRestClient.reset()
+        efSakRestKlient.reset()
         val søkersAktør = personidentService.hentAktør(scenario.søker.aktørId)
 
         val periodeOvergangsstønadTom = LocalDate.now().minusMonths(3)
-        efSakRestClient.leggTilEksternPeriode(
+        efSakRestKlient.leggTilEksternPeriode(
             personIdent = scenario.søker.ident,
             eksternePerioderResponse =
                 EksternePerioderResponse(
@@ -387,13 +387,13 @@ class BehandleSmåbarnstilleggTest(
     @Test
     @Order(4)
     fun `Skal automatisk endre småbarnstilleggperioder`() {
-        efSakRestClient.reset()
+        efSakRestKlient.reset()
 
         val søkersIdent = scenario.søker.ident
         val søkersAktør = personidentService.hentAktør(søkersIdent)
 
         val periodeOvergangsstønadTom = LocalDate.now()
-        efSakRestClient.leggTilEksternPeriode(
+        efSakRestKlient.leggTilEksternPeriode(
             personIdent = søkersIdent,
             eksternePerioderResponse =
                 EksternePerioderResponse(

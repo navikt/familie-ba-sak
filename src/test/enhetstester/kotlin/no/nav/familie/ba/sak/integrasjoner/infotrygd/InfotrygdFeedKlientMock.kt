@@ -7,9 +7,9 @@ import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 
 @TestConfiguration
-class InfotrygdFeedClientMock {
+class InfotrygdFeedKlientMock {
     @Bean
     @Profile("mock-infotrygd-feed")
     @Primary
-    fun mockInfotrygdFeed(): InfotrygdFeedClient = mockk(relaxed = true)
+    fun mockInfotrygdFeed(): InfotrygdFeedKlient = mockk(relaxed = true)
 }
