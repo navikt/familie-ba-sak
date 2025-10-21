@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Plassholdertekst for egenskap - jvuhYG0bfv
+Egenskap: Innvilget enslig mindreårlig ved oppfylt lovlig opphold
 
   Bakgrunn:
     Gitt følgende fagsaker
@@ -16,7 +16,7 @@ Egenskap: Plassholdertekst for egenskap - jvuhYG0bfv
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | BARN       | 09.10.2008  |              |
 
-  Scenario: Plassholdertekst for scenario - EARI5WKDtV
+  Scenario: Skal gi utvidet etter endring i lovlig opphold
     Og dagens dato er 21.10.2025
     Og med personer fremstilt krav for
       | BehandlingId | AktørId |
