@@ -60,6 +60,8 @@ data class ØkonomiSimuleringPostering(
     val forfallsdato: LocalDate,
     @Column(name = "uten_inntrekk", nullable = false)
     val utenInntrekk: Boolean,
+    @Column(name = "fagsak_id", updatable = false)
+    val fagsakId: Long?,
 ) : BaseEntitet() {
     override fun hashCode() = id.hashCode()
 

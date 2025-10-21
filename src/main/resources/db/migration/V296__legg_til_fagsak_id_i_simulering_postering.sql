@@ -1,0 +1,1 @@
+ALTER TABLE okonomi_simulering_postering ADD COLUMN fagsak_id bigint;
