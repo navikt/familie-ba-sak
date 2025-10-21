@@ -559,6 +559,7 @@ class CucumberMock(
             pdlRestKlient = systemOnlyPdlRestKlient,
             søknadService = mockk(),
             persongrunnlagService = persongrunnlagService,
+            featureToggleService = featureToggleService,
         )
 
     val preutfyllVilkårService =
