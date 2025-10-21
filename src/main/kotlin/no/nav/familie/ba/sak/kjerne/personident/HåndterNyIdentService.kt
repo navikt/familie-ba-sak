@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.personident
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivAktørId
@@ -31,7 +31,7 @@ class HåndterNyIdentService(
     private val opprettTaskService: OpprettTaskService,
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlinghentOgPersisterService: BehandlingHentOgPersisterService,
-    private val pdlRestClient: PdlRestClient,
+    private val pdlRestKlient: PdlRestKlient,
     private val personIdentService: PersonidentService,
 ) {
     @Transactional
@@ -122,7 +122,7 @@ class HåndterNyIdentService(
         if (fagsak.type != FagsakType.BARN_ENSLIG_MINDREÅRIG && søkersAktørId in alleIdenterFraPdl.hentAktørIder()) return
 
         val aktivFødselsnummer = alleIdenterFraPdl.hentAktivFødselsnummer()
-        val fødselsdatoFraPdl = pdlRestClient.hentPerson(aktivFødselsnummer, PersonInfoQuery.ENKEL).fødselsdato
+        val fødselsdatoFraPdl = pdlRestKlient.hentPerson(aktivFødselsnummer, PersonInfoQuery.ENKEL).fødselsdato
 
         val forrigeBehandling =
             behandlinghentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id)

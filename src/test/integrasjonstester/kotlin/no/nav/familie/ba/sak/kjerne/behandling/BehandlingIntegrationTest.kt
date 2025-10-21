@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
-import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
 import no.nav.familie.ba.sak.fake.tilPayload
@@ -101,7 +101,7 @@ class BehandlingIntegrationTest(
     @Autowired
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     @Autowired
-    private val fakeInfotrygdBarnetrygdClient: FakeInfotrygdBarnetrygdClient,
+    private val fakeInfotrygdBarnetrygdKlient: FakeInfotrygdBarnetrygdKlient,
     @Autowired
     private val personidentService: PersonidentService,
     @Autowired
@@ -163,7 +163,7 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
 
-        fakeInfotrygdBarnetrygdClient.leggTilÅpenSakIInfotrygd(fnr, emptyList(), true)
+        fakeInfotrygdBarnetrygdKlient.leggTilÅpenSakIInfotrygd(fnr, emptyList(), true)
 
         assertThatThrownBy { behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak)) }
             .hasMessageContaining("sak i Infotrygd")
@@ -174,7 +174,7 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
 
-        fakeInfotrygdBarnetrygdClient.leggTilLøpendeSakIInfotrygd(fnr, emptyList(), true)
+        fakeInfotrygdBarnetrygdKlient.leggTilLøpendeSakIInfotrygd(fnr, emptyList(), true)
 
         assertThatThrownBy { behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak)) }
             .hasMessageContaining("sak i Infotrygd")

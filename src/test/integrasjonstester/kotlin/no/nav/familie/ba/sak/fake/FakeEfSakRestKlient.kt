@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.fake
 
-import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
+import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestKlient
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
@@ -8,9 +8,9 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
 
-class FakeEfSakRestClient(
+class FakeEfSakRestKlient(
     restOperations: RestOperations,
-) : EfSakRestClient(
+) : EfSakRestKlient(
         URI("dummy_uri"),
         restOperations,
     ) {

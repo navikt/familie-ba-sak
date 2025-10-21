@@ -3,11 +3,9 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
-import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.settPersonInfoStatsborgerskap
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -27,14 +25,12 @@ class VelgFagsystemIntegrasjonTest(
     @Autowired val persongrunnlagService: PersongrunnlagService,
     @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     @Autowired val velgFagSystemService: VelgFagSystemService,
-    @Autowired val infotrygdService: InfotrygdService,
-    @Autowired val fakeInfotrygdBarnetrygdClient: FakeInfotrygdBarnetrygdClient,
-    @Autowired val pdlIdentRestClient: PdlIdentRestClient,
+    @Autowired val fakeInfotrygdBarnetrygdKlient: FakeInfotrygdBarnetrygdKlient,
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `sjekk om mor har løpende utbetalinger i infotrygd`() {
         val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
-        fakeInfotrygdBarnetrygdClient.leggTilLøpendeSakIInfotrygd(søkerFnr, emptyList(), true)
+        fakeInfotrygdBarnetrygdKlient.leggTilLøpendeSakIInfotrygd(søkerFnr, emptyList(), true)
         assertEquals(true, velgFagSystemService.morEllerBarnHarLøpendeSakIInfotrygd(søkerFnr, emptyList()))
     }
 
@@ -44,7 +40,7 @@ class VelgFagsystemIntegrasjonTest(
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(søkerFnr))
         val fagsystemUtfall = FagsystemUtfall.SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER
 
-        fakeInfotrygdBarnetrygdClient.leggTilStønaderIInfotrygd(
+        fakeInfotrygdBarnetrygdKlient.leggTilStønaderIInfotrygd(
             søkerFnr,
             emptyList(),
             InfotrygdSøkResponse<Stønad>(

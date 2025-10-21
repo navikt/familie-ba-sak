@@ -9,7 +9,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.lagArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.TilpassArbeidsfordelingService
@@ -48,7 +48,7 @@ import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 
 class OppgaveServiceTest {
-    private val mockedIntegrasjonClient: IntegrasjonClient = mockk()
+    private val mockedIntegrasjonKlient: IntegrasjonKlient = mockk()
     private val mockedArbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository = mockk()
     private val mockedBehandlingRepository: BehandlingRepository = mockk()
     private val mockedBehandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
@@ -59,7 +59,7 @@ class OppgaveServiceTest {
     private val mockedTilpassArbeidsfordelingService: TilpassArbeidsfordelingService = mockk()
     private val oppgaveService: OppgaveService =
         OppgaveService(
-            integrasjonClient = mockedIntegrasjonClient,
+            integrasjonKlient = mockedIntegrasjonKlient,
             behandlingRepository = mockedBehandlingRepository,
             oppgaveRepository = mockedOppgaveRepository,
             opprettTaskService = mockedOpprettTaskService,
@@ -91,7 +91,7 @@ class OppgaveServiceTest {
         every { mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(any()) } returns arbeidsfordelingPåBehandling
 
         val opprettOppgaveRequestSlot = slot<OpprettOppgaveRequest>()
-        every { mockedIntegrasjonClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
+        every { mockedIntegrasjonKlient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
 
         every { mockedTilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, null) } returns null
 
@@ -144,7 +144,7 @@ class OppgaveServiceTest {
         every { mockedArbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any()) } returns arbeidsfordelingPåBehandling
 
         val opprettOppgaveRequestSlot = slot<OpprettOppgaveRequest>()
-        every { mockedIntegrasjonClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
+        every { mockedIntegrasjonKlient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
 
         every { mockedTilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, null) } returns null
 
@@ -190,8 +190,8 @@ class OppgaveServiceTest {
         } returns listOf(lagTestOppgave())
         every { mockedOppgaveRepository.saveAndFlush(any()) } returns lagTestOppgave()
         val slot = slot<Long>()
-        every { mockedIntegrasjonClient.ferdigstillOppgave(capture(slot)) } just runs
-        every { mockedIntegrasjonClient.finnOppgaveMedId(any()) } returns lagTestOppgaveDTO(0L)
+        every { mockedIntegrasjonKlient.ferdigstillOppgave(capture(slot)) } just runs
+        every { mockedIntegrasjonKlient.finnOppgaveMedId(any()) } returns lagTestOppgaveDTO(0L)
 
         // Act
         oppgaveService.ferdigstillOppgaver(BEHANDLING_ID, Oppgavetype.BehandleSak)
@@ -206,12 +206,12 @@ class OppgaveServiceTest {
         val oppgaveSlot = slot<Long>()
         val saksbehandlerSlot = slot<String>()
         every {
-            mockedIntegrasjonClient.fordelOppgave(
+            mockedIntegrasjonKlient.fordelOppgave(
                 capture(oppgaveSlot),
                 capture(saksbehandlerSlot),
             )
         } returns OppgaveResponse(OPPGAVE_ID.toLong())
-        every { mockedIntegrasjonClient.finnOppgaveMedId(any()) } returns Oppgave()
+        every { mockedIntegrasjonKlient.finnOppgaveMedId(any()) } returns Oppgave()
 
         // Act
         oppgaveService.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID)
@@ -229,14 +229,14 @@ class OppgaveServiceTest {
         val saksbehandler = "Test Testersen"
 
         every {
-            mockedIntegrasjonClient.fordelOppgave(
+            mockedIntegrasjonKlient.fordelOppgave(
                 capture(oppgaveSlot),
                 capture(saksbehandlerSlot),
             )
         } returns OppgaveResponse(OPPGAVE_ID.toLong())
 
         every {
-            mockedIntegrasjonClient.finnOppgaveMedId(
+            mockedIntegrasjonKlient.finnOppgaveMedId(
                 any(),
             )
         } returns Oppgave(tilordnetRessurs = saksbehandler)
@@ -255,12 +255,12 @@ class OppgaveServiceTest {
         val fordelOppgaveSlot = slot<Long>()
         val finnOppgaveSlot = slot<Long>()
         every {
-            mockedIntegrasjonClient.fordelOppgave(
+            mockedIntegrasjonKlient.fordelOppgave(
                 capture(fordelOppgaveSlot),
                 any(),
             )
         } returns OppgaveResponse(OPPGAVE_ID.toLong())
-        every { mockedIntegrasjonClient.finnOppgaveMedId(capture(finnOppgaveSlot)) } returns Oppgave()
+        every { mockedIntegrasjonKlient.finnOppgaveMedId(capture(finnOppgaveSlot)) } returns Oppgave()
 
         // Act
         oppgaveService.tilbakestillFordelingPåOppgave(OPPGAVE_ID.toLong())
@@ -268,7 +268,7 @@ class OppgaveServiceTest {
         // Assert
         assertThat(OPPGAVE_ID.toLong()).isEqualTo(fordelOppgaveSlot.captured)
         assertThat(OPPGAVE_ID.toLong()).isEqualTo(finnOppgaveSlot.captured)
-        verify(exactly = 1) { mockedIntegrasjonClient.fordelOppgave(any(), null) }
+        verify(exactly = 1) { mockedIntegrasjonKlient.fordelOppgave(any(), null) }
     }
 
     @Test
@@ -281,7 +281,7 @@ class OppgaveServiceTest {
             )
         every { mockedOppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any(), any()) } returns lagTestOppgave()
 
-        every { mockedIntegrasjonClient.finnOppgaveMedId(any()) } returns Oppgave(id = 10018798L, fristFerdigstillelse = "21.01.23")
+        every { mockedIntegrasjonKlient.finnOppgaveMedId(any()) } returns Oppgave(id = 10018798L, fristFerdigstillelse = "21.01.23")
 
         // Act
         val frister = oppgaveService.hentFristerForÅpneUtvidetBarnetrygdBehandlinger()

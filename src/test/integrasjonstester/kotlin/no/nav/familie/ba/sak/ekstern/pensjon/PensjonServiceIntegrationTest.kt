@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.datagenerator.årMnd
 import no.nav.familie.ba.sak.fake.FakeEnvService
-import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -41,7 +41,7 @@ class PensjonServiceIntegrationTest(
     @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired
-    private val fakeInfotrygdBarnetrygdClient: FakeInfotrygdBarnetrygdClient,
+    private val fakeInfotrygdBarnetrygdKlient: FakeInfotrygdBarnetrygdKlient,
     @Autowired
     private val envService: FakeEnvService,
 ) : AbstractSpringIntegrationTest() {
@@ -186,7 +186,7 @@ class PensjonServiceIntegrationTest(
     ) {
         envService.setErPreprod(false)
 
-        fakeInfotrygdBarnetrygdClient.leggTilBarnetrygdTilPensjon(
+        fakeInfotrygdBarnetrygdKlient.leggTilBarnetrygdTilPensjon(
             søker.aktivFødselsnummer(),
             BarnetrygdTilPensjonResponse(
                 fagsaker =

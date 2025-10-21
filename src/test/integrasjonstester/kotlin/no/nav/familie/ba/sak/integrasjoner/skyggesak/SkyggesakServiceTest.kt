@@ -34,7 +34,7 @@ class SkyggesakServiceTest : AbstractSpringIntegrationTest() {
             SkyggesakService(
                 skyggesakRepository = skyggesakRepository,
                 fagsakRepository = mockk(),
-                integrasjonClient = mockk(relaxed = true),
+                integrasjonKlient = mockk(relaxed = true),
             )
         skyggesakRepository.deleteAll()
     }
@@ -51,7 +51,7 @@ class SkyggesakServiceTest : AbstractSpringIntegrationTest() {
         skyggesakService.sendSkyggesaker()
 
         verify(exactly = 1) {
-            skyggesakService.integrasjonClient.opprettSkyggesak(Aktør("1234567890123"), 0)
+            skyggesakService.integrasjonKlient.opprettSkyggesak(Aktør("1234567890123"), 0)
         }
         Assertions.assertEquals(0, skyggesakRepository.finnSkyggesakerKlareForSending(Pageable.unpaged()).size)
     }

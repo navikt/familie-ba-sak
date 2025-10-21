@@ -60,7 +60,7 @@ import java.time.LocalDate
 const val DEFAULT_JOURNALFØRENDE_ENHET = "9999"
 
 @Component
-class IntegrasjonClient(
+class IntegrasjonKlient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "integrasjon") {

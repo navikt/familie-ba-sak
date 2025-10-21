@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.TilknyttetBehandling
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.FagsakSystem
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Journalføringsbehandlingstype
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRequest
@@ -40,7 +40,7 @@ import java.time.LocalDate
 
 @Service
 class InnkommendeJournalføringService(
-    private val integrasjonClient: IntegrasjonClient,
+    private val integrasjonKlient: IntegrasjonKlient,
     private val fagsakService: FagsakService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val loggService: LoggService,
@@ -52,12 +52,12 @@ class InnkommendeJournalføringService(
     fun hentDokument(
         journalpostId: String,
         dokumentInfoId: String,
-    ): ByteArray = integrasjonClient.hentDokument(dokumentInfoId, journalpostId)
+    ): ByteArray = integrasjonKlient.hentDokument(dokumentInfoId, journalpostId)
 
-    fun hentJournalpost(journalpostId: String): Journalpost = integrasjonClient.hentJournalpost(journalpostId)
+    fun hentJournalpost(journalpostId: String): Journalpost = integrasjonKlient.hentJournalpost(journalpostId)
 
     fun hentJournalposterForBruker(brukerId: String): List<TilgangsstyrtJournalpost> =
-        integrasjonClient
+        integrasjonKlient
             .hentTilgangsstyrteJournalposterForBruker(
                 JournalposterForBrukerRequest(
                     antall = 1000,
@@ -78,10 +78,10 @@ class InnkommendeJournalføringService(
                         (dokument.eksisterendeLogiskeVedlegg ?: emptyList()).contains(it)
                     }.second
             fjernedeVedlegg.forEach {
-                integrasjonClient.slettLogiskVedlegg(it.logiskVedleggId, dokument.dokumentInfoId)
+                integrasjonKlient.slettLogiskVedlegg(it.logiskVedleggId, dokument.dokumentInfoId)
             }
             nyeVedlegg.forEach {
-                integrasjonClient.leggTilLogiskVedlegg(LogiskVedleggRequest(it.tittel), dokument.dokumentInfoId)
+                integrasjonKlient.leggTilLogiskVedlegg(LogiskVedleggRequest(it.tittel), dokument.dokumentInfoId)
             }
         }
     }
@@ -126,7 +126,7 @@ class InnkommendeJournalføringService(
             )
 
         val tilknyttedeBehandlinger: MutableList<TilknyttetBehandling> = request.tilknyttedeBehandlinger.toMutableList()
-        val journalpost = integrasjonClient.hentJournalpost(journalpostId)
+        val journalpost = integrasjonKlient.hentJournalpost(journalpostId)
         val brevkode = journalpost.dokumenter?.firstNotNullOfOrNull { it.brevkode }
 
         if (request.opprettOgKnyttTilNyBehandling) {
@@ -236,7 +236,7 @@ class InnkommendeJournalføringService(
             }
         }
 
-        integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId)
+        integrasjonKlient.ferdigstillOppgave(oppgaveId = oppgaveId)
 
         return fagsak.id.toString()
     }
@@ -250,18 +250,18 @@ class InnkommendeJournalføringService(
     ) {
         runCatching {
             secureLogger.info("Oppdaterer journalpost $journalpostId med $request")
-            integrasjonClient.oppdaterJournalpost(request, journalpostId)
+            integrasjonKlient.oppdaterJournalpost(request, journalpostId)
             genererOgOpprettLogg(journalpostId, barnetrygdBehandlinger)
             secureLogger.info("Ferdigstiller journalpost $journalpostId")
-            integrasjonClient.ferdigstillJournalpost(
+            integrasjonKlient.ferdigstillJournalpost(
                 journalpostId = journalpostId,
                 journalførendeEnhet = behandlendeEnhet,
             )
-            integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
+            integrasjonKlient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
         }.onFailure {
             hentJournalpost(journalpostId).journalstatus.apply {
                 if (this == FERDIGSTILT) {
-                    integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
+                    integrasjonKlient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
                 } else {
                     throw it
                 }

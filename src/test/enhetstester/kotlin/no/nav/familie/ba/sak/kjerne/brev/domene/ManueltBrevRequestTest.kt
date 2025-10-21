@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagInstitusjon
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -311,7 +311,7 @@ class ManueltBrevRequestTest {
             val aktør = randomAktør()
             val fagsak = lagFagsak(aktør = aktør, type = FagsakType.NORMAL)
 
-            val pdlRestClient = mockk<PdlRestClient>()
+            val pdlRestKlient = mockk<PdlRestKlient>()
             val arbeidsfordelingsenhet =
                 Arbeidsfordelingsenhet(
                     enhetId = "enhetId",
@@ -323,7 +323,7 @@ class ManueltBrevRequestTest {
                 }
 
             val request = ManueltBrevRequest(brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE, mottakerMålform = Målform.NB)
-            val result = request.byggMottakerdataFraFagsak(fagsak, arbeidsfordelingService, pdlRestClient)
+            val result = request.byggMottakerdataFraFagsak(fagsak, arbeidsfordelingService, pdlRestKlient)
 
             assertThat(result.enhet?.enhetId).isEqualTo("enhetId")
             assertThat(result.enhet?.enhetNavn).isEqualTo("enhetNavn")
@@ -336,8 +336,8 @@ class ManueltBrevRequestTest {
             val aktør = randomAktør()
             val fagsak = lagFagsak(aktør = aktør, institusjon = institusjon, type = FagsakType.INSTITUSJON)
 
-            val pdlRestClient =
-                mockk<PdlRestClient> {
+            val pdlRestKlient =
+                mockk<PdlRestKlient> {
                     every { hentPerson(fagsak.aktør, PersonInfoQuery.ENKEL) } returns PersonInfo(fødselsdato = LocalDate.now(), navn = "Navn navnesen")
                 }
             val arbeidsfordelingsenhet =
@@ -351,7 +351,7 @@ class ManueltBrevRequestTest {
                 }
 
             val request = ManueltBrevRequest(brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON, mottakerMålform = Målform.NB)
-            val result = request.byggMottakerdataFraFagsak(fagsak, arbeidsfordelingService, pdlRestClient)
+            val result = request.byggMottakerdataFraFagsak(fagsak, arbeidsfordelingService, pdlRestKlient)
 
             assertThat(result.enhet?.enhetId).isEqualTo("enhetId")
             assertThat(result.enhet?.enhetNavn).isEqualTo("enhetNavn")

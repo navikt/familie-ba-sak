@@ -4,7 +4,7 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service
 @Service
 class DokumentDistribueringService(
     private val taskService: TaskService,
-    private val integrasjonClient: IntegrasjonClient,
+    private val integrasjonKlient: IntegrasjonKlient,
     private val loggService: LoggService,
 ) {
     fun prøvDistribuerBrevOgLoggHendelse(
@@ -74,7 +74,7 @@ class DokumentDistribueringService(
     }
 
     fun hentDistribusjonskanal(personIdent: PersonIdent): Distribusjonskanal =
-        integrasjonClient.hentDistribusjonskanal(
+        integrasjonKlient.hentDistribusjonskanal(
             DokdistkanalRequest(
                 bruker = personIdent,
                 mottaker = personIdent,
@@ -114,7 +114,7 @@ class DokumentDistribueringService(
         loggBehandlerRolle: BehandlerRolle,
     ) {
         val brevmal = distribuerDokumentDTO.brevmal
-        integrasjonClient.distribuerBrev(distribuerDokumentDTO)
+        integrasjonKlient.distribuerBrev(distribuerDokumentDTO)
 
         if (distribuerDokumentDTO.behandlingId != null) {
             loggService.opprettDistribuertBrevLogg(

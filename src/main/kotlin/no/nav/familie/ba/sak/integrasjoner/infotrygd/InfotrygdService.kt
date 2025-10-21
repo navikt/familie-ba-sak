@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service
 
 @Service
 class InfotrygdService(
-    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    private val infotrygdBarnetrygdKlient: InfotrygdBarnetrygdKlient,
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val personidentService: PersonidentService,
 ) {
-    fun hentInfotrygdsakerForSøker(aktør: Aktør): InfotrygdSøkResponse<Sak> = infotrygdBarnetrygdClient.hentSaker(listOf(aktør.aktivFødselsnummer()), emptyList())
+    fun hentInfotrygdsakerForSøker(aktør: Aktør): InfotrygdSøkResponse<Sak> = infotrygdBarnetrygdKlient.hentSaker(listOf(aktør.aktivFødselsnummer()), emptyList())
 
     fun hentMaskertRestInfotrygdsakerVedManglendeTilgang(aktør: Aktør): RestInfotrygdsaker? =
         familieIntegrasjonerTilgangskontrollService
@@ -36,18 +36,18 @@ class InfotrygdService(
                 .hentIdenter(personIdent = ident, historikk = true)
                 .filter { it.gruppe == "FOLKEREGISTERIDENT" }
                 .map { it.ident }
-        return infotrygdBarnetrygdClient.hentStønader(søkerIdenter, emptyList(), historikk)
+        return infotrygdBarnetrygdKlient.hentStønader(søkerIdenter, emptyList(), historikk)
     }
 
     fun harÅpenSakIInfotrygd(
         søkerIdenter: List<String>,
         barnasIdenter: List<String> = emptyList(),
-    ): Boolean = infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(søkerIdenter, barnasIdenter)
+    ): Boolean = infotrygdBarnetrygdKlient.harÅpenSakIInfotrygd(søkerIdenter, barnasIdenter)
 
     fun harLøpendeSakIInfotrygd(
         søkerIdenter: List<String>,
         barnasIdenter: List<String> = emptyList(),
-    ): Boolean = infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkerIdenter, barnasIdenter)
+    ): Boolean = infotrygdBarnetrygdKlient.harLøpendeSakIInfotrygd(søkerIdenter, barnasIdenter)
 
     fun harSendtbrev(
         søkerIdenter: List<String>,
@@ -57,7 +57,7 @@ class InfotrygdService(
             return false
         }
 
-        val infotrygdbrevrespons = infotrygdBarnetrygdClient.harNyligSendtBrevFor(søkerIdenter, brevkoder)
+        val infotrygdbrevrespons = infotrygdBarnetrygdKlient.harNyligSendtBrevFor(søkerIdenter, brevkoder)
         secureLogger.info("InfotrygdBrevRespons  $infotrygdbrevrespons")
         return infotrygdbrevrespons.harSendtBrev
     }
