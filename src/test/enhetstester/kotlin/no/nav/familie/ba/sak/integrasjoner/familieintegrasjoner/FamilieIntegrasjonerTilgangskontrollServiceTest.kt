@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
@@ -20,8 +21,12 @@ class FamilieIntegrasjonerTilgangskontrollServiceTest {
 
     @BeforeEach
     fun setUp() {
-        fakeFamilieIntegrasjonerTilgangskontrollClient.reset()
         cacheManager.clearAllCaches()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        fakeFamilieIntegrasjonerTilgangskontrollClient.reset()
     }
 
     @Test
@@ -84,6 +89,6 @@ class FamilieIntegrasjonerTilgangskontrollServiceTest {
 
         val forventetFørsteKall = listOf("1")
         val forventetAndreKall = listOf("2", "3")
-        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.kallMotSjekkTilgangTilPersoner).containsExactlyElementsOf(listOf(forventetFørsteKall, forventetAndreKall))
+        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.hentKallMotSjekkTilgangTilPersoner()).containsExactlyElementsOf(listOf(forventetFørsteKall, forventetAndreKall))
     }
 }

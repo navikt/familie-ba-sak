@@ -33,5 +33,7 @@ class TilgangControllerTest(
         val tilgangDTO = response.body?.data ?: throw Feil("Fikk ikke forventet respons")
         assertThat(tilgangDTO.adressebeskyttelsegradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
         assertThat(tilgangDTO.saksbehandlerHarTilgang).isEqualTo(true)
+
+        fakeFamilieIntegrasjonerTilgangskontrollClient.reset()
     }
 }

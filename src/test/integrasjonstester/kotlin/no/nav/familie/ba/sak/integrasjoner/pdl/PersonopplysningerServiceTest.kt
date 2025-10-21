@@ -12,6 +12,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -52,6 +53,11 @@ internal class PersonopplysningerServiceTest(
                 fakeIntegrasjonClient,
             )
         lagMockForPersoner()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        fakeFamilieIntegrasjonerTilgangskontrollClient.reset()
     }
 
     @Test

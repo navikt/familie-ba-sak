@@ -16,10 +16,12 @@ class FakeFamilieIntegrasjonerTilgangskontrollClient(
 ) : FamilieIntegrasjonerTilgangskontrollClient(URI("dummyURI"), restOperations) {
     private val personIdentTilTilgang = mutableMapOf<String, Tilgang>()
 
-    val kallMotSjekkTilgangTilPersoner: MutableList<List<String>> = mutableListOf()
-    var godkjennByDefault: Boolean = true
+    private val kallMotSjekkTilgangTilPersoner: MutableList<List<String>> = mutableListOf()
+    private var godkjennByDefault: Boolean = true
 
-    fun antallKallTilSjekkTilgangTilPersoner() = kallMotSjekkTilgangTilPersoner.size
+    fun antallKallTilSjekkTilgangTilPersoner(): Int = kallMotSjekkTilgangTilPersoner.size.also { this.reset() }
+
+    fun hentKallMotSjekkTilgangTilPersoner(): MutableList<List<String>> = kallMotSjekkTilgangTilPersoner.also { this.reset() }
 
     override fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
         kallMotSjekkTilgangTilPersoner.add(personIdenter)
@@ -28,13 +30,22 @@ class FakeFamilieIntegrasjonerTilgangskontrollClient(
         }
     }
 
+    /**
+     * Legger til tilgang for testIdenter og setter defaulten for godkjenning til false
+     *
+     * VIKTIG at man resetter godkjennDefault tilbake til true i etterkant, hvis ikke feiler påfølgende tester som trenger at den er satt til true
+     */
     fun leggTilPersonIdentTilTilgang(
         personIdentTilHarTilgang: List<Tilgang>,
-        godkjennDefault: Boolean = true,
+        godkjennDefault: Boolean = false,
     ) {
         personIdentTilTilgang.putAll(personIdentTilHarTilgang.associate { tilgang -> tilgang.personIdent to tilgang })
         godkjennByDefault = godkjennDefault
     }
 
-    fun reset() = personIdentTilTilgang.clear()
+    fun reset() {
+        personIdentTilTilgang.clear()
+        kallMotSjekkTilgangTilPersoner.clear()
+        godkjennByDefault = true
+    }
 }

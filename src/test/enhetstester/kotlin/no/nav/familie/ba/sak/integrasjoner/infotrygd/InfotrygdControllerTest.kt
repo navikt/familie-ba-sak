@@ -14,6 +14,7 @@ import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,6 +39,11 @@ class InfotrygdControllerTest {
     @BeforeEach
     fun setUp() {
         cacheManager.clearAllCaches()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        familieIntegrasjonerTilgangskontrollClient.reset()
     }
 
     @Test

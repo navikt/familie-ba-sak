@@ -88,6 +88,7 @@ class TilgangServiceTest {
     @AfterEach
     internal fun tearDown() {
         clearBrukerContext()
+        fakeFamilieIntegrasjonerTilgangskontrollClient.reset()
     }
 
     @Test
@@ -320,7 +321,7 @@ class TilgangServiceTest {
             }
         assertThat(rolletilgangskontrollFeil.message).isEqualTo("Saksbehandler A har ikke tilgang til fagsak=${fagsak.id}. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse.")
         assertThat(rolletilgangskontrollFeil.frontendFeilmelding).isEqualTo("Fagsaken inneholder personer som krever ytterligere tilganger. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse.")
-        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.kallMotSjekkTilgangTilPersoner)
+        assertThat(fakeFamilieIntegrasjonerTilgangskontrollClient.hentKallMotSjekkTilgangTilPersoner())
             .hasSize(1)
             .containsOnly(listOf(barnAktør.aktivFødselsnummer(), søkerAktør.aktivFødselsnummer()))
     }
