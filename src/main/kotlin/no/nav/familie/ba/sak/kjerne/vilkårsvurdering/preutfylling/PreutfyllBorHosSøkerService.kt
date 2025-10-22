@@ -22,7 +22,6 @@ import java.time.temporal.ChronoUnit
 @Service
 class PreutfyllBorHosSøkerService(
     private val pdlRestKlient: SystemOnlyPdlRestKlient,
-    private val persongrunnlagService: PersongrunnlagService,
 ) {
     fun preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering: Vilkårsvurdering) {
         val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
@@ -49,23 +48,11 @@ class PreutfyllBorHosSøkerService(
         bostedsadresserBarn: List<Bostedsadresse>,
         bostedsadresserSøker: List<Bostedsadresse>,
     ): Set<VilkårResultat> {
-        val fødselsdatoForBeskjæring =
-            persongrunnlagService
-                .hentAktivThrows(personResultat.vilkårsvurdering.behandling.id)
-                .barna
-                .find { it.aktør.aktørId == personResultat.aktør.aktørId }
-                ?.fødselsdato ?: PRAKTISK_TIDLIGSTE_DAG
-
-        val innflytningsdatoForBeskjæring =
-            bostedsadresserBarn
-                .mapNotNull { it.gyldigFraOgMed }
-                .minOrNull() ?: PRAKTISK_TIDLIGSTE_DAG
-
         val harSammeBostedsadresseTidslinje =
             lagBorHosSøkerTidslinje(
                 bostedsadresserBarn = bostedsadresserBarn,
                 bostedsadresserSøker = bostedsadresserSøker,
-                fødselsdatoForBeskjæring = maxOf(fødselsdatoForBeskjæring, innflytningsdatoForBeskjæring),
+                fødselsdatoForBeskjæring = hentInnflytningsdatoForBeskjæring(bostedsadresserBarn, bostedsadresserSøker),
             )
 
         return harSammeBostedsadresseTidslinje
@@ -83,6 +70,23 @@ class PreutfyllBorHosSøkerService(
                     erOpprinneligPreutfylt = true,
                 )
             }.toSet()
+    }
+
+    private fun hentInnflytningsdatoForBeskjæring(
+        bostedsadresserBarn: List<Bostedsadresse>,
+        bostedsadresserSøker: List<Bostedsadresse>,
+    ): LocalDate {
+        val innflytningsdatoForBeskjæringBarn =
+            bostedsadresserBarn
+                .mapNotNull { it.gyldigFraOgMed }
+                .minOrNull() ?: PRAKTISK_TIDLIGSTE_DAG
+
+        val innflytningsdatoForBeskjæringSøker =
+            bostedsadresserSøker
+                .mapNotNull { it.gyldigFraOgMed }
+                .minOrNull() ?: PRAKTISK_TIDLIGSTE_DAG
+
+        return maxOf(innflytningsdatoForBeskjæringBarn, innflytningsdatoForBeskjæringSøker)
     }
 
     private fun lagBorHosSøkerTidslinje(
