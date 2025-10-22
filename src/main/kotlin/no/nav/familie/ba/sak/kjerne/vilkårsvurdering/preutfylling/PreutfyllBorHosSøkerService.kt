@@ -31,10 +31,9 @@ class PreutfyllBorHosSøkerService(
         val søkersResultater = vilkårsvurdering.personResultater.first { it.erSøkersResultater() }
         val bostedsadresserSøker = bostedsadresser[søkersResultater.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
 
-        vilkårsvurdering.personResultater.forEach { personResultat ->
-            if (personResultat.erSøkersResultater()) {
-                return@forEach
-            } else {
+        vilkårsvurdering.personResultater
+            .filterNot { it.erSøkersResultater() }
+            .forEach { personResultat ->
                 val bostedsadresserBarn = bostedsadresser[personResultat.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
                 val borFastHosSøkerVilkårResultat = genererBorHosSøkerVilkårResultat(personResultat, bostedsadresserBarn, bostedsadresserSøker)
 
@@ -43,7 +42,6 @@ class PreutfyllBorHosSøkerService(
                     personResultat.vilkårResultater.addAll(borFastHosSøkerVilkårResultat)
                 }
             }
-        }
     }
 
     private fun genererBorHosSøkerVilkårResultat(
@@ -58,7 +56,17 @@ class PreutfyllBorHosSøkerService(
                 .find { it.aktør.aktørId == personResultat.aktør.aktørId }
                 ?.fødselsdato ?: PRAKTISK_TIDLIGSTE_DAG
 
-        val harSammeBostedsadresseTidslinje = lagBorHosSøkerTidslinje(bostedsadresserBarn, bostedsadresserSøker, fødselsdatoForBeskjæring)
+        val innflytningsdatoForBeskjæring =
+            bostedsadresserBarn
+                .mapNotNull { it.gyldigFraOgMed }
+                .minOrNull() ?: PRAKTISK_TIDLIGSTE_DAG
+
+        val harSammeBostedsadresseTidslinje =
+            lagBorHosSøkerTidslinje(
+                bostedsadresserBarn = bostedsadresserBarn,
+                bostedsadresserSøker = bostedsadresserSøker,
+                fødselsdatoForBeskjæring = maxOf(fødselsdatoForBeskjæring, innflytningsdatoForBeskjæring),
+            )
 
         return harSammeBostedsadresseTidslinje
             .tilPerioderIkkeNull()

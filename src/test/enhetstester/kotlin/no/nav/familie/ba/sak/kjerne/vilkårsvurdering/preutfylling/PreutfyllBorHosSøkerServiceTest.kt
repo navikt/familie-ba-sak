@@ -331,4 +331,65 @@ class PreutfyllBorHosSøkerServiceTest {
         assertThat(borFastHosSøkerVilkår.begrunnelse)
             .isEqualTo("$PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT- Har samme bostedsadresse som søker.")
     }
+
+    @Test
+    fun `Skal filtrere vekk perioder før barn har sin første adresse i Norge`() {
+        // Arrange
+        val aktørSøker = randomAktør()
+        val aktørBarn = randomAktør()
+
+        val vilkårsvurdering =
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                søker = lagPerson(type = PersonType.SØKER, aktør = aktørSøker),
+                barna = listOf(lagPerson(type = PersonType.BARN, aktør = aktørBarn)),
+                overstyrendeVilkårResultater = emptyMap(),
+            )
+
+        every {
+            pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(
+                any(),
+            )
+        } answers {
+            mapOf(
+                aktørSøker.aktivFødselsnummer() to
+                    PdlAdresserPerson(
+                        bostedsadresse =
+                            listOf(
+                                Bostedsadresse(
+                                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                                    gyldigTilOgMed = null,
+                                    vegadresse = lagVegadresse(12345L),
+                                ),
+                            ),
+                        deltBosted = emptyList(),
+                    ),
+                aktørBarn.aktivFødselsnummer() to
+                    PdlAdresserPerson(
+                        bostedsadresse =
+                            listOf(
+                                Bostedsadresse(
+                                    gyldigFraOgMed = LocalDate.now().minusYears(2),
+                                    gyldigTilOgMed = null,
+                                    vegadresse = lagVegadresse(12345L),
+                                ),
+                            ),
+                        deltBosted = emptyList(),
+                    ),
+            )
+        }
+
+        // Act
+        preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
+
+        // Assert
+        val borFastHosSøkerVilkår =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == aktørBarn }
+                .vilkårResultater
+                .single {
+                    it.vilkårType == Vilkår.BOR_MED_SØKER
+                }
+
+        assertThat(borFastHosSøkerVilkår.periodeFom).isEqualTo(LocalDate.now().minusYears(2))
+    }
 }
