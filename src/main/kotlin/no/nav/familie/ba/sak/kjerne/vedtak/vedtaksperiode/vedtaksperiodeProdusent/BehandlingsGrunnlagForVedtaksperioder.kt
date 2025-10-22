@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProduse
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -138,9 +137,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                             fagsakType = behandling.fagsak.type,
                             vilkårRolle = vilkårRolle,
                             bareSøkerOgUregistrertBarn = bareSøkerOgUregistrertBarn,
-                        ).run {
-                            this.slåSammenSplitterPåUtdypendeVilkår()
-                        }
+                        ).slåSammenSplitterPåUtdypendeVilkår()
 
                 AktørOgRolleBegrunnelseGrunnlag(aktør, vilkårRolle) to
                     GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag(
