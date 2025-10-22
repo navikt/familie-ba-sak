@@ -8,8 +8,10 @@ fun validerBehandlingKanRedigeres(behandling: Behandling) {
 }
 
 fun validerBehandlingKanRedigeres(status: BehandlingStatus) {
-    feilHvis(status.erLåstForVidereRedigering()) {
-        "Behandlingen er låst for videre redigering ($status)"
+    if (status.erLåstForVidereRedigering()) {
+        throw FunksjonellFeil(
+            melding = "Behandlingen er låst for videre redigering da den har statusen ${status.name}",
+        )
     }
 }
 
