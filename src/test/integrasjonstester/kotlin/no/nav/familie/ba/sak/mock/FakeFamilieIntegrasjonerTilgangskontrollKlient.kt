@@ -43,7 +43,7 @@ class FakeFamilieIntegrasjonerTilgangskontrollKlient(
      *
      * VIKTIG at man resetter godkjennDefault tilbake til true i etterkant, hvis ikke feiler påfølgende tester som trenger at den er satt til true
      */
-    fun leggTilPersonIdentTilTilgang(
+    fun leggTilTilganger(
         personIdentTilHarTilgang: List<Tilgang>,
         godkjennDefault: Boolean = false,
     ) {

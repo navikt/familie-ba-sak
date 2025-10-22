@@ -93,7 +93,7 @@ class TilgangServiceTest {
 
     @Test
     internal fun `skal kaste RolleTilgangskontrollFeil dersom saksbehandler ikke har tilgang til person eller dets barn`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             listOf(
                 Tilgang(
                     aktør.aktivFødselsnummer(),
@@ -117,7 +117,7 @@ class TilgangServiceTest {
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til person og dets barn`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             listOf(
                 Tilgang(
                     aktør.aktivFødselsnummer(),
@@ -131,7 +131,7 @@ class TilgangServiceTest {
 
     @Test
     internal fun `skal kaste RolleTilgangskontrollFeil dersom saksbehandler ikke har tilgang til behandling`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             listOf(
                 Tilgang(
                     aktør.aktivFødselsnummer(),
@@ -154,7 +154,7 @@ class TilgangServiceTest {
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til behandling`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             listOf(
                 Tilgang(
                     aktør.aktivFødselsnummer(),
@@ -168,7 +168,7 @@ class TilgangServiceTest {
 
     @Test
     internal fun `validerTilgangTilPersoner - hvis samme saksbehandler kaller skal den ha cachet`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             listOf(
                 Tilgang(
                     olaIdent,
@@ -185,7 +185,7 @@ class TilgangServiceTest {
 
     @Test
     internal fun `validerTilgangTilPersoner - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             listOf(
                 Tilgang(
                     olaIdent,
@@ -202,7 +202,7 @@ class TilgangServiceTest {
 
     @Test
     internal fun `validerTilgangTilBehandling - hvis samme saksbehandler kaller skal den ha cachet`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             listOf(
                 Tilgang(
                     aktør.aktivFødselsnummer(),
@@ -220,7 +220,7 @@ class TilgangServiceTest {
 
     @Test
     internal fun `validerTilgangTilBehandling - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             listOf(
                 Tilgang(
                     aktør.aktivFødselsnummer(),
@@ -261,7 +261,7 @@ class TilgangServiceTest {
                 ),
             ),
         )
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             listOf(
                 Tilgang(
                     søkerAktør.aktivFødselsnummer(),
@@ -300,7 +300,7 @@ class TilgangServiceTest {
             emptyList<PersonEnkel>().toSet(),
         )
 
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             listOf(
                 Tilgang(
                     søkerAktør.aktivFødselsnummer(),
@@ -331,7 +331,7 @@ class TilgangServiceTest {
         val fnr = randomFnr()
         val fnr2 = randomFnr()
         val fnr3 = randomFnr()
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             listOf(
                 Tilgang(fnr, true),
                 Tilgang(fnr2, false),

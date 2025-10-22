@@ -31,31 +31,31 @@ class FamilieIntegrasjonerTilgangskontrollServiceTest {
 
     @Test
     fun `har tilgang skal cacheas`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(listOf(Tilgang("1", true)))
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(listOf(Tilgang("1", true)))
         assertThat(testWithBrukerContext { service.sjekkTilgangTilPerson("1") }.harTilgang).isTrue
         fakeFamilieIntegrasjonerTilgangskontrollKlient.reset()
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(listOf(Tilgang("1", false)))
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(listOf(Tilgang("1", false)))
         assertThat(testWithBrukerContext { service.sjekkTilgangTilPerson("1") }.harTilgang).isTrue
     }
 
     @Test
     fun `har ikke tilgang skal caches`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(listOf(Tilgang("1", false)))
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(listOf(Tilgang("1", false)))
         assertThat(testWithBrukerContext { service.sjekkTilgangTilPerson("1") }.harTilgang).isFalse
         fakeFamilieIntegrasjonerTilgangskontrollKlient.reset()
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(listOf(Tilgang("1", true)))
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(listOf(Tilgang("1", true)))
         assertThat(testWithBrukerContext { service.sjekkTilgangTilPerson("1") }.harTilgang).isFalse
     }
 
     @Test
     fun `cacher per saksbehandlere`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(listOf(Tilgang("1", false)))
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(listOf(Tilgang("1", false)))
 
         // Systemcontext
         service.sjekkTilgangTilPerson("1")
         val kall1 = testWithBrukerContext("saksbehandler1") { service.sjekkTilgangTilPerson("1") }
         fakeFamilieIntegrasjonerTilgangskontrollKlient.reset()
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(listOf(Tilgang("1", true)))
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(listOf(Tilgang("1", true)))
         val kall2 = testWithBrukerContext("saksbehandler2") { service.sjekkTilgangTilPerson("1") }
         assertThat(kall1.harTilgang).isFalse
         assertThat(kall2.harTilgang).isTrue
@@ -63,7 +63,7 @@ class FamilieIntegrasjonerTilgangskontrollServiceTest {
 
     @Test
     fun `tilgangskontrollerer unike identer`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(listOf(Tilgang("1", false)))
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(listOf(Tilgang("1", false)))
 
         testWithBrukerContext("saksbehandler1") { service.sjekkTilgangTilPersoner(listOf("1", "1")) }
 
@@ -73,7 +73,7 @@ class FamilieIntegrasjonerTilgangskontrollServiceTest {
     @Test
     fun `skal ikke hente identer som allerede finnes i cachen`() {
         val tilgang = listOf(Tilgang("1", false), Tilgang("2", true), Tilgang("3", false))
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(tilgang)
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(tilgang)
 
         testWithBrukerContext { service.sjekkTilgangTilPerson("1") }
         val sjekkTilgangTilPersoner = testWithBrukerContext { service.sjekkTilgangTilPersoner(listOf("2", "1", "3")) }

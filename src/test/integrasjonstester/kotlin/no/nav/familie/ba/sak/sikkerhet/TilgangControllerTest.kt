@@ -27,7 +27,7 @@ class TilgangControllerTest(
                 PersonInfo(fødselsdato = fødselsdato, adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG),
             )
 
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(listOf(Tilgang(fnr, true)))
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(listOf(Tilgang(fnr, true)))
 
         val response = tilgangController.hentTilgangOgDiskresjonskode(TilgangRequestDTO(fnr))
         val tilgangDTO = response.body?.data ?: throw Feil("Fikk ikke forventet respons")

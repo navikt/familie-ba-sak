@@ -51,7 +51,7 @@ class InfotrygdControllerTest {
         val fnr = "12345678910"
 
         every { personidentService.hentAktør(fnr) } returns lagAktør(fnr)
-        familieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(listOf(Tilgang(fnr, true)))
+        familieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(listOf(Tilgang(fnr, true)))
         every {
             infotrygdBarnetrygdKlient.hentSaker(
                 any(),
@@ -76,7 +76,7 @@ class InfotrygdControllerTest {
         val fnr = "12345678910"
 
         every { personidentService.hentAktør(fnr) } returns lagAktør(fnr)
-        familieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(listOf(Tilgang(fnr, false)))
+        familieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(listOf(Tilgang(fnr, false)))
 
         every { systemOnlyPdlRestKlient.hentAdressebeskyttelse(any()) } returns
             listOf(Adressebeskyttelse(ADRESSEBESKYTTELSEGRADERING.FORTROLIG))

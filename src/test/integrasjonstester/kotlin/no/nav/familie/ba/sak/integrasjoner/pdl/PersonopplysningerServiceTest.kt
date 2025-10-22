@@ -62,7 +62,7 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             listOf(
                 Tilgang(ID_BARN_1, true),
                 Tilgang(ID_BARN_2, false),
@@ -84,7 +84,7 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal returnere riktig personinfo for død person`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             listOf(
                 Tilgang(ID_BARN_1, true),
                 Tilgang(ID_BARN_2, false),
@@ -105,7 +105,7 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal filtrere bort relasjoner med opphørte folkreregisteridenter eller uten fødselsdato`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilPersonIdentTilTilgang(
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             emptyList(),
             godkjennDefault = true,
         )
