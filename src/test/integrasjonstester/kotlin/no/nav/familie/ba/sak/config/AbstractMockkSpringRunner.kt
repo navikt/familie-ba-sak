@@ -1,12 +1,5 @@
 package no.nav.familie.ba.sak.config
 
-import io.mockk.unmockkAll
-import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
-import no.nav.familie.ba.sak.fake.FakePdlIdentRestKlient
-import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestKlient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollKlient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestKlient
-import no.nav.familie.ba.sak.mock.FamilieIntegrasjonerTilgangskontrollMock
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,15 +8,6 @@ import org.springframework.cache.CacheManager
 import java.util.UUID
 
 abstract class AbstractMockkSpringRunner {
-    @Autowired
-    private lateinit var pdlIdentRestKlient: PdlIdentRestKlient
-
-    @Autowired
-    private lateinit var efSakRestKlient: EfSakRestKlient
-
-    @Autowired
-    private lateinit var mockFamilieIntegrasjonerTilgangskontrollKlient: FamilieIntegrasjonerTilgangskontrollKlient
-
     /**
      * Cachemanagere
      */
@@ -41,22 +25,10 @@ abstract class AbstractMockkSpringRunner {
     @BeforeEach
     fun reset() {
         clearCaches()
-        clearMocks()
+        setCallIdForLogging()
     }
 
-    private fun clearMocks() {
-        unmockkAll()
-
-        val fakePdlIdentRestKlient = pdlIdentRestKlient as? FakePdlIdentRestKlient
-        fakePdlIdentRestKlient?.reset()
-
-        val fakeEfSakRestKlient = efSakRestKlient as? FakeEfSakRestKlient
-        fakeEfSakRestKlient?.reset()
-
-        FamilieIntegrasjonerTilgangskontrollMock.clearMockFamilieIntegrasjonerTilgangskontrollKlient(
-            mockFamilieIntegrasjonerTilgangskontrollKlient,
-        )
-
+    private fun setCallIdForLogging() {
         MDC.put("callId", "${this::class.java.simpleName}-${UUID.randomUUID()}")
     }
 
