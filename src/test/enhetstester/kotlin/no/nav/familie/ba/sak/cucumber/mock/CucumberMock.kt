@@ -85,6 +85,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.TilpassFinnmarkOgSvalbardPåBosattIRiketService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
@@ -559,7 +560,11 @@ class CucumberMock(
             pdlRestKlient = systemOnlyPdlRestKlient,
             søknadService = mockk(),
             persongrunnlagService = persongrunnlagService,
-            featureToggleService = featureToggleService,
+        )
+
+    val tilpassFinnmarkOgSvalbardPåBosattIRiketService =
+        TilpassFinnmarkOgSvalbardPåBosattIRiketService(
+            pdlRestKlient = systemOnlyPdlRestKlient,
         )
 
     val preutfyllVilkårService =
@@ -568,6 +573,7 @@ class CucumberMock(
             preutfyllBosattIRiketService = preutfyllBosattIRiketService,
             featureToggleService = featureToggleService,
             preutfyllBorHosSøkerService = mockk(),
+            tilpassFinnmarkOgSvalbardPåBosattIRiketService = tilpassFinnmarkOgSvalbardPåBosattIRiketService,
         )
 
     val vilkårsvurderingForNyBehandlingService =
