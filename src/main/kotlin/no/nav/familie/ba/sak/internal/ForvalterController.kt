@@ -634,7 +634,9 @@ class ForvalterController(
         val antallSider = sisteIverksatteBehandlingForLøpendeEøsFagsaker.totalPages
 
         repeat(antallSider) { side ->
-            FinnEøsFagsakerMedBarnSomBorIFinnmarkNordTromsTask.opprettTask(startside = side)
+            taskService.save(
+                FinnEøsFagsakerMedBarnSomBorIFinnmarkNordTromsTask.opprettTask(startside = side),
+            )
         }
 
         return ResponseEntity.ok("Opprettet $antallSider tasker for å finne barn i EØS-fagsaker som bor i Finnmark")
