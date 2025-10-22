@@ -62,7 +62,7 @@ class FinnEøsFagsakerMedBarnSomBorIFinnmarkNordTromsTask(
 
         eøsFagsakerDerMinstEttBarnBorIFinnmark
             .forEach { (fagsakId, behandlendeEnhet) ->
-                logger.warn("EØS-fagsak har barn med bostedsadresse eller delt bosted i Finnmark/Nord-Troms, fagsak id = $fagsakId, behandlende enhet = $behandlendeEnhet")
+                logger.warn("EØS-fagsak har barn med bostedsadresse eller delt bosted i Finnmark/Nord-Troms, fagsak id = $fagsakId, behandlende enhet = ${behandlendeEnhet.behandlendeEnhetId}")
             }
     }
 
