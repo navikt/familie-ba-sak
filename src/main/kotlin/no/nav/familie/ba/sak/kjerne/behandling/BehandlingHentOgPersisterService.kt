@@ -4,10 +4,13 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository.FagsakIdBehandlingIdOgKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Visningsbehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 
@@ -95,6 +98,8 @@ class BehandlingHentOgPersisterService(
             .flatMap { funksjon(it) }
 
     fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+
+    fun hentSisteIverksatteBehandlingerFraLøpendeEøsFagsaker(page: Pageable): Page<FagsakIdBehandlingIdOgKategori> = behandlingRepository.finnSisteIverksatteBehandlingForLøpendeEøsFagsaker(page)
 
     fun hentAlleFagsakerMedLøpendeValutakursIMåned(måned: YearMonth): List<Long> = behandlingRepository.finnAlleFagsakerMedLøpendeValutakursIMåned(måned.førsteDagIInneværendeMåned())
 
