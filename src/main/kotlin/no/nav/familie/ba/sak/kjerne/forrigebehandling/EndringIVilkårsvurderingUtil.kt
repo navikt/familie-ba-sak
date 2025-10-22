@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -87,12 +86,7 @@ object EndringIVilkårsvurderingUtil {
                 val erKunEndringIFinnmarkstillegg = erEndringIFinnmarkstillegg && !erEndringerIUtdypendeVilkårsvurdering && !erEndringerIRegelverk
 
                 (forrige.obligatoriskUtdypendeVilkårsvurderingErSatt() && erEndringerIUtdypendeVilkårsvurdering) ||
-                    erEndringerIRegelverk ||
-                    if (featureToggleService.isEnabled(FeatureToggle.SLÅ_SAMMEN_FINNMARK_ELLER_SVALBARD)) {
-                        (erVilkårSomErSplittetOpp && !erKunEndringIFinnmarkstillegg)
-                    } else {
-                        erVilkårSomErSplittetOpp
-                    }
+                    erEndringerIRegelverk || (erVilkårSomErSplittetOpp && !erKunEndringIFinnmarkstillegg)
             }
 
         return endringIVilkårResultat

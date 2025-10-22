@@ -139,11 +139,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                             vilkårRolle = vilkårRolle,
                             bareSøkerOgUregistrertBarn = bareSøkerOgUregistrertBarn,
                         ).run {
-                            if (featureToggleService.isEnabled(FeatureToggle.SLÅ_SAMMEN_FINNMARK_ELLER_SVALBARD)) {
-                                this.slåSammenSplitterPåUtdypendeVilkår()
-                            } else {
-                                this
-                            }
+                            this.slåSammenSplitterPåUtdypendeVilkår()
                         }
 
                 AktørOgRolleBegrunnelseGrunnlag(aktør, vilkårRolle) to
