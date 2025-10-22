@@ -41,7 +41,7 @@ spec:
         tier: db-custom-1-3840
         name: familie-ba-sak
         autoBackupHour: 2
-        pointInTimeRecovery: true
+        pointInTimeRecovery: false
         diskAutoresize: true
         highAvailability: false
         databases:
