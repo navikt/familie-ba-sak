@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
@@ -44,6 +46,7 @@ class ForvalterService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val aktørIdRepository: AktørIdRepository,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -208,6 +211,18 @@ class ForvalterService(
             throw Feil("Det finnes flere vilkårresultater som begynner før fødselsdato til person: $this")
         }
     }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun slettAktørId(aktørId: String) {
+        val aktør =
+            aktørIdRepository.findByAktørIdOrNull(aktørId)
+                ?: throw Feil("Fant ikke aktør med aktørId $aktørId som skal slettes")
+
+        aktørIdRepository.delete(aktør)
+        secureLogger.info("Slettet aktør med aktørId=$aktørId og fnr=${aktør.aktivFødselsnummer()}")
+    }
+
+    fun finnAktørIderSomSkalSlettes(limit: Long): List<String> = aktørIdRepository.finnAktørerSomKanSlettes(limit)
 }
 
 interface FagsakMedFlereMigreringer {

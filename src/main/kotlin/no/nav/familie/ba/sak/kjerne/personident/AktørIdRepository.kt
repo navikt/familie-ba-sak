@@ -20,4 +20,17 @@ interface AktørIdRepository : JpaRepository<Aktør, String> {
         gammelAktørId: String,
         nyAktørId: String,
     )
+
+    @Query(
+        """
+            SELECT a.aktoer_id
+            FROM aktoer a
+            LEFT JOIN po_person p ON p.fk_aktoer_id = a.aktoer_id
+            LEFT JOIN fagsak f ON f.fk_aktoer_id = a.aktoer_id
+            WHERE p.fk_aktoer_id IS NULL 
+            AND f.fk_aktoer_id IS NULL
+            LIMIT :limit""",
+        nativeQuery = true,
+    )
+    fun finnAktørerSomKanSlettes(limit: Long): List<String>
 }
