@@ -350,7 +350,7 @@ class VilkårsvurderingValideringTest {
                 }
 
             // Act && Assert
-            assertThat(validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering)).isTrue()
+            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering)).isTrue()
         }
 
         @Test
@@ -399,7 +399,7 @@ class VilkårsvurderingValideringTest {
                 }
 
             // Act && Assert
-            assertThat(validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering)).isFalse()
+            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering)).isFalse()
         }
     }
 
@@ -451,7 +451,7 @@ class VilkårsvurderingValideringTest {
                 }
 
             // Act && Assert
-            assertThat(validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)).isTrue()
+            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)).isTrue()
         }
 
         @Test
@@ -504,7 +504,7 @@ class VilkårsvurderingValideringTest {
                 }
 
             // Act && Assert
-            assertThat(validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)).isFalse
+            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)).isFalse
         }
     }
 

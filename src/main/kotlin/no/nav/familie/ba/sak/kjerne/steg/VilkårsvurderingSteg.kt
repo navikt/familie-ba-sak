@@ -19,9 +19,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.valider18ÅrsVilkårEksistererFraFødselsdato
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerBarnasVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIkkeBlandetRegelverk
@@ -81,7 +81,7 @@ class VilkårsvurderingSteg(
             )
 
             if (behandling.erFinnmarkstillegg()) {
-                val skalBehandlesManuelt = validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(this)
+                val skalBehandlesManuelt = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(this)
                 if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
                     oppgaveService.opprettOppgaveForManuellBehandling(
                         behandlingId = behandling.id,
@@ -93,7 +93,7 @@ class VilkårsvurderingSteg(
             }
 
             if (behandling.erSvalbardtillegg()) {
-                val skalBehandlesManuelt = validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(this)
+                val skalBehandlesManuelt = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(this)
                 if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
                     oppgaveService.opprettOppgaveForManuellBehandling(
                         behandlingId = behandling.id,

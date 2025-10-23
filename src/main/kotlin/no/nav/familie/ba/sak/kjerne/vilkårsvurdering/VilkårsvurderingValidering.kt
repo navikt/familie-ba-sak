@@ -125,11 +125,11 @@ fun validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig(
     }
 }
 
-fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering: Vilkårsvurdering): Boolean = validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_I_FINNMARK_NORD_TROMS)
+fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering: Vilkårsvurdering): Boolean = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_I_FINNMARK_NORD_TROMS)
 
-fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(vilkårsvurdering: Vilkårsvurdering): Boolean = validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_PÅ_SVALBARD)
+fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering: Vilkårsvurdering): Boolean = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_PÅ_SVALBARD)
 
-private fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerITilleggssone(
+private fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(
     vilkårsvurdering: Vilkårsvurdering,
     utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering,
 ): Boolean {
