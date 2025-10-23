@@ -25,7 +25,7 @@ class SwaggerConfig(
     fun openApi(): OpenAPI =
         OpenAPI()
             .components(Components().addSecuritySchemes("oauth2", securitySchemes()))
-            .addSecurityItem(SecurityRequirement().addList("oauth2", listOf("read", "write")))
+            .addSecurityItem(SecurityRequirement().addList("oauth2", listOf(apiScope)))
 
     @Bean
     fun eksternOpenApi(): GroupedOpenApi =
