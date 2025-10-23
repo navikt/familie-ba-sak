@@ -306,12 +306,8 @@ class VilkårsvurderingValideringTest {
     @Nested
     inner class ValiderAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark {
         @Test
-        fun `skal logge fagsak id hvis barn har delt bosted og ikke bor med søker i Finnmark`() {
+        fun `skal returnere true hvis barn har delt bosted og ikke bor med søker i Finnmark`() {
             // Arrange
-            val listAppender = ListAppender<ILoggingEvent>().apply { start() }
-            val logger = LoggerFactory.getLogger("VilkårsvurderingValidering.kt") as Logger
-            logger.addAppender(listAppender)
-
             val søker = lagPerson(type = PersonType.SØKER)
             val barn = lagPerson(type = PersonType.BARN)
 
@@ -354,24 +350,13 @@ class VilkårsvurderingValideringTest {
                     )
                 }
 
-            // Act
-            validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering)
-
-            // Assert
-            assertThat(listAppender.list.single().level).isEqualTo(Level.WARN)
-            assertThat(listAppender.list.single().message).isEqualTo(
-                "For fagsak ${vilkårsvurdering.behandling.fagsak.id} finnes det perioder der søker er " +
-                    "BOSATT_I_FINNMARK_NORD_TROMS samtidig som et barn med delt bosted ikke er BOSATT_I_FINNMARK_NORD_TROMS.",
-            )
+            // Act && Assert
+            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering)).isTrue()
         }
 
         @Test
-        fun `skal ikke logge fagsak id hvis barn har delt bosted og ikke bor med søker i Finnmark i forskjellig periode`() {
+        fun `skal returnere false hvis barn har delt bosted og ikke bor med søker i Finnmark i forskjellig periode`() {
             // Arrange
-            val listAppender = ListAppender<ILoggingEvent>().apply { start() }
-            val logger = LoggerFactory.getLogger("VilkårsvurderingValidering.kt") as Logger
-            logger.addAppender(listAppender)
-
             val søker = lagPerson(type = PersonType.SØKER)
             val barn = lagPerson(type = PersonType.BARN)
 
@@ -414,11 +399,8 @@ class VilkårsvurderingValideringTest {
                     )
                 }
 
-            // Act
-            validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering)
-
-            // Assert
-            assertThat(listAppender.list).isEmpty()
+            // Act && Assert
+            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering)).isFalse()
         }
 
         @Test
@@ -491,7 +473,7 @@ class VilkårsvurderingValideringTest {
                 }
 
             // Act
-            validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering)
+            finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering)
 
             // Assert
             assertThat(listAppender.list.single().level).isEqualTo(Level.WARN)
@@ -505,12 +487,8 @@ class VilkårsvurderingValideringTest {
     @Nested
     inner class ValiderAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard {
         @Test
-        fun `skal logge fagsak id hvis barn har delt bosted og ikke bor med søker på Svalbard`() {
+        fun `skal returnere true hvis barn har delt bosted og ikke bor med søker på Svalbard`() {
             // Arrange
-            val listAppender = ListAppender<ILoggingEvent>().apply { start() }
-            val logger = LoggerFactory.getLogger("VilkårsvurderingValidering.kt") as Logger
-            logger.addAppender(listAppender)
-
             val søker = lagPerson(type = PersonType.SØKER)
             val barn = lagPerson(type = PersonType.BARN)
 
@@ -553,19 +531,12 @@ class VilkårsvurderingValideringTest {
                     )
                 }
 
-            // Act
-            validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)
-
-            // Assert
-            assertThat(listAppender.list.single().level).isEqualTo(Level.WARN)
-            assertThat(listAppender.list.single().message).isEqualTo(
-                "For fagsak ${vilkårsvurdering.behandling.fagsak.id} finnes det perioder der søker er " +
-                    "BOSATT_PÅ_SVALBARD samtidig som et barn med delt bosted ikke er BOSATT_PÅ_SVALBARD.",
-            )
+            // Act && Assert
+            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)).isTrue()
         }
 
         @Test
-        fun `skal ikke logge fagsak id hvis barn har delt bosted og ikke bor med søker på Svalbard i forskjellig periode`() {
+        fun `skal returnere false hvis barn har delt bosted og ikke bor med søker på Svalbard i forskjellig periode`() {
             // Arrange
             val listAppender = ListAppender<ILoggingEvent>().apply { start() }
             val logger = LoggerFactory.getLogger("VilkårsvurderingValidering.kt") as Logger
@@ -613,11 +584,8 @@ class VilkårsvurderingValideringTest {
                     )
                 }
 
-            // Act
-            validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)
-
-            // Assert
-            assertThat(listAppender.list).isEmpty()
+            // Act && Assert
+            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)).isFalse
         }
 
         @Test
@@ -690,7 +658,7 @@ class VilkårsvurderingValideringTest {
                 }
 
             // Act
-            validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)
+            finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)
 
             // Assert
             assertThat(listAppender.list.single().level).isEqualTo(Level.WARN)

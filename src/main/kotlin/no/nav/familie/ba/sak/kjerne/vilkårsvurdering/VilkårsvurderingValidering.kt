@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.VilkårFeil
@@ -125,19 +126,15 @@ fun validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig(
     }
 }
 
-fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering: Vilkårsvurdering) {
-    validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_I_FINNMARK_NORD_TROMS)
-}
+fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering: Vilkårsvurdering): Boolean = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_I_FINNMARK_NORD_TROMS)
 
-fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(vilkårsvurdering: Vilkårsvurdering) {
-    validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_PÅ_SVALBARD)
-}
+fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering: Vilkårsvurdering): Boolean = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_PÅ_SVALBARD)
 
-private fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerITilleggssone(
+private fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(
     vilkårsvurdering: Vilkårsvurdering,
     utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering,
-) {
-    val søkersPersonResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() } ?: return
+): Boolean {
+    val søkersPersonResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() } ?: throw Feil("Finner ikke personresultat for søker i vilkårsvurdering for ny behandling i fagsak ${vilkårsvurdering.behandling.fagsak.id}")
 
     val søkerBosattITilleggssoneTidslinje =
         søkersPersonResultat.vilkårResultater
@@ -169,6 +166,8 @@ private fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerITilleggss
     if (finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerITilleggssone) {
         logger.warn("For fagsak ${vilkårsvurdering.behandling.fagsak.id} finnes det perioder der søker er $utdypendeVilkårsvurdering samtidig som et barn med delt bosted ikke er $utdypendeVilkårsvurdering.")
     }
+
+    return finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerITilleggssone
 }
 
 fun validerResultatBegrunnelse(restVilkårResultat: RestVilkårResultat) {

@@ -629,6 +629,7 @@ class CucumberMock(
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             featureToggleService = featureToggleService,
+            oppgaveService = oppgaveService,
         )
 
     val ferdigstillBehandlingSteg =

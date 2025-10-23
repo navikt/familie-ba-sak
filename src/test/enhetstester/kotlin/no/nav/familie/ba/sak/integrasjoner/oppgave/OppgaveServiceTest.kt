@@ -172,7 +172,7 @@ class OppgaveServiceTest {
         assertThat(opprettOppgaveRequestSlot.captured.beskrivelse).contains("https://barnetrygd.intern.nav.no/fagsak/$FAGSAK_ID")
         assertThat(opprettOppgaveRequestSlot.captured.tilordnetRessurs).isNull()
         when (manuellOppgaveType) {
-            ManuellOppgaveType.SMÅBARNSTILLEGG, ManuellOppgaveType.ÅPEN_BEHANDLING -> assertThat(opprettOppgaveRequestSlot.captured.behandlesAvApplikasjon).isEqualTo("familie-ba-sak")
+            ManuellOppgaveType.SMÅBARNSTILLEGG, ManuellOppgaveType.ÅPEN_BEHANDLING, ManuellOppgaveType.FINNMARKSTILLEGG, ManuellOppgaveType.SVALBARDTILLEGG -> assertThat(opprettOppgaveRequestSlot.captured.behandlesAvApplikasjon).isEqualTo("familie-ba-sak")
             ManuellOppgaveType.FØDSELSHENDELSE -> assertThat(opprettOppgaveRequestSlot.captured.behandlesAvApplikasjon).isNull()
         }
         verify(exactly = 0) { mockedArbeidsfordelingPåBehandlingRepository.save(any()) }
