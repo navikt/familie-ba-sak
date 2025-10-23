@@ -218,8 +218,9 @@ class ForvalterService(
             aktørIdRepository.findByAktørIdOrNull(aktørId)
                 ?: throw Feil("Fant ikke aktør med aktørId $aktørId som skal slettes")
 
+        val fødselsnummer = aktør.aktivFødselsnummer()
         aktørIdRepository.delete(aktør)
-        secureLogger.info("Slettet aktør med aktørId=$aktørId og fnr=${aktør.aktivFødselsnummer()}")
+        secureLogger.info("Slettet aktør med aktørId=$aktørId og fnr=$fødselsnummer")
     }
 
     fun finnAktørIderSomSkalSlettes(limit: Long): List<String> = aktørIdRepository.finnAktørerSomKanSlettes(limit)
