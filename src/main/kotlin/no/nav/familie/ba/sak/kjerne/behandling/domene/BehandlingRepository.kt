@@ -73,39 +73,39 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
     @Query(
         value = """
-        WITH siste_iverksatte_behandling_per_fagsak AS (
+        WITH siste_vedtatte_behandling_per_fagsak AS (
             SELECT DISTINCT ON (b.fk_fagsak_id) b.id, b.fk_fagsak_id, b.kategori
             FROM behandling b
                 INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
-                INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
             WHERE f.status = 'LØPENDE'
               AND f.arkivert = false
-              AND ty.utbetalingsoppdrag IS NOT NULL
+              AND b.status = 'AVSLUTTET'
+              AND b.resultat NOT LIKE '%HENLAGT%'
             ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC
         )
         SELECT b.id as behandlingId, b.fk_fagsak_id as fagsakId, b.kategori as kategori
-        FROM siste_iverksatte_behandling_per_fagsak b
+        FROM siste_vedtatte_behandling_per_fagsak b
         WHERE b.kategori = 'EØS'
         ORDER BY b.id
         """,
         countQuery = """
-        WITH siste_iverksatte_behandling_per_fagsak AS (
+        WITH siste_vedtatte_behandling_per_fagsak AS (
             SELECT DISTINCT ON (b.fk_fagsak_id) b.id, b.fk_fagsak_id, b.kategori
             FROM behandling b
                 INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
-                INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
             WHERE f.status = 'LØPENDE'
-                AND f.arkivert = false
-                AND ty.utbetalingsoppdrag IS NOT NULL
+              AND f.arkivert = false
+              AND b.status = 'AVSLUTTET'
+              AND b.resultat NOT LIKE '%HENLAGT%'
             ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC
         )
-        SELECT COUNT(*) 
-        FROM siste_iverksatte_behandling_per_fagsak b
+        SELECT COUNT(*)
+        FROM siste_vedtatte_behandling_per_fagsak b
         WHERE b.kategori = 'EØS'
         """,
         nativeQuery = true,
     )
-    fun finnSisteIverksatteBehandlingForLøpendeEøsFagsaker(page: Pageable): Page<FagsakIdBehandlingIdOgKategori>
+    fun finnSisteVedtatteBehandlingForLøpendeEøsFagsaker(page: Pageable): Page<FagsakIdBehandlingIdOgKategori>
 
     @Query(
         value = """SELECT DISTINCT f.id
@@ -141,6 +141,18 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         nativeQuery = true,
     )
     fun finnSisteIverksatteBehandling(fagsakId: Long): Behandling?
+
+    @Query(
+        """SELECT DISTINCT ON(b.fk_fagsak_id) b.*
+            FROM behandling b
+                INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+            WHERE f.id = :fagsakId
+              AND f.arkivert = false
+              AND b.status = 'AVSLUTTET'
+            ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC""",
+        nativeQuery = true,
+    )
+    fun finnSisteVedtatteBehandling(fagsakId: Long): Behandling?
 
     @Query(
         """SELECT DISTINCT ON(b.fk_fagsak_id) b.*
