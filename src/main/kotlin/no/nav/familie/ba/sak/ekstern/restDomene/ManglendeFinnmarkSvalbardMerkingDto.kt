@@ -20,7 +20,7 @@ import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.time.LocalDate
 
-private val cutOffTomDatoForVisningAvManglendeMerkinger = LocalDate.of(2025, 10, 1)
+private val cutOffTomDatoForVisningAvManglendeMerkinger = LocalDate.of(2025, 9, 30)
 
 data class ManglendeFinnmarkSvalbardMerkingDto(
     val ident: String,

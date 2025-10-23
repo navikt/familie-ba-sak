@@ -238,7 +238,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
         }
 
         @Test
-        fun `skal ikke vise perioder som slutter før første oktober 2025`() {
+        fun `skal ikke vise perioder som slutter før 30 september 2025`() {
             // Arrange
             val behandling = lagBehandling()
             val personopplysningGrunnlag = lagPersonopplysningGrunnlag(behandlingId = behandling.id)
@@ -255,14 +255,14 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                                 periode =
                                     DatoIntervallEntitet(
                                         fom = LocalDate.of(1980, 1, 1),
-                                        tom = LocalDate.of(2025, 9, 30),
+                                        tom = LocalDate.of(2025, 9, 29),
                                     ),
                             ),
                             lagGrVegadresseOppholdsadresse(
                                 kommunenummer = KommunerIFinnmarkOgNordTroms.NORDREISA.kommunenummer,
                                 periode =
                                     DatoIntervallEntitet(
-                                        fom = LocalDate.of(2025, 10, 1),
+                                        fom = LocalDate.of(2025, 9, 30),
                                         tom = null,
                                     ),
                             ),
@@ -283,14 +283,14 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                                 periode =
                                     DatoIntervallEntitet(
                                         fom = LocalDate.of(2015, 1, 1),
-                                        tom = LocalDate.of(2025, 9, 10),
+                                        tom = LocalDate.of(2025, 9, 29),
                                     ),
                             ),
                             lagGrVegadresseOppholdsadresse(
                                 kommunenummer = KommunerIFinnmarkOgNordTroms.NORDREISA.kommunenummer,
                                 periode =
                                     DatoIntervallEntitet(
-                                        fom = LocalDate.of(2025, 10, 1),
+                                        fom = LocalDate.of(2025, 9, 30),
                                         tom = null,
                                     ),
                             ),
@@ -315,7 +315,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                                             periode =
                                                 DatoIntervallEntitet(
                                                     fom = LocalDate.of(1980, 1, 1),
-                                                    tom = LocalDate.of(2025, 9, 30),
+                                                    tom = LocalDate.of(2025, 9, 29),
                                                 ),
                                             utdypendeVilkårsvurderinger = emptyList(),
                                         ),
@@ -324,7 +324,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                                             behandling = behandling,
                                             periode =
                                                 DatoIntervallEntitet(
-                                                    fom = LocalDate.of(2025, 10, 1),
+                                                    fom = LocalDate.of(2025, 9, 30),
                                                     tom = null,
                                                 ),
                                             utdypendeVilkårsvurderinger =
@@ -346,7 +346,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                                             periode =
                                                 DatoIntervallEntitet(
                                                     fom = LocalDate.of(2015, 1, 1),
-                                                    tom = LocalDate.of(2025, 9, 30),
+                                                    tom = LocalDate.of(2025, 9, 29),
                                                 ),
                                             utdypendeVilkårsvurderinger = emptyList(),
                                         ),
@@ -355,7 +355,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                                             behandling = behandling,
                                             periode =
                                                 DatoIntervallEntitet(
-                                                    fom = LocalDate.of(2025, 10, 1),
+                                                    fom = LocalDate.of(2025, 9, 30),
                                                     tom = null,
                                                 ),
                                             utdypendeVilkårsvurderinger =
@@ -380,7 +380,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
         }
 
         @Test
-        fun `skal vise perioder som har fom dato før første oktober 2025 hvor tom dato er null`() {
+        fun `skal vise perioder som har fom dato før 30 september 2025 hvor tom dato er null`() {
             // Arrange
             val behandling = lagBehandling()
             val personopplysningGrunnlag = lagPersonopplysningGrunnlag(behandlingId = behandling.id)
@@ -409,14 +409,14 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                 lagPerson(
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     type = PersonType.BARN,
-                    fødselsdato = LocalDate.of(2015, 1, 1),
+                    fødselsdato = LocalDate.of(2025, 9, 29),
                     oppholdsadresser = {
                         listOf(
                             lagGrVegadresseOppholdsadresse(
                                 kommunenummer = SvalbardKommune.SVALBARD.kommunenummer,
                                 periode =
                                     DatoIntervallEntitet(
-                                        fom = LocalDate.of(2015, 1, 1),
+                                        fom = LocalDate.of(2025, 9, 29),
                                         tom = null,
                                     ),
                             ),
@@ -458,7 +458,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                                             behandling = behandling,
                                             periode =
                                                 DatoIntervallEntitet(
-                                                    fom = LocalDate.of(2015, 1, 1),
+                                                    fom = LocalDate.of(2025, 9, 29),
                                                     tom = null,
                                                 ),
                                             utdypendeVilkårsvurderinger = emptyList(),
@@ -486,13 +486,13 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
             assertThat(manglendeSvalbardmerking).anySatisfy {
                 assertThat(it.ident).isEqualTo(barn.aktør.aktivFødselsnummer())
                 assertThat(it.manglendeFinnmarkSvalbardMerkingPerioder).hasSize(1)
-                assertThat(it.manglendeFinnmarkSvalbardMerkingPerioder.first().fom).isEqualTo(LocalDate.of(2015, 1, 1))
+                assertThat(it.manglendeFinnmarkSvalbardMerkingPerioder.first().fom).isEqualTo(LocalDate.of(2025, 9, 29))
                 assertThat(it.manglendeFinnmarkSvalbardMerkingPerioder.first().tom).isNull()
             }
         }
 
         @Test
-        fun `skal vise perioder som har tom dato lik første oktober 2025`() {
+        fun `skal vise perioder som har tom dato lik 30 september 2025`() {
             // Arrange
             val behandling = lagBehandling()
             val personopplysningGrunnlag = lagPersonopplysningGrunnlag(behandlingId = behandling.id)
@@ -509,7 +509,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                                 periode =
                                     DatoIntervallEntitet(
                                         fom = LocalDate.of(1980, 1, 1),
-                                        tom = LocalDate.of(2025, 10, 1),
+                                        tom = LocalDate.of(2025, 9, 30),
                                     ),
                             ),
                         )
@@ -529,7 +529,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                                 periode =
                                     DatoIntervallEntitet(
                                         fom = LocalDate.of(2015, 1, 1),
-                                        tom = LocalDate.of(2025, 10, 1),
+                                        tom = LocalDate.of(2025, 9, 30),
                                     ),
                             ),
                         )
@@ -553,7 +553,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                                             periode =
                                                 DatoIntervallEntitet(
                                                     fom = LocalDate.of(1980, 1, 1),
-                                                    tom = LocalDate.of(2025, 10, 1),
+                                                    tom = LocalDate.of(2025, 9, 30),
                                                 ),
                                             utdypendeVilkårsvurderinger = emptyList(),
                                         ),
@@ -571,7 +571,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                                             periode =
                                                 DatoIntervallEntitet(
                                                     fom = LocalDate.of(2015, 1, 1),
-                                                    tom = LocalDate.of(2025, 10, 1),
+                                                    tom = LocalDate.of(2025, 9, 30),
                                                 ),
                                             utdypendeVilkårsvurderinger = emptyList(),
                                         ),
@@ -593,13 +593,13 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                 assertThat(it.ident).isEqualTo(søker.aktør.aktivFødselsnummer())
                 assertThat(it.manglendeFinnmarkSvalbardMerkingPerioder).hasSize(1)
                 assertThat(it.manglendeFinnmarkSvalbardMerkingPerioder.first().fom).isEqualTo(LocalDate.of(1980, 1, 1))
-                assertThat(it.manglendeFinnmarkSvalbardMerkingPerioder.first().tom).isEqualTo(LocalDate.of(2025, 10, 1))
+                assertThat(it.manglendeFinnmarkSvalbardMerkingPerioder.first().tom).isEqualTo(LocalDate.of(2025, 9, 30))
             }
             assertThat(manglendeSvalbardmerking).anySatisfy {
                 assertThat(it.ident).isEqualTo(barn.aktør.aktivFødselsnummer())
                 assertThat(it.manglendeFinnmarkSvalbardMerkingPerioder).hasSize(1)
                 assertThat(it.manglendeFinnmarkSvalbardMerkingPerioder.first().fom).isEqualTo(LocalDate.of(2015, 1, 1))
-                assertThat(it.manglendeFinnmarkSvalbardMerkingPerioder.first().tom).isEqualTo(LocalDate.of(2025, 10, 1))
+                assertThat(it.manglendeFinnmarkSvalbardMerkingPerioder.first().tom).isEqualTo(LocalDate.of(2025, 9, 30))
             }
         }
 
@@ -723,7 +723,127 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
         }
 
         @Test
-        fun `skal ikke vise perioder som slutter før første oktober 2025`() {
+        fun `skal ikke vise perioder som slutter før 30 september 2025`() {
+            // Arrange
+            val samhandlerInfo =
+                SamhandlerInfo(
+                    tssEksternId = "123",
+                    navn = "Testinstitusjon",
+                    adresser =
+                        listOf(
+                            SamhandlerAdresse(
+                                adresselinjer = listOf(""),
+                                postNr = "",
+                                postSted = "",
+                                adresseType = "",
+                                kommunenummer = KommunerIFinnmarkOgNordTroms.KARASJOK.kommunenummer,
+                                gyldighetsperiode =
+                                    Gyldighetsperiode(
+                                        fom = LocalDate.of(2010, 2, 5),
+                                        tom = LocalDate.of(2025, 9, 29),
+                                    ),
+                            ),
+                        ),
+                )
+
+            val barn = lagPerson(type = PersonType.BARN)
+
+            val behandling = lagBehandling()
+            val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerPersonIdent = barn.aktør.aktivFødselsnummer(), barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()))
+            val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+            val personResultater =
+                setOf(
+                    lagPersonResultat(
+                        vilkårsvurdering = vilkårsvurdering,
+                        aktør = barn.aktør,
+                        lagVilkårResultater = { personResultat ->
+                            setOf(
+                                lagBosattIRiketVilkårForPersonResultat(
+                                    personResultat = personResultat,
+                                    behandling = behandling,
+                                    periode =
+                                        DatoIntervallEntitet(
+                                            fom = LocalDate.of(2010, 2, 5),
+                                            tom = LocalDate.of(2025, 9, 29),
+                                        ),
+                                    utdypendeVilkårsvurderinger = emptyList(),
+                                ),
+                            )
+                        },
+                    ),
+                )
+
+            // Act
+            val manglendeFinnmarkmerking = samhandlerInfo.tilManglendeFinnmarkmerkingPerioder(personResultater = personResultater)
+
+            // Assert
+            assertThat(manglendeFinnmarkmerking?.manglendeFinnmarkSvalbardMerkingPerioder).isNull()
+        }
+
+        @Test
+        fun `skal vise perioder med en fom dato før 30 september 2025 hvor tom dato er null`() {
+            // Arrange
+            val samhandlerInfo =
+                SamhandlerInfo(
+                    tssEksternId = "123",
+                    navn = "Testinstitusjon",
+                    adresser =
+                        listOf(
+                            SamhandlerAdresse(
+                                adresselinjer = listOf(""),
+                                postNr = "",
+                                postSted = "",
+                                adresseType = "",
+                                kommunenummer = KommunerIFinnmarkOgNordTroms.KARASJOK.kommunenummer,
+                                gyldighetsperiode =
+                                    Gyldighetsperiode(
+                                        fom = LocalDate.of(2025, 9, 29),
+                                        tom = null,
+                                    ),
+                            ),
+                        ),
+                )
+
+            val barn = lagPerson(type = PersonType.BARN)
+
+            val behandling = lagBehandling()
+            val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerPersonIdent = barn.aktør.aktivFødselsnummer(), barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()))
+            val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+            val personResultater =
+                setOf(
+                    lagPersonResultat(
+                        vilkårsvurdering = vilkårsvurdering,
+                        aktør = barn.aktør,
+                        lagVilkårResultater = { personResultat ->
+                            setOf(
+                                lagBosattIRiketVilkårForPersonResultat(
+                                    personResultat = personResultat,
+                                    behandling = behandling,
+                                    periode =
+                                        DatoIntervallEntitet(
+                                            fom = LocalDate.of(2025, 9, 29),
+                                            tom = null,
+                                        ),
+                                    utdypendeVilkårsvurderinger = emptyList(),
+                                ),
+                            )
+                        },
+                    ),
+                )
+
+            // Act
+            val manglendeFinnmarkmerking = samhandlerInfo.tilManglendeFinnmarkmerkingPerioder(personResultater = personResultater)
+
+            // Assert
+            assertThat(manglendeFinnmarkmerking).isNotNull()
+            assertThat(manglendeFinnmarkmerking?.manglendeFinnmarkSvalbardMerkingPerioder).hasSize(1)
+            val manglendePeriode = manglendeFinnmarkmerking?.manglendeFinnmarkSvalbardMerkingPerioder?.single()
+            assertThat(manglendePeriode?.fom).isEqualTo(LocalDate.of(2025, 9, 29))
+            assertThat(manglendePeriode?.tom).isNull()
+        }
+
+        @Test
+        fun `skal vise perioder med tom dato lik 30 september 2025`() {
             // Arrange
             val samhandlerInfo =
                 SamhandlerInfo(
@@ -777,131 +897,11 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
             val manglendeFinnmarkmerking = samhandlerInfo.tilManglendeFinnmarkmerkingPerioder(personResultater = personResultater)
 
             // Assert
-            assertThat(manglendeFinnmarkmerking?.manglendeFinnmarkSvalbardMerkingPerioder).isNull()
-        }
-
-        @Test
-        fun `skal vise perioder med en fom dato før første oktober 2025 hvor tom dato er null`() {
-            // Arrange
-            val samhandlerInfo =
-                SamhandlerInfo(
-                    tssEksternId = "123",
-                    navn = "Testinstitusjon",
-                    adresser =
-                        listOf(
-                            SamhandlerAdresse(
-                                adresselinjer = listOf(""),
-                                postNr = "",
-                                postSted = "",
-                                adresseType = "",
-                                kommunenummer = KommunerIFinnmarkOgNordTroms.KARASJOK.kommunenummer,
-                                gyldighetsperiode =
-                                    Gyldighetsperiode(
-                                        fom = LocalDate.of(2010, 2, 5),
-                                        tom = null,
-                                    ),
-                            ),
-                        ),
-                )
-
-            val barn = lagPerson(type = PersonType.BARN)
-
-            val behandling = lagBehandling()
-            val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerPersonIdent = barn.aktør.aktivFødselsnummer(), barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()))
-            val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
-            val personResultater =
-                setOf(
-                    lagPersonResultat(
-                        vilkårsvurdering = vilkårsvurdering,
-                        aktør = barn.aktør,
-                        lagVilkårResultater = { personResultat ->
-                            setOf(
-                                lagBosattIRiketVilkårForPersonResultat(
-                                    personResultat = personResultat,
-                                    behandling = behandling,
-                                    periode =
-                                        DatoIntervallEntitet(
-                                            fom = LocalDate.of(2010, 2, 5),
-                                            tom = null,
-                                        ),
-                                    utdypendeVilkårsvurderinger = emptyList(),
-                                ),
-                            )
-                        },
-                    ),
-                )
-
-            // Act
-            val manglendeFinnmarkmerking = samhandlerInfo.tilManglendeFinnmarkmerkingPerioder(personResultater = personResultater)
-
-            // Assert
             assertThat(manglendeFinnmarkmerking).isNotNull()
             assertThat(manglendeFinnmarkmerking?.manglendeFinnmarkSvalbardMerkingPerioder).hasSize(1)
             val manglendePeriode = manglendeFinnmarkmerking?.manglendeFinnmarkSvalbardMerkingPerioder?.single()
             assertThat(manglendePeriode?.fom).isEqualTo(LocalDate.of(2010, 2, 5))
-            assertThat(manglendePeriode?.tom).isNull()
-        }
-
-        @Test
-        fun `skal vise perioder med tom dato lik første oktober 2025`() {
-            // Arrange
-            val samhandlerInfo =
-                SamhandlerInfo(
-                    tssEksternId = "123",
-                    navn = "Testinstitusjon",
-                    adresser =
-                        listOf(
-                            SamhandlerAdresse(
-                                adresselinjer = listOf(""),
-                                postNr = "",
-                                postSted = "",
-                                adresseType = "",
-                                kommunenummer = KommunerIFinnmarkOgNordTroms.KARASJOK.kommunenummer,
-                                gyldighetsperiode =
-                                    Gyldighetsperiode(
-                                        fom = LocalDate.of(2010, 2, 5),
-                                        tom = LocalDate.of(2025, 10, 1),
-                                    ),
-                            ),
-                        ),
-                )
-
-            val barn = lagPerson(type = PersonType.BARN)
-
-            val behandling = lagBehandling()
-            val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerPersonIdent = barn.aktør.aktivFødselsnummer(), barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()))
-            val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
-            val personResultater =
-                setOf(
-                    lagPersonResultat(
-                        vilkårsvurdering = vilkårsvurdering,
-                        aktør = barn.aktør,
-                        lagVilkårResultater = { personResultat ->
-                            setOf(
-                                lagBosattIRiketVilkårForPersonResultat(
-                                    personResultat = personResultat,
-                                    behandling = behandling,
-                                    periode =
-                                        DatoIntervallEntitet(
-                                            fom = LocalDate.of(2010, 2, 5),
-                                            tom = LocalDate.of(2025, 10, 1),
-                                        ),
-                                    utdypendeVilkårsvurderinger = emptyList(),
-                                ),
-                            )
-                        },
-                    ),
-                )
-
-            // Act
-            val manglendeFinnmarkmerking = samhandlerInfo.tilManglendeFinnmarkmerkingPerioder(personResultater = personResultater)
-
-            // Assert
-            assertThat(manglendeFinnmarkmerking).isNotNull()
-            assertThat(manglendeFinnmarkmerking?.manglendeFinnmarkSvalbardMerkingPerioder).hasSize(1)
-            val manglendePeriode = manglendeFinnmarkmerking?.manglendeFinnmarkSvalbardMerkingPerioder?.single()
-            assertThat(manglendePeriode?.fom).isEqualTo(LocalDate.of(2010, 2, 5))
-            assertThat(manglendePeriode?.tom).isEqualTo(LocalDate.of(2025, 10, 1))
+            assertThat(manglendePeriode?.tom).isEqualTo(LocalDate.of(2025, 9, 30))
         }
 
         private fun lagBosattIRiketVilkårForPersonResultat(
