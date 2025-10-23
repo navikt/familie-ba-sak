@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
 import jakarta.persistence.LockModeType
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
@@ -68,6 +70,42 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         nativeQuery = true,
     )
     fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(): List<Long>
+
+    @Query(
+        value = """
+        WITH siste_iverksatte_behandling_per_fagsak AS (
+            SELECT DISTINCT ON (b.fk_fagsak_id) b.id, b.fk_fagsak_id, b.kategori
+            FROM behandling b
+                INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+            WHERE f.status = 'LØPENDE'
+              AND f.arkivert = false
+              AND ty.utbetalingsoppdrag IS NOT NULL
+            ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC
+        )
+        SELECT b.id as behandlingId, b.fk_fagsak_id as fagsakId, b.kategori as kategori
+        FROM siste_iverksatte_behandling_per_fagsak b
+        WHERE b.kategori = 'EØS'
+        ORDER BY b.id
+        """,
+        countQuery = """
+        WITH siste_iverksatte_behandling_per_fagsak AS (
+            SELECT DISTINCT ON (b.fk_fagsak_id) b.id, b.fk_fagsak_id, b.kategori
+            FROM behandling b
+                INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+            WHERE f.status = 'LØPENDE'
+                AND f.arkivert = false
+                AND ty.utbetalingsoppdrag IS NOT NULL
+            ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC
+        )
+        SELECT COUNT(*) 
+        FROM siste_iverksatte_behandling_per_fagsak b
+        WHERE b.kategori = 'EØS'
+        """,
+        nativeQuery = true,
+    )
+    fun finnSisteIverksatteBehandlingForLøpendeEøsFagsaker(page: Pageable): Page<FagsakIdBehandlingIdOgKategori>
 
     @Query(
         value = """SELECT DISTINCT f.id

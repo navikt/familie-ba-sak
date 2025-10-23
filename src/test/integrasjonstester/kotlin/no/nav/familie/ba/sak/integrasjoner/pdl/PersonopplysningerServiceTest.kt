@@ -4,14 +4,15 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.mock.FamilieIntegrasjonerTilgangskontrollMock.Companion.mockSjekkTilgang
+import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollKlient
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -28,7 +29,7 @@ internal class PersonopplysningerServiceTest(
     @Qualifier("jwtBearer")
     private val restTemplate: RestOperations,
     @Autowired
-    private val mockFamilieIntegrasjonerTilgangskontrollKlient: FamilieIntegrasjonerTilgangskontrollKlient,
+    private val fakeFamilieIntegrasjonerTilgangskontrollKlient: FakeFamilieIntegrasjonerTilgangskontrollKlient,
     @Autowired
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     @Autowired
@@ -54,9 +55,19 @@ internal class PersonopplysningerServiceTest(
         lagMockForPersoner()
     }
 
+    @AfterEach
+    fun tearDown() {
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.reset()
+    }
+
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
-        mockFamilieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(mapOf(ID_BARN_1 to true, ID_BARN_2 to false))
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+            listOf(
+                Tilgang(ID_BARN_1, true),
+                Tilgang(ID_BARN_2, false),
+            ),
+        )
         fakeIntegrasjonKlient.leggTilEgenansatt(ID_MOR)
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(lagAktør(ID_MOR))
@@ -73,7 +84,12 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal returnere riktig personinfo for død person`() {
-        mockFamilieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(mapOf(ID_BARN_1 to true, ID_BARN_2 to false))
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+            listOf(
+                Tilgang(ID_BARN_1, true),
+                Tilgang(ID_BARN_2, false),
+            ),
+        )
 
         val personInfo =
             personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
@@ -89,7 +105,10 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal filtrere bort relasjoner med opphørte folkreregisteridenter eller uten fødselsdato`() {
-        mockFamilieIntegrasjonerTilgangskontrollKlient.mockSjekkTilgang(true)
+        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+            emptyList(),
+            godkjennDefault = true,
+        )
 
         val personInfo =
             personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(

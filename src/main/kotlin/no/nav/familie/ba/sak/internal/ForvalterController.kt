@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinjeService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeDto
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggTaskOppretter
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.FinnEøsFagsakerMedBarnSomBorIFinnmarkNordTromsTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
@@ -53,6 +54,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
@@ -617,6 +619,27 @@ class ForvalterController(
         autovedtakSvalbardtilleggTaskOppretter.opprettTasker(antallBehandlinger)
 
         return ResponseEntity.ok("Tasker for autovedtak av Svalbardtillegg opprettet")
+    }
+
+    @PostMapping("/opprett-tasker-som-logger-eos-fagsaker-med-barn-finnmark")
+    fun opprettTaskerSomLoggerEøsFagsakerMedBarnIFinnmark(): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett tasker som logger EØS-fagsaker der minst ett barn bor i Finnmark",
+        )
+
+        val pageRequest = PageRequest.of(0, FinnEøsFagsakerMedBarnSomBorIFinnmarkNordTromsTask.PAGE_SIZE)
+        val sisteIverksatteBehandlingForLøpendeEøsFagsaker =
+            behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeEøsFagsaker(pageRequest)
+        val antallSider = sisteIverksatteBehandlingForLøpendeEøsFagsaker.totalPages
+
+        repeat(antallSider) { side ->
+            taskService.save(
+                FinnEøsFagsakerMedBarnSomBorIFinnmarkNordTromsTask.opprettTask(startside = side),
+            )
+        }
+
+        return ResponseEntity.ok("Opprettet $antallSider tasker for å finne barn i EØS-fagsaker som bor i Finnmark")
     }
 
     @PostMapping("/aktiver-minside-for-ident")
