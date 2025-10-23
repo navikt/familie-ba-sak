@@ -125,19 +125,15 @@ fun validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig(
     }
 }
 
-fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering: Vilkårsvurdering) {
-    validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_I_FINNMARK_NORD_TROMS)
-}
+fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(vilkårsvurdering: Vilkårsvurdering): Boolean = validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_I_FINNMARK_NORD_TROMS)
 
-fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(vilkårsvurdering: Vilkårsvurdering) {
-    validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_PÅ_SVALBARD)
-}
+fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(vilkårsvurdering: Vilkårsvurdering): Boolean = validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_PÅ_SVALBARD)
 
 private fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerITilleggssone(
     vilkårsvurdering: Vilkårsvurdering,
     utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering,
-) {
-    val søkersPersonResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() } ?: return
+): Boolean {
+    val søkersPersonResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() } ?: return false
 
     val søkerBosattITilleggssoneTidslinje =
         søkersPersonResultat.vilkårResultater
@@ -166,9 +162,7 @@ private fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerITilleggss
                     .any { it.verdi == true }
             }
 
-    if (finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerITilleggssone) {
-        logger.warn("For fagsak ${vilkårsvurdering.behandling.fagsak.id} finnes det perioder der søker er $utdypendeVilkårsvurdering samtidig som et barn med delt bosted ikke er $utdypendeVilkårsvurdering.")
-    }
+    return finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerITilleggssone
 }
 
 fun validerResultatBegrunnelse(restVilkårResultat: RestVilkårResultat) {

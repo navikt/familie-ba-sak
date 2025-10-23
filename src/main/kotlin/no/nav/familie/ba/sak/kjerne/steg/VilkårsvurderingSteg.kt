@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -25,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerAtManIkkeBorIBådeF
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerBarnasVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIkkeBlandetRegelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIngenVilkårSattEtterSøkersDød
+import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
@@ -44,6 +46,7 @@ class VilkårsvurderingSteg(
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val featureToggleService: FeatureToggleService,
+    private val oppgaveService: OppgaveService,
 ) : BehandlingSteg<List<String>?> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -78,11 +81,27 @@ class VilkårsvurderingSteg(
             )
 
             if (behandling.erFinnmarkstillegg()) {
-                validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(this)
+                val skalBehandlesManuelt = validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(this)
+                if (skalBehandlesManuelt) {
+                    oppgaveService.opprettOppgaveForManuellBehandling(
+                        behandlingId = behandling.id,
+                        begrunnelse = "Det finnes perioder der søker er bosatt i Finnmark eller Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark eller Nord-Troms.",
+                        opprettLogginnslag = true,
+                        manuellOppgaveType = ManuellOppgaveType.FINNMARKSTILLEGG,
+                    )
+                }
             }
 
             if (behandling.erSvalbardtillegg()) {
-                validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(this)
+                val skalBehandlesManuelt = validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(this)
+                if (skalBehandlesManuelt) {
+                    oppgaveService.opprettOppgaveForManuellBehandling(
+                        behandlingId = behandling.id,
+                        begrunnelse = "Det finnes perioder der søker er bosatt på Svalbard samtidig som et barn med delt barnetrygd ikke er bosatt på Svalbard.",
+                        opprettLogginnslag = true,
+                        manuellOppgaveType = ManuellOppgaveType.SVALBARDTILLEGG,
+                    )
+                }
             }
         }
     }
