@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.VilkårFeil
@@ -133,7 +134,7 @@ private fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(
     vilkårsvurdering: Vilkårsvurdering,
     utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering,
 ): Boolean {
-    val søkersPersonResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() } ?: return false
+    val søkersPersonResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() } ?: throw Feil("Finner ikke personresultat for søker i vilkårsvurdering for ny behandling i fagsak ${vilkårsvurdering.behandling.fagsak.id}")
 
     val søkerBosattITilleggssoneTidslinje =
         søkersPersonResultat.vilkårResultater
