@@ -29,13 +29,13 @@ class FinnEøsFagsakerMedBarnSomBorIFinnmarkNordTromsTask(
     override fun doTask(task: Task) {
         val startside = task.payload.toInt()
 
-        val sisteIverksatteBehandlingPerEøsFagsak =
+        val sisteVedtatteBehandlingPerEøsFagsak =
             behandlingHentOgPersisterService
-                .hentSisteIverksatteBehandlingerFraLøpendeEøsFagsaker(PageRequest.of(startside, PAGE_SIZE))
+                .hentSisteVedtatteBehandlingerFraLøpendeEøsFagsaker(PageRequest.of(startside, PAGE_SIZE))
                 .toList()
 
         val eøsFagsakerMedBarnasIdenter =
-            sisteIverksatteBehandlingPerEøsFagsak
+            sisteVedtatteBehandlingPerEøsFagsak
                 .associate {
                     (it.fagsakId to it.behandlingId) to
                         persongrunnlagService.hentBarna(it.behandlingId).map { barna -> barna.aktør.aktivFødselsnummer() }

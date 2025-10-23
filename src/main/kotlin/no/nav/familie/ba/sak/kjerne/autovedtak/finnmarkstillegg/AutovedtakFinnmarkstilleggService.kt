@@ -55,21 +55,21 @@ class AutovedtakFinnmarkstilleggService(
 
         if (!fagsaktypeKanBehandles || !harLøpendeBarnetrygd) return false
 
-        val sisteIverksatteBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandlingsdata.fagsakId)
+        val sisteVedtatteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandlingsdata.fagsakId)
                 ?: return false
 
-        if (sisteIverksatteBehandling.kategori == BehandlingKategori.EØS) return false
+        if (sisteVedtatteBehandling.kategori == BehandlingKategori.EØS) return false
 
-        val sisteIverksatteBehandlingHarFinnmarkstilleggAndeler =
+        val sisteVedtatteBehandlingHarFinnmarkstilleggAndeler =
             beregningService
-                .hentTilkjentYtelseForBehandling(sisteIverksatteBehandling.id)
+                .hentTilkjentYtelseForBehandling(sisteVedtatteBehandling.id)
                 .andelerTilkjentYtelse
                 .any { it.type == YtelseType.FINNMARKSTILLEGG }
 
         val minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg =
             persongrunnlagService
-                .hentAktivThrows(sisteIverksatteBehandling.id)
+                .hentAktivThrows(sisteVedtatteBehandling.id)
                 .personer
                 .map { it.aktør.aktivFødselsnummer() }
                 .let { identer ->
@@ -79,7 +79,7 @@ class AutovedtakFinnmarkstilleggService(
                         .any { it.value.harAdresserSomErRelevantForFinnmarkstillegg() }
                 }
 
-        return sisteIverksatteBehandlingHarFinnmarkstilleggAndeler || minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg
+        return sisteVedtatteBehandlingHarFinnmarkstilleggAndeler || minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg
     }
 
     @Transactional

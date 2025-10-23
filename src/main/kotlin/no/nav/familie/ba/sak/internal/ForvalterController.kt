@@ -629,9 +629,9 @@ class ForvalterController(
         )
 
         val pageRequest = PageRequest.of(0, FinnEøsFagsakerMedBarnSomBorIFinnmarkNordTromsTask.PAGE_SIZE)
-        val sisteIverksatteBehandlingForLøpendeEøsFagsaker =
-            behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeEøsFagsaker(pageRequest)
-        val antallSider = sisteIverksatteBehandlingForLøpendeEøsFagsaker.totalPages
+        val sisteVedtatteBehandlingForLøpendeEøsFagsaker =
+            behandlingHentOgPersisterService.hentSisteVedtatteBehandlingerFraLøpendeEøsFagsaker(pageRequest)
+        val antallSider = sisteVedtatteBehandlingForLøpendeEøsFagsaker.totalPages
 
         repeat(antallSider) { side ->
             taskService.save(
@@ -729,5 +729,37 @@ class ForvalterController(
         )
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandlingId)
         return ResponseEntity.ok("Sendt behandlingsstatistikk for behandling $behandlingId til Datavarehus")
+    }
+
+    @Deprecated("Slettes etter at NAV-26442 er ferdig")
+    @PostMapping(path = ["/aktør/slett"])
+    fun slettListeMedAktører(
+        @RequestBody aktørIder: List<String>,
+    ): Map<String, List<String>> {
+        val ikkeSlettet = mutableListOf<String>()
+
+        aktørIder.toSet().forEach { aktørId ->
+            try {
+                forvalterService.slettAktørId(aktørId)
+            } catch (e: RuntimeException) {
+                secureLogger.info("Kunne ikke slette $aktørId", e)
+                ikkeSlettet.add(aktørId)
+            }
+        }
+
+        return mapOf(
+            "ikkeSlettet" to ikkeSlettet,
+            "slettet" to (aktørIder.toSet() - ikkeSlettet).toList(),
+        )
+    }
+
+    @Deprecated("Slettes etter at NAV-26442 er ferdig")
+    @PostMapping(path = ["/aktør/slett/{antallIdenter}"])
+    fun slettAntallIdenter(
+        @RequestBody antallIdenter: Long,
+    ): Map<String, List<String>> {
+        logger.info("Sletter opptil $antallIdenter identer")
+        val aktørIdeSomKanSlettes = forvalterService.finnAktørIderSomSkalSlettes(antallIdenter)
+        return slettListeMedAktører(aktørIdeSomKanSlettes)
     }
 }
