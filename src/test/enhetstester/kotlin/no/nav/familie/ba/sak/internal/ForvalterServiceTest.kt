@@ -57,6 +57,7 @@ class ForvalterServiceTest {
             arbeidsfordelingService = arbeidsfordelingService,
             vilkårsvurderingService = vilkårsvurderingService,
             persongrunnlagService = persongrunnlagService,
+            aktørIdRepository = mockk(relaxed = true),
         )
 
     @Test

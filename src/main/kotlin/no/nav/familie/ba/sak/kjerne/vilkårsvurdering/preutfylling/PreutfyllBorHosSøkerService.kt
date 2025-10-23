@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
@@ -22,7 +21,6 @@ import java.time.temporal.ChronoUnit
 @Service
 class PreutfyllBorHosSøkerService(
     private val pdlRestKlient: SystemOnlyPdlRestKlient,
-    private val persongrunnlagService: PersongrunnlagService,
 ) {
     fun preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering: Vilkårsvurdering) {
         val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
@@ -31,10 +29,9 @@ class PreutfyllBorHosSøkerService(
         val søkersResultater = vilkårsvurdering.personResultater.first { it.erSøkersResultater() }
         val bostedsadresserSøker = bostedsadresser[søkersResultater.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
 
-        vilkårsvurdering.personResultater.forEach { personResultat ->
-            if (personResultat.erSøkersResultater()) {
-                return@forEach
-            } else {
+        vilkårsvurdering.personResultater
+            .filterNot { it.erSøkersResultater() }
+            .forEach { personResultat ->
                 val bostedsadresserBarn = bostedsadresser[personResultat.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
                 val borFastHosSøkerVilkårResultat = genererBorHosSøkerVilkårResultat(personResultat, bostedsadresserBarn, bostedsadresserSøker)
 
@@ -43,7 +40,6 @@ class PreutfyllBorHosSøkerService(
                     personResultat.vilkårResultater.addAll(borFastHosSøkerVilkårResultat)
                 }
             }
-        }
     }
 
     private fun genererBorHosSøkerVilkårResultat(
@@ -51,14 +47,12 @@ class PreutfyllBorHosSøkerService(
         bostedsadresserBarn: List<Bostedsadresse>,
         bostedsadresserSøker: List<Bostedsadresse>,
     ): Set<VilkårResultat> {
-        val fødselsdatoForBeskjæring =
-            persongrunnlagService
-                .hentAktivThrows(personResultat.vilkårsvurdering.behandling.id)
-                .barna
-                .find { it.aktør.aktørId == personResultat.aktør.aktørId }
-                ?.fødselsdato ?: PRAKTISK_TIDLIGSTE_DAG
-
-        val harSammeBostedsadresseTidslinje = lagBorHosSøkerTidslinje(bostedsadresserBarn, bostedsadresserSøker, fødselsdatoForBeskjæring)
+        val harSammeBostedsadresseTidslinje =
+            lagBorHosSøkerTidslinje(
+                bostedsadresserBarn = bostedsadresserBarn,
+                bostedsadresserSøker = bostedsadresserSøker,
+                fødselsdatoForBeskjæring = hentInnflytningsdatoForBeskjæring(bostedsadresserBarn, bostedsadresserSøker),
+            )
 
         return harSammeBostedsadresseTidslinje
             .tilPerioderIkkeNull()
@@ -75,6 +69,23 @@ class PreutfyllBorHosSøkerService(
                     erOpprinneligPreutfylt = true,
                 )
             }.toSet()
+    }
+
+    private fun hentInnflytningsdatoForBeskjæring(
+        bostedsadresserBarn: List<Bostedsadresse>,
+        bostedsadresserSøker: List<Bostedsadresse>,
+    ): LocalDate {
+        val innflytningsdatoForBeskjæringBarn =
+            bostedsadresserBarn
+                .mapNotNull { it.gyldigFraOgMed }
+                .minOrNull() ?: PRAKTISK_TIDLIGSTE_DAG
+
+        val innflytningsdatoForBeskjæringSøker =
+            bostedsadresserSøker
+                .mapNotNull { it.gyldigFraOgMed }
+                .minOrNull() ?: PRAKTISK_TIDLIGSTE_DAG
+
+        return maxOf(innflytningsdatoForBeskjæringBarn, innflytningsdatoForBeskjæringSøker)
     }
 
     private fun lagBorHosSøkerTidslinje(
