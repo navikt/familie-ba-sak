@@ -99,7 +99,7 @@ class BehandlingHentOgPersisterService(
 
     fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
 
-    fun hentSisteIverksatteBehandlingerFraLøpendeEøsFagsaker(page: Pageable): Page<FagsakIdBehandlingIdOgKategori> = behandlingRepository.finnSisteIverksatteBehandlingForLøpendeEøsFagsaker(page)
+    fun hentSisteVedtatteBehandlingerFraLøpendeEøsFagsaker(page: Pageable): Page<FagsakIdBehandlingIdOgKategori> = behandlingRepository.finnSisteVedtatteBehandlingForLøpendeEøsFagsaker(page)
 
     fun hentAlleFagsakerMedLøpendeValutakursIMåned(måned: YearMonth): List<Long> = behandlingRepository.finnAlleFagsakerMedLøpendeValutakursIMåned(måned.førsteDagIInneværendeMåned())
 

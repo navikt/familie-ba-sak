@@ -629,9 +629,9 @@ class ForvalterController(
         )
 
         val pageRequest = PageRequest.of(0, FinnEøsFagsakerMedBarnSomBorIFinnmarkNordTromsTask.PAGE_SIZE)
-        val sisteIverksatteBehandlingForLøpendeEøsFagsaker =
-            behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeEøsFagsaker(pageRequest)
-        val antallSider = sisteIverksatteBehandlingForLøpendeEøsFagsaker.totalPages
+        val sisteVedtatteBehandlingForLøpendeEøsFagsaker =
+            behandlingHentOgPersisterService.hentSisteVedtatteBehandlingerFraLøpendeEøsFagsaker(pageRequest)
+        val antallSider = sisteVedtatteBehandlingForLøpendeEøsFagsaker.totalPages
 
         repeat(antallSider) { side ->
             taskService.save(
