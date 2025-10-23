@@ -82,7 +82,7 @@ class VilkårsvurderingSteg(
 
             if (behandling.erFinnmarkstillegg()) {
                 val skalBehandlesManuelt = validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark(this)
-                if (skalBehandlesManuelt) {
+                if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
                     oppgaveService.opprettOppgaveForManuellBehandling(
                         behandlingId = behandling.id,
                         begrunnelse = "Det finnes perioder der søker er bosatt i Finnmark eller Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark eller Nord-Troms.",
@@ -94,7 +94,7 @@ class VilkårsvurderingSteg(
 
             if (behandling.erSvalbardtillegg()) {
                 val skalBehandlesManuelt = validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard(this)
-                if (skalBehandlesManuelt) {
+                if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
                     oppgaveService.opprettOppgaveForManuellBehandling(
                         behandlingId = behandling.id,
                         begrunnelse = "Det finnes perioder der søker er bosatt på Svalbard samtidig som et barn med delt barnetrygd ikke er bosatt på Svalbard.",

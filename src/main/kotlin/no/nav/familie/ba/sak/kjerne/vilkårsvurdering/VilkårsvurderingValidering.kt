@@ -162,6 +162,10 @@ private fun validerAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerITilleggss
                     .any { it.verdi == true }
             }
 
+    if (finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerITilleggssone) {
+        logger.warn("For fagsak ${vilkårsvurdering.behandling.fagsak.id} finnes det perioder der søker er $utdypendeVilkårsvurdering samtidig som et barn med delt bosted ikke er $utdypendeVilkårsvurdering.")
+    }
+
     return finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerITilleggssone
 }
 
