@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
