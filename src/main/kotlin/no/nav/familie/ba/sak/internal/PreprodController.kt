@@ -6,13 +6,18 @@ import no.nav.familie.ba.sak.config.featureToggle.miljø.Profil
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.cache.CacheManager
+import org.springframework.context.annotation.Profile
 import org.springframework.core.env.Environment
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+@Profile("!prod")
 @RestController
 @RequestMapping("/api/preprod")
 @ProtectedWithClaims(issuer = "azuread")
@@ -20,6 +25,8 @@ class PreprodController(
     private val testVerktøyService: TestVerktøyService,
     private val tilgangService: TilgangService,
     private val environment: Environment,
+    @Qualifier("shortCache")
+    private val shortCacheManager: CacheManager,
 ) {
     @PutMapping(path = ["/{behandlingId}/fyll-ut-vilkarsvurdering"])
     fun settFomPåTommeVilkårTilFødselsdato(
@@ -40,5 +47,17 @@ class PreprodController(
         testVerktøyService.oppdaterVilkårUtenFomTilFødselsdato(behandlingId)
 
         return ResponseEntity.ok(Ressurs.success("Oppdaterte vilkårsvurdering"))
+    }
+
+    @PostMapping("/clear-personopplysninger-cache")
+    fun tømPersonopplysningerCache(): ResponseEntity<String> {
+        val erProd = environment.activeProfiles.any { it == Profil.Prod.navn.trim() }
+        if (erProd) {
+            throw Feil("Skal ikke være tilgjengelig i prod")
+        }
+
+        shortCacheManager.getCache("personopplysninger")?.clear()
+
+        return ResponseEntity.ok("Personopplysninger-cache er tømt")
     }
 }
