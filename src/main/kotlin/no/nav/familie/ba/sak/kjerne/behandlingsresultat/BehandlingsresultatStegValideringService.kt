@@ -1,19 +1,28 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
+import no.nav.familie.ba.sak.common.AutovedtakSkalIkkeGjennomføresFeil
 import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils.andelerMedYtelseTypeErInnvilgetInneværendeMånedOgToMånederFramITid
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils.erEndringIUtbetalingUtenomYtelseType
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils.rekjørNesteMånedHvisYtelseTypeErInnvilgetToMånederFramITid
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
@@ -24,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.slf4j.LoggerFactory
@@ -41,6 +51,8 @@ class BehandlingsresultatStegValideringService(
     private val valutakursRepository: ValutakursRepository,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val clockProvider: ClockProvider,
+    private val oppgaveService: OppgaveService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {
         if (behandling.status == BehandlingStatus.AVSLUTTET) return
@@ -97,36 +109,77 @@ class BehandlingsresultatStegValideringService(
     }
 
     fun validerFinnmarkstilleggBehandling(tilkjentYtelse: TilkjentYtelse) {
-        val behandling = tilkjentYtelse.behandling
-
-        val forrigeBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
-                ?: throw Feil("Kan ikke kjøre finnmarkstillegg behandling dersom det ikke finnes en tidligere iverksatt behandling")
-
-        val andelerNåværendeBehandling = tilkjentYtelse.andelerTilkjentYtelse.toList()
-        val andelerForrigeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
-
-        BehandlingsresultatValideringUtils.validerFinnmarkstilleggBehandling(
-            andelerNåværendeBehandling = andelerNåværendeBehandling,
-            andelerForrigeBehandling = andelerForrigeBehandling,
-            inneværendeMåned = YearMonth.now(clockProvider.get()),
+        validerFinnmarksOgSvalbardtilleggBehandling(
+            tilkjentYtelse = tilkjentYtelse,
+            ytelseType = YtelseType.FINNMARKSTILLEGG,
+            manuellOppgaveType = ManuellOppgaveType.FINNMARKSTILLEGG,
         )
     }
 
     fun validerSvalbardtilleggBehandling(tilkjentYtelse: TilkjentYtelse) {
+        validerFinnmarksOgSvalbardtilleggBehandling(
+            tilkjentYtelse = tilkjentYtelse,
+            ytelseType = YtelseType.SVALBARDTILLEGG,
+            manuellOppgaveType = ManuellOppgaveType.SVALBARDTILLEGG,
+        )
+    }
+
+    private fun validerFinnmarksOgSvalbardtilleggBehandling(
+        tilkjentYtelse: TilkjentYtelse,
+        ytelseType: YtelseType,
+        manuellOppgaveType: ManuellOppgaveType,
+    ) {
         val behandling = tilkjentYtelse.behandling
 
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
-                ?: throw Feil("Kan ikke kjøre svalbardtillegg behandling dersom det ikke finnes en tidligere iverksatt behandling")
+                ?: throw Feil("Kan ikke kjøre ${behandling.opprettetÅrsak.visningsnavn}-behandling dersom det ikke finnes en tidligere iverksatt behandling")
 
         val andelerNåværendeBehandling = tilkjentYtelse.andelerTilkjentYtelse.toList()
-        val andelerFraForrigeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
+        val andelerForrigeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
+        val inneværendeMåned = YearMonth.now(clockProvider.get())
 
-        BehandlingsresultatValideringUtils.validerSvalbardtilleggBehandling(
+        val erEndringIUtbetalingUtenomYtelseType =
+            erEndringIUtbetalingUtenomYtelseType(
+                andelerNåværendeBehandling = andelerNåværendeBehandling,
+                andelerForrigeBehandling = andelerForrigeBehandling,
+                ytelseType = ytelseType,
+            )
+
+        val andelerMedYtelseTypeErInnvilgetInneværendeMånedOgToMånederFramITid =
+            andelerMedYtelseTypeErInnvilgetInneværendeMånedOgToMånederFramITid(
+                andelerNåværendeBehandling = andelerNåværendeBehandling,
+                andelerForrigeBehandling = andelerForrigeBehandling,
+                ytelseType = ytelseType,
+                inneværendeMåned = inneværendeMåned,
+            )
+
+        if (erEndringIUtbetalingUtenomYtelseType || andelerMedYtelseTypeErInnvilgetInneværendeMånedOgToMånederFramITid) {
+            val begrunnelse =
+                if (erEndringIUtbetalingUtenomYtelseType) {
+                    "Automatisk behandlingen fører til endringer i utbetaling utenom ${ytelseType.toString().storForbokstav()}."
+                } else {
+                    "Automatisk behandling fører til innvilgelse av ${ytelseType.toString().storForbokstav()} mer enn én måned fram i tid."
+                }
+
+            if (featureToggleService.isEnabled(OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
+                oppgaveService.opprettOppgaveForManuellBehandling(
+                    behandlingId = behandling.id,
+                    begrunnelse = begrunnelse,
+                    manuellOppgaveType = manuellOppgaveType,
+                )
+
+                throw AutovedtakSkalIkkeGjennomføresFeil(begrunnelse)
+            } else {
+                throw Feil(begrunnelse)
+            }
+        }
+
+        rekjørNesteMånedHvisYtelseTypeErInnvilgetToMånederFramITid(
             andelerNåværendeBehandling = andelerNåværendeBehandling,
-            andelerForrigeBehandling = andelerFraForrigeBehandling,
-            inneværendeMåned = YearMonth.now(clockProvider.get()),
+            andelerForrigeBehandling = andelerForrigeBehandling,
+            ytelseType = ytelseType,
+            inneværendeMåned = inneværendeMåned,
         )
     }
 

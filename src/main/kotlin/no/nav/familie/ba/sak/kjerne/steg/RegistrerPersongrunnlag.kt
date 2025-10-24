@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.AutovedtakSkalIkkeGjennomføresFeil
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.IngenEndringIBosattIRiketVilkårFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -99,7 +99,7 @@ class RegistrerPersongrunnlag(
                 .all { it.verdi == false }
 
         if (ingenEndringIBosattIRiketVilkår) {
-            throw IngenEndringIBosattIRiketVilkårFeil("Ruller tilbake behandling pga ingen endring i 'Bosatt i riket'-vilkåret")
+            throw AutovedtakSkalIkkeGjennomføresFeil("Ingen endring i 'Bosatt i riket'-vilkåret")
         }
     }
 

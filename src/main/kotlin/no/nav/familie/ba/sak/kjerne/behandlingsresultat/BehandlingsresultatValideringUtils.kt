@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSA
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.IKKE_VURDERT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.OPPHØRT
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
@@ -31,10 +30,8 @@ import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.error.RekjørSenereException
 import no.nav.familie.tidslinje.Tidslinje
-import no.nav.familie.tidslinje.tilPeriodeVerdi
 import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
@@ -183,56 +180,15 @@ object BehandlingsresultatValideringUtils {
         }
     }
 
-    fun validerFinnmarkstilleggBehandling(
-        andelerNåværendeBehandling: Collection<AndelTilkjentYtelse>,
-        andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
-        inneværendeMåned: YearMonth,
-    ) {
-        validerAtDetIkkeHarVærtEndringIUtbetalingUtenomYtelseType(
-            andelerNåværendeBehandling = andelerNåværendeBehandling,
-            andelerForrigeBehandling = andelerForrigeBehandling,
-            ytelseType = YtelseType.FINNMARKSTILLEGG,
-            behandlingÅrsak = BehandlingÅrsak.FINNMARKSTILLEGG,
-        )
-
-        validerAtIngenAndelerMedYtelseTypeErInnvilgetFramITid(
-            andelerNåværendeBehandling = andelerNåværendeBehandling,
-            andelerForrigeBehandling = andelerForrigeBehandling,
-            ytelseType = YtelseType.FINNMARKSTILLEGG,
-            inneværendeMåned = inneværendeMåned,
-        )
-    }
-
-    fun validerSvalbardtilleggBehandling(
-        andelerNåværendeBehandling: Collection<AndelTilkjentYtelse>,
-        andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
-        inneværendeMåned: YearMonth,
-    ) {
-        validerAtDetIkkeHarVærtEndringIUtbetalingUtenomYtelseType(
-            andelerNåværendeBehandling = andelerNåværendeBehandling,
-            andelerForrigeBehandling = andelerForrigeBehandling,
-            ytelseType = YtelseType.SVALBARDTILLEGG,
-            behandlingÅrsak = BehandlingÅrsak.SVALBARDTILLEGG,
-        )
-
-        validerAtIngenAndelerMedYtelseTypeErInnvilgetFramITid(
-            andelerNåværendeBehandling = andelerNåværendeBehandling,
-            andelerForrigeBehandling = andelerForrigeBehandling,
-            ytelseType = YtelseType.SVALBARDTILLEGG,
-            inneværendeMåned = inneværendeMåned,
-        )
-    }
-
-    private fun validerAtDetIkkeHarVærtEndringIUtbetalingUtenomYtelseType(
+    fun erEndringIUtbetalingUtenomYtelseType(
         andelerNåværendeBehandling: Collection<AndelTilkjentYtelse>,
         andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
         ytelseType: YtelseType,
-        behandlingÅrsak: BehandlingÅrsak,
-    ) {
+    ): Boolean {
         val andelerUtenomYtelseTypeDenneBehandling = andelerNåværendeBehandling.filterNot { it.type == ytelseType }
         val andelerUtenomYtelseTypeForrigeBehandling = andelerForrigeBehandling.filterNot { it.type == ytelseType }
 
-        val erEndringIUtbetaling =
+        val erEndringIUtbetalingUtenomYtelseType =
             EndringIUtbetalingUtil
                 .lagEndringIUtbetalingTidslinje(
                     nåværendeAndeler = andelerUtenomYtelseTypeDenneBehandling,
@@ -240,20 +196,59 @@ object BehandlingsresultatValideringUtils {
                 ).tilPerioder()
                 .any { it.verdi == true }
 
-        if (erEndringIUtbetaling) {
-            secureLogger.info(objectMapper.writeValueAsString(andelerUtenomYtelseTypeDenneBehandling.joinToString(",", "(", ")", transform = { " fom: " + it.stønadFom.toString() + " tom: " + it.stønadTom.toString() + " aktør: " + it.aktør.aktivFødselsnummer() + " type " + it.type + " beløp: " + it.kalkulertUtbetalingsbeløp })))
-            secureLogger.info(objectMapper.writeValueAsString(andelerUtenomYtelseTypeForrigeBehandling.joinToString(",", "(", ")", transform = { " fom: " + it.stønadFom.toString() + " tom: " + it.stønadTom.toString() + " aktør: " + it.aktør.aktivFødselsnummer() + " type " + it.type + " beløp: " + it.kalkulertUtbetalingsbeløp })))
-
-            throw Feil("Det er oppdaget forskjell i utbetaling utenom $ytelseType andeler. Dette kan ikke skje i en behandling der årsak er $behandlingÅrsak, og den automatiske kjøring stoppes derfor.")
+        if (erEndringIUtbetalingUtenomYtelseType) {
+            secureLogger.info(
+                "Det er en uforventet endring i andeler. Kun $ytelseType kan endres i denne behandlingen.\n" +
+                    "Andeler utenom $ytelseType for denne behandlingen: $andelerUtenomYtelseTypeDenneBehandling\n" +
+                    "Andeler utenom $ytelseType for forrige behandling: $andelerUtenomYtelseTypeForrigeBehandling",
+            )
         }
+
+        return erEndringIUtbetalingUtenomYtelseType
     }
 
-    private fun validerAtIngenAndelerMedYtelseTypeErInnvilgetFramITid(
+    fun andelerMedYtelseTypeErInnvilgetInneværendeMånedOgToMånederFramITid(
+        andelerNåværendeBehandling: Collection<AndelTilkjentYtelse>,
+        andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
+        ytelseType: YtelseType,
+        inneværendeMåned: YearMonth,
+    ): Boolean {
+        val nesteMåned = inneværendeMåned.plusMonths(1)
+        val tidligsteInnvilgelsesTidspunktPerAktør =
+            finnTidligsteInnvilgelsesTidspunktPerAktør(andelerNåværendeBehandling, ytelseType, andelerForrigeBehandling)
+
+        val andelErInnvilgetOmToMånederEllerSenere = tidligsteInnvilgelsesTidspunktPerAktør.any { it.value != null && it.value!! > nesteMåned }
+        val andelErInnvilgetInneværendeMånedEllerTidligere = tidligsteInnvilgelsesTidspunktPerAktør.any { it.value != null && it.value!! < nesteMåned }
+
+        return andelErInnvilgetInneværendeMånedEllerTidligere && andelErInnvilgetOmToMånederEllerSenere
+    }
+
+    fun rekjørNesteMånedHvisYtelseTypeErInnvilgetToMånederFramITid(
         andelerNåværendeBehandling: Collection<AndelTilkjentYtelse>,
         andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
         ytelseType: YtelseType,
         inneværendeMåned: YearMonth,
     ) {
+        val nesteMåned = inneværendeMåned.plusMonths(1)
+        val tidligsteInnvilgelsesTidspunktPerAktør =
+            finnTidligsteInnvilgelsesTidspunktPerAktør(andelerNåværendeBehandling, ytelseType, andelerForrigeBehandling)
+
+        val andelErInnvilgetOmToMånederEllerSenere = tidligsteInnvilgelsesTidspunktPerAktør.any { it.value != null && it.value!! > nesteMåned }
+        if (andelErInnvilgetOmToMånederEllerSenere) {
+            throw RekjørSenereException(
+                årsak =
+                    "Det eksisterer $ytelseType-andeler som er innvilget mer enn en måned fram i tid. " +
+                        "Disse andelene kan ikke innvilges ennå. Prøver igjen neste måned.",
+                triggerTid = nesteMåned.førsteDagIInneværendeMåned().atTime(6, 0),
+            )
+        }
+    }
+
+    private fun finnTidligsteInnvilgelsesTidspunktPerAktør(
+        andelerNåværendeBehandling: Collection<AndelTilkjentYtelse>,
+        ytelseType: YtelseType,
+        andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
+    ): Map<Aktør, YearMonth?> {
         val nåværendeAndelerMedYtelseTypeTidslinjePerAktør =
             andelerNåværendeBehandling
                 .filter { it.type == ytelseType }
@@ -282,27 +277,7 @@ object BehandlingsresultatValideringUtils {
                         .minOfOrNull { it.fom ?: throw Feil("Fra og med-dato må være satt for AndelTilkjentYtelse") }
                         ?.toYearMonth()
                 }
-
-        val nesteMåned = inneværendeMåned.plusMonths(1)
-
-        val andelErInnvilgetOmToMånederEllerSenere = tidligsteInnvilgelsesTidspunktPerAktør.any { it.value != null && it.value!! > nesteMåned }
-        if (andelErInnvilgetOmToMånederEllerSenere) {
-            val andelErInnvilgetInneværendeMånedEllerTidligere = tidligsteInnvilgelsesTidspunktPerAktør.any { it.value != null && it.value!! < nesteMåned }
-            if (andelErInnvilgetInneværendeMånedEllerTidligere) {
-                throw Feil(
-                    "Det eksisterer $ytelseType-andeler som er innvilget inneværende måned eller tidligere, " +
-                        "samtidig som det eksisterer andeler som blir innvilget mer enn en måned fram i tid. " +
-                        "Dette kan ikke behandles automatisk, og behandlingen stoppes derfor.",
-                )
-            }
-
-            throw RekjørSenereException(
-                årsak =
-                    "Det eksisterer $ytelseType-andeler som er innvilget mer enn en måned fram i tid. " +
-                        "Disse andelene kan ikke innvilges ennå. Prøver igjen neste måned.",
-                triggerTid = nesteMåned.førsteDagIInneværendeMåned().atTime(6, 0),
-            )
-        }
+        return tidligsteInnvilgelsesTidspunktPerAktør
     }
 }
 

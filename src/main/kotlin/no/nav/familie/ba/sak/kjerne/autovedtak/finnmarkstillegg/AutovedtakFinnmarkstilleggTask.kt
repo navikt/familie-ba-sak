@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import no.nav.familie.ba.sak.common.IngenEndringIBosattIRiketVilkårFeil
+import no.nav.familie.ba.sak.common.AutovedtakSkalIkkeGjennomføresFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -33,8 +33,8 @@ class AutovedtakFinnmarkstilleggTask(
                     fagsakId = fagsakId,
                     førstegangKjørt = task.opprettetTid,
                 )
-            } catch (e: IngenEndringIBosattIRiketVilkårFeil) {
-                "Finnmarkstillegg: ${e.message}"
+            } catch (e: AutovedtakSkalIkkeGjennomføresFeil) {
+                "Ruller tilbake Finnmarkstillegg: ${e.message}"
             }
 
         logger.info(resultat)

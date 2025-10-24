@@ -192,7 +192,7 @@ class RegistrerPersongrunnlagEnhetTest {
 
             // Act & Assert
             assertThatThrownBy { registrerPersongrunnlagSteg.postValiderSteg(behandling) }
-                .hasMessage("Ruller tilbake behandling pga ingen endring i 'Bosatt i riket'-vilkåret")
+                .hasMessage("Ingen endring i 'Bosatt i riket'-vilkåret")
         }
 
         @Test
@@ -329,7 +329,7 @@ class RegistrerPersongrunnlagEnhetTest {
 
             // Act & Assert
             assertThatThrownBy { registrerPersongrunnlagSteg.postValiderSteg(behandling) }.hasMessage(
-                "Ruller tilbake behandling pga ingen endring i 'Bosatt i riket'-vilkåret",
+                "Ingen endring i 'Bosatt i riket'-vilkåret",
             )
         }
 
