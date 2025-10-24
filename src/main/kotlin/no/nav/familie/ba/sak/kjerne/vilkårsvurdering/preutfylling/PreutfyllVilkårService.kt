@@ -12,6 +12,7 @@ class PreutfyllVilkårService(
     private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService,
     private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService,
     private val preutfyllBorHosSøkerService: PreutfyllBorHosSøkerService,
+    private val tilpassFinnmarkOgSvalbardPåBosattIRiketService: TilpassFinnmarkOgSvalbardPåBosattIRiketService,
     private val featureToggleService: FeatureToggleService,
 ) {
     fun preutfyllVilkår(vilkårsvurdering: Vilkårsvurdering) {
@@ -32,10 +33,17 @@ class PreutfyllVilkårService(
         vilkårsvurdering: Vilkårsvurdering,
         cutOffFomDato: LocalDate,
     ) {
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(
-            vilkårsvurdering = vilkårsvurdering,
-            cutOffFomDato = cutOffFomDato,
-        )
+        if (featureToggleService.isEnabled(FeatureToggle.NY_PREUTFYLLING_FOR_BOSATT_I_RIKET_VILKÅR_VED_AUTOVEDTAK_FINNMARK_SVALBARD)) {
+            tilpassFinnmarkOgSvalbardPåBosattIRiketService.tilpassFinnmarkOgSvalbard(
+                vilkårsvurdering = vilkårsvurdering,
+                cutOffFomDato = cutOffFomDato,
+            )
+        } else {
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(
+                vilkårsvurdering = vilkårsvurdering,
+                cutOffFomDato = cutOffFomDato,
+            )
+        }
     }
 
     fun preutfyllBosattIRiketForFødselshendelseBehandlinger(
