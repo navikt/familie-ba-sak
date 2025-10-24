@@ -127,9 +127,7 @@ no.nav.security.jwt:
 
 spring:
   datasource:
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-ba-sak
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${DB_JDBC_URL}
 
 prosessering.rolle: "928636f4-fd0d-4149-978e-a6fb68bb19de" # 0000-GA-STDAPPS
 
