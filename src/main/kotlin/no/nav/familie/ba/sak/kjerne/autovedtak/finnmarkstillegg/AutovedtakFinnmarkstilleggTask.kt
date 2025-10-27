@@ -3,8 +3,10 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.AutovedtakSkalIkkeGjennomføresFeil
+import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service
 class AutovedtakFinnmarkstilleggTask(
     private val autovedtakStegService: AutovedtakStegService,
     private val fagsakService: FagsakService,
+    private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
@@ -37,6 +40,12 @@ class AutovedtakFinnmarkstilleggTask(
             } catch (feil: AutovedtakSkalIkkeGjennomføresFeil) {
                 "Ruller tilbake Finnmarkstillegg: ${feil.message}"
             } catch (feil: AutovedtakMåBehandlesManueltFeil) {
+                oppgaveService.opprettOppgaveForManuellBehandling(
+                    behandlingId = feil.behandlingId,
+                    begrunnelse = feil.begrunnelse,
+                    manuellOppgaveType = ManuellOppgaveType.FINNMARKSTILLEGG,
+                )
+
                 "Ruller tilbake Finnmarkstillegg: ${feil.message}"
             }
 

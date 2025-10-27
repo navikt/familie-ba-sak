@@ -2,9 +2,8 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.familie.ba.sak.TestClockProvider.Companion.lagClockProviderMedFastTidspunkt
-import no.nav.familie.ba.sak.common.AutovedtakSkalIkkeGjennomføresFeil
+import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.SatsendringFeil
@@ -21,7 +20,6 @@ import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.datagenerator.lagValutakurs
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.FØRSTEGANGSBEHANDLING
@@ -45,7 +43,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
-import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -66,7 +63,6 @@ class BehandlingsresultatStegValideringServiceTest {
     private val valutakursRepository: ValutakursRepository = mockk()
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService = mockk()
     private val clockProvider = lagClockProviderMedFastTidspunkt(LocalDate.of(2025, 10, 10))
-    private val oppgaveService = mockk<OppgaveService>()
     private val featureToggleService = mockk<FeatureToggleService>()
 
     private val behandlingsresultatStegValideringService =
@@ -80,11 +76,9 @@ class BehandlingsresultatStegValideringServiceTest {
             valutakursRepository = valutakursRepository,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             clockProvider = clockProvider,
-            oppgaveService = oppgaveService,
             featureToggleService = featureToggleService,
         )
 
-    private val søker = lagPerson(type = PersonType.SØKER)
     private val barn = lagPerson(type = PersonType.BARN)
     private val barn2 = lagPerson(type = PersonType.BARN)
     private val behandling = lagBehandling()
@@ -418,7 +412,7 @@ class BehandlingsresultatStegValideringServiceTest {
         }
 
         @Test
-        fun `skal kaste feil dersom det har vært endringer i andre ytelsetyper enn finnmarkstillegg med toggle av`() {
+        fun `skal kaste Feil dersom det har vært endringer i andre ytelsetyper enn finnmarkstillegg med toggle av`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
             val forrigeAndeler =
@@ -464,14 +458,10 @@ class BehandlingsresultatStegValideringServiceTest {
             val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
 
             assertThat(feil.message).isEqualTo("Automatisk behandlingen fører til endringer i utbetaling utenom Finnmarkstillegg.")
-
-            verify(exactly = 0) {
-                oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any())
-            }
         }
 
         @Test
-        fun `skal opprette oppgave og kaste feil dersom det har vært endringer i andre ytelsetyper enn finnmarkstillegg med toggle på`() {
+        fun `skal kaste AutovedtakMåBehandlesManueltFeil dersom det har vært endringer i andre ytelsetyper enn finnmarkstillegg med toggle på`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
             val forrigeAndeler =
@@ -510,22 +500,13 @@ class BehandlingsresultatStegValideringServiceTest {
                 }
 
             every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
-            every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
 
             // Act & Assert
-            val feil = assertThrows<AutovedtakSkalIkkeGjennomføresFeil> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
+            val feil = assertThrows<AutovedtakMåBehandlesManueltFeil> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
 
             assertThat(feil.message).isEqualTo("Automatisk behandlingen fører til endringer i utbetaling utenom Finnmarkstillegg.")
-
-            verify(exactly = 1) {
-                oppgaveService.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    begrunnelse = "Automatisk behandlingen fører til endringer i utbetaling utenom Finnmarkstillegg.",
-                    manuellOppgaveType = ManuellOppgaveType.FINNMARKSTILLEGG,
-                )
-            }
         }
 
         @Test
@@ -600,7 +581,7 @@ class BehandlingsresultatStegValideringServiceTest {
         }
 
         @Test
-        fun `skal kaste feil dersom finnmarkstillegg er innvilget inneværende måned og om to måneder med toggle av`() {
+        fun `skal kaste Feil dersom finnmarkstillegg er innvilget inneværende måned og om to måneder med toggle av`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
             val forrigeAndeler =
@@ -671,14 +652,10 @@ class BehandlingsresultatStegValideringServiceTest {
             val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
 
             assertThat(feil.message).isEqualTo("Automatisk behandling fører til innvilgelse av Finnmarkstillegg mer enn én måned fram i tid.")
-
-            verify(exactly = 0) {
-                oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any())
-            }
         }
 
         @Test
-        fun `skal opprette oppgave og kaste feil dersom finnmarkstillegg er innvilget inneværende måned og om to måneder med toggle på`() {
+        fun `skal kaste AutovedtakMåBehandlesManueltFeil dersom finnmarkstillegg er innvilget inneværende måned og om to måneder med toggle på`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
             val forrigeAndeler =
@@ -741,23 +718,14 @@ class BehandlingsresultatStegValideringServiceTest {
                 }
 
             every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
-            every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
             every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns mockk(relaxed = true)
 
             // Act & Assert
-            val feil = assertThrows<AutovedtakSkalIkkeGjennomføresFeil> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
+            val feil = assertThrows<AutovedtakMåBehandlesManueltFeil> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
 
             assertThat(feil.message).isEqualTo("Automatisk behandling fører til innvilgelse av Finnmarkstillegg mer enn én måned fram i tid.")
-
-            verify(exactly = 1) {
-                oppgaveService.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    begrunnelse = "Automatisk behandling fører til innvilgelse av Finnmarkstillegg mer enn én måned fram i tid.",
-                    manuellOppgaveType = ManuellOppgaveType.FINNMARKSTILLEGG,
-                )
-            }
         }
 
         @Test
@@ -888,7 +856,7 @@ class BehandlingsresultatStegValideringServiceTest {
         }
 
         @Test
-        fun `skal kaste feil dersom det har vært endringer i andre ytelsetyper enn svalbardtillegg med toggle av`() {
+        fun `skal kaste Feil dersom det har vært endringer i andre ytelsetyper enn svalbardtillegg med toggle av`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
             val forrigeAndeler =
@@ -934,14 +902,10 @@ class BehandlingsresultatStegValideringServiceTest {
             val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
 
             assertThat(feil.message).isEqualTo("Automatisk behandlingen fører til endringer i utbetaling utenom Svalbardtillegg.")
-
-            verify(exactly = 0) {
-                oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any())
-            }
         }
 
         @Test
-        fun `skal opprette oppgave og kaste feil dersom det har vært endringer i andre ytelsetyper enn svalbardtillegg med toggle på`() {
+        fun `skal kaste AutovedtakMåBehandlesManueltFeil dersom det har vært endringer i andre ytelsetyper enn svalbardtillegg med toggle på`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
             val forrigeAndeler =
@@ -980,22 +944,13 @@ class BehandlingsresultatStegValideringServiceTest {
                 }
 
             every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
-            every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
 
             // Act & Assert
-            val feil = assertThrows<AutovedtakSkalIkkeGjennomføresFeil> { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
+            val feil = assertThrows<AutovedtakMåBehandlesManueltFeil> { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
 
             assertThat(feil.message).isEqualTo("Automatisk behandlingen fører til endringer i utbetaling utenom Svalbardtillegg.")
-
-            verify(exactly = 1) {
-                oppgaveService.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    begrunnelse = "Automatisk behandlingen fører til endringer i utbetaling utenom Svalbardtillegg.",
-                    manuellOppgaveType = ManuellOppgaveType.SVALBARDTILLEGG,
-                )
-            }
         }
 
         @Test
@@ -1070,7 +1025,7 @@ class BehandlingsresultatStegValideringServiceTest {
         }
 
         @Test
-        fun `skal kaste feil dersom svalbardtillegg er innvilget inneværende måned og om to måneder med toggle av`() {
+        fun `skal kaste Feil dersom svalbardtillegg er innvilget inneværende måned og om to måneder med toggle av`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
             val forrigeAndeler =
@@ -1141,14 +1096,10 @@ class BehandlingsresultatStegValideringServiceTest {
             val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
 
             assertThat(feil.message).isEqualTo("Automatisk behandling fører til innvilgelse av Svalbardtillegg mer enn én måned fram i tid.")
-
-            verify(exactly = 0) {
-                oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any())
-            }
         }
 
         @Test
-        fun `skal opprette oppgave og kaste feil dersom svalbardtillegg er innvilget inneværende måned og om to måneder med toggle på`() {
+        fun `skal kaste AutovedtakMåBehandlesManueltFeil dersom svalbardtillegg er innvilget inneværende måned og om to måneder med toggle på`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
             val forrigeAndeler =
@@ -1211,23 +1162,14 @@ class BehandlingsresultatStegValideringServiceTest {
                 }
 
             every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
-            every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
             every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns mockk(relaxed = true)
 
             // Act & Assert
-            val feil = assertThrows<AutovedtakSkalIkkeGjennomføresFeil> { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
+            val feil = assertThrows<AutovedtakMåBehandlesManueltFeil> { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
 
             assertThat(feil.message).isEqualTo("Automatisk behandling fører til innvilgelse av Svalbardtillegg mer enn én måned fram i tid.")
-
-            verify(exactly = 1) {
-                oppgaveService.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    begrunnelse = "Automatisk behandling fører til innvilgelse av Svalbardtillegg mer enn én måned fram i tid.",
-                    manuellOppgaveType = ManuellOppgaveType.SVALBARDTILLEGG,
-                )
-            }
         }
 
         @Test

@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -51,7 +50,6 @@ class BehandlingsresultatStegValideringService(
     private val valutakursRepository: ValutakursRepository,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val clockProvider: ClockProvider,
-    private val oppgaveService: OppgaveService,
     private val featureToggleService: FeatureToggleService,
 ) {
     fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {
@@ -163,12 +161,6 @@ class BehandlingsresultatStegValideringService(
                 }
 
             if (featureToggleService.isEnabled(OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
-                oppgaveService.opprettOppgaveForManuellBehandling(
-                    behandlingId = behandling.id,
-                    begrunnelse = begrunnelse,
-                    manuellOppgaveType = manuellOppgaveType,
-                )
-
                 throw AutovedtakMåBehandlesManueltFeil(begrunnelse, behandling.id)
             } else {
                 throw Feil(begrunnelse)
