@@ -41,7 +41,7 @@ class AutovedtakSvalbardtilleggTask(
             } catch (feil: AutovedtakMåBehandlesManueltFeil) {
                 opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(
                     fagsakId = fagsakId,
-                    beskrivelse = feil.begrunnelse,
+                    beskrivelse = feil.beskrivelse,
                 )
 
                 "Ruller tilbake Svalbardtillegg: ${feil.message}"

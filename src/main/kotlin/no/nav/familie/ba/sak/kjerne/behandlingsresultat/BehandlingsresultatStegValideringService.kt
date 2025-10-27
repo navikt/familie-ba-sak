@@ -32,7 +32,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
-import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.slf4j.LoggerFactory
@@ -110,7 +109,6 @@ class BehandlingsresultatStegValideringService(
         validerFinnmarksOgSvalbardtilleggBehandling(
             tilkjentYtelse = tilkjentYtelse,
             ytelseType = YtelseType.FINNMARKSTILLEGG,
-            manuellOppgaveType = ManuellOppgaveType.FINNMARKSTILLEGG,
         )
     }
 
@@ -118,14 +116,12 @@ class BehandlingsresultatStegValideringService(
         validerFinnmarksOgSvalbardtilleggBehandling(
             tilkjentYtelse = tilkjentYtelse,
             ytelseType = YtelseType.SVALBARDTILLEGG,
-            manuellOppgaveType = ManuellOppgaveType.SVALBARDTILLEGG,
         )
     }
 
     private fun validerFinnmarksOgSvalbardtilleggBehandling(
         tilkjentYtelse: TilkjentYtelse,
         ytelseType: YtelseType,
-        manuellOppgaveType: ManuellOppgaveType,
     ) {
         val behandling = tilkjentYtelse.behandling
 
@@ -161,7 +157,7 @@ class BehandlingsresultatStegValideringService(
                 }
 
             if (featureToggleService.isEnabled(OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
-                throw AutovedtakMåBehandlesManueltFeil(begrunnelse, behandling.id)
+                throw AutovedtakMåBehandlesManueltFeil(begrunnelse)
             } else {
                 throw Feil(begrunnelse)
             }

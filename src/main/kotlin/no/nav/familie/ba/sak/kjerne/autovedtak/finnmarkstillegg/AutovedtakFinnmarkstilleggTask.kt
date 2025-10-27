@@ -41,7 +41,7 @@ class AutovedtakFinnmarkstilleggTask(
             } catch (feil: AutovedtakMåBehandlesManueltFeil) {
                 opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(
                     fagsakId = fagsakId,
-                    beskrivelse = feil.begrunnelse,
+                    beskrivelse = feil.beskrivelse,
                 )
 
                 "Ruller tilbake Finnmarkstillegg: ${feil.message}"
