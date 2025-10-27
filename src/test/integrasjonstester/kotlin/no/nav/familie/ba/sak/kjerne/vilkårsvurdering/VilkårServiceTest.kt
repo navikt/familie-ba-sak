@@ -274,7 +274,7 @@ class VilkårServiceTest(
                         )
                 }
 
-            assertThat(funksjonellFeil.frontendFeilmelding).isEqualTo("Du har endret vilkåret, og må derfor fylle inn en begrunnelse.")
+            assertThat(funksjonellFeil.frontendFeilmelding).isEqualTo("Du har endret vilkåret, og må derfor fjerne den automatiske begrunnelsen og fylle inn en ny begrunnelse.")
         }
 
         @Test
