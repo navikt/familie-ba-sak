@@ -47,6 +47,7 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
+import no.nav.familie.kontrakter.felles.søknad.MissingVersionException
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.hibernate.exception.ConstraintViolationException
 import org.slf4j.LoggerFactory
@@ -241,7 +242,12 @@ class StegService(
                 restRegistrerSøknad = restRegistrerSøknad,
             )
         } catch (e: Exception) {
-            logger.warn("Klarte ikke å automatisk registrere søknad for behandling ${behandling.id}. Feil: ${e.message}", e)
+            val feilmelding = "Klarte ikke å automatisk registrere søknad for behandling ${behandling.id}. Feil: ${e.message}"
+            if (e is MissingVersionException) {
+                logger.error(feilmelding, e)
+            } else {
+                logger.warn(feilmelding, e)
+            }
             behandling
         }
 
