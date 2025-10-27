@@ -79,7 +79,7 @@ class AutovedtakSvalbardtilleggServiceTest {
     @BeforeEach
     fun setUp() {
         every { fagsakService.hentPåFagsakId(fagsak.id) } returns lagFagsak(status = LØPENDE, type = NORMAL)
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id) } returns behandling
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns behandling
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
         every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns lagTilkjentYtelse { emptySet() }
         every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
@@ -121,7 +121,7 @@ class AutovedtakSvalbardtilleggServiceTest {
         @Test
         fun `skal returnere false når det ikke finnes noen siste iverksatte behandling`() {
             // Arrange
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id) } returns null
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
 
             // Act
             val skalAutovedtakBehandles = autovedtakSvalbardtilleggService.skalAutovedtakBehandles(SvalbardtilleggData(fagsakId = fagsak.id))

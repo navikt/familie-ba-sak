@@ -55,21 +55,21 @@ class AutovedtakSvalbardtilleggService(
 
         if (!fagsaktypeKanBehandles || !harLøpendeBarnetrygd) return false
 
-        val sisteIverksatteBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandlingsdata.fagsakId)
+        val sisteVedtatteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandlingsdata.fagsakId)
                 ?: return false
 
-        if (sisteIverksatteBehandling.kategori == BehandlingKategori.EØS) return false
+        if (sisteVedtatteBehandling.kategori == BehandlingKategori.EØS) return false
 
-        val sisteIverksatteBehandlingHarSvalbardtilleggAndeler =
+        val sisteVedtatteBehandlingHarSvalbardtilleggAndeler =
             beregningService
-                .hentTilkjentYtelseForBehandling(sisteIverksatteBehandling.id)
+                .hentTilkjentYtelseForBehandling(sisteVedtatteBehandling.id)
                 .andelerTilkjentYtelse
                 .any { it.type == YtelseType.SVALBARDTILLEGG }
 
         val minstÈnAktørHarAdresseSomErRelevantForSvalbardtillegg =
             persongrunnlagService
-                .hentAktivThrows(sisteIverksatteBehandling.id)
+                .hentAktivThrows(sisteVedtatteBehandling.id)
                 .personer
                 .map { it.aktør.aktivFødselsnummer() }
                 .let { identer ->
@@ -79,7 +79,7 @@ class AutovedtakSvalbardtilleggService(
                         .any { it.value.harAdresserSomErRelevantForSvalbardtillegg() }
                 }
 
-        return sisteIverksatteBehandlingHarSvalbardtilleggAndeler || minstÈnAktørHarAdresseSomErRelevantForSvalbardtillegg
+        return sisteVedtatteBehandlingHarSvalbardtilleggAndeler || minstÈnAktørHarAdresseSomErRelevantForSvalbardtillegg
     }
 
     @Transactional
