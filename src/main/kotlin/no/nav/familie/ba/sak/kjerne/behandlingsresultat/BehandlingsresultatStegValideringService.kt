@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
-import no.nav.familie.ba.sak.common.AutovedtakSkalIkkeGjennomføresFeil
+import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -169,7 +169,7 @@ class BehandlingsresultatStegValideringService(
                     manuellOppgaveType = manuellOppgaveType,
                 )
 
-                throw AutovedtakSkalIkkeGjennomføresFeil(begrunnelse)
+                throw AutovedtakMåBehandlesManueltFeil(begrunnelse, behandling.id)
             } else {
                 throw Feil(begrunnelse)
             }

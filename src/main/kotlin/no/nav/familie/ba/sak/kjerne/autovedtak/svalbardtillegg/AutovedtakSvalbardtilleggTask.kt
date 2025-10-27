@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.AutovedtakSkalIkkeGjennomføresFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -33,8 +34,10 @@ class AutovedtakSvalbardtilleggTask(
                     fagsakId = fagsakId,
                     førstegangKjørt = task.opprettetTid,
                 )
-            } catch (e: AutovedtakSkalIkkeGjennomføresFeil) {
-                "Ruller tilbake Svalbardtillegg: ${e.message}"
+            } catch (feil: AutovedtakSkalIkkeGjennomføresFeil) {
+                "Ruller tilbake Svalbardtillegg: ${feil.message}"
+            } catch (feil: AutovedtakMåBehandlesManueltFeil) {
+                "Ruller tilbake Svalbardtillegg: ${feil.message}"
             }
 
         logger.info(resultat)
