@@ -26,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerAtManIkkeBorIBådeF
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerBarnasVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIkkeBlandetRegelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIngenVilkårSattEtterSøkersDød
-import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
@@ -83,11 +82,9 @@ class VilkårsvurderingSteg(
             if (behandling.erFinnmarkstillegg()) {
                 val skalBehandlesManuelt = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(this)
                 if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
-                    oppgaveService.opprettOppgaveForManuellBehandling(
-                        behandlingId = behandling.id,
-                        begrunnelse = "Det finnes perioder der søker er bosatt i Finnmark eller Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark eller Nord-Troms.",
-                        opprettLogginnslag = true,
-                        manuellOppgaveType = ManuellOppgaveType.FINNMARKSTILLEGG,
+                    oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
+                        fagsakId = behandling.fagsak.id,
+                        beskrivelse = "Det finnes perioder der søker er bosatt i Finnmark eller Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark eller Nord-Troms.",
                     )
                 }
             }
@@ -95,11 +92,9 @@ class VilkårsvurderingSteg(
             if (behandling.erSvalbardtillegg()) {
                 val skalBehandlesManuelt = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(this)
                 if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
-                    oppgaveService.opprettOppgaveForManuellBehandling(
-                        behandlingId = behandling.id,
-                        begrunnelse = "Det finnes perioder der søker er bosatt på Svalbard samtidig som et barn med delt barnetrygd ikke er bosatt på Svalbard.",
-                        opprettLogginnslag = true,
-                        manuellOppgaveType = ManuellOppgaveType.SVALBARDTILLEGG,
+                    oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
+                        fagsakId = behandling.fagsak.id,
+                        beskrivelse = "Det finnes perioder der søker er bosatt på Svalbard samtidig som et barn med delt barnetrygd ikke er bosatt på Svalbard.",
                     )
                 }
             }
