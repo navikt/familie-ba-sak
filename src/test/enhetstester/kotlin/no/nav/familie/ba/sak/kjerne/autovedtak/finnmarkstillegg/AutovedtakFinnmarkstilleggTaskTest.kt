@@ -1,15 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.AutovedtakSkalIkkeGjennomføresFeil
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -19,12 +19,12 @@ import org.junit.jupiter.api.assertThrows
 internal class AutovedtakFinnmarkstilleggTaskTest {
     private val autovedtakStegService = mockk<AutovedtakStegService>()
     private val fagsakService = mockk<FagsakService>()
-    private val oppgaveService = mockk<OppgaveService>()
+    private val opprettTaskService = mockk<OpprettTaskService>()
     private val autovedtakFinnmarkstilleggTask =
         AutovedtakFinnmarkstilleggTask(
             autovedtakStegService = autovedtakStegService,
             fagsakService = fagsakService,
-            oppgaveService = oppgaveService,
+            opprettTaskService = opprettTaskService,
         )
 
     @Nested
@@ -239,14 +239,14 @@ internal class AutovedtakFinnmarkstilleggTaskTest {
                 )
 
             every { fagsakService.hentAktør(fagsakId) } returns aktør
-            every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
+            justRun { opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(fagsakId, any()) }
             every {
                 autovedtakStegService.kjørBehandlingFinnmarkstillegg(
                     mottakersAktør = aktør,
                     fagsakId = fagsakId,
                     førstegangKjørt = any(),
                 )
-            } throws AutovedtakMåBehandlesManueltFeil("Feilmelding", 1L)
+            } throws AutovedtakMåBehandlesManueltFeil("Feilmelding")
 
             // Act
             assertDoesNotThrow { autovedtakFinnmarkstilleggTask.doTask(task) }
@@ -261,10 +261,9 @@ internal class AutovedtakFinnmarkstilleggTaskTest {
                 )
             }
             verify(exactly = 1) {
-                oppgaveService.opprettOppgaveForManuellBehandling(
-                    behandlingId = 1L,
-                    begrunnelse = "Feilmelding",
-                    manuellOppgaveType = ManuellOppgaveType.FINNMARKSTILLEGG,
+                opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(
+                    fagsakId = fagsakId,
+                    beskrivelse = "Feilmelding",
                 )
             }
         }

@@ -90,7 +90,7 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserTest {
 
         val forventedeUtenlandskePeriodebeløp =
             UtenlandskPeriodebeløpBuilder(nov2020)
-                .medBeløp("123>", "PLN", "PL", barn1)
+                .medBeløp("123", "PLN", "PL", barn1)
                 .bygg()
 
         val faktiskeUtenlandskPeriodebeløp =

@@ -158,6 +158,42 @@ class OppgaveService(
         return opprettetOppgaveId
     }
 
+    fun opprettOppgaveForFinnmarksOgSvalbardtillegg(
+        fagsakId: Long,
+        beskrivelse: String,
+    ): String {
+        logger.info("Sender autovedtak til manuell behandling, se secureLogger for mer detaljer.")
+        secureLogger.info("Sender autovedtak til manuell behandling. Beskrivelse: $beskrivelse")
+
+        val sisteVedtatteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId)
+                ?: throw Feil("Finner ikke siste vedtatte behandling for fagsak $fagsakId")
+
+        val arbeidsfordelingsenhet =
+            arbeidsfordelingPåBehandlingRepository
+                .hentArbeidsfordelingPåBehandling(sisteVedtatteBehandling.id)
+                .tilArbeidsfordelingsenhet()
+
+        val opprettOppgave =
+            OpprettOppgaveRequest(
+                ident = OppgaveIdentV2(ident = sisteVedtatteBehandling.fagsak.aktør.aktørId, gruppe = IdentGruppe.AKTOERID),
+                saksId = fagsakId.toString(),
+                tema = Tema.BAR,
+                oppgavetype = Oppgavetype.VurderLivshendelse,
+                fristFerdigstillelse = LocalDate.now(),
+                beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
+                enhetsnummer = arbeidsfordelingsenhet.enhetId,
+                behandlingstema = sisteVedtatteBehandling.tilOppgaveBehandlingTema().value,
+                behandlingstype = sisteVedtatteBehandling.kategori.tilOppgavebehandlingType().value,
+                behandlesAvApplikasjon = "familie-ba-sak",
+            )
+        val opprettetOppgaveId = integrasjonKlient.opprettOppgave(opprettOppgave).oppgaveId.toString()
+
+        økTellerForAntallOppgaveTyper(Oppgavetype.VurderLivshendelse)
+
+        return opprettetOppgaveId
+    }
+
     private fun økTellerForAntallOppgaveTyper(oppgavetype: Oppgavetype) {
         if (antallOppgaveTyper[oppgavetype] == null) {
             antallOppgaveTyper[oppgavetype] = Metrics.counter("oppgave.opprettet", "type", oppgavetype.name)

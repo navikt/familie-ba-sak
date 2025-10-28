@@ -334,8 +334,8 @@ class TilpassKompetanserTilRegelverkTest {
     }
 
     @Test
-    fun `skal sette tom på kompetanse til uendelig dersom tom på tidslinje er lik eller senere nåværende måned`() {
-        val inneværendeMåned = YearMonth.of(2024, 12)
+    fun `skal sette tom på kompetanse til uendelig dersom tom på tidslinje er senere nåværende måned`() {
+        val inneværendeMåned = YearMonth.of(2024, 11)
         val sep2024 = sep(2024)
 
         val kompetanser =
@@ -368,6 +368,47 @@ class TilpassKompetanserTilRegelverkTest {
         val forventedeKompetanser =
             KompetanseBuilder(sep2024)
                 .medKompetanse("->", barn1, barn2)
+                .byggKompetanser()
+
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
+    fun `skal ikke sette tom på kompetanse til uendelig dersom tom på tidslinje er samme som inneværende måned`() {
+        val inneværendeMåned = YearMonth.of(2024, 12)
+        val sep2024 = sep(2024)
+
+        val kompetanser =
+            KompetanseBuilder(sep2024)
+                .medKompetanse("----", barn1, barn2)
+                .medKompetanse("    --", barn1)
+                .medKompetanse("      ->", barn1, barn2)
+                .byggKompetanser()
+
+        val barnasRegelverkResultatTidslinjer =
+            mapOf(
+                barn1.aktør to "EEEEEEEEEEE".tilRegelverkResultatTidslinje(sep2024),
+                barn2.aktør to "EEEE  EE".tilRegelverkResultatTidslinje(sep2024),
+            )
+
+        val endredeUtbetalingPerioderSomKreverKompetanseTidlinjer =
+            mapOf(
+                Pair(barn1.aktør, "TTTTTTTTTTT".somBoolskTidslinje(sep2024)),
+                Pair(barn2.aktør, "TTTTFFTT".somBoolskTidslinje(sep2024)),
+            )
+
+        val faktiskeKompetanser =
+            tilpassKompetanserTilRegelverk(
+                gjeldendeKompetanser = kompetanser,
+                barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
+                endredeUtbetalingPerioderSomKreverKompetanseTidlinjer = endredeUtbetalingPerioderSomKreverKompetanseTidlinjer,
+                inneværendeMåned = inneværendeMåned,
+            )
+
+        val forventedeKompetanser =
+            KompetanseBuilder(sep2024)
+                .medKompetanse("----", barn1, barn2)
+                .medKompetanse("    ->", barn1)
                 .byggKompetanser()
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)

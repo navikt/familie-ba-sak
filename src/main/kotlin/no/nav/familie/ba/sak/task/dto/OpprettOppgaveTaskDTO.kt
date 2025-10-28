@@ -18,6 +18,4 @@ enum class ManuellOppgaveType(
     SMÅBARNSTILLEGG(true),
     FØDSELSHENDELSE(false),
     ÅPEN_BEHANDLING(true),
-    FINNMARKSTILLEGG(true),
-    SVALBARDTILLEGG(true),
 }

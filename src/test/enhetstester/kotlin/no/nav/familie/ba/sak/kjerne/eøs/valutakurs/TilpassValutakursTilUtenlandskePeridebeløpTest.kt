@@ -91,7 +91,7 @@ class TilpassValutakursTilUtenlandskePeridebeløpTest {
 
         val forventedeValutakurser =
             ValutakursBuilder(nov2020)
-                .medKurs("123>", "PLN", barn1)
+                .medKurs("123", "PLN", barn1)
                 .bygg()
 
         val faktiskeValutakurser =
