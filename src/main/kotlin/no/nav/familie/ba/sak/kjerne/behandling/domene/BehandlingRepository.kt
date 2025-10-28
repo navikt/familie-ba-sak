@@ -36,20 +36,31 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
     @Query(
         value = """WITH sisteiverksattebehandlingfraløpendefagsak AS (
-                        SELECT DISTINCT ON (b.fk_fagsak_id) b.id
-                        FROM behandling b
-                                 INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
-                                 INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
-                        WHERE f.status = 'LØPENDE'
-                          AND ty.utbetalingsoppdrag IS NOT NULL
-                          AND f.arkivert = false
-                        ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC)
+                        SELECT id
+                        FROM (
+                                 SELECT b.id,
+                                        ROW_NUMBER() OVER (
+                                            PARTITION BY b.fk_fagsak_id
+                                            ORDER BY b.aktivert_tid DESC
+                                            ) AS rn
+                                 FROM behandling b
+                                          INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                                          INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+                                 WHERE f.status = 'LØPENDE'
+                                   AND f.arkivert = false
+                                   AND ty.utbetalingsoppdrag IS NOT NULL
+                             ) ranked
+                        WHERE rn = 1
+                        )
                         
                         select sum(aty.kalkulert_utbetalingsbelop) 
                         from andel_tilkjent_ytelse aty
                         where aty.stonad_fom <= :måned
                           AND aty.stonad_tom >= :måned
-                        AND aty.fk_behandling_id in (SELECT silp.id FROM sisteiverksattebehandlingfraløpendefagsak silp)""",
+                        AND EXISTS (
+                            SELECT 1
+                            FROM sisteiverksattebehandlingfraløpendefagsak silp
+                            WHERE silp.id = aty.fk_behandling_id)""",
         nativeQuery = true,
     )
     fun hentTotalUtbetalingForMåned(måned: LocalDateTime): Long
