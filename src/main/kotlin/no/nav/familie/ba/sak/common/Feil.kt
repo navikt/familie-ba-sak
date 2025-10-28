@@ -15,9 +15,8 @@ class AutovedtakSkalIkkeGjennomføresFeil(
 ) : RuntimeException(message)
 
 class AutovedtakMåBehandlesManueltFeil(
-    val begrunnelse: String,
-    val behandlingId: Long,
-) : RuntimeException(begrunnelse)
+    val beskrivelse: String,
+) : RuntimeException(beskrivelse)
 
 open class Feil(
     message: String,
