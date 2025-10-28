@@ -49,7 +49,10 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                         from andel_tilkjent_ytelse aty
                         where aty.stonad_fom <= :måned
                           AND aty.stonad_tom >= :måned
-                        AND aty.fk_behandling_id in (SELECT silp.id FROM sisteiverksattebehandlingfraløpendefagsak silp)""",
+                        AND EXISTS (
+                            SELECT 1
+                            FROM sisteiverksattebehandlingfraløpendefagsak silp
+                            WHERE silp.id = aty.fk_behandling_id)""",
         nativeQuery = true,
     )
     fun hentTotalUtbetalingForMåned(måned: LocalDateTime): Long
