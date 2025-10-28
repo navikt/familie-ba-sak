@@ -6,10 +6,12 @@ import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.VilkårFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -25,6 +27,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØ
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.slf4j.LoggerFactory
@@ -126,13 +130,20 @@ fun validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig(
     }
 }
 
-fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering: Vilkårsvurdering): Boolean = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_I_FINNMARK_NORD_TROMS)
+fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(
+    vilkårsvurdering: Vilkårsvurdering,
+    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+): Boolean = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_I_FINNMARK_NORD_TROMS, andelTilkjentYtelseRepository)
 
-fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering: Vilkårsvurdering): Boolean = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_PÅ_SVALBARD)
+fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(
+    vilkårsvurdering: Vilkårsvurdering,
+    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+): Boolean = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_PÅ_SVALBARD, andelTilkjentYtelseRepository)
 
 private fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(
     vilkårsvurdering: Vilkårsvurdering,
     utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering,
+    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ): Boolean {
     val søkersPersonResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() } ?: throw Feil("Finner ikke personresultat for søker i vilkårsvurdering for ny behandling i fagsak ${vilkårsvurdering.behandling.fagsak.id}")
 
@@ -156,9 +167,24 @@ private fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(
                         .filter { it.vilkårType == BOR_MED_SØKER && (DELT_BOSTED in it.utdypendeVilkårsvurderinger || DELT_BOSTED_SKAL_IKKE_DELES in it.utdypendeVilkårsvurderinger) }
                         .lagForskjøvetTidslinjeForOppfylteVilkår(BOR_MED_SØKER)
 
+                val harLøpendeAndelTidslinje =
+                    andelTilkjentYtelseRepository
+                        .finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                            vilkårsvurdering.behandling.id,
+                            personResultat.aktør,
+                        ).filter { it.kalkulertUtbetalingsbeløp > 0 }
+                        .map { Periode(true, it.stønadFom.toLocalDate(), it.stønadTom.toLocalDate()) }
+                        .tilTidslinje()
+
+                val barnDeltBostedMedLøpendeAndelTidslinje =
+                    barnDeltBostedTidslinje
+                        .kombinerMed(harLøpendeAndelTidslinje) { deltBosted, løpendeAndel ->
+                            deltBosted != null && løpendeAndel == true
+                        }
+
                 søkerBosattITilleggssoneTidslinje
-                    .kombinerMed(barnBosattITilleggssoneTidslinje, barnDeltBostedTidslinje) { søkerBosattITilleggssone, barnBosattITilleggssone, barnDeltBosted ->
-                        søkerBosattITilleggssone != null && barnBosattITilleggssone == null && barnDeltBosted != null
+                    .kombinerMed(barnBosattITilleggssoneTidslinje, barnDeltBostedMedLøpendeAndelTidslinje) { søkerBosattITilleggssone, barnBosattITilleggssone, barnDeltBostedLøpendeAndel ->
+                        søkerBosattITilleggssone != null && barnBosattITilleggssone == null && barnDeltBostedLøpendeAndel == true
                     }.tilPerioder()
                     .any { it.verdi == true }
             }
