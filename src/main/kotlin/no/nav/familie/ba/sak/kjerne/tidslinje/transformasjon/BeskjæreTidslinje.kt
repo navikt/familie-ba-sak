@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.replaceLast
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
@@ -71,14 +72,16 @@ fun <K, V> Map<K, Tidslinje<V>>.beskjærTilOgMed(
 ): Map<K, Tidslinje<V>> = this.mapValues { (_, tidslinje) -> tidslinje.beskjærTilOgMed(tilOgMed) }
 
 fun <T : Any> Tidslinje<T>.forlengFremtidTilUendelig(tidspunktForUendelighet: LocalDate): Tidslinje<T> {
-    val tom = this.tilPerioderIkkeNull().mapNotNull { it.tom }.maxOrNull()
-    return if (tom != null && tom >= tidspunktForUendelighet) {
+    val senesteTomIPerioder = this.tilPerioderIkkeNull().mapNotNull { it.tom }.maxOrNull()
+
+    return if (senesteTomIPerioder != null && senesteTomIPerioder >= tidspunktForUendelighet) {
         this
             .tilPerioderIkkeNull()
             .filter { it.fom != null && it.fom!! < tidspunktForUendelighet }
             .ifEmpty { return tomTidslinje() }
-            .replaceLast { it.copy(tom = null) }
-            .tilTidslinje()
+            .replaceLast { periode ->
+                if (periode.tom?.toYearMonth() != tidspunktForUendelighet.toYearMonth()) periode.copy(tom = null) else periode
+            }.tilTidslinje()
     } else {
         this.tilPerioderIkkeNull().tilTidslinje()
     }
