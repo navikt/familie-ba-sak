@@ -4,7 +4,11 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
@@ -15,6 +19,7 @@ import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -40,6 +45,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.YearMonth
 
 class VilkårsvurderingValideringTest {
     @Nested
@@ -305,11 +311,15 @@ class VilkårsvurderingValideringTest {
 
     @Nested
     inner class ValiderAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerIFinnmark {
+        private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
+
         @Test
         fun `skal returnere true hvis barn har delt bosted og ikke bor med søker i Finnmark`() {
             // Arrange
             val søker = lagPerson(type = PersonType.SØKER)
             val barn = lagPerson(type = PersonType.BARN)
+            val fom = LocalDate.now()
+            val tom = LocalDate.now().plusYears(5)
 
             val vilkårsvurdering =
                 lagVilkårsvurdering {
@@ -322,8 +332,8 @@ class VilkårsvurderingValideringTest {
                                     lagVilkårResultat(
                                         vilkårType = BOSATT_I_RIKET,
                                         utdypendeVilkårsvurderinger = listOf(BOSATT_I_FINNMARK_NORD_TROMS),
-                                        periodeFom = LocalDate.of(2025, 1, 1),
-                                        periodeTom = LocalDate.of(2025, 6, 1),
+                                        periodeFom = fom,
+                                        periodeTom = tom,
                                     ),
                                 )
                             },
@@ -341,8 +351,8 @@ class VilkårsvurderingValideringTest {
                                     lagVilkårResultat(
                                         vilkårType = BOR_MED_SØKER,
                                         utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
-                                        periodeFom = LocalDate.of(2025, 1, 1),
-                                        periodeTom = LocalDate.of(2025, 6, 1),
+                                        periodeFom = fom,
+                                        periodeTom = tom,
                                     ),
                                 )
                             },
@@ -350,8 +360,67 @@ class VilkårsvurderingValideringTest {
                     )
                 }
 
+            val andel = lagAndelTilkjentYtelse(fom = fom.toYearMonth(), tom = tom.toYearMonth(), aktør = barn.aktør, kalkulertUtbetalingsbeløp = 1000)
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } returns listOf(andel)
+
             // Act && Assert
-            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering)).isTrue()
+            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering, andelTilkjentYtelseRepository)).isTrue()
+        }
+
+        @Test
+        fun `skal returnere false hvis barn har delt bosted og ikke bor med søker i Finnmark, men ingen løpende utbetaling`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER)
+            val barn = lagPerson(type = PersonType.BARN)
+            val fom = LocalDate.now()
+            val tom = LocalDate.now().plusYears(5)
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering {
+                    setOf(
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = søker.aktør,
+                            lagVilkårResultater = {
+                                setOf(
+                                    lagVilkårResultat(
+                                        vilkårType = BOSATT_I_RIKET,
+                                        utdypendeVilkårsvurderinger = listOf(BOSATT_I_FINNMARK_NORD_TROMS),
+                                        periodeFom = fom,
+                                        periodeTom = tom,
+                                    ),
+                                )
+                            },
+                        ),
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = barn.aktør,
+                            lagVilkårResultater = {
+                                setOf(
+                                    lagVilkårResultat(
+                                        vilkårType = UNDER_18_ÅR,
+                                        periodeFom = barn.fødselsdato,
+                                        periodeTom = barn.fødselsdato.plusYears(18),
+                                    ),
+                                    lagVilkårResultat(
+                                        vilkårType = BOR_MED_SØKER,
+                                        utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
+                                        periodeFom = fom,
+                                        periodeTom = tom,
+                                    ),
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            val andel = lagAndelTilkjentYtelse(fom = fom.toYearMonth(), tom = tom.toYearMonth(), aktør = barn.aktør, kalkulertUtbetalingsbeløp = 0)
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } returns listOf(andel)
+
+            // Act && Assert
+            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering, andelTilkjentYtelseRepository)).isFalse()
         }
 
         @Test
@@ -399,8 +468,12 @@ class VilkårsvurderingValideringTest {
                     )
                 }
 
+            val andel = lagAndelTilkjentYtelse(fom = YearMonth.of(2025, 3), tom = YearMonth.of(2025, 4), aktør = barn.aktør)
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } returns listOf(andel)
+
             // Act && Assert
-            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering)).isFalse()
+            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering, andelTilkjentYtelseRepository)).isFalse()
         }
 
         @Test
@@ -413,6 +486,8 @@ class VilkårsvurderingValideringTest {
             val søker = lagPerson(type = PersonType.SØKER)
             val barn1 = lagPerson(type = PersonType.BARN)
             val barn2 = lagPerson(type = PersonType.BARN)
+            val fom = LocalDate.now()
+            val tom = LocalDate.now().plusYears(5)
 
             val vilkårsvurdering =
                 lagVilkårsvurdering {
@@ -425,8 +500,8 @@ class VilkårsvurderingValideringTest {
                                     lagVilkårResultat(
                                         vilkårType = BOSATT_I_RIKET,
                                         utdypendeVilkårsvurderinger = listOf(BOSATT_I_FINNMARK_NORD_TROMS),
-                                        periodeFom = LocalDate.of(2025, 1, 1),
-                                        periodeTom = LocalDate.of(2025, 6, 1),
+                                        periodeFom = fom,
+                                        periodeTom = tom,
                                     ),
                                 )
                             },
@@ -444,8 +519,8 @@ class VilkårsvurderingValideringTest {
                                     lagVilkårResultat(
                                         vilkårType = BOR_MED_SØKER,
                                         utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
-                                        periodeFom = LocalDate.of(2025, 1, 1),
-                                        periodeTom = LocalDate.of(2025, 6, 1),
+                                        periodeFom = fom,
+                                        periodeTom = tom,
                                     ),
                                 )
                             },
@@ -463,8 +538,8 @@ class VilkårsvurderingValideringTest {
                                     lagVilkårResultat(
                                         vilkårType = BOR_MED_SØKER,
                                         utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
-                                        periodeFom = LocalDate.of(2025, 1, 1),
-                                        periodeTom = LocalDate.of(2025, 6, 1),
+                                        periodeFom = fom,
+                                        periodeTom = tom,
                                     ),
                                 )
                             },
@@ -472,8 +547,12 @@ class VilkårsvurderingValideringTest {
                     )
                 }
 
+            val andel = lagAndelTilkjentYtelse(fom = fom.toYearMonth(), tom = tom.toYearMonth(), aktør = barn1.aktør)
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } returns listOf(andel)
+
             // Act
-            finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering)
+            finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering, andelTilkjentYtelseRepository)
 
             // Assert
             assertThat(listAppender.list.single().level).isEqualTo(Level.WARN)
@@ -486,11 +565,15 @@ class VilkårsvurderingValideringTest {
 
     @Nested
     inner class ValiderAtDetIkkeFinnesDeltBostedForBarnSomIkkeBorMedSøkerPåSvalbard {
+        private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
+
         @Test
         fun `skal returnere true hvis barn har delt bosted og ikke bor med søker på Svalbard`() {
             // Arrange
             val søker = lagPerson(type = PersonType.SØKER)
             val barn = lagPerson(type = PersonType.BARN)
+            val fom = LocalDate.now()
+            val tom = LocalDate.now().plusYears(5)
 
             val vilkårsvurdering =
                 lagVilkårsvurdering {
@@ -503,8 +586,8 @@ class VilkårsvurderingValideringTest {
                                     lagVilkårResultat(
                                         vilkårType = BOSATT_I_RIKET,
                                         utdypendeVilkårsvurderinger = listOf(BOSATT_PÅ_SVALBARD),
-                                        periodeFom = LocalDate.of(2025, 1, 1),
-                                        periodeTom = LocalDate.of(2025, 6, 1),
+                                        periodeFom = fom,
+                                        periodeTom = tom,
                                     ),
                                 )
                             },
@@ -522,8 +605,62 @@ class VilkårsvurderingValideringTest {
                                     lagVilkårResultat(
                                         vilkårType = BOR_MED_SØKER,
                                         utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
-                                        periodeFom = LocalDate.of(2025, 1, 1),
-                                        periodeTom = LocalDate.of(2025, 6, 1),
+                                        periodeFom = fom,
+                                        periodeTom = tom,
+                                    ),
+                                )
+                            },
+                        ),
+                    )
+                }
+            val andel = lagAndelTilkjentYtelse(fom = fom.toYearMonth(), tom = tom.toYearMonth(), aktør = barn.aktør)
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } returns listOf(andel)
+
+            // Act && Assert
+            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering, andelTilkjentYtelseRepository)).isTrue()
+        }
+
+        @Test
+        fun `skal returnere false hvis barn har delt bosted og ikke bor med søker på Svalbard, men ingen løpende utbetaling`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER)
+            val barn = lagPerson(type = PersonType.BARN)
+            val fom = LocalDate.now()
+            val tom = LocalDate.now().plusYears(5)
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering {
+                    setOf(
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = søker.aktør,
+                            lagVilkårResultater = {
+                                setOf(
+                                    lagVilkårResultat(
+                                        vilkårType = BOSATT_I_RIKET,
+                                        utdypendeVilkårsvurderinger = listOf(BOSATT_PÅ_SVALBARD),
+                                        periodeFom = fom,
+                                        periodeTom = tom,
+                                    ),
+                                )
+                            },
+                        ),
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = barn.aktør,
+                            lagVilkårResultater = {
+                                setOf(
+                                    lagVilkårResultat(
+                                        vilkårType = UNDER_18_ÅR,
+                                        periodeFom = barn.fødselsdato,
+                                        periodeTom = barn.fødselsdato.plusYears(18),
+                                    ),
+                                    lagVilkårResultat(
+                                        vilkårType = BOR_MED_SØKER,
+                                        utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
+                                        periodeFom = fom,
+                                        periodeTom = tom,
                                     ),
                                 )
                             },
@@ -531,8 +668,12 @@ class VilkårsvurderingValideringTest {
                     )
                 }
 
+            val andel = lagAndelTilkjentYtelse(fom = fom.toYearMonth(), tom = tom.toYearMonth(), aktør = barn.aktør, kalkulertUtbetalingsbeløp = 0)
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } returns listOf(andel)
+
             // Act && Assert
-            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)).isTrue()
+            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering, andelTilkjentYtelseRepository)).isFalse()
         }
 
         @Test
@@ -544,6 +685,8 @@ class VilkårsvurderingValideringTest {
 
             val søker = lagPerson(type = PersonType.SØKER)
             val barn = lagPerson(type = PersonType.BARN)
+            val fom = LocalDate.of(2025, 3, 1)
+            val tom = LocalDate.of(2025, 4, 1)
 
             val vilkårsvurdering =
                 lagVilkårsvurdering {
@@ -575,8 +718,8 @@ class VilkårsvurderingValideringTest {
                                     lagVilkårResultat(
                                         vilkårType = BOR_MED_SØKER,
                                         utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
-                                        periodeFom = LocalDate.of(2025, 3, 1),
-                                        periodeTom = LocalDate.of(2025, 4, 1),
+                                        periodeFom = fom,
+                                        periodeTom = tom,
                                     ),
                                 )
                             },
@@ -584,8 +727,12 @@ class VilkårsvurderingValideringTest {
                     )
                 }
 
+            val andel = lagAndelTilkjentYtelse(fom = fom.toYearMonth(), tom = tom.toYearMonth(), aktør = barn.aktør)
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } returns listOf(andel)
+
             // Act && Assert
-            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)).isFalse
+            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering, andelTilkjentYtelseRepository)).isFalse
         }
 
         @Test
@@ -598,6 +745,8 @@ class VilkårsvurderingValideringTest {
             val søker = lagPerson(type = PersonType.SØKER)
             val barn1 = lagPerson(type = PersonType.BARN)
             val barn2 = lagPerson(type = PersonType.BARN)
+            val fom = LocalDate.now()
+            val tom = LocalDate.now().plusYears(5)
 
             val vilkårsvurdering =
                 lagVilkårsvurdering {
@@ -610,8 +759,8 @@ class VilkårsvurderingValideringTest {
                                     lagVilkårResultat(
                                         vilkårType = BOSATT_I_RIKET,
                                         utdypendeVilkårsvurderinger = listOf(BOSATT_PÅ_SVALBARD),
-                                        periodeFom = LocalDate.of(2025, 1, 1),
-                                        periodeTom = LocalDate.of(2025, 6, 1),
+                                        periodeFom = fom,
+                                        periodeTom = tom,
                                     ),
                                 )
                             },
@@ -629,8 +778,8 @@ class VilkårsvurderingValideringTest {
                                     lagVilkårResultat(
                                         vilkårType = BOR_MED_SØKER,
                                         utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
-                                        periodeFom = LocalDate.of(2025, 1, 1),
-                                        periodeTom = LocalDate.of(2025, 6, 1),
+                                        periodeFom = fom,
+                                        periodeTom = tom,
                                     ),
                                 )
                             },
@@ -648,8 +797,8 @@ class VilkårsvurderingValideringTest {
                                     lagVilkårResultat(
                                         vilkårType = BOR_MED_SØKER,
                                         utdypendeVilkårsvurderinger = listOf(DELT_BOSTED),
-                                        periodeFom = LocalDate.of(2025, 1, 1),
-                                        periodeTom = LocalDate.of(2025, 6, 1),
+                                        periodeFom = fom,
+                                        periodeTom = tom,
                                     ),
                                 )
                             },
@@ -657,8 +806,12 @@ class VilkårsvurderingValideringTest {
                     )
                 }
 
+            val andel = lagAndelTilkjentYtelse(fom = fom.toYearMonth(), tom = tom.toYearMonth(), aktør = barn1.aktør)
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } returns listOf(andel)
+
             // Act
-            finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering)
+            finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering, andelTilkjentYtelseRepository)
 
             // Assert
             assertThat(listAppender.list.single().level).isEqualTo(Level.WARN)

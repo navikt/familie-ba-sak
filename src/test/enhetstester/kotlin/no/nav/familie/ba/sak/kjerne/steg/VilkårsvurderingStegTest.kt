@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaSe
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -56,6 +57,7 @@ class VilkårsvurderingStegTest {
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val oppgaveService: OppgaveService = mockk()
+    private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>(relaxed = true)
 
     private val vilkårsvurderingSteg: VilkårsvurderingSteg =
         VilkårsvurderingSteg(
@@ -73,6 +75,7 @@ class VilkårsvurderingStegTest {
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             featureToggleService = featureToggleService,
             oppgaveService = oppgaveService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
 
     val behandling =
