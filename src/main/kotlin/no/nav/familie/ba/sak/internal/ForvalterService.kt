@@ -222,8 +222,6 @@ class ForvalterService(
         aktørIdRepository.delete(aktør)
         secureLogger.info("Slettet aktør med aktørId=$aktørId og fnr=$fødselsnummer")
     }
-
-    fun finnAktørIderSomSkalSlettes(limit: Long): List<String> = aktørIdRepository.finnAktørerSomKanSlettes(limit)
 }
 
 interface FagsakMedFlereMigreringer {
