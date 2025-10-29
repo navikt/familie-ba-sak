@@ -513,6 +513,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetSvalbardtilleggUtenDato"
     },
+    INNVILGET_ENSLIG_MINDREÅRIG_FINNMARKSTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEnsligMindrearigFinnmarkstillegg"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
@@ -824,6 +828,14 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     REDUKSJON_SVALBARDTILLEGG_BODDE_IKKE_PÅ_SVALBARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonSvalbardtilleggBoddeIkkePaaSvalbard"
+    },
+    REDUKSJON_ENSLIG_MINDREÅRIG_FINNMARKSTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonEnsligMindrearigFinnmarkstillegg"
+    },
+    REDUKSJON_ENSLIG_MINDREÅRIG_BODDE_IKKE_I_FINNMARK_ELLER_TILLEGGSONE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonEnsligMindrearigBoddeIkkeIFinnmarkEllerTilleggsone"
     },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
