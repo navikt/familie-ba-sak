@@ -1377,7 +1377,7 @@ class PreutfyllBosattIRiketServiceTest {
     }
 
     @Nested
-    inner class TilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat {
+    inner class OppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat {
         @Test
         fun `skal oppdatere utvidet vilkårsvurderinger for 'Bosatt i riket'-vilkåret for person som har oppholdsadresse på Svalbard`() {
             // Arrange
@@ -1415,7 +1415,7 @@ class PreutfyllBosattIRiketServiceTest {
 
             // Act
             val vilkårresultat =
-                preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+                preutfyllBosattIRiketService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
@@ -1480,7 +1480,7 @@ class PreutfyllBosattIRiketServiceTest {
 
             // Act
             val vilkårresultat =
-                preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+                preutfyllBosattIRiketService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
@@ -1544,7 +1544,7 @@ class PreutfyllBosattIRiketServiceTest {
 
             // Act
             val vilkårresultat =
-                preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+                preutfyllBosattIRiketService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
@@ -1619,7 +1619,7 @@ class PreutfyllBosattIRiketServiceTest {
 
             // Act
             val vilkårresultat =
-                preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+                preutfyllBosattIRiketService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
@@ -1710,7 +1710,7 @@ class PreutfyllBosattIRiketServiceTest {
 
             // Act
             val vilkårresultat =
-                preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+                preutfyllBosattIRiketService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
@@ -1791,7 +1791,7 @@ class PreutfyllBosattIRiketServiceTest {
 
             // Act
             val vilkårresultat =
-                preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+                preutfyllBosattIRiketService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,

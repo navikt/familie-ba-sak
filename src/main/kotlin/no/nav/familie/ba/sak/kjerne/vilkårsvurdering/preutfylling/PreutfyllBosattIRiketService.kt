@@ -71,7 +71,7 @@ class PreutfyllBosattIRiketService(
 
                 val nyeBosattIRiketVilkårResultater =
                     if (behandling.erFinnmarksEllerSvalbardtillegg() && featureToggleService.isEnabled(FeatureToggle.NY_PREUTFYLLING_FOR_BOSATT_I_RIKET_VILKÅR_VED_AUTOVEDTAK_FINNMARK_SVALBARD)) {
-                        tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+                        oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                             personResultat = personResultat,
                             adresserForPerson = adresserForPerson,
                             behandling = behandling,
@@ -195,7 +195,7 @@ class PreutfyllBosattIRiketService(
             }.toSet()
     }
 
-    fun tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+    fun oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
         personResultat: PersonResultat,
         adresserForPerson: Adresser,
         behandling: Behandling,
@@ -216,7 +216,7 @@ class PreutfyllBosattIRiketService(
                 erBostedsadresseIFinnmarkEllerNordTroms == true || erDeltBostedIFinnmarkEllerNordTroms == true
             }
 
-        val finnmarkEllerSvalbardtilleggTidslinje =
+        val finnmarkEllerSvalbardmerkingTidslinje =
             erBosattIFinnmarkEllerNordTromsTidslinje
                 .kombinerMed(erOppholdsadressePåSvalbardTidslinje) { erBosattIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
                     when {
@@ -230,12 +230,12 @@ class PreutfyllBosattIRiketService(
 
         return eksisterendeBosattIRiketVilkårResultater
             .tilTidslinje()
-            .kombinerMed(finnmarkEllerSvalbardtilleggTidslinje) { eksisterendeVilkårResultat, finnmarkEllerSvalbardtillegg ->
+            .kombinerMed(finnmarkEllerSvalbardmerkingTidslinje) { eksisterendeVilkårResultat, finnmarkEllerSvalbardmerking ->
                 if (eksisterendeVilkårResultat == null) {
                     return@kombinerMed null
                 }
 
-                val gjeldendeFinnmarkEllerSvalbardMarkeringer = finnmarkEllerSvalbardtillegg.orEmpty().toSet()
+                val gjeldendeFinnmarkEllerSvalbardMarkeringer = finnmarkEllerSvalbardmerking.orEmpty().toSet()
                 val eksisterendeFinnmarkEllerSvalbardMarkeringer = eksisterendeVilkårResultat.utdypendeVilkårsvurderinger.filter { it == BOSATT_I_FINNMARK_NORD_TROMS || it == BOSATT_PÅ_SVALBARD }.toSet()
                 val utdypendeVilkårsvurderingMåOppdateres = eksisterendeFinnmarkEllerSvalbardMarkeringer != gjeldendeFinnmarkEllerSvalbardMarkeringer
 
