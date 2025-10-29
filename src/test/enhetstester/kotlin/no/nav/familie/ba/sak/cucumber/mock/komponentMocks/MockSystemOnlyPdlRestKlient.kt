@@ -3,17 +3,17 @@ package no.nav.familie.ba.sak.cucumber.mock.komponentMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 
-fun mockSystemOnlyPdlRestClient(
+fun mockSystemOnlyPdlRestKlient(
     dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
-): SystemOnlyPdlRestClient =
-    mockk<SystemOnlyPdlRestClient> {
+): SystemOnlyPdlRestKlient =
+    mockk<SystemOnlyPdlRestKlient> {
         every { hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
             val identer = firstArg<List<String>>()
             val vegadresseIOslo = Vegadresse(null, null, null, null, null, "0301", null, null)

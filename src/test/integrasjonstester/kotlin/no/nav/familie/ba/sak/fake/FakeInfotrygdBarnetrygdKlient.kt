@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.fake
 
 import no.nav.familie.ba.sak.ekstern.pensjon.BarnetrygdTilPensjonResponse
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdKlient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBrevkode
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
@@ -10,9 +10,9 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
 
-class FakeInfotrygdBarnetrygdClient(
+class FakeInfotrygdBarnetrygdKlient(
     restOperations: RestOperations,
-) : InfotrygdBarnetrygdClient(URI.create("http://fake-infotrygd-barnetrygd"), restOperations) {
+) : InfotrygdBarnetrygdKlient(URI.create("http://fake-infotrygd-barnetrygd"), restOperations) {
     val løpendeSakerIInfotrygd = mutableMapOf<Pair<String, List<String>>, Boolean>()
     val stønaderIInfotrygd = mutableMapOf<Pair<String, List<String>>, InfotrygdSøkResponse<Stønad>>()
     val barnerygdTilPensjon = mutableMapOf<String, BarnetrygdTilPensjonResponse>()

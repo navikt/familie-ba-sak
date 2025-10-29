@@ -6,7 +6,7 @@ import io.mockk.slot
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseUtvidet
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedKlient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -18,11 +18,11 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 internal class SendVedtakTilInfotrygdTaskTest {
-    val infotrygdFeedClient: InfotrygdFeedClient = mockk()
+    val infotrygdFeedKlient: InfotrygdFeedKlient = mockk()
     val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService = mockk()
     private val sendVedtakTilInfotrygdTask =
         SendVedtakTilInfotrygdTask(
-            infotrygdFeedClient,
+            infotrygdFeedKlient,
             andelerTilkjentYtelseOgEndreteUtbetalingerService,
         )
 
@@ -32,7 +32,7 @@ internal class SendVedtakTilInfotrygdTaskTest {
         val fom = YearMonth.now().minusMonths(2)
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id) } returns lagAndelerMedFom(behandling, fom)
         val slot = slot<InfotrygdVedtakFeedDto>()
-        every { infotrygdFeedClient.sendVedtakFeedTilInfotrygd(capture(slot)) } returns Unit
+        every { infotrygdFeedKlient.sendVedtakFeedTilInfotrygd(capture(slot)) } returns Unit
 
         sendVedtakTilInfotrygdTask.doTask(SendVedtakTilInfotrygdTask.opprettTask(behandling.fagsak.aktør.aktivFødselsnummer(), behandling.id))
 

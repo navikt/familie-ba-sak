@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad
 
 import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
+import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggGenerator
@@ -22,7 +22,7 @@ import java.time.LocalDate
 @Service
 class OvergangsstønadService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val efSakRestClient: EfSakRestClient,
+    private val efSakRestKlient: EfSakRestKlient,
     private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val persongrunnlagService: PersongrunnlagService,
@@ -150,7 +150,7 @@ class OvergangsstønadService(
     }
 
     fun hentPerioderMedFullOvergangsstønad(aktør: Aktør): List<EksternPeriode> =
-        efSakRestClient
+        efSakRestKlient
             .hentPerioderMedFullOvergangsstønad(
                 aktør.aktivFødselsnummer(),
             ).perioder

@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.fake.FakeBrevKlient
-import no.nav.familie.ba.sak.fake.FakeIntegrasjonClient
+import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -76,7 +76,7 @@ class DokumentServiceIntegrationTest(
     @Autowired
     private val brevService: BrevService,
     @Autowired
-    private val fakeIntegrasjonClient: FakeIntegrasjonClient,
+    private val fakeIntegrasjonKlient: FakeIntegrasjonKlient,
     @Autowired
     private val arbeidsfordelingService: ArbeidsfordelingService,
     @Autowired
@@ -290,7 +290,7 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        assertThat(fakeIntegrasjonClient.hentJournalførteDokumenter().filter { it.fnr == fnr }).isNotEmpty()
+        assertThat(fakeIntegrasjonKlient.hentJournalførteDokumenter().filter { it.fnr == fnr }).isNotEmpty()
     }
 
     @Test
@@ -331,7 +331,7 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        assertThat(fakeIntegrasjonClient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
+        assertThat(fakeIntegrasjonKlient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
         assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
         assertEquals("institusjonsbarnets navn", manueltBrevRequest.vedrørende?.navn)
         val genererteBrev = fakeBrevKlient.genererteBrev
@@ -382,7 +382,7 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        assertThat(fakeIntegrasjonClient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
+        assertThat(fakeIntegrasjonKlient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
         assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
         assertEquals("institusjonsbarnets navn", manueltBrevRequest.vedrørende?.navn)
     }
@@ -425,7 +425,7 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        assertThat(fakeIntegrasjonClient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
+        assertThat(fakeIntegrasjonKlient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
         assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
         assertEquals("institusjonsbarnets navn", manueltBrevRequest.vedrørende?.navn)
     }
@@ -469,7 +469,7 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        assertThat(fakeIntegrasjonClient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
+        assertThat(fakeIntegrasjonKlient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
         assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
         assertEquals("institusjonsbarnets navn", manueltBrevRequest.vedrørende?.navn)
     }

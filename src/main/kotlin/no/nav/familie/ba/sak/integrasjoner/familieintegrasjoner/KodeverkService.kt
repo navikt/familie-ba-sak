@@ -6,12 +6,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class KodeverkService(
-    private val integrasjonClient: IntegrasjonClient,
+    private val integrasjonKlient: IntegrasjonKlient,
 ) {
-    fun hentLand(landkode: String): String = integrasjonClient.hentLand(landkode)
+    fun hentLand(landkode: String): String = integrasjonKlient.hentLand(landkode)
 
     fun hentPoststed(postnummer: String?): String? =
-        integrasjonClient
+        integrasjonKlient
             .hentPoststeder()
             .betydninger[postnummer]
             ?.firstOrNull()
@@ -19,7 +19,7 @@ class KodeverkService(
             ?.term
             ?.storForbokstav()
 
-    fun henteEøsMedlemskapsPerioderForValgtLand(land: String) = integrasjonClient.hentAlleEØSLand().betydninger[land] ?: emptyList()
+    fun henteEøsMedlemskapsPerioderForValgtLand(land: String) = integrasjonKlient.hentAlleEØSLand().betydninger[land] ?: emptyList()
 
-    fun hentLandkoderISO2() = integrasjonClient.hentLandkoderISO2()
+    fun hentLandkoderISO2() = integrasjonKlient.hentLandkoderISO2()
 }

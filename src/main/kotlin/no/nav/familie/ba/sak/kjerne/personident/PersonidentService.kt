@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.saner
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivAktørId
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivFødselsnummer
@@ -20,13 +20,13 @@ import java.time.LocalDateTime
 class PersonidentService(
     private val personidentRepository: PersonidentRepository,
     private val aktørIdRepository: AktørIdRepository,
-    private val pdlIdentRestClient: PdlIdentRestClient,
+    private val pdlIdentRestKlient: PdlIdentRestKlient,
     private val taskRepository: TaskRepositoryWrapper,
 ) {
     fun hentIdenter(
         personIdent: String,
         historikk: Boolean,
-    ): List<IdentInformasjon> = pdlIdentRestClient.hentIdenter(personIdent, historikk)
+    ): List<IdentInformasjon> = pdlIdentRestKlient.hentIdenter(personIdent, historikk)
 
     fun identSkalLeggesTil(nyIdent: PersonIdent): Boolean {
         val identerFraPdl = hentIdenter(nyIdent.ident, true)

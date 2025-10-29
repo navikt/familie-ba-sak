@@ -145,16 +145,16 @@ Egenskap: Finnmarkstillegg autovedtak
 
     Og lag personresultater for behandling 1
     Og legg til nye vilkårresultater for behandling 1
-      | AktørId | Vilkår                        | Fra dato   | Til dato   | Resultat | Utdypende vilkår             |
-      | 1       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                              |
-      | 1       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
-      | 1       | LOVLIG_OPPHOLD                | 01.01.2025 |            | OPPFYLT  |                              |
+      | AktørId | Vilkår                        | Fra dato   | Til dato   | Resultat | Utdypende vilkår                                 |
+      | 1       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                                                  |
+      | 1       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS, VURDERT_MEDLEMSKAP |
+      | 1       | LOVLIG_OPPHOLD                | 01.01.2025 |            | OPPFYLT  |                                                  |
 
-      | 2       | UNDER_18_ÅR                   | 01.01.2025 | 31.12.2042 | OPPFYLT  |                              |
-      | 2       | GIFT_PARTNERSKAP              | 01.01.2025 |            | OPPFYLT  |                              |
-      | 2       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                              |
-      | 2       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
-      | 2       | BOR_MED_SØKER, LOVLIG_OPPHOLD | 01.01.2025 |            | OPPFYLT  |                              |
+      | 2       | UNDER_18_ÅR                   | 01.01.2025 | 31.12.2042 | OPPFYLT  |                                                  |
+      | 2       | GIFT_PARTNERSKAP              | 01.01.2025 |            | OPPFYLT  |                                                  |
+      | 2       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                                                  |
+      | 2       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS                     |
+      | 2       | BOR_MED_SØKER, LOVLIG_OPPHOLD | 01.01.2025 |            | OPPFYLT  |                                                  |
 
     Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Prosent | Ytelse type        |
@@ -171,16 +171,16 @@ Egenskap: Finnmarkstillegg autovedtak
     Når vi lager automatisk behandling med id 2 på fagsak 1 på grunn av finnmarkstillegg
 
     Så forvent følgende vilkårresultater for behandling 2
-      | AktørId | Vilkår                        | Fra dato   | Til dato   | Resultat | Utdypende vilkår             |
-      | 1       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                              |
-      | 1       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
-      | 1       | LOVLIG_OPPHOLD                | 01.01.2025 |            | OPPFYLT  |                              |
+      | AktørId | Vilkår                        | Fra dato   | Til dato   | Resultat | Utdypende vilkår                                 |
+      | 1       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                                                  |
+      | 1       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS, VURDERT_MEDLEMSKAP |
+      | 1       | LOVLIG_OPPHOLD                | 01.01.2025 |            | OPPFYLT  |                                                  |
 
-      | 2       | UNDER_18_ÅR                   | 01.01.2025 | 31.12.2042 | OPPFYLT  |                              |
-      | 2       | GIFT_PARTNERSKAP              | 01.01.2025 |            | OPPFYLT  |                              |
-      | 2       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                              |
-      | 2       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  |                              |
-      | 2       | BOR_MED_SØKER, LOVLIG_OPPHOLD | 01.01.2025 |            | OPPFYLT  |                              |
+      | 2       | UNDER_18_ÅR                   | 01.01.2025 | 31.12.2042 | OPPFYLT  |                                                  |
+      | 2       | GIFT_PARTNERSKAP              | 01.01.2025 |            | OPPFYLT  |                                                  |
+      | 2       | BOSATT_I_RIKET                | 01.01.2025 | 31.08.2025 | OPPFYLT  |                                                  |
+      | 2       | BOSATT_I_RIKET                | 01.09.2025 |            | OPPFYLT  |                                                  |
+      | 2       | BOR_MED_SØKER, LOVLIG_OPPHOLD | 01.01.2025 |            | OPPFYLT  |                                                  |
 
     Så forvent følgende andeler tilkjent ytelse for behandling 2
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Prosent | Ytelse type        |

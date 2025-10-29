@@ -9,7 +9,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
-import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
+import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -29,7 +29,7 @@ import java.time.LocalDate
 
 class OvergangsstønadServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val efSakRestClient = mockk<EfSakRestClient>()
+    private val efSakRestKlient = mockk<EfSakRestKlient>()
     private val periodeOvergangsstønadGrunnlagRepository = mockk<PeriodeOvergangsstønadGrunnlagRepository>()
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val persongrunnlagService = mockk<PersongrunnlagService>()
@@ -43,7 +43,7 @@ class OvergangsstønadServiceTest {
         overgangsstønadService =
             OvergangsstønadService(
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-                efSakRestClient = efSakRestClient,
+                efSakRestKlient = efSakRestKlient,
                 periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository,
                 tilkjentYtelseRepository = tilkjentYtelseRepository,
                 persongrunnlagService = persongrunnlagService,
@@ -106,7 +106,7 @@ class OvergangsstønadServiceTest {
 
         assertThat(slot.captured).containsAll(forventetNyePerioder)
         verify(exactly = 1) { periodeOvergangsstønadGrunnlagRepository.saveAll(forventetNyePerioder) }
-        verify(exactly = 0) { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) }
+        verify(exactly = 0) { efSakRestKlient.hentPerioderMedFullOvergangsstønad(any()) }
     }
 
     @Test
@@ -114,7 +114,7 @@ class OvergangsstønadServiceTest {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.NYE_OPPLYSNINGER)
         val søker = lagPerson(type = PersonType.SØKER)
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+        every { efSakRestKlient.hentPerioderMedFullOvergangsstønad(any()) } returns
             EksternePerioderResponse(
                 perioder =
                     listOf(
@@ -143,7 +143,7 @@ class OvergangsstønadServiceTest {
             behandling = behandling,
         )
 
-        verify(exactly = 1) { efSakRestClient.hentPerioderMedFullOvergangsstønad(søker.aktør.aktivFødselsnummer()) }
+        verify(exactly = 1) { efSakRestKlient.hentPerioderMedFullOvergangsstønad(søker.aktør.aktivFødselsnummer()) }
         assertThat(slot.captured).containsExactly(
             forventetPeriode,
         )

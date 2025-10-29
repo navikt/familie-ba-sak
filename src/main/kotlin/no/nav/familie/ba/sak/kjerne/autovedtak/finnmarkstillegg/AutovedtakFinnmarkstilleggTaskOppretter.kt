@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -19,7 +19,7 @@ class AutovedtakFinnmarkstilleggTaskOppretter(
     private val finnmarkstilleggKjøringService: FinnmarkstilleggKjøringService,
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val pdlRestClient: SystemOnlyPdlRestClient,
+    private val pdlRestKlient: SystemOnlyPdlRestKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -66,7 +66,7 @@ class AutovedtakFinnmarkstilleggTaskOppretter(
                     .distinct()
                     .chunked(1000)
                     .flatMap { personer ->
-                        pdlRestClient
+                        pdlRestKlient
                             .hentBostedsadresseOgDeltBostedForPersoner(personer)
                             .mapValues { Adresser.opprettFra(it.value) }
                             .filterValues { it.harAdresserSomErRelevantForFinnmarkstillegg() }

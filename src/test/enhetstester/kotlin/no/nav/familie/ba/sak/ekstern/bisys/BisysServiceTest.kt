@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseUtvidet
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -31,14 +31,14 @@ internal class BisysServiceTest {
     private val mockFagsakRepository = mockk<FagsakRepository>()
     private val mockBehandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val mockTilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    private val mockInfotrygdClient = mockk<InfotrygdBarnetrygdClient>()
+    private val mockInfotrygdKlient = mockk<InfotrygdBarnetrygdKlient>()
 
     @BeforeAll
     fun setUp() {
         bisysService =
             BisysService(
                 mockBehandlingHentOgPersisterService,
-                mockInfotrygdClient,
+                mockInfotrygdKlient,
                 mockFagsakRepository,
                 mockPersonidentService,
                 mockTilkjentYtelseRepository,
@@ -53,7 +53,7 @@ internal class BisysServiceTest {
         every { mockPersonidentService.hentAktør(any()) } answers { aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(aktør.aktivFødselsnummer()) }
         every { mockPersonidentService.hentIdenter(any(), any()) } answers { listOf(IdentInformasjon(aktør.aktivFødselsnummer(), false, Type.FOLKEREGISTERIDENT.name)) }
-        every { mockInfotrygdClient.hentUtvidetBarnetrygd(fnr, any()) } returns
+        every { mockInfotrygdKlient.hentUtvidetBarnetrygd(fnr, any()) } returns
             BisysUtvidetBarnetrygdResponse(
                 perioder = emptyList(),
             )
@@ -91,7 +91,7 @@ internal class BisysServiceTest {
                 500.0,
                 manueltBeregnet = true,
             )
-        every { mockInfotrygdClient.hentUtvidetBarnetrygd(fnr, any()) } returns
+        every { mockInfotrygdKlient.hentUtvidetBarnetrygd(fnr, any()) } returns
             BisysUtvidetBarnetrygdResponse(
                 perioder = listOf(periodeInfotrygd),
             )
@@ -120,7 +120,7 @@ internal class BisysServiceTest {
             )
         tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
 
-        every { mockInfotrygdClient.hentUtvidetBarnetrygd(any(), any()) } returns
+        every { mockInfotrygdKlient.hentUtvidetBarnetrygd(any(), any()) } returns
             BisysUtvidetBarnetrygdResponse(
                 perioder = emptyList(),
             )
@@ -174,7 +174,7 @@ internal class BisysServiceTest {
                 deltBosted = true,
             )
         every {
-            mockInfotrygdClient.hentUtvidetBarnetrygd(
+            mockInfotrygdKlient.hentUtvidetBarnetrygd(
                 andelTilkjentYtelse.aktør.aktivFødselsnummer(),
                 any(),
             )
@@ -229,7 +229,7 @@ internal class BisysServiceTest {
                 deltBosted = false,
             )
         every {
-            mockInfotrygdClient.hentUtvidetBarnetrygd(
+            mockInfotrygdKlient.hentUtvidetBarnetrygd(
                 andelTilkjentYtelse.aktør.aktivFødselsnummer(),
                 any(),
             )
@@ -284,7 +284,7 @@ internal class BisysServiceTest {
                 deltBosted = false,
             )
         every {
-            mockInfotrygdClient.hentUtvidetBarnetrygd(
+            mockInfotrygdKlient.hentUtvidetBarnetrygd(
                 andelTilkjentYtelse.aktør.aktivFødselsnummer(),
                 any(),
             )
@@ -343,7 +343,7 @@ internal class BisysServiceTest {
                 deltBosted = false,
             )
         every {
-            mockInfotrygdClient.hentUtvidetBarnetrygd(
+            mockInfotrygdKlient.hentUtvidetBarnetrygd(
                 andelTilkjentYtelse.aktør.aktivFødselsnummer(),
                 any(),
             )

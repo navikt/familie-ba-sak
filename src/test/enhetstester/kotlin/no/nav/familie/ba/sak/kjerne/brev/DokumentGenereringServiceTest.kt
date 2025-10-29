@@ -7,7 +7,7 @@ import io.mockk.slot
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -29,7 +29,7 @@ import java.time.LocalDate
 class DokumentGenereringServiceTest {
     private val brevService = mockk<BrevService>()
     private val brevKlient = mockk<BrevKlient>()
-    private val integrasjonClient = mockk<IntegrasjonClient>()
+    private val integrasjonKlient = mockk<IntegrasjonKlient>()
     private val saksbehandlerContext = mockk<SaksbehandlerContext>()
     private val sammensattKontrollsakService = mockk<SammensattKontrollsakService>()
     private val testVerktøyService = mockk<TestVerktøyService>()
@@ -41,7 +41,7 @@ class DokumentGenereringServiceTest {
             persongrunnlagService = mockk(),
             brevService = brevService,
             brevKlient = brevKlient,
-            kodeverkService = KodeverkService(integrasjonClient = integrasjonClient),
+            kodeverkService = KodeverkService(integrasjonKlient = integrasjonKlient),
             saksbehandlerContext = saksbehandlerContext,
             sammensattKontrollsakService = sammensattKontrollsakService,
             testVerktøyService = testVerktøyService,

@@ -26,7 +26,7 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
-class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
+class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
     val løpendeBarnetrygdURL = "/api/infotrygd/barnetrygd/lopende-barnetrygd"
     val sakerURL = "/api/infotrygd/barnetrygd/saker"
     val stønaderURL = "/api/infotrygd/barnetrygd/stonad?historikk=false"
@@ -42,12 +42,12 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
     @Autowired
     lateinit var environment: Environment
 
-    lateinit var client: InfotrygdBarnetrygdClient
+    lateinit var klient: InfotrygdBarnetrygdKlient
 
     @BeforeEach
     fun setUp() {
-        client =
-            InfotrygdBarnetrygdClient(
+        klient =
+            InfotrygdBarnetrygdKlient(
                 URI.create(wireMockServer.baseUrl() + "/api"),
                 restOperations,
             )
@@ -90,9 +90,9 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
 
         val infotrygdSøkRequest = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
 
-        val finnesIkkeHosInfotrygd = client.harLøpendeSakIInfotrygd(søkersIdenter, barnasIdenter)
-        val hentsakerResponse = client.hentSaker(søkersIdenter, barnasIdenter)
-        val hentstønaderResponse = client.hentStønader(søkersIdenter, barnasIdenter)
+        val finnesIkkeHosInfotrygd = klient.harLøpendeSakIInfotrygd(søkersIdenter, barnasIdenter)
+        val hentsakerResponse = klient.hentSaker(søkersIdenter, barnasIdenter)
+        val hentstønaderResponse = klient.hentStønader(søkersIdenter, barnasIdenter)
 
         wireMockServer.verify(
             anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(
@@ -140,7 +140,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
 
         val infotrygdSøkRequest = InfotrygdSøkRequest(søkersIdenter, emptyList())
 
-        val finnesIkkeHosInfotrygd = client.harLøpendeSakIInfotrygd(søkersIdenter, emptyList())
+        val finnesIkkeHosInfotrygd = klient.harLøpendeSakIInfotrygd(søkersIdenter, emptyList())
 
         wireMockServer.verify(
             anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(
@@ -159,7 +159,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(post(løpendeBarnetrygdURL).willReturn(aResponse().withStatus(401)))
 
         assertThrows<HttpClientErrorException> {
-            client.harLøpendeSakIInfotrygd(søkersIdenter, barnasIdenter)
+            klient.harLøpendeSakIInfotrygd(søkersIdenter, barnasIdenter)
         }
     }
 
@@ -167,12 +167,12 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
     fun `harNyligSendtBrevFor skal returnerer true for personIdent`() {
         wireMockServer.stubFor(
             post(brevURL).willReturn(
-                okJson(objectMapper.writeValueAsString(InfotrygdBarnetrygdClient.SendtBrevResponse(true, emptyList()))),
+                okJson(objectMapper.writeValueAsString(InfotrygdBarnetrygdKlient.SendtBrevResponse(true, emptyList()))),
             ),
         )
 
         val harNyligSendtBrev =
-            client.harNyligSendtBrevFor(
+            klient.harNyligSendtBrevFor(
                 søkersIdenter,
                 listOf(InfotrygdBrevkode.BREV_BATCH_INNVILGET_SMÅBARNSTILLEGG),
             )

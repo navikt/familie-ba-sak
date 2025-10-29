@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -43,7 +43,7 @@ class PensjonService(
     private val personidentService: PersonidentService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val taskRepository: TaskRepositoryWrapper,
-    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    private val infotrygdBarnetrygdKlient: InfotrygdBarnetrygdKlient,
     private val envService: EnvService,
     private val featureToggleService: FeatureToggleService,
 ) {
@@ -116,7 +116,7 @@ class PensjonService(
         val barnetrygdFraRelaterteSaker = mutableListOf<BarnetrygdTilPensjon>()
 
         personidenter.forEach { ident ->
-            infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(ident, fraDato).fagsaker.forEach {
+            infotrygdBarnetrygdKlient.hentBarnetrygdTilPensjon(ident, fraDato).fagsaker.forEach {
                 if (personidenter.contains(it.fagsakEiersIdent)) {
                     allePerioderTilhørendeAktør.addAll(it.barnetrygdPerioder.maskerPersonidenteneIPreprod(barnFnr))
                 } else if (!envService.erPreprod()) { // tar ikke med relaterte saker i test fra Q2 i denne omgang. Må i så fall maskeres
@@ -134,7 +134,7 @@ class PensjonService(
     private fun hentBarnetrygdTilPensjonFraInfotrygdQ(
         personIdent: String,
         fraDato: LocalDate,
-    ): List<BarnetrygdTilPensjon> = infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(personIdent, fraDato).fagsaker
+    ): List<BarnetrygdTilPensjon> = infotrygdBarnetrygdKlient.hentBarnetrygdTilPensjon(personIdent, fraDato).fagsaker
 
     private fun hentBarnetrygdTilPensjon(
         fagsak: Fagsak,
@@ -198,7 +198,7 @@ class PensjonService(
         require(envService.erPreprod())
         return when {
             Random.nextBoolean() -> {
-                infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år).random()
+                infotrygdBarnetrygdKlient.hentPersonerMedBarnetrygdTilPensjon(år).random()
             }
 
             else -> null

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class InfotrygdController(
-    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    private val infotrygdBarnetrygdKlient: InfotrygdBarnetrygdKlient,
     private val personidentService: PersonidentService,
     private val infotrygdService: InfotrygdService,
 ) {

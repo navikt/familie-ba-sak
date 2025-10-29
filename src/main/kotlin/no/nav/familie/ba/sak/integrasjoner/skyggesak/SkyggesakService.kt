@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.skyggesak
 
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.log.mdc.MDCConstants
@@ -17,7 +17,7 @@ import java.util.UUID
 class SkyggesakService(
     private val skyggesakRepository: SkyggesakRepository,
     val fagsakRepository: FagsakRepository,
-    val integrasjonClient: IntegrasjonClient,
+    val integrasjonKlient: IntegrasjonKlient,
 ) {
     @Transactional
     fun sendSkyggesaker() {
@@ -28,7 +28,7 @@ class SkyggesakService(
                 MDC.put(MDCConstants.MDC_CALL_ID, UUID.randomUUID().toString())
                 val fagsak = fagsakRepository.finnFagsak(skyggesak.fagsakId)!!
                 logger.info("Oppretter skyggesak for fagsak ${fagsak.id}")
-                integrasjonClient.opprettSkyggesak(fagsak.aktør, fagsak.id)
+                integrasjonKlient.opprettSkyggesak(fagsak.aktør, fagsak.id)
                 skyggesakRepository.save(skyggesak.copy(sendtTidspunkt = LocalDateTime.now()))
             } catch (e: Exception) {
                 logger.warn("Kunne ikke opprette skyggesak for fagsak ${skyggesak.fagsakId}")

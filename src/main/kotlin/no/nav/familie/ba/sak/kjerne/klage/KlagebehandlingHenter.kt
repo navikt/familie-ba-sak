@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component
 
 @Component
 class KlagebehandlingHenter(
-    private val klageClient: KlageClient,
+    private val klageKlient: KlageKlient,
 ) {
     fun hentKlagebehandlingerPåFagsak(fagsakId: Long): List<KlagebehandlingDto> {
-        val klagerPåFagsak = klageClient.hentKlagebehandlinger(fagsakId)
+        val klagerPåFagsak = klageKlient.hentKlagebehandlinger(fagsakId)
         return klagerPåFagsak.map { it.brukVedtaksdatoFraKlageinstansHvisOversendt() }
     }
 

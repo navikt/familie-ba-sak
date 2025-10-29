@@ -32,8 +32,6 @@ data class Adresse(
 
     fun erFomEtterTom() = gyldigFraOgMed != null && gyldigTilOgMed != null && gyldigFraOgMed.isAfter(gyldigTilOgMed)
 
-    fun erOpphørt() = folkeregistermetadata?.opphoerstidspunkt != null
-
     fun overlapperMedDato(dato: LocalDate): Boolean {
         val harGyldigFraOgMed = gyldigFraOgMed == null || gyldigFraOgMed.isSameOrBefore(dato)
         val harGyldigTilOgMed = gyldigTilOgMed == null || gyldigTilOgMed.isSameOrAfter(dato)

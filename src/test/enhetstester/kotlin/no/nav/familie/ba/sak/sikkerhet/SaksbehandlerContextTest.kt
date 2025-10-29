@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -15,10 +15,10 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class SaksbehandlerContextTest {
-    private val mockIntegrasjonClient = mockk<IntegrasjonClient>()
+    private val mockIntegrasjonKlient = mockk<IntegrasjonKlient>()
     private val kode6GruppeId = "kode6GruppeId"
 
-    private val saksbehandlerContext = SaksbehandlerContext(kode6GruppeId, mockIntegrasjonClient)
+    private val saksbehandlerContext = SaksbehandlerContext(kode6GruppeId, mockIntegrasjonKlient)
 
     @BeforeEach
     fun beforeEach() {
@@ -48,7 +48,7 @@ class SaksbehandlerContextTest {
         fun `skal returnere navn fra token dersom kall mot integrasjoner feiler`() {
             // Arrange
             every { SikkerhetContext.hentGrupper() } returns emptyList()
-            every { mockIntegrasjonClient.hentSaksbehandler(any()) } throws Exception()
+            every { mockIntegrasjonKlient.hentSaksbehandler(any()) } throws Exception()
             every { SikkerhetContext.hentSaksbehandlerNavn() } returns "Etternavn, Fornavn"
 
             // Act
@@ -74,7 +74,7 @@ class SaksbehandlerContextTest {
                 )
 
             every { SikkerhetContext.hentGrupper() } returns emptyList()
-            every { mockIntegrasjonClient.hentSaksbehandler(any()) } returns saksbehandler
+            every { mockIntegrasjonKlient.hentSaksbehandler(any()) } returns saksbehandler
 
             // Act
             val saksbehandlerSignatur = saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
@@ -82,7 +82,7 @@ class SaksbehandlerContextTest {
             // Assert
             assertThat(saksbehandlerSignatur).isEqualTo("fornavn etternavn")
 
-            verify(exactly = 1) { mockIntegrasjonClient.hentSaksbehandler(any()) }
+            verify(exactly = 1) { mockIntegrasjonKlient.hentSaksbehandler(any()) }
         }
     }
 }

@@ -6,11 +6,11 @@ import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Ansettelsesperiode
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
@@ -30,11 +30,11 @@ import java.time.LocalDate
 class PreutfyllLovligOppholdServiceTest {
     @Nested
     inner class GenererLovligOppholdVilkårResultatTest {
-        private val pdlRestClient: SystemOnlyPdlRestClient = mockk(relaxed = true)
+        private val pdlRestKlient: SystemOnlyPdlRestKlient = mockk(relaxed = true)
         private val statsborgerskapService = mockk<StatsborgerskapService>(relaxed = true)
-        private val systemOnlyIntegrasjonClient: SystemOnlyIntegrasjonClient = mockk(relaxed = true)
+        private val systemOnlyIntegrasjonKlient: SystemOnlyIntegrasjonKlient = mockk(relaxed = true)
         private val persongrunnlagService: PersongrunnlagService = mockk(relaxed = true)
-        private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService = PreutfyllLovligOppholdService(pdlRestClient, statsborgerskapService, systemOnlyIntegrasjonClient, persongrunnlagService)
+        private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService = PreutfyllLovligOppholdService(pdlRestKlient, statsborgerskapService, systemOnlyIntegrasjonKlient, persongrunnlagService)
 
         @Test
         fun `skal preutfylle oppfylt lovlig opphold vilkår basert på norsk eller nordisk statsborgerskap`() {
@@ -54,7 +54,7 @@ class PreutfyllLovligOppholdServiceTest {
                     },
                 )
 
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+            every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
@@ -71,7 +71,7 @@ class PreutfyllLovligOppholdServiceTest {
                 }
             }
 
-            every { pdlRestClient.hentStatsborgerskap(aktør, historikk = true) } returns
+            every { pdlRestKlient.hentStatsborgerskap(aktør, historikk = true) } returns
                 listOf(
                     Statsborgerskap("SWE", LocalDate.now().minusYears(10), null, null),
                 )
@@ -106,13 +106,13 @@ class PreutfyllLovligOppholdServiceTest {
                     },
                 )
 
-            every { pdlRestClient.hentStatsborgerskap(aktør, historikk = true) } returns
+            every { pdlRestKlient.hentStatsborgerskap(aktør, historikk = true) } returns
                 listOf(
                     Statsborgerskap("ES", LocalDate.now().minusYears(5), LocalDate.now().minusYears(2), null),
                     Statsborgerskap("NOR", LocalDate.now().minusYears(2).plusDays(1), null, null),
                 )
 
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+            every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
@@ -161,13 +161,13 @@ class PreutfyllLovligOppholdServiceTest {
                     },
                 )
 
-            every { pdlRestClient.hentStatsborgerskap(aktør, historikk = true) } returns
+            every { pdlRestKlient.hentStatsborgerskap(aktør, historikk = true) } returns
                 listOf(
                     Statsborgerskap("ES", LocalDate.now().minusYears(10), LocalDate.now().minusYears(5), null),
                     Statsborgerskap("NOR", LocalDate.now().minusYears(5).plusDays(1), null, null),
                 )
 
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+            every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
@@ -221,12 +221,12 @@ class PreutfyllLovligOppholdServiceTest {
                     },
                 )
 
-            every { pdlRestClient.hentStatsborgerskap(aktør, historikk = true) } returns
+            every { pdlRestKlient.hentStatsborgerskap(aktør, historikk = true) } returns
                 listOf(
                     Statsborgerskap("SWE", null, null, null),
                 )
 
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+            every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
@@ -275,12 +275,12 @@ class PreutfyllLovligOppholdServiceTest {
                     },
                 )
 
-            every { pdlRestClient.hentStatsborgerskap(aktør, historikk = true) } returns
+            every { pdlRestKlient.hentStatsborgerskap(aktør, historikk = true) } returns
                 listOf(
                     Statsborgerskap("NOR", LocalDate.now().minusYears(10), null, null),
                 )
 
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+            every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
@@ -329,12 +329,12 @@ class PreutfyllLovligOppholdServiceTest {
                     },
                 )
 
-            every { pdlRestClient.hentStatsborgerskap(aktør, historikk = true) } returns
+            every { pdlRestKlient.hentStatsborgerskap(aktør, historikk = true) } returns
                 listOf(
                     Statsborgerskap("BE", LocalDate.now().minusYears(20), null, null),
                 )
 
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+            every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
@@ -353,7 +353,7 @@ class PreutfyllLovligOppholdServiceTest {
 
             every { statsborgerskapService.hentSterkesteMedlemskap(Statsborgerskap("BE", LocalDate.now().minusYears(20), null, null)) } returns Medlemskap.EØS
 
-            every { systemOnlyIntegrasjonClient.hentArbeidsforholdMedSystembruker(any(), LocalDate.now().minusYears(10)) } returns
+            every { systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(any(), LocalDate.now().minusYears(10)) } returns
                 listOf(Arbeidsforhold(arbeidsgiver = null, ansettelsesperiode = Ansettelsesperiode(Periode(LocalDate.now().minusYears(10), null))))
 
             // Act
@@ -388,12 +388,12 @@ class PreutfyllLovligOppholdServiceTest {
                     },
                 )
 
-            every { pdlRestClient.hentStatsborgerskap(aktør, historikk = true) } returns
+            every { pdlRestKlient.hentStatsborgerskap(aktør, historikk = true) } returns
                 listOf(
                     Statsborgerskap("BE", LocalDate.now().minusYears(20), null, null),
                 )
 
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+            every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
@@ -412,7 +412,7 @@ class PreutfyllLovligOppholdServiceTest {
 
             every { statsborgerskapService.hentSterkesteMedlemskap(Statsborgerskap("BE", LocalDate.now().minusYears(20), null, null)) } returns Medlemskap.EØS
 
-            every { systemOnlyIntegrasjonClient.hentArbeidsforholdMedSystembruker(any(), LocalDate.now().minusYears(10)) } returns
+            every { systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(any(), LocalDate.now().minusYears(10)) } returns
                 listOf(Arbeidsforhold(arbeidsgiver = null, ansettelsesperiode = Ansettelsesperiode(Periode(LocalDate.now().minusYears(10), null))))
 
             // Act
@@ -448,10 +448,10 @@ class PreutfyllLovligOppholdServiceTest {
                     },
                 )
 
-            every { pdlRestClient.hentOppholdstillatelse(aktør, true) } returns
+            every { pdlRestKlient.hentOppholdstillatelse(aktør, true) } returns
                 listOf(Opphold(OPPHOLDSTILLATELSE.PERMANENT, null, null))
 
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+            every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
@@ -500,10 +500,10 @@ class PreutfyllLovligOppholdServiceTest {
                     },
                 )
 
-            every { pdlRestClient.hentOppholdstillatelse(aktør, true) } returns
+            every { pdlRestKlient.hentOppholdstillatelse(aktør, true) } returns
                 listOf(Opphold(OPPHOLDSTILLATELSE.MIDLERTIDIG, LocalDate.now().minusYears(5), LocalDate.now().plusYears(5)))
 
-            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+            every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(

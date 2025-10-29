@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivAktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -31,7 +31,7 @@ class PatchMergetIdentTask(
     private val personidentService: PersonidentService,
     private val aktørMergeLoggRepository: AktørMergeLoggRepository,
     private val persongrunnlagService: PersongrunnlagService,
-    private val pdlIdentRestClient: PdlIdentRestClient,
+    private val pdlIdentRestKlient: PdlIdentRestKlient,
     private val aktørIdRepository: AktørIdRepository,
     private val personidentRepository: PersonidentRepository,
 ) : AsyncTaskStep {
@@ -55,7 +55,7 @@ class PatchMergetIdentTask(
         if (aktørerForIdentSomSkalPatches.size > 1) throw Feil("Fant flere aktører for ident som skal patches. fagsak=${dto.fagsakId} aktører=$aktørerForIdentSomSkalPatches")
         val aktørSomSkalPatches = aktørerForIdentSomSkalPatches.firstOrNull() ?: throw Feil("Fant ikke ident som skal patches på fagsak=${dto.fagsakId} aktører=$aktørerForIdentSomSkalPatches")
 
-        val identer = pdlIdentRestClient.hentIdenter(personIdent = dto.nyIdent.ident, historikk = true)
+        val identer = pdlIdentRestKlient.hentIdenter(personIdent = dto.nyIdent.ident, historikk = true)
         if (dto.skalSjekkeAtGammelIdentErHistoriskAvNyIdent) {
             if (identer.none { it.ident == dto.gammelIdent.ident && it.historisk }) {
                 throw Feil("Ident som skal patches finnes ikke som historisk ident av ny ident")

@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalføringService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DataForManuellJournalføring
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
@@ -38,7 +38,7 @@ class OppgaveController(
     private val oppgaveService: OppgaveService,
     private val fagsakService: FagsakService,
     private val personidentService: PersonidentService,
-    private val integrasjonClient: IntegrasjonClient,
+    private val integrasjonKlient: IntegrasjonKlient,
     private val personopplysningerService: PersonopplysningerService,
     private val tilgangService: TilgangService,
     private val innkommendeJournalføringService: InnkommendeJournalføringService,
@@ -106,7 +106,7 @@ class OppgaveController(
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val aktør = oppgave.aktoerId?.let { personidentService.hentAktør(it) }
 
-        val journalpost = if (oppgave.journalpostId != null) integrasjonClient.hentJournalpost(oppgave.journalpostId!!) else throw Feil("Oppgave har ingen journalpost knyttet til seg")
+        val journalpost = if (oppgave.journalpostId != null) integrasjonKlient.hentJournalpost(oppgave.journalpostId!!) else throw Feil("Oppgave har ingen journalpost knyttet til seg")
 
         val minimalFagsak = if (aktør != null) fagsakService.hentMinimalFagsakForPerson(aktør).data else null
 

@@ -10,9 +10,13 @@ import java.time.LocalDateTime
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
-class IngenEndringIBosattIRiketVilkårFeil(
+class AutovedtakSkalIkkeGjennomføresFeil(
     message: String,
 ) : RuntimeException(message)
+
+class AutovedtakMåBehandlesManueltFeil(
+    val beskrivelse: String,
+) : RuntimeException(beskrivelse)
 
 open class Feil(
     message: String,

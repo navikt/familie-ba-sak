@@ -6,17 +6,17 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class LogJournalpostIdForFagsakTaskTest {
-    val mockIntegrasjonClient = mockk<IntegrasjonClient>()
+    val mockIntegrasjonKlient = mockk<IntegrasjonKlient>()
     val mockFagsakRepository = mockk<FagsakRepository>()
 
-    val logJournalpostIdForFagsak = LogJournalpostIdForFagsakTask(mockIntegrasjonClient, mockFagsakRepository)
+    val logJournalpostIdForFagsak = LogJournalpostIdForFagsakTask(mockIntegrasjonKlient, mockFagsakRepository)
 
     @Test
     fun `Skal kaste feil dersom fagsak med id ikke finnes`() {
@@ -26,7 +26,7 @@ internal class LogJournalpostIdForFagsakTaskTest {
 
         every { mockFagsakRepository.finnFagsak(fagsak.id) } returns null
 
-        every { mockIntegrasjonClient.hentJournalposterForBruker(any()) } returns
+        every { mockIntegrasjonKlient.hentJournalposterForBruker(any()) } returns
             listOf(
                 lagTestJournalpost(
                     personIdent = "12345",
@@ -53,7 +53,7 @@ internal class LogJournalpostIdForFagsakTaskTest {
 
         every { mockFagsakRepository.finnFagsak(fagsak.id) } returns fagsak
 
-        every { mockIntegrasjonClient.hentJournalposterForBruker(any()) } returns
+        every { mockIntegrasjonKlient.hentJournalposterForBruker(any()) } returns
             listOf(
                 lagTestJournalpost(
                     personIdent = "12345",
@@ -67,6 +67,6 @@ internal class LogJournalpostIdForFagsakTaskTest {
         logJournalpostIdForFagsak.doTask(task)
 
         // Assert
-        verify(exactly = 1) { mockIntegrasjonClient.hentJournalposterForBruker(any()) }
+        verify(exactly = 1) { mockIntegrasjonKlient.hentJournalposterForBruker(any()) }
     }
 }

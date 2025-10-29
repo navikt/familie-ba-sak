@@ -4,8 +4,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalføringService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -27,7 +27,7 @@ class OppgaveControllerTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val personidentService = mockk<PersonidentService>()
-    private val integrasjonClient = mockk<IntegrasjonClient>()
+    private val integrasjonKlient = mockk<IntegrasjonKlient>()
     private val fagsakService = mockk<FagsakService>()
     private val innkommendeJournalføringService = mockk<InnkommendeJournalføringService>()
     private val tilgangService = mockk<TilgangService>()
@@ -37,7 +37,7 @@ class OppgaveControllerTest {
             oppgaveService = oppgaveService,
             fagsakService = fagsakService,
             personidentService = personidentService,
-            integrasjonClient = integrasjonClient,
+            integrasjonKlient = integrasjonKlient,
             personopplysningerService = personopplysningerService,
             tilgangService = tilgangService,
             innkommendeJournalføringService = innkommendeJournalføringService,

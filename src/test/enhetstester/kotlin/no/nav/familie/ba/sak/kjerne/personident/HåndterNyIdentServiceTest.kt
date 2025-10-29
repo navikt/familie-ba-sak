@@ -15,8 +15,8 @@ import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestKlient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -45,7 +45,7 @@ internal class HåndterNyIdentServiceTest {
     private val opprettTaskService: OpprettTaskService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
-    private val pdlRestClient: PdlRestClient = mockk()
+    private val pdlRestKlient: PdlRestKlient = mockk()
 
     @Nested
     inner class OpprettMergeIdentTaskTest {
@@ -57,7 +57,7 @@ internal class HåndterNyIdentServiceTest {
                 opprettTaskService = opprettTaskService,
                 persongrunnlagService = persongrunnlagService,
                 behandlinghentOgPersisterService = behandlingHentOgPersisterService,
-                pdlRestClient = pdlRestClient,
+                pdlRestKlient = pdlRestKlient,
                 personIdentService = personIdentService,
             )
 
@@ -130,7 +130,7 @@ internal class HåndterNyIdentServiceTest {
         @Test
         fun `håndterNyIdent kaster Feil når fødselsdato er endret for identer`() {
             // arrange
-            every { pdlRestClient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = nyFødselsdato)
+            every { pdlRestKlient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = nyFødselsdato)
 
             // act & assert
             val feil =
@@ -152,7 +152,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
         @Test
         fun `håndterNyIdent kaster ikke Feil når fødselsdato er endret innenfor samme måned`() {
             // arrange
-            every { pdlRestClient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = gammelFødselsdato.sisteDagIMåned())
+            every { pdlRestKlient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = gammelFødselsdato.sisteDagIMåned())
 
             // act & assert
             assertDoesNotThrow {
@@ -163,7 +163,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
         @Test
         fun `håndterNyIdent kaster ikke Feil når fødselsdato er endret for søker`() {
             // arrange
-            every { pdlRestClient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = nyFødselsdato)
+            every { pdlRestKlient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = nyFødselsdato)
             every { fagsakService.hentFagsakerPåPerson(any()) } returns
                 listOf(
                     Fagsak(id = 1, aktør = gammelAktør),
@@ -178,7 +178,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
         @Test
         fun `håndterNyIdent kaster Feil når fødselsdato er endret for søker i en enslig-mindreårig-sak`() {
             // arrange
-            every { pdlRestClient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = nyFødselsdato)
+            every { pdlRestKlient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = nyFødselsdato)
             every { fagsakService.hentFagsakerPåPerson(any()) } returns
                 listOf(
                     Fagsak(id = 1, aktør = gammelAktør, type = FagsakType.BARN_ENSLIG_MINDREÅRIG),
@@ -196,7 +196,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
         @Test
         fun `håndterNyIdent lager en PatchMergetIdent task ved endret fødselsdato, hvis det ikke er en vedtatt behandling`() {
             // arrange
-            every { pdlRestClient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = nyFødselsdato)
+            every { pdlRestKlient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = nyFødselsdato)
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns null
 
             // act & assert
@@ -209,7 +209,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
         @Test
         fun `håndterNyIdent lager en PatchMergetIdent task ved endret fødselsdato, hvis aktør ikke er med i forrige vedtatte behandling`() {
             // arrange
-            every { pdlRestClient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = nyFødselsdato)
+            every { pdlRestKlient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = nyFødselsdato)
             every { persongrunnlagService.hentAktiv(any()) } returns PersonopplysningGrunnlag(behandlingId = gammelBehandling.id)
 
             // act & assert
@@ -222,7 +222,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
         @Test
         fun `håndterNyIdent lager en PatchMergetIdent task hvis fødselsdato er uendret`() {
             // arrange
-            every { pdlRestClient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = gammelFødselsdato)
+            every { pdlRestKlient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = gammelFødselsdato)
 
             // act & assert
             val aktør = håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
@@ -234,7 +234,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
 
     @Nested
     inner class HåndterNyIdentTest {
-        private val pdlIdentRestClient: PdlIdentRestClient = mockk(relaxed = true)
+        private val pdlIdentRestKlient: PdlIdentRestKlient = mockk(relaxed = true)
         private val personidentRepository: PersonidentRepository = mockk()
         private val taskRepositoryMock = mockk<TaskRepositoryWrapper>(relaxed = true)
 
@@ -249,7 +249,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
             PersonidentService(
                 personidentRepository = personidentRepository,
                 aktørIdRepository = aktørIdRepository,
-                pdlIdentRestClient = pdlIdentRestClient,
+                pdlIdentRestKlient = pdlIdentRestKlient,
                 taskRepository = taskRepositoryMock,
             )
 
@@ -260,7 +260,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
                 opprettTaskService = opprettTaskService,
                 persongrunnlagService = persongrunnlagService,
                 behandlinghentOgPersisterService = behandlingHentOgPersisterService,
-                pdlRestClient = pdlRestClient,
+                pdlRestKlient = pdlRestKlient,
                 personIdentService = personidentService,
             )
 
@@ -281,13 +281,13 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
                 aktørSlot.captured
             }
 
-            every { pdlIdentRestClient.hentIdenter(personidentAktiv, false) } answers {
+            every { pdlIdentRestKlient.hentIdenter(personidentAktiv, false) } answers {
                 listOf(
                     IdentInformasjon(aktørIdAktiv.aktørId, false, "AKTORID"),
                     IdentInformasjon(personidentAktiv, false, "FOLKEREGISTERIDENT"),
                 )
             }
-            every { pdlIdentRestClient.hentIdenter(personidentHistorisk, false) } answers {
+            every { pdlIdentRestKlient.hentIdenter(personidentHistorisk, false) } answers {
                 listOf(
                     IdentInformasjon(aktørIdAktiv.aktørId, false, "AKTORID"),
                     IdentInformasjon(personidentAktiv, false, "FOLKEREGISTERIDENT"),
@@ -305,7 +305,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
             val fødselsdato = LocalDate.now().minusYears(4)
 
             every {
-                pdlRestClient.hentPerson(personIdentSomSkalLeggesTil, PersonInfoQuery.ENKEL)
+                pdlRestKlient.hentPerson(personIdentSomSkalLeggesTil, PersonInfoQuery.ENKEL)
             } returns PersonInfo(fødselsdato = fødselsdato)
 
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling()
@@ -323,14 +323,14 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
                         ),
                 )
 
-            every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
+            every { pdlIdentRestKlient.hentIdenter(personIdentSomFinnes, false) } answers {
                 listOf(
                     IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
                     IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
                 )
             }
 
-            every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, true) } answers {
+            every { pdlIdentRestKlient.hentIdenter(personIdentSomSkalLeggesTil, true) } answers {
                 listOf(
                     IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
                     IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
@@ -383,7 +383,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
             val fødselsdato = LocalDate.now().minusYears(4)
 
             every {
-                pdlRestClient.hentPerson(personIdentSomSkalLeggesTil, PersonInfoQuery.ENKEL)
+                pdlRestKlient.hentPerson(personIdentSomSkalLeggesTil, PersonInfoQuery.ENKEL)
             } returns PersonInfo(fødselsdato = fødselsdato)
 
             every { fagsakService.hentFagsakerPåPerson(any()) } returns emptyList()
@@ -404,14 +404,14 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
                         ),
                 )
 
-            every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
+            every { pdlIdentRestKlient.hentIdenter(personIdentSomFinnes, false) } answers {
                 listOf(
                     IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
                     IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
                 )
             }
 
-            every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, true) } answers {
+            every { pdlIdentRestKlient.hentIdenter(personIdentSomSkalLeggesTil, true) } answers {
                 listOf(
                     IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
                     IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
@@ -464,7 +464,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
             val fødselsdato = LocalDate.now().minusYears(4)
 
             every {
-                pdlRestClient.hentPerson(personIdentSomSkalLeggesTil, PersonInfoQuery.ENKEL)
+                pdlRestKlient.hentPerson(personIdentSomSkalLeggesTil, PersonInfoQuery.ENKEL)
             } returns PersonInfo(fødselsdato = fødselsdato.minusMonths(2))
 
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling()
@@ -482,7 +482,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
                         ),
                 )
 
-            every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, true) } answers {
+            every { pdlIdentRestKlient.hentIdenter(personIdentSomSkalLeggesTil, true) } answers {
                 listOf(
                     IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
                     IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
@@ -512,7 +512,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
             val personIdentSomFinnes = randomFnr()
             val aktørIdSomFinnes = lagAktør(personIdentSomFinnes)
 
-            every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, true) } answers {
+            every { pdlIdentRestKlient.hentIdenter(personIdentSomFinnes, true) } answers {
                 listOf(
                     IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
                     IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
@@ -544,7 +544,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
 
             secureLogger.info("gammelIdent=$fnrIdent1,${aktørIdent1.aktørId}   nyIdent=$aktivFnrIdent2,${aktivAktørIdent2.aktørId}")
 
-            every { pdlIdentRestClient.hentIdenter(aktivFnrIdent2, true) } answers {
+            every { pdlIdentRestKlient.hentIdenter(aktivFnrIdent2, true) } answers {
                 listOf(
                     IdentInformasjon(aktivAktørIdent2.aktørId, false, "AKTORID"),
                     IdentInformasjon(aktivFnrIdent2, false, "FOLKEREGISTERIDENT"),

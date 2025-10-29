@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -169,7 +169,7 @@ fun ManueltBrevRequest.byggMottakerdataFraBehandling(
 fun ManueltBrevRequest.byggMottakerdataFraFagsak(
     fagsak: Fagsak,
     arbeidsfordelingService: ArbeidsfordelingService,
-    pdlRestClient: PdlRestClient,
+    pdlRestKlient: PdlRestKlient,
 ): ManueltBrevRequest {
     val enhet =
         arbeidsfordelingService
@@ -184,7 +184,7 @@ fun ManueltBrevRequest.byggMottakerdataFraFagsak(
         FagsakType.INSTITUSJON, FagsakType.SKJERMET_BARN -> {
             val aktør = fagsak.skjermetBarnSøker?.aktør ?: fagsak.aktør
 
-            val personNavn = pdlRestClient.hentPerson(aktør, PersonInfoQuery.ENKEL).navn ?: throw FunksjonellFeil("Finner ikke navn på person i PDL")
+            val personNavn = pdlRestKlient.hentPerson(aktør, PersonInfoQuery.ENKEL).navn ?: throw FunksjonellFeil("Finner ikke navn på person i PDL")
 
             this.copy(
                 enhet = enhet,

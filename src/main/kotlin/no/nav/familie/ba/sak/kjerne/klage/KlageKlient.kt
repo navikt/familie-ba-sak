@@ -14,7 +14,7 @@ import java.net.URI
 import java.util.UUID
 
 @Component
-class KlageClient(
+class KlageKlient(
     @Qualifier("jwtBearer") restOperations: RestOperations,
     @Value("\${FAMILIE_KLAGE_URL}") private val familieKlageUri: URI,
 ) : AbstractRestClient(restOperations, "integrasjon") {

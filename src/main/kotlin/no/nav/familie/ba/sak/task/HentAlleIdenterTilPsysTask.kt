@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.pensjon.HentAlleIdenterTilPsysResponseDTO
 import no.nav.familie.ba.sak.ekstern.pensjon.Meldingstype
 import no.nav.familie.ba.sak.ekstern.pensjon.Meldingstype.DATA
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdKlient
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask.Companion.TASK_STEP_TYPE
@@ -30,7 +30,7 @@ import java.util.UUID
 class HentAlleIdenterTilPsysTask(
     private val kafkaProducer: KafkaProducer,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    private val infotrygdBarnetrygdKlient: InfotrygdBarnetrygdKlient,
     private val envService: EnvService,
     private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
@@ -67,7 +67,7 @@ class HentAlleIdenterTilPsysTask(
         val identerFraInfotrygd =
             when {
                 envService.erPreprod() && !featureToggleService.isEnabled(FeatureToggle.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD) -> emptyList()
-                else -> infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år)
+                else -> infotrygdBarnetrygdKlient.hentPersonerMedBarnetrygdTilPensjon(år)
             }
         logger.info("Ferdig med å hente alle identer fra Infotrygd for request $requestId")
 

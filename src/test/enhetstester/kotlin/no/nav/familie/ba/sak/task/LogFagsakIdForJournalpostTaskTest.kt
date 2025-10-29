@@ -5,15 +5,15 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class LogFagsakIdForJournalpostTaskTest {
-    val mockIntegrasjonClient = mockk<IntegrasjonClient>()
+    val mockIntegrasjonKlient = mockk<IntegrasjonKlient>()
 
-    val logFagsakIdForJournalpostTask = LogFagsakIdForJournalpostTask(mockIntegrasjonClient)
+    val logFagsakIdForJournalpostTask = LogFagsakIdForJournalpostTask(mockIntegrasjonKlient)
 
     @Test
     fun `Skal hente journalpost og logge ut sak data`() {
@@ -28,13 +28,13 @@ internal class LogFagsakIdForJournalpostTaskTest {
                 kanal = "NAV_NO",
             )
 
-        every { mockIntegrasjonClient.hentJournalpost("12345") } returns journalpost
+        every { mockIntegrasjonKlient.hentJournalpost("12345") } returns journalpost
 
         // Act
         logFagsakIdForJournalpostTask.doTask(task)
 
         // Assert
-        verify(exactly = 1) { mockIntegrasjonClient.hentJournalpost("12345") }
+        verify(exactly = 1) { mockIntegrasjonKlient.hentJournalpost("12345") }
     }
 
     @Test
@@ -51,7 +51,7 @@ internal class LogFagsakIdForJournalpostTaskTest {
                 sak = null,
             )
 
-        every { mockIntegrasjonClient.hentJournalpost("12345") } returns journalpost
+        every { mockIntegrasjonKlient.hentJournalpost("12345") } returns journalpost
 
         // Act && Assert
 
@@ -63,6 +63,6 @@ internal class LogFagsakIdForJournalpostTaskTest {
         assertThat(feilmelding).contains("Fant ikke fagsak informasjon i journalpost 12345")
 
         // Assert
-        verify(exactly = 1) { mockIntegrasjonClient.hentJournalpost("12345") }
+        verify(exactly = 1) { mockIntegrasjonKlient.hentJournalpost("12345") }
     }
 }

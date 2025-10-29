@@ -7,7 +7,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPersonEnkel
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -34,7 +34,7 @@ class ArbeidsfordelingServiceTest {
     private val personidentService: PersonidentService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val loggService: LoggService = mockk()
-    private val integrasjonClient: IntegrasjonClient = mockk()
+    private val integrasjonKlient: IntegrasjonKlient = mockk()
     private val personopplysningerService: PersonopplysningerService = mockk()
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher = mockk()
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService = mockk()
@@ -46,7 +46,7 @@ class ArbeidsfordelingServiceTest {
             personidentService = personidentService,
             oppgaveService = oppgaveService,
             loggService = loggService,
-            integrasjonClient = integrasjonClient,
+            integrasjonKlient = integrasjonKlient,
             personopplysningerService = personopplysningerService,
             saksstatistikkEventPublisher = saksstatistikkEventPublisher,
             tilpassArbeidsfordelingService = tilpassArbeidsfordelingService,
@@ -77,7 +77,7 @@ class ArbeidsfordelingServiceTest {
                     .finnSøkerOgBarnAktørerTilAktiv(behandling.id)
             } returns listOf(søker, barn)
 
-            every { integrasjonClient.hentBehandlendeEnhet(søker.aktør.aktivFødselsnummer()) } returns
+            every { integrasjonKlient.hentBehandlendeEnhet(søker.aktør.aktivFødselsnummer()) } returns
                 listOf(
                     arbeidsfordelingsenhet,
                 )

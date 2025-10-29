@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.lagOppholdsadresse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVegadresse
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøringRepository
@@ -35,7 +35,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
     private val svalbardtilleggKjøringRepository = mockk<SvalbardtilleggKjøringRepository>()
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val behandlingRepository = mockk<BehandlingRepository>()
-    private val pdlRestClient = mockk<SystemOnlyPdlRestClient>()
+    private val pdlRestKlient = mockk<SystemOnlyPdlRestKlient>()
 
     private val autovedtakSvalbardtilleggTaskOppretter =
         AutovedtakSvalbardtilleggTaskOppretter(
@@ -44,7 +44,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
             svalbardtilleggKjøringRepository = svalbardtilleggKjøringRepository,
             persongrunnlagService = persongrunnlagService,
             behandlingRepository = behandlingRepository,
-            pdlRestClient = pdlRestClient,
+            pdlRestKlient = pdlRestKlient,
         )
 
     @Nested
@@ -86,7 +86,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
             verify(exactly = 1) { svalbardtilleggKjøringRepository.saveAll(emptyList()) }
             verify(exactly = 1) { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) }
             verify(exactly = 1) { persongrunnlagService.hentAktivForBehandlinger(any()) }
-            verify(exactly = 0) { pdlRestClient.hentAdresserForPersoner(any()) }
+            verify(exactly = 0) { pdlRestKlient.hentAdresserForPersoner(any()) }
             verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(emptySet()) }
         }
 
@@ -130,7 +130,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                 )
             } returns mapOf(behandling1.id to persongrunnlag1, behandling2.id to persongrunnlag2)
 
-            every { pdlRestClient.hentAdresserForPersoner(any()) } returns
+            every { pdlRestKlient.hentAdresserForPersoner(any()) } returns
                 mapOf(
                     person1.aktør.aktivFødselsnummer() to
                         PdlAdresserPerson(
@@ -165,7 +165,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
             verify(exactly = 1) { svalbardtilleggKjøringRepository.saveAll(any<List<SvalbardtilleggKjøring>>()) }
             verify(exactly = 1) { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) }
             verify(exactly = 1) { persongrunnlagService.hentAktivForBehandlinger(listOf(behandling1.id, behandling2.id)) }
-            verify(exactly = 1) { pdlRestClient.hentAdresserForPersoner(any()) }
+            verify(exactly = 1) { pdlRestKlient.hentAdresserForPersoner(any()) }
             verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(fagsakIder) }
         }
 
@@ -196,7 +196,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
 
             every { persongrunnlagService.hentAktivForBehandlinger(listOf(behandling1.id)) } returns mapOf(behandling1.id to persongrunnlag1)
 
-            every { pdlRestClient.hentAdresserForPersoner(any()) } returns
+            every { pdlRestKlient.hentAdresserForPersoner(any()) } returns
                 mapOf(
                     person1.aktør.aktivFødselsnummer() to
                         PdlAdresserPerson(
@@ -231,7 +231,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
             verify(exactly = 1) { svalbardtilleggKjøringRepository.saveAll(any<List<SvalbardtilleggKjøring>>()) }
             verify(exactly = 1) { behandlingRepository.finnSisteIverksatteBehandlingForFagsakerAndKategori(fagsakIder) }
             verify(exactly = 1) { persongrunnlagService.hentAktivForBehandlinger(listOf(behandling1.id)) }
-            verify(exactly = 1) { pdlRestClient.hentAdresserForPersoner(any()) }
+            verify(exactly = 1) { pdlRestKlient.hentAdresserForPersoner(any()) }
             verify(exactly = 1) { opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(setOf(fagsak1.id)) }
         }
 
@@ -270,7 +270,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                 persongrunnlagService.hentAktivForBehandlinger(emptyList())
             } returns mapOf(eøsBehandling1.id to persongrunnlag1, eøsBehandling2.id to persongrunnlag2)
 
-            every { pdlRestClient.hentAdresserForPersoner(any()) } returns
+            every { pdlRestKlient.hentAdresserForPersoner(any()) } returns
                 mapOf(
                     person1.aktør.aktivFødselsnummer() to
                         PdlAdresserPerson(

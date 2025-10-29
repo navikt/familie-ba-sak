@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -36,7 +36,7 @@ class FagsakDeltagerServiceTest {
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val familieIntegrasjonerTilgangskontrollService = mockk<FamilieIntegrasjonerTilgangskontrollService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val integrasjonClient = mockk<IntegrasjonClient>()
+    private val integrasjonKlient = mockk<IntegrasjonKlient>()
     private val fagsakService = mockk<FagsakService>()
 
     private val fagsakDeltagerService =
@@ -48,7 +48,7 @@ class FagsakDeltagerServiceTest {
             personopplysningerService = personopplysningerService,
             familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            integrasjonClient = integrasjonClient,
+            integrasjonKlient = integrasjonKlient,
         )
 
     @Test
@@ -98,7 +98,7 @@ class FagsakDeltagerServiceTest {
         every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør) } returns personInfo
         every { fagsakRepository.finnFagsakerForAktør(aktør) } returns emptyList()
         every { personRepository.findByAktør(aktør) } returns emptyList()
-        every { integrasjonClient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
+        every { integrasjonKlient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
 
         // Act
         val resultat = fagsakDeltagerService.hentFagsakDeltagere(ident)
@@ -141,7 +141,7 @@ class FagsakDeltagerServiceTest {
         every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnAktør) } returns barnPersonInfo
         every { personRepository.findByAktør(barnAktør) } returns listOf()
         every {
-            integrasjonClient.sjekkErEgenAnsattBulk(match { it.containsAll(listOf(barnIdent, morIdent, farIdent)) })
+            integrasjonKlient.sjekkErEgenAnsattBulk(match { it.containsAll(listOf(barnIdent, morIdent, farIdent)) })
         } returns emptyMap()
         every { fagsakRepository.finnFagsakerForAktør(match { it in aktører }) } returns emptyList()
 
@@ -185,7 +185,7 @@ class FagsakDeltagerServiceTest {
         every { fagsakRepository.finnFagsakerForAktør(match { it in aktører }) } returns emptyList()
         every { personRepository.findByAktør(match { it in aktører }) } returns emptyList()
         every {
-            integrasjonClient.sjekkErEgenAnsattBulk(match { it.containsAll(listOf(barnIdent, morIdent, farIdent)) })
+            integrasjonKlient.sjekkErEgenAnsattBulk(match { it.containsAll(listOf(barnIdent, morIdent, farIdent)) })
         } returns mapOf(barnIdent to false, morIdent to true) // Far utelates
 
         // Act
@@ -293,7 +293,7 @@ class FagsakDeltagerServiceTest {
             familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(any())
         } returns null
         every { fagsakRepository.finnFagsakerForAktør(person.aktør) } returns emptyList()
-        every { integrasjonClient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
+        every { integrasjonKlient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
         every {
             personopplysningerService.hentPersoninfoEnkel(any())
         } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)

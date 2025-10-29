@@ -87,7 +87,7 @@ class VilkårService(
                 if (erEndringIAnnetFeltEnnBegrunnelse && begrunnelseErTomEllerAutomatiskUtfylt) {
                     throw FunksjonellFeil(
                         melding = "Begrunnelse må være fylt inn ved oppdatering av preutfylt vilkår",
-                        frontendFeilmelding = "Du har endret vilkåret, og må derfor fylle inn en begrunnelse.",
+                        frontendFeilmelding = "Du har endret vilkåret, og må derfor fjerne den automatiske begrunnelsen og fylle inn en ny begrunnelse.",
                     )
                 }
             }

@@ -14,12 +14,13 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinjeService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeDto
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggTaskOppretter
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.FinnEøsFagsakerMedBarnSomBorIFinnmarkNordTromsTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
@@ -53,6 +54,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
@@ -78,7 +80,7 @@ import kotlin.concurrent.thread
 @ProtectedWithClaims(issuer = "azuread")
 class ForvalterController(
     private val oppgaveRepository: OppgaveRepository,
-    private val integrasjonClient: IntegrasjonClient,
+    private val integrasjonKlient: IntegrasjonKlient,
     private val forvalterService: ForvalterService,
     private val ecbService: ECBService,
     private val testVerktøyService: TestVerktøyService,
@@ -140,7 +142,7 @@ class ForvalterController(
             handling = "Ferdigstill oppgave",
         )
 
-        integrasjonClient.ferdigstillOppgave(oppgaveId)
+        integrasjonKlient.ferdigstillOppgave(oppgaveId)
         oppgaveRepository.findByGsakId(oppgaveId.toString()).also {
             if (it != null && !it.erFerdigstilt) {
                 it.erFerdigstilt = true
@@ -619,6 +621,27 @@ class ForvalterController(
         return ResponseEntity.ok("Tasker for autovedtak av Svalbardtillegg opprettet")
     }
 
+    @PostMapping("/opprett-tasker-som-logger-eos-fagsaker-med-barn-finnmark")
+    fun opprettTaskerSomLoggerEøsFagsakerMedBarnIFinnmark(): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett tasker som logger EØS-fagsaker der minst ett barn bor i Finnmark",
+        )
+
+        val pageRequest = PageRequest.of(0, FinnEøsFagsakerMedBarnSomBorIFinnmarkNordTromsTask.PAGE_SIZE)
+        val sisteVedtatteBehandlingForLøpendeEøsFagsaker =
+            behandlingHentOgPersisterService.hentSisteVedtatteBehandlingerFraLøpendeEøsFagsaker(pageRequest)
+        val antallSider = sisteVedtatteBehandlingForLøpendeEøsFagsaker.totalPages
+
+        repeat(antallSider) { side ->
+            taskService.save(
+                FinnEøsFagsakerMedBarnSomBorIFinnmarkNordTromsTask.opprettTask(startside = side),
+            )
+        }
+
+        return ResponseEntity.ok("Opprettet $antallSider tasker for å finne barn i EØS-fagsaker som bor i Finnmark")
+    }
+
     @PostMapping("/aktiver-minside-for-ident")
     @Operation(
         summary = "Sender Kafka-melding om å aktivere MinSide for en ident",
@@ -681,7 +704,7 @@ class ForvalterController(
             fagsakService
                 .finnOrgnummerForLøpendeFagsaker()
                 .mapNotNull { orgNummer ->
-                    val organisasjon = integrasjonClient.hentOrganisasjon(orgNummer)
+                    val organisasjon = integrasjonKlient.hentOrganisasjon(orgNummer)
                     val kommunenummer = organisasjon.adresse?.kommunenummer
                     if (kommunenummer == null) {
                         logger.info("Kommunenummer er null for orgnummer ${organisasjon.organisasjonsnummer}")

@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
@@ -18,20 +18,20 @@ import org.springframework.web.client.RestClientResponseException
 
 internal class DokumentDistribueringServiceTest {
     private val taskService = mockk<TaskService>(relaxed = true)
-    private val integrasjonClient = mockk<IntegrasjonClient>()
+    private val integrasjonKlient = mockk<IntegrasjonKlient>()
     private val loggService = mockk<LoggService>(relaxed = true)
 
     private val dokumentDistribueringService =
         DokumentDistribueringService(
             taskService = taskService,
-            integrasjonClient = integrasjonClient,
+            integrasjonKlient = integrasjonKlient,
             loggService = loggService,
         )
 
     @Test
     fun `Skal kalle 'loggBrevIkkeDistribuertUkjentAdresse' ved 400 kode og 'Mottaker har ukjent adresse' melding`() {
         every {
-            integrasjonClient.distribuerBrev(any())
+            integrasjonKlient.distribuerBrev(any())
         } throws
             RessursException(
                 httpStatus = HttpStatus.BAD_REQUEST,
@@ -50,7 +50,7 @@ internal class DokumentDistribueringServiceTest {
     @Test
     fun `Skal kalle 'håndterMottakerDødIngenAdressePåBehandling' ved 410 Gone svar under distribuering`() {
         every {
-            integrasjonClient.distribuerBrev(any())
+            integrasjonKlient.distribuerBrev(any())
         } throws
             RessursException(
                 httpStatus = HttpStatus.GONE,
@@ -71,7 +71,7 @@ internal class DokumentDistribueringServiceTest {
     @Test
     fun `Skal hoppe over distribuering ved 409 Conflict mot dokdist`() {
         every {
-            integrasjonClient.distribuerBrev(any())
+            integrasjonKlient.distribuerBrev(any())
         } throws
             RessursException(
                 httpStatus = HttpStatus.CONFLICT,

@@ -38,7 +38,7 @@ class DokumentControllerTest(
             arbeidsfordelingService = mockk(relaxed = true),
             utvidetBehandlingService = mockk(relaxed = true),
             dokumentDistribueringService = mockk(relaxed = true),
-            pdlRestClient = mockk(relaxed = true),
+            pdlRestKlient = mockk(relaxed = true),
         )
 
     @Test

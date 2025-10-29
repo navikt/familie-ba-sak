@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.fake
 
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Ansettelsesperiode
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsgiver
@@ -9,8 +9,8 @@ import org.springframework.web.client.RestTemplate
 import java.net.URI
 import java.time.LocalDate
 
-class FakeSystemOnlyIntegrasjonClient :
-    SystemOnlyIntegrasjonClient(
+class FakeSystemOnlyIntegrasjonKlient :
+    SystemOnlyIntegrasjonKlient(
         integrasjonUri = URI("http://dummy-uri"),
         restOperations = RestTemplate(),
     ) {

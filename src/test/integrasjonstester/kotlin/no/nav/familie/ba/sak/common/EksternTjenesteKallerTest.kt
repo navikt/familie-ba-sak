@@ -4,8 +4,8 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagTestOppgave
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.ikkeTilgang
@@ -30,12 +30,12 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
     @Qualifier("jwtBearer")
     lateinit var restOperations: RestOperations
 
-    lateinit var integrasjonClient: IntegrasjonClient
+    lateinit var integrasjonKlient: IntegrasjonKlient
 
     @BeforeEach
     fun setUp() {
-        integrasjonClient =
-            IntegrasjonClient(
+        integrasjonKlient =
+            IntegrasjonKlient(
                 URI.create(wireMockServer.baseUrl() + "/api"),
                 restOperations,
             )
@@ -59,7 +59,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
             ),
         )
 
-        assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
+        assertThrows<IntegrasjonException> { integrasjonKlient.opprettOppgave(lagTestOppgave()) }
     }
 
     @Test
@@ -73,7 +73,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
             ),
         )
 
-        assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
+        assertThrows<IntegrasjonException> { integrasjonKlient.opprettOppgave(lagTestOppgave()) }
     }
 
     @Test
@@ -89,7 +89,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
         )
 
         val feil =
-            assertThrows<RessursException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
+            assertThrows<RessursException> { integrasjonKlient.opprettOppgave(lagTestOppgave()) }
         assertTrue(feil.httpStatus == HttpStatus.FORBIDDEN)
         assertTrue(feil.message?.contains("Ikke tilgang til å opprett oppgave") == true)
     }
@@ -104,6 +104,6 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
             ),
         )
 
-        assertThrows<HttpClientErrorException.NotFound> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
+        assertThrows<HttpClientErrorException.NotFound> { integrasjonKlient.opprettOppgave(lagTestOppgave()) }
     }
 }

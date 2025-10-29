@@ -27,6 +27,7 @@ class SimuleringUtilTest {
         beløp: Int = 5000,
         posteringstype: PosteringType = PosteringType.YTELSE,
         betalingstype: BetalingType = if (beløp >= 0) BetalingType.DEBIT else BetalingType.KREDIT,
+        fagsakId: Long = 0,
     ): List<ØkonomiSimuleringPostering> =
         MutableList(antallMåneder) { index ->
             ØkonomiSimuleringPostering(
@@ -39,6 +40,7 @@ class SimuleringUtilTest {
                 posteringType = posteringstype,
                 forfallsdato = måned.plusMonths(index.toLong()).atEndOfMonth(),
                 utenInntrekk = false,
+                fagsakId = fagsakId,
             )
         }
 

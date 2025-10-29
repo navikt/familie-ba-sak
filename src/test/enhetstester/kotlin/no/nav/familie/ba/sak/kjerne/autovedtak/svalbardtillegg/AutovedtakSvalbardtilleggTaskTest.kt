@@ -1,23 +1,30 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg
 
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
+import no.nav.familie.ba.sak.common.AutovedtakSkalIkkeGjennomføresFeil
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 internal class AutovedtakSvalbardtilleggTaskTest {
     private val autovedtakStegService = mockk<AutovedtakStegService>()
     private val fagsakService = mockk<FagsakService>()
+    private val opprettTaskService = mockk<OpprettTaskService>()
     private val autovedtakSvalbardtilleggTask =
         AutovedtakSvalbardtilleggTask(
             autovedtakStegService = autovedtakStegService,
             fagsakService = fagsakService,
+            opprettTaskService = opprettTaskService,
         )
 
     @Nested
@@ -117,6 +124,83 @@ internal class AutovedtakSvalbardtilleggTaskTest {
 
             verify(exactly = 0) { fagsakService.hentAktør(any()) }
             verify(exactly = 0) { autovedtakStegService.kjørBehandlingSvalbardtillegg(any(), any(), any()) }
+        }
+
+        @Test
+        fun `doTask skal håndtere AutovedtakSkalIkkeGjennomføresFeil riktig`() {
+            // Arrange
+            val fagsakId = 12345L
+            val aktør = randomAktør()
+
+            val task =
+                Task(
+                    type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE,
+                    payload = fagsakId.toString(),
+                )
+
+            every { fagsakService.hentAktør(fagsakId) } returns aktør
+            every {
+                autovedtakStegService.kjørBehandlingSvalbardtillegg(
+                    mottakersAktør = aktør,
+                    fagsakId = fagsakId,
+                    førstegangKjørt = any(),
+                )
+            } throws AutovedtakSkalIkkeGjennomføresFeil("Feilmelding")
+
+            // Act
+            assertDoesNotThrow { autovedtakSvalbardtilleggTask.doTask(task) }
+
+            // Assert
+            verify(exactly = 1) { fagsakService.hentAktør(fagsakId) }
+            verify(exactly = 1) {
+                autovedtakStegService.kjørBehandlingSvalbardtillegg(
+                    mottakersAktør = aktør,
+                    fagsakId = fagsakId,
+                    førstegangKjørt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `doTask skal håndtere AutovedtakMåBehandlesManueltFeil riktig`() {
+            // Arrange
+            val fagsakId = 12345L
+            val aktør = randomAktør()
+
+            val task =
+                Task(
+                    type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE,
+                    payload = fagsakId.toString(),
+                )
+
+            every { fagsakService.hentAktør(fagsakId) } returns aktør
+            justRun { opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(fagsakId, any()) }
+            every {
+                autovedtakStegService.kjørBehandlingSvalbardtillegg(
+                    mottakersAktør = aktør,
+                    fagsakId = fagsakId,
+                    førstegangKjørt = any(),
+                )
+            } throws AutovedtakMåBehandlesManueltFeil("Feilmelding")
+
+            // Act
+            assertDoesNotThrow { autovedtakSvalbardtilleggTask.doTask(task) }
+
+            // Assert
+            verify(exactly = 1) { fagsakService.hentAktør(fagsakId) }
+            verify(exactly = 1) {
+                autovedtakStegService.kjørBehandlingSvalbardtillegg(
+                    mottakersAktør = aktør,
+                    fagsakId = fagsakId,
+                    førstegangKjørt = any(),
+                )
+            }
+            verify(exactly = 1) {
+                opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(
+                    fagsakId = fagsakId,
+                    beskrivelse = "Feilmelding",
+                )
+            }
         }
     }
 }

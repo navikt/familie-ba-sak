@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.datagenerator.GBR_EØS_TOM
 import no.nav.familie.ba.sak.datagenerator.POL_EØS_FOM
 import no.nav.familie.ba.sak.datagenerator.lagKodeverkLand
 import no.nav.familie.ba.sak.datagenerator.lagPerson
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
@@ -22,15 +22,15 @@ import java.time.LocalDate
 import java.time.Month
 
 internal class StatsborgerskapServiceTest {
-    private val integrasjonClient = mockk<IntegrasjonClient>()
-    private val kodeverkService = KodeverkService(integrasjonClient)
+    private val integrasjonKlient = mockk<IntegrasjonKlient>()
+    private val kodeverkService = KodeverkService(integrasjonKlient)
 
     private lateinit var statsborgerskapService: StatsborgerskapService
 
     @BeforeEach
     fun setUp() {
         statsborgerskapService = StatsborgerskapService(kodeverkService)
-        every { integrasjonClient.hentAlleEØSLand() } returns lagKodeverkLand()
+        every { integrasjonKlient.hentAlleEØSLand() } returns lagKodeverkLand()
     }
 
     @Test

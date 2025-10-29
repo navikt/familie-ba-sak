@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingMedOverstyrendeResultater
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -23,9 +23,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class PreutfyllBorHosSøkerServiceTest {
-    private val pdlRestClient: SystemOnlyPdlRestClient = mockk(relaxed = true)
+    private val pdlRestKlient: SystemOnlyPdlRestKlient = mockk(relaxed = true)
     private val persongrunnlagService: PersongrunnlagService = mockk(relaxed = true)
-    private val preutfyllBorHosSøkerService: PreutfyllBorHosSøkerService = PreutfyllBorHosSøkerService(pdlRestClient, persongrunnlagService)
+    private val preutfyllBorHosSøkerService: PreutfyllBorHosSøkerService = PreutfyllBorHosSøkerService(pdlRestKlient)
 
     @Test
     fun `skal preutfylle bor fast hos søker vilkår til oppfylt om barn bor på samme adresse som søker`() {
@@ -42,7 +42,7 @@ class PreutfyllBorHosSøkerServiceTest {
 
         val nåDato = LocalDate.now()
 
-        every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+        every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
             val identer = firstArg<List<String>>()
             identer.associateWith {
                 PdlAdresserPerson(
@@ -97,7 +97,7 @@ class PreutfyllBorHosSøkerServiceTest {
 
         val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
 
-        every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer) } returns
+        every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(identer) } returns
             identer.associateWith { ident ->
                 if (ident == aktørSøker.aktivFødselsnummer()) {
                     PdlAdresserPerson(
@@ -156,7 +156,7 @@ class PreutfyllBorHosSøkerServiceTest {
 
         val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
 
-        every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer) } returns
+        every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(identer) } returns
             identer.associateWith { ident ->
                 if (ident == aktørSøker.aktivFødselsnummer()) {
                     PdlAdresserPerson(
@@ -226,7 +226,7 @@ class PreutfyllBorHosSøkerServiceTest {
 
         val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
 
-        every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer) } returns
+        every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(identer) } returns
             identer.associateWith { ident ->
                 if (ident == aktørSøker.aktivFødselsnummer()) {
                     PdlAdresserPerson(
@@ -299,7 +299,7 @@ class PreutfyllBorHosSøkerServiceTest {
                 overstyrendeVilkårResultater = emptyMap(),
             )
 
-        every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+        every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
             val identer = firstArg<List<String>>()
             identer.associateWith {
                 PdlAdresserPerson(
@@ -330,5 +330,127 @@ class PreutfyllBorHosSøkerServiceTest {
 
         assertThat(borFastHosSøkerVilkår.begrunnelse)
             .isEqualTo("$PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT- Har samme bostedsadresse som søker.")
+    }
+
+    @Test
+    fun `Skal filtrere vekk perioder før barn har sin første adresse i Norge`() {
+        // Arrange
+        val aktørSøker = randomAktør()
+        val aktørBarn = randomAktør()
+
+        val vilkårsvurdering =
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                søker = lagPerson(type = PersonType.SØKER, aktør = aktørSøker),
+                barna = listOf(lagPerson(type = PersonType.BARN, aktør = aktørBarn)),
+                overstyrendeVilkårResultater = emptyMap(),
+            )
+
+        every {
+            pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(
+                any(),
+            )
+        } answers {
+            mapOf(
+                aktørSøker.aktivFødselsnummer() to
+                    PdlAdresserPerson(
+                        bostedsadresse =
+                            listOf(
+                                Bostedsadresse(
+                                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                                    gyldigTilOgMed = null,
+                                    vegadresse = lagVegadresse(12345L),
+                                ),
+                            ),
+                        deltBosted = emptyList(),
+                    ),
+                aktørBarn.aktivFødselsnummer() to
+                    PdlAdresserPerson(
+                        bostedsadresse =
+                            listOf(
+                                Bostedsadresse(
+                                    gyldigFraOgMed = LocalDate.now().minusYears(2),
+                                    gyldigTilOgMed = null,
+                                    vegadresse = lagVegadresse(12345L),
+                                ),
+                            ),
+                        deltBosted = emptyList(),
+                    ),
+            )
+        }
+
+        // Act
+        preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
+
+        // Assert
+        val borFastHosSøkerVilkår =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == aktørBarn }
+                .vilkårResultater
+                .single {
+                    it.vilkårType == Vilkår.BOR_MED_SØKER
+                }
+
+        assertThat(borFastHosSøkerVilkår.periodeFom).isEqualTo(LocalDate.now().minusYears(2))
+    }
+
+    @Test
+    fun `Skal filtrere vekk perioder før søker har sin første adresse i Norge`() {
+        // Arrange
+        val aktørSøker = randomAktør()
+        val aktørBarn = randomAktør()
+
+        val vilkårsvurdering =
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                søker = lagPerson(type = PersonType.SØKER, aktør = aktørSøker),
+                barna = listOf(lagPerson(type = PersonType.BARN, aktør = aktørBarn)),
+                overstyrendeVilkårResultater = emptyMap(),
+            )
+
+        every {
+            pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(
+                any(),
+            )
+        } answers {
+            mapOf(
+                aktørSøker.aktivFødselsnummer() to
+                    PdlAdresserPerson(
+                        bostedsadresse =
+                            listOf(
+                                Bostedsadresse(
+                                    gyldigFraOgMed = LocalDate.now().minusYears(2),
+                                    gyldigTilOgMed = null,
+                                    vegadresse = lagVegadresse(12345L),
+                                ),
+                            ),
+                        deltBosted = emptyList(),
+                    ),
+                aktørBarn.aktivFødselsnummer() to
+                    PdlAdresserPerson(
+                        bostedsadresse =
+                            listOf(
+                                Bostedsadresse(
+                                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                                    gyldigTilOgMed = null,
+                                    vegadresse = lagVegadresse(12345L),
+                                ),
+                            ),
+                        deltBosted = emptyList(),
+                    ),
+            )
+        }
+
+        // Act
+        preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
+
+        // Assert
+        val borFastHosSøkerVilkår =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == aktørBarn }
+                .vilkårResultater
+                .single {
+                    it.vilkårType == Vilkår.BOR_MED_SØKER
+                }
+
+        assertThat(borFastHosSøkerVilkår.periodeFom).isEqualTo(LocalDate.now().minusYears(2))
     }
 }

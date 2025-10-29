@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
@@ -39,7 +39,7 @@ class AutovedtakSvalbardtilleggService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
-    private val pdlRestClient: SystemOnlyPdlRestClient,
+    private val pdlRestKlient: SystemOnlyPdlRestKlient,
     private val autovedtakService: AutovedtakService,
     private val simuleringService: SimuleringService,
     private val behandlingService: BehandlingService,
@@ -55,31 +55,31 @@ class AutovedtakSvalbardtilleggService(
 
         if (!fagsaktypeKanBehandles || !harLøpendeBarnetrygd) return false
 
-        val sisteIverksatteBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandlingsdata.fagsakId)
+        val sisteVedtatteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandlingsdata.fagsakId)
                 ?: return false
 
-        if (sisteIverksatteBehandling.kategori == BehandlingKategori.EØS) return false
+        if (sisteVedtatteBehandling.kategori == BehandlingKategori.EØS) return false
 
-        val sisteIverksatteBehandlingHarSvalbardtilleggAndeler =
+        val sisteVedtatteBehandlingHarSvalbardtilleggAndeler =
             beregningService
-                .hentTilkjentYtelseForBehandling(sisteIverksatteBehandling.id)
+                .hentTilkjentYtelseForBehandling(sisteVedtatteBehandling.id)
                 .andelerTilkjentYtelse
                 .any { it.type == YtelseType.SVALBARDTILLEGG }
 
         val minstÈnAktørHarAdresseSomErRelevantForSvalbardtillegg =
             persongrunnlagService
-                .hentAktivThrows(sisteIverksatteBehandling.id)
+                .hentAktivThrows(sisteVedtatteBehandling.id)
                 .personer
                 .map { it.aktør.aktivFødselsnummer() }
                 .let { identer ->
-                    pdlRestClient
+                    pdlRestKlient
                         .hentAdresserForPersoner(identer)
                         .mapValues { Adresser.opprettFra(it.value) }
                         .any { it.value.harAdresserSomErRelevantForSvalbardtillegg() }
                 }
 
-        return sisteIverksatteBehandlingHarSvalbardtilleggAndeler || minstÈnAktørHarAdresseSomErRelevantForSvalbardtillegg
+        return sisteVedtatteBehandlingHarSvalbardtilleggAndeler || minstÈnAktørHarAdresseSomErRelevantForSvalbardtillegg
     }
 
     @Transactional

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.søknad
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknad
 import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
+import no.nav.familie.kontrakter.felles.søknad.MissingVersionException
 import org.springframework.stereotype.Component
 
 interface SøknadMapper {
@@ -23,6 +24,6 @@ interface SøknadMapper {
     class Lookup(
         private val søknadMappere: List<SøknadMapper>,
     ) {
-        fun hentSøknadMapperForVersjon(søknadVersjon: Int) = søknadMappere.single { it.søknadVersjon == søknadVersjon }
+        fun hentSøknadMapperForVersjon(søknadVersjon: Int) = søknadMappere.singleOrNull { it.søknadVersjon == søknadVersjon } ?: throw MissingVersionException("Mangler SøknadMapper for versjon $søknadVersjon")
     }
 }

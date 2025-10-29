@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagTilgangsstyrtJournalpost
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -18,7 +18,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class InnkommendeJournalføringServiceTest {
-    private val mockedIntegrasjonClient: IntegrasjonClient = mockk()
+    private val mockedIntegrasjonKlient: IntegrasjonKlient = mockk()
     private val mockedFagsakService: FagsakService = mockk()
     private val mockedBehandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val mockedLoggService: LoggService = mockk()
@@ -28,7 +28,7 @@ class InnkommendeJournalføringServiceTest {
     private val klageService: KlageService = mockk()
     private val innkommendeJournalføringService: InnkommendeJournalføringService =
         InnkommendeJournalføringService(
-            integrasjonClient = mockedIntegrasjonClient,
+            integrasjonKlient = mockedIntegrasjonKlient,
             fagsakService = mockedFagsakService,
             behandlingHentOgPersisterService = mockedBehandlingHentOgPersisterService,
             loggService = mockedLoggService,
@@ -53,7 +53,7 @@ class InnkommendeJournalføringServiceTest {
             )
 
         every {
-            mockedIntegrasjonClient.hentTilgangsstyrteJournalposterForBruker(
+            mockedIntegrasjonKlient.hentTilgangsstyrteJournalposterForBruker(
                 JournalposterForBrukerRequest(
                     antall = 1000,
                     brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),

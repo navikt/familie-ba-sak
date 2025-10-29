@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.fake.FakeEfSakRestClient
+import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -41,7 +41,7 @@ class AndelTilkjentYtelseOffsetTest(
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val stegService: StegService,
-    @Autowired private val efSakRestClient: FakeEfSakRestClient,
+    @Autowired private val efSakRestKlient: FakeEfSakRestKlient,
     @Autowired private val beregningService: BeregningService,
     @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
@@ -111,7 +111,7 @@ class AndelTilkjentYtelseOffsetTest(
         personScenario: RestScenario,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-        efSakRestClient.leggTilEksternPeriode(
+        efSakRestKlient.leggTilEksternPeriode(
             personIdent = personScenario.søker.ident,
             eksternePerioderResponse =
                 EksternePerioderResponse(
@@ -165,7 +165,7 @@ class AndelTilkjentYtelseOffsetTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        efSakRestClient.leggTilEksternPeriode(
+        efSakRestKlient.leggTilEksternPeriode(
             personIdent = personScenario.søker.ident,
             eksternePerioderResponse =
                 EksternePerioderResponse(

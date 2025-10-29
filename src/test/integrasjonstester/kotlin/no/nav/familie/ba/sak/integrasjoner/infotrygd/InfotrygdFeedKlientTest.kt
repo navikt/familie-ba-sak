@@ -24,8 +24,8 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
-class InfotrygdFeedClientTest : AbstractSpringIntegrationTest() {
-    lateinit var client: InfotrygdFeedClient
+class InfotrygdFeedKlientTest : AbstractSpringIntegrationTest() {
+    lateinit var klient: InfotrygdFeedKlient
 
     @Autowired
     @Qualifier("jwtBearer")
@@ -33,8 +33,8 @@ class InfotrygdFeedClientTest : AbstractSpringIntegrationTest() {
 
     @BeforeEach
     fun setUp() {
-        client =
-            InfotrygdFeedClient(
+        klient =
+            InfotrygdFeedKlient(
                 URI.create(wireMockServer.baseUrl() + "/api"),
                 restOperations,
             )
@@ -56,7 +56,7 @@ class InfotrygdFeedClientTest : AbstractSpringIntegrationTest() {
         val request = InfotrygdFødselhendelsesFeedTaskDto(listOf("fnr"))
 
         request.fnrBarn.forEach {
-            client.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto(fnrBarn = it))
+            klient.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto(fnrBarn = it))
         }
 
         wireMockServer.verify(
@@ -76,7 +76,7 @@ class InfotrygdFeedClientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(aResponse().withStatus(401)))
 
         assertThrows<HttpClientErrorException> {
-            client.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto("fnr"))
+            klient.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto("fnr"))
         }
     }
 
@@ -86,7 +86,7 @@ class InfotrygdFeedClientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(aResponse().withBody("Create")))
 
         assertThrows<RuntimeException> {
-            client.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto("fnr"))
+            klient.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto("fnr"))
         }
     }
 }

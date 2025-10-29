@@ -2,7 +2,7 @@
 import io.mockk.mockk
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
-import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
+import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
@@ -23,14 +23,14 @@ fun mockAutovedtakSmåbarnstilleggService(
             .maxByOrNull { it.id }
     dataFraCucumber.behandlingTilForrigeBehandling.put(småbarnstilleggBehandlingId, forrigeBehandling?.id)
 
-    val efSakRestClient = mockEfSakRestClient(internPeriodeOvergangsstønadNyBehandling)
+    val efSakRestKlient = mockEfSakRestKlient(internPeriodeOvergangsstønadNyBehandling)
 
     val cucumberMock =
         CucumberMock(
             dataFraCucumber = dataFraCucumber,
             nyBehandlingId = småbarnstilleggBehandlingId,
             forrigeBehandling = forrigeBehandling,
-            efSakRestClientMock = efSakRestClient,
+            efSakRestKlientMock = efSakRestKlient,
         )
 
     return AutovedtakStegService(
@@ -47,9 +47,9 @@ fun mockAutovedtakSmåbarnstilleggService(
     )
 }
 
-private fun mockEfSakRestClient(internPeriodeOvergangsstønadNyBehandling: List<InternPeriodeOvergangsstønad>): EfSakRestClient {
-    val efSakRestClient = mockk<EfSakRestClient>()
-    every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } answers {
+private fun mockEfSakRestKlient(internPeriodeOvergangsstønadNyBehandling: List<InternPeriodeOvergangsstønad>): EfSakRestKlient {
+    val efSakRestKlient = mockk<EfSakRestKlient>()
+    every { efSakRestKlient.hentPerioderMedFullOvergangsstønad(any()) } answers {
         EksternePerioderResponse(
             internPeriodeOvergangsstønadNyBehandling.map {
                 EksternPeriode(
@@ -61,5 +61,5 @@ private fun mockEfSakRestClient(internPeriodeOvergangsstønadNyBehandling: List<
             },
         )
     }
-    return efSakRestClient
+    return efSakRestKlient
 }

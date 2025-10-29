@@ -4,7 +4,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedKlient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedTaskDto
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -28,14 +28,14 @@ import java.util.Properties
     beskrivelse = "Send vedtaksmelding til Infotrygd feed.",
 )
 class SendVedtakTilInfotrygdTask(
-    private val infotrygdFeedClient: InfotrygdFeedClient,
+    private val infotrygdFeedKlient: InfotrygdFeedKlient,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
         val infotrygdVedtakFeedTaskDto = objectMapper.readValue(task.payload, InfotrygdVedtakFeedTaskDto::class.java)
 
-        infotrygdFeedClient.sendVedtakFeedTilInfotrygd(
+        infotrygdFeedKlient.sendVedtakFeedTilInfotrygd(
             InfotrygdVedtakFeedDto(
                 infotrygdVedtakFeedTaskDto.fnrStoenadsmottaker,
                 finnFørsteUtbetalingsperiode(infotrygdVedtakFeedTaskDto.behandlingId),

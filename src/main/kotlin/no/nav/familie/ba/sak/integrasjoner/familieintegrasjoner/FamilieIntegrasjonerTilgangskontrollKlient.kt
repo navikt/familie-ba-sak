@@ -14,11 +14,11 @@ import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
-class FamilieIntegrasjonerTilgangskontrollClient(
+class FamilieIntegrasjonerTilgangskontrollKlient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "integrasjon-tilgangskontroll") {
-    val tilgangPersonUri: URI =
+    private val tilgangPersonUri: URI =
         UriComponentsBuilder
             .fromUri(integrasjonUri)
             .pathSegment(PATH_TILGANG_PERSON)

@@ -39,7 +39,7 @@ import java.time.temporal.ChronoUnit
     "testcontainers",
     "mock-pdl",
     "mock-rest-template-config",
-    "mock-ident-client",
+    "mock-ident-klient",
     "mock-brev-klient",
 )
 class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {

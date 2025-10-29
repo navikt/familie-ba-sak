@@ -39,7 +39,7 @@ import java.net.URI
 import java.time.LocalDate
 
 @Service
-class PdlRestClient(
+class PdlRestKlient(
     @Value("\${PDL_URL}") pdlBaseUrl: URI,
     @Qualifier("jwtBearer") val restTemplate: RestOperations,
     val personidentService: PersonidentService,

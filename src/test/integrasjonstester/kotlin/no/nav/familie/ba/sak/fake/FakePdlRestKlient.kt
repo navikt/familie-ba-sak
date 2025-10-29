@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.fake
 
 import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.VergemaalEllerFremtidsfullmakt
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -16,10 +16,10 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
 
-class FakePdlRestClient(
+class FakePdlRestKlient(
     restOperations: RestOperations,
     personidentService: PersonidentService,
-) : SystemOnlyPdlRestClient(
+) : SystemOnlyPdlRestKlient(
         pdlBaseUrl = URI("dummy_uri"),
         restTemplate = restOperations,
         personidentService = personidentService,

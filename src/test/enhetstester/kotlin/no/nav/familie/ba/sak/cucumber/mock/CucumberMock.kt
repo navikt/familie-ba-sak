@@ -12,11 +12,11 @@ import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigrerin
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingSøknadsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
-import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockSystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockSystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockTilbakekrevingsvedtakMotregningRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategiForValutakurserRepository
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
-import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
+import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestKlient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
@@ -100,7 +100,7 @@ class CucumberMock(
     dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     nyBehandlingId: Long,
     forrigeBehandling: Behandling? = dataFraCucumber.behandlingTilForrigeBehandling[nyBehandlingId]?.let { dataFraCucumber.behandlinger[it] },
-    efSakRestClientMock: EfSakRestClient = mockEfSakRestClient(),
+    efSakRestKlientMock: EfSakRestKlient = mockEfSakRestKlient(),
     ecbService: ECBService = mockEcbService(dataFraCucumber),
     scope: CoroutineScope? = null,
 ) {
@@ -150,7 +150,7 @@ class CucumberMock(
     val behandlingMigreringsinfoRepository = mockBehandlingMigreringsinfoRepository()
     val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
     val behandlingSøknadsinfoRepository = mockBehandlingSøknadsinfoRepository()
-    val systemOnlyPdlRestClient = mockSystemOnlyPdlRestClient(dataFraCucumber)
+    val systemOnlyPdlRestKlient = mockSystemOnlyPdlRestKlient(dataFraCucumber)
 
     init {
         dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
@@ -176,7 +176,7 @@ class CucumberMock(
     val overgangsstønadService =
         OvergangsstønadService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            efSakRestClient = efSakRestClientMock,
+            efSakRestKlient = efSakRestKlientMock,
             periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             persongrunnlagService = persongrunnlagService,
@@ -425,6 +425,7 @@ class CucumberMock(
             valutakursRepository = valutakursRepository,
             clockProvider = clockProvider,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            featureToggleService = featureToggleService,
         )
 
     val behandlingsresultatSteg =
@@ -556,9 +557,10 @@ class CucumberMock(
 
     val preutfyllBosattIRiketService =
         PreutfyllBosattIRiketService(
-            pdlRestClient = systemOnlyPdlRestClient,
+            pdlRestKlient = systemOnlyPdlRestKlient,
             søknadService = mockk(),
             persongrunnlagService = persongrunnlagService,
+            featureToggleService = featureToggleService,
         )
 
     val preutfyllVilkårService =
@@ -628,6 +630,7 @@ class CucumberMock(
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             featureToggleService = featureToggleService,
+            oppgaveService = oppgaveService,
         )
 
     val ferdigstillBehandlingSteg =

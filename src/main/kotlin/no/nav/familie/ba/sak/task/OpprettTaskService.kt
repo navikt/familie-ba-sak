@@ -85,6 +85,18 @@ class OpprettTaskService(
         )
     }
 
+    fun opprettOppgaveForFinnmarksOgSvalbardtilleggTask(
+        fagsakId: Long,
+        beskrivelse: String,
+    ) {
+        taskRepository.save(
+            OpprettVurderLivshendelseOppgaveForFinnmarksOgSvalbardtilleggTask.opprettTask(
+                fagsakId = fagsakId,
+                beskrivelse = beskrivelse,
+            ),
+        )
+    }
+
     fun opprettSendFeedTilInfotrygdTask(barnasIdenter: List<String>) {
         taskRepository.save(SendFødselsmeldingTilInfotrygdTask.opprettTask(barnasIdenter))
     }

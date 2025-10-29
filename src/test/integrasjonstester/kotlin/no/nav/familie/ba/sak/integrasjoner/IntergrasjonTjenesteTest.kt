@@ -27,11 +27,11 @@ import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyAktivBrukerIModiaContext
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.hentVedlegg
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient.Companion.VEDTAK_VEDLEGG_FILNAVN
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient.Companion.VEDTAK_VEDLEGG_TITTEL
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient.Companion.hentVedlegg
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Ansettelsesperiode
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
@@ -85,19 +85,19 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
     @Qualifier("jwtBearer")
     lateinit var restOperations: RestOperations
 
-    lateinit var integrasjonClient: IntegrasjonClient
+    lateinit var integrasjonKlient: IntegrasjonKlient
     lateinit var utgåendeJournalføringService: UtgåendeJournalføringService
 
     @BeforeEach
     fun setUp() {
-        integrasjonClient =
-            IntegrasjonClient(
+        integrasjonKlient =
+            IntegrasjonKlient(
                 URI.create(wireMockServer.baseUrl() + "/api"),
                 restOperations,
             )
         utgåendeJournalføringService =
             UtgåendeJournalføringService(
-                integrasjonClient = integrasjonClient,
+                integrasjonKlient = integrasjonKlient,
             )
     }
 
@@ -119,7 +119,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
 
         val request = lagTestOppgave()
 
-        val opprettOppgaveResponse = integrasjonClient.opprettOppgave(request).oppgaveId.toString()
+        val opprettOppgaveResponse = integrasjonKlient.opprettOppgave(request).oppgaveId.toString()
 
         assertThat(opprettOppgaveResponse).isEqualTo("1234")
         wireMockServer.verify(
@@ -141,7 +141,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             ),
         )
 
-        val feil = assertThrows<RessursException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
+        val feil = assertThrows<RessursException> { integrasjonKlient.opprettOppgave(lagTestOppgave()) }
         assertEquals("test", feil.ressurs.melding)
     }
 
@@ -159,7 +159,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             ),
         )
 
-        val oppgaverOgAntall = integrasjonClient.hentOppgaver(FinnOppgaveRequest(tema = Tema.BAR))
+        val oppgaverOgAntall = integrasjonKlient.hentOppgaver(FinnOppgaveRequest(tema = Tema.BAR))
         assertThat(oppgaverOgAntall.oppgaver).hasSize(1)
     }
 
@@ -237,7 +237,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 .willReturn(okJson(objectMapper.writeValueAsString(success("1234567")))),
         )
 
-        assertDoesNotThrow { integrasjonClient.distribuerBrev(lagDistribuerDokumentDTO()) }
+        assertDoesNotThrow { integrasjonKlient.distribuerBrev(lagDistribuerDokumentDTO()) }
         wireMockServer.verify(
             postRequestedFor(anyUrl())
                 .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("distribuerVedtaksbrev"))
@@ -265,7 +265,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 .willReturn(okJson(objectMapper.writeValueAsString(success("")))),
         )
 
-        assertThrows<Feil> { integrasjonClient.distribuerBrev(lagDistribuerDokumentDTO()) }
+        assertThrows<Feil> { integrasjonKlient.distribuerBrev(lagDistribuerDokumentDTO()) }
     }
 
     @Test
@@ -277,7 +277,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 .willReturn(okJson(objectMapper.writeValueAsString(failure<Any>("")))),
         )
 
-        val feil = assertThrows<IntegrasjonException> { integrasjonClient.distribuerBrev(lagDistribuerDokumentDTO()) }
+        val feil = assertThrows<IntegrasjonException> { integrasjonKlient.distribuerBrev(lagDistribuerDokumentDTO()) }
         assertTrue(feil.message?.contains("dokdist") == true)
     }
 
@@ -294,7 +294,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 ),
         )
 
-        assertThrows<HttpClientErrorException.BadRequest> { integrasjonClient.distribuerBrev(lagDistribuerDokumentDTO()) }
+        assertThrows<HttpClientErrorException.BadRequest> { integrasjonKlient.distribuerBrev(lagDistribuerDokumentDTO()) }
     }
 
     @Test
@@ -307,7 +307,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 .willReturn(okJson(objectMapper.writeValueAsString(success(OppgaveResponse(1))))),
         )
 
-        integrasjonClient.ferdigstillOppgave(123)
+        integrasjonKlient.ferdigstillOppgave(123)
 
         wireMockServer.verify(
             patchRequestedFor(urlEqualTo("/api/oppgave/123/ferdigstill"))
@@ -332,7 +332,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         )
 
         val feil =
-            assertThrows<RessursException> { integrasjonClient.ferdigstillOppgave(123) }
+            assertThrows<RessursException> { integrasjonKlient.ferdigstillOppgave(123) }
         assertEquals("test", feil.ressurs.melding)
     }
 
@@ -355,7 +355,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 ),
         )
 
-        val enhet = integrasjonClient.hentBehandlendeEnhet("1")
+        val enhet = integrasjonKlient.hentBehandlendeEnhet("1")
         assertThat(enhet).isNotEmpty
         assertThat(enhet.first().enhetId).isEqualTo("2")
     }
@@ -378,7 +378,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             ),
         )
 
-        val oppgave = integrasjonClient.finnOppgaveMedId(oppgaveId)
+        val oppgave = integrasjonKlient.finnOppgaveMedId(oppgaveId)
         assertThat(oppgave.id).isEqualTo(oppgaveId)
 
         wireMockServer.verify(getRequestedFor(urlEqualTo("/api/oppgave/$oppgaveId")))
@@ -401,7 +401,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             ),
         )
 
-        val journalpost = integrasjonClient.hentJournalpost(journalpostId)
+        val journalpost = integrasjonKlient.hentJournalpost(journalpostId)
         assertThat(journalpost).isNotNull
         assertThat(journalpost.journalpostId).isEqualTo(journalpostId)
         assertThat(journalpost.bruker?.id).isEqualTo(fnr)
@@ -426,7 +426,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             ),
         )
 
-        val dokument = integrasjonClient.hentDokument(journalpostId = journalpostId, dokumentInfoId = dokumentId)
+        val dokument = integrasjonKlient.hentDokument(journalpostId = journalpostId, dokumentInfoId = dokumentId)
         assertThat(dokument).isNotNull
         assertThat(dokument.decodeToString()).isEqualTo("Test")
 
@@ -458,7 +458,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             ),
         )
 
-        val response = integrasjonClient.hentArbeidsforhold(fnr, LocalDate.now())
+        val response = integrasjonKlient.hentArbeidsforhold(fnr, LocalDate.now())
 
         assertThat(response).hasSize(1)
         assertThat(response.first().arbeidsgiver?.organisasjonsnummer).isEqualTo("998877665")
@@ -478,7 +478,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
 
         wireMockServer.stubFor(post("/api/aareg/arbeidsforhold").willReturn(status(500)))
 
-        val feil = assertThrows<IntegrasjonException> { integrasjonClient.hentArbeidsforhold(fnr, LocalDate.now()) }
+        val feil = assertThrows<IntegrasjonException> { integrasjonKlient.hentArbeidsforhold(fnr, LocalDate.now()) }
         assertTrue(feil.message?.contains("aareg") == true)
     }
 
@@ -489,7 +489,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
 
         wireMockServer.stubFor(post("/api/skyggesak/v1").willReturn(okJson(objectMapper.writeValueAsString(success(null)))))
 
-        integrasjonClient.opprettSkyggesak(aktørId, MOCK_FAGSAK_ID.toLong())
+        integrasjonKlient.opprettSkyggesak(aktørId, MOCK_FAGSAK_ID.toLong())
 
         wireMockServer.verify(
             postRequestedFor(urlEqualTo("/api/skyggesak/v1"))
@@ -516,7 +516,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(post("/api/skyggesak/v1").willReturn(status(500)))
 
         val feil =
-            assertThrows<IntegrasjonException> { integrasjonClient.opprettSkyggesak(aktørId, MOCK_FAGSAK_ID.toLong()) }
+            assertThrows<IntegrasjonException> { integrasjonKlient.opprettSkyggesak(aktørId, MOCK_FAGSAK_ID.toLong()) }
         assertTrue(feil.message?.contains("skyggesak") == true)
     }
 
@@ -529,7 +529,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                     .willReturn(okJson(modiaContextResponse { success(it) })),
             )
 
-        val modiaContext = integrasjonClient.hentModiaContext()
+        val modiaContext = integrasjonKlient.hentModiaContext()
 
         assertThat(modiaContext.aktivBruker).isEqualTo("13025514402")
     }
@@ -544,7 +544,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                     .willReturn(okJson(modiaContextResponse { success(it) })),
             )
 
-        val modiaContext = integrasjonClient.settNyAktivBrukerIModiaContext(RestNyAktivBrukerIModiaContext(personIdent = "13025514402"))
+        val modiaContext = integrasjonKlient.settNyAktivBrukerIModiaContext(RestNyAktivBrukerIModiaContext(personIdent = "13025514402"))
 
         assertThat(modiaContext.aktivBruker).isEqualTo("13025514402")
     }
@@ -562,7 +562,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                     ),
             )
 
-        val exception = assertThrows<RessursException> { integrasjonClient.hentModiaContext() }
+        val exception = assertThrows<RessursException> { integrasjonKlient.hentModiaContext() }
 
         assertThat(exception.message).contains("modia-context-holder")
         assertThat(exception.httpStatus).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -585,7 +585,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
 
         val exception =
             assertThrows<RessursException> {
-                integrasjonClient.settNyAktivBrukerIModiaContext(RestNyAktivBrukerIModiaContext(personIdent = "13025514402"))
+                integrasjonKlient.settNyAktivBrukerIModiaContext(RestNyAktivBrukerIModiaContext(personIdent = "13025514402"))
             }
 
         assertThat(exception.message).contains("modia-context-holder")
@@ -614,7 +614,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 ),
         )
 
-        val versjonertSøknad = integrasjonClient.hentVersjonertBarnetrygdSøknad(journalpostId)
+        val versjonertSøknad = integrasjonKlient.hentVersjonertBarnetrygdSøknad(journalpostId)
 
         assertThat(versjonertSøknad).isNotNull
         assertThat(versjonertSøknad).isEqualTo(versjonertBarnetrygdSøknadV9)
@@ -631,7 +631,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 ),
         )
 
-        val aInntektUrl = integrasjonClient.hentAInntektUrl(PersonIdent(randomFnr()))
+        val aInntektUrl = integrasjonKlient.hentAInntektUrl(PersonIdent(randomFnr()))
 
         assertThat(aInntektUrl).isEqualTo(url)
     }
@@ -641,7 +641,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
     fun `skal kaste feil når henting av URL mot A-Inntekt feiler`() {
         wireMockServer.stubFor(post("/api/arbeid-og-inntekt/hent-url").willReturn(status(500)))
 
-        val feil = assertThrows<IntegrasjonException> { integrasjonClient.hentAInntektUrl(PersonIdent(randomFnr())) }
+        val feil = assertThrows<IntegrasjonException> { integrasjonKlient.hentAInntektUrl(PersonIdent(randomFnr())) }
         assertTrue(feil.message?.contains("a-inntekt-url") == true)
     }
 

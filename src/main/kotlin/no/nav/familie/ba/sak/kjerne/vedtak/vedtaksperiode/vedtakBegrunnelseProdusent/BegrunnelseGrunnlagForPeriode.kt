@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -63,14 +64,25 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
                 .filter { it.type == SatsType.SVALBARDTILLEGG }
                 .minOfOrNull { it.gyldigFom } ?: LocalDate.MAX
 
-        return forrigePeriode?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true ||
-            forrigePeriode
+        val erBarn = dennePerioden.person.type == PersonType.BARN
+
+        val bosattPåSvalbardSammePeriodeForrigeBehandling =
+            sammePeriodeForrigeBehandling
                 ?.vilkårResultater
                 ?.any {
                     it.vilkårType == Vilkår.BOSATT_I_RIKET &&
                         it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD) &&
                         (it.tom == null || it.tom >= startdatoForSvalbardtillegg)
                 } == true
+
+        return if (erBarn) {
+            val haddeSvalbardAndelerForrigePeriode = sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true
+
+            haddeSvalbardAndelerForrigePeriode &&
+                bosattPåSvalbardSammePeriodeForrigeBehandling
+        } else {
+            bosattPåSvalbardSammePeriodeForrigeBehandling
+        }
     }
 
     fun sjekkOmHarKravPåSvalbardtilleggDennePeriode() =

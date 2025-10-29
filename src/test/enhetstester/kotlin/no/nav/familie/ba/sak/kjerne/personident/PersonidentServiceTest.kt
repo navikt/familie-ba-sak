@@ -8,7 +8,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -28,7 +28,7 @@ internal class PersonidentServiceTest {
     private val aktørIdAktiv = lagAktør(personidentAktiv)
     private val personidentHistorisk = randomFnr()
 
-    private val pdlIdentRestClient: PdlIdentRestClient = mockk(relaxed = true)
+    private val pdlIdentRestKlient: PdlIdentRestKlient = mockk(relaxed = true)
     private val personidentRepository: PersonidentRepository = mockk()
     private val aktørIdRepository: AktørIdRepository = mockk()
     private val personIdentSlot = slot<Personident>()
@@ -39,19 +39,19 @@ internal class PersonidentServiceTest {
         PersonidentService(
             personidentRepository = personidentRepository,
             aktørIdRepository = aktørIdRepository,
-            pdlIdentRestClient = pdlIdentRestClient,
+            pdlIdentRestKlient = pdlIdentRestKlient,
             taskRepository = taskRepositoryMock,
         )
 
     @BeforeAll
     fun init() {
-        every { pdlIdentRestClient.hentIdenter(personidentAktiv, false) } answers {
+        every { pdlIdentRestKlient.hentIdenter(personidentAktiv, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdAktiv.aktørId, false, "AKTORID"),
                 IdentInformasjon(personidentAktiv, false, "FOLKEREGISTERIDENT"),
             )
         }
-        every { pdlIdentRestClient.hentIdenter(personidentHistorisk, false) } answers {
+        every { pdlIdentRestKlient.hentIdenter(personidentHistorisk, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdAktiv.aktørId, false, "AKTORID"),
                 IdentInformasjon(personidentAktiv, false, "FOLKEREGISTERIDENT"),
@@ -184,14 +184,14 @@ internal class PersonidentServiceTest {
                 ),
             )
 
-            every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
+            every { pdlIdentRestKlient.hentIdenter(personIdentSomFinnes, false) } answers {
                 listOf(
                     IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
                     IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
                 )
             }
 
-            every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, true) } answers {
+            every { pdlIdentRestKlient.hentIdenter(personIdentSomSkalLeggesTil, true) } answers {
                 listOf(
                     IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
                     IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
@@ -225,14 +225,14 @@ internal class PersonidentServiceTest {
                 ),
             )
 
-            every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
+            every { pdlIdentRestKlient.hentIdenter(personIdentSomFinnes, false) } answers {
                 listOf(
                     IdentInformasjon(aktørIdGammel.aktørId, false, "AKTORID"),
                     IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
                 )
             }
 
-            every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, true) } answers {
+            every { pdlIdentRestKlient.hentIdenter(personIdentSomSkalLeggesTil, true) } answers {
                 listOf(
                     IdentInformasjon(aktørIdGammel.aktørId, false, "AKTORID"),
                     IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
@@ -269,14 +269,14 @@ internal class PersonidentServiceTest {
                 ),
             )
 
-            every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
+            every { pdlIdentRestKlient.hentIdenter(personIdentSomFinnes, false) } answers {
                 listOf(
                     IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
                     IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
                 )
             }
 
-            every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, false) } answers {
+            every { pdlIdentRestKlient.hentIdenter(personIdentSomSkalLeggesTil, false) } answers {
                 listOf(
                     IdentInformasjon(aktørIdIkkeIBaSak.aktørId, false, "AKTORID"),
                     IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),

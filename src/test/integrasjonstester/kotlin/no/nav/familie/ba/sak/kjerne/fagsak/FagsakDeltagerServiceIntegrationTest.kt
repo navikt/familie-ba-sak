@@ -1,16 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
-import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
-import no.nav.familie.ba.sak.fake.FakePdlIdentRestClient
-import no.nav.familie.ba.sak.fake.FakePersonopplysningerService
+import no.nav.familie.ba.sak.fake.FakePdlIdentRestKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonIkkeFunnet
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -32,8 +29,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
-import org.springframework.web.client.HttpServerErrorException
 import java.time.LocalDate
 
 class FagsakDeltagerServiceIntegrationTest(
@@ -50,9 +45,7 @@ class FagsakDeltagerServiceIntegrationTest(
     @Autowired
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     @Autowired
-    private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
-    @Autowired
-    private val fakePdlIdentRestClient: FakePdlIdentRestClient,
+    private val fakePdlIdentRestKlient: FakePdlIdentRestKlient,
 ) : AbstractSpringIntegrationTest() {
     /*
         This is a complicated test against following family relationship:
@@ -312,7 +305,7 @@ class FagsakDeltagerServiceIntegrationTest(
     @Test
     fun `Skal returnere tom liste ved søk hvis ident ikke har aktiv fødselsnummer`() {
         val fnr = randomFnr()
-        fakePdlIdentRestClient.leggTilIdent(
+        fakePdlIdentRestKlient.leggTilIdent(
             fnr,
             listOf(
                 IdentInformasjon("npid", gruppe = "NPID", historisk = false),
@@ -322,19 +315,10 @@ class FagsakDeltagerServiceIntegrationTest(
         assertThat(fagsakDeltagerService.hentFagsakDeltagere(fnr)).hasSize(0)
     }
 
-    // Satte XX for at dette testet skal kjøre sist.
     @Test
-    fun `XX Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
+    fun `Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
         val aktør = lagAktør()
 
-        every {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer()))
-        } answers {
-            throw HttpServerErrorException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "[PdlRestClient][Feil ved oppslag på person: Fant ikke person]",
-            )
-        }
         leggTilPersonIkkeFunnet(aktør.aktivFødselsnummer())
         assertEquals(emptyList<RestFagsakDeltager>(), fagsakDeltagerService.hentFagsakDeltagere(aktør.aktivFødselsnummer()))
     }
