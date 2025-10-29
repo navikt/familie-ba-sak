@@ -37,9 +37,9 @@ spec:
       runtime: java
   gcp: # Database
     sqlInstances:
-      - type: POSTGRES_15 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
+      - type: POSTGRES_16 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
         tier: db-custom-1-3840
-        name: familie-ba-sak
+        name: familie-ba-sak-16
         autoBackupHour: 2
         pointInTimeRecovery: false
         diskAutoresize: true
