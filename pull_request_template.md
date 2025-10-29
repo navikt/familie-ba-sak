@@ -1,12 +1,12 @@
 ### 📮 Favro: NAV-
 
-
 ### 💰 Hva skal gjøres, og hvorfor?
-<!--- Skriv 1 eller 2 setninger om hvilken funksjonell endring som blir implementert. Ta med en **lenke til Favro** og
-skriv en kort beskrivelse av hvorfor endringen skal gjøres. --->
+<!--- Skriv 1 eller 2 setninger om hvilken funksjonell endring som blir implementert og skriv en kort beskrivelse av hvorfor endringen skal gjøres. --->
+
 
 ### 🔎️ Er det noe spesielt du ønsker tilbakemelding om?
 <!--- Er det noe du er usikker på eller ønsker å diskutere? Beskriv det gjerne her eller kommenter koden det gjelder. --->
+
 
 ### ✅ Checklist
 _Har du husket alle punktene i listen?_
