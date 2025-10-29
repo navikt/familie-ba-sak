@@ -1419,6 +1419,8 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                 )
 
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } returns emptyList()
+
             // Act
             val vilkårresultat =
                 preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
@@ -1485,6 +1487,8 @@ class PreutfyllBosattIRiketServiceTest {
                             ),
                         ),
                 )
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
 
             // Act
             val vilkårresultat =
@@ -1553,6 +1557,8 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                 )
 
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
+
             // Act
             val vilkårresultat =
                 preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
@@ -1619,6 +1625,8 @@ class PreutfyllBosattIRiketServiceTest {
                             ),
                         ),
                 )
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
 
             // Act
             val vilkårresultat =
@@ -1687,6 +1695,8 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                 )
 
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
+
             // Act
             val vilkårresultat =
                 preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
@@ -1753,6 +1763,8 @@ class PreutfyllBosattIRiketServiceTest {
                             ),
                         ),
                 )
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
 
             // Act
             val vilkårresultat =
