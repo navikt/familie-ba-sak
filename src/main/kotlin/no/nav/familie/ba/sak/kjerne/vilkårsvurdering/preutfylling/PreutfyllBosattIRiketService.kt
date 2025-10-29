@@ -234,17 +234,28 @@ class PreutfyllBosattIRiketService(
                 if (eksisterendeVilkårResultat == null) {
                     return@kombinerMed null
                 }
-                val utdypendeVilkårsvurderingUtenFinnmarkOgSvalbardtillegg = eksisterendeVilkårResultat.utdypendeVilkårsvurderinger.filter { it != BOSATT_I_FINNMARK_NORD_TROMS && it != BOSATT_PÅ_SVALBARD }
-                if (finnmarkEllerSvalbardtillegg == null) {
-                    return@kombinerMed eksisterendeVilkårResultat.copy(utdypendeVilkårsvurderinger = utdypendeVilkårsvurderingUtenFinnmarkOgSvalbardtillegg)
+
+                val gjeldendeFinnmarkEllerSvalbardMarkeringer = finnmarkEllerSvalbardtillegg.orEmpty().toSet()
+                val eksisterendeFinnmarkEllerSvalbardMarkeringer = eksisterendeVilkårResultat.utdypendeVilkårsvurderinger.filter { it == BOSATT_I_FINNMARK_NORD_TROMS || it == BOSATT_PÅ_SVALBARD }.toSet()
+                val utdypendeVilkårsvurderingMåOppdateres = eksisterendeFinnmarkEllerSvalbardMarkeringer != gjeldendeFinnmarkEllerSvalbardMarkeringer
+
+                if (utdypendeVilkårsvurderingMåOppdateres) {
+                    val oppdaterteUtdypendeVilkårsvurderinger =
+                        eksisterendeVilkårResultat.utdypendeVilkårsvurderinger
+                            .filter { it != BOSATT_I_FINNMARK_NORD_TROMS && it != BOSATT_PÅ_SVALBARD }
+                            .plus(gjeldendeFinnmarkEllerSvalbardMarkeringer)
+
+                    eksisterendeVilkårResultat.copy(utdypendeVilkårsvurderinger = oppdaterteUtdypendeVilkårsvurderinger, begrunnelse = PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
+                } else {
+                    eksisterendeVilkårResultat
                 }
-                val utdypendeVilkårsvurderingMedFinnmarkOgSvalbardtillegg = utdypendeVilkårsvurderingUtenFinnmarkOgSvalbardtillegg.plus(finnmarkEllerSvalbardtillegg)
-                eksisterendeVilkårResultat.copy(utdypendeVilkårsvurderinger = utdypendeVilkårsvurderingMedFinnmarkOgSvalbardtillegg, begrunnelse = PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
             }.tilPerioderIkkeNull()
             .map {
+                val periodeErEndret = it.fom != it.verdi.periodeFom || it.tom != it.verdi.periodeTom
                 it.verdi.copy(
                     periodeFom = it.fom,
                     periodeTom = it.tom,
+                    begrunnelse = if (periodeErEndret) PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT else it.verdi.begrunnelse,
                 )
             }
     }
