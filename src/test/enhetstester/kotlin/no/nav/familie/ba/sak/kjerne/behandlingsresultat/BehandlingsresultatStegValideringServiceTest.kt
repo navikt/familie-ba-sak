@@ -457,7 +457,10 @@ class BehandlingsresultatStegValideringServiceTest {
             // Act & Assert
             val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
 
-            assertThat(feil.message).isEqualTo("Automatisk behandlingen fører til endringer i utbetaling utenom Finnmarkstillegg.")
+            assertThat(feil.message).isEqualTo(
+                "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
+                    "Automatisk behandling fører til endringer i annen sats enn Finnmarkstillegg.",
+            )
         }
 
         @Test
@@ -506,7 +509,10 @@ class BehandlingsresultatStegValideringServiceTest {
             // Act & Assert
             val feil = assertThrows<AutovedtakMåBehandlesManueltFeil> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
 
-            assertThat(feil.message).isEqualTo("Automatisk behandlingen fører til endringer i utbetaling utenom Finnmarkstillegg.")
+            assertThat(feil.message).isEqualTo(
+                "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
+                    "Automatisk behandling fører til endringer i annen sats enn Finnmarkstillegg.",
+            )
         }
 
         @Test
@@ -651,7 +657,10 @@ class BehandlingsresultatStegValideringServiceTest {
             // Act & Assert
             val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
 
-            assertThat(feil.message).isEqualTo("Automatisk behandling fører til innvilgelse av Finnmarkstillegg mer enn én måned fram i tid.")
+            assertThat(feil.message).isEqualTo(
+                "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
+                    "Automatisk behandling fører til innvilgelse av Finnmarkstillegg mer enn én måned fram i tid.",
+            )
         }
 
         @Test
@@ -725,7 +734,10 @@ class BehandlingsresultatStegValideringServiceTest {
             // Act & Assert
             val feil = assertThrows<AutovedtakMåBehandlesManueltFeil> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
 
-            assertThat(feil.message).isEqualTo("Automatisk behandling fører til innvilgelse av Finnmarkstillegg mer enn én måned fram i tid.")
+            assertThat(feil.message).isEqualTo(
+                "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
+                    "Automatisk behandling fører til innvilgelse av Finnmarkstillegg mer enn én måned fram i tid.",
+            )
         }
 
         @Test
@@ -901,7 +913,10 @@ class BehandlingsresultatStegValideringServiceTest {
             // Act & Assert
             val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
 
-            assertThat(feil.message).isEqualTo("Automatisk behandlingen fører til endringer i utbetaling utenom Svalbardtillegg.")
+            assertThat(feil.message).isEqualTo(
+                "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
+                    "Automatisk behandling fører til endringer i annen sats enn Svalbardtillegg.",
+            )
         }
 
         @Test
@@ -950,7 +965,10 @@ class BehandlingsresultatStegValideringServiceTest {
             // Act & Assert
             val feil = assertThrows<AutovedtakMåBehandlesManueltFeil> { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
 
-            assertThat(feil.message).isEqualTo("Automatisk behandlingen fører til endringer i utbetaling utenom Svalbardtillegg.")
+            assertThat(feil.message).isEqualTo(
+                "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
+                    "Automatisk behandling fører til endringer i annen sats enn Svalbardtillegg.",
+            )
         }
 
         @Test
@@ -1095,7 +1113,10 @@ class BehandlingsresultatStegValideringServiceTest {
             // Act & Assert
             val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
 
-            assertThat(feil.message).isEqualTo("Automatisk behandling fører til innvilgelse av Svalbardtillegg mer enn én måned fram i tid.")
+            assertThat(feil.message).isEqualTo(
+                "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
+                    "Automatisk behandling fører til innvilgelse av Svalbardtillegg mer enn én måned fram i tid.",
+            )
         }
 
         @Test
@@ -1169,7 +1190,10 @@ class BehandlingsresultatStegValideringServiceTest {
             // Act & Assert
             val feil = assertThrows<AutovedtakMåBehandlesManueltFeil> { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
 
-            assertThat(feil.message).isEqualTo("Automatisk behandling fører til innvilgelse av Svalbardtillegg mer enn én måned fram i tid.")
+            assertThat(feil.message).isEqualTo(
+                "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
+                    "Automatisk behandling fører til innvilgelse av Svalbardtillegg mer enn én måned fram i tid.",
+            )
         }
 
         @Test
