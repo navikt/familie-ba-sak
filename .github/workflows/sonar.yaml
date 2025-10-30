@@ -23,7 +23,7 @@ jobs:
         run: |
           mvn verify -B --no-transfer-progress --settings .m2/maven-settings.xml --file pom.xml -Penhetstest -Pkover -Dkover.reportXml.path=target/kover/UT.xml
       - name: Last opp kover UT rapport
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # ratchet:actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # ratchet:actions/upload-artifact@v4
         with:
           name: koverUT
           path: target/kover/UT.xml
@@ -48,7 +48,7 @@ jobs:
         run: |
           mvn verify -B --no-transfer-progress --settings .m2/maven-settings.xml --file pom.xml  -Dsurefire.rerunFailingTestsCount=2 -Pintegrasjonstest -Pkover -Dkover.reportXml.path=target/kover/IT.xml
       - name: Last opp Kover IT rapport
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # ratchet:actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # ratchet:actions/upload-artifact@v4
         with:
           name: koverIT
           path: target/kover/IT.xml
@@ -70,12 +70,12 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Last ned Kover UT rapport
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # ratchet:actions/download-artifact@v4
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # ratchet:actions/download-artifact@v4
         with:
           name: koverUT
           path: kover/UT
       - name: Last ned Kover IT rapport
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # ratchet:actions/download-artifact@v4
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # ratchet:actions/download-artifact@v4
         with:
           name: koverIT
           path: kover/IT
