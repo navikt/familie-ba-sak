@@ -37,9 +37,9 @@ spec:
       runtime: java
   gcp: # Database
     sqlInstances:
-      - type: POSTGRES_16 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
+      - type: POSTGRES_17 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
         tier: db-custom-1-3840
-        name: familie-ba-sak-16
+        name: familie-ba-sak-17
         autoBackupHour: 2
         pointInTimeRecovery: false
         diskAutoresize: true
@@ -47,6 +47,13 @@ spec:
         databases:
           - name: familie-ba-sak
             envVarPrefix: DB
+        flags:
+          - name: cloudsql.enable_pgaudit
+            value: "on"
+          - name: pgaudit.log
+            value: "write,ddl,role"
+          - name: "pgaudit.log_parameter"
+            value: "on"
   azure:
     application:
       enabled: true
