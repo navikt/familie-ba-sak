@@ -37,6 +37,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_Å
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -673,7 +675,7 @@ class VilkårsvurderingValideringTest {
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } returns listOf(andel)
 
             // Act && Assert
-            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering, andelTilkjentYtelseRepository)).isFalse()
+            assertThat(finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering, andelTilkjentYtelseRepository)).isFalse()
         }
 
         @Test
@@ -819,6 +821,234 @@ class VilkårsvurderingValideringTest {
                 "For fagsak ${vilkårsvurdering.behandling.fagsak.id} finnes det perioder der søker er " +
                     "BOSATT_PÅ_SVALBARD samtidig som et barn med delt bosted ikke er BOSATT_PÅ_SVALBARD.",
             )
+        }
+    }
+
+    @Nested
+    inner class ValiderAtVilkårsvurderingErEndret {
+        @Test
+        fun `Skal kaste feil i finnmarkstillegg-behandlinger hvis det ikke er endringer i 'Bosatt i riket'-vilkåret`() {
+            // Arrange
+            val person = lagPerson()
+
+            val forrigeBehandling = lagBehandling()
+            val forrigeVilkårsvurdering =
+                lagVilkårsvurdering(behandling = forrigeBehandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = forrigeBehandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(BOSATT_I_FINNMARK_NORD_TROMS),
+                        ),
+                    )
+                }
+
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.FINNMARKSTILLEGG)
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = behandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(BOSATT_I_FINNMARK_NORD_TROMS),
+                        ),
+                    )
+                }
+
+            // Act & Assert
+            assertThatThrownBy { validerAtVilkårsvurderingErEndret(vilkårsvurdering, forrigeVilkårsvurdering) }
+                .hasMessage("Ingen endring i 'Bosatt i riket'-vilkåret")
+        }
+
+        @Test
+        fun `Skal ikke kaste feil i finnmarkstillegg-behandlinger hvis utdypende vilkårsvurdering i 'Bosatt i riket'-vilkåret er endret`() {
+            // Arrange
+            val person = lagPerson()
+
+            val forrigeBehandling = lagBehandling()
+            val forrigeVilkårsvurdering =
+                lagVilkårsvurdering(behandling = forrigeBehandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = forrigeBehandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(BOSATT_I_FINNMARK_NORD_TROMS),
+                        ),
+                    )
+                }
+
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.FINNMARKSTILLEGG)
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = behandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(),
+                        ),
+                    )
+                }
+
+            // Act & Assert
+            assertThatCode { validerAtVilkårsvurderingErEndret(vilkårsvurdering, forrigeVilkårsvurdering) }.doesNotThrowAnyException()
+        }
+
+        @Test
+        fun `Skal ikke kaste feil i finnmarkstillegg-behandlinger hvis periode i 'Bosatt i riket'-vilkåret er endret`() {
+            // Arrange
+            val person = lagPerson()
+
+            val forrigeBehandling = lagBehandling()
+            val forrigeVilkårsvurdering =
+                lagVilkårsvurdering(behandling = forrigeBehandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = forrigeBehandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(BOSATT_I_FINNMARK_NORD_TROMS),
+                        ),
+                    )
+                }
+
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.FINNMARKSTILLEGG)
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = behandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 2, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(BOSATT_I_FINNMARK_NORD_TROMS),
+                        ),
+                    )
+                }
+
+            // Act & Assert
+            assertThatCode { validerAtVilkårsvurderingErEndret(vilkårsvurdering, forrigeVilkårsvurdering) }.doesNotThrowAnyException()
+        }
+
+        @Test
+        fun `Skal kaste feil i svalbardtillegg-behandlinger hvis det ikke er endringer i 'Bosatt i riket'-vilkåret`() {
+            // Arrange
+            val person = lagPerson()
+
+            val forrigeBehandling = lagBehandling()
+            val forrigeVilkårsvurdering =
+                lagVilkårsvurdering(behandling = forrigeBehandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = forrigeBehandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(BOSATT_PÅ_SVALBARD),
+                        ),
+                    )
+                }
+
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.SVALBARDTILLEGG)
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = behandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(BOSATT_PÅ_SVALBARD),
+                        ),
+                    )
+                }
+
+            // Act & Assert
+            assertThatThrownBy { validerAtVilkårsvurderingErEndret(vilkårsvurdering, forrigeVilkårsvurdering) }.hasMessage(
+                "Ingen endring i 'Bosatt i riket'-vilkåret",
+            )
+        }
+
+        @Test
+        fun `Skal ikke kaste feil i svalbardtillegg-behandlinger hvis utdypende vilkårsvurdering i 'Bosatt i riket'-vilkåret er endret`() {
+            // Arrange
+            val person = lagPerson()
+
+            val forrigeBehandling = lagBehandling()
+            val forrigeVilkårsvurdering =
+                lagVilkårsvurdering(behandling = forrigeBehandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = forrigeBehandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(BOSATT_PÅ_SVALBARD),
+                        ),
+                    )
+                }
+
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.SVALBARDTILLEGG)
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = behandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(),
+                        ),
+                    )
+                }
+
+            // Act & Assert
+            assertThatCode { validerAtVilkårsvurderingErEndret(vilkårsvurdering, forrigeVilkårsvurdering) }.doesNotThrowAnyException()
+        }
+
+        @Test
+        fun `Skal ikke kaste feil i svalbardtillegg-behandlinger hvis periode i 'Bosatt i riket'-vilkåret er endret`() {
+            // Arrange
+            val person = lagPerson()
+
+            val forrigeBehandling = lagBehandling()
+            val forrigeVilkårsvurdering =
+                lagVilkårsvurdering(behandling = forrigeBehandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = forrigeBehandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(BOSATT_PÅ_SVALBARD),
+                        ),
+                    )
+                }
+
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.SVALBARDTILLEGG)
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = behandling,
+                            person = person,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 2, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(BOSATT_PÅ_SVALBARD),
+                        ),
+                    )
+                }
+
+            // Act & Assert
+            assertThatCode { validerAtVilkårsvurderingErEndret(vilkårsvurdering, forrigeVilkårsvurdering) }.doesNotThrowAnyException()
         }
     }
 
