@@ -36,6 +36,8 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+private val FINNMARK_OG_SVALBARD_MERKING_CUT_OFF_FOM_DATO = LocalDate.of(2025, 9, 1)
+
 @Service
 class PreutfyllBosattIRiketService(
     private val pdlRestKlient: SystemOnlyPdlRestKlient,
@@ -75,7 +77,6 @@ class PreutfyllBosattIRiketService(
                             personResultat = personResultat,
                             adresserForPerson = adresserForPerson,
                             behandling = behandling,
-                            cutOffFomDato = cutOffFomDato!!,
                         )
                     } else {
                         val bosattIRiketVilkårResultat =
@@ -199,7 +200,6 @@ class PreutfyllBosattIRiketService(
         personResultat: PersonResultat,
         adresserForPerson: Adresser,
         behandling: Behandling,
-        cutOffFomDato: LocalDate,
     ): List<VilkårResultat> {
         val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erDeltBostedIFinnmarkEllerNordTromsTidslinje = lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
@@ -224,7 +224,7 @@ class PreutfyllBosattIRiketService(
                         erBosattIFinnmarkEllerNordTroms == true -> listOf(BOSATT_I_FINNMARK_NORD_TROMS)
                         else -> emptyList()
                     }
-                }.beskjærFraOgMed(cutOffFomDato)
+                }.beskjærFraOgMed(FINNMARK_OG_SVALBARD_MERKING_CUT_OFF_FOM_DATO)
 
         val eksisterendeBosattIRiketVilkårResultater = personResultat.vilkårResultater.filter { it.vilkårType == BOSATT_I_RIKET }
 

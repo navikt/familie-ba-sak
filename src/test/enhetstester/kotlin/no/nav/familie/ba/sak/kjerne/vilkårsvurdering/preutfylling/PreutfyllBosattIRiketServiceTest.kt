@@ -1419,7 +1419,6 @@ class PreutfyllBosattIRiketServiceTest {
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
-                    cutOffFomDato = LocalDate.of(2025, 9, 1),
                 )
 
             // Assert
@@ -1484,7 +1483,6 @@ class PreutfyllBosattIRiketServiceTest {
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
-                    cutOffFomDato = LocalDate.of(2025, 9, 1),
                 )
 
             // Assert
@@ -1548,7 +1546,6 @@ class PreutfyllBosattIRiketServiceTest {
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
-                    cutOffFomDato = LocalDate.of(2025, 9, 1),
                 )
 
             // Assert
@@ -1623,7 +1620,6 @@ class PreutfyllBosattIRiketServiceTest {
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
-                    cutOffFomDato = LocalDate.of(2025, 9, 1),
                 )
 
             // Assert
@@ -1714,7 +1710,6 @@ class PreutfyllBosattIRiketServiceTest {
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
-                    cutOffFomDato = LocalDate.of(2025, 9, 1),
                 )
 
             // Assert
@@ -1795,7 +1790,6 @@ class PreutfyllBosattIRiketServiceTest {
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
-                    cutOffFomDato = LocalDate.of(2025, 9, 1),
                 )
 
             // Assert
