@@ -20,6 +20,10 @@ fun mockAndelTilkjentYtelseRepository(
         val behandlingId = firstArg<Long>()
         tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList()
     }
+    every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } answers {
+        val behandlingId = firstArg<Long>()
+        tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList()
+    }
     every { andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(any()) } answers {
         val fagsakId = firstArg<Long>()
         val behandlingId =

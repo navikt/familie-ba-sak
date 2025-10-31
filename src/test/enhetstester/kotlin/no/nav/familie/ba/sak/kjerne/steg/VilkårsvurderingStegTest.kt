@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -24,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaSe
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -35,8 +37,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -56,6 +60,7 @@ class VilkårsvurderingStegTest {
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val oppgaveService: OppgaveService = mockk()
+    private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>(relaxed = true)
 
     private val vilkårsvurderingSteg: VilkårsvurderingSteg =
         VilkårsvurderingSteg(
@@ -73,6 +78,7 @@ class VilkårsvurderingStegTest {
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             featureToggleService = featureToggleService,
             oppgaveService = oppgaveService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
 
     val behandling =
@@ -188,5 +194,36 @@ class VilkårsvurderingStegTest {
 
         val exception = assertThrows<FunksjonellFeil> { vilkårsvurderingSteg.preValiderSteg(behandling, null) }
         assertTrue(exception.message?.contains("Det er forskjellig regelverk for en eller flere perioder for søker eller barna.") == true)
+    }
+
+    @Nested
+    inner class ValiderFinnmarkOgSvalbardBehandling {
+        @Test
+        fun `Skal kaste feil i finnmarkstillegg-behandlinger om forrige vedtatte behandling ikke finnes`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.FINNMARKSTILLEGG)
+            val vilkårsvurdering = lagVilkårsvurdering(1L, behandling)
+
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
+
+            // Act & Assert
+            assertThatThrownBy { vilkårsvurderingSteg.validerFinnmarkOgSvalbardBehandling(behandling, vilkårsvurdering) }.hasMessage(
+                "Kan ikke kjøre behandling med årsak ${behandling.opprettetÅrsak} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}",
+            )
+        }
+
+        @Test
+        fun `Skal kaste feil i svalbardtillegg-behandlinger om forrige vedtatte behandling ikke finnes`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.SVALBARDTILLEGG)
+            val vilkårsvurdering = lagVilkårsvurdering(2L, behandling)
+
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
+
+            // Act & Assert
+            assertThatThrownBy { vilkårsvurderingSteg.validerFinnmarkOgSvalbardBehandling(behandling, vilkårsvurdering) }.hasMessage(
+                "Kan ikke kjøre behandling med årsak ${behandling.opprettetÅrsak} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}",
+            )
+        }
     }
 }

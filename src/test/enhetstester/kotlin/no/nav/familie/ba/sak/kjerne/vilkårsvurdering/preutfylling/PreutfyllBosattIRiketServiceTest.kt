@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
@@ -47,6 +48,7 @@ class PreutfyllBosattIRiketServiceTest {
     private val søknadService: SøknadService = mockk(relaxed = true)
     private val persongrunnlagService: PersongrunnlagService = mockk(relaxed = true)
     private val featureToggleService = mockk<FeatureToggleService>()
+    private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
 
     private val preutfyllBosattIRiketService =
         PreutfyllBosattIRiketService(
@@ -54,6 +56,7 @@ class PreutfyllBosattIRiketServiceTest {
             søknadService = søknadService,
             persongrunnlagService = persongrunnlagService,
             featureToggleService = featureToggleService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
 
     @BeforeEach
@@ -1416,6 +1419,8 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                 )
 
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } returns emptyList()
+
             // Act
             val vilkårresultat =
                 preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
@@ -1482,6 +1487,8 @@ class PreutfyllBosattIRiketServiceTest {
                             ),
                         ),
                 )
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
 
             // Act
             val vilkårresultat =
@@ -1550,6 +1557,8 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                 )
 
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
+
             // Act
             val vilkårresultat =
                 preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
@@ -1616,6 +1625,8 @@ class PreutfyllBosattIRiketServiceTest {
                             ),
                         ),
                 )
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
 
             // Act
             val vilkårresultat =
@@ -1684,6 +1695,8 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                 )
 
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
+
             // Act
             val vilkårresultat =
                 preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
@@ -1750,6 +1763,8 @@ class PreutfyllBosattIRiketServiceTest {
                             ),
                         ),
                 )
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
 
             // Act
             val vilkårresultat =
