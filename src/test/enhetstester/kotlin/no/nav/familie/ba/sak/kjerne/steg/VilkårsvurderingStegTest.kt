@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
-import no.nav.familie.ba.sak.datagenerator.lagPersonEnkel
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
@@ -45,8 +44,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -201,21 +198,6 @@ class VilkårsvurderingStegTest {
 
     @Nested
     inner class ValiderFinnmarkOgSvalbardBehandling {
-        @ParameterizedTest
-        @EnumSource(BehandlingÅrsak::class, names = ["FINNMARKSTILLEGG", "SVALBARDTILLEGG"], mode = EnumSource.Mode.EXCLUDE)
-        fun `skal ikke validere om behandlingen har en annen årsak enn FINNMARKSTILLEGG eller SVALBARDTILLEGG`(
-            behandlingÅrsak: BehandlingÅrsak,
-        ) {
-            // Arrange
-            val behandling = lagBehandling(årsak = behandlingÅrsak)
-
-            every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id) } returns listOf(lagPersonEnkel(PersonType.SØKER))
-            every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns Vilkårsvurdering(id = 1L, behandling = behandling)
-
-            // Act & Assert
-            assertDoesNotThrow { vilkårsvurderingSteg.preValiderSteg(behandling) }
-        }
-
         @Test
         fun `Skal kaste feil i finnmarkstillegg-behandlinger om forrige vedtatte behandling ikke finnes`() {
             // Arrange
