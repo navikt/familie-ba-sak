@@ -37,7 +37,7 @@ fun mockPersongrunnlagService(dataFraCucumber: VedtaksperioderOgBegrunnelserStep
     }
     every { persongrunnlagService.oppdaterAdresserPåPersoner(any()) } answers {
         val personopplysningGrunnlag = firstArg<PersonopplysningGrunnlag>()
-
+        dataFraCucumber.persongrunnlag[personopplysningGrunnlag.behandlingId] = personopplysningGrunnlag
         personopplysningGrunnlag
     }
     every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers {
@@ -45,6 +45,13 @@ fun mockPersongrunnlagService(dataFraCucumber: VedtaksperioderOgBegrunnelserStep
         dataFraCucumber.persongrunnlag[personopplysningGrunnlag.behandlingId] = personopplysningGrunnlag
         personopplysningGrunnlag
     }
+
+    every { persongrunnlagService.oppdaterStatsborgerskapPåPersoner(any()) } answers {
+        val personopplysningGrunnlag = firstArg<PersonopplysningGrunnlag>()
+        dataFraCucumber.persongrunnlag[personopplysningGrunnlag.behandlingId] = personopplysningGrunnlag
+        personopplysningGrunnlag
+    }
+
     every { persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(any(), any(), any(), any(), any()) } answers {
         val aktør = firstArg<Aktør>()
         val barnFraInneværendeBehandling = secondArg<List<Aktør>>()

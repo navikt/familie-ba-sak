@@ -435,6 +435,27 @@ class PersongrunnlagService(
         return personopplysningGrunnlag
     }
 
+    fun oppdaterStatsborgerskapPåPersoner(
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+    ): PersonopplysningGrunnlag {
+        personopplysningGrunnlag.personer.forEach { person ->
+            val aktør = person.aktør
+            val personinfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+
+            person.statsborgerskap =
+                personinfo.statsborgerskap
+                    ?.flatMap {
+                        statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+                            statsborgerskap = it,
+                            person = person,
+                        )
+                    }?.sortedBy { it.gyldigPeriode?.fom }
+                    ?.toMutableList() ?: mutableListOf()
+        }
+
+        return personopplysningGrunnlag
+    }
+
     fun hentSøkersMålform(behandlingId: Long) = hentSøkerOgBarnPåBehandlingThrows(behandlingId).søker().målform
 
     @Transactional

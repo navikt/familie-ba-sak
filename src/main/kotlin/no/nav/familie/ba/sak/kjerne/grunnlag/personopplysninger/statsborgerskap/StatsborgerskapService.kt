@@ -204,6 +204,8 @@ fun Statsborgerskap.hentFom() = this.bekreftelsesdato ?: this.gyldigFraOgMed
 
 fun Statsborgerskap.iNordiskLand() = Norden.entries.map { it.name }.contains(this.land)
 
+fun GrStatsborgerskap.iNordiskLand() = Norden.entries.map { it.name }.contains(this.landkode)
+
 fun Statsborgerskap.iTredjeland() = this.land != StatsborgerskapService.LANDKODE_UKJENT
 
 fun Statsborgerskap.erStatsløs() = this.land == StatsborgerskapService.LANDKODE_STATSLØS

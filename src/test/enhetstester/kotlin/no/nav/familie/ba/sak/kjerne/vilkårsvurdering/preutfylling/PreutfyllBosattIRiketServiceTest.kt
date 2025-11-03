@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.cucumber.lagVilkårsvurdering
@@ -28,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -462,6 +464,19 @@ class PreutfyllBosattIRiketServiceTest {
                 barnasIdenter = listOf(randomFnr()),
                 barnasFødselsdatoer = listOf(LocalDate.now().minusYears(10)),
             )
+
+        persongrunnlag.personer.forEach {
+            it.statsborgerskap =
+                mutableListOf(
+                    GrStatsborgerskap(
+                        landkode = "DNK",
+                        gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(3), tom = null),
+                        id = 0,
+                        person = it,
+                    ),
+                )
+        }
+
         val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.søker.aktør)
 
@@ -486,11 +501,6 @@ class PreutfyllBosattIRiketServiceTest {
             )
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad()
-
-        every { pdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
-            listOf(
-                Statsborgerskap(land = "DNK", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
-            )
 
         // Act
         val vilkårResultat =

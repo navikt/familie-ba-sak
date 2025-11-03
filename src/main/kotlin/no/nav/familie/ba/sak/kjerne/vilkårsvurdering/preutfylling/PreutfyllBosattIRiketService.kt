@@ -63,7 +63,7 @@ class PreutfyllBosattIRiketService(
                 .map { it.aktør.aktivFødselsnummer() }
                 .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
 
-        val persongrunnlag = persongrunnlagService.oppdaterAdresserPåPersoner(persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id))
+        val personOpplysningsgrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id).let { persongrunnlagService.oppdaterAdresserPåPersoner(it) }
 
         vilkårsvurdering
             .personResultater
@@ -75,7 +75,7 @@ class PreutfyllBosattIRiketService(
                 }
 
                 val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
-                val adresserForPerson = Adresser.opprettFra(persongrunnlag.søker)
+                val adresserForPerson = Adresser.opprettFra(personOpplysningsgrunnlag.søker)
 
                 val nyeBosattIRiketVilkårResultater =
                     if (behandling.erFinnmarksEllerSvalbardtillegg() && featureToggleService.isEnabled(FeatureToggle.NY_PREUTFYLLING_FOR_BOSATT_I_RIKET_VILKÅR_VED_AUTOVEDTAK_FINNMARK_SVALBARD)) {
@@ -116,8 +116,9 @@ class PreutfyllBosattIRiketService(
         adresserForPerson: Adresser,
         behandling: Behandling,
     ): Set<VilkårResultat> {
+        val personopplysningGrunnlag = persongrunnlagService.oppdaterStatsborgerskapPåPersoner(persongrunnlagService.hentAktivThrows(behandling.id)) // todo må man ha alles statsborgerskap her?
         val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(adresserForPerson, personResultat)
-        val erNordiskStatsborgerTidslinje = pdlRestKlient.lagErNordiskStatsborgerTidslinje(personResultat)
+        val erNordiskStatsborgerTidslinje = lagErNordiskStatsborgerTidslinje(personopplysningGrunnlag)
         val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erDeltBostedIFinnmarkEllerNordTromsTidslinje = lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erOppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje(adresserForPerson, personResultat)

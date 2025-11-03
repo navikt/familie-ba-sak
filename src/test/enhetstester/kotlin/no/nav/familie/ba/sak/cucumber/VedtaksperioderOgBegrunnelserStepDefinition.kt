@@ -50,6 +50,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
@@ -448,12 +450,12 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
                 utvidetVedtaksperiodeMedBegrunnelser.find { it.fom == forventet.fom && it.tom == forventet.tom }
                     ?: throw Feil(
                         "Forventet å finne en vedtaksperiode med  \n" +
-                            "   Fom: ${forventet.fom?.tilddMMyyyy()} og Tom: ${forventet.tom?.tilddMMyyyy()}. \n" +
-                            "Faktiske vedtaksperioder var \n${
-                                utvidetVedtaksperiodeMedBegrunnelser.joinToString("\n") {
-                                    "   Fom: ${it.fom?.tilddMMyyyy()}, Tom: ${it.tom?.tilddMMyyyy()}"
-                                }
-                            }",
+                                "   Fom: ${forventet.fom?.tilddMMyyyy()} og Tom: ${forventet.tom?.tilddMMyyyy()}. \n" +
+                                "Faktiske vedtaksperioder var \n${
+                                    utvidetVedtaksperiodeMedBegrunnelser.joinToString("\n") {
+                                        "   Fom: ${it.fom?.tilddMMyyyy()}, Tom: ${it.tom?.tilddMMyyyy()}"
+                                    }
+                                }",
                     )
             assertThat(faktisk.type)
                 .`as`("For periode: ${forventet.fom} til ${forventet.tom}")
@@ -491,11 +493,11 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         if (vedtaksperioderMedBegrunnelser.isEmpty()) {
             throw Feil(
                 "Forventet å finne en vedtaksperiode med Fom: $periodeFom og Tom: $periodeTom. \n" +
-                    "Faktiske vedtaksperioder var \n${
-                        vedtaksperioderMedBegrunnelser.joinToString("\n") {
-                            "   Fom: ${it.fom}, Tom: ${it.tom}"
-                        }
-                    }",
+                        "Faktiske vedtaksperioder var \n${
+                            vedtaksperioderMedBegrunnelser.joinToString("\n") {
+                                "   Fom: ${it.fom}, Tom: ${it.tom}"
+                            }
+                        }",
             )
         }
 
@@ -596,354 +598,363 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
      */
     @Og("med adressekommuner")
     fun `med adressekommuner`(dataTable: DataTable) {
+        val identTilAdresser = parseAdresser(dataTable, persongrunnlag)
         adresser.putAll(parseAdresser(dataTable, persongrunnlag))
-    }
+        persongrunnlag.forEach {
+            it.value.personer.forEach { person ->
+                person.bostedsadresser =
+                    (identTilAdresser[person.aktør.personidenter.first().fødselsnummer]?.bostedsadresse?.map { bostedsadresse ->
+                        GrBostedsadresse.fraBostedsadresse(bostedsadresse, person)
+                    } ?: emptyList()).toMutableList()
+            }
 
-    @Når("vi lager automatisk behandling med id {} på fagsak {} på grunn av finnmarkstillegg")
-    fun `kjør behandling finnmarkstillegg på fagsak med behandlingsid`(
-        finnmarkstilleggBehandlingId: Long,
-        fagsakId: Long,
-    ) {
-        mockAutovedtakFinnmarkstilleggService(
-            dataFraCucumber = this,
-            fagsakId = fagsakId,
-            nyBehanldingId = finnmarkstilleggBehandlingId,
-        ).kjørBehandling(FinnmarkstilleggData(fagsakId))
-    }
+        }
 
-    @Når("vi lager automatisk behandling med id {} på fagsak {} på grunn av svalbardtillegg")
-    fun `kjør behandling svalbardtillegg på fagsak med behandlingsid`(
-        svalbardtilleggBehandlingId: Long,
-        fagsakId: Long,
-    ) {
-        mockAutovedtakSvalbardtilleggService(
-            dataFraCucumber = this,
-            fagsakId = fagsakId,
-            nyBehanldingId = svalbardtilleggBehandlingId,
-        ).kjørBehandling(SvalbardtilleggData(fagsakId))
-    }
-
-    @Så("forvent at brevmal {} er brukt for behandling {}")
-    fun `forvent følgende brevmal for behandling`(
-        forventetBrevmal: Brevmal,
-        behandlingId: Long,
-    ) {
-        val behandling = behandlinger.finnBehandling(behandlingId)
-        val faktiskBrevmal = CucumberMock(this, behandlingId).brevmalService.hentBrevmal(behandling)
-
-        assertThat(faktiskBrevmal).isEqualTo(forventetBrevmal)
-    }
-
-    @Så("forvent følgende vilkårresultater for behandling {}")
-    fun `forvent følgende vilkårresultater for behandling`(
-        behandlingId: Long,
-        dataTable: DataTable,
-    ) {
-        val forventedeVilkårResultaterPerAktør =
-            dataTable
-                .asMaps()
-                .groupBy { parseAktørId(it) }
-                .mapValues { (aktørId, vilkårResultatRaderForAktør) ->
-                    parseVilkårResultaterForAktør(
-                        vilkårResultatRaderForAktør = vilkårResultatRaderForAktør,
-                        behandlingId = behandlingId,
-                        personResultat = vilkårsvurderinger[behandlingId]!!.personResultater.first { it.aktør.aktørId == aktørId },
-                    )
-                }
-
-        val faktiskeVilkårResultaterPerAktør =
-            vilkårsvurderinger[behandlingId]!!
-                .personResultater
-                .associate { it.aktør.aktørId to it.vilkårResultater }
-
-        assertThat(faktiskeVilkårResultaterPerAktør)
-            .usingRecursiveComparison()
-            .ignoringFieldsMatchingRegexes("id", ".*opprettetTidspunkt", ".*endretTidspunkt", ".*begrunnelse", ".*erAutomatiskVurdert", ".*erOpprinneligPreutfylt")
-            .ignoringCollectionOrder()
-            .isEqualTo(forventedeVilkårResultaterPerAktør)
-    }
-
-    /**
-     * Mulige verdier: | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
-     */
-    @Så("forvent følgende andeler tilkjent ytelse for behandling {}")
-    fun `forvent andeler tilkjent ytelse`(
-        behandlingId: Long,
-        dataTable: DataTable,
-    ) {
-        val beregnetTilkjentYtelse =
-            tilkjenteYtelser[behandlingId]
-                ?.andelerTilkjentYtelse
-                ?.toList()!!
-                .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
-
-        val forventedeAndeler =
-            lagTilkjentYtelse(
+        @Når("vi lager automatisk behandling med id {} på fagsak {} på grunn av finnmarkstillegg")
+        fun `kjør behandling finnmarkstillegg på fagsak med behandlingsid`(
+            finnmarkstilleggBehandlingId: Long,
+            fagsakId: Long,
+        ) {
+            mockAutovedtakFinnmarkstilleggService(
                 dataFraCucumber = this,
-                dataTable = dataTable,
-                behandlinger = behandlinger,
-                personGrunnlag = persongrunnlag,
-                vedtaksliste = vedtaksliste,
-                behandlingTilForrigeBehandling = behandlingTilForrigeBehandling,
-            )[behandlingId]!!
-                .andelerTilkjentYtelse
-                .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
+                fagsakId = fagsakId,
+                nyBehanldingId = finnmarkstilleggBehandlingId,
+            ).kjørBehandling(FinnmarkstilleggData(fagsakId))
+        }
 
-        assertThat(beregnetTilkjentYtelse)
-            .usingRecursiveComparison()
-            .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*kildeBehandlingId", ".*tilkjentYtelse", ".*id", ".*forrigePeriodeOffset", ".*periodeOffset")
-            .isEqualTo(forventedeAndeler)
-    }
+        @Når("vi lager automatisk behandling med id {} på fagsak {} på grunn av svalbardtillegg")
+        fun `kjør behandling svalbardtillegg på fagsak med behandlingsid`(
+            svalbardtilleggBehandlingId: Long,
+            fagsakId: Long,
+        ) {
+            mockAutovedtakSvalbardtilleggService(
+                dataFraCucumber = this,
+                fagsakId = fagsakId,
+                nyBehanldingId = svalbardtilleggBehandlingId,
+            ).kjørBehandling(SvalbardtilleggData(fagsakId))
+        }
 
-    /**
-     * Mulige verdier: | AktørId | Dødsfalldato |
-     */
-    @Og("med dødsfall")
-    fun `med dødsfall`(
-        dataTable: DataTable,
-    ) {
-        val aktørTilDødsfall: Map<String, LocalDate> =
-            dataTable
-                .asMaps()
-                .map { rad ->
-                    val aktørId = parseAktørId(rad)
-                    val dødsfallDato =
-                        parseValgfriDato(
-                            VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag.DØDSFALLDATO,
-                            rad,
-                        ) ?: throw Feil("Dødsfallsdato må være satt")
+        @Så("forvent at brevmal {} er brukt for behandling {}")
+        fun `forvent følgende brevmal for behandling`(
+            forventetBrevmal: Brevmal,
+            behandlingId: Long,
+        ) {
+            val behandling = behandlinger.finnBehandling(behandlingId)
+            val faktiskBrevmal = CucumberMock(this, behandlingId).brevmalService.hentBrevmal(behandling)
 
-                    aktørId to dødsfallDato
-                }.toMap()
+            assertThat(faktiskBrevmal).isEqualTo(forventetBrevmal)
+        }
 
-        aktørTilDødsfall.forEach { (aktørId, dødsfallDato) ->
-            persongrunnlag.values.flatMap { it.personer }.filter { it.aktør.aktørId == aktørId }.forEach {
-                it.dødsfall =
-                    lagDødsfall(
-                        person = it,
-                        dødsfallDato = dødsfallDato,
-                    )
+        @Så("forvent følgende vilkårresultater for behandling {}")
+        fun `forvent følgende vilkårresultater for behandling`(
+            behandlingId: Long,
+            dataTable: DataTable,
+        ) {
+            val forventedeVilkårResultaterPerAktør =
+                dataTable
+                    .asMaps()
+                    .groupBy { parseAktørId(it) }
+                    .mapValues { (aktørId, vilkårResultatRaderForAktør) ->
+                        parseVilkårResultaterForAktør(
+                            vilkårResultatRaderForAktør = vilkårResultatRaderForAktør,
+                            behandlingId = behandlingId,
+                            personResultat = vilkårsvurderinger[behandlingId]!!.personResultater.first { it.aktør.aktørId == aktørId },
+                        )
+                    }
+
+            val faktiskeVilkårResultaterPerAktør =
+                vilkårsvurderinger[behandlingId]!!
+                    .personResultater
+                    .associate { it.aktør.aktørId to it.vilkårResultater }
+
+            assertThat(faktiskeVilkårResultaterPerAktør)
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes("id", ".*opprettetTidspunkt", ".*endretTidspunkt", ".*begrunnelse", ".*erAutomatiskVurdert", ".*erOpprinneligPreutfylt")
+                .ignoringCollectionOrder()
+                .isEqualTo(forventedeVilkårResultaterPerAktør)
+        }
+
+        /**
+         * Mulige verdier: | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
+         */
+        @Så("forvent følgende andeler tilkjent ytelse for behandling {}")
+        fun `forvent andeler tilkjent ytelse`(
+            behandlingId: Long,
+            dataTable: DataTable,
+        ) {
+            val beregnetTilkjentYtelse =
+                tilkjenteYtelser[behandlingId]
+                    ?.andelerTilkjentYtelse
+                    ?.toList()!!
+                    .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
+
+            val forventedeAndeler =
+                lagTilkjentYtelse(
+                    dataFraCucumber = this,
+                    dataTable = dataTable,
+                    behandlinger = behandlinger,
+                    personGrunnlag = persongrunnlag,
+                    vedtaksliste = vedtaksliste,
+                    behandlingTilForrigeBehandling = behandlingTilForrigeBehandling,
+                )[behandlingId]!!
+                    .andelerTilkjentYtelse
+                    .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
+
+            assertThat(beregnetTilkjentYtelse)
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*kildeBehandlingId", ".*tilkjentYtelse", ".*id", ".*forrigePeriodeOffset", ".*periodeOffset")
+                .isEqualTo(forventedeAndeler)
+        }
+
+        /**
+         * Mulige verdier: | AktørId | Dødsfalldato |
+         */
+        @Og("med dødsfall")
+        fun `med dødsfall`(
+            dataTable: DataTable,
+        ) {
+            val aktørTilDødsfall: Map<String, LocalDate> =
+                dataTable
+                    .asMaps()
+                    .map { rad ->
+                        val aktørId = parseAktørId(rad)
+                        val dødsfallDato =
+                            parseValgfriDato(
+                                VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag.DØDSFALLDATO,
+                                rad,
+                            ) ?: throw Feil("Dødsfallsdato må være satt")
+
+                        aktørId to dødsfallDato
+                    }.toMap()
+
+            aktørTilDødsfall.forEach { (aktørId, dødsfallDato) ->
+                persongrunnlag.values.flatMap { it.personer }.filter { it.aktør.aktørId == aktørId }.forEach {
+                    it.dødsfall =
+                        lagDødsfall(
+                            person = it,
+                            dødsfallDato = dødsfallDato,
+                        )
+                }
             }
         }
-    }
 
-    /**
-     * | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Behandlingsstatus | Behandlingssteg | Underkategori |
-     */
-    @Så("forvent disse behandlingene")
-    fun `forvent disse behandlingene`(
-        dataTable: DataTable,
-    ) {
-        val forventedeBehandlinger = lagBehandlinger(dataTable, fagsaker)
-        forventedeBehandlinger.forEach {
-            assertThat(behandlinger[it.id].toString()).isEqualTo(it.toString())
+        /**
+         * | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Behandlingsstatus | Behandlingssteg | Underkategori |
+         */
+        @Så("forvent disse behandlingene")
+        fun `forvent disse behandlingene`(
+            dataTable: DataTable,
+        ) {
+            val forventedeBehandlinger = lagBehandlinger(dataTable, fagsaker)
+            forventedeBehandlinger.forEach {
+                assertThat(behandlinger[it.id].toString()).isEqualTo(it.toString())
+            }
+        }
+
+        @Så("forvent nøyaktig disse behandlingene for fagsak {}")
+        fun `forvent nøyaktig disse behandlingene for fagsak`(
+            fagsakId: Long,
+            dataTable: DataTable,
+        ) {
+            val forventedeBehandlinger = lagBehandlinger(dataTable, fagsaker).map { it.toString() }
+            val behandlingerPåFagsak = behandlinger.filter { it.value.fagsak.id == fagsakId }.map { it.value.toString() }
+            assertThat(behandlingerPåFagsak).containsExactlyInAnyOrder(*forventedeBehandlinger.toTypedArray())
+        }
+
+        /**
+         * | Valuta kode | Valutakursdato | Kurs |
+         */
+        @Når("vi lager automatisk behandling med id {} på fagsak {} på grunn av automatisk valutajustering og har følgende valutakurser")
+        fun `kjør automatisk valutajustering med behandlingsid på fagsak `(
+            nyBehandling: Long,
+            fagsakId: Long,
+            dataTable: DataTable,
+        ) {
+            val fagsak = fagsaker[fagsakId]!!
+
+            val svarFraEcbMock = lagSvarFraEcbMock(dataTable)
+
+            mockAutovedtakMånedligValutajusteringService(
+                dataFraCucumber = this,
+                fagsak = fagsak,
+                nyBehanldingId = nyBehandling,
+                svarFraEcbMock = svarFraEcbMock,
+            ).utførMånedligValutajustering(fagsakId = fagsakId, måned = dagensDato.toYearMonth())
+        }
+
+        @Så("forvent følgende valutakurser for behandling {}")
+        fun `forvent følgende valutakurser for behandling`(
+            behandlingId: Long,
+            dataTable: DataTable,
+        ) {
+            val forventedeValutakurser = lagValutakurs(dataTable.asMaps(), persongrunnlag)
+
+            assertThat(valutakurs[behandlingId]!!.sortedBy { it.valutakursdato })
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*id", ".*personidenter")
+                .isEqualTo(forventedeValutakurser[behandlingId]!!.sortedBy { it.valutakursdato })
+        }
+
+        @Så("forvent at endringstidspunktet er {} for behandling {}")
+        fun `forvent at endringstidspunktet er for behandling`(
+            forventetEndringstidspunktString: String,
+            behandlingId: Long,
+        ) {
+            val vedtak =
+                vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: throw Feil("Finner ikke vedtak")
+            val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
+            val grunnlagForBegrunnelser = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
+
+            val faktiskEndringstidspunkt =
+                utledEndringstidspunkt(
+                    behandlingsGrunnlagForVedtaksperioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
+                    behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
+                    featureToggleService = mockFeatureToggleService(),
+                )
+
+            val forventetEndringstidspunkt =
+                parseNullableDato(forventetEndringstidspunktString)
+                    ?: throw Feil("Så forvent følgende endringstidspunkt {} forventer en dato")
+
+            assertThat(faktiskEndringstidspunkt).isEqualTo(forventetEndringstidspunkt)
+        }
+
+        @Når("vi oppdaterer valutakursene for beslutter på behandling {}")
+        fun `vi oppdaterer valutakursene for beslutter på behandling`(
+            behandlingId: Long,
+        ) {
+            val mock =
+                CucumberMock(
+                    dataFraCucumber = this,
+                    nyBehandlingId = behandlingId,
+                )
+
+            mock.automatiskOppdaterValutakursService.oppdaterValutakurserOgSimulering(BehandlingId(behandlingId))
+        }
+
+        /**
+         * Mulige felt:
+         * | AktørId | Fra dato | Til dato | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |
+         */
+        @Når("vi legger til utenlandsk periodebeløp for behandling {}")
+        fun `når vi legger til upb på behandling`(
+            behandlingId: Long,
+            dataTable: DataTable,
+        ) {
+            val utenlandskPeriodebeløp = lagUtenlandskperiodeBeløp(dataTable.asMaps(), persongrunnlag)[behandlingId]!!
+
+            val mock =
+                CucumberMock(
+                    dataFraCucumber = this,
+                    nyBehandlingId = behandlingId,
+                    forrigeBehandling = null,
+                )
+
+            mock.utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(BehandlingId(behandlingId), utenlandskPeriodebeløp.single())
+        }
+
+        @Når("vi automatisk oppdaterer valutakurser for behandling {}")
+        fun `når vi automatisk oppdaterer valutakurser for behandling`(
+            behandlingId: Long,
+        ) {
+            val mock =
+                CucumberMock(
+                    dataFraCucumber = this,
+                    nyBehandlingId = behandlingId,
+                )
+
+            mock.automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
+        }
+
+        @Og("med overstyrt endringstidspunkt {} for behandling {}")
+        fun settEndringstidspunkt(
+            endringstidspunkt: String,
+            behandlingId: Long,
+        ) {
+            overstyrteEndringstidspunkt[behandlingId] = parseDato(endringstidspunkt)
+        }
+
+        @Så("forvent følgende vedtaksperioder for behandling {}")
+        fun `forvent følgende vedtaksperioder for behandling`(
+            behandlingId: Long,
+            dataTable: DataTable,
+        ) {
+            val forventedeVedtaksperioder =
+                mapForventetVedtaksperioderMedBegrunnelser(
+                    dataTable = dataTable,
+                    vedtak =
+                        vedtaksliste.find { it.behandling.id == behandlingId }
+                            ?: throw Feil("Fant ingen vedtak for behandling $behandlingId"),
+                )
+            val vedtaksperioderComparator = compareBy<VedtaksperiodeMedBegrunnelser>({ it.type }, { it.fom }, { it.tom })
+            assertThat(vedtaksperioderMedBegrunnelser.sortedWith(vedtaksperioderComparator))
+                .usingRecursiveComparison()
+                .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt")
+                .isEqualTo(forventedeVedtaksperioder.sortedWith(vedtaksperioderComparator))
+        }
+
+        @Og("kopier kompetanser fra behandling {} til behandling {}")
+        fun `kopier kompetanser fra behandling til behandling`(
+            fraBehandlingId: Long,
+            tilBehandlingId: Long,
+        ) {
+            kompetanser[tilBehandlingId] = kompetanser[fraBehandlingId]
+                ?: throw Feil("Finner ikke kompetanser for behandling med id $fraBehandlingId")
+        }
+
+        @Og("kopier utenlandsk periodebeløp fra behandling {} til behandling {}")
+        fun `kopier utenlandsk periodebeløp fra behandling til behandling`(
+            fraBehandlingId: Long,
+            tilBehandlingId: Long,
+        ) {
+            utenlandskPeriodebeløp[tilBehandlingId] = utenlandskPeriodebeløp[fraBehandlingId]
+                ?: throw Feil("Finner ikke utenlandsk periodebeløp for behandling med id $fraBehandlingId")
+        }
+
+        @Når("vi utfører vilkårsvurderingssteget for behandling {}")
+        fun `vi utfører vilkårsvurderingssteg for behandling`(
+            behandlingId: Long,
+        ) {
+            val mock =
+                CucumberMock(
+                    dataFraCucumber = this,
+                    nyBehandlingId = behandlingId,
+                )
+
+            mock.stegService.håndterVilkårsvurdering(behandlinger[behandlingId]!!)
+        }
+
+        @Og("når behandlingsresultatet er utledet for behandling {}")
+        fun `når behandlingsresultatet er utledet for behehandling`(
+            behandlingId: Long,
+        ) {
+            val mock =
+                CucumberMock(
+                    dataFraCucumber = this,
+                    nyBehandlingId = behandlingId,
+                )
+
+            val behandling = behandlinger[behandlingId]!!
+
+            val behandlingsresultat = mock.behandlingsresultatService.utledBehandlingsresultat(behandlingId)
+
+            behandlinger[behandlingId] = behandling.copy(resultat = behandlingsresultat)
+        }
+
+        @Så("forvent at behandlingsresultatet er {} på behandling {}")
+        fun `forvent følgende behandlingsresultat på behandling`(
+            forventetBehandlingsresultat: Behandlingsresultat,
+            behandlingId: Long,
+        ) {
+            val faktiskResultat = behandlinger[behandlingId]!!.resultat
+            assertThat(faktiskResultat).isEqualTo(forventetBehandlingsresultat)
         }
     }
 
-    @Så("forvent nøyaktig disse behandlingene for fagsak {}")
-    fun `forvent nøyaktig disse behandlingene for fagsak`(
-        fagsakId: Long,
-        dataTable: DataTable,
-    ) {
-        val forventedeBehandlinger = lagBehandlinger(dataTable, fagsaker).map { it.toString() }
-        val behandlingerPåFagsak = behandlinger.filter { it.value.fagsak.id == fagsakId }.map { it.value.toString() }
-        assertThat(behandlingerPåFagsak).containsExactlyInAnyOrder(*forventedeBehandlinger.toTypedArray())
-    }
-
-    /**
-     * | Valuta kode | Valutakursdato | Kurs |
-     */
-    @Når("vi lager automatisk behandling med id {} på fagsak {} på grunn av automatisk valutajustering og har følgende valutakurser")
-    fun `kjør automatisk valutajustering med behandlingsid på fagsak `(
-        nyBehandling: Long,
-        fagsakId: Long,
-        dataTable: DataTable,
-    ) {
-        val fagsak = fagsaker[fagsakId]!!
-
-        val svarFraEcbMock = lagSvarFraEcbMock(dataTable)
-
-        mockAutovedtakMånedligValutajusteringService(
-            dataFraCucumber = this,
-            fagsak = fagsak,
-            nyBehanldingId = nyBehandling,
-            svarFraEcbMock = svarFraEcbMock,
-        ).utførMånedligValutajustering(fagsakId = fagsakId, måned = dagensDato.toYearMonth())
-    }
-
-    @Så("forvent følgende valutakurser for behandling {}")
-    fun `forvent følgende valutakurser for behandling`(
-        behandlingId: Long,
-        dataTable: DataTable,
-    ) {
-        val forventedeValutakurser = lagValutakurs(dataTable.asMaps(), persongrunnlag)
-
-        assertThat(valutakurs[behandlingId]!!.sortedBy { it.valutakursdato })
-            .usingRecursiveComparison()
-            .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*id", ".*personidenter")
-            .isEqualTo(forventedeValutakurser[behandlingId]!!.sortedBy { it.valutakursdato })
-    }
-
-    @Så("forvent at endringstidspunktet er {} for behandling {}")
-    fun `forvent at endringstidspunktet er for behandling`(
-        forventetEndringstidspunktString: String,
-        behandlingId: Long,
-    ) {
-        val vedtak =
-            vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: throw Feil("Finner ikke vedtak")
-        val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
-        val grunnlagForBegrunnelser = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
-
-        val faktiskEndringstidspunkt =
-            utledEndringstidspunkt(
-                behandlingsGrunnlagForVedtaksperioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
-                behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
-                featureToggleService = mockFeatureToggleService(),
-            )
-
-        val forventetEndringstidspunkt =
-            parseNullableDato(forventetEndringstidspunktString)
-                ?: throw Feil("Så forvent følgende endringstidspunkt {} forventer en dato")
-
-        assertThat(faktiskEndringstidspunkt).isEqualTo(forventetEndringstidspunkt)
-    }
-
-    @Når("vi oppdaterer valutakursene for beslutter på behandling {}")
-    fun `vi oppdaterer valutakursene for beslutter på behandling`(
-        behandlingId: Long,
-    ) {
-        val mock =
-            CucumberMock(
-                dataFraCucumber = this,
-                nyBehandlingId = behandlingId,
-            )
-
-        mock.automatiskOppdaterValutakursService.oppdaterValutakurserOgSimulering(BehandlingId(behandlingId))
-    }
-
-    /**
-     * Mulige felt:
-     * | AktørId | Fra dato | Til dato | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |
-     */
-    @Når("vi legger til utenlandsk periodebeløp for behandling {}")
-    fun `når vi legger til upb på behandling`(
-        behandlingId: Long,
-        dataTable: DataTable,
-    ) {
-        val utenlandskPeriodebeløp = lagUtenlandskperiodeBeløp(dataTable.asMaps(), persongrunnlag)[behandlingId]!!
-
-        val mock =
-            CucumberMock(
-                dataFraCucumber = this,
-                nyBehandlingId = behandlingId,
-                forrigeBehandling = null,
-            )
-
-        mock.utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(BehandlingId(behandlingId), utenlandskPeriodebeløp.single())
-    }
-
-    @Når("vi automatisk oppdaterer valutakurser for behandling {}")
-    fun `når vi automatisk oppdaterer valutakurser for behandling`(
-        behandlingId: Long,
-    ) {
-        val mock =
-            CucumberMock(
-                dataFraCucumber = this,
-                nyBehandlingId = behandlingId,
-            )
-
-        mock.automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
-    }
-
-    @Og("med overstyrt endringstidspunkt {} for behandling {}")
-    fun settEndringstidspunkt(
-        endringstidspunkt: String,
-        behandlingId: Long,
-    ) {
-        overstyrteEndringstidspunkt[behandlingId] = parseDato(endringstidspunkt)
-    }
-
-    @Så("forvent følgende vedtaksperioder for behandling {}")
-    fun `forvent følgende vedtaksperioder for behandling`(
-        behandlingId: Long,
-        dataTable: DataTable,
-    ) {
-        val forventedeVedtaksperioder =
-            mapForventetVedtaksperioderMedBegrunnelser(
-                dataTable = dataTable,
-                vedtak =
-                    vedtaksliste.find { it.behandling.id == behandlingId }
-                        ?: throw Feil("Fant ingen vedtak for behandling $behandlingId"),
-            )
-        val vedtaksperioderComparator = compareBy<VedtaksperiodeMedBegrunnelser>({ it.type }, { it.fom }, { it.tom })
-        assertThat(vedtaksperioderMedBegrunnelser.sortedWith(vedtaksperioderComparator))
-            .usingRecursiveComparison()
-            .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt")
-            .isEqualTo(forventedeVedtaksperioder.sortedWith(vedtaksperioderComparator))
-    }
-
-    @Og("kopier kompetanser fra behandling {} til behandling {}")
-    fun `kopier kompetanser fra behandling til behandling`(
-        fraBehandlingId: Long,
-        tilBehandlingId: Long,
-    ) {
-        kompetanser[tilBehandlingId] = kompetanser[fraBehandlingId]
-            ?: throw Feil("Finner ikke kompetanser for behandling med id $fraBehandlingId")
-    }
-
-    @Og("kopier utenlandsk periodebeløp fra behandling {} til behandling {}")
-    fun `kopier utenlandsk periodebeløp fra behandling til behandling`(
-        fraBehandlingId: Long,
-        tilBehandlingId: Long,
-    ) {
-        utenlandskPeriodebeløp[tilBehandlingId] = utenlandskPeriodebeløp[fraBehandlingId]
-            ?: throw Feil("Finner ikke utenlandsk periodebeløp for behandling med id $fraBehandlingId")
-    }
-
-    @Når("vi utfører vilkårsvurderingssteget for behandling {}")
-    fun `vi utfører vilkårsvurderingssteg for behandling`(
-        behandlingId: Long,
-    ) {
-        val mock =
-            CucumberMock(
-                dataFraCucumber = this,
-                nyBehandlingId = behandlingId,
-            )
-
-        mock.stegService.håndterVilkårsvurdering(behandlinger[behandlingId]!!)
-    }
-
-    @Og("når behandlingsresultatet er utledet for behandling {}")
-    fun `når behandlingsresultatet er utledet for behehandling`(
-        behandlingId: Long,
-    ) {
-        val mock =
-            CucumberMock(
-                dataFraCucumber = this,
-                nyBehandlingId = behandlingId,
-            )
-
-        val behandling = behandlinger[behandlingId]!!
-
-        val behandlingsresultat = mock.behandlingsresultatService.utledBehandlingsresultat(behandlingId)
-
-        behandlinger[behandlingId] = behandling.copy(resultat = behandlingsresultat)
-    }
-
-    @Så("forvent at behandlingsresultatet er {} på behandling {}")
-    fun `forvent følgende behandlingsresultat på behandling`(
-        forventetBehandlingsresultat: Behandlingsresultat,
-        behandlingId: Long,
-    ) {
-        val faktiskResultat = behandlinger[behandlingId]!!.resultat
-        assertThat(faktiskResultat).isEqualTo(forventetBehandlingsresultat)
-    }
-}
-
-data class SammenlignbarBegrunnelse(
-    val fom: LocalDate?,
-    val tom: LocalDate?,
-    val type: Vedtaksperiodetype,
-    val inkluderteStandardBegrunnelser: Set<IVedtakBegrunnelse>,
-    val ekskluderteStandardBegrunnelser: Set<IVedtakBegrunnelse> = emptySet<IVedtakBegrunnelse>(),
-)
+    data class SammenlignbarBegrunnelse(
+        val fom: LocalDate?,
+        val tom: LocalDate?,
+        val type: Vedtaksperiodetype,
+        val inkluderteStandardBegrunnelser: Set<IVedtakBegrunnelse>,
+        val ekskluderteStandardBegrunnelser: Set<IVedtakBegrunnelse> = emptySet<IVedtakBegrunnelse>(),
+    )
