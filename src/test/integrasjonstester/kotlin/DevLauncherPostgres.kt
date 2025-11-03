@@ -19,7 +19,7 @@ fun main(args: Array<String>) {
         )
 
     if (args.contains("--dbcontainer")) {
-        System.setProperty("spring.datasource.url", "jdbc:tc:postgresql:15://localhost/familie-ba-sak")
+        System.setProperty("spring.datasource.url", "jdbc:tc:postgresql:17://localhost/familie-ba-sak")
     }
 
     springBuilder.run(*args)

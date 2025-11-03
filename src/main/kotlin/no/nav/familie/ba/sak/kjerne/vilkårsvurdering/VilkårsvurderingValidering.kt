@@ -1,15 +1,18 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.AutovedtakSkalIkkeGjennomføresFeil
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.VilkårFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -25,7 +28,12 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØ
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -126,13 +134,20 @@ fun validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig(
     }
 }
 
-fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering: Vilkårsvurdering): Boolean = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_I_FINNMARK_NORD_TROMS)
+fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(
+    vilkårsvurdering: Vilkårsvurdering,
+    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+): Boolean = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_I_FINNMARK_NORD_TROMS, andelTilkjentYtelseRepository)
 
-fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering: Vilkårsvurdering): Boolean = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_PÅ_SVALBARD)
+fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(
+    vilkårsvurdering: Vilkårsvurdering,
+    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+): Boolean = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_PÅ_SVALBARD, andelTilkjentYtelseRepository)
 
 private fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(
     vilkårsvurdering: Vilkårsvurdering,
     utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering,
+    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ): Boolean {
     val søkersPersonResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() } ?: throw Feil("Finner ikke personresultat for søker i vilkårsvurdering for ny behandling i fagsak ${vilkårsvurdering.behandling.fagsak.id}")
 
@@ -156,9 +171,24 @@ private fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(
                         .filter { it.vilkårType == BOR_MED_SØKER && (DELT_BOSTED in it.utdypendeVilkårsvurderinger || DELT_BOSTED_SKAL_IKKE_DELES in it.utdypendeVilkårsvurderinger) }
                         .lagForskjøvetTidslinjeForOppfylteVilkår(BOR_MED_SØKER)
 
+                val harLøpendeAndelTidslinje =
+                    andelTilkjentYtelseRepository
+                        .finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                            vilkårsvurdering.behandling.id,
+                            personResultat.aktør,
+                        ).filter { it.kalkulertUtbetalingsbeløp > 0 }
+                        .map { Periode(true, it.stønadFom.toLocalDate(), it.stønadTom.toLocalDate()) }
+                        .tilTidslinje()
+
+                val barnDeltBostedMedLøpendeAndelTidslinje =
+                    barnDeltBostedTidslinje
+                        .kombinerMed(harLøpendeAndelTidslinje) { deltBosted, løpendeAndel ->
+                            deltBosted != null && løpendeAndel == true
+                        }
+
                 søkerBosattITilleggssoneTidslinje
-                    .kombinerMed(barnBosattITilleggssoneTidslinje, barnDeltBostedTidslinje) { søkerBosattITilleggssone, barnBosattITilleggssone, barnDeltBosted ->
-                        søkerBosattITilleggssone != null && barnBosattITilleggssone == null && barnDeltBosted != null
+                    .kombinerMed(barnBosattITilleggssoneTidslinje, barnDeltBostedMedLøpendeAndelTidslinje) { søkerBosattITilleggssone, barnBosattITilleggssone, barnDeltBostedLøpendeAndel ->
+                        søkerBosattITilleggssone != null && barnBosattITilleggssone == null && barnDeltBostedLøpendeAndel == true
                     }.tilPerioder()
                     .any { it.verdi == true }
             }
@@ -169,6 +199,40 @@ private fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(
 
     return finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerITilleggssone
 }
+
+fun validerAtVilkårsvurderingErEndret(
+    vilkårsvurdering: Vilkårsvurdering,
+    forrigeVilkårsvurdering: Vilkårsvurdering,
+) {
+    val bosattIRiketVilkårPerAktør = lagBosattIRiketVilkårTidslinjePerAktør(vilkårsvurdering)
+    val forrigeBosattIRiketVilkårPerAktør = lagBosattIRiketVilkårTidslinjePerAktør(forrigeVilkårsvurdering)
+
+    val ingenEndringIBosattIRiketVilkår =
+        bosattIRiketVilkårPerAktør
+            .outerJoin(forrigeBosattIRiketVilkårPerAktør) { nåværende, forrige ->
+                val erEndringerIUtdypendeVilkårsvurdering = nåværende?.utdypendeVilkårsvurderinger?.toSet() != forrige?.utdypendeVilkårsvurderinger?.toSet()
+                val erEndringerIRegelverk = nåværende?.vurderesEtter != forrige?.vurderesEtter
+                val erVilkårSomErSplittetOpp = nåværende?.periodeFom != forrige?.periodeFom
+                erEndringerIUtdypendeVilkårsvurdering || erEndringerIRegelverk || erVilkårSomErSplittetOpp
+            }.values
+            .kombiner { erEndringIVilkår -> erEndringIVilkår.any { it } }
+            .tilPerioder()
+            .all { it.verdi == false }
+
+    if (ingenEndringIBosattIRiketVilkår) {
+        throw AutovedtakSkalIkkeGjennomføresFeil("Ingen endring i 'Bosatt i riket'-vilkåret")
+    }
+}
+
+private fun lagBosattIRiketVilkårTidslinjePerAktør(vilkårsvurdering: Vilkårsvurdering) =
+    vilkårsvurdering
+        .personResultater
+        .associate { personResultat ->
+            personResultat.aktør.aktørId to
+                personResultat.vilkårResultater
+                    .filter { it.vilkårType == BOSATT_I_RIKET }
+                    .tilTidslinje()
+        }
 
 fun validerResultatBegrunnelse(restVilkårResultat: RestVilkårResultat) {
     val resultat = restVilkårResultat.resultat
