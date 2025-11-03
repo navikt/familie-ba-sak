@@ -9,6 +9,7 @@ data class AutovedtakEndring(
 ) : Vedtaksbrev {
     constructor(
         vedtakFellesfelter: VedtakFellesfelter,
+        etterbetaling: Etterbetaling? = null,
     ) :
         this(
             data =
@@ -20,6 +21,7 @@ data class AutovedtakEndring(
                                 AutoUnderskrift(
                                     enhet = vedtakFellesfelter.enhet,
                                 ),
+                            etterbetaling = etterbetaling,
                         ),
                     flettefelter =
                         FlettefelterForDokumentImpl(
@@ -40,5 +42,6 @@ data class AutovedtakEndringData(
     data class Delmaler(
         val hjemmeltekst: Hjemmeltekst,
         val autoUnderskrift: AutoUnderskrift,
+        val etterbetaling: Etterbetaling?,
     )
 }
