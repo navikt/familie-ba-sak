@@ -1430,17 +1430,15 @@ class PreutfyllBosattIRiketServiceTest {
     }
 
     @Nested
-    inner class TilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat {
+    inner class OppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat {
         @Test
-        fun `skal generere bosatt i riket vilkår for person som har oppholdsadresse på Svalbard`() {
+        fun `skal oppdatere utvidet vilkårsvurderinger for 'Bosatt i riket'-vilkåret for person som har oppholdsadresse på Svalbard`() {
             // Arrange
             val behandling = lagBehandling()
 
-            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
-
             val personResultat =
                 lagPersonResultat(
-                    vilkårsvurdering = vilkårsvurdering,
+                    vilkårsvurdering = lagVilkårsvurdering(behandling = behandling),
                     lagVilkårResultater = {
                         setOf(
                             lagVilkårResultat(
@@ -1455,14 +1453,13 @@ class PreutfyllBosattIRiketServiceTest {
                         )
                     },
                 )
-            vilkårsvurdering.personResultater.plus(personResultat)
 
             val adresser =
                 lagAdresser(
                     oppholdsadresse =
                         listOf(
                             lagAdresse(
-                                gyldigFraOgMed = LocalDate.of(2021, 1, 1),
+                                gyldigFraOgMed = LocalDate.of(2022, 1, 1),
                                 gyldigTilOgMed = null,
                                 matrikkeladresse = lagMatrikkeladresse(kommunenummer = SvalbardKommune.SVALBARD.kommunenummer),
                             ),
@@ -1473,11 +1470,10 @@ class PreutfyllBosattIRiketServiceTest {
 
             // Act
             val vilkårresultat =
-                preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+                preutfyllBosattIRiketService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
-                    cutOffFomDato = LocalDate.of(2025, 9, 1),
                 )
 
             // Assert
@@ -1485,7 +1481,7 @@ class PreutfyllBosattIRiketServiceTest {
             assertThat(vilkårresultat).anySatisfy {
                 assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
                 assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
-                assertThat(it.begrunnelse).isEqualTo("")
+                assertThat(it.begrunnelse).isEqualTo(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
                 assertThat(it.periodeFom).isEqualTo(LocalDate.of(2021, 1, 1))
                 assertThat(it.periodeTom).isEqualTo(LocalDate.of(2025, 8, 31))
                 assertThat(it.utdypendeVilkårsvurderinger).isEmpty()
@@ -1493,7 +1489,7 @@ class PreutfyllBosattIRiketServiceTest {
             assertThat(vilkårresultat).anySatisfy {
                 assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
                 assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
-                assertThat(it.begrunnelse).isEqualTo("Fylt ut automatisk fra registerdata i PDL\n")
+                assertThat(it.begrunnelse).isEqualTo(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
                 assertThat(it.periodeFom).isEqualTo(LocalDate.of(2025, 9, 1))
                 assertThat(it.periodeTom).isNull()
                 assertThat(it.utdypendeVilkårsvurderinger).containsOnly(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
@@ -1501,15 +1497,13 @@ class PreutfyllBosattIRiketServiceTest {
         }
 
         @Test
-        fun `skal generere bosatt i riket vilkår for person som har bostedsadresse i Finnmark eller Nord-Troms`() {
+        fun `skal oppdatere utvidet vilkårsvurderinger for 'Bosatt i riket'-vilkåret for person som har bostedsadresse i Finnmark eller Nord-Troms`() {
             // Arrange
             val behandling = lagBehandling()
 
-            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
-
             val personResultat =
                 lagPersonResultat(
-                    vilkårsvurdering = vilkårsvurdering,
+                    vilkårsvurdering = lagVilkårsvurdering(behandling = behandling),
                     lagVilkårResultater = {
                         setOf(
                             lagVilkårResultat(
@@ -1520,18 +1514,18 @@ class PreutfyllBosattIRiketServiceTest {
                                 periodeTom = null,
                                 behandlingId = behandling.id,
                                 utdypendeVilkårsvurderinger = emptyList(),
+                                begrunnelse = "Begrunnelse som ikke skal endres",
                             ),
                         )
                     },
                 )
-            vilkårsvurdering.personResultater.plus(personResultat)
 
             val adresser =
                 lagAdresser(
                     bostedsadresser =
                         listOf(
                             lagAdresse(
-                                gyldigFraOgMed = LocalDate.of(2021, 1, 1),
+                                gyldigFraOgMed = LocalDate.of(2022, 1, 1),
                                 gyldigTilOgMed = null,
                                 matrikkeladresse = lagMatrikkeladresse(kommunenummer = KommunerIFinnmarkOgNordTroms.KARASJOK.kommunenummer),
                             ),
@@ -1542,11 +1536,10 @@ class PreutfyllBosattIRiketServiceTest {
 
             // Act
             val vilkårresultat =
-                preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+                preutfyllBosattIRiketService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
-                    cutOffFomDato = LocalDate.of(2025, 9, 1),
                 )
 
             // Assert
@@ -1554,7 +1547,7 @@ class PreutfyllBosattIRiketServiceTest {
             assertThat(vilkårresultat).anySatisfy {
                 assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
                 assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
-                assertThat(it.begrunnelse).isEqualTo("")
+                assertThat(it.begrunnelse).isEqualTo(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
                 assertThat(it.periodeFom).isEqualTo(LocalDate.of(2021, 1, 1))
                 assertThat(it.periodeTom).isEqualTo(LocalDate.of(2025, 8, 31))
                 assertThat(it.utdypendeVilkårsvurderinger).isEmpty()
@@ -1562,7 +1555,7 @@ class PreutfyllBosattIRiketServiceTest {
             assertThat(vilkårresultat).anySatisfy {
                 assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
                 assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
-                assertThat(it.begrunnelse).isEqualTo("Fylt ut automatisk fra registerdata i PDL\n")
+                assertThat(it.begrunnelse).isEqualTo(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
                 assertThat(it.periodeFom).isEqualTo(LocalDate.of(2025, 9, 1))
                 assertThat(it.periodeTom).isNull()
                 assertThat(it.utdypendeVilkårsvurderinger).containsOnly(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
@@ -1570,15 +1563,13 @@ class PreutfyllBosattIRiketServiceTest {
         }
 
         @Test
-        fun `skal generere bosatt i riket vilkår for person som har delt bosted i Finnmark eller Nord-Troms`() {
+        fun `skal oppdatere utvidet vilkårsvurderinger for 'Bosatt i riket'-vilkåret for person som har delt bosted i Finnmark eller Nord-Troms`() {
             // Arrange
             val behandling = lagBehandling()
 
-            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
-
             val personResultat =
                 lagPersonResultat(
-                    vilkårsvurdering = vilkårsvurdering,
+                    vilkårsvurdering = lagVilkårsvurdering(behandling = behandling),
                     lagVilkårResultater = {
                         setOf(
                             lagVilkårResultat(
@@ -1593,7 +1584,6 @@ class PreutfyllBosattIRiketServiceTest {
                         )
                     },
                 )
-            vilkårsvurdering.personResultater.plus(personResultat)
 
             val adresser =
                 lagAdresser(
@@ -1611,11 +1601,10 @@ class PreutfyllBosattIRiketServiceTest {
 
             // Act
             val vilkårresultat =
-                preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+                preutfyllBosattIRiketService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
-                    cutOffFomDato = LocalDate.of(2025, 9, 1),
                 )
 
             // Assert
@@ -1623,7 +1612,7 @@ class PreutfyllBosattIRiketServiceTest {
             assertThat(vilkårresultat).anySatisfy {
                 assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
                 assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
-                assertThat(it.begrunnelse).isEqualTo("")
+                assertThat(it.begrunnelse).isEqualTo(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
                 assertThat(it.periodeFom).isEqualTo(LocalDate.of(2021, 1, 1))
                 assertThat(it.periodeTom).isEqualTo(LocalDate.of(2025, 8, 31))
                 assertThat(it.utdypendeVilkårsvurderinger).isEmpty()
@@ -1631,7 +1620,7 @@ class PreutfyllBosattIRiketServiceTest {
             assertThat(vilkårresultat).anySatisfy {
                 assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
                 assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
-                assertThat(it.begrunnelse).isEqualTo("Fylt ut automatisk fra registerdata i PDL\n")
+                assertThat(it.begrunnelse).isEqualTo(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
                 assertThat(it.periodeFom).isEqualTo(LocalDate.of(2025, 9, 1))
                 assertThat(it.periodeTom).isNull()
                 assertThat(it.utdypendeVilkårsvurderinger).containsOnly(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
@@ -1639,17 +1628,25 @@ class PreutfyllBosattIRiketServiceTest {
         }
 
         @Test
-        fun `skal generere bosatt i riket vilkår og fjerne utdypende vilkårsvurdering Svalbard om man har flyttet bort`() {
+        fun `skal oppdatere utvidet vilkårsvurderinger for 'Bosatt i riket'-vilkåret om man har flyttet bort fra Svalbard`() {
             // Arrange
             val behandling = lagBehandling()
 
-            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
-
             val personResultat =
                 lagPersonResultat(
-                    vilkårsvurdering = vilkårsvurdering,
+                    vilkårsvurdering = lagVilkårsvurdering(behandling = behandling),
                     lagVilkårResultater = {
                         setOf(
+                            lagVilkårResultat(
+                                personResultat = it,
+                                vilkårType = Vilkår.BOSATT_I_RIKET,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = LocalDate.of(2020, 1, 1),
+                                periodeTom = LocalDate.of(2020, 12, 31),
+                                behandlingId = behandling.id,
+                                utdypendeVilkårsvurderinger = listOf(),
+                                begrunnelse = "Begrunnelse som ikke skal endres",
+                            ),
                             lagVilkårResultat(
                                 personResultat = it,
                                 vilkårType = Vilkår.BOSATT_I_RIKET,
@@ -1658,20 +1655,20 @@ class PreutfyllBosattIRiketServiceTest {
                                 periodeTom = null,
                                 behandlingId = behandling.id,
                                 utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
+                                begrunnelse = "Begrunnelse som skal endres",
                             ),
                         )
                     },
                 )
-            vilkårsvurdering.personResultater.plus(personResultat)
 
             val adresser =
                 lagAdresser(
-                    delteBosteder =
+                    oppholdsadresse =
                         listOf(
                             lagAdresse(
                                 gyldigFraOgMed = LocalDate.of(2021, 1, 1),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(kommunenummer = "001"),
+                                gyldigTilOgMed = LocalDate.of(2025, 10, 15),
+                                matrikkeladresse = lagMatrikkeladresse(kommunenummer = SvalbardKommune.SVALBARD.kommunenummer),
                             ),
                         ),
                 )
@@ -1680,19 +1677,26 @@ class PreutfyllBosattIRiketServiceTest {
 
             // Act
             val vilkårresultat =
-                preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+                preutfyllBosattIRiketService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
-                    cutOffFomDato = LocalDate.of(2025, 9, 1),
                 )
 
             // Assert
-            assertThat(vilkårresultat).hasSize(2)
+            assertThat(vilkårresultat).hasSize(4)
             assertThat(vilkårresultat).anySatisfy {
                 assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
                 assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
-                assertThat(it.begrunnelse).isEqualTo("")
+                assertThat(it.begrunnelse).isEqualTo("Begrunnelse som ikke skal endres")
+                assertThat(it.periodeFom).isEqualTo(LocalDate.of(2020, 1, 1))
+                assertThat(it.periodeTom).isEqualTo(LocalDate.of(2020, 12, 31))
+                assertThat(it.utdypendeVilkårsvurderinger).isEmpty()
+            }
+            assertThat(vilkårresultat).anySatisfy {
+                assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
+                assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
+                assertThat(it.begrunnelse).isEqualTo(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
                 assertThat(it.periodeFom).isEqualTo(LocalDate.of(2021, 1, 1))
                 assertThat(it.periodeTom).isEqualTo(LocalDate.of(2025, 8, 31))
                 assertThat(it.utdypendeVilkårsvurderinger).isEmpty()
@@ -1700,25 +1704,41 @@ class PreutfyllBosattIRiketServiceTest {
             assertThat(vilkårresultat).anySatisfy {
                 assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
                 assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
-                assertThat(it.begrunnelse).isEqualTo("Fylt ut automatisk fra registerdata i PDL\n")
+                assertThat(it.begrunnelse).isEqualTo(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
                 assertThat(it.periodeFom).isEqualTo(LocalDate.of(2025, 9, 1))
+                assertThat(it.periodeTom).isEqualTo(LocalDate.of(2025, 10, 15))
+                assertThat(it.utdypendeVilkårsvurderinger).isEqualTo(listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD))
+            }
+            assertThat(vilkårresultat).anySatisfy {
+                assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
+                assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
+                assertThat(it.begrunnelse).isEqualTo(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
+                assertThat(it.periodeFom).isEqualTo(LocalDate.of(2025, 10, 16))
                 assertThat(it.periodeTom).isNull()
                 assertThat(it.utdypendeVilkårsvurderinger).isEmpty()
             }
         }
 
         @Test
-        fun `skal generere bosatt i riket vilkår og fjerne utdypende vilkårsvurdering Finnmark eller Nord-Troms om man har flyttet bort`() {
+        fun `skal oppdatere utvidet vilkårsvurderinger for 'Bosatt i riket'-vilkåret om man har flyttet bort fra Finnmark eller Nord-Troms`() {
             // Arrange
             val behandling = lagBehandling()
 
-            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
-
             val personResultat =
                 lagPersonResultat(
-                    vilkårsvurdering = vilkårsvurdering,
+                    vilkårsvurdering = lagVilkårsvurdering(behandling = behandling),
                     lagVilkårResultater = {
                         setOf(
+                            lagVilkårResultat(
+                                personResultat = it,
+                                vilkårType = Vilkår.BOSATT_I_RIKET,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = LocalDate.of(2020, 1, 1),
+                                periodeTom = LocalDate.of(2020, 12, 31),
+                                behandlingId = behandling.id,
+                                utdypendeVilkårsvurderinger = listOf(),
+                                begrunnelse = "Begrunnelse som ikke skal endres",
+                            ),
                             lagVilkårResultat(
                                 personResultat = it,
                                 vilkårType = Vilkår.BOSATT_I_RIKET,
@@ -1727,20 +1747,20 @@ class PreutfyllBosattIRiketServiceTest {
                                 periodeTom = null,
                                 behandlingId = behandling.id,
                                 utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
+                                begrunnelse = "Begrunnelse som skal endres",
                             ),
                         )
                     },
                 )
-            vilkårsvurdering.personResultater.plus(personResultat)
 
             val adresser =
                 lagAdresser(
-                    delteBosteder =
+                    bostedsadresser =
                         listOf(
                             lagAdresse(
                                 gyldigFraOgMed = LocalDate.of(2021, 1, 1),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(kommunenummer = "001"),
+                                gyldigTilOgMed = LocalDate.of(2025, 10, 15),
+                                matrikkeladresse = lagMatrikkeladresse(kommunenummer = KommunerIFinnmarkOgNordTroms.ALTA.kommunenummer),
                             ),
                         ),
                 )
@@ -1749,19 +1769,26 @@ class PreutfyllBosattIRiketServiceTest {
 
             // Act
             val vilkårresultat =
-                preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+                preutfyllBosattIRiketService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
-                    cutOffFomDato = LocalDate.of(2025, 9, 1),
                 )
 
             // Assert
-            assertThat(vilkårresultat).hasSize(2)
+            assertThat(vilkårresultat).hasSize(4)
             assertThat(vilkårresultat).anySatisfy {
                 assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
                 assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
-                assertThat(it.begrunnelse).isEqualTo("")
+                assertThat(it.begrunnelse).isEqualTo("Begrunnelse som ikke skal endres")
+                assertThat(it.periodeFom).isEqualTo(LocalDate.of(2020, 1, 1))
+                assertThat(it.periodeTom).isEqualTo(LocalDate.of(2020, 12, 31))
+                assertThat(it.utdypendeVilkårsvurderinger).isEmpty()
+            }
+            assertThat(vilkårresultat).anySatisfy {
+                assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
+                assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
+                assertThat(it.begrunnelse).isEqualTo(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
                 assertThat(it.periodeFom).isEqualTo(LocalDate.of(2021, 1, 1))
                 assertThat(it.periodeTom).isEqualTo(LocalDate.of(2025, 8, 31))
                 assertThat(it.utdypendeVilkårsvurderinger).isEmpty()
@@ -1769,23 +1796,29 @@ class PreutfyllBosattIRiketServiceTest {
             assertThat(vilkårresultat).anySatisfy {
                 assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
                 assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
-                assertThat(it.begrunnelse).isEqualTo("Fylt ut automatisk fra registerdata i PDL\n")
+                assertThat(it.begrunnelse).isEqualTo(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
                 assertThat(it.periodeFom).isEqualTo(LocalDate.of(2025, 9, 1))
+                assertThat(it.periodeTom).isEqualTo(LocalDate.of(2025, 10, 15))
+                assertThat(it.utdypendeVilkårsvurderinger).isEqualTo(listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS))
+            }
+            assertThat(vilkårresultat).anySatisfy {
+                assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
+                assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
+                assertThat(it.begrunnelse).isEqualTo(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
+                assertThat(it.periodeFom).isEqualTo(LocalDate.of(2025, 10, 16))
                 assertThat(it.periodeTom).isNull()
                 assertThat(it.utdypendeVilkårsvurderinger).isEmpty()
             }
         }
 
         @Test
-        fun `skal generere bosatt i riket vilkår for person som hverken bor på Svalbard eller i Finnmark eller Nord-Troms`() {
+        fun `skal ikke endre 'Bosatt i riket'-vilkåret hvis personen hverken bor på Svalbard eller i Finnmark eller Nord-Troms`() {
             // Arrange
             val behandling = lagBehandling()
 
-            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
-
             val personResultat =
                 lagPersonResultat(
-                    vilkårsvurdering = vilkårsvurdering,
+                    vilkårsvurdering = lagVilkårsvurdering(behandling = behandling),
                     lagVilkårResultater = {
                         setOf(
                             lagVilkårResultat(
@@ -1796,20 +1829,20 @@ class PreutfyllBosattIRiketServiceTest {
                                 periodeTom = null,
                                 behandlingId = behandling.id,
                                 utdypendeVilkårsvurderinger = emptyList(),
+                                begrunnelse = "Begrunnelse som ikke skal endres",
                             ),
                         )
                     },
                 )
-            vilkårsvurdering.personResultater.plus(personResultat)
 
             val adresser =
                 lagAdresser(
-                    delteBosteder =
+                    bostedsadresser =
                         listOf(
                             lagAdresse(
                                 gyldigFraOgMed = LocalDate.of(2021, 1, 1),
                                 gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(kommunenummer = "0001"),
+                                matrikkeladresse = lagMatrikkeladresse(kommunenummer = "0301"),
                             ),
                         ),
                 )
@@ -1818,31 +1851,15 @@ class PreutfyllBosattIRiketServiceTest {
 
             // Act
             val vilkårresultat =
-                preutfyllBosattIRiketService.tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+                preutfyllBosattIRiketService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                     personResultat = personResultat,
                     adresserForPerson = adresser,
                     behandling = behandling,
-                    cutOffFomDato = LocalDate.of(2025, 9, 1),
                 )
 
             // Assert
-            assertThat(vilkårresultat).hasSize(2)
-            assertThat(vilkårresultat).anySatisfy {
-                assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
-                assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
-                assertThat(it.begrunnelse).isEqualTo("")
-                assertThat(it.periodeFom).isEqualTo(LocalDate.of(2021, 1, 1))
-                assertThat(it.periodeTom).isEqualTo(LocalDate.of(2025, 8, 31))
-                assertThat(it.utdypendeVilkårsvurderinger).isEmpty()
-            }
-            assertThat(vilkårresultat).anySatisfy {
-                assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
-                assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
-                assertThat(it.begrunnelse).isEqualTo("Fylt ut automatisk fra registerdata i PDL\n")
-                assertThat(it.periodeFom).isEqualTo(LocalDate.of(2025, 9, 1))
-                assertThat(it.periodeTom).isNull()
-                assertThat(it.utdypendeVilkårsvurderinger).isEmpty()
-            }
+            assertThat(vilkårresultat).hasSize(1)
+            assertThat(vilkårresultat.single()).isEqualTo(personResultat.vilkårResultater.first())
         }
     }
 }

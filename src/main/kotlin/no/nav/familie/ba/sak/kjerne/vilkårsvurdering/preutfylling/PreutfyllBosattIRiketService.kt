@@ -41,6 +41,8 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+private val FINNMARK_OG_SVALBARD_MERKING_CUT_OFF_FOM_DATO = LocalDate.of(2025, 9, 1)
+
 @Service
 class PreutfyllBosattIRiketService(
     private val pdlRestKlient: SystemOnlyPdlRestKlient,
@@ -77,11 +79,10 @@ class PreutfyllBosattIRiketService(
 
                 val nyeBosattIRiketVilkårResultater =
                     if (behandling.erFinnmarksEllerSvalbardtillegg() && featureToggleService.isEnabled(FeatureToggle.NY_PREUTFYLLING_FOR_BOSATT_I_RIKET_VILKÅR_VED_AUTOVEDTAK_FINNMARK_SVALBARD)) {
-                        tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+                        oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                             personResultat = personResultat,
                             adresserForPerson = adresserForPerson,
                             behandling = behandling,
-                            cutOffFomDato = cutOffFomDato!!,
                         )
                     } else {
                         val bosattIRiketVilkårResultat =
@@ -204,11 +205,10 @@ class PreutfyllBosattIRiketService(
             }.toSet()
     }
 
-    fun tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+    fun oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
         personResultat: PersonResultat,
         adresserForPerson: Adresser,
         behandling: Behandling,
-        cutOffFomDato: LocalDate,
     ): List<VilkårResultat> {
         val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erDeltBostedIFinnmarkEllerNordTromsTidslinje = lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
@@ -227,7 +227,7 @@ class PreutfyllBosattIRiketService(
                 erBostedsadresseIFinnmarkEllerNordTroms == true || erDeltBostedIFinnmarkEllerNordTroms == true
             }
 
-        val finnmarkEllerSvalbardtilleggTidslinje =
+        val finnmarkEllerSvalbardmerkingTidslinje =
             erBosattIFinnmarkEllerNordTromsTidslinje
                 .kombinerMed(erOppholdsadressePåSvalbardTidslinje) { erBosattIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
                     when {
@@ -235,27 +235,38 @@ class PreutfyllBosattIRiketService(
                         erBosattIFinnmarkEllerNordTroms == true -> listOf(BOSATT_I_FINNMARK_NORD_TROMS)
                         else -> emptyList()
                     }
-                }.beskjærFraOgMed(cutOffFomDato)
+                }.beskjærFraOgMed(FINNMARK_OG_SVALBARD_MERKING_CUT_OFF_FOM_DATO)
 
         val eksisterendeBosattIRiketVilkårResultater = personResultat.vilkårResultater.filter { it.vilkårType == BOSATT_I_RIKET }
 
         return eksisterendeBosattIRiketVilkårResultater
             .tilTidslinje()
-            .kombinerMed(finnmarkEllerSvalbardtilleggTidslinje) { eksisterendeVilkårResultat, finnmarkEllerSvalbardtillegg ->
+            .kombinerMed(finnmarkEllerSvalbardmerkingTidslinje) { eksisterendeVilkårResultat, finnmarkEllerSvalbardmerking ->
                 if (eksisterendeVilkårResultat == null) {
                     return@kombinerMed null
                 }
-                val utdypendeVilkårsvurderingUtenFinnmarkOgSvalbardtillegg = eksisterendeVilkårResultat.utdypendeVilkårsvurderinger.filter { it != BOSATT_I_FINNMARK_NORD_TROMS && it != BOSATT_PÅ_SVALBARD }
-                if (finnmarkEllerSvalbardtillegg == null) {
-                    return@kombinerMed eksisterendeVilkårResultat.copy(utdypendeVilkårsvurderinger = utdypendeVilkårsvurderingUtenFinnmarkOgSvalbardtillegg)
+
+                val gjeldendeFinnmarkEllerSvalbardMarkeringer = finnmarkEllerSvalbardmerking.orEmpty().toSet()
+                val eksisterendeFinnmarkEllerSvalbardMarkeringer = eksisterendeVilkårResultat.utdypendeVilkårsvurderinger.filter { it == BOSATT_I_FINNMARK_NORD_TROMS || it == BOSATT_PÅ_SVALBARD }.toSet()
+                val utdypendeVilkårsvurderingMåOppdateres = eksisterendeFinnmarkEllerSvalbardMarkeringer != gjeldendeFinnmarkEllerSvalbardMarkeringer
+
+                if (utdypendeVilkårsvurderingMåOppdateres) {
+                    val oppdaterteUtdypendeVilkårsvurderinger =
+                        eksisterendeVilkårResultat.utdypendeVilkårsvurderinger
+                            .filter { it != BOSATT_I_FINNMARK_NORD_TROMS && it != BOSATT_PÅ_SVALBARD }
+                            .plus(gjeldendeFinnmarkEllerSvalbardMarkeringer)
+
+                    eksisterendeVilkårResultat.copy(utdypendeVilkårsvurderinger = oppdaterteUtdypendeVilkårsvurderinger, begrunnelse = PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
+                } else {
+                    eksisterendeVilkårResultat
                 }
-                val utdypendeVilkårsvurderingMedFinnmarkOgSvalbardtillegg = utdypendeVilkårsvurderingUtenFinnmarkOgSvalbardtillegg.plus(finnmarkEllerSvalbardtillegg)
-                eksisterendeVilkårResultat.copy(utdypendeVilkårsvurderinger = utdypendeVilkårsvurderingMedFinnmarkOgSvalbardtillegg, begrunnelse = PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
             }.tilPerioderIkkeNull()
             .map {
+                val periodeErEndret = it.fom != it.verdi.periodeFom || it.tom != it.verdi.periodeTom
                 it.verdi.copy(
                     periodeFom = it.fom,
                     periodeTom = it.tom,
+                    begrunnelse = if (periodeErEndret) PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT else it.verdi.begrunnelse,
                 )
             }
     }
