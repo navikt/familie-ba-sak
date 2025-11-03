@@ -74,6 +74,8 @@ class SimuleringService(
 
         val detaljertSimuleringResultat = økonomiKlient.hentSimulering(utbetalingsoppdrag)
 
+        logger.info("Henter simulering for ${vedtak.behandling.id}, fikk fagsystemIder ${detaljertSimuleringResultat.simuleringMottaker.flatMap { mottaker -> mottaker.simulertPostering.map { postering -> postering.fagsakId } }}")
+
         simulert.increment()
         return detaljertSimuleringResultat
     }
