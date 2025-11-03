@@ -210,7 +210,7 @@ fun validerAtVilkårsvurderingErEndret(
     val ingenEndringIBosattIRiketVilkår =
         bosattIRiketVilkårPerAktør
             .outerJoin(forrigeBosattIRiketVilkårPerAktør) { nåværende, forrige ->
-                val erEndringerIUtdypendeVilkårsvurdering = nåværende?.utdypendeVilkårsvurderinger != forrige?.utdypendeVilkårsvurderinger
+                val erEndringerIUtdypendeVilkårsvurdering = nåværende?.utdypendeVilkårsvurderinger?.toSet() != forrige?.utdypendeVilkårsvurderinger?.toSet()
                 val erEndringerIRegelverk = nåværende?.vurderesEtter != forrige?.vurderesEtter
                 val erVilkårSomErSplittetOpp = nåværende?.periodeFom != forrige?.periodeFom
                 erEndringerIUtdypendeVilkårsvurdering || erEndringerIRegelverk || erVilkårSomErSplittetOpp
