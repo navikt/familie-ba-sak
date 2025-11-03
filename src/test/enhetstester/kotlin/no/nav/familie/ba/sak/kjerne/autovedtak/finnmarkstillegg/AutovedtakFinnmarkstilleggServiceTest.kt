@@ -2,16 +2,19 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
+import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.FinnmarkstilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -43,6 +46,7 @@ class AutovedtakFinnmarkstilleggServiceTest {
     private val pdlRestKlient = mockk<SystemOnlyPdlRestKlient>()
     private val simuleringService = mockk<SimuleringService>()
     private val autovedtakFinnmarkstilleggBegrunnelseService = mockk<AutovedtakFinnmarkstilleggBegrunnelseService>()
+    private val oppgaveService = mockk<OppgaveService>()
 
     private val autovedtakFinnmarkstilleggService =
         AutovedtakFinnmarkstilleggService(
@@ -53,6 +57,7 @@ class AutovedtakFinnmarkstilleggServiceTest {
             pdlRestKlient = pdlRestKlient,
             simuleringService = simuleringService,
             autovedtakFinnmarkstilleggBegrunnelseService = autovedtakFinnmarkstilleggBegrunnelseService,
+            oppgaveService = oppgaveService,
             autovedtakService = mockk(),
             behandlingService = mockk(),
             taskService = mockk(),
@@ -187,6 +192,33 @@ class AutovedtakFinnmarkstilleggServiceTest {
 
             // Assert
             assertThat(skalAutovedtakBehandles).isTrue()
+        }
+
+        @Test
+        fun `skal opprette oppgave og returnere false når siste vedtatte behandling er av kategori EØS`() {
+            // Arrange
+            val behandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns behandling
+            every { oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(any(), any()) } returns "1"
+            every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns lagTilkjentYtelse { emptySet() }
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+            every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
+                mapOf(
+                    søkerIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseIFinnmark), deltBosted = emptyList()),
+                    barnIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                )
+
+            // Act
+            val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
+
+            // Assert
+            assertThat(skalAutovedtakBehandles).isFalse()
+            verify(exactly = 1) {
+                oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
+                    fagsakId = fagsak.id,
+                    beskrivelse = "Automatisk behandling av finnmarkstillegg kan ikke gjennomføres for EØS-saker.",
+                )
+            }
         }
     }
 }
