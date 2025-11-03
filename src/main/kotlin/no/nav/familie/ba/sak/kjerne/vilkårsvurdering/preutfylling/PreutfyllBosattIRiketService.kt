@@ -1,11 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
+import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
@@ -44,6 +49,7 @@ class PreutfyllBosattIRiketService(
     private val søknadService: SøknadService,
     private val persongrunnlagService: PersongrunnlagService,
     private val featureToggleService: FeatureToggleService,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
     fun preutfyllBosattIRiket(
         vilkårsvurdering: Vilkårsvurdering,
@@ -127,11 +133,14 @@ class PreutfyllBosattIRiketService(
                 }.tilPerioderIkkeNull()
                 .tilTidslinje()
 
+        val andelForAktør = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør)
+
         if (behandling.erFinnmarksEllerSvalbardtillegg()) {
             validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
                 behandling = behandling,
                 erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
                 erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
+                andelForAktør = andelForAktør,
             )
         }
 
@@ -204,11 +213,13 @@ class PreutfyllBosattIRiketService(
         val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erDeltBostedIFinnmarkEllerNordTromsTidslinje = lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erOppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje(adresserForPerson, personResultat)
+        val andelForAktør = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør)
 
         validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
             behandling = behandling,
             erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
             erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
+            andelForAktør = andelForAktør,
         )
 
         val erBosattIFinnmarkEllerNordTromsTidslinje =
@@ -463,16 +474,23 @@ private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandling
     behandling: Behandling,
     erDeltBostedIFinnmarkEllerNordTromsTidslinje: Tidslinje<Boolean>,
     erOppholdsadressePåSvalbardTidslinje: Tidslinje<Boolean>,
+    andelForAktør: List<AndelTilkjentYtelse>,
 ) {
+    val harLøpendeAndelTidslinje =
+        andelForAktør
+            .filter { it.kalkulertUtbetalingsbeløp > 0 && it.type == YtelseType.ORDINÆR_BARNETRYGD }
+            .map { Periode(true, it.stønadFom.toLocalDate(), it.stønadTom.toLocalDate()) }
+            .tilTidslinje()
+
     val harDeltBostedIFinnmarkOgOppholdsadressePåSvalbardISammePeriode =
         erDeltBostedIFinnmarkEllerNordTromsTidslinje
-            .kombinerMed(erOppholdsadressePåSvalbardTidslinje) { erDeltBostedIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
-                erDeltBostedIFinnmarkEllerNordTroms == true && erOppholdsadressePåSvalbard == true
+            .kombinerMed(erOppholdsadressePåSvalbardTidslinje, harLøpendeAndelTidslinje) { erDeltBostedIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard, harLøpendeAndel ->
+                erDeltBostedIFinnmarkEllerNordTroms == true && erOppholdsadressePåSvalbard == true && harLøpendeAndel == true
             }.tilPerioder()
             .any { it.verdi == true }
 
     if (harDeltBostedIFinnmarkOgOppholdsadressePåSvalbardISammePeriode) {
-        throw Feil("Kan ikke behandle ${behandling.opprettetÅrsak.visningsnavn} automatisk, fordi barn har delt bosted i Finnmark/Nord-Troms og oppholdsadresse på Svalbard")
+        throw AutovedtakMåBehandlesManueltFeil(beskrivelse = "${behandling.opprettetÅrsak.visningsnavn} kan ikke behandles automatisk som følge av adresseendring. Barn har delt bosted i Finnmark/Nord-Troms og oppholdsadresse på Svalbard")
     }
 }
 

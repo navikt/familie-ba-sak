@@ -85,6 +85,7 @@ class OpprettTaskService(
         )
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettOppgaveForFinnmarksOgSvalbardtilleggTask(
         fagsakId: Long,
         beskrivelse: String,
