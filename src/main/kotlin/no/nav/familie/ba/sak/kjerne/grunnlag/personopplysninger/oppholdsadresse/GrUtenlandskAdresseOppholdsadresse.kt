@@ -5,7 +5,9 @@ import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted.PAA_SVALBARD
 import no.nav.familie.kontrakter.felles.personopplysning.UtenlandskAdresse
 
@@ -26,7 +28,7 @@ data class GrUtenlandskAdresseOppholdsadresse(
     @Column(name = "region")
     val regionDistriktOmraade: String?,
     @Column(name = "landkode")
-    val landkode: String?,
+    val landkode: String, // todo sjekke om den ikke er null noen sted i db
 ) : GrOppholdsadresse() {
     override fun tilKopiForNyPerson(): GrOppholdsadresse =
         GrUtenlandskAdresseOppholdsadresse(
@@ -67,6 +69,23 @@ data class GrUtenlandskAdresseOppholdsadresse(
     override fun erPåSvalbard(): Boolean = oppholdAnnetSted == PAA_SVALBARD
 
     override fun toString(): String = "GrUtenlandskAdresseOppholdsadresse(detaljer skjult)"
+
+    override fun tilAdresse(): Adresse =
+        Adresse(
+            gyldigFraOgMed = periode?.fom,
+            gyldigTilOgMed = periode?.tom,
+            oppholdAnnetSted = oppholdAnnetSted,
+            utenlandskAdresse =
+                UtenlandskAdresse(
+                    adressenavnNummer = adressenavnNummer,
+                    bygningEtasjeLeilighet = bygningEtasjeLeilighet,
+                    postboksNummerNavn = postboksNummerNavn,
+                    postkode = postkode,
+                    bySted = bySted,
+                    regionDistriktOmraade = regionDistriktOmraade,
+                    landkode = landkode,
+                ),
+        )
 
     companion object {
         fun fraUtenlandskAdresse(utenlandskAdresse: UtenlandskAdresse): GrUtenlandskAdresseOppholdsadresse =

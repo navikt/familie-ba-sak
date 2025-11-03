@@ -63,7 +63,7 @@ class PreutfyllBosattIRiketService(
                 .map { it.aktør.aktivFødselsnummer() }
                 .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
 
-        val adresser = pdlRestKlient.hentAdresserForPersoner(identer)
+        val persongrunnlag = persongrunnlagService.oppdaterAdresserPåPersoner(persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id))
 
         vilkårsvurdering
             .personResultater
@@ -75,7 +75,7 @@ class PreutfyllBosattIRiketService(
                 }
 
                 val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
-                val adresserForPerson = Adresser.opprettFra(adresser[personResultat.aktør.aktivFødselsnummer()])
+                val adresserForPerson = Adresser.opprettFra(persongrunnlag.søker)
 
                 val nyeBosattIRiketVilkårResultater =
                     if (behandling.erFinnmarksEllerSvalbardtillegg() && featureToggleService.isEnabled(FeatureToggle.NY_PREUTFYLLING_FOR_BOSATT_I_RIKET_VILKÅR_VED_AUTOVEDTAK_FINNMARK_SVALBARD)) {

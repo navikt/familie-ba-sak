@@ -57,6 +57,8 @@ abstract class GrBostedsadresse(
 
     abstract fun tilFrontendString(): String
 
+    abstract fun tilAdresse(): Adresse
+
     protected abstract fun tilKopiForNyPerson(): GrBostedsadresse
 
     fun tilKopiForNyPerson(nyPerson: Person): GrBostedsadresse =
