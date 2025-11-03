@@ -8,7 +8,9 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
@@ -130,13 +132,14 @@ class PreutfyllBosattIRiketService(
                 }.tilPerioderIkkeNull()
                 .tilTidslinje()
 
+        val andelForAktør = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør)
+
         if (behandling.erFinnmarksEllerSvalbardtillegg()) {
             validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
                 behandling = behandling,
                 erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
                 erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
-                andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-                personResultat = personResultat,
+                andelForAktør = andelForAktør,
             )
         }
 
@@ -210,13 +213,13 @@ class PreutfyllBosattIRiketService(
         val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erDeltBostedIFinnmarkEllerNordTromsTidslinje = lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erOppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje(adresserForPerson, personResultat)
+        val andelForAktør = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør)
 
         validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
             behandling = behandling,
             erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
             erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            personResultat = personResultat,
+            andelForAktør = andelForAktør,
         )
 
         val erBosattIFinnmarkEllerNordTromsTidslinje =
@@ -339,7 +342,7 @@ class PreutfyllBosattIRiketService(
         adresser: Adresser,
         personResultat: PersonResultat,
     ): Tidslinje<Boolean> {
-        val filtrerteAdresser = filtrereUgyldigeBostedsadresser(adresser.bostedsadresser)
+        val filtrerteAdresser = filtrereUgyldigeAdresser(adresser.bostedsadresser)
         return lagTidslinjeForAdresser(filtrerteAdresser, personResultat, "Bostedadresse") { it.erINorge() }
     }
 
@@ -347,7 +350,7 @@ class PreutfyllBosattIRiketService(
         adresser: Adresser,
         personResultat: PersonResultat,
     ): Tidslinje<Boolean> {
-        val filtrerteAdresser = filtrereUgyldigeBostedsadresser(adresser.bostedsadresser)
+        val filtrerteAdresser = filtrereUgyldigeAdresser(adresser.bostedsadresser)
         return lagTidslinjeForAdresser(filtrerteAdresser, personResultat, "Bostedadresse") { it.erIFinnmarkEllerNordTroms() }
     }
 
@@ -355,7 +358,7 @@ class PreutfyllBosattIRiketService(
         adresser: Adresser,
         personResultat: PersonResultat,
     ): Tidslinje<Boolean> {
-        val filtrerteAdresser = filtrereUgyldigeBostedsadresser(adresser.delteBosteder)
+        val filtrerteAdresser = filtrereUgyldigeAdresser(adresser.delteBosteder)
         val tidslinjer =
             filtrerteAdresser.map { adresse ->
                 lagTidslinjeForAdresser(listOf(adresse), personResultat, "Delt bostedadresse") { it.erIFinnmarkEllerNordTroms() }
@@ -412,7 +415,7 @@ class PreutfyllBosattIRiketService(
         }
     }
 
-    private fun filtrereUgyldigeBostedsadresser(adresser: List<Adresse>): List<Adresse> {
+    private fun filtrereUgyldigeAdresser(adresser: List<Adresse>): List<Adresse> {
         val filtrert =
             adresser
                 .filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
@@ -460,15 +463,11 @@ private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandling
     behandling: Behandling,
     erDeltBostedIFinnmarkEllerNordTromsTidslinje: Tidslinje<Boolean>,
     erOppholdsadressePåSvalbardTidslinje: Tidslinje<Boolean>,
-    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    personResultat: PersonResultat,
+    andelForAktør: List<AndelTilkjentYtelse>,
 ) {
     val harLøpendeAndelTidslinje =
-        andelTilkjentYtelseRepository
-            .finnAndelerTilkjentYtelseForBehandlingOgBarn(
-                behandling.id,
-                personResultat.aktør,
-            ).filter { it.kalkulertUtbetalingsbeløp > 0 }
+        andelForAktør
+            .filter { it.kalkulertUtbetalingsbeløp > 0 && it.type == YtelseType.ORDINÆR_BARNETRYGD }
             .map { Periode(true, it.stønadFom.toLocalDate(), it.stønadTom.toLocalDate()) }
             .tilTidslinje()
 
