@@ -109,7 +109,7 @@ abstract class GrBostedsadresse(
                 }
             return mappetAdresse.also {
                 it.person = person
-                it.periode = DatoIntervallEntitet(bostedsadresse.angittFlyttedato, bostedsadresse.gyldigTilOgMed)
+                it.periode = DatoIntervallEntitet(bostedsadresse.angittFlyttedato ?: bostedsadresse.gyldigFraOgMed, bostedsadresse.gyldigTilOgMed)
             }
         }
 
