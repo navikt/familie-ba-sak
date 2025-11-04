@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -30,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerAtVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerBarnasVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIkkeBlandetRegelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIngenVilkårSattEtterSøkersDød
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
@@ -49,7 +49,7 @@ class VilkårsvurderingSteg(
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val featureToggleService: FeatureToggleService,
-    private val oppgaveService: OppgaveService,
+    private val opprettTaskService: OpprettTaskService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) : BehandlingSteg<List<String>?> {
     override fun preValiderSteg(
@@ -164,7 +164,7 @@ class VilkårsvurderingSteg(
         if (behandling.erFinnmarkstillegg()) {
             val skalBehandlesManuelt = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering, andelerIForrigeBehandling)
             if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
-                oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
+                opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(
                     fagsakId = behandling.fagsak.id,
                     beskrivelse = "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\nDet finnes perioder der søker er bosatt i Finnmark/Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark/Nord-Troms.",
                 )
@@ -174,7 +174,7 @@ class VilkårsvurderingSteg(
         if (behandling.erSvalbardtillegg()) {
             val skalBehandlesManuelt = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering, andelerIForrigeBehandling)
             if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
-                oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
+                opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(
                     fagsakId = behandling.fagsak.id,
                     beskrivelse = "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\nDet finnes perioder der søker er bosatt på Svalbard samtidig som et barn med delt barnetrygd ikke er bosatt på Svalbard.",
                 )

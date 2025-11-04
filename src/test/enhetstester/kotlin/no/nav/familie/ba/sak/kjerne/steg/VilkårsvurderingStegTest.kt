@@ -20,7 +20,6 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -40,6 +39,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -62,7 +62,7 @@ class VilkårsvurderingStegTest {
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService = mockk()
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
-    private val oppgaveService: OppgaveService = mockk()
+    private val opprettTaskService: OpprettTaskService = mockk()
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>(relaxed = true)
 
     private val vilkårsvurderingSteg: VilkårsvurderingSteg =
@@ -80,7 +80,7 @@ class VilkårsvurderingStegTest {
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             featureToggleService = featureToggleService,
-            oppgaveService = oppgaveService,
+            opprettTaskService = opprettTaskService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
 
@@ -327,14 +327,14 @@ class VilkårsvurderingStegTest {
                     listOf(lagAndelTilkjentYtelse(fom = barn.fødselsdato.toYearMonth(), tom = barn.fødselsdato.plusYears(18).toYearMonth(), kalkulertUtbetalingsbeløp = 1000, aktør = barn.aktør))
                 every { vilkårService.hentVilkårsvurderingThrows(forrigeBehandling.id) } returns lagVilkårsvurdering(forrigeBehandling.id)
                 every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
-                every { oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(any(), any()) } returns ""
+                justRun { opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(any(), any()) }
 
                 // Act
                 vilkårsvurderingSteg.preValiderSteg(behandling, null)
 
                 // Assert
                 verify(exactly = 1) {
-                    oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
+                    opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(
                         behandling.fagsak.id,
                         "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
                             "Det finnes perioder der søker er bosatt i Finnmark/Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark/Nord-Troms.",
@@ -390,13 +390,13 @@ class VilkårsvurderingStegTest {
                     listOf(lagAndelTilkjentYtelse(fom = barn.fødselsdato.toYearMonth(), tom = barn.fødselsdato.plusYears(18).toYearMonth(), kalkulertUtbetalingsbeløp = 0, aktør = barn.aktør))
                 every { vilkårService.hentVilkårsvurderingThrows(forrigeBehandling.id) } returns lagVilkårsvurdering(forrigeBehandling.id)
                 every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
-                every { oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(any(), any()) } returns ""
+                justRun { opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(any(), any()) }
 
                 // Act
                 vilkårsvurderingSteg.preValiderSteg(behandling, null)
 
                 // Assert
-                verify(exactly = 0) { oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(any(), any()) }
+                verify(exactly = 0) { opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(any(), any()) }
             }
 
             @Test
@@ -467,14 +467,14 @@ class VilkårsvurderingStegTest {
                     )
                 every { vilkårService.hentVilkårsvurderingThrows(forrigeBehandling.id) } returns lagVilkårsvurdering(forrigeBehandling.id)
                 every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
-                every { oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(any(), any()) } returns ""
+                justRun { opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(any(), any()) }
 
                 // Act
                 vilkårsvurderingSteg.preValiderSteg(behandling, null)
 
                 // Assert
                 verify(exactly = 1) {
-                    oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
+                    opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(
                         behandling.fagsak.id,
                         "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
                             "Det finnes perioder der søker er bosatt i Finnmark/Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark/Nord-Troms.",
@@ -524,13 +524,13 @@ class VilkårsvurderingStegTest {
                     listOf(lagAndelTilkjentYtelse(fom = barn.fødselsdato.toYearMonth(), tom = barn.fødselsdato.plusYears(18).toYearMonth(), kalkulertUtbetalingsbeløp = 0, aktør = barn.aktør))
                 every { vilkårService.hentVilkårsvurderingThrows(forrigeBehandling.id) } returns lagVilkårsvurdering(forrigeBehandling.id)
                 every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
-                every { oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(any(), any()) } returns ""
+                justRun { opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(any(), any()) }
 
                 // Act
                 vilkårsvurderingSteg.preValiderSteg(behandling, null)
 
                 // Assert
-                verify(exactly = 0) { oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(any(), any()) }
+                verify(exactly = 0) { opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(any(), any()) }
             }
         }
     }
