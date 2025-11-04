@@ -236,6 +236,7 @@ class BrevService(
             Brevmal.AUTOVEDTAK_ENDRING ->
                 AutovedtakEndring(
                     vedtakFellesfelter = vedtakFellesfelter,
+                    etterbetaling = hentEtterbetaling(vedtak),
                 )
 
             Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN ->

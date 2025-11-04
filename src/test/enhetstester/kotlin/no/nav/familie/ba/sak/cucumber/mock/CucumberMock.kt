@@ -561,6 +561,7 @@ class CucumberMock(
             søknadService = mockk(),
             persongrunnlagService = persongrunnlagService,
             featureToggleService = featureToggleService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
 
     val preutfyllVilkårService =
@@ -631,6 +632,7 @@ class CucumberMock(
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             featureToggleService = featureToggleService,
             oppgaveService = oppgaveService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
 
     val ferdigstillBehandlingSteg =

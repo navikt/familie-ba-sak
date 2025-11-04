@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.ClockProvider
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -11,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -19,10 +21,12 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.valider18ÅrsVilkårEksistererFraFødselsdato
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerAtVilkårsvurderingErEndret
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerBarnasVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIkkeBlandetRegelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIngenVilkårSattEtterSøkersDød
@@ -46,6 +50,7 @@ class VilkårsvurderingSteg(
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val featureToggleService: FeatureToggleService,
     private val oppgaveService: OppgaveService,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) : BehandlingSteg<List<String>?> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -79,24 +84,8 @@ class VilkårsvurderingSteg(
                 vilkårsvurdering = this,
             )
 
-            if (behandling.erFinnmarkstillegg()) {
-                val skalBehandlesManuelt = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(this)
-                if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
-                    oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
-                        fagsakId = behandling.fagsak.id,
-                        beskrivelse = "Det finnes perioder der søker er bosatt i Finnmark eller Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark eller Nord-Troms.",
-                    )
-                }
-            }
-
-            if (behandling.erSvalbardtillegg()) {
-                val skalBehandlesManuelt = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(this)
-                if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
-                    oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
-                        fagsakId = behandling.fagsak.id,
-                        beskrivelse = "Det finnes perioder der søker er bosatt på Svalbard samtidig som et barn med delt barnetrygd ikke er bosatt på Svalbard.",
-                    )
-                }
+            if (behandling.erFinnmarksEllerSvalbardtillegg()) {
+                validerFinnmarkOgSvalbardBehandling(behandling = behandling, vilkårsvurdering = this)
             }
         }
     }
@@ -159,6 +148,43 @@ class VilkårsvurderingSteg(
 
             validerBarnasVilkår(søkerOgBarn.barn(), vilkårsvurdering)
         }
+    }
+
+    private fun validerFinnmarkOgSvalbardBehandling(
+        behandling: Behandling,
+        vilkårsvurdering: Vilkårsvurdering,
+    ) {
+        val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+        if (forrigeVedtatteBehandling == null) {
+            throw Feil("Kan ikke kjøre behandling med årsak ${behandling.opprettetÅrsak} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}")
+        }
+
+        val andelerIForrigeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeVedtatteBehandling.id)
+
+        if (behandling.erFinnmarkstillegg()) {
+            val skalBehandlesManuelt = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering, andelerIForrigeBehandling)
+            if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
+                oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
+                    fagsakId = behandling.fagsak.id,
+                    beskrivelse = "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\nDet finnes perioder der søker er bosatt i Finnmark/Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark/Nord-Troms.",
+                )
+            }
+        }
+
+        if (behandling.erSvalbardtillegg()) {
+            val skalBehandlesManuelt = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering, andelerIForrigeBehandling)
+            if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
+                oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
+                    fagsakId = behandling.fagsak.id,
+                    beskrivelse = "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\nDet finnes perioder der søker er bosatt på Svalbard samtidig som et barn med delt barnetrygd ikke er bosatt på Svalbard.",
+                )
+            }
+        }
+
+        validerAtVilkårsvurderingErEndret(
+            vilkårsvurdering = vilkårsvurdering,
+            forrigeVilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(forrigeVedtatteBehandling.id),
+        )
     }
 
     override fun stegType(): StegType = StegType.VILKÅRSVURDERING

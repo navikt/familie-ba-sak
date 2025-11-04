@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -12,6 +13,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.FinnmarkstilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -27,6 +29,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE
@@ -187,6 +190,29 @@ class AutovedtakFinnmarkstilleggServiceTest {
 
             // Assert
             assertThat(skalAutovedtakBehandles).isTrue()
+        }
+
+        @Test
+        fun `skal kaste feil når minst en person bor i tilleggssone, men siste vedtatte behandling er av kategori EØS`() {
+            // Arrange
+            val behandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns behandling
+            every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns lagTilkjentYtelse { emptySet() }
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+            every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
+                mapOf(
+                    søkerIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseIFinnmark), deltBosted = emptyList()),
+                    barnIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                )
+
+            // Act
+            val feil =
+                assertThrows<AutovedtakMåBehandlesManueltFeil> {
+                    autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
+                }
+
+            // Assert
+            assertThat(feil.message).isEqualTo("Automatisk behandling av finnmarkstillegg kan ikke gjennomføres for EØS-saker.")
         }
     }
 }

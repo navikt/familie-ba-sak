@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
+import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
@@ -59,8 +60,6 @@ class AutovedtakFinnmarkstilleggService(
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandlingsdata.fagsakId)
                 ?: return false
 
-        if (sisteVedtatteBehandling.kategori == BehandlingKategori.EØS) return false
-
         val sisteVedtatteBehandlingHarFinnmarkstilleggAndeler =
             beregningService
                 .hentTilkjentYtelseForBehandling(sisteVedtatteBehandling.id)
@@ -79,7 +78,14 @@ class AutovedtakFinnmarkstilleggService(
                         .any { it.value.harAdresserSomErRelevantForFinnmarkstillegg() }
                 }
 
-        return sisteVedtatteBehandlingHarFinnmarkstilleggAndeler || minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg
+        val skalBehandleFinnmarkstillegg =
+            sisteVedtatteBehandlingHarFinnmarkstilleggAndeler || minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg
+
+        if (skalBehandleFinnmarkstillegg && sisteVedtatteBehandling.kategori == BehandlingKategori.EØS) {
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av finnmarkstillegg kan ikke gjennomføres for EØS-saker.")
+        }
+
+        return skalBehandleFinnmarkstillegg
     }
 
     @Transactional

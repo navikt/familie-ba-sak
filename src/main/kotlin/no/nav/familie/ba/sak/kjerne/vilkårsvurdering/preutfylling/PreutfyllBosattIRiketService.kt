@@ -1,11 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
+import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
@@ -36,12 +41,15 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+private val FINNMARK_OG_SVALBARD_MERKING_CUT_OFF_FOM_DATO = LocalDate.of(2025, 9, 1)
+
 @Service
 class PreutfyllBosattIRiketService(
     private val pdlRestKlient: SystemOnlyPdlRestKlient,
     private val søknadService: SøknadService,
     private val persongrunnlagService: PersongrunnlagService,
     private val featureToggleService: FeatureToggleService,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
     fun preutfyllBosattIRiket(
         vilkårsvurdering: Vilkårsvurdering,
@@ -71,11 +79,10 @@ class PreutfyllBosattIRiketService(
 
                 val nyeBosattIRiketVilkårResultater =
                     if (behandling.erFinnmarksEllerSvalbardtillegg() && featureToggleService.isEnabled(FeatureToggle.NY_PREUTFYLLING_FOR_BOSATT_I_RIKET_VILKÅR_VED_AUTOVEDTAK_FINNMARK_SVALBARD)) {
-                        tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+                        oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                             personResultat = personResultat,
                             adresserForPerson = adresserForPerson,
                             behandling = behandling,
-                            cutOffFomDato = cutOffFomDato!!,
                         )
                     } else {
                         val bosattIRiketVilkårResultat =
@@ -126,11 +133,14 @@ class PreutfyllBosattIRiketService(
                 }.tilPerioderIkkeNull()
                 .tilTidslinje()
 
+        val andelForAktør = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør)
+
         if (behandling.erFinnmarksEllerSvalbardtillegg()) {
             validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
                 behandling = behandling,
                 erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
                 erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
+                andelForAktør = andelForAktør,
             )
         }
 
@@ -195,20 +205,21 @@ class PreutfyllBosattIRiketService(
             }.toSet()
     }
 
-    fun tilpassFinnmarkOgSvalbardtilleggPåBosattIRiketVilkårResultat(
+    fun oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
         personResultat: PersonResultat,
         adresserForPerson: Adresser,
         behandling: Behandling,
-        cutOffFomDato: LocalDate,
     ): List<VilkårResultat> {
         val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erDeltBostedIFinnmarkEllerNordTromsTidslinje = lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erOppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje(adresserForPerson, personResultat)
+        val andelForAktør = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør)
 
         validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
             behandling = behandling,
             erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
             erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
+            andelForAktør = andelForAktør,
         )
 
         val erBosattIFinnmarkEllerNordTromsTidslinje =
@@ -216,7 +227,7 @@ class PreutfyllBosattIRiketService(
                 erBostedsadresseIFinnmarkEllerNordTroms == true || erDeltBostedIFinnmarkEllerNordTroms == true
             }
 
-        val finnmarkEllerSvalbardtilleggTidslinje =
+        val finnmarkEllerSvalbardmerkingTidslinje =
             erBosattIFinnmarkEllerNordTromsTidslinje
                 .kombinerMed(erOppholdsadressePåSvalbardTidslinje) { erBosattIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
                     when {
@@ -224,27 +235,38 @@ class PreutfyllBosattIRiketService(
                         erBosattIFinnmarkEllerNordTroms == true -> listOf(BOSATT_I_FINNMARK_NORD_TROMS)
                         else -> emptyList()
                     }
-                }.beskjærFraOgMed(cutOffFomDato)
+                }.beskjærFraOgMed(FINNMARK_OG_SVALBARD_MERKING_CUT_OFF_FOM_DATO)
 
         val eksisterendeBosattIRiketVilkårResultater = personResultat.vilkårResultater.filter { it.vilkårType == BOSATT_I_RIKET }
 
         return eksisterendeBosattIRiketVilkårResultater
             .tilTidslinje()
-            .kombinerMed(finnmarkEllerSvalbardtilleggTidslinje) { eksisterendeVilkårResultat, finnmarkEllerSvalbardtillegg ->
+            .kombinerMed(finnmarkEllerSvalbardmerkingTidslinje) { eksisterendeVilkårResultat, finnmarkEllerSvalbardmerking ->
                 if (eksisterendeVilkårResultat == null) {
                     return@kombinerMed null
                 }
-                val utdypendeVilkårsvurderingUtenFinnmarkOgSvalbardtillegg = eksisterendeVilkårResultat.utdypendeVilkårsvurderinger.filter { it != BOSATT_I_FINNMARK_NORD_TROMS && it != BOSATT_PÅ_SVALBARD }
-                if (finnmarkEllerSvalbardtillegg == null) {
-                    return@kombinerMed eksisterendeVilkårResultat.copy(utdypendeVilkårsvurderinger = utdypendeVilkårsvurderingUtenFinnmarkOgSvalbardtillegg)
+
+                val gjeldendeFinnmarkEllerSvalbardMarkeringer = finnmarkEllerSvalbardmerking.orEmpty().toSet()
+                val eksisterendeFinnmarkEllerSvalbardMarkeringer = eksisterendeVilkårResultat.utdypendeVilkårsvurderinger.filter { it == BOSATT_I_FINNMARK_NORD_TROMS || it == BOSATT_PÅ_SVALBARD }.toSet()
+                val utdypendeVilkårsvurderingMåOppdateres = eksisterendeFinnmarkEllerSvalbardMarkeringer != gjeldendeFinnmarkEllerSvalbardMarkeringer
+
+                if (utdypendeVilkårsvurderingMåOppdateres) {
+                    val oppdaterteUtdypendeVilkårsvurderinger =
+                        eksisterendeVilkårResultat.utdypendeVilkårsvurderinger
+                            .filter { it != BOSATT_I_FINNMARK_NORD_TROMS && it != BOSATT_PÅ_SVALBARD }
+                            .plus(gjeldendeFinnmarkEllerSvalbardMarkeringer)
+
+                    eksisterendeVilkårResultat.copy(utdypendeVilkårsvurderinger = oppdaterteUtdypendeVilkårsvurderinger, begrunnelse = PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
+                } else {
+                    eksisterendeVilkårResultat
                 }
-                val utdypendeVilkårsvurderingMedFinnmarkOgSvalbardtillegg = utdypendeVilkårsvurderingUtenFinnmarkOgSvalbardtillegg.plus(finnmarkEllerSvalbardtillegg)
-                eksisterendeVilkårResultat.copy(utdypendeVilkårsvurderinger = utdypendeVilkårsvurderingMedFinnmarkOgSvalbardtillegg, begrunnelse = PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
             }.tilPerioderIkkeNull()
             .map {
+                val periodeErEndret = it.fom != it.verdi.periodeFom || it.tom != it.verdi.periodeTom
                 it.verdi.copy(
                     periodeFom = it.fom,
                     periodeTom = it.tom,
+                    begrunnelse = if (periodeErEndret) PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT else it.verdi.begrunnelse,
                 )
             }
     }
@@ -452,16 +474,23 @@ private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandling
     behandling: Behandling,
     erDeltBostedIFinnmarkEllerNordTromsTidslinje: Tidslinje<Boolean>,
     erOppholdsadressePåSvalbardTidslinje: Tidslinje<Boolean>,
+    andelForAktør: List<AndelTilkjentYtelse>,
 ) {
+    val harLøpendeAndelTidslinje =
+        andelForAktør
+            .filter { it.kalkulertUtbetalingsbeløp > 0 && it.type == YtelseType.ORDINÆR_BARNETRYGD }
+            .map { Periode(true, it.stønadFom.toLocalDate(), it.stønadTom.toLocalDate()) }
+            .tilTidslinje()
+
     val harDeltBostedIFinnmarkOgOppholdsadressePåSvalbardISammePeriode =
         erDeltBostedIFinnmarkEllerNordTromsTidslinje
-            .kombinerMed(erOppholdsadressePåSvalbardTidslinje) { erDeltBostedIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
-                erDeltBostedIFinnmarkEllerNordTroms == true && erOppholdsadressePåSvalbard == true
+            .kombinerMed(erOppholdsadressePåSvalbardTidslinje, harLøpendeAndelTidslinje) { erDeltBostedIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard, harLøpendeAndel ->
+                erDeltBostedIFinnmarkEllerNordTroms == true && erOppholdsadressePåSvalbard == true && harLøpendeAndel == true
             }.tilPerioder()
             .any { it.verdi == true }
 
     if (harDeltBostedIFinnmarkOgOppholdsadressePåSvalbardISammePeriode) {
-        throw Feil("Kan ikke behandle ${behandling.opprettetÅrsak.visningsnavn} automatisk, fordi barn har delt bosted i Finnmark/Nord-Troms og oppholdsadresse på Svalbard")
+        throw AutovedtakMåBehandlesManueltFeil(beskrivelse = "${behandling.opprettetÅrsak.visningsnavn} kan ikke behandles automatisk som følge av adresseendring. Barn har delt bosted i Finnmark/Nord-Troms og oppholdsadresse på Svalbard")
     }
 }
 

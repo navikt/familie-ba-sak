@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.simulering
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.OverlappendePerioderMedAndreFagsaker
+import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -79,6 +80,72 @@ class FinnOverlappendePerioderTest {
                                 tom = LocalDate.now().minusMonths(13),
                                 beløp = 100,
                                 fagsakId = 4,
+                            ),
+                        ),
+                ),
+            )
+
+        // Act
+        val overlappendePerioder = finnOverlappendePerioder(økonomiSimuleringMottakere = økonomiSimuleringMottakere, 1)
+
+        // Assert
+        assertThat(overlappendePerioder).isEmpty()
+    }
+
+    @Test
+    fun `finnOverlappendePerioder skal fjerne like perioder per fagsak`() {
+        // Arrange
+        val økonomiSimuleringMottakere =
+            listOf(
+                lagØkonomiSimuleringMottaker(
+                    økonomiSimuleringPostering =
+                        listOf(
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.now().minusYears(1),
+                                tom = LocalDate.now(),
+                                posteringType = PosteringType.YTELSE,
+                                beløp = 100,
+                                fagsakId = 1,
+                            ),
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.now().minusYears(1),
+                                tom = LocalDate.now(),
+                                posteringType = PosteringType.YTELSE,
+                                beløp = 100,
+                                fagsakId = 1,
+                            ),
+                        ),
+                ),
+            )
+
+        // Act
+        val overlappendePerioder = finnOverlappendePerioder(økonomiSimuleringMottakere = økonomiSimuleringMottakere, 1)
+
+        // Assert
+        assertThat(overlappendePerioder).isEmpty()
+    }
+
+    @Test
+    fun `finnOverlappendePerioder skal fjerne like perioder per fagsak uavhengig av posteringstype`() {
+        // Arrange
+        val økonomiSimuleringMottakere =
+            listOf(
+                lagØkonomiSimuleringMottaker(
+                    økonomiSimuleringPostering =
+                        listOf(
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.now().minusYears(1),
+                                tom = LocalDate.now(),
+                                posteringType = PosteringType.YTELSE,
+                                beløp = 100,
+                                fagsakId = 1,
+                            ),
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.now().minusYears(1),
+                                tom = LocalDate.now(),
+                                posteringType = PosteringType.JUSTERING,
+                                beløp = 100,
+                                fagsakId = 1,
                             ),
                         ),
                 ),
