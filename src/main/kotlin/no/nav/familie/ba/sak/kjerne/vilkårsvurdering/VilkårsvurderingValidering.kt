@@ -5,14 +5,16 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.VilkårFeil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -136,18 +138,18 @@ fun validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig(
 
 fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(
     vilkårsvurdering: Vilkårsvurdering,
-    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-): Boolean = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_I_FINNMARK_NORD_TROMS, andelTilkjentYtelseRepository)
+    andelerIForrigeBehandling: List<AndelTilkjentYtelse>,
+): Boolean = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_I_FINNMARK_NORD_TROMS, andelerIForrigeBehandling)
 
 fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(
     vilkårsvurdering: Vilkårsvurdering,
-    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-): Boolean = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_PÅ_SVALBARD, andelTilkjentYtelseRepository)
+    andelerIForrigeBehandling: List<AndelTilkjentYtelse>,
+): Boolean = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(vilkårsvurdering, BOSATT_PÅ_SVALBARD, andelerIForrigeBehandling)
 
 private fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(
     vilkårsvurdering: Vilkårsvurdering,
     utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering,
-    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    andelerIForrigeBehandling: List<AndelTilkjentYtelse>,
 ): Boolean {
     val søkersPersonResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() } ?: throw Feil("Finner ikke personresultat for søker i vilkårsvurdering for ny behandling i fagsak ${vilkårsvurdering.behandling.fagsak.id}")
 
@@ -172,12 +174,9 @@ private fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(
                         .lagForskjøvetTidslinjeForOppfylteVilkår(BOR_MED_SØKER)
 
                 val harLøpendeAndelTidslinje =
-                    andelTilkjentYtelseRepository
-                        .finnAndelerTilkjentYtelseForBehandlingOgBarn(
-                            vilkårsvurdering.behandling.id,
-                            personResultat.aktør,
-                        ).filter { it.kalkulertUtbetalingsbeløp > 0 }
-                        .map { Periode(true, it.stønadFom.toLocalDate(), it.stønadTom.toLocalDate()) }
+                    andelerIForrigeBehandling
+                        .filter { it.aktør == personResultat.aktør && it.kalkulertUtbetalingsbeløp > 0 && it.type == YtelseType.ORDINÆR_BARNETRYGD }
+                        .map { Periode(true, it.stønadFom.førsteDagIInneværendeMåned(), it.stønadTom.sisteDagIInneværendeMåned()) }
                         .tilTidslinje()
 
                 val barnDeltBostedMedLøpendeAndelTidslinje =
@@ -192,10 +191,6 @@ private fun finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerITilleggssone(
                     }.tilPerioder()
                     .any { it.verdi == true }
             }
-
-    if (finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerITilleggssone) {
-        logger.warn("For fagsak ${vilkårsvurdering.behandling.fagsak.id} finnes det perioder der søker er $utdypendeVilkårsvurdering samtidig som et barn med delt bosted ikke er $utdypendeVilkårsvurdering.")
-    }
 
     return finnesPerioderDerBarnMedDeltBostedIkkeBorSammenMedSøkerITilleggssone
 }

@@ -5,11 +5,13 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.justRun
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -35,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -202,12 +205,36 @@ class VilkårsvurderingStegTest {
         fun `Skal kaste feil i finnmarkstillegg-behandlinger om forrige vedtatte behandling ikke finnes`() {
             // Arrange
             val behandling = lagBehandling(årsak = BehandlingÅrsak.FINNMARKSTILLEGG)
-            val vilkårsvurdering = lagVilkårsvurdering(1L, behandling)
+            val vilkårsvurdering =
+                lagVilkårsvurdering(1L, behandling) {
+                    setOf(
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            person = søker,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = søker.fødselsdato,
+                            periodeTom = null,
+                            lagFullstendigVilkårResultat = true,
+                            personType = PersonType.SØKER,
+                        ),
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            person = barn,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = barn.fødselsdato,
+                            periodeTom = null,
+                            lagFullstendigVilkårResultat = true,
+                            personType = PersonType.BARN,
+                        ),
+                    )
+                }
 
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
+            every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id) } returns listOf(søker.tilPersonEnkel(), barn.tilPersonEnkel())
+            every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
 
             // Act & Assert
-            assertThatThrownBy { vilkårsvurderingSteg.validerFinnmarkOgSvalbardBehandling(behandling, vilkårsvurdering) }.hasMessage(
+            assertThatThrownBy { vilkårsvurderingSteg.preValiderSteg(behandling, null) }.hasMessage(
                 "Kan ikke kjøre behandling med årsak ${behandling.opprettetÅrsak} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}",
             )
         }
@@ -216,14 +243,295 @@ class VilkårsvurderingStegTest {
         fun `Skal kaste feil i svalbardtillegg-behandlinger om forrige vedtatte behandling ikke finnes`() {
             // Arrange
             val behandling = lagBehandling(årsak = BehandlingÅrsak.SVALBARDTILLEGG)
-            val vilkårsvurdering = lagVilkårsvurdering(2L, behandling)
+            val vilkårsvurdering =
+                lagVilkårsvurdering(2L, behandling) {
+                    setOf(
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            person = søker,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = søker.fødselsdato,
+                            periodeTom = null,
+                            lagFullstendigVilkårResultat = true,
+                            personType = PersonType.SØKER,
+                        ),
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            person = barn,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = barn.fødselsdato,
+                            periodeTom = null,
+                            lagFullstendigVilkårResultat = true,
+                            personType = PersonType.BARN,
+                        ),
+                    )
+                }
 
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
+            every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id) } returns listOf(søker.tilPersonEnkel(), barn.tilPersonEnkel())
+            every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
 
             // Act & Assert
-            assertThatThrownBy { vilkårsvurderingSteg.validerFinnmarkOgSvalbardBehandling(behandling, vilkårsvurdering) }.hasMessage(
+            assertThatThrownBy { vilkårsvurderingSteg.preValiderSteg(behandling, null) }.hasMessage(
                 "Kan ikke kjøre behandling med årsak ${behandling.opprettetÅrsak} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}",
             )
+        }
+
+        @Nested
+        inner class FinnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark {
+            @Test
+            fun `Skal opprette manuell oppgave i finnmarkstillegg-behandlinger dersom søker bor i Finnmark, og barn med delt bosted ikke bor i Finnmark`() {
+                // Arrange
+                val behandling = lagBehandling(årsak = BehandlingÅrsak.FINNMARKSTILLEGG)
+                val forrigeBehandling = lagBehandling()
+                val vilkårsvurdering =
+                    lagVilkårsvurdering(1L, behandling) {
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                person = søker,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = søker.fødselsdato,
+                                periodeTom = null,
+                                lagFullstendigVilkårResultat = true,
+                                personType = PersonType.SØKER,
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                person = barn,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = barn.fødselsdato,
+                                periodeTom = null,
+                                lagFullstendigVilkårResultat = true,
+                                personType = PersonType.BARN,
+                            ),
+                        )
+                    }
+
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == søker.aktør }
+                    .vilkårResultater
+                    .first { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+                    .utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
+
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == barn.aktør }
+                    .vilkårResultater
+                    .first { it.vilkårType == Vilkår.BOR_MED_SØKER }
+                    .utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+
+                every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns forrigeBehandling
+                every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id) } returns listOf(søker.tilPersonEnkel(), barn.tilPersonEnkel())
+                every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
+                every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns
+                    listOf(lagAndelTilkjentYtelse(fom = barn.fødselsdato.toYearMonth(), tom = barn.fødselsdato.plusYears(18).toYearMonth(), kalkulertUtbetalingsbeløp = 1000, aktør = barn.aktør))
+                every { vilkårService.hentVilkårsvurderingThrows(forrigeBehandling.id) } returns lagVilkårsvurdering(forrigeBehandling.id)
+                every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
+                every { oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(any(), any()) } returns ""
+
+                // Act
+                vilkårsvurderingSteg.preValiderSteg(behandling, null)
+
+                // Assert
+                verify(exactly = 1) {
+                    oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
+                        behandling.fagsak.id,
+                        "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
+                            "Det finnes perioder der søker er bosatt i Finnmark/Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark/Nord-Troms.",
+                    )
+                }
+            }
+
+            @Test
+            fun `Skal ikke opprette manuell oppgave i finnmarkstillegg-behandlinger dersom søker bor i Finnmark, og barn med delt bosted ikke bor i Finnmark men ikke har løpende andeler`() {
+                // Arrange
+                val behandling = lagBehandling(årsak = BehandlingÅrsak.FINNMARKSTILLEGG)
+                val forrigeBehandling = lagBehandling()
+                val vilkårsvurdering =
+                    lagVilkårsvurdering(1L, behandling) {
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                person = søker,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = søker.fødselsdato,
+                                periodeTom = null,
+                                lagFullstendigVilkårResultat = true,
+                                personType = PersonType.SØKER,
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                person = barn,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = barn.fødselsdato,
+                                periodeTom = null,
+                                lagFullstendigVilkårResultat = true,
+                                personType = PersonType.BARN,
+                            ),
+                        )
+                    }
+
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == søker.aktør }
+                    .vilkårResultater
+                    .first { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+                    .utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
+
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == barn.aktør }
+                    .vilkårResultater
+                    .first { it.vilkårType == Vilkår.BOR_MED_SØKER }
+                    .utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+
+                every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns forrigeBehandling
+                every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id) } returns listOf(søker.tilPersonEnkel(), barn.tilPersonEnkel())
+                every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
+                every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns
+                    listOf(lagAndelTilkjentYtelse(fom = barn.fødselsdato.toYearMonth(), tom = barn.fødselsdato.plusYears(18).toYearMonth(), kalkulertUtbetalingsbeløp = 0, aktør = barn.aktør))
+                every { vilkårService.hentVilkårsvurderingThrows(forrigeBehandling.id) } returns lagVilkårsvurdering(forrigeBehandling.id)
+                every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
+                every { oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(any(), any()) } returns ""
+
+                // Act
+                vilkårsvurderingSteg.preValiderSteg(behandling, null)
+
+                // Assert
+                verify(exactly = 0) { oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(any(), any()) }
+            }
+
+            @Test
+            fun `Skal opprette manuell oppgave i finnmarkstillegg-behandlinger dersom søker bor i Finnmark med ett barn, og ett barn med delt bosted ikke bor i Finnmark`() {
+                // Arrange
+                val behandling = lagBehandling(årsak = BehandlingÅrsak.FINNMARKSTILLEGG)
+                val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 1, 1))
+                val forrigeBehandling = lagBehandling()
+
+                val vilkårsvurdering =
+                    lagVilkårsvurdering(1L, behandling) {
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                person = søker,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = søker.fødselsdato,
+                                periodeTom = null,
+                                lagFullstendigVilkårResultat = true,
+                                personType = PersonType.SØKER,
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                person = barn,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = barn.fødselsdato,
+                                periodeTom = null,
+                                lagFullstendigVilkårResultat = true,
+                                personType = PersonType.BARN,
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                person = barn2,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = barn2.fødselsdato,
+                                periodeTom = null,
+                                lagFullstendigVilkårResultat = true,
+                                personType = PersonType.BARN,
+                            ),
+                        )
+                    }
+
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == søker.aktør }
+                    .vilkårResultater
+                    .first { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+                    .utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
+
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == barn2.aktør }
+                    .vilkårResultater
+                    .first { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+                    .utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
+
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == barn.aktør }
+                    .vilkårResultater
+                    .first { it.vilkårType == Vilkår.BOR_MED_SØKER }
+                    .utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+
+                every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns forrigeBehandling
+                every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id) } returns listOf(søker.tilPersonEnkel(), barn.tilPersonEnkel(), barn2.tilPersonEnkel())
+                every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
+                every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns
+                    listOf(
+                        lagAndelTilkjentYtelse(fom = barn.fødselsdato.toYearMonth(), tom = barn.fødselsdato.plusYears(18).toYearMonth(), kalkulertUtbetalingsbeløp = 1000, aktør = barn.aktør),
+                        lagAndelTilkjentYtelse(fom = barn2.fødselsdato.toYearMonth(), tom = barn2.fødselsdato.plusYears(18).toYearMonth(), kalkulertUtbetalingsbeløp = 1000, aktør = barn2.aktør),
+                    )
+                every { vilkårService.hentVilkårsvurderingThrows(forrigeBehandling.id) } returns lagVilkårsvurdering(forrigeBehandling.id)
+                every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
+                every { oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(any(), any()) } returns ""
+
+                // Act
+                vilkårsvurderingSteg.preValiderSteg(behandling, null)
+
+                // Assert
+                verify(exactly = 1) {
+                    oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
+                        behandling.fagsak.id,
+                        "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
+                            "Det finnes perioder der søker er bosatt i Finnmark/Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark/Nord-Troms.",
+                    )
+                }
+            }
+
+            @Test
+            fun `Skal ikke opprette manuell oppgave i finnmarkstillegg-behandlinger dersom søker ikke bor i Finnmark, og barn med delt bosted ikke bor i Finnmark`() {
+                // Arrange
+                val behandling = lagBehandling(årsak = BehandlingÅrsak.FINNMARKSTILLEGG)
+                val forrigeBehandling = lagBehandling()
+                val vilkårsvurdering =
+                    lagVilkårsvurdering(1L, behandling) {
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                person = søker,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = søker.fødselsdato,
+                                periodeTom = null,
+                                lagFullstendigVilkårResultat = true,
+                                personType = PersonType.SØKER,
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                person = barn,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = barn.fødselsdato,
+                                periodeTom = null,
+                                lagFullstendigVilkårResultat = true,
+                                personType = PersonType.BARN,
+                            ),
+                        )
+                    }
+
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == barn.aktør }
+                    .vilkårResultater
+                    .first { it.vilkårType == Vilkår.BOR_MED_SØKER }
+                    .utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+
+                every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns forrigeBehandling
+                every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id) } returns listOf(søker.tilPersonEnkel(), barn.tilPersonEnkel())
+                every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
+                every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns
+                    listOf(lagAndelTilkjentYtelse(fom = barn.fødselsdato.toYearMonth(), tom = barn.fødselsdato.plusYears(18).toYearMonth(), kalkulertUtbetalingsbeløp = 0, aktør = barn.aktør))
+                every { vilkårService.hentVilkårsvurderingThrows(forrigeBehandling.id) } returns lagVilkårsvurdering(forrigeBehandling.id)
+                every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
+                every { oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(any(), any()) } returns ""
+
+                // Act
+                vilkårsvurderingSteg.preValiderSteg(behandling, null)
+
+                // Assert
+                verify(exactly = 0) { oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(any(), any()) }
+            }
         }
     }
 }
