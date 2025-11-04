@@ -64,6 +64,7 @@ class PreutfyllBosattIRiketServiceTest {
     @BeforeEach
     fun setup() {
         every { featureToggleService.isEnabled(FeatureToggle.NY_PREUTFYLLING_FOR_BOSATT_I_RIKET_VILKÅR_VED_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } returns emptyList()
     }
 
     @Test
@@ -102,8 +103,6 @@ class PreutfyllBosattIRiketServiceTest {
                 delteBosteder = emptyList(),
                 oppholdsadresse = emptyList(),
             )
-
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør) } returns emptyList()
 
         // Act
         val vilkårResultat =
@@ -182,8 +181,6 @@ class PreutfyllBosattIRiketServiceTest {
                 oppholdsadresse = emptyList(),
             )
 
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør) } returns emptyList()
-
         // Act
         val vilkårResultat =
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
@@ -229,8 +226,6 @@ class PreutfyllBosattIRiketServiceTest {
                 oppholdsadresse = emptyList(),
             )
 
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør) } returns emptyList()
-
         // Act
         val vilkårResultat =
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
@@ -269,7 +264,6 @@ class PreutfyllBosattIRiketServiceTest {
             )
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false)
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør) } returns emptyList()
 
         // Act
         val vilkårResultat =
@@ -317,8 +311,6 @@ class PreutfyllBosattIRiketServiceTest {
             )
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = true)
-
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør) } returns emptyList()
 
         // Act
         val vilkårResultater =
@@ -380,7 +372,6 @@ class PreutfyllBosattIRiketServiceTest {
             )
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false, barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnFnr to true))
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør) } returns emptyList()
 
         // Act
         val vilkårResultater =
@@ -436,8 +427,6 @@ class PreutfyllBosattIRiketServiceTest {
                 delteBosteder = emptyList(),
                 oppholdsadresse = emptyList(),
             )
-
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør) } returns emptyList()
 
         // Act
         val vilkårResultat =
@@ -502,8 +491,6 @@ class PreutfyllBosattIRiketServiceTest {
             listOf(
                 Statsborgerskap(land = "DNK", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
-
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør) } returns emptyList()
 
         // Act
         val vilkårResultat =
@@ -575,8 +562,6 @@ class PreutfyllBosattIRiketServiceTest {
                 Statsborgerskap(land = "AUT", gyldigFraOgMed = LocalDate.now().minusYears(5), gyldigTilOgMed = LocalDate.now().minusYears(1), bekreftelsesdato = null),
             )
 
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør) } returns emptyList()
-
         // Act
         val vilkårResultat =
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
@@ -621,7 +606,6 @@ class PreutfyllBosattIRiketServiceTest {
                 delteBosteder = emptyList(),
                 oppholdsadresse = emptyList(),
             )
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør) } returns emptyList()
 
         // Act
         val vilkårResultat =
@@ -650,8 +634,6 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør) } returns emptyList()
 
         val bostedsadresser =
             Adresser(
@@ -701,8 +683,6 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør) } returns emptyList()
 
         val bostedsadresser =
             Adresser(
@@ -764,7 +744,7 @@ class PreutfyllBosattIRiketServiceTest {
                 oppholdsadresse = emptyList(),
             )
 
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør) } returns listOf(lagAndelTilkjentYtelse(fom = YearMonth.now().minusYears(4), tom = YearMonth.now().plusYears(5), differanseberegnetPeriodebeløp = 1000))
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør) } returns listOf(lagAndelTilkjentYtelse(fom = YearMonth.now().minusYears(4), tom = YearMonth.now().plusYears(5), kalkulertUtbetalingsbeløp = 1000))
 
         // Act
         val vilkårResultat =

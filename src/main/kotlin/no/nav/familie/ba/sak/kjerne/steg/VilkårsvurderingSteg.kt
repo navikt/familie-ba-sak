@@ -90,41 +90,6 @@ class VilkårsvurderingSteg(
         }
     }
 
-    fun validerFinnmarkOgSvalbardBehandling(
-        behandling: Behandling,
-        vilkårsvurdering: Vilkårsvurdering,
-    ) {
-        if (behandling.erFinnmarkstillegg()) {
-            val skalBehandlesManuelt = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering, andelTilkjentYtelseRepository)
-            if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
-                oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
-                    fagsakId = behandling.fagsak.id,
-                    beskrivelse = "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\nDet finnes perioder der søker er bosatt i Finnmark/Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark/Nord-Troms.",
-                )
-            }
-        }
-
-        if (behandling.erSvalbardtillegg()) {
-            val skalBehandlesManuelt = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering, andelTilkjentYtelseRepository)
-            if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
-                oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
-                    fagsakId = behandling.fagsak.id,
-                    beskrivelse = "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\nDet finnes perioder der søker er bosatt på Svalbard samtidig som et barn med delt barnetrygd ikke er bosatt på Svalbard.",
-                )
-            }
-        }
-
-        val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-        if (forrigeVedtatteBehandling == null) {
-            throw Feil("Kan ikke kjøre behandling med årsak ${behandling.opprettetÅrsak} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}")
-        }
-
-        validerAtVilkårsvurderingErEndret(
-            vilkårsvurdering = vilkårsvurdering,
-            forrigeVilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(forrigeVedtatteBehandling.id),
-        )
-    }
-
     @Transactional
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -183,6 +148,43 @@ class VilkårsvurderingSteg(
 
             validerBarnasVilkår(søkerOgBarn.barn(), vilkårsvurdering)
         }
+    }
+
+    private fun validerFinnmarkOgSvalbardBehandling(
+        behandling: Behandling,
+        vilkårsvurdering: Vilkårsvurdering,
+    ) {
+        val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+        if (forrigeVedtatteBehandling == null) {
+            throw Feil("Kan ikke kjøre behandling med årsak ${behandling.opprettetÅrsak} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}")
+        }
+
+        val andelerIForrigeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeVedtatteBehandling.id)
+
+        if (behandling.erFinnmarkstillegg()) {
+            val skalBehandlesManuelt = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering, andelerIForrigeBehandling)
+            if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
+                oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
+                    fagsakId = behandling.fagsak.id,
+                    beskrivelse = "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\nDet finnes perioder der søker er bosatt i Finnmark/Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark/Nord-Troms.",
+                )
+            }
+        }
+
+        if (behandling.erSvalbardtillegg()) {
+            val skalBehandlesManuelt = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering, andelerIForrigeBehandling)
+            if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
+                oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
+                    fagsakId = behandling.fagsak.id,
+                    beskrivelse = "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\nDet finnes perioder der søker er bosatt på Svalbard samtidig som et barn med delt barnetrygd ikke er bosatt på Svalbard.",
+                )
+            }
+        }
+
+        validerAtVilkårsvurderingErEndret(
+            vilkårsvurdering = vilkårsvurdering,
+            forrigeVilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(forrigeVedtatteBehandling.id),
+        )
     }
 
     override fun stegType(): StegType = StegType.VILKÅRSVURDERING
