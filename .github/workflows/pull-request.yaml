@@ -31,7 +31,7 @@ jobs:
     secrets: inherit
 
   integrasjonstest:
-    name: Integrationstest
+    name: Integrasjonstest
     permissions:
       contents: read
     uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@main # ratchet:exclude
