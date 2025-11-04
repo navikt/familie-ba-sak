@@ -12,6 +12,7 @@ import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
+import no.nav.familie.kontrakter.felles.simulering.SimulertPostering
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -43,6 +44,32 @@ class SimuleringUtilTest {
                 fagsakId = fagsakId,
             )
         }
+
+    @Test
+    fun `Test henting av fagsakId`() {
+        // Arrange
+        val fagsakId = 123456L
+
+        val simuleringPostering =
+            SimulertPostering(
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+                fom = LocalDate.now().minusYears(1),
+                tom = LocalDate.now(),
+                betalingType = BetalingType.DEBIT,
+                beløp = BigDecimal(500),
+                posteringType = PosteringType.YTELSE,
+                forfallsdato = LocalDate.now().plusDays(1),
+                fagsakId = "$fagsakId     ",
+            )
+
+        val økonomiSimuleringMottaker = lagØkonomiSimuleringMottaker()
+
+        // Act
+        val postering = simuleringPostering.tilVedtakSimuleringPostering(økonomiSimuleringMottaker)
+
+        // Assert
+        assertThat(postering.fagsakId).isEqualTo(fagsakId)
+    }
 
     @Test
     fun `Test henting av 'nytt beløp ', 'tidligere utbetalt ' og 'resultat ' for simuleringsperiode uten feilutbetaling`() {
