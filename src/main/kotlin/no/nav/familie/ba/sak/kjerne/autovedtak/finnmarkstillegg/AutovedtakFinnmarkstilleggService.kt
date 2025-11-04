@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
+import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -46,7 +46,6 @@ class AutovedtakFinnmarkstilleggService(
     private val beregningService: BeregningService,
     private val simuleringService: SimuleringService,
     private val autovedtakFinnmarkstilleggBegrunnelseService: AutovedtakFinnmarkstilleggBegrunnelseService,
-    private val oppgaveService: OppgaveService,
 ) : AutovedtakBehandlingService<FinnmarkstilleggData> {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -83,12 +82,7 @@ class AutovedtakFinnmarkstilleggService(
             sisteVedtatteBehandlingHarFinnmarkstilleggAndeler || minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg
 
         if (skalBehandleFinnmarkstillegg && sisteVedtatteBehandling.kategori == BehandlingKategori.EØS) {
-            oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
-                fagsakId = behandlingsdata.fagsakId,
-                beskrivelse = "Automatisk behandling av finnmarkstillegg kan ikke gjennomføres for EØS-saker.",
-            )
-
-            return false
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av finnmarkstillegg kan ikke gjennomføres for EØS-saker.")
         }
 
         return skalBehandleFinnmarkstillegg
