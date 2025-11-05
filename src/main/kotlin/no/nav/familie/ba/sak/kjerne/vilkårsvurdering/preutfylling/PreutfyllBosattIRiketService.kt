@@ -75,7 +75,11 @@ class PreutfyllBosattIRiketService(
                 }
 
                 val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
-                val adresserForPerson = Adresser.opprettFra(personOpplysningsgrunnlag.søker)
+                val adresserForPerson =
+                    Adresser.opprettFra(
+                        personOpplysningsgrunnlag.personer.find { it.aktør.aktørId == personResultat.aktør.aktørId }
+                            ?: throw Feil("Fant ikke Person i personopplysningsgrunnlag for aktør ${personResultat.aktør.aktørId}"),
+                    )
 
                 val nyeBosattIRiketVilkårResultater =
                     if (behandling.erFinnmarksEllerSvalbardtillegg() && featureToggleService.isEnabled(FeatureToggle.NY_PREUTFYLLING_FOR_BOSATT_I_RIKET_VILKÅR_VED_AUTOVEDTAK_FINNMARK_SVALBARD)) {
