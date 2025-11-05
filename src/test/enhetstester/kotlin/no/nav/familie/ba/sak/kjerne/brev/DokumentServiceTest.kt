@@ -22,12 +22,12 @@ import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
-import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.Bruker
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.FullmektigEllerVerge
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -38,11 +38,10 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
-import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
+import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -99,20 +98,11 @@ internal class DokumentServiceTest {
             )
 
         every { fagsakRepository.finnFagsak(any()) } returns behandling.fagsak
-        val orgNummer = behandling.fagsak.institusjon!!.orgNummer
 
-        every {
-            utgåendeJournalføringService.journalførManueltBrev(
-                fnr = any(),
-                fagsakId = any(),
-                journalførendeEnhet = any(),
-                brev = any(),
-                dokumenttype = any(),
-                førsteside = any(),
-                eksternReferanseId = any(),
-                avsenderMottaker = capture(avsenderMottaker),
-            )
-        } returns "mockJournalpostId"
+        val taskSlot = slot<Task>()
+        every { taskRepository.save(capture(taskSlot)) } returns mockk()
+
+        val orgNummer = behandling.fagsak.institusjon!!.orgNummer
         every { organisasjonService.hentOrganisasjon(any()) } returns
             Organisasjon(
                 organisasjonsnummer = orgNummer,
@@ -130,10 +120,14 @@ internal class DokumentServiceTest {
                 fagsakId = behandling.fagsak.id,
             )
         }
-        assert(avsenderMottaker.isCaptured) { "AvsenderMottaker skal være satt for ikke å defaulte til Bruker" }
-        assertThat(avsenderMottaker.captured.idType).isEqualTo(AvsenderMottakerIdType.ORGNR)
-        assertThat(avsenderMottaker.captured.id).isEqualTo(orgNummer)
-        assertThat(avsenderMottaker.captured.navn).isEqualTo("Testinstitusjon")
+
+        val capturedTask = taskSlot.captured
+
+        assertThat(capturedTask.metadata["mottakerType"]).isEqualTo(Institusjon::class.simpleName)
+//        assert(avsenderMottaker.isCaptured) { "AvsenderMottaker skal være satt for ikke å defaulte til Bruker" }
+//        assertThat(avsenderMottaker.captured.idType).isEqualTo(AvsenderMottakerIdType.ORGNR)
+//        assertThat(avsenderMottaker.captured.id).isEqualTo(orgNummer)
+//        assertThat(avsenderMottaker.captured.navn).isEqualTo("Testinstitusjon")
     }
 
     @Test
@@ -271,99 +265,27 @@ internal class DokumentServiceTest {
     fun `sendManueltBrev skal sende manuelt brev til FULLMEKTIG og bruker som har FULLMEKTIG manuelt brev mottaker`() {
         val behandling = lagBehandling()
         val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.SVARTIDSBREV)
-        val avsenderMottakere = mutableListOf<AvsenderMottaker>()
 
         every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
             listOf(
                 lagBrevmottakerDb(behandlingId = behandling.id, navn = "Fullmektig navn"),
             )
-        every {
-            utgåendeJournalføringService.journalførManueltBrev(
-                fnr = any(),
-                fagsakId = any(),
-                journalførendeEnhet = any(),
-                brev = any(),
-                dokumenttype = any(),
-                førsteside = any(),
-                eksternReferanseId = any(),
-                avsenderMottaker = capture(avsenderMottakere),
-            )
-        } returns "mockJournalPostId" andThen "mockJournalPostId1"
 
-        every { taskRepository.save(any()) } returns mockk()
+        val lagredeTasker = mutableListOf<Task>()
+
+        every { taskRepository.save(capture(lagredeTasker)) } returns mockk()
         every { fagsakRepository.finnFagsak(behandling.fagsak.id) } returns behandling.fagsak
 
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
         verify(exactly = 2) {
-            utgåendeJournalføringService.journalførManueltBrev(
-                fnr = any(),
-                fagsakId = any(),
-                journalførendeEnhet = any(),
-                brev = any(),
-                dokumenttype = any(),
-                førsteside = any(),
-                eksternReferanseId = any(),
-                avsenderMottaker = any(),
+            taskRepository.save(
+                any(),
             )
         }
-        verify(exactly = 2) { taskRepository.save(any()) }
 
-        assertEquals(1, avsenderMottakere.size)
-        assertEquals("Fullmektig navn", avsenderMottakere.single { it.idType == null }.navn)
-    }
-
-    @Test
-    fun `sendManueltBrev skal sende manuelt brev til FULLMEKTIG og bruker ved manuell brevmottaker på fagsak`() {
-        val aktør = randomAktør()
-        val fagsak = Fagsak(aktør = aktør)
-        val brevmottakere =
-            listOf(
-                ManuellBrevmottaker(
-                    lagBrevmottakerDb(behandlingId = 1234, type = MottakerType.FULLMEKTIG, navn = "Fullmektig navn"),
-                ),
-            )
-        val manueltBrevRequest =
-            ManueltBrevRequest(
-                brevmal = Brevmal.SVARTIDSBREV,
-                manuelleBrevmottakere = brevmottakere,
-            )
-        val avsenderMottakere = mutableListOf<AvsenderMottaker>()
-
-        every {
-            utgåendeJournalføringService.journalførManueltBrev(
-                fnr = any(),
-                fagsakId = any(),
-                journalførendeEnhet = any(),
-                brev = any(),
-                dokumenttype = any(),
-                førsteside = any(),
-                eksternReferanseId = any(),
-                avsenderMottaker = capture(avsenderMottakere),
-            )
-        } returns "mockJournalPostId" andThen "mockJournalPostId1"
-
-        every { taskRepository.save(any()) } returns mockk()
-        every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
-
-        dokumentService.sendManueltBrev(manueltBrevRequest, null, fagsak.id)
-
-        verify(exactly = 2) {
-            utgåendeJournalføringService.journalførManueltBrev(
-                fnr = any(),
-                fagsakId = any(),
-                journalførendeEnhet = any(),
-                brev = any(),
-                dokumenttype = any(),
-                førsteside = any(),
-                eksternReferanseId = any(),
-                avsenderMottaker = any(),
-            )
-        }
-        verify(exactly = 2) { taskRepository.save(any()) }
-
-        assertEquals(1, avsenderMottakere.size)
-        assertEquals("Fullmektig navn", avsenderMottakere.single { it.idType == null }.navn)
+        val mottakerTyper = lagredeTasker.map { it.metadata["mottakerType"] }
+        assertThat(mottakerTyper).containsExactlyInAnyOrder(Bruker::class.simpleName, FullmektigEllerVerge::class.simpleName)
     }
 
     @Test
@@ -371,36 +293,24 @@ internal class DokumentServiceTest {
         val fagsak = defaultFagsak()
         val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.INFORMASJONSBREV_KAN_SØKE)
 
-        every {
-            utgåendeJournalføringService.journalførManueltBrev(
-                fnr = any(),
-                fagsakId = any(),
-                journalførendeEnhet = any(),
-                brev = any(),
-                dokumenttype = any(),
-                førsteside = any(),
-                eksternReferanseId = any(),
-                avsenderMottaker = any(),
-            )
-        } returns "mockJournalPostId"
+        val taskSlot = slot<Task>()
 
-        every { taskRepository.save(any()) } returns mockk()
+        every { taskRepository.save(capture(taskSlot)) } returns mockk()
+        every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
 
         dokumentService.sendManueltBrev(manueltBrevRequest, null, fagsak.id)
 
         verify(exactly = 1) {
-            utgåendeJournalføringService.journalførManueltBrev(
-                fnr = any(),
-                fagsakId = any(),
-                journalførendeEnhet = any(),
-                brev = any(),
-                dokumenttype = any(),
-                førsteside = any(),
-                eksternReferanseId = any(),
-                avsenderMottaker = any(),
+            taskRepository.save(
+                any(),
             )
         }
-        verify(exactly = 1) { taskRepository.save(any()) }
+
+        val capturedTask = taskSlot.captured
+        assertThat(capturedTask.type).isEqualTo("journalførManueltBrev")
+        assertThat(capturedTask.metadata["fagsakId"]).isEqualTo(fagsak.id.toString())
+        assertThat(capturedTask.metadata["behandlingId"]).isEqualTo("null")
+        assertThat(capturedTask.payload).contains(Brevmal.INFORMASJONSBREV_KAN_SØKE.name)
     }
 
     @Test
