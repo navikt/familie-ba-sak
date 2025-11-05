@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
@@ -59,7 +58,6 @@ class PersongrunnlagService(
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val kodeverkService: KodeverkService,
-    private val pdlRestKlient: PdlRestKlient,
     private val systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
 ) {
     fun mapTilRestPersonMedStatsborgerskapLand(
@@ -446,7 +444,7 @@ class PersongrunnlagService(
         person: Person,
     ) {
         val aktør = person.aktør
-        val statsborgerskap = pdlRestKlient.hentStatsborgerskap(aktør = aktør, historikk = true)
+        val statsborgerskap = systemOnlyPdlRestKlient.hentStatsborgerskap(aktør = aktør, historikk = true)
 
         person.statsborgerskap =
             statsborgerskap
