@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
+import no.nav.familie.ba.sak.fake.FakeFeatureToggleService
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
 import no.nav.familie.ba.sak.fake.tilPayload
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -47,6 +48,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -65,6 +67,7 @@ class FødselshendelseHenleggelseTest(
     @Autowired private val utvidetBehandlingService: UtvidetBehandlingService,
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val fakeTaskRepositoryWrapper: FakeTaskRepositoryWrapper,
+    @Autowired private val featureToggleService: FakeFeatureToggleService,
 ) : AbstractVerdikjedetest() {
     @BeforeEach
     fun førHverTest() {
@@ -133,6 +136,7 @@ class FødselshendelseHenleggelseTest(
     }
 
     @Test
+    @Disabled("Denne bør enables igjen dersom vi bestemmer oss for at vi ikke forkaster adresser med dårlig data i preutfylling. Tagger SKAL_PREUTFYLLE_BOSATT_I_RIKET_I_FØDSELSHENDELSER siden denne avgjørelsen bør tas før vi fjerner den togglen.")
     fun `Skal henlegge fødselshendelse på grunn av at søker har flere adresser uten fom-dato (vilkårsvurdering)`() {
         val scenario =
             RestScenario(
