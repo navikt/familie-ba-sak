@@ -101,7 +101,7 @@ class AutovedtakFinnmarkstilleggService(
                 fagsakId = behandlingsdata.fagsakId,
             )
 
-        simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingEtterBehandlingsresultat.id)
+        simuleringService.oppdaterSimuleringPåBehandling(behandlingEtterBehandlingsresultat)
 
         val feilutbetaling = simuleringService.hentFeilutbetaling(behandlingEtterBehandlingsresultat.id)
         if (feilutbetaling > BigDecimal.ZERO) {
