@@ -49,7 +49,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class PreutfyllBosattIRiketServiceTest {
-    private val pdlRestKlient: SystemOnlyPdlRestKlient = mockk(relaxed = true)
+    private val systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient = mockk(relaxed = true)
     private val søknadService: SøknadService = mockk(relaxed = true)
     private val persongrunnlagService: PersongrunnlagService = mockk(relaxed = true)
     private val featureToggleService = mockk<FeatureToggleService>()
@@ -57,7 +57,7 @@ class PreutfyllBosattIRiketServiceTest {
 
     private val preutfyllBosattIRiketService =
         PreutfyllBosattIRiketService(
-            pdlRestKlient = pdlRestKlient,
+            pdlRestKlient = systemOnlyPdlRestKlient,
             søknadService = søknadService,
             persongrunnlagService = persongrunnlagService,
             featureToggleService = featureToggleService,
@@ -166,6 +166,7 @@ class PreutfyllBosattIRiketServiceTest {
         // Arrange
         val behandling = lagBehandling()
         val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
+        persongrunnlag.personer.forEach { it.statsborgerskap = emptyList<GrStatsborgerskap>().toMutableList() }
         val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
@@ -253,6 +254,7 @@ class PreutfyllBosattIRiketServiceTest {
         // Arrange
         val behandling = lagBehandling()
         val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
+        persongrunnlag.personer.forEach { it.statsborgerskap = emptyList<GrStatsborgerskap>().toMutableList() }
         val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
@@ -300,6 +302,7 @@ class PreutfyllBosattIRiketServiceTest {
                 søkerPersonIdent = randomFnr(),
                 barnasIdenter = listOf(randomFnr()),
             )
+        persongrunnlag.personer.forEach { it.statsborgerskap = emptyList<GrStatsborgerskap>().toMutableList() }
         val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.søker.aktør)
 
@@ -348,6 +351,7 @@ class PreutfyllBosattIRiketServiceTest {
                 søkerPersonIdent = randomFnr(),
                 barnasIdenter = listOf(barnFnr),
             )
+        persongrunnlag.personer.forEach { it.statsborgerskap = emptyList<GrStatsborgerskap>().toMutableList() }
         val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
         val personResultat =
             lagPersonResultat(
@@ -550,6 +554,7 @@ class PreutfyllBosattIRiketServiceTest {
                 søkerPersonIdent = randomFnr(),
                 barnasIdenter = listOf(randomFnr()),
             )
+        persongrunnlag.personer.forEach { it.statsborgerskap = emptyList<GrStatsborgerskap>().toMutableList() }
         val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.søker.aktør)
 
@@ -575,7 +580,7 @@ class PreutfyllBosattIRiketServiceTest {
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad()
 
-        every { pdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
+        every { systemOnlyPdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
             listOf(
                 Statsborgerskap(land = "DNK", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
                 Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(1), gyldigTilOgMed = null, bekreftelsesdato = null),
@@ -650,6 +655,7 @@ class PreutfyllBosattIRiketServiceTest {
         // Arrange
         val behandling = lagBehandling()
         val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barnasFødselsdatoer = listOf(LocalDate.now().minusMonths(2)), søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
+        persongrunnlag.personer.forEach { it.statsborgerskap = emptyList<GrStatsborgerskap>().toMutableList() }
         val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
@@ -699,6 +705,8 @@ class PreutfyllBosattIRiketServiceTest {
         // Arrange
         val behandling = lagBehandling()
         val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barnasFødselsdatoer = listOf(LocalDate.now().minusMonths(2)), søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
+        persongrunnlag.personer.forEach { it.statsborgerskap = emptyList<GrStatsborgerskap>().toMutableList() }
+
         val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
@@ -746,7 +754,7 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-        every { pdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
+        every { systemOnlyPdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
             listOf(
                 Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
@@ -790,7 +798,7 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-        every { pdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
+        every { systemOnlyPdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
             listOf(
                 Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
@@ -841,7 +849,7 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-        every { pdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
+        every { systemOnlyPdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
             listOf(
                 Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
@@ -885,7 +893,7 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-        every { pdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
+        every { systemOnlyPdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
             listOf(
                 Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
@@ -934,7 +942,7 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-        every { pdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
+        every { systemOnlyPdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
             listOf(
                 Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
@@ -978,7 +986,7 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-        every { pdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
+        every { systemOnlyPdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
             listOf(
                 Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
@@ -1022,7 +1030,7 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-        every { pdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
+        every { systemOnlyPdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
             listOf(
                 Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
@@ -1066,7 +1074,7 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-        every { pdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
+        every { systemOnlyPdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
             listOf(
                 Statsborgerskap(land = "VNM", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
@@ -1110,7 +1118,7 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-        every { pdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
+        every { systemOnlyPdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
             listOf(
                 Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
@@ -1168,7 +1176,7 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-        every { pdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
+        every { systemOnlyPdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
             listOf(
                 Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
@@ -1225,7 +1233,7 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-        every { pdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
+        every { systemOnlyPdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
             listOf(
                 Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
@@ -1286,7 +1294,7 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-        every { pdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
+        every { systemOnlyPdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
             listOf(
                 Statsborgerskap(land = "VNM", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
@@ -1335,7 +1343,7 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-        every { pdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
+        every { systemOnlyPdlRestKlient.hentStatsborgerskap(any(), historikk = true) } returns
             listOf(
                 Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
@@ -1395,12 +1403,12 @@ class PreutfyllBosattIRiketServiceTest {
                 },
             )
 
-        every { pdlRestKlient.hentStatsborgerskap(any()) } returns
+        every { systemOnlyPdlRestKlient.hentStatsborgerskap(any()) } returns
             listOf(
                 Statsborgerskap(land = "UKR", gyldigFraOgMed = LocalDate.now().minusYears(10), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
 
-        every { pdlRestKlient.hentAdresserForPersoner(any()) } answers {
+        every { systemOnlyPdlRestKlient.hentAdresserForPersoner(any()) } answers {
             val identer = firstArg<List<String>>()
             identer.associateWith {
                 PdlAdresserPerson(
