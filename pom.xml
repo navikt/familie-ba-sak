@@ -53,6 +53,8 @@
         <sonar.tests>src/test</sonar.tests>
         <sonar.projectKey>navikt_familie-ba-sak</sonar.projectKey>
         <sonar-maven-plugin.version>5.2.0.4988</sonar-maven-plugin.version>
+        <!-- Http Client - nyeste versjon fra httpclient(5.5.1) skaper problemer med Spring Boot 3.5.7. Issue: HTTPCLIENT-2405. Skal være fikset i 3.5.8, men bør testes -->
+        <httpclient5.version>5.5</httpclient5.version>
 
         <kover.reportXml.path>${project.build.directory}/site/kover/report.xml</kover.reportXml.path>
     </properties>
