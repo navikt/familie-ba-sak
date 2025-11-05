@@ -616,25 +616,6 @@ class CucumberMock(
             featureToggleService = featureToggleService,
         )
 
-    val vilkårsvurderingSteg =
-        VilkårsvurderingSteg(
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            behandlingstemaService = behandlingstemaService,
-            vilkårService = vilkårService,
-            beregningService = beregningService,
-            persongrunnlagService = persongrunnlagService,
-            tilbakestillBehandlingService = tilbakestillBehandlingService,
-            tilpassKompetanserTilRegelverkService = tilpassKompetanserTilRegelverkService,
-            vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
-            månedligValutajusteringService = månedligValutajusteringService,
-            clockProvider = clockProvider,
-            automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
-            endretUtbetalingAndelService = endretUtbetalingAndelService,
-            featureToggleService = featureToggleService,
-            oppgaveService = oppgaveService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-        )
-
     val ferdigstillBehandlingSteg =
         FerdigstillBehandling(
             fagsakService = fagsakService,
@@ -676,6 +657,25 @@ class CucumberMock(
             featureToggleService = featureToggleService,
             finnmarkstilleggKjøringRepository = mockk(),
             svalbardtilleggKjøringRepository = mockk(),
+        )
+
+    val vilkårsvurderingSteg =
+        VilkårsvurderingSteg(
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            behandlingstemaService = behandlingstemaService,
+            vilkårService = vilkårService,
+            beregningService = beregningService,
+            persongrunnlagService = persongrunnlagService,
+            tilbakestillBehandlingService = tilbakestillBehandlingService,
+            tilpassKompetanserTilRegelverkService = tilpassKompetanserTilRegelverkService,
+            vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
+            månedligValutajusteringService = månedligValutajusteringService,
+            clockProvider = clockProvider,
+            automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
+            endretUtbetalingAndelService = endretUtbetalingAndelService,
+            featureToggleService = featureToggleService,
+            opprettTaskService = opprettTaskService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
 
     val stegService =

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg
 
+import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
@@ -99,9 +100,8 @@ class AutovedtakSvalbardtilleggService(
         simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingEtterBehandlingsresultat.id)
 
         val feilutbetaling = simuleringService.hentFeilutbetaling(behandlingEtterBehandlingsresultat.id)
-
         if (feilutbetaling > BigDecimal.ZERO) {
-            throw Feil("Det er oppdaget feilutbetaling ved kjøring av svalbardtillegg for fagsakId=${behandlingsdata.fagsakId}. Automatisk kjøring stoppes.")
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av svalbardtillegg fører til feilutbetaling.")
         }
 
         if (behandlingEtterBehandlingsresultat.steg == StegType.IVERKSETT_MOT_OPPDRAG) {

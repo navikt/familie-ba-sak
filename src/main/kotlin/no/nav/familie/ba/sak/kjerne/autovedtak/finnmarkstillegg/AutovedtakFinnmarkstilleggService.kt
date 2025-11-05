@@ -104,9 +104,8 @@ class AutovedtakFinnmarkstilleggService(
         simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingEtterBehandlingsresultat.id)
 
         val feilutbetaling = simuleringService.hentFeilutbetaling(behandlingEtterBehandlingsresultat.id)
-
         if (feilutbetaling > BigDecimal.ZERO) {
-            throw Feil("Det er oppdaget feilutbetaling ved kjøring av finnmarkstillegg for fagsakId=${behandlingsdata.fagsakId}. Automatisk kjøring stoppes.")
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av finnmarkstillegg fører til feilutbetaling.")
         }
 
         if (behandlingEtterBehandlingsresultat.steg == StegType.IVERKSETT_MOT_OPPDRAG) {
