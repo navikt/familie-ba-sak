@@ -10,21 +10,14 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
-import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
-import no.nav.familie.ba.sak.datagenerator.lagDeltBosted
-import no.nav.familie.ba.sak.datagenerator.lagFolkeregistermetadata
-import no.nav.familie.ba.sak.datagenerator.lagGrMatrikkelDeltBosted
-import no.nav.familie.ba.sak.datagenerator.lagGrMatrikkelOppholdsadresse
-import no.nav.familie.ba.sak.datagenerator.lagGrVegadresse
-import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
-import no.nav.familie.ba.sak.datagenerator.lagOppholdsadresse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
-import no.nav.familie.ba.sak.datagenerator.lagPersonInfo
 import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -50,6 +43,8 @@ class PersongrunnlagServiceTest {
     private val loggService = mockk<LoggService>()
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val kodeverkService = mockk<KodeverkService>()
+    private val systemOnlyPdlRestKlient = mockk<SystemOnlyPdlRestKlient>()
+    private val pdlRestKlient = mockk<PdlRestKlient>()
 
     private val persongrunnlagService =
         spyk(
@@ -66,10 +61,10 @@ class PersongrunnlagServiceTest {
                 arbeidsforholdService = mockk(),
                 vilkårsvurderingService = vilkårsvurderingService,
                 kodeverkService = kodeverkService,
+                systemOnlyPdlRestKlient = systemOnlyPdlRestKlient,
+                pdlRestKlient = pdlRestKlient,
             ),
         )
-
-    private val dagensDato = LocalDate.now()
 
     @Test
     fun `Skal sende med barna fra forrige behandling ved førstegangsbehandling nummer to`() {

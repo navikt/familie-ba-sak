@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.iNordiskLand
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.tidslinje.Periode
@@ -28,9 +28,9 @@ fun PdlRestKlient.lagErNordiskStatsborgerTidslinje(personResultat: PersonResulta
         }.kombiner { statsborgerskap -> statsborgerskap.any { it.iNordiskLand() } }
 }
 
-fun lagErNordiskStatsborgerTidslinje(personopplysningGrunnlag: PersonopplysningGrunnlag): Tidslinje<Boolean> {
+fun lagErNordiskStatsborgerTidslinje(statsborgerskap: List<GrStatsborgerskap>): Tidslinje<Boolean> {
     val statsborgerskapGruppertPåNavn =
-        personopplysningGrunnlag.søker.statsborgerskap
+        statsborgerskap
             .groupBy { it.landkode }
             .mapValues { (_, perLand) ->
                 val unikeStatsborgerskapInnslag = perLand.distinct()

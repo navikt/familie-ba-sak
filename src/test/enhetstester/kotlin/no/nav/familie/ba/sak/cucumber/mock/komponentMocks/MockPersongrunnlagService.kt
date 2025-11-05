@@ -2,7 +2,6 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.runs
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
@@ -41,12 +40,6 @@ fun mockPersongrunnlagService(dataFraCucumber: VedtaksperioderOgBegrunnelserStep
         personopplysningGrunnlag
     }
     every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers {
-        val personopplysningGrunnlag = firstArg<PersonopplysningGrunnlag>()
-        dataFraCucumber.persongrunnlag[personopplysningGrunnlag.behandlingId] = personopplysningGrunnlag
-        personopplysningGrunnlag
-    }
-
-    every { persongrunnlagService.oppdaterStatsborgerskapPåPersoner(any()) } answers {
         val personopplysningGrunnlag = firstArg<PersonopplysningGrunnlag>()
         dataFraCucumber.persongrunnlag[personopplysningGrunnlag.behandlingId] = personopplysningGrunnlag
         personopplysningGrunnlag

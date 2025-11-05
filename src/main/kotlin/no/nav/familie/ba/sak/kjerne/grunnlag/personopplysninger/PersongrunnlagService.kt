@@ -9,7 +9,9 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -57,6 +59,8 @@ class PersongrunnlagService(
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val kodeverkService: KodeverkService,
+    private val pdlRestKlient: PdlRestKlient,
+    private val systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
 ) {
     fun mapTilRestPersonMedStatsborgerskapLand(
         person: Person,
@@ -398,12 +402,15 @@ class PersongrunnlagService(
     fun oppdaterAdresserPåPersoner(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ): PersonopplysningGrunnlag {
+        val adresserForPersoner = systemOnlyPdlRestKlient.hentAdresserForPersoner(personopplysningGrunnlag.personer.map { it.aktør.aktivFødselsnummer() })
+
         personopplysningGrunnlag.personer.forEach { person ->
-            val aktør = person.aktør
-            val personinfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+            val adresser =
+                adresserForPersoner[person.aktør.aktivFødselsnummer()]
+                    ?: return@forEach
 
             person.bostedsadresser =
-                personinfo.bostedsadresser
+                adresser.bostedsadresse
                     .filtrerUtKunNorskeBostedsadresser()
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
@@ -413,7 +420,7 @@ class PersongrunnlagService(
                         )
                     }.toMutableList()
             person.oppholdsadresser =
-                personinfo.oppholdsadresser
+                adresser.oppholdsadresse
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
@@ -422,7 +429,7 @@ class PersongrunnlagService(
                         )
                     }.toMutableList()
             person.deltBosted =
-                personinfo.deltBosted
+                adresser.deltBosted
                     .map {
                         GrDeltBosted.fraDeltBosted(
                             deltBosted = it,
@@ -435,25 +442,21 @@ class PersongrunnlagService(
         return personopplysningGrunnlag
     }
 
-    fun oppdaterStatsborgerskapPåPersoner(
-        personopplysningGrunnlag: PersonopplysningGrunnlag,
-    ): PersonopplysningGrunnlag {
-        personopplysningGrunnlag.personer.forEach { person ->
-            val aktør = person.aktør
-            val personinfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+    fun oppdaterStatsborgerskapPåPerson(
+        person: Person,
+    ) {
+        val aktør = person.aktør
+        val statsborgerskap = pdlRestKlient.hentStatsborgerskap(aktør = aktør, historikk = true)
 
-            person.statsborgerskap =
-                personinfo.statsborgerskap
-                    ?.flatMap {
-                        statsborgerskapService.hentStatsborgerskapMedMedlemskap(
-                            statsborgerskap = it,
-                            person = person,
-                        )
-                    }?.sortedBy { it.gyldigPeriode?.fom }
-                    ?.toMutableList() ?: mutableListOf()
-        }
-
-        return personopplysningGrunnlag
+        person.statsborgerskap =
+            statsborgerskap
+                .flatMap {
+                    statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+                        statsborgerskap = it,
+                        person = person,
+                    )
+                }.sortedBy { it.gyldigPeriode?.fom }
+                .toMutableList()
     }
 
     fun hentSøkersMålform(behandlingId: Long) = hentSøkerOgBarnPåBehandlingThrows(behandlingId).søker().målform

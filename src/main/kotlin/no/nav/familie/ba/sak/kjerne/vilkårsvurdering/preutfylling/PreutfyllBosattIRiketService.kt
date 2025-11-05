@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.erUkraina
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
@@ -123,9 +124,10 @@ class PreutfyllBosattIRiketService(
         adresserForPerson: Adresser,
         behandling: Behandling,
     ): Set<VilkårResultat> {
-        val personopplysningGrunnlag = persongrunnlagService.oppdaterStatsborgerskapPåPersoner(persongrunnlagService.hentAktivThrows(behandling.id)) // TODO: må man ha alles statsborgerskap her?
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+        persongrunnlagService.oppdaterStatsborgerskapPåPerson(personResultat.aktør.tilPerson(personopplysningGrunnlag))
         val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(adresserForPerson, personResultat)
-        val erNordiskStatsborgerTidslinje = lagErNordiskStatsborgerTidslinje(personopplysningGrunnlag)
+        val erNordiskStatsborgerTidslinje = lagErNordiskStatsborgerTidslinje(personResultat.aktør.tilPerson(personopplysningGrunnlag).statsborgerskap)
         val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erDeltBostedIFinnmarkEllerNordTromsTidslinje = lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erOppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje(adresserForPerson, personResultat)
