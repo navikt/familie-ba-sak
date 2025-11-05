@@ -9,7 +9,7 @@ import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombiner
 
-fun PdlRestKlient.lagErNordiskStatsborgerTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> { // todo fjerne
+fun PdlRestKlient.lagErNordiskStatsborgerTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> { // TODO: Denne brukes kun for Lovlig opphold for øyeblikket og kan erstattes når vi tar oss til til å fikse preutfylling som ikke er live
     val statsborgerskapGruppertPåNavn =
         hentStatsborgerskap(personResultat.aktør, historikk = true)
             .groupBy { it.land }
