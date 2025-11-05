@@ -63,7 +63,10 @@ class PreutfyllBosattIRiketService(
                 .map { it.aktør.aktivFødselsnummer() }
                 .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
 
-        val personOpplysningsgrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id).let { persongrunnlagService.oppdaterAdresserPåPersoner(it) }
+        val personOpplysningsgrunnlag =
+            persongrunnlagService
+                .hentAktivThrows(vilkårsvurdering.behandling.id)
+                .let { persongrunnlagService.oppdaterAdresserPåPersoner(it) }
 
         vilkårsvurdering
             .personResultater
@@ -120,7 +123,7 @@ class PreutfyllBosattIRiketService(
         adresserForPerson: Adresser,
         behandling: Behandling,
     ): Set<VilkårResultat> {
-        val personopplysningGrunnlag = persongrunnlagService.oppdaterStatsborgerskapPåPersoner(persongrunnlagService.hentAktivThrows(behandling.id)) // todo må man ha alles statsborgerskap her?
+        val personopplysningGrunnlag = persongrunnlagService.oppdaterStatsborgerskapPåPersoner(persongrunnlagService.hentAktivThrows(behandling.id)) // TODO: må man ha alles statsborgerskap her?
         val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(adresserForPerson, personResultat)
         val erNordiskStatsborgerTidslinje = lagErNordiskStatsborgerTidslinje(personopplysningGrunnlag)
         val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
