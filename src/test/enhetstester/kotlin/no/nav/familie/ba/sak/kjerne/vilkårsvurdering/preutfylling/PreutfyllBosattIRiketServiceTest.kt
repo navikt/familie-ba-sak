@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
@@ -75,7 +76,9 @@ class PreutfyllBosattIRiketServiceTest {
         val behandling = lagBehandling()
         val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
         val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
-        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.single().aktør)
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
             Adresser(
@@ -131,10 +134,13 @@ class PreutfyllBosattIRiketServiceTest {
     fun `skal ikke få noen vilkårresultat når pdl ikke returnerer noen bostedsadresser`() {
         // Arrange
         val behandling = lagBehandling()
-        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id)
-        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
-        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
+        persongrunnlag.søkerOgBarn.forEach { barn -> barn.bostedsadresser = emptyList<GrBostedsadresse>().toMutableList() }
 
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.single().aktør)
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør) } returns emptyList()
 
         // Act
@@ -151,7 +157,8 @@ class PreutfyllBosattIRiketServiceTest {
             )
 
         // Assert
-        assertThat(vilkårResultat).isEmpty()
+        assertThat(vilkårResultat).hasSize(1)
+        assertThat(vilkårResultat).allSatisfy { it.resultat == Resultat.IKKE_OPPFYLT }
     }
 
     @Test
@@ -403,6 +410,9 @@ class PreutfyllBosattIRiketServiceTest {
                 barnasIdenter = listOf(barnFnr),
                 barnasFødselsdatoer = listOf(LocalDate.now().minusYears(10)),
             )
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
         val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.søker.aktør)
 
