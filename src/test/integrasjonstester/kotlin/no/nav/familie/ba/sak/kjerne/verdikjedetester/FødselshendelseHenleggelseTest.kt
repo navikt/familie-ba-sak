@@ -3,10 +3,8 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
 import no.nav.familie.ba.sak.fake.FakeFeatureToggleService
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
 import no.nav.familie.ba.sak.fake.tilPayload
@@ -41,14 +39,11 @@ import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
 import no.nav.familie.ba.sak.util.ordinærSatsNesteMånedTilTester
 import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
-import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -133,108 +128,6 @@ class FødselshendelseHenleggelseTest(
 
         val automatiskVurdertBehandling = fagsak?.behandlinger?.first { it.skalBehandlesAutomatisk }!!
         assertEquals(0, automatiskVurdertBehandling.personResultater.size)
-    }
-
-    @Test
-    @Disabled("Denne bør enables igjen dersom vi bestemmer oss for at vi ikke forkaster adresser med dårlig data i preutfylling. Tagger SKAL_PREUTFYLLE_BOSATT_I_RIKET_I_FØDSELSHENDELSER siden denne avgjørelsen bør tas før vi fjerner den togglen.")
-    fun `Skal henlegge fødselshendelse på grunn av at søker har flere adresser uten fom-dato (vilkårsvurdering)`() {
-        val scenario =
-            RestScenario(
-                søker =
-                    RestScenarioPerson(
-                        fødselsdato = "1993-01-12",
-                        fornavn = "Mor",
-                        etternavn = "Søker",
-                        bostedsadresser =
-                            listOf(
-                                lagBostedsadresse(
-                                    angittFlyttedato = now().minusYears(10),
-                                    gyldigFraOgMed = TIDENES_MORGEN,
-                                    gyldigTilOgMed = null,
-                                    matrikkeladresse =
-                                        Matrikkeladresse(
-                                            matrikkelId = 123L,
-                                            bruksenhetsnummer = "H301",
-                                            tilleggsnavn = "navn",
-                                            postnummer = "0202",
-                                            kommunenummer = "2231",
-                                        ),
-                                ),
-                                Bostedsadresse(
-                                    angittFlyttedato = null,
-                                    gyldigTilOgMed = null,
-                                    matrikkeladresse =
-                                        Matrikkeladresse(
-                                            matrikkelId = 123L,
-                                            bruksenhetsnummer = "H301",
-                                            tilleggsnavn = "navn",
-                                            postnummer = "0202",
-                                            kommunenummer = "2231",
-                                        ),
-                                ),
-                                Bostedsadresse(
-                                    angittFlyttedato = null,
-                                    gyldigTilOgMed = null,
-                                    matrikkeladresse =
-                                        Matrikkeladresse(
-                                            matrikkelId = 123L,
-                                            bruksenhetsnummer = "H301",
-                                            tilleggsnavn = "navn",
-                                            postnummer = "0202",
-                                            kommunenummer = "2231",
-                                        ),
-                                ),
-                                Bostedsadresse(
-                                    angittFlyttedato = now(),
-                                    gyldigTilOgMed = null,
-                                    matrikkeladresse =
-                                        Matrikkeladresse(
-                                            matrikkelId = 123L,
-                                            bruksenhetsnummer = "H301",
-                                            tilleggsnavn = "navn",
-                                            postnummer = "0202",
-                                            kommunenummer = "2231",
-                                        ),
-                                ),
-                            ),
-                    ),
-                barna =
-                    listOf(
-                        RestScenarioPerson(
-                            fødselsdato = now().toString(),
-                            fornavn = "Barn",
-                            etternavn = "Barnesen",
-                        ),
-                    ),
-            ).also { stubScenario(it) }
-
-        val behandling =
-            behandleFødselshendelse(
-                nyBehandlingHendelse =
-                    NyBehandlingHendelse(
-                        morsIdent = scenario.søker.ident,
-                        barnasIdenter = listOf(scenario.barna.first().ident),
-                    ),
-                behandleFødselshendelseTask = behandleFødselshendelseTask,
-                fagsakService = fagsakService,
-                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-                personidentService = personidentService,
-                vedtakService = vedtakService,
-                stegService = stegService,
-                brevmalService = brevmalService,
-            )
-
-        assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
-        assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
-
-        val lagredeTaskerAvType =
-            fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilPayload<OpprettOppgaveTaskDTO>()
-
-        val lagretTask =
-            lagredeTaskerAvType
-                .singleOrNull { it.behandlingId == behandling!!.id && it.beskrivelse == "Fødselshendelse: Mor har flere bostedsadresser uten fra- og med dato" && it.manuellOppgaveType == ManuellOppgaveType.FØDSELSHENDELSE }
-
-        assertThat(lagretTask).isNotNull
     }
 
     @Test
