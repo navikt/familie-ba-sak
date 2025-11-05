@@ -33,13 +33,13 @@
         <cucumber.version>7.31.0</cucumber.version>
         <mockk.version>1.14.6</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
-        <token-validation-spring.version>5.0.37</token-validation-spring.version>
+        <token-validation-spring.version>5.0.39</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.8.13</springdoc.version>
         <sentry.version>8.25.0</sentry.version>
         <kotlinx.version>1.10.2</kotlinx.version>
         <kotlinx-kover.version>0.9.3</kotlinx-kover.version>
-        <mock-oauth2-server.version>3.0.0</mock-oauth2-server.version>
+        <mock-oauth2-server.version>3.0.1</mock-oauth2-server.version>
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <unleash.version>11.1.1</unleash.version>
