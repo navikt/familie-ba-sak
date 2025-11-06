@@ -332,10 +332,10 @@ class PersongrunnlagIntegrationTest(
             )
 
             // Act
-            val oppdatertPersonopplysningGrunnlag = persongrunnlagService.oppdaterAdresserPåPersoner(personopplysningGrunnlag)
+            persongrunnlagService.oppdaterAdresserPåPersoner(personopplysningGrunnlag)
 
             // Assert
-            val søkerOppdatert = oppdatertPersonopplysningGrunnlag.personer.single { it.type == PersonType.SØKER }
+            val søkerOppdatert = personopplysningGrunnlag.personer.single { it.type == PersonType.SØKER }
 
             val bostedsadresseForSøker = søkerOppdatert.bostedsadresser.single() as GrVegadresseBostedsadresse
             val oppholdsadresseForSøker = søkerOppdatert.oppholdsadresser.single() as GrVegadresseOppholdsadresse

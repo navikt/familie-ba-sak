@@ -85,10 +85,11 @@ fun mockSystemOnlyPdlRestKlient(
                 personInfoQuery = any(),
             )
         } answers {
+            val fødselsnummer = firstArg<String>()
             lagPersonInfo(
-                bostedsadresser = dataFraCucumber.adresser[firstArg<String>()]?.bostedsadresse ?: emptyList(),
-                oppholdsadresser = dataFraCucumber.adresser[firstArg<String>()]?.oppholdsadresse ?: emptyList(),
-                deltBosted = dataFraCucumber.adresser[firstArg<String>()]?.deltBosted ?: emptyList(),
+                bostedsadresser = dataFraCucumber.adresser[fødselsnummer]?.bostedsadresse ?: emptyList(),
+                oppholdsadresser = dataFraCucumber.adresser[fødselsnummer]?.oppholdsadresse ?: emptyList(),
+                deltBosted = dataFraCucumber.adresser[fødselsnummer]?.deltBosted ?: emptyList(),
             )
         }
     }

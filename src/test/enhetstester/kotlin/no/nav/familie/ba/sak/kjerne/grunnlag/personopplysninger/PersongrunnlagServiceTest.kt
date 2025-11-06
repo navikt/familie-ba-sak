@@ -59,7 +59,6 @@ class PersongrunnlagServiceTest {
                 arbeidsforholdService = mockk(),
                 vilkårsvurderingService = vilkårsvurderingService,
                 kodeverkService = kodeverkService,
-                systemOnlyPdlRestKlient = systemOnlyPdlRestKlient,
             ),
         )
 

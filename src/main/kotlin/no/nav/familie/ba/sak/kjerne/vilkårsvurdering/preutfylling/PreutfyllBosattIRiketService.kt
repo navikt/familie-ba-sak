@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.erUkraina
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.lagErNordiskStatsborgerTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
@@ -67,7 +68,10 @@ class PreutfyllBosattIRiketService(
         val personOpplysningsgrunnlag =
             persongrunnlagService
                 .hentAktivThrows(vilkårsvurdering.behandling.id)
-                .let { persongrunnlagService.oppdaterAdresserPåPersoner(it) }
+        persongrunnlagService.oppdaterAdresserPåPersoner(personOpplysningsgrunnlag)
+        if (!behandling.erFinnmarksEllerSvalbardtillegg()) {
+            persongrunnlagService.oppdaterStatsborgerskapPåPersoner(personOpplysningsgrunnlag.personer.toList())
+        }
 
         vilkårsvurdering
             .personResultater
@@ -125,7 +129,6 @@ class PreutfyllBosattIRiketService(
         behandling: Behandling,
     ): Set<VilkårResultat> {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
-        persongrunnlagService.oppdaterStatsborgerskapPåPerson(personResultat.aktør.tilPerson(personopplysningGrunnlag))
         val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(adresserForPerson, personResultat)
         val erNordiskStatsborgerTidslinje = lagErNordiskStatsborgerTidslinje(personResultat.aktør.tilPerson(personopplysningGrunnlag).statsborgerskap)
         val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)

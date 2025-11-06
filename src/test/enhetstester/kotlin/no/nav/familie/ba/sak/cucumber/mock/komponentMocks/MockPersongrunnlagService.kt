@@ -8,6 +8,9 @@ import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrDeltBosted
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 
 fun mockPersongrunnlagService(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): PersongrunnlagService {
@@ -62,6 +65,34 @@ fun mockPersongrunnlagService(dataFraCucumber: VedtaksperioderOgBegrunnelserStep
         }
         dataFraCucumber.persongrunnlag[behandling.id] = personopplysningGrunnlag
         personopplysningGrunnlag
+    }
+
+    every { persongrunnlagService.oppdaterAdresserPåPersoner(any()) } answers {
+        val persongrunnlag = firstArg<PersonopplysningGrunnlag>()
+
+        val identTilAdresser = dataFraCucumber.adresser
+
+        persongrunnlag.personer.forEach { person ->
+            val adresseForPerson = identTilAdresser[person.aktør.aktivFødselsnummer()]
+            person.bostedsadresser =
+                (
+                    adresseForPerson?.bostedsadresse?.map { bostedsadresse ->
+                        GrBostedsadresse.fraBostedsadresse(bostedsadresse, person)
+                    } ?: emptyList()
+                ).toMutableList()
+            person.deltBosted =
+                (
+                    adresseForPerson?.deltBosted?.map { deltBosted ->
+                        GrDeltBosted.fraDeltBosted(deltBosted, person)
+                    } ?: emptyList()
+                ).toMutableList()
+            person.oppholdsadresser =
+                (
+                    adresseForPerson?.oppholdsadresse?.map { oppholdsadresse ->
+                        GrOppholdsadresse.fraOppholdsadresse(oppholdsadresse, person)
+                    } ?: emptyList()
+                ).toMutableList()
+        }
     }
 
     return persongrunnlagService

@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -58,7 +57,6 @@ class PersongrunnlagService(
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val kodeverkService: KodeverkService,
-    private val systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
 ) {
     fun mapTilRestPersonMedStatsborgerskapLand(
         person: Person,
@@ -399,8 +397,8 @@ class PersongrunnlagService(
 
     fun oppdaterAdresserPåPersoner(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-    ): PersonopplysningGrunnlag {
-        val adresserForPersoner = systemOnlyPdlRestKlient.hentAdresserForPersoner(personopplysningGrunnlag.personer.map { it.aktør.aktivFødselsnummer() })
+    ) {
+        val adresserForPersoner = personopplysningerService.hentAdresserForPersoner(personopplysningGrunnlag.personer.map { it.aktør.aktivFødselsnummer() })
 
         personopplysningGrunnlag.personer.forEach { person ->
             val adresser =
@@ -436,25 +434,24 @@ class PersongrunnlagService(
                         )
                     }.toMutableList()
         }
-
-        return personopplysningGrunnlag
     }
 
-    fun oppdaterStatsborgerskapPåPerson(
-        person: Person,
+    fun oppdaterStatsborgerskapPåPersoner(
+        personer: List<Person>,
     ) {
-        val aktør = person.aktør
-        val statsborgerskap = systemOnlyPdlRestKlient.hentStatsborgerskap(aktør = aktør, historikk = true)
+        personer.forEach { person ->
+            val statsborgerskap = personopplysningerService.hentHistoriskStatsborgerskap(aktør = person.aktør)
 
-        person.statsborgerskap =
-            statsborgerskap
-                .flatMap {
-                    statsborgerskapService.hentStatsborgerskapMedMedlemskap(
-                        statsborgerskap = it,
-                        person = person,
-                    )
-                }.sortedBy { it.gyldigPeriode?.fom }
-                .toMutableList()
+            person.statsborgerskap =
+                statsborgerskap
+                    .flatMap {
+                        statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+                            statsborgerskap = it,
+                            person = person,
+                        )
+                    }.sortedBy { it.gyldigPeriode?.fom }
+                    .toMutableList()
+        }
     }
 
     fun hentSøkersMålform(behandlingId: Long) = hentSøkerOgBarnPåBehandlingThrows(behandlingId).søker().målform

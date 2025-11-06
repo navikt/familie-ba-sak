@@ -599,51 +599,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
      */
     @Og("med adressekommuner")
     fun `med adressekommuner`(dataTable: DataTable) {
-        val identTilAdresser = parseAdresser(dataTable, persongrunnlag)
         adresser.putAll(parseAdresser(dataTable, persongrunnlag))
-
-        val aktiveBehandlingeer = behandlinger.filter { it.value.aktiv }.keys
-
-        persongrunnlag.forEach { behandlingId, grunnlag ->
-            if (aktiveBehandlingeer.contains(behandlingId)) {
-                grunnlag.personer.forEach { person ->
-                    val adresseForPerson = identTilAdresser[person.aktør.aktivFødselsnummer()]
-                    person.bostedsadresser =
-                        (
-                            adresseForPerson?.bostedsadresse?.map { bostedsadresse ->
-                                GrBostedsadresse.fraBostedsadresse(bostedsadresse, person)
-                            } ?: emptyList()
-                        ).toMutableList()
-                    person.deltBosted =
-                        (
-                            adresseForPerson?.deltBosted?.map { deltBosted ->
-                                GrDeltBosted.fraDeltBosted(deltBosted, person)
-                            } ?: emptyList()
-                        ).toMutableList()
-                    person.oppholdsadresser =
-                        (
-                            adresseForPerson?.oppholdsadresse?.map { oppholdsadresse ->
-                                GrOppholdsadresse.fraOppholdsadresse(oppholdsadresse, person)
-                            } ?: emptyList()
-                        ).toMutableList()
-                }
-            }
-        }
-
-        persongrunnlag.forEach { grunnlag ->
-            grunnlag.value.personer.forEach { person ->
-                person.bostedsadresser =
-                    (
-                        identTilAdresser[
-                            person.aktør.personidenter
-                                .first()
-                                .fødselsnummer,
-                        ]?.bostedsadresse?.map { bostedsadresse ->
-                            GrBostedsadresse.fraBostedsadresse(bostedsadresse, person)
-                        } ?: emptyList()
-                    ).toMutableList()
-            }
-        }
     }
 
     @Når("vi lager automatisk behandling med id {} på fagsak {} på grunn av finnmarkstillegg")
