@@ -36,7 +36,7 @@ class IdenthendelseV2Consumer(
         ack: Acknowledgment,
     ) {
         try {
-            Thread.sleep(60000) // Venter 1 min da det kan hende at PDL ikke er ferdig med å populere sine opplysninger rett etter at vi har lest meldingen
+//            Thread.sleep(60000) // Venter 1 min da det kan hende at PDL ikke er ferdig med å populere sine opplysninger rett etter at vi har lest meldingen
             MDC.put(MDCConstants.MDC_CALL_ID, UUID.randomUUID().toString())
             SECURE_LOGGER.info("Har mottatt ident-hendelse $consumerRecord")
 
@@ -71,7 +71,7 @@ class IdenthendelseV2Consumer(
         } catch (e: RuntimeException) {
             log.warn("Feil i prosessering av ident-hendelser", e)
             SECURE_LOGGER.warn("Feil i prosessering av ident-hendelser $consumerRecord", e)
-            throw RuntimeException("Feil i prosessering av ident-hendelser")
+//            throw RuntimeException("Feil i prosessering av ident-hendelser")
         } finally {
             MDC.clear()
         }
