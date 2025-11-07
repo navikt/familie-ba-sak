@@ -138,12 +138,11 @@ internal class DokumentServiceTest {
         every { fagsakRepository.finnFagsak(any()) } returns behandling.fagsak
 
         every {
-            utgåendeJournalføringService.journalførManueltBrev(
+            utgåendeJournalføringService.journalførDokument(
                 fnr = any(),
                 fagsakId = any(),
                 journalførendeEnhet = any(),
                 brev = any(),
-                dokumenttype = any(),
                 førsteside = any(),
                 eksternReferanseId = any(),
                 avsenderMottaker = capture(avsenderMottaker),
@@ -326,12 +325,11 @@ internal class DokumentServiceTest {
                 lagBrevmottakerDb(behandlingId = behandling.id, landkode = "NO"),
             )
         every {
-            utgåendeJournalføringService.journalførManueltBrev(
+            utgåendeJournalføringService.journalførDokument(
                 fnr = any(),
                 fagsakId = any(),
                 journalførendeEnhet = any(),
                 brev = any(),
-                dokumenttype = any(),
                 førsteside = any(),
                 eksternReferanseId = any(),
                 avsenderMottaker = capture(avsenderMottakere),
@@ -350,12 +348,11 @@ internal class DokumentServiceTest {
         assertThat(exception.message).isEqualTo("Det finnes ugyldige brevmottakere i utsending av manuelt brev")
 
         verify(exactly = 0) {
-            utgåendeJournalføringService.journalførManueltBrev(
+            utgåendeJournalføringService.journalførDokument(
                 fnr = any(),
                 fagsakId = any(),
                 journalførendeEnhet = any(),
                 brev = any(),
-                dokumenttype = any(),
                 førsteside = any(),
                 eksternReferanseId = any(),
                 avsenderMottaker = any(),

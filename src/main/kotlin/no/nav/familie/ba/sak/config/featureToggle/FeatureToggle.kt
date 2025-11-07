@@ -80,4 +80,6 @@ enum class FeatureToggle(
     TUNGTKJØRENDE_GRAFANA_STATISTIKK("familie-ba-sak.generer-grafana-statistikk"),
 
     NY_PREUTFYLLING_FOR_BOSATT_I_RIKET_VILKÅR_VED_AUTOVEDTAK_FINNMARK_SVALBARD("familie-ba-sak.ny-preutfylling-for-bosatt-i-riket-vilkaar-ved-autovedtak-finnmark-svalbard"),
+
+    JOURNALFOER_MANUELT_BREV_I_TASK("familie-ba-sak.journalfoer-manuelt-brev-i-task"),
 }

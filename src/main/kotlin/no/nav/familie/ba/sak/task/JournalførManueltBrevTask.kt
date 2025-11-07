@@ -1,22 +1,25 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.brev.DokumentGenereringService
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService.Companion.genererEksternReferanseIdForJournalpost
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerInfo
-import no.nav.familie.ba.sak.kjerne.brev.mottaker.tilAvsenderMottaker
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.task.LogJournalpostIdForFagsakTask.Companion.TASK_STEP_TYPE
+import no.nav.familie.ba.sak.task.JournalførManueltBrevTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.ba.sak.task.dto.JournalførManueltBrevDTO
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.Properties
 
@@ -28,14 +31,17 @@ import java.util.Properties
 )
 class JournalførManueltBrevTask(
     val utgåendeJournalføringService: UtgåendeJournalføringService,
-    val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     val dokumentGenereringService: DokumentGenereringService,
     val taskRepository: TaskRepositoryWrapper,
     val fagsakService: FagsakService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val journalførManueltBrevDTO = objectMapper.readValue(task.payload, JournalførManueltBrevDTO::class.java)
+        logger.info("Journalfører manuelt brev for fagsak=${journalførManueltBrevDTO.fagsakId} og behandling=${journalførManueltBrevDTO.behandlingId}")
+
         val fagsak = fagsakService.hentPåFagsakId(journalførManueltBrevDTO.fagsakId)
+        val generertBrev = dokumentGenereringService.genererManueltBrev(journalførManueltBrevDTO.manuellBrevRequest, fagsak)
 
         val førsteside =
             if (journalførManueltBrevDTO.manuellBrevRequest.brevmal.skalGenerereForside()) {
@@ -50,15 +56,21 @@ class JournalførManueltBrevTask(
 
         val journalpostId =
             utgåendeJournalføringService
-                .journalførManueltBrev(
+                .journalførDokument(
                     fnr = fagsak.aktør.aktivFødselsnummer(),
                     fagsakId = fagsak.id.toString(),
                     journalførendeEnhet = journalførManueltBrevDTO.manuellBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
-                    brev = dokumentGenereringService.genererManueltBrev(journalførManueltBrevDTO.manuellBrevRequest, fagsak),
-                    dokumenttype = journalførManueltBrevDTO.manuellBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
+                    brev =
+                        listOf(
+                            Dokument(
+                                dokument = generertBrev,
+                                filtype = Filtype.PDFA,
+                                dokumenttype = journalførManueltBrevDTO.manuellBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
+                            ),
+                        ),
                     førsteside = førsteside,
                     eksternReferanseId = journalførManueltBrevDTO.eksternReferanseId,
-                    avsenderMottaker = journalførManueltBrevDTO.mottakerInfo.tilAvsenderMottaker(),
+                    avsenderMottaker = journalførManueltBrevDTO.mottaker.avsenderMottaker,
                 )
 
         DistribuerDokumentTask
@@ -70,13 +82,13 @@ class JournalførManueltBrevTask(
                         journalpostId = journalpostId,
                         brevmal = journalførManueltBrevDTO.manuellBrevRequest.brevmal,
                         erManueltSendt = true,
-                        manuellAdresseInfo = journalførManueltBrevDTO.mottakerInfo.manuellAdresseInfo,
+                        manuellAdresseInfo = journalførManueltBrevDTO.mottaker.manuellAdresseInfo,
                     ),
                 properties =
                     Properties().apply
                         {
                             this["fagsakIdent"] = fagsak.aktør.aktivFødselsnummer()
-                            this["mottakerType"] = journalførManueltBrevDTO.mottakerInfo::class.simpleName
+                            this["mottakerType"] = task.metadata["mottakerType"]
                             this["journalpostId"] = journalpostId
                             this["behandlingId"] = journalførManueltBrevDTO.behandlingId.toString()
                             this["fagsakId"] = fagsak.id.toString()
@@ -85,6 +97,7 @@ class JournalførManueltBrevTask(
     }
 
     companion object {
+        private val logger: Logger = LoggerFactory.getLogger(JournalførManueltBrevTask::class.java)
         const val TASK_STEP_TYPE = "journalførManueltBrev"
 
         fun opprettTask(
@@ -100,7 +113,7 @@ class JournalførManueltBrevTask(
                         fagsakId = fagsakId,
                         behandlingId = behandlingId,
                         manuellBrevRequest = manuellBrevRequest,
-                        mottakerInfo = mottakerInfo,
+                        mottaker = JournalførManueltBrevDTO.Mottaker.opprettFra(mottakerInfo),
                         eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsakId, behandlingId, mottakerInfo),
                     ),
                 ),
@@ -110,7 +123,7 @@ class JournalførManueltBrevTask(
                             this["behandlingId"] = behandlingId.toString()
                             this["fagsakId"] = fagsakId.toString()
                             this["brevmal"] = manuellBrevRequest.brevmal.name
-                            this["mottakerType"] = mottakerInfo::class.simpleName
+                            this["mottakerType"] = mottakerInfo.javaClass.simpleName
                         },
             )
     }
