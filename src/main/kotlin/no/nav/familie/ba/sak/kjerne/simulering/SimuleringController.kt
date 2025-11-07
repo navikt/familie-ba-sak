@@ -31,14 +31,15 @@ class SimuleringController(
         val avregningsperioder = avregningService.hentPerioderMedAvregning(behandlingId)
 
         val fagsakId = behandlingRepository.finnBehandling(behandlingId).fagsak.id
-        val overlappendePerioder = finnOverlappendePerioder(vedtakSimuleringMottaker, fagsakId)
+        val overlappendePerioderMedAndreFagsaker = finnOverlappendePerioder(vedtakSimuleringMottaker, fagsakId)
 
         val simulering =
             vedtakSimuleringMottakereTilRestSimulering(
                 økonomiSimuleringMottakere = vedtakSimuleringMottaker,
             )
 
-        val restSimulering = simulering.tilRestSimulering(avregningsperioder, overlappendePerioder)
+        val restSimulering =
+            simulering.tilRestSimulering(avregningsperioder, overlappendePerioderMedAndreFagsaker)
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }
 }

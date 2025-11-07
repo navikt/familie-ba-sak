@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.simulering.domene
 
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.tilTidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -16,7 +19,7 @@ data class Simulering(
 ) {
     fun tilRestSimulering(
         avregningsperioder: List<AvregningPeriode>,
-        overlappendePerioderMedAndreFagsaker: List<OverlappendePerioderMedAndreFagsaker>,
+        overlappendePerioderAndreFagsaker: List<OverlappendePerioderMedAndreFagsaker>,
     ): RestSimulering =
         RestSimulering(
             perioder = perioder,
@@ -29,7 +32,7 @@ data class Simulering(
             tidSimuleringHentet = tidSimuleringHentet,
             tomSisteUtbetaling = tomSisteUtbetaling,
             avregningsperioder = avregningsperioder,
-            overlappendePerioderMedAndreFagsaker = overlappendePerioderMedAndreFagsaker,
+            overlappendeFeilutbetalingerAndreFagsaker = overlappendePerioderAndreFagsaker,
         )
 }
 
@@ -56,7 +59,7 @@ data class RestSimulering(
     val tidSimuleringHentet: LocalDate?,
     val tomSisteUtbetaling: LocalDate?,
     val avregningsperioder: List<AvregningPeriode>,
-    val overlappendePerioderMedAndreFagsaker: List<OverlappendePerioderMedAndreFagsaker> = emptyList(),
+    val overlappendeFeilutbetalingerAndreFagsaker: List<OverlappendePerioderMedAndreFagsaker> = emptyList(),
 )
 
 data class AvregningPeriode(
@@ -69,5 +72,8 @@ data class AvregningPeriode(
 data class OverlappendePerioderMedAndreFagsaker(
     val fom: LocalDate,
     val tom: LocalDate,
-    val fagsaker: List<Long>,
+    val fagsakerMedFeilutbetaling: List<Long>,
+    val fagsakerMedEtterbetaling: List<Long>,
 )
+
+fun List<OverlappendePerioderMedAndreFagsaker>.tilTidslinje(): Tidslinje<OverlappendePerioderMedAndreFagsaker> = this.map { Periode(it, it.fom, it.tom) }.tilTidslinje()
