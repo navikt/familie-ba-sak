@@ -212,7 +212,7 @@ class AutovedtakSvalbardtilleggServiceTest {
         fun setup() {
             every { fagsakService.hentAktør(fagsak.id) } returns persongrunnlag.søker.aktør
             every { autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(any(), any(), any(), any()) } returns behandling
-            every { simuleringService.oppdaterSimuleringPåBehandlingVedBehov(any()) } returns emptyList()
+            every { simuleringService.oppdaterSimuleringPåBehandling(any()) } returns emptyList()
             every { simuleringService.hentFeilutbetaling(any<Long>()) } returns BigDecimal.ZERO
             every { autovedtakSvalbardtilleggBegrunnelseService.begrunnAutovedtakForSvalbardtillegg(any()) } just Runs
             every { autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any()) } returns lagVedtak()
