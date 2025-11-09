@@ -16,6 +16,9 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.finnInnvilgedeOgReduserteFinnmarkstilleggPerioder
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.finnInnvilgedeOgReduserteSvalbardtilleggPerioder
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.filtrerBortIrrelevanteAndeler
@@ -103,6 +106,7 @@ class BrevService(
     private val hjemmeltekstUtleder: HjemmeltekstUtleder,
     private val avregningService: AvregningService,
     private val featureToggleService: FeatureToggleService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -237,6 +241,8 @@ class BrevService(
                 AutovedtakEndring(
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetaling = hentEtterbetaling(vedtak),
+                    innvilgetSvalbardtillegg = sjekkOmDetErNyInnvilgetSvalbardtilleggIBehandling(behandling),
+                    innvilgetFinnmarkstillegg = sjekkOmDetErNyInnvilgetFinnmarkstilleggIBehandling(behandling),
                 )
 
             Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN ->
@@ -285,6 +291,28 @@ class BrevService(
         val andelerIBehandlingSomErDifferanseBeregnetOgLøpende = andelerIBehandlingSomErDifferanseBeregnet.filter { it.erLøpende() }
 
         return andelerIBehandlingSomErDifferanseBeregnetOgLøpende.isNotEmpty()
+    }
+
+    fun sjekkOmDetErNyInnvilgetFinnmarkstilleggIBehandling(behandling: Behandling): Boolean {
+        val sistIverksatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id) ?: throw Feil("Finner ikke siste iverksatte behandling")
+        val forrigeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = sistIverksatteBehandling.id)
+        val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+
+        return finnInnvilgedeOgReduserteFinnmarkstilleggPerioder(
+            forrigeAndeler = forrigeAndeler,
+            nåværendeAndeler = nåværendeAndeler,
+        ).first.isNotEmpty()
+    }
+
+    fun sjekkOmDetErNyInnvilgetSvalbardtilleggIBehandling(behandling: Behandling): Boolean {
+        val sistIverksatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id) ?: throw Feil("Finner ikke siste iverksatte behandling")
+        val forrigeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = sistIverksatteBehandling.id)
+        val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+
+        return finnInnvilgedeOgReduserteSvalbardtilleggPerioder(
+            forrigeAndeler = forrigeAndeler,
+            nåværendeAndeler = nåværendeAndeler,
+        ).first.isNotEmpty()
     }
 
     private fun beskrivPerioderMedUavklartRefusjonEøs(vedtak: Vedtak) =
