@@ -23,13 +23,16 @@ import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
+import org.jboss.logging.MDC
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.util.UUID
 
 class JournalførManueltBrevTaskTest {
     @Nested
@@ -365,6 +368,8 @@ class JournalførManueltBrevTaskTest {
             val behandlingId = 123L
             val manueltBrevDto = ManueltBrevRequest(brevmal = Brevmal.SVARTIDSBREV)
             val mottakerInfo = Bruker
+            val callId = UUID.randomUUID()
+            MDC.put(MDCConstants.MDC_CALL_ID, callId)
 
             // Act
             val task =
@@ -384,7 +389,7 @@ class JournalførManueltBrevTaskTest {
             assertThat(journalførManueltBrevDTO.manuellBrevRequest).isEqualTo(manueltBrevDto)
             assertThat(journalførManueltBrevDTO.mottaker.avsenderMottaker).isEqualTo(mottakerInfo.tilAvsenderMottaker())
             assertThat(journalførManueltBrevDTO.mottaker.manuellAdresseInfo).isEqualTo(mottakerInfo.manuellAdresseInfo)
-            assertThat(journalførManueltBrevDTO.eksternReferanseId).isEqualTo("${fagsakId}_$behandlingId")
+            assertThat(journalførManueltBrevDTO.eksternReferanseId).isEqualTo("${fagsakId}_${behandlingId}_$callId")
             assertThat(task.metadata["fagsakId"]).isEqualTo(fagsakId.toString())
             assertThat(task.metadata["behandlingId"]).isEqualTo(behandlingId.toString())
             assertThat(task.metadata["brevmal"]).isEqualTo(manueltBrevDto.brevmal.name)
