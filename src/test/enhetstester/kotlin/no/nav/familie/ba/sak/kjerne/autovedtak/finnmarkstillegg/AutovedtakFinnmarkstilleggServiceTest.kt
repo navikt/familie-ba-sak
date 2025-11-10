@@ -163,8 +163,8 @@ class AutovedtakFinnmarkstilleggServiceTest {
 
             every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
-                    søkerIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
-                    barnIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                    søkerIdent to PdlAdresserPerson(bostedsadresser = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                    barnIdent to PdlAdresserPerson(bostedsadresser = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
                 )
 
             // Act
@@ -179,8 +179,8 @@ class AutovedtakFinnmarkstilleggServiceTest {
             // Arrange
             every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
-                    søkerIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
-                    barnIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                    søkerIdent to PdlAdresserPerson(bostedsadresser = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                    barnIdent to PdlAdresserPerson(bostedsadresser = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
                 )
 
             // Act
@@ -195,8 +195,8 @@ class AutovedtakFinnmarkstilleggServiceTest {
             // Arrange
             every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
-                    søkerIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseIFinnmark), deltBosted = emptyList()),
-                    barnIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                    søkerIdent to PdlAdresserPerson(bostedsadresser = listOf(bostedsadresseIFinnmark), deltBosted = emptyList()),
+                    barnIdent to PdlAdresserPerson(bostedsadresser = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
                 )
 
             // Act
@@ -215,8 +215,8 @@ class AutovedtakFinnmarkstilleggServiceTest {
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
             every { pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
-                    søkerIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseIFinnmark), deltBosted = emptyList()),
-                    barnIdent to PdlAdresserPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                    søkerIdent to PdlAdresserPerson(bostedsadresser = listOf(bostedsadresseIFinnmark), deltBosted = emptyList()),
+                    barnIdent to PdlAdresserPerson(bostedsadresser = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
                 )
 
             // Act

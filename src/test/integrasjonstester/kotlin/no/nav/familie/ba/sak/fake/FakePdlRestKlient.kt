@@ -27,7 +27,7 @@ class FakePdlRestKlient(
     override fun hentBostedsadresseOgDeltBostedForPersoner(identer: List<String>): Map<String, PdlAdresserPerson> =
         identer.associateWith {
             PdlAdresserPerson(
-                bostedsadresse =
+                bostedsadresser =
                     bostedsadresser[it]
                         ?: listOf(
                             Bostedsadresse(
@@ -39,14 +39,14 @@ class FakePdlRestKlient(
                             ),
                         ),
                 deltBosted = deltBosteder[it] ?: emptyList(),
-                oppholdsadresse = emptyList(),
+                oppholdsadresser = emptyList(),
             )
         }
 
     override fun hentAdresserForPersoner(identer: List<String>): Map<String, PdlAdresserPerson> =
         identer.associateWith {
             PdlAdresserPerson(
-                bostedsadresse =
+                bostedsadresser =
                     bostedsadresser[it]
                         ?: listOf(
                             Bostedsadresse(
@@ -58,7 +58,7 @@ class FakePdlRestKlient(
                             ),
                         ),
                 deltBosted = deltBosteder[it] ?: emptyList(),
-                oppholdsadresse = oppholdsadresser[it] ?: emptyList(),
+                oppholdsadresser = oppholdsadresser[it] ?: emptyList(),
             )
         }
 

@@ -3,6 +3,7 @@
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
+import no.nav.familie.ba.sak.datagenerator.lagPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -16,6 +17,15 @@ fun mockPersonopplysningerService(dataFraCucumber: VedtaksperioderOgBegrunnelser
             .flatMap { it.personer }
             .first { it.aktør == aktør }
             .tilPersonInfo()
+    }
+
+    every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(any()) } answers {
+        val fødselsnummer = firstArg<Aktør>().personidenter.first().fødselsnummer
+        lagPersonInfo(
+            bostedsadresser = dataFraCucumber.adresser[fødselsnummer]?.bostedsadresser ?: emptyList(),
+            oppholdsadresser = dataFraCucumber.adresser[fødselsnummer]?.oppholdsadresser ?: emptyList(),
+            deltBosted = dataFraCucumber.adresser[fødselsnummer]?.deltBosted ?: emptyList(),
+        )
     }
     return personopplysningerService
 }

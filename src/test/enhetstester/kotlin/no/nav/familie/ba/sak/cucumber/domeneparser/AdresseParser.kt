@@ -116,8 +116,8 @@ fun parseAdresser(
 
             ident to
                 PdlAdresserPerson(
-                    bostedsadresse = bostedsadresser,
+                    bostedsadresser = bostedsadresser,
                     deltBosted = deltBosted,
-                    oppholdsadresse = oppholdsadresser,
+                    oppholdsadresser = oppholdsadresser,
                 )
         }.toMap()

@@ -6,6 +6,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
+import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import java.util.Objects
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -56,6 +57,20 @@ data class GrMatrikkeladresseBostedsadresse(
     }
 
     override fun hashCode(): Int = Objects.hash(matrikkelId)
+
+    override fun tilAdresse(): Adresse =
+        Adresse(
+            gyldigFraOgMed = periode?.fom,
+            gyldigTilOgMed = periode?.tom,
+            matrikkeladresse =
+                Matrikkeladresse(
+                    matrikkelId = matrikkelId,
+                    bruksenhetsnummer = bruksenhetsnummer,
+                    tilleggsnavn = tilleggsnavn,
+                    postnummer = postnummer,
+                    kommunenummer = kommunenummer,
+                ),
+        )
 
     companion object {
         fun fraMatrikkeladresse(

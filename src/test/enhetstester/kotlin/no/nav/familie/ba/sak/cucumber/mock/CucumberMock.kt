@@ -83,7 +83,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.Tilba
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
@@ -556,7 +556,7 @@ class CucumberMock(
         )
 
     val preutfyllBosattIRiketService =
-        PreutfyllBosattIRiketService(
+        PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
             pdlRestKlient = systemOnlyPdlRestKlient,
             søknadService = mockk(),
             persongrunnlagService = persongrunnlagService,

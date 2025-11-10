@@ -184,7 +184,7 @@ private fun stubHentBostedsadresserOgDeltBostedForPerson(restScenario: RestScena
                                     code = "ok",
                                     person =
                                         PdlAdresserPerson(
-                                            bostedsadresse = person.bostedsadresser,
+                                            bostedsadresser = person.bostedsadresser,
                                             deltBosted = emptyList(),
                                         ),
                                 )
@@ -226,7 +226,7 @@ private fun stubHenthentBostedsadresseDeltBostedOgOppholdsadresseForPerson(restS
                                     code = "ok",
                                     person =
                                         PdlAdresserPerson(
-                                            bostedsadresse = person.bostedsadresser,
+                                            bostedsadresser = person.bostedsadresser,
                                             deltBosted = emptyList(),
                                         ),
                                 )

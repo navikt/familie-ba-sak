@@ -36,12 +36,12 @@ class PreutfyllLovligOppholdService(
         val bostedsadresser = pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(identer)
         val søkersResultater = vilkårsvurdering.personResultater.first { it.erSøkersResultater() }
 
-        val bostedsadresserSøker = bostedsadresser[søkersResultater.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
+        val bostedsadresserSøker = bostedsadresser[søkersResultater.aktør.aktivFødselsnummer()]?.bostedsadresser ?: emptyList()
         val fomDatoForBeskjæring = finnFomDatoForBeskjæring(søkersResultater, vilkårsvurdering, bostedsadresserSøker) ?: PRAKTISK_TIDLIGSTE_DAG
         val erEØSBorgerOgHarArbeidsforholdTidslinjeSøker = lagErEØSBorgerOgHarArbeidsforholdTidslinje(søkersResultater, fomDatoForBeskjæring)
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
-            val bostedsadresserForPerson = bostedsadresser[personResultat.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
+            val bostedsadresserForPerson = bostedsadresser[personResultat.aktør.aktivFødselsnummer()]?.bostedsadresser ?: emptyList()
             val lovligOppholdVilkårResultat =
                 genererLovligOppholdVilkårResultat(personResultat, erEØSBorgerOgHarArbeidsforholdTidslinjeSøker, bostedsadresserForPerson)
 

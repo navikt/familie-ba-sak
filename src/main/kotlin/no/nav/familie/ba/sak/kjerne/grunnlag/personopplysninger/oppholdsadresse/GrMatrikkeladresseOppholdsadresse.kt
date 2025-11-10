@@ -4,6 +4,7 @@ import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted.PAA_SVALBARD
@@ -71,6 +72,21 @@ data class GrMatrikkeladresseOppholdsadresse(
     }
 
     override fun hashCode(): Int = Objects.hash(matrikkelId)
+
+    override fun tilAdresse(): Adresse =
+        Adresse(
+            gyldigFraOgMed = periode?.fom,
+            gyldigTilOgMed = periode?.tom,
+            oppholdAnnetSted = oppholdAnnetSted,
+            matrikkeladresse =
+                Matrikkeladresse(
+                    matrikkelId = matrikkelId,
+                    bruksenhetsnummer = bruksenhetsnummer,
+                    tilleggsnavn = tilleggsnavn,
+                    postnummer = postnummer,
+                    kommunenummer = kommunenummer,
+                ),
+        )
 
     companion object {
         fun fraMatrikkeladresse(

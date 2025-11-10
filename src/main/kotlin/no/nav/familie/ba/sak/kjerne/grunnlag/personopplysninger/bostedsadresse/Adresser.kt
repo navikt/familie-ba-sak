@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import java.time.LocalDate
 
 private val FØRSTE_RELEVANTE_ADRESSEDATO_FOR_FINNMARKSTILLEGG = LocalDate.of(2025, 9, 30)
@@ -22,9 +23,16 @@ data class Adresser(
     companion object {
         fun opprettFra(pdlAdresser: PdlAdresserPerson?): Adresser =
             Adresser(
-                bostedsadresser = pdlAdresser?.bostedsadresse?.map { Adresse.opprettFra(it) } ?: emptyList(),
+                bostedsadresser = pdlAdresser?.bostedsadresser?.map { Adresse.opprettFra(it) } ?: emptyList(),
                 delteBosteder = pdlAdresser?.deltBosted?.map { Adresse.opprettFra(it) } ?: emptyList(),
-                oppholdsadresse = pdlAdresser?.oppholdsadresse?.map { Adresse.opprettFra(it) } ?: emptyList(),
+                oppholdsadresse = pdlAdresser?.oppholdsadresser?.map { Adresse.opprettFra(it) } ?: emptyList(),
+            )
+
+        fun opprettFra(person: Person): Adresser =
+            Adresser(
+                bostedsadresser = person.bostedsadresser.map { it.tilAdresse() },
+                delteBosteder = person.deltBosted.map { it.tilAdresse() },
+                oppholdsadresse = person.oppholdsadresser.map { it.tilAdresse() },
             )
     }
 }
