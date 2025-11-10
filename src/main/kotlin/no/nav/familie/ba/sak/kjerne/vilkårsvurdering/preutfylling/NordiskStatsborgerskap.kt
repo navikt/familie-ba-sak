@@ -8,7 +8,7 @@ import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombiner
 
-@Deprecated("Denne brukes kun for Lovlig opphold for øyeblikket og kan erstattes når vi tar oss tid til å fikse preutfylling som ikke er live")
+@Deprecated("Denne brukes kun for Lovlig opphold for øyeblikket og kan fjernes når vi fjerner PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG -togglen")
 fun PdlRestKlient.lagErNordiskStatsborgerTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
     val statsborgerskapGruppertPåNavn =
         hentStatsborgerskap(personResultat.aktør, historikk = true)

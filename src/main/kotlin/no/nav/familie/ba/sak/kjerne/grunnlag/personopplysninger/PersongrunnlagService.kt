@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
@@ -57,6 +59,7 @@ class PersongrunnlagService(
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val kodeverkService: KodeverkService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun mapTilRestPersonMedStatsborgerskapLand(
         person: Person,
@@ -398,15 +401,22 @@ class PersongrunnlagService(
     fun oppdaterAdresserPåPersoner(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) {
-        val adresserForPersoner = personopplysningerService.hentAdresserForPersoner(personopplysningGrunnlag.personer.map { it.aktør.aktivFødselsnummer() })
-
         personopplysningGrunnlag.personer.forEach { person ->
-            val adresser =
-                adresserForPersoner[person.aktør.aktivFødselsnummer()]
-                    ?: return@forEach
+            val (bostedsadresse, oppholdsadresse, deltBosted) =
+                if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
+                    val adresserForPersoner = personopplysningerService.hentAdresserForPersoner(personopplysningGrunnlag.personer.map { it.aktør.aktivFødselsnummer() })
+                    val adresser =
+                        adresserForPersoner[person.aktør.aktivFødselsnummer()]
+                            ?: return@forEach
+                    Triple(adresser.bostedsadresser, adresser.oppholdsadresser, adresser.deltBosted)
+                } else {
+                    val aktør = person.aktør
+                    val personinfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+                    Triple(personinfo.bostedsadresser, personinfo.oppholdsadresser, personinfo.deltBosted)
+                }
 
             person.bostedsadresser =
-                adresser.bostedsadresse
+                bostedsadresse
                     .filtrerUtKunNorskeBostedsadresser()
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
@@ -416,7 +426,7 @@ class PersongrunnlagService(
                         )
                     }.toMutableList()
             person.oppholdsadresser =
-                adresser.oppholdsadresse
+                oppholdsadresse
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
@@ -425,7 +435,7 @@ class PersongrunnlagService(
                         )
                     }.toMutableList()
             person.deltBosted =
-                adresser.deltBosted
+                deltBosted
                     .map {
                         GrDeltBosted.fraDeltBosted(
                             deltBosted = it,

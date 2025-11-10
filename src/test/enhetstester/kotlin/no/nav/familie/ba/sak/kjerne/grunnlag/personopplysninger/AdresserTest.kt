@@ -657,9 +657,9 @@ class AdresserTest {
 
             val pdlAdresser =
                 PdlAdresserPerson(
-                    bostedsadresse = listOf(bostedsadresse),
+                    bostedsadresser = listOf(bostedsadresse),
                     deltBosted = emptyList(),
-                    oppholdsadresse = emptyList(),
+                    oppholdsadresser = emptyList(),
                 )
 
             // Act
@@ -687,9 +687,9 @@ class AdresserTest {
 
             val pdlAdresser =
                 PdlAdresserPerson(
-                    bostedsadresse = emptyList(),
+                    bostedsadresser = emptyList(),
                     deltBosted = listOf(deltBosted),
-                    oppholdsadresse = emptyList(),
+                    oppholdsadresser = emptyList(),
                 )
 
             // Act
@@ -717,9 +717,9 @@ class AdresserTest {
 
             val pdlAdresser =
                 PdlAdresserPerson(
-                    bostedsadresse = emptyList(),
+                    bostedsadresser = emptyList(),
                     deltBosted = emptyList(),
-                    oppholdsadresse = listOf(oppholdsadresse),
+                    oppholdsadresser = listOf(oppholdsadresse),
                 )
 
             // Act

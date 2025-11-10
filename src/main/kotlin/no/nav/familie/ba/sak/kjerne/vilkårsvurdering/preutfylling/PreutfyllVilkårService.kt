@@ -10,7 +10,7 @@ import java.time.LocalDate
 @Service
 class PreutfyllVilkårService(
     private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService,
-    private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService,
+    private val preutfyllBosattIRiketService: PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService,
     private val preutfyllBorHosSøkerService: PreutfyllBorHosSøkerService,
     private val featureToggleService: FeatureToggleService,
 ) {

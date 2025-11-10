@@ -22,8 +22,8 @@ fun mockPersonopplysningerService(dataFraCucumber: VedtaksperioderOgBegrunnelser
     every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(any()) } answers {
         val fødselsnummer = firstArg<Aktør>().personidenter.first().fødselsnummer
         lagPersonInfo(
-            bostedsadresser = dataFraCucumber.adresser[fødselsnummer]?.bostedsadresse ?: emptyList(),
-            oppholdsadresser = dataFraCucumber.adresser[fødselsnummer]?.oppholdsadresse ?: emptyList(),
+            bostedsadresser = dataFraCucumber.adresser[fødselsnummer]?.bostedsadresser ?: emptyList(),
+            oppholdsadresser = dataFraCucumber.adresser[fødselsnummer]?.oppholdsadresser ?: emptyList(),
             deltBosted = dataFraCucumber.adresser[fødselsnummer]?.deltBosted ?: emptyList(),
         )
     }

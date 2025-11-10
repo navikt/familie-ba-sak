@@ -23,9 +23,9 @@ data class Adresser(
     companion object {
         fun opprettFra(pdlAdresser: PdlAdresserPerson?): Adresser =
             Adresser(
-                bostedsadresser = pdlAdresser?.bostedsadresse?.map { Adresse.opprettFra(it) } ?: emptyList(),
+                bostedsadresser = pdlAdresser?.bostedsadresser?.map { Adresse.opprettFra(it) } ?: emptyList(),
                 delteBosteder = pdlAdresser?.deltBosted?.map { Adresse.opprettFra(it) } ?: emptyList(),
-                oppholdsadresse = pdlAdresser?.oppholdsadresse?.map { Adresse.opprettFra(it) } ?: emptyList(),
+                oppholdsadresse = pdlAdresser?.oppholdsadresser?.map { Adresse.opprettFra(it) } ?: emptyList(),
             )
 
         fun opprettFra(person: Person): Adresser =

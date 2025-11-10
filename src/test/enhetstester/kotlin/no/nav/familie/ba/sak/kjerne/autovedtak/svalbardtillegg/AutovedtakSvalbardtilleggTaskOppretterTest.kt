@@ -134,7 +134,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                 mapOf(
                     person1.aktør.aktivFødselsnummer() to
                         PdlAdresserPerson(
-                            oppholdsadresse =
+                            oppholdsadresser =
                                 listOf(
                                     lagOppholdsadresse(
                                         gyldigFraOgMed = LocalDate.of(2025, 1, 1),
@@ -145,7 +145,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                         ),
                     person2.aktør.aktivFødselsnummer() to
                         PdlAdresserPerson(
-                            oppholdsadresse =
+                            oppholdsadresser =
                                 listOf(
                                     lagOppholdsadresse(
                                         gyldigFraOgMed = LocalDate.of(2025, 1, 1),
@@ -200,7 +200,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                 mapOf(
                     person1.aktør.aktivFødselsnummer() to
                         PdlAdresserPerson(
-                            oppholdsadresse =
+                            oppholdsadresser =
                                 listOf(
                                     lagOppholdsadresse(
                                         gyldigFraOgMed = LocalDate.of(2025, 1, 1),
@@ -211,7 +211,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                         ),
                     person2.aktør.aktivFødselsnummer() to
                         PdlAdresserPerson(
-                            oppholdsadresse =
+                            oppholdsadresser =
                                 listOf(
                                     lagOppholdsadresse(
                                         gyldigFraOgMed = LocalDate.of(2025, 1, 1),
@@ -274,7 +274,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                 mapOf(
                     person1.aktør.aktivFødselsnummer() to
                         PdlAdresserPerson(
-                            oppholdsadresse =
+                            oppholdsadresser =
                                 listOf(
                                     lagOppholdsadresse(
                                         gyldigFraOgMed = LocalDate.of(2025, 1, 1),
@@ -285,7 +285,7 @@ class AutovedtakSvalbardtilleggTaskOppretterTest {
                         ),
                     person2.aktør.aktivFødselsnummer() to
                         PdlAdresserPerson(
-                            oppholdsadresse =
+                            oppholdsadresser =
                                 listOf(
                                     lagOppholdsadresse(
                                         gyldigFraOgMed = LocalDate.of(2025, 1, 1),

@@ -16,6 +16,7 @@ enum class FeatureToggle(
     PREUTFYLLING_VILKÅR("familie-ba-sak.preutfylling-vilkaar"),
     PREUTFYLLING_VILKÅR_LOVLIG_OPPHOLD("familie-ba-sak.preutfylling-lovlig-opphold"),
     PREUTFYLLING_BOR_HOS_SØKER("familie-ba-sak.preutfylling-bor-hos-soker"),
+    PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG("familie-ba-sak.preutfylling-personopplysningsgrunnlag"),
 
     AUTOMAITSK_REGISTRER_SØKNAD("familie-ba-sak.automatisk-registrer-soknad"),
     PREUTFYLLING_ENDRET_UTBETALING_3ÅR_ELLER_3MND("familie-ba-sak.preutfylling-endret-utbetaling-3aar-eller-3mnd"),

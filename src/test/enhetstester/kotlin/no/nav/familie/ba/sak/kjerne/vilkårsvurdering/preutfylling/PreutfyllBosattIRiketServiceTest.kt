@@ -56,7 +56,7 @@ class PreutfyllBosattIRiketServiceTest {
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
 
     private val preutfyllBosattIRiketService =
-        PreutfyllBosattIRiketService(
+        PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
             pdlRestKlient = systemOnlyPdlRestKlient,
             søknadService = søknadService,
             persongrunnlagService = persongrunnlagService,
@@ -1412,7 +1412,7 @@ class PreutfyllBosattIRiketServiceTest {
             val identer = firstArg<List<String>>()
             identer.associateWith {
                 PdlAdresserPerson(
-                    bostedsadresse =
+                    bostedsadresser =
                         listOf(
                             Bostedsadresse(
                                 gyldigFraOgMed = LocalDate.now().minusYears(1),

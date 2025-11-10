@@ -76,7 +76,7 @@ fun mockPersongrunnlagService(dataFraCucumber: VedtaksperioderOgBegrunnelserStep
             val adresseForPerson = identTilAdresser[person.aktør.aktivFødselsnummer()]
             person.bostedsadresser =
                 (
-                    adresseForPerson?.bostedsadresse?.map { bostedsadresse ->
+                    adresseForPerson?.bostedsadresser?.map { bostedsadresse ->
                         GrBostedsadresse.fraBostedsadresse(bostedsadresse, person)
                     } ?: emptyList()
                 ).toMutableList()
@@ -88,7 +88,7 @@ fun mockPersongrunnlagService(dataFraCucumber: VedtaksperioderOgBegrunnelserStep
                 ).toMutableList()
             person.oppholdsadresser =
                 (
-                    adresseForPerson?.oppholdsadresse?.map { oppholdsadresse ->
+                    adresseForPerson?.oppholdsadresser?.map { oppholdsadresse ->
                         GrOppholdsadresse.fraOppholdsadresse(oppholdsadresse, person)
                     } ?: emptyList()
                 ).toMutableList()
