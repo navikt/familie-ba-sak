@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.filtrerBortIrrelevanteAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.BrevBegrunnelseFeil
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
@@ -83,6 +84,7 @@ import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class BrevService(
@@ -293,26 +295,33 @@ class BrevService(
         return andelerIBehandlingSomErDifferanseBeregnetOgLøpende.isNotEmpty()
     }
 
-    fun sjekkOmDetErNyInnvilgetFinnmarkstilleggIBehandling(behandling: Behandling): Boolean {
-        val sistIverksatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id) ?: throw Feil("Finner ikke siste iverksatte behandling")
-        val forrigeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = sistIverksatteBehandling.id)
-        val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+    fun sjekkOmDetErNyInnvilgetFinnmarkstilleggIBehandling(behandling: Behandling): Boolean =
+        sjekkOmDetErNyInnvilgetTilleggIBehandling(
+            behandling = behandling,
+            finnPerioder = ::finnInnvilgedeOgReduserteFinnmarkstilleggPerioder,
+        )
 
-        return finnInnvilgedeOgReduserteFinnmarkstilleggPerioder(
-            forrigeAndeler = forrigeAndeler,
-            nåværendeAndeler = nåværendeAndeler,
-        ).first.isNotEmpty()
-    }
+    fun sjekkOmDetErNyInnvilgetSvalbardtilleggIBehandling(behandling: Behandling): Boolean =
+        sjekkOmDetErNyInnvilgetTilleggIBehandling(
+            behandling = behandling,
+            finnPerioder = ::finnInnvilgedeOgReduserteSvalbardtilleggPerioder,
+        )
 
-    fun sjekkOmDetErNyInnvilgetSvalbardtilleggIBehandling(behandling: Behandling): Boolean {
-        val sistIverksatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id) ?: throw Feil("Finner ikke siste iverksatte behandling")
-        val forrigeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = sistIverksatteBehandling.id)
-        val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+    private fun sjekkOmDetErNyInnvilgetTilleggIBehandling(
+        behandling: Behandling,
+        finnPerioder: (forrige: List<AndelTilkjentYtelse>, nåværende: List<AndelTilkjentYtelse>) -> Pair<Set<YearMonth>, Set<YearMonth>>,
+    ): Boolean {
+        val sistIverksatteBehandling =
+            behandlingHentOgPersisterService
+                .hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+                ?: throw Feil("Finner ikke siste iverksatte behandling")
 
-        return finnInnvilgedeOgReduserteSvalbardtilleggPerioder(
-            forrigeAndeler = forrigeAndeler,
-            nåværendeAndeler = nåværendeAndeler,
-        ).first.isNotEmpty()
+        val forrigeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sistIverksatteBehandling.id)
+        val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+
+        val (innvilgedePerioder, _) = finnPerioder(forrigeAndeler, nåværendeAndeler)
+
+        return innvilgedePerioder.isNotEmpty()
     }
 
     private fun beskrivPerioderMedUavklartRefusjonEøs(vedtak: Vedtak) =
