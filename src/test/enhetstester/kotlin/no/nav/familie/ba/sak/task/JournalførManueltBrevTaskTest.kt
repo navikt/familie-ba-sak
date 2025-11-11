@@ -27,6 +27,7 @@ import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.jboss.logging.MDC
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -369,6 +370,7 @@ class JournalførManueltBrevTaskTest {
             val manueltBrevDto = ManueltBrevRequest(brevmal = Brevmal.SVARTIDSBREV)
             val mottakerInfo = Bruker
             val callId = UUID.randomUUID()
+            MDC.clear()
             MDC.put(MDCConstants.MDC_CALL_ID, callId)
 
             // Act
@@ -394,6 +396,7 @@ class JournalførManueltBrevTaskTest {
             assertThat(task.metadata["behandlingId"]).isEqualTo(behandlingId.toString())
             assertThat(task.metadata["brevmal"]).isEqualTo(manueltBrevDto.brevmal.name)
             assertThat(task.metadata["mottakerType"]).isEqualTo(Bruker::class.simpleName)
+            MDC.clear()
         }
     }
 }
