@@ -36,8 +36,11 @@ import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.Vilkårsvurderi
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.task.dto.JournalførManueltBrevDTO
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
+import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
@@ -124,10 +127,12 @@ internal class DokumentServiceTest {
         val capturedTask = taskSlot.captured
 
         assertThat(capturedTask.metadata["mottakerType"]).isEqualTo(Institusjon::class.simpleName)
-//        assert(avsenderMottaker.isCaptured) { "AvsenderMottaker skal være satt for ikke å defaulte til Bruker" }
-//        assertThat(avsenderMottaker.captured.idType).isEqualTo(AvsenderMottakerIdType.ORGNR)
-//        assertThat(avsenderMottaker.captured.id).isEqualTo(orgNummer)
-//        assertThat(avsenderMottaker.captured.navn).isEqualTo("Testinstitusjon")
+
+        val journalførManueltBrevDTO = objectMapper.readValue(capturedTask.payload, JournalførManueltBrevDTO::class.java)
+        assertThat(journalførManueltBrevDTO.mottaker.avsenderMottaker).isNotNull
+        assertThat(journalførManueltBrevDTO.mottaker.avsenderMottaker!!.idType).isEqualTo(AvsenderMottakerIdType.ORGNR)
+        assertThat(journalførManueltBrevDTO.mottaker.avsenderMottaker.id).isEqualTo(orgNummer)
+        assertThat(journalførManueltBrevDTO.mottaker.avsenderMottaker.navn).isEqualTo("Testinstitusjon")
     }
 
     @Test
