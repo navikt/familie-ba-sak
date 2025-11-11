@@ -408,7 +408,7 @@ class PersongrunnlagService(
                     val adresser =
                         adresserForPersoner[person.aktør.aktivFødselsnummer()]
                             ?: return@forEach
-                    Triple(adresser.bostedsadresser, adresser.oppholdsadresser, adresser.deltBosted)
+                    Triple(adresser.bostedsadresse, adresser.oppholdsadresse, adresser.deltBosted)
                 } else {
                     val aktør = person.aktør
                     val personinfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
