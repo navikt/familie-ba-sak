@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -14,10 +13,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.erUkraina
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.iUkraina
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.lagErNordiskStatsborgerTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -47,7 +45,6 @@ private val FINNMARK_OG_SVALBARD_MERKING_CUT_OFF_FOM_DATO = LocalDate.of(2025, 9
 
 @Service
 class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
-    private val pdlRestKlient: SystemOnlyPdlRestKlient,
     private val søknadService: SøknadService,
     private val persongrunnlagService: PersongrunnlagService,
     private val featureToggleService: FeatureToggleService,
@@ -65,19 +62,15 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
                 .map { it.aktør.aktivFødselsnummer() }
                 .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
 
-        val personOpplysningsgrunnlag =
-            persongrunnlagService
-                .hentAktivThrows(vilkårsvurdering.behandling.id)
-        persongrunnlagService.oppdaterAdresserPåPersoner(personOpplysningsgrunnlag)
-        if (!behandling.erFinnmarksEllerSvalbardtillegg()) {
-            persongrunnlagService.oppdaterStatsborgerskapPåPersoner(personOpplysningsgrunnlag.personer.toList())
-        }
+        val personOpplysningsgrunnlag = persongrunnlagService.oppdaterRegisteropplysninger(vilkårsvurdering.behandling.id)
 
         vilkårsvurdering
             .personResultater
             .filter { it.aktør.aktivFødselsnummer() in identer }
             .forEach { personResultat ->
-                val erUkrainskStatsborger = hentErUkrainskStatsborger(personResultat.aktør)
+                val personInfoForPerson = personOpplysningsgrunnlag.personer.find { it.aktør == personResultat.aktør } ?: throw Feil("Aktør ${personResultat.aktør.aktørId} har personresultat men ikke persgrunnlag")
+                val erUkrainskStatsborger = personInfoForPerson.statsborgerskap.iUkraina()
+
                 if (erUkrainskStatsborger && !behandling.erFinnmarksEllerSvalbardtillegg()) {
                     return@forEach
                 }
@@ -282,11 +275,6 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
                     begrunnelse = if (periodeErEndret) PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT else it.verdi.begrunnelse,
                 )
             }
-    }
-
-    private fun hentErUkrainskStatsborger(aktør: Aktør): Boolean {
-        val statsborgerskap = pdlRestKlient.hentStatsborgerskap(aktør)
-        return statsborgerskap.any { it.erUkraina() }
     }
 
     private fun lagErØvrigeKravForBosattIRiketOppfyltTidslinje(

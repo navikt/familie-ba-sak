@@ -57,7 +57,6 @@ class PreutfyllBosattIRiketServiceTest {
 
     private val preutfyllBosattIRiketService =
         PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
-            pdlRestKlient = systemOnlyPdlRestKlient,
             søknadService = søknadService,
             persongrunnlagService = persongrunnlagService,
             featureToggleService = featureToggleService,

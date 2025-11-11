@@ -558,7 +558,6 @@ class CucumberMock(
 
     val preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService =
         PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
-            pdlRestKlient = systemOnlyPdlRestKlient,
             søknadService = mockk(),
             persongrunnlagService = persongrunnlagService,
             featureToggleService = featureToggleService,

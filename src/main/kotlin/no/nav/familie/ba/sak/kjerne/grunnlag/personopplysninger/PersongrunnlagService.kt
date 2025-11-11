@@ -446,24 +446,6 @@ class PersongrunnlagService(
         }
     }
 
-    fun oppdaterStatsborgerskapPåPersoner(
-        personer: List<Person>,
-    ) {
-        personer.forEach { person ->
-            val statsborgerskap = personopplysningerService.hentHistoriskStatsborgerskap(aktør = person.aktør)
-
-            person.statsborgerskap =
-                statsborgerskap
-                    .flatMap {
-                        statsborgerskapService.hentStatsborgerskapMedMedlemskap(
-                            statsborgerskap = it,
-                            person = person,
-                        )
-                    }.sortedBy { it.gyldigPeriode?.fom }
-                    .toMutableList()
-        }
-    }
-
     fun hentSøkersMålform(behandlingId: Long) = hentSøkerOgBarnPåBehandlingThrows(behandlingId).søker().målform
 
     @Transactional
