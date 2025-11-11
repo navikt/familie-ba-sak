@@ -46,7 +46,7 @@ class PreutfyllBorHosSøkerServiceTest {
             val identer = firstArg<List<String>>()
             identer.associateWith {
                 PdlAdresserPerson(
-                    bostedsadresser =
+                    bostedsadresse =
                         listOf(
                             Bostedsadresse(
                                 gyldigFraOgMed = nåDato.minusYears(10),
@@ -101,7 +101,7 @@ class PreutfyllBorHosSøkerServiceTest {
             identer.associateWith { ident ->
                 if (ident == aktørSøker.aktivFødselsnummer()) {
                     PdlAdresserPerson(
-                        bostedsadresser =
+                        bostedsadresse =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = fødselsdatoSøker,
@@ -113,7 +113,7 @@ class PreutfyllBorHosSøkerServiceTest {
                     )
                 } else {
                     PdlAdresserPerson(
-                        bostedsadresser =
+                        bostedsadresse =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = fødselsdatoBarn,
@@ -160,7 +160,7 @@ class PreutfyllBorHosSøkerServiceTest {
             identer.associateWith { ident ->
                 if (ident == aktørSøker.aktivFødselsnummer()) {
                     PdlAdresserPerson(
-                        bostedsadresser =
+                        bostedsadresse =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = LocalDate.now().minusYears(1),
@@ -172,7 +172,7 @@ class PreutfyllBorHosSøkerServiceTest {
                     )
                 } else {
                     PdlAdresserPerson(
-                        bostedsadresser =
+                        bostedsadresse =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = LocalDate.now().minusMonths(2),
@@ -230,7 +230,7 @@ class PreutfyllBorHosSøkerServiceTest {
             identer.associateWith { ident ->
                 if (ident == aktørSøker.aktivFødselsnummer()) {
                     PdlAdresserPerson(
-                        bostedsadresser =
+                        bostedsadresse =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = fødselsdatoSøker,
@@ -247,7 +247,7 @@ class PreutfyllBorHosSøkerServiceTest {
                     )
                 } else {
                     PdlAdresserPerson(
-                        bostedsadresser =
+                        bostedsadresse =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = fødselsdatoBarn,
@@ -303,7 +303,7 @@ class PreutfyllBorHosSøkerServiceTest {
             val identer = firstArg<List<String>>()
             identer.associateWith {
                 PdlAdresserPerson(
-                    bostedsadresser =
+                    bostedsadresse =
                         listOf(
                             Bostedsadresse(
                                 gyldigFraOgMed = LocalDate.now().minusYears(10),
@@ -353,7 +353,7 @@ class PreutfyllBorHosSøkerServiceTest {
             mapOf(
                 aktørSøker.aktivFødselsnummer() to
                     PdlAdresserPerson(
-                        bostedsadresser =
+                        bostedsadresse =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = LocalDate.now().minusYears(10),
@@ -365,7 +365,7 @@ class PreutfyllBorHosSøkerServiceTest {
                     ),
                 aktørBarn.aktivFødselsnummer() to
                     PdlAdresserPerson(
-                        bostedsadresser =
+                        bostedsadresse =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = LocalDate.now().minusYears(2),
@@ -414,7 +414,7 @@ class PreutfyllBorHosSøkerServiceTest {
             mapOf(
                 aktørSøker.aktivFødselsnummer() to
                     PdlAdresserPerson(
-                        bostedsadresser =
+                        bostedsadresse =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = LocalDate.now().minusYears(2),
@@ -426,7 +426,7 @@ class PreutfyllBorHosSøkerServiceTest {
                     ),
                 aktørBarn.aktivFødselsnummer() to
                     PdlAdresserPerson(
-                        bostedsadresser =
+                        bostedsadresse =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = LocalDate.now().minusYears(10),

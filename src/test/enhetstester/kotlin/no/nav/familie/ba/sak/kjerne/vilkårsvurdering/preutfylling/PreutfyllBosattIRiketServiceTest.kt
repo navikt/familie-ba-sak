@@ -1412,7 +1412,7 @@ class PreutfyllBosattIRiketServiceTest {
             val identer = firstArg<List<String>>()
             identer.associateWith {
                 PdlAdresserPerson(
-                    bostedsadresser =
+                    bostedsadresse =
                         listOf(
                             Bostedsadresse(
                                 gyldigFraOgMed = LocalDate.now().minusYears(1),
