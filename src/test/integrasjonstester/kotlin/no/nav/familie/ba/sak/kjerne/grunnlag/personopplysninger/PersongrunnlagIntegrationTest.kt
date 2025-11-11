@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
+import no.nav.familie.ba.sak.fake.FakePdlRestKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsbo
@@ -262,6 +263,7 @@ class PersongrunnlagIntegrationTest(
     inner class OppdaterAdresserPåPersonerTest {
         @Test
         fun `Skal oppdatere adresser på personer med det nyeste fra PDL`() {
+            // Arrange
             val søkerfødselsdato = randomSøkerFødselsdato()
             val fødselsnrMor =
                 leggTilPersonInfo(
@@ -300,34 +302,40 @@ class PersongrunnlagIntegrationTest(
             assertThat(søker.oppholdsadresser).isEmpty()
             assertThat(søker.deltBosted).isEmpty()
 
-            leggTilPersonInfo(
-                søkerfødselsdato,
-                PersonInfo(
-                    fødselsdato = LocalDate.of(1990, 1, 1),
-                    bostedsadresser =
-                        listOf(
-                            lagBostedsadresse(
-                                vegadresse = lagVegadresse(kommunenummer = "9601"),
-                            ),
-                        ),
-                    oppholdsadresser =
-                        listOf(
-                            lagOppholdsadresse(
-                                vegadresse = lagVegadresse(kommunenummer = "9601"),
-                            ),
-                        ),
-                    deltBosted =
-                        listOf(
-                            lagDeltBosted(
-                                vegadresse = lagVegadresse(kommunenummer = "9601"),
-                            ),
-                        ),
+            FakePdlRestKlient.leggTilBostedsadresseIPDL(
+                personIdenter =
+                    listOf(
+                        fødselsnrMor,
+                    ),
+                lagBostedsadresse(
+                    vegadresse = lagVegadresse(kommunenummer = "9601"),
                 ),
-                personIdent = fødselsnrMor,
+            )
+            FakePdlRestKlient.leggTilOppholdsadresseIPDL(
+                personIdenter =
+                    listOf(
+                        fødselsnrMor,
+                    ),
+                lagOppholdsadresse(
+                    vegadresse = lagVegadresse(kommunenummer = "9601"),
+                ),
             )
 
-            val oppdatertPersonopplysningGrunnlag = persongrunnlagService.oppdaterAdresserPåPersoner(personopplysningGrunnlag)
-            val søkerOppdatert = oppdatertPersonopplysningGrunnlag.personer.single { it.type == PersonType.SØKER }
+            FakePdlRestKlient.leggTilDeltBostedIPDL(
+                personIdenter =
+                    listOf(
+                        fødselsnrMor,
+                    ),
+                lagDeltBosted(
+                    vegadresse = lagVegadresse(kommunenummer = "9601"),
+                ),
+            )
+
+            // Act
+            persongrunnlagService.oppdaterAdresserPåPersoner(personopplysningGrunnlag)
+
+            // Assert
+            val søkerOppdatert = personopplysningGrunnlag.personer.single { it.type == PersonType.SØKER }
 
             val bostedsadresseForSøker = søkerOppdatert.bostedsadresser.single() as GrVegadresseBostedsadresse
             val oppholdsadresseForSøker = søkerOppdatert.oppholdsadresser.single() as GrVegadresseOppholdsadresse

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.cucumber.mock.komponentMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
+import no.nav.familie.ba.sak.datagenerator.lagPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -25,9 +26,9 @@ fun mockSystemOnlyPdlRestKlient(
                         .fødselsdato
 
                 val eksisterendeAdresser = dataFraCucumber.adresser[ident]
-                if (eksisterendeAdresser == null || eksisterendeAdresser.bostedsadresse.isEmpty()) {
+                if (eksisterendeAdresser == null || eksisterendeAdresser.bostedsadresser.isEmpty()) {
                     PdlAdresserPerson(
-                        bostedsadresse = listOf(Bostedsadresse(gyldigFraOgMed = fødselsdato, vegadresse = vegadresseIOslo)),
+                        bostedsadresser = listOf(Bostedsadresse(gyldigFraOgMed = fødselsdato, vegadresse = vegadresseIOslo)),
                         deltBosted = eksisterendeAdresser?.deltBosted ?: emptyList(),
                     )
                 } else {
@@ -47,11 +48,11 @@ fun mockSystemOnlyPdlRestKlient(
                         .fødselsdato
 
                 val eksisterendeAdresser = dataFraCucumber.adresser[ident]
-                if (eksisterendeAdresser == null || eksisterendeAdresser.bostedsadresse.isEmpty()) {
+                if (eksisterendeAdresser == null || eksisterendeAdresser.bostedsadresser.isEmpty()) {
                     PdlAdresserPerson(
-                        bostedsadresse = listOf(Bostedsadresse(gyldigFraOgMed = fødselsdato, vegadresse = vegadresseIOslo)),
+                        bostedsadresser = listOf(Bostedsadresse(gyldigFraOgMed = fødselsdato, vegadresse = vegadresseIOslo)),
                         deltBosted = eksisterendeAdresser?.deltBosted ?: emptyList(),
-                        oppholdsadresse = eksisterendeAdresser?.oppholdsadresse ?: emptyList(),
+                        oppholdsadresser = eksisterendeAdresser?.oppholdsadresser ?: emptyList(),
                     )
                 } else {
                     eksisterendeAdresser
@@ -74,6 +75,20 @@ fun mockSystemOnlyPdlRestKlient(
                     gyldigTilOgMed = null,
                     bekreftelsesdato = fødselsdato,
                 ),
+            )
+        }
+
+        every {
+            hentPerson(
+                fødselsnummer = any(),
+                personInfoQuery = any(),
+            )
+        } answers {
+            val fødselsnummer = firstArg<String>()
+            lagPersonInfo(
+                bostedsadresser = dataFraCucumber.adresser[fødselsnummer]?.bostedsadresser ?: emptyList(),
+                oppholdsadresser = dataFraCucumber.adresser[fødselsnummer]?.oppholdsadresser ?: emptyList(),
+                deltBosted = dataFraCucumber.adresser[fødselsnummer]?.deltBosted ?: emptyList(),
             )
         }
     }

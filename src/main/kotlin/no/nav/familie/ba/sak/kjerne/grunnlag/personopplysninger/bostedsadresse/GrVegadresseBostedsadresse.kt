@@ -82,6 +82,23 @@ data class GrVegadresseBostedsadresse(
 
     override fun hashCode(): Int = Objects.hash(matrikkelId)
 
+    override fun tilAdresse(): Adresse =
+        Adresse(
+            gyldigFraOgMed = periode?.fom,
+            gyldigTilOgMed = periode?.tom,
+            vegadresse =
+                Vegadresse(
+                    matrikkelId = matrikkelId,
+                    husnummer = husnummer,
+                    husbokstav = husbokstav,
+                    bruksenhetsnummer = bruksenhetsnummer,
+                    adressenavn = adressenavn,
+                    kommunenummer = kommunenummer,
+                    tilleggsnavn = tilleggsnavn,
+                    postnummer = postnummer,
+                ),
+        )
+
     companion object {
         fun fraVegadresse(
             vegadresse: Vegadresse,

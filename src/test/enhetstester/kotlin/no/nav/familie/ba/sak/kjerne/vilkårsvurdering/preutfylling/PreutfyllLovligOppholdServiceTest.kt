@@ -58,7 +58,7 @@ class PreutfyllLovligOppholdServiceTest {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
-                        bostedsadresse =
+                        bostedsadresser =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = LocalDate.now().minusYears(10),
@@ -116,7 +116,7 @@ class PreutfyllLovligOppholdServiceTest {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
-                        bostedsadresse =
+                        bostedsadresser =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = LocalDate.now().minusYears(10),
@@ -171,7 +171,7 @@ class PreutfyllLovligOppholdServiceTest {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
-                        bostedsadresse =
+                        bostedsadresser =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = LocalDate.now().minusYears(10),
@@ -230,7 +230,7 @@ class PreutfyllLovligOppholdServiceTest {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
-                        bostedsadresse =
+                        bostedsadresser =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = LocalDate.now().minusYears(10),
@@ -284,7 +284,7 @@ class PreutfyllLovligOppholdServiceTest {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
-                        bostedsadresse =
+                        bostedsadresser =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = LocalDate.now().minusYears(10),
@@ -338,7 +338,7 @@ class PreutfyllLovligOppholdServiceTest {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
-                        bostedsadresse =
+                        bostedsadresser =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = LocalDate.now().minusYears(10),
@@ -397,7 +397,7 @@ class PreutfyllLovligOppholdServiceTest {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
-                        bostedsadresse =
+                        bostedsadresser =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = LocalDate.now().minusYears(10),
@@ -455,7 +455,7 @@ class PreutfyllLovligOppholdServiceTest {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
-                        bostedsadresse =
+                        bostedsadresser =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = LocalDate.now().minusYears(10),
@@ -507,7 +507,7 @@ class PreutfyllLovligOppholdServiceTest {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
                     PdlAdresserPerson(
-                        bostedsadresse =
+                        bostedsadresser =
                             listOf(
                                 Bostedsadresse(
                                     gyldigFraOgMed = LocalDate.now().minusYears(5),

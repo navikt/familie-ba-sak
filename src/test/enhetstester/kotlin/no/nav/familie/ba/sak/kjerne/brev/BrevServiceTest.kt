@@ -70,6 +70,7 @@ class BrevServiceTest {
             hjemmeltekstUtleder = hjemmeltekstUtleder,
             avregningService = mockAvregningService,
             featureToggleService = mockFeatureToggleService,
+            behandlingHentOgPersisterService = mockk(),
         )
 
     @BeforeEach

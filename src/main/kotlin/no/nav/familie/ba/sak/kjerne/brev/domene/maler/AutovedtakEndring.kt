@@ -10,6 +10,8 @@ data class AutovedtakEndring(
     constructor(
         vedtakFellesfelter: VedtakFellesfelter,
         etterbetaling: Etterbetaling? = null,
+        innvilgetSvalbardtillegg: Boolean = false,
+        innvilgetFinnmarkstillegg: Boolean = false,
     ) :
         this(
             data =
@@ -22,6 +24,8 @@ data class AutovedtakEndring(
                                     enhet = vedtakFellesfelter.enhet,
                                 ),
                             etterbetaling = etterbetaling,
+                            innvilgetSvalbardtillegg = innvilgetSvalbardtillegg,
+                            innvilgetFinnmarkstillegg = innvilgetFinnmarkstillegg,
                         ),
                     flettefelter =
                         FlettefelterForDokumentImpl(
@@ -43,5 +47,7 @@ data class AutovedtakEndringData(
         val hjemmeltekst: Hjemmeltekst,
         val autoUnderskrift: AutoUnderskrift,
         val etterbetaling: Etterbetaling?,
+        val innvilgetSvalbardtillegg: Boolean,
+        val innvilgetFinnmarkstillegg: Boolean,
     )
 }
