@@ -23,12 +23,12 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20251103090009_f7d38c7</prosessering.version>
+        <prosessering.version>2.20251110093725_10552cd</prosessering.version>
         <felles.version>3.20251105152539_b03ed80</felles.version>
-        <eksterne-kontrakter-bisys.version>2.0_20251027085135_48de1e7</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20251030120445_40c2cd0</felles-kontrakter.version>
-        <familie.kontrakter.saksstatistikk>2.0_20251027085135_48de1e7</familie.kontrakter.saksstatistikk>
-        <familie.kontrakter.stønadsstatistikk>2.0_20251027085135_48de1e7</familie.kontrakter.stønadsstatistikk>
+        <eksterne-kontrakter-bisys.version>2.0_20251111094125_cdf5bf2</eksterne-kontrakter-bisys.version>
+        <felles-kontrakter.version>3.0_20251111092809_222854c</felles-kontrakter.version>
+        <familie.kontrakter.saksstatistikk>2.0_20251111094125_cdf5bf2</familie.kontrakter.saksstatistikk>
+        <familie.kontrakter.stønadsstatistikk>2.0_20251111094125_cdf5bf2</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250922101633_e4c1c4d</utbetalingsgenerator.version>
         <cucumber.version>7.31.0</cucumber.version>
         <mockk.version>1.14.6</mockk.version>
@@ -52,7 +52,7 @@
         <sonar.sources>src/main</sonar.sources>
         <sonar.tests>src/test</sonar.tests>
         <sonar.projectKey>navikt_familie-ba-sak</sonar.projectKey>
-        <sonar-maven-plugin.version>5.2.0.4988</sonar-maven-plugin.version>
+        <sonar-maven-plugin.version>5.3.0.6276</sonar-maven-plugin.version>
         <!-- Http Client - nyeste versjon fra httpclient(5.5.1) skaper problemer med Spring Boot 3.5.7. Issue: HTTPCLIENT-2405. Skal være fikset i 3.5.8, men bør testes -->
         <httpclient5.version>5.5</httpclient5.version>
 
