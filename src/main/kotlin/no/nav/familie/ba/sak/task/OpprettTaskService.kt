@@ -194,9 +194,11 @@ class OpprettTaskService(
                         Properties().apply {
                             this["fagsakId"] = fagsakId.toString()
                         },
-                ).apply {
+                ).run {
                     if (envService.erProd() && featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG)) {
                         medTriggerTid(LocalDateTime.now().plusHours(1))
+                    } else {
+                        this
                     }
                 },
             )
