@@ -12,7 +12,6 @@ concurrency:
 jobs:
   ktlint:
     name: Ktlint
-    if: github.event_name != 'merge_group'
     permissions:
       contents: read
     uses: navikt/familie-baks-gha-workflows/.github/workflows/ktlint.yaml@main # ratchet:exclude
