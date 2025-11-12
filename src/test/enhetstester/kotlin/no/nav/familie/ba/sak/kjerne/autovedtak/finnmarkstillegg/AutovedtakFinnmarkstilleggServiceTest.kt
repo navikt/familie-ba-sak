@@ -1,7 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
@@ -9,11 +13,15 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.FinnmarkstilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -23,8 +31,13 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
+import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -46,6 +59,9 @@ class AutovedtakFinnmarkstilleggServiceTest {
     private val pdlRestKlient = mockk<SystemOnlyPdlRestKlient>()
     private val simuleringService = mockk<SimuleringService>()
     private val autovedtakFinnmarkstilleggBegrunnelseService = mockk<AutovedtakFinnmarkstilleggBegrunnelseService>()
+    private val autovedtakService = mockk<AutovedtakService>()
+    private val behandlingService = mockk<BehandlingService>()
+    private val taskService = mockk<TaskService>()
 
     private val autovedtakFinnmarkstilleggService =
         AutovedtakFinnmarkstilleggService(
@@ -56,9 +72,9 @@ class AutovedtakFinnmarkstilleggServiceTest {
             pdlRestKlient = pdlRestKlient,
             simuleringService = simuleringService,
             autovedtakFinnmarkstilleggBegrunnelseService = autovedtakFinnmarkstilleggBegrunnelseService,
-            autovedtakService = mockk(),
-            behandlingService = mockk(),
-            taskService = mockk(),
+            autovedtakService = autovedtakService,
+            behandlingService = behandlingService,
+            taskService = taskService,
         )
 
     private val fagsak = defaultFagsak()
@@ -79,18 +95,16 @@ class AutovedtakFinnmarkstilleggServiceTest {
     private val bostedsadresseIFinnmark =
         Bostedsadresse(gyldigFraOgMed = LocalDate.of(2025, 9, 15), vegadresse = adresse.copy(kommunenummer = "5601"))
 
-    @BeforeEach
-    fun setUp() {
-        every { fagsakService.hentPåFagsakId(fagsak.id) } returns lagFagsak(status = LØPENDE, type = NORMAL)
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns behandling
-        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-        every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns lagTilkjentYtelse { emptySet() }
-        every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
-        every { simuleringService.oppdaterSimuleringPåBehandling(behandling) } returns emptyList()
-    }
-
     @Nested
     inner class SkalAutovedtakBehandles {
+        @BeforeEach
+        fun setUp() {
+            every { fagsakService.hentPåFagsakId(fagsak.id) } returns lagFagsak(status = LØPENDE, type = NORMAL)
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns behandling
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+            every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns lagTilkjentYtelse()
+        }
+
         @ParameterizedTest
         @EnumSource(FagsakStatus::class, names = ["LØPENDE"], mode = EXCLUDE)
         fun `skal returnere false når fagsak ikke har løpende barnetrygd`(
@@ -212,7 +226,82 @@ class AutovedtakFinnmarkstilleggServiceTest {
                 }
 
             // Assert
-            assertThat(feil.message).isEqualTo("Automatisk behandling av finnmarkstillegg kan ikke gjennomføres for EØS-saker.")
+            assertThat(feil.message).isEqualTo("Automatisk behandling av Finnmarkstillegg kan ikke gjennomføres for EØS-saker.\nRett til Finnmarkstillegg må håndteres manuelt.")
+        }
+    }
+
+    @Nested
+    inner class KjørBehandling {
+        @BeforeEach
+        fun setup() {
+            every { fagsakService.hentAktør(fagsak.id) } returns persongrunnlag.søker.aktør
+            every { autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(any(), any(), any(), any()) } returns behandling
+            every { simuleringService.oppdaterSimuleringPåBehandling(any()) } returns emptyList()
+            every { simuleringService.hentFeilutbetaling(any<Long>()) } returns BigDecimal.ZERO
+            every { autovedtakFinnmarkstilleggBegrunnelseService.begrunnAutovedtakForFinnmarkstillegg(any()) } just Runs
+            every { autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any()) } returns lagVedtak()
+            every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns mockk()
+            every { taskService.save(any()) } returns mockk()
+        }
+
+        @Test
+        fun `skal kaste AutovedtakMåBehandlesManueltFeil når behandling fører til feilutbetaling`() {
+            // Arrange
+            every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ONE
+
+            // Act & Assert
+            val feil =
+                assertThrows<AutovedtakMåBehandlesManueltFeil> {
+                    autovedtakFinnmarkstilleggService.kjørBehandling(FinnmarkstilleggData(fagsakId = fagsak.id))
+                }
+
+            assertThat(feil.message).isEqualTo("Automatisk behandling av Finnmarkstillegg fører til feilutbetaling.\nEndring av Finnmarkstillegg må håndteres manuelt.")
+        }
+
+        @Test
+        fun `skal begrunne brev og oprette riktig task hvis behandlingsteg etter behandlingsresultat er IVERKSETT_MOT_OPPDRAG`() {
+            // Arrange
+            val behandlingEtterBehandlingsresultat = lagBehandling(førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG)
+            val taskSlot = slot<Task>()
+
+            every { autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(any(), any(), any(), any()) } returns behandlingEtterBehandlingsresultat
+            every { taskService.save(capture(taskSlot)) } returns mockk()
+
+            // Act
+            autovedtakFinnmarkstilleggService.kjørBehandling(FinnmarkstilleggData(fagsakId = fagsak.id))
+
+            // Assert
+            assertThat(taskSlot.captured.type).isEqualTo(IverksettMotOppdragTask.TASK_STEP_TYPE)
+            verify(exactly = 1) {
+                autovedtakFinnmarkstilleggBegrunnelseService.begrunnAutovedtakForFinnmarkstillegg(behandlingEtterBehandlingsresultat)
+                autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandlingEtterBehandlingsresultat)
+            }
+        }
+
+        @Test
+        fun `skal ikke begrunne brev og opprette riktig task hvis behandlingsteg etter behandlingsresultat er FERDIGSTILLE_BEHANDLING`() {
+            // Arrange
+            val behandlingEtterBehandlingsresultat = lagBehandling(førsteSteg = StegType.FERDIGSTILLE_BEHANDLING)
+            val taskSlot = slot<Task>()
+
+            every { autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(any(), any(), any(), any()) } returns behandlingEtterBehandlingsresultat
+            every { taskService.save(capture(taskSlot)) } returns mockk()
+
+            // Act
+            autovedtakFinnmarkstilleggService.kjørBehandling(FinnmarkstilleggData(fagsakId = fagsak.id))
+
+            // Assert
+            assertThat(taskSlot.captured.type).isEqualTo(FerdigstillBehandlingTask.TASK_STEP_TYPE)
+            verify(exactly = 0) {
+                autovedtakFinnmarkstilleggBegrunnelseService.begrunnAutovedtakForFinnmarkstillegg(behandling)
+            }
+            verify(exactly = 1) {
+                autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandlingEtterBehandlingsresultat)
+                behandlingService.oppdaterStatusPåBehandling(
+                    behandlingEtterBehandlingsresultat.id,
+                    BehandlingStatus.IVERKSETTER_VEDTAK,
+                )
+            }
         }
     }
 }

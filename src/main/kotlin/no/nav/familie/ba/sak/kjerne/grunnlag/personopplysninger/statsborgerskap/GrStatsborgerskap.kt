@@ -22,6 +22,10 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombiner
 import java.time.LocalDate
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -83,6 +87,8 @@ data class GrStatsborgerskap(
 
 fun Statsborgerskap.fom() = this.gyldigFraOgMed ?: this.bekreftelsesdato
 
+fun GrStatsborgerskap.iNordiskLand() = Norden.entries.map { it.name }.contains(this.landkode)
+
 fun List<GrStatsborgerskap>.filtrerGjeldendeNå(): List<GrStatsborgerskap> = this.filter { it.gjeldendeNå() }
 
 fun List<GrStatsborgerskap>.hentSterkesteMedlemskap(): Medlemskap? {
@@ -103,3 +109,22 @@ fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? =
             else -> null
         }
     }
+
+fun lagErNordiskStatsborgerTidslinje(statsborgerskap: List<GrStatsborgerskap>): Tidslinje<Boolean> {
+    val statsborgerskapGruppertPåNavn =
+        statsborgerskap
+            .groupBy { it.landkode }
+            .mapValues { (_, perLand) ->
+                val unikeStatsborgerskapInnslag = perLand.distinct()
+                val innslagMedDato = unikeStatsborgerskapInnslag.filter { it.gyldigPeriode?.fom != null || it.gyldigPeriode?.tom != null }
+
+                innslagMedDato.ifEmpty { unikeStatsborgerskapInnslag }
+            }
+
+    return statsborgerskapGruppertPåNavn.values
+        .map { statsborgerskapSammeLand ->
+            statsborgerskapSammeLand
+                .map { Periode(it, it.gyldigPeriode?.fom, it.gyldigPeriode?.tom) }
+                .tilTidslinje()
+        }.kombiner { statsborgerskap -> statsborgerskap.any { it.iNordiskLand() } }
+}

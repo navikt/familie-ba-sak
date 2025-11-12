@@ -6,6 +6,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import no.nav.familie.ba.sak.common.Utils.nullableTilString
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import java.util.Objects
@@ -95,6 +96,23 @@ data class GrVegadresseDeltBosted(
     }
 
     override fun hashCode(): Int = Objects.hash(matrikkelId)
+
+    override fun tilAdresse(): Adresse =
+        Adresse(
+            gyldigFraOgMed = periode?.fom,
+            gyldigTilOgMed = periode?.tom,
+            vegadresse =
+                Vegadresse(
+                    matrikkelId = matrikkelId,
+                    husnummer = husnummer,
+                    husbokstav = husbokstav,
+                    bruksenhetsnummer = bruksenhetsnummer,
+                    adressenavn = adressenavn,
+                    kommunenummer = kommunenummer,
+                    tilleggsnavn = tilleggsnavn,
+                    postnummer = postnummer,
+                ),
+        )
 
     companion object {
         fun fraVegadresse(

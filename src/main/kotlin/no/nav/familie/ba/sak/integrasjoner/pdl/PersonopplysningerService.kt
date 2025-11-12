@@ -95,6 +95,8 @@ class PersonopplysningerService(
 
     fun hentGjeldendeStatsborgerskap(aktør: Aktør): Statsborgerskap = pdlRestKlient.hentStatsborgerskap(aktør).firstOrNull() ?: UKJENT_STATSBORGERSKAP
 
+    fun hentHistoriskStatsborgerskap(aktør: Aktør) = systemOnlyPdlRestKlient.hentStatsborgerskap(aktør, historikk = true)
+
     fun hentGjeldendeOpphold(aktør: Aktør): Opphold =
         pdlRestKlient.hentOppholdstillatelse(aktør).firstOrNull()
             ?: throw Feil(
@@ -117,6 +119,8 @@ class PersonopplysningerService(
             landkode
         }
     }
+
+    fun hentAdresserForPersoner(identer: List<String>) = systemOnlyPdlRestKlient.hentAdresserForPersoner(identer)
 
     fun hentAdressebeskyttelseSomSystembruker(aktør: Aktør): ADRESSEBESKYTTELSEGRADERING = systemOnlyPdlRestKlient.hentAdressebeskyttelse(aktør).tilAdressebeskyttelse()
 

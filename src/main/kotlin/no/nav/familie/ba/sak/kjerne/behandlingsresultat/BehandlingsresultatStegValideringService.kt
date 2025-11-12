@@ -152,9 +152,9 @@ class BehandlingsresultatStegValideringService(
             val begrunnelse =
                 "${ytelseType.toString().storForbokstav()} kan ikke behandles automatisk som følge av adresseendring.\n" +
                     if (erEndringIUtbetalingUtenomYtelseType) {
-                        "Automatisk behandling fører til endringer i annen sats enn ${ytelseType.toString().storForbokstav()}."
+                        "Automatisk behandling fører til endringer i annen sats enn ${ytelseType.toString().storForbokstav()}.\nEndring av ${ytelseType.toString().storForbokstav()} må håndteres manuelt."
                     } else {
-                        "Automatisk behandling fører til innvilgelse av ${ytelseType.toString().storForbokstav()} mer enn én måned fram i tid."
+                        "Automatisk behandling fører til innvilgelse av ${ytelseType.toString().storForbokstav()} mer enn én måned fram i tid.\nEndring av ${ytelseType.toString().storForbokstav()} må håndteres manuelt."
                     }
 
             if (featureToggleService.isEnabled(OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {

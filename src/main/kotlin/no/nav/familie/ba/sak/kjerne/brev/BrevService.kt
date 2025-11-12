@@ -16,10 +16,14 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.finnInnvilgedeOgReduserteFinnmarkstilleggPerioder
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.finnInnvilgedeOgReduserteSvalbardtilleggPerioder
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.filtrerBortIrrelevanteAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.BrevBegrunnelseFeil
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
@@ -80,6 +84,7 @@ import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class BrevService(
@@ -103,6 +108,7 @@ class BrevService(
     private val hjemmeltekstUtleder: HjemmeltekstUtleder,
     private val avregningService: AvregningService,
     private val featureToggleService: FeatureToggleService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -237,6 +243,8 @@ class BrevService(
                 AutovedtakEndring(
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetaling = hentEtterbetaling(vedtak),
+                    innvilgetSvalbardtillegg = sjekkOmDetErNyInnvilgetSvalbardtilleggIBehandling(behandling),
+                    innvilgetFinnmarkstillegg = sjekkOmDetErNyInnvilgetFinnmarkstilleggIBehandling(behandling),
                 )
 
             Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN ->
@@ -285,6 +293,35 @@ class BrevService(
         val andelerIBehandlingSomErDifferanseBeregnetOgLøpende = andelerIBehandlingSomErDifferanseBeregnet.filter { it.erLøpende() }
 
         return andelerIBehandlingSomErDifferanseBeregnetOgLøpende.isNotEmpty()
+    }
+
+    fun sjekkOmDetErNyInnvilgetFinnmarkstilleggIBehandling(behandling: Behandling): Boolean =
+        sjekkOmDetErNyInnvilgetTilleggIBehandling(
+            behandling = behandling,
+            finnPerioderMedNyInnvilgetAndeler = ::finnInnvilgedeOgReduserteFinnmarkstilleggPerioder,
+        )
+
+    fun sjekkOmDetErNyInnvilgetSvalbardtilleggIBehandling(behandling: Behandling): Boolean =
+        sjekkOmDetErNyInnvilgetTilleggIBehandling(
+            behandling = behandling,
+            finnPerioderMedNyInnvilgetAndeler = ::finnInnvilgedeOgReduserteSvalbardtilleggPerioder,
+        )
+
+    private fun sjekkOmDetErNyInnvilgetTilleggIBehandling(
+        behandling: Behandling,
+        finnPerioderMedNyInnvilgetAndeler: (forrige: List<AndelTilkjentYtelse>, nåværende: List<AndelTilkjentYtelse>) -> Pair<Set<YearMonth>, Set<YearMonth>>,
+    ): Boolean {
+        val sistIverksatteBehandling =
+            behandlingHentOgPersisterService
+                .hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+                ?: throw Feil("Finner ikke siste iverksatte behandling")
+
+        val forrigeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sistIverksatteBehandling.id)
+        val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+
+        val (innvilgedePerioder, _) = finnPerioderMedNyInnvilgetAndeler(forrigeAndeler, nåværendeAndeler)
+
+        return innvilgedePerioder.isNotEmpty()
     }
 
     private fun beskrivPerioderMedUavklartRefusjonEøs(vedtak: Vedtak) =
