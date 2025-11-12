@@ -115,6 +115,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetSekundaerlandBeggeForeldreInaktiveTilbakeITid"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_SEKUNDÆRLAND_TO_ARBEIDSLAND_INGEN_UTBETALING {
+        override val sanityApiNavn = "innvilgetSekundaerlandToArbeidslandIngenUtbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
     INNVILGET_TILLEGGSTEKST_SATSENDRING {
         override val sanityApiNavn = "innvilgetTilleggstekstSatsendring"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET

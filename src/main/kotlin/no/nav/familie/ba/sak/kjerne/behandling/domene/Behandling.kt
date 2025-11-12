@@ -434,6 +434,8 @@ enum class BehandlingStatus {
     ;
 
     fun erLåstForVidereRedigering() = this != UTREDES
+
+    fun erStatusIverksetterVedtakEllerAvsluttet() = this in listOf(IVERKSETTER_VEDTAK, AVSLUTTET)
 }
 
 class BehandlingStegComparator : Comparator<BehandlingStegTilstand> {

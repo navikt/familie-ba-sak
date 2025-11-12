@@ -10,6 +10,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
+import no.nav.familie.kontrakter.felles.personopplysning.UtenlandskAdresse
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.familie.kontrakter.felles.svalbard.erKommunePåSvalbard
 import java.time.LocalDate
@@ -22,6 +23,7 @@ data class Adresse(
     val ukjentBosted: UkjentBosted? = null,
     val oppholdAnnetSted: OppholdAnnetSted? = null,
     val folkeregistermetadata: Folkeregistermetadata? = null,
+    val utenlandskAdresse: UtenlandskAdresse? = null,
 ) {
     /**
      * Dette kan oppstå ved dårlig datakvalitet.

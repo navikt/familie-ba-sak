@@ -15,6 +15,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.erUkraina
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.lagErNordiskStatsborgerTidslinje
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
@@ -44,27 +46,18 @@ import java.time.temporal.ChronoUnit
 private val FINNMARK_OG_SVALBARD_MERKING_CUT_OFF_FOM_DATO = LocalDate.of(2025, 9, 1)
 
 @Service
-class PreutfyllBosattIRiketService(
+class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
     private val pdlRestKlient: SystemOnlyPdlRestKlient,
     private val søknadService: SøknadService,
     private val persongrunnlagService: PersongrunnlagService,
     private val featureToggleService: FeatureToggleService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val preutfyllBosattIRIketMedLagringIPersonopplysningsgrunnlagService: PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService,
 ) {
     fun preutfyllBosattIRiket(
         vilkårsvurdering: Vilkårsvurdering,
         identerVilkårSkalPreutfyllesFor: List<String>? = null,
         cutOffFomDato: LocalDate? = null,
     ) {
-        if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
-            return preutfyllBosattIRIketMedLagringIPersonopplysningsgrunnlagService.preutfyllBosattIRiket(
-                vilkårsvurdering,
-                identerVilkårSkalPreutfyllesFor,
-                cutOffFomDato,
-            )
-        }
-
         val behandling = vilkårsvurdering.behandling
         val identer =
             vilkårsvurdering
@@ -72,7 +65,13 @@ class PreutfyllBosattIRiketService(
                 .map { it.aktør.aktivFødselsnummer() }
                 .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
 
-        val adresser = pdlRestKlient.hentAdresserForPersoner(identer)
+        val personOpplysningsgrunnlag =
+            persongrunnlagService
+                .hentAktivThrows(vilkårsvurdering.behandling.id)
+        persongrunnlagService.oppdaterAdresserPåPersoner(personOpplysningsgrunnlag)
+        if (!behandling.erFinnmarksEllerSvalbardtillegg()) {
+            persongrunnlagService.oppdaterStatsborgerskapPåPersoner(personOpplysningsgrunnlag.personer.toList())
+        }
 
         vilkårsvurdering
             .personResultater
@@ -84,7 +83,11 @@ class PreutfyllBosattIRiketService(
                 }
 
                 val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
-                val adresserForPerson = Adresser.opprettFra(adresser[personResultat.aktør.aktivFødselsnummer()])
+                val adresserForPerson =
+                    Adresser.opprettFra(
+                        personOpplysningsgrunnlag.personer.find { it.aktør.aktørId == personResultat.aktør.aktørId }
+                            ?: throw Feil("Fant ikke Person i personopplysningsgrunnlag for aktør ${personResultat.aktør.aktørId}"),
+                    )
 
                 val nyeBosattIRiketVilkårResultater =
                     if (behandling.erFinnmarksEllerSvalbardtillegg() && featureToggleService.isEnabled(FeatureToggle.NY_PREUTFYLLING_FOR_BOSATT_I_RIKET_VILKÅR_VED_AUTOVEDTAK_FINNMARK_SVALBARD)) {
@@ -125,8 +128,9 @@ class PreutfyllBosattIRiketService(
         adresserForPerson: Adresser,
         behandling: Behandling,
     ): Set<VilkårResultat> {
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
         val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(adresserForPerson, personResultat)
-        val erNordiskStatsborgerTidslinje = pdlRestKlient.lagErNordiskStatsborgerTidslinje(personResultat)
+        val erNordiskStatsborgerTidslinje = lagErNordiskStatsborgerTidslinje(personResultat.aktør.tilPerson(personopplysningGrunnlag).statsborgerskap)
         val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erDeltBostedIFinnmarkEllerNordTromsTidslinje = lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(adresserForPerson, personResultat)
         val erOppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje(adresserForPerson, personResultat)

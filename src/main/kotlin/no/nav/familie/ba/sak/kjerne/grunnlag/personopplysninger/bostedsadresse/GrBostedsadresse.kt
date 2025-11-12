@@ -57,6 +57,8 @@ abstract class GrBostedsadresse(
 
     abstract fun tilFrontendString(): String
 
+    abstract fun tilAdresse(): Adresse
+
     protected abstract fun tilKopiForNyPerson(): GrBostedsadresse
 
     fun tilKopiForNyPerson(nyPerson: Person): GrBostedsadresse =
@@ -107,7 +109,7 @@ abstract class GrBostedsadresse(
                 }
             return mappetAdresse.also {
                 it.person = person
-                it.periode = DatoIntervallEntitet(bostedsadresse.angittFlyttedato, bostedsadresse.gyldigTilOgMed)
+                it.periode = DatoIntervallEntitet(bostedsadresse.angittFlyttedato ?: bostedsadresse.gyldigFraOgMed, bostedsadresse.gyldigTilOgMed)
             }
         }
 

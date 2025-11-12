@@ -49,6 +49,8 @@ fun lagBehandling(
     status = status,
     aktivertTid = aktivertTid,
     aktiv = aktiv,
+    førsteSteg = førsteSteg,
+    endretTidspunkt = endretTidspunkt,
 ).copy(id = id)
 
 /**

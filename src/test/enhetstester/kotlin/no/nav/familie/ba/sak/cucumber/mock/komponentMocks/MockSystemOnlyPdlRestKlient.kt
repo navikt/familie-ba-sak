@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.cucumber.mock.komponentMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
+import no.nav.familie.ba.sak.datagenerator.lagPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -74,6 +75,20 @@ fun mockSystemOnlyPdlRestKlient(
                     gyldigTilOgMed = null,
                     bekreftelsesdato = fødselsdato,
                 ),
+            )
+        }
+
+        every {
+            hentPerson(
+                fødselsnummer = any(),
+                personInfoQuery = any(),
+            )
+        } answers {
+            val fødselsnummer = firstArg<String>()
+            lagPersonInfo(
+                bostedsadresser = dataFraCucumber.adresser[fødselsnummer]?.bostedsadresse ?: emptyList(),
+                oppholdsadresser = dataFraCucumber.adresser[fødselsnummer]?.oppholdsadresse ?: emptyList(),
+                deltBosted = dataFraCucumber.adresser[fødselsnummer]?.deltBosted ?: emptyList(),
             )
         }
     }

@@ -16,13 +16,15 @@ fun finnOverlappendePerioder(
     fagsakId: Long,
 ): List<OverlappendePerioderMedAndreFagsaker> {
     val fagsakPerioder =
-        økonomiSimuleringMottakere.flatMap { mottaker ->
-            mottaker.økonomiSimuleringPostering.mapNotNull { postering ->
-                postering.fagsakId?.let {
-                    Periode(it, postering.fom, postering.tom)
+        økonomiSimuleringMottakere
+            .flatMap { mottaker ->
+                mottaker.økonomiSimuleringPostering.mapNotNull { postering ->
+                    postering.fagsakId?.let {
+                        Periode(it, postering.fom, postering.tom)
+                    }
                 }
-            }
-        }
+            }.distinct()
+
     val perioderForForskjelligeFagsaker = fagsakPerioder.groupBy { it.verdi }
     val fagsakMedPosteringTidslinjer = perioderForForskjelligeFagsaker.mapValues { (_, perioder) -> perioder.tilTidslinje() }
 
