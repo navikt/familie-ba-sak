@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinjeService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeDto
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
-import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggTaskOppretter
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.FinnEøsFagsakerMedBarnSomBorIFinnmarkNordTromsTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
@@ -100,8 +99,6 @@ class ForvalterController(
     private val hentAlleIdenterTilPsysTask: HentAlleIdenterTilPsysTask,
     private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
     private val personidentRepository: PersonidentRepository,
-    private val autovedtakFinnmarkstilleggTaskOppretter: AutovedtakFinnmarkstilleggTaskOppretter,
-    private val envService: EnvService,
     private val autovedtakSvalbardtilleggTaskOppretter: AutovedtakSvalbardtilleggTaskOppretter,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 ) {
@@ -537,50 +534,6 @@ class ForvalterController(
         val opprettetTask = taskRepository.save(PorteføljejusteringTask.opprettTask(antallOppgaver = antallOppgaver))
 
         return ResponseEntity.ok(opprettetTask.id)
-    }
-
-    @PostMapping("/opprett-tasker-for-autovedtak-finnmarkstillegg")
-    @Operation(
-        summary = "Oppretter tasker for autovedtak av Finnmarkstillegg",
-    )
-    fun opprettTaskerForAutovedtakFinnmarkstillegg(
-        @RequestBody fagsakIder: List<Long>,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Opprett task for autovedtak av Finnmarkstillegg",
-        )
-
-        if (envService.erProd()) {
-            throw Feil("Dette endepunktet skal ikke brukes i prod")
-        }
-
-        fagsakIder.forEach { fagsakId ->
-            opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(fagsakId)
-        }
-
-        return ResponseEntity.ok("Tasker for autovedtak av Finnmarkstillegg opprettet")
-    }
-
-    @PostMapping("/opprett-tasker-for-autovedtak-finnmarkstillegg/{antallBehandlinger}")
-    @Operation(
-        summary = "Oppretter tasker for autovedtak av Finnmarkstillegg",
-    )
-    fun opprettTaskerForAutovedtakFinnmarkstillegg(
-        @PathVariable antallBehandlinger: Int,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Opprett task for autovedtak av Finnmarkstillegg",
-        )
-
-        if (!featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG)) {
-            throw Feil("Toggle for å opprette tasker for autovedtak av Finnmarkstillegg er skrudd av")
-        }
-
-        autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(antallBehandlinger)
-
-        return ResponseEntity.ok("Tasker for autovedtak av Finnmarkstillegg opprettet")
     }
 
     @PostMapping("/opprett-tasker-for-autovedtak-svalbardtillegg")
