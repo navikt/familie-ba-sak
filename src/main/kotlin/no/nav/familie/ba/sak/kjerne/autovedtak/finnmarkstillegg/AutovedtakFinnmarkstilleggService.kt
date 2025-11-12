@@ -82,7 +82,7 @@ class AutovedtakFinnmarkstilleggService(
             sisteVedtatteBehandlingHarFinnmarkstilleggAndeler || minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg
 
         if (skalBehandleFinnmarkstillegg && sisteVedtatteBehandling.kategori == BehandlingKategori.EØS) {
-            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av finnmarkstillegg kan ikke gjennomføres for EØS-saker.")
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av Finnmarkstillegg kan ikke gjennomføres for EØS-saker.\nEndring av Finnmarkstillegg må håndteres manuelt.")
         }
 
         return skalBehandleFinnmarkstillegg
@@ -105,7 +105,7 @@ class AutovedtakFinnmarkstilleggService(
 
         val feilutbetaling = simuleringService.hentFeilutbetaling(behandlingEtterBehandlingsresultat.id)
         if (feilutbetaling > BigDecimal.ZERO) {
-            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av finnmarkstillegg fører til feilutbetaling.")
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av Finnmarkstillegg fører til feilutbetaling.\nEndring av Finnmarkstillegg må håndteres manuelt.")
         }
 
         if (behandlingEtterBehandlingsresultat.steg == StegType.IVERKSETT_MOT_OPPDRAG) {
