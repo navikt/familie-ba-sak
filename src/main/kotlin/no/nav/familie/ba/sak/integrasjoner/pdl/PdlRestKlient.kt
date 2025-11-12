@@ -263,7 +263,7 @@ class PdlRestKlient(
         val pdlPersonRequest =
             PdlPersonRequest(
                 variables = PdlPersonRequestVariables(ident),
-                query = hentGraphqlQuery("hentperson-bostedsadresse-delt-bosted-oppholdsadresse"),
+                query = hentGraphqlQuery("bolk-kommunenr-alle-adressetyper"),
             )
 
         val pdlResponse: PdlBaseResponse<PdlAdresserPerson> =

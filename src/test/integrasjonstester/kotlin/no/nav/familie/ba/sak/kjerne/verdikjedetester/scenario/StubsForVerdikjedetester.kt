@@ -170,7 +170,7 @@ private fun stubHentBostedsadresserOgDeltBostedForPerson(restScenario: RestScena
         val pdlRequestBody =
             PdlPersonBolkRequest(
                 variables = PdlPersonBolkRequestVariables(personer.map { it.ident }),
-                query = hentGraphqlQuery("bostedsadresse-og-delt-bosted"),
+                query = hentGraphqlQuery("bolk-kommunenr-matrikkel-bostedsadresse-og-delt-bosted"),
             )
 
         val response =
@@ -212,7 +212,7 @@ private fun stubHenthentBostedsadresseDeltBostedOgOppholdsadresseForPerson(restS
         val pdlRequestBody =
             PdlPersonBolkRequest(
                 variables = PdlPersonBolkRequestVariables(personer.map { it.ident }),
-                query = hentGraphqlQuery("bostedsadresse-delt-bosted-oppholdsadresse"),
+                query = hentGraphqlQuery("bolk-kommunenr-alle-adressetyper"),
             )
 
         val response =
