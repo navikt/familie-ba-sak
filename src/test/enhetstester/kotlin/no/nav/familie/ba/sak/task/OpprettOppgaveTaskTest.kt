@@ -18,8 +18,8 @@ import java.time.LocalDate
 
 class OpprettOppgaveTaskTest {
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
-    private val hentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val opprettOppgaveTask = OpprettOppgaveTask(oppgaveService, hentOgPersisterService)
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val opprettOppgaveTask = OpprettOppgaveTask(oppgaveService, behandlingHentOgPersisterService)
 
     @Test
     fun `oppretter oppgave når behandling har annen status enn iverksatt eller avsluttet`() {
@@ -40,7 +40,7 @@ class OpprettOppgaveTaskTest {
             )
         val task = Task(type = OpprettOppgaveTask.TASK_STEP_TYPE, payload = objectMapper.writeValueAsString(dto))
 
-        every { hentOgPersisterService.hent(1L) } returns behandling
+        every { behandlingHentOgPersisterService.hent(1L) } returns behandling
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns "12345"
 
         // When
@@ -79,7 +79,7 @@ class OpprettOppgaveTaskTest {
             )
         val task = Task(type = OpprettOppgaveTask.TASK_STEP_TYPE, payload = objectMapper.writeValueAsString(dto))
 
-        every { hentOgPersisterService.hent(2L) } returns behandling
+        every { behandlingHentOgPersisterService.hent(2L) } returns behandling
 
         // When
         opprettOppgaveTask.doTask(task)
@@ -107,7 +107,7 @@ class OpprettOppgaveTaskTest {
             )
         val task = Task(type = OpprettOppgaveTask.TASK_STEP_TYPE, payload = objectMapper.writeValueAsString(dto))
 
-        every { hentOgPersisterService.hent(3L) } returns behandling
+        every { behandlingHentOgPersisterService.hent(3L) } returns behandling
 
         // When
         opprettOppgaveTask.doTask(task)
@@ -135,7 +135,7 @@ class OpprettOppgaveTaskTest {
             )
         val task = Task(type = OpprettOppgaveTask.TASK_STEP_TYPE, payload = objectMapper.writeValueAsString(dto))
 
-        every { hentOgPersisterService.hent(4L) } returns behandling
+        every { behandlingHentOgPersisterService.hent(4L) } returns behandling
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns "67890"
 
         // When
@@ -164,7 +164,7 @@ class OpprettOppgaveTaskTest {
             )
         val task = Task(type = OpprettOppgaveTask.TASK_STEP_TYPE, payload = objectMapper.writeValueAsString(dto))
 
-        every { hentOgPersisterService.hent(5L) } returns behandling
+        every { behandlingHentOgPersisterService.hent(5L) } returns behandling
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns "11111"
 
         // When

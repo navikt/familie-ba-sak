@@ -22,7 +22,7 @@ import java.time.LocalDate
 )
 class OpprettOppgaveTask(
     private val oppgaveService: OppgaveService,
-    private val hentOgPersisterService: BehandlingHentOgPersisterService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AsyncTaskStep {
     val logger = LoggerFactory.getLogger(OpprettOppgaveTask::class.java)
 
@@ -30,7 +30,7 @@ class OpprettOppgaveTask(
     override fun doTask(task: Task) {
         val opprettOppgaveTaskDTO = objectMapper.readValue(task.payload, OpprettOppgaveTaskDTO::class.java)
 
-        val behandling = hentOgPersisterService.hent(opprettOppgaveTaskDTO.behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(opprettOppgaveTaskDTO.behandlingId)
         if (behandling.status.erStatusIverksetterVedtakEllerAvsluttet() &&
             opprettOppgaveTaskDTO.oppgavetype in
             listOf(
