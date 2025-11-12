@@ -53,7 +53,6 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
     fun preutfyllBosattIRiket(
         vilkårsvurdering: Vilkårsvurdering,
         identerVilkårSkalPreutfyllesFor: List<String>? = null,
-        cutOffFomDato: LocalDate? = null,
     ) {
         val behandling = vilkårsvurdering.behandling
         val identer =
@@ -62,50 +61,42 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
                 .map { it.aktør.aktivFødselsnummer() }
                 .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
 
-        val personOpplysningsgrunnlag = persongrunnlagService.oppdaterRegisteropplysninger(vilkårsvurdering.behandling.id)
-
         vilkårsvurdering
             .personResultater
             .filter { it.aktør.aktivFødselsnummer() in identer }
             .forEach { personResultat ->
-                val personInfoForPerson = personOpplysningsgrunnlag.personer.find { it.aktør == personResultat.aktør } ?: throw Feil("Aktør ${personResultat.aktør.aktørId} har personresultat men ikke persgrunnlag")
-                val erUkrainskStatsborger = personInfoForPerson.statsborgerskap.iUkraina()
-
-                if (erUkrainskStatsborger && !behandling.erFinnmarksEllerSvalbardtillegg()) {
-                    return@forEach
-                }
-
-                val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
-                val adresserForPerson =
-                    Adresser.opprettFra(
-                        personOpplysningsgrunnlag.personer.find { it.aktør.aktørId == personResultat.aktør.aktørId }
-                            ?: throw Feil("Fant ikke Person i personopplysningsgrunnlag for aktør ${personResultat.aktør.aktørId}"),
-                    )
-
                 val nyeBosattIRiketVilkårResultater =
                     if (behandling.erFinnmarksEllerSvalbardtillegg() && featureToggleService.isEnabled(FeatureToggle.NY_PREUTFYLLING_FOR_BOSATT_I_RIKET_VILKÅR_VED_AUTOVEDTAK_FINNMARK_SVALBARD)) {
+                        val personOpplysningsgrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+                        val personInfo = personOpplysningsgrunnlag.personer.find { it.aktør == personResultat.aktør } ?: throw Feil("Aktør ${personResultat.aktør.aktørId} har personresultat men ikke persongrunnlag")
+
+                        val adresserForPerson =
+                            Adresser.opprettFra(personInfo)
+
                         oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                             personResultat = personResultat,
                             adresserForPerson = adresserForPerson,
                             behandling = behandling,
                         )
                     } else {
-                        val bosattIRiketVilkårResultat =
-                            genererBosattIRiketVilkårResultat(
-                                personResultat = personResultat,
-                                fødselsdatoForBeskjæring = fødselsdatoForBeskjæring,
-                                adresserForPerson = adresserForPerson,
-                                behandling = behandling,
-                            )
-                        if (cutOffFomDato != null) {
-                            val eksisterendeBosattIRiketVilkårResultater = personResultat.vilkårResultater.filter { it.vilkårType == BOSATT_I_RIKET }
-                            kombinerNyeOgGamleVilkårResultater(
-                                nyeBosattIRiketVilkårResultaterTidslinje = bosattIRiketVilkårResultat.tilTidslinje().beskjærFraOgMed(cutOffFomDato),
-                                eksisterendeBosattIRiketVilkårResultaterTidslinje = eksisterendeBosattIRiketVilkårResultater.tilTidslinje(),
-                            )
-                        } else {
-                            bosattIRiketVilkårResultat
+                        val personOpplysningsgrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+                        val person = personOpplysningsgrunnlag.personer.find { it.aktør == personResultat.aktør } ?: throw Feil("Aktør ${personResultat.aktør.aktørId} har personresultat men ikke persongrunnlag")
+
+                        if (person.statsborgerskap.iUkraina()) {
+                            return@forEach
                         }
+
+                        val adresserForPerson =
+                            Adresser.opprettFra(person)
+
+                        val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
+
+                        genererBosattIRiketVilkårResultat(
+                            personResultat = personResultat,
+                            fødselsdatoForBeskjæring = fødselsdatoForBeskjæring,
+                            adresserForPerson = adresserForPerson,
+                            behandling = behandling,
+                        )
                     }
 
                 if (nyeBosattIRiketVilkårResultater.isNotEmpty()) {
@@ -494,17 +485,3 @@ private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandling
         throw AutovedtakMåBehandlesManueltFeil(beskrivelse = "${behandling.opprettetÅrsak.visningsnavn} kan ikke behandles automatisk som følge av adresseendring. Barn har delt bosted i Finnmark/Nord-Troms og oppholdsadresse på Svalbard.\nEndring av ${behandling.opprettetÅrsak.visningsnavn} må håndteres manuelt.")
     }
 }
-
-private fun kombinerNyeOgGamleVilkårResultater(
-    nyeBosattIRiketVilkårResultaterTidslinje: Tidslinje<VilkårResultat>,
-    eksisterendeBosattIRiketVilkårResultaterTidslinje: Tidslinje<VilkårResultat>,
-): Collection<VilkårResultat> =
-    nyeBosattIRiketVilkårResultaterTidslinje
-        .kombinerMed(eksisterendeBosattIRiketVilkårResultaterTidslinje) { nytt, gammelt -> nytt ?: gammelt }
-        .tilPerioderIkkeNull()
-        .map {
-            it.verdi.copy(
-                periodeFom = it.fom,
-                periodeTom = it.tom,
-            )
-        }

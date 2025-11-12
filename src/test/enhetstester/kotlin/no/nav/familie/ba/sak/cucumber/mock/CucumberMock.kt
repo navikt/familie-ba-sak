@@ -580,6 +580,7 @@ class CucumberMock(
             preutfyllBosattIRiketService = preutfyllBosattIRiketService,
             featureToggleService = featureToggleService,
             preutfyllBorHosSøkerService = mockk(),
+            persongrunnlagService = persongrunnlagService,
         )
 
     val vilkårsvurderingForNyBehandlingService =
