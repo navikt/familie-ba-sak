@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
@@ -57,6 +59,7 @@ class PersongrunnlagService(
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val kodeverkService: KodeverkService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun mapTilRestPersonMedStatsborgerskapLand(
         person: Person,
@@ -397,13 +400,23 @@ class PersongrunnlagService(
 
     fun oppdaterAdresserPåPersoner(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-    ): PersonopplysningGrunnlag {
+    ) {
         personopplysningGrunnlag.personer.forEach { person ->
-            val aktør = person.aktør
-            val personinfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+            val (bostedsadresse, oppholdsadresse, deltBosted) =
+                if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
+                    val adresserForPersoner = personopplysningerService.hentAdresserForPersoner(personopplysningGrunnlag.personer.map { it.aktør.aktivFødselsnummer() })
+                    val adresser =
+                        adresserForPersoner[person.aktør.aktivFødselsnummer()]
+                            ?: return@forEach
+                    Triple(adresser.bostedsadresse, adresser.oppholdsadresse, adresser.deltBosted)
+                } else {
+                    val aktør = person.aktør
+                    val personinfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+                    Triple(personinfo.bostedsadresser, personinfo.oppholdsadresser, personinfo.deltBosted)
+                }
 
             person.bostedsadresser =
-                personinfo.bostedsadresser
+                bostedsadresse
                     .filtrerUtKunNorskeBostedsadresser()
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
@@ -413,7 +426,7 @@ class PersongrunnlagService(
                         )
                     }.toMutableList()
             person.oppholdsadresser =
-                personinfo.oppholdsadresser
+                oppholdsadresse
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
@@ -422,7 +435,7 @@ class PersongrunnlagService(
                         )
                     }.toMutableList()
             person.deltBosted =
-                personinfo.deltBosted
+                deltBosted
                     .map {
                         GrDeltBosted.fraDeltBosted(
                             deltBosted = it,
@@ -431,8 +444,24 @@ class PersongrunnlagService(
                         )
                     }.toMutableList()
         }
+    }
 
-        return personopplysningGrunnlag
+    fun oppdaterStatsborgerskapPåPersoner(
+        personer: List<Person>,
+    ) {
+        personer.forEach { person ->
+            val statsborgerskap = personopplysningerService.hentHistoriskStatsborgerskap(aktør = person.aktør)
+
+            person.statsborgerskap =
+                statsborgerskap
+                    .flatMap {
+                        statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+                            statsborgerskap = it,
+                            person = person,
+                        )
+                    }.sortedBy { it.gyldigPeriode?.fom }
+                    .toMutableList()
+        }
     }
 
     fun hentSøkersMålform(behandlingId: Long) = hentSøkerOgBarnPåBehandlingThrows(behandlingId).søker().målform

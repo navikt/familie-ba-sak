@@ -6,6 +6,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
+import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "GrUkjentBostedBostedsadresse")
@@ -21,6 +22,13 @@ data class GrUkjentBostedBostedsadresse(
     override fun tilFrontendString() = """Ukjent adresse, kommune $bostedskommune""".trimMargin()
 
     override fun toString(): String = "GrUkjentBostedBostedsadresse(detaljer skjult)"
+
+    override fun tilAdresse(): Adresse =
+        Adresse(
+            gyldigFraOgMed = periode?.fom,
+            gyldigTilOgMed = periode?.tom,
+            ukjentBosted = UkjentBosted(bostedskommune = bostedskommune),
+        )
 
     companion object {
         fun fraUkjentBosted(ukjentBosted: UkjentBosted): GrUkjentBostedBostedsadresse = GrUkjentBostedBostedsadresse(bostedskommune = ukjentBosted.bostedskommune)

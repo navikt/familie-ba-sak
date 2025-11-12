@@ -1,0 +1,1 @@
+CREATE INDEX idx_task_type ON task(type);

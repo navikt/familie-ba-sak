@@ -48,6 +48,7 @@ class AutovedtakFinnmarkstilleggTask(
             }
 
         logger.info(resultat)
+        task.metadata["resultat"] = resultat
     }
 
     companion object {

@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrMatrikkeladresseDeltBosted.Companion.fraMatrikkeladresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrUkjentBostedDeltBosted.Companion.fraUkjentBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrVegadresseDeltBosted.Companion.fraVegadresse
@@ -51,6 +52,8 @@ abstract class GrDeltBosted(
     abstract fun toSecureString(): String
 
     abstract fun tilFrontendString(): String
+
+    abstract fun tilAdresse(): Adresse
 
     protected abstract fun tilKopiForNyPerson(): GrDeltBosted
 
