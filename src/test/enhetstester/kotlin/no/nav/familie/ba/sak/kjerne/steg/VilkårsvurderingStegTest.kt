@@ -336,8 +336,7 @@ class VilkårsvurderingStegTest {
                 verify(exactly = 1) {
                     opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(
                         behandling.fagsak.id,
-                        "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
-                            "Det finnes perioder der søker er bosatt i Finnmark/Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark/Nord-Troms.",
+                        "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring. Det finnes perioder der søker er bosatt i Finnmark/Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark/Nord-Troms.\nEndring av Finnmarkstillegg må håndteres manuelt.",
                     )
                 }
             }
@@ -476,8 +475,7 @@ class VilkårsvurderingStegTest {
                 verify(exactly = 1) {
                     opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(
                         behandling.fagsak.id,
-                        "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
-                            "Det finnes perioder der søker er bosatt i Finnmark/Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark/Nord-Troms.",
+                        "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring. Det finnes perioder der søker er bosatt i Finnmark/Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark/Nord-Troms.\nEndring av Finnmarkstillegg må håndteres manuelt.",
                     )
                 }
             }
