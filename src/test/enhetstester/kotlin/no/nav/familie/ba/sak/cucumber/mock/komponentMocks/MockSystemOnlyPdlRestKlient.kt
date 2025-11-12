@@ -26,9 +26,9 @@ fun mockSystemOnlyPdlRestKlient(
                         .fødselsdato
 
                 val eksisterendeAdresser = dataFraCucumber.adresser[ident]
-                if (eksisterendeAdresser == null || eksisterendeAdresser.bostedsadresser.isEmpty()) {
+                if (eksisterendeAdresser == null || eksisterendeAdresser.bostedsadresse.isEmpty()) {
                     PdlAdresserPerson(
-                        bostedsadresser = listOf(Bostedsadresse(gyldigFraOgMed = fødselsdato, vegadresse = vegadresseIOslo)),
+                        bostedsadresse = listOf(Bostedsadresse(gyldigFraOgMed = fødselsdato, vegadresse = vegadresseIOslo)),
                         deltBosted = eksisterendeAdresser?.deltBosted ?: emptyList(),
                     )
                 } else {
@@ -48,11 +48,11 @@ fun mockSystemOnlyPdlRestKlient(
                         .fødselsdato
 
                 val eksisterendeAdresser = dataFraCucumber.adresser[ident]
-                if (eksisterendeAdresser == null || eksisterendeAdresser.bostedsadresser.isEmpty()) {
+                if (eksisterendeAdresser == null || eksisterendeAdresser.bostedsadresse.isEmpty()) {
                     PdlAdresserPerson(
-                        bostedsadresser = listOf(Bostedsadresse(gyldigFraOgMed = fødselsdato, vegadresse = vegadresseIOslo)),
+                        bostedsadresse = listOf(Bostedsadresse(gyldigFraOgMed = fødselsdato, vegadresse = vegadresseIOslo)),
                         deltBosted = eksisterendeAdresser?.deltBosted ?: emptyList(),
-                        oppholdsadresser = eksisterendeAdresser?.oppholdsadresser ?: emptyList(),
+                        oppholdsadresse = eksisterendeAdresser?.oppholdsadresse ?: emptyList(),
                     )
                 } else {
                     eksisterendeAdresser
@@ -86,8 +86,8 @@ fun mockSystemOnlyPdlRestKlient(
         } answers {
             val fødselsnummer = firstArg<String>()
             lagPersonInfo(
-                bostedsadresser = dataFraCucumber.adresser[fødselsnummer]?.bostedsadresser ?: emptyList(),
-                oppholdsadresser = dataFraCucumber.adresser[fødselsnummer]?.oppholdsadresser ?: emptyList(),
+                bostedsadresser = dataFraCucumber.adresser[fødselsnummer]?.bostedsadresse ?: emptyList(),
+                oppholdsadresser = dataFraCucumber.adresser[fødselsnummer]?.oppholdsadresse ?: emptyList(),
                 deltBosted = dataFraCucumber.adresser[fødselsnummer]?.deltBosted ?: emptyList(),
             )
         }

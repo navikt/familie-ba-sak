@@ -27,12 +27,12 @@ class PreutfyllBorHosSøkerService(
         val bostedsadresser = pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(identer)
 
         val søkersResultater = vilkårsvurdering.personResultater.first { it.erSøkersResultater() }
-        val bostedsadresserSøker = bostedsadresser[søkersResultater.aktør.aktivFødselsnummer()]?.bostedsadresser ?: emptyList()
+        val bostedsadresserSøker = bostedsadresser[søkersResultater.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
 
         vilkårsvurdering.personResultater
             .filterNot { it.erSøkersResultater() }
             .forEach { personResultat ->
-                val bostedsadresserBarn = bostedsadresser[personResultat.aktør.aktivFødselsnummer()]?.bostedsadresser ?: emptyList()
+                val bostedsadresserBarn = bostedsadresser[personResultat.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
                 val borFastHosSøkerVilkårResultat = genererBorHosSøkerVilkårResultat(personResultat, bostedsadresserBarn, bostedsadresserSøker)
 
                 if (borFastHosSøkerVilkårResultat.isNotEmpty()) {

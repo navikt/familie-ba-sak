@@ -72,7 +72,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
 
     private val bostedsadresseIFinnmark =
         PdlAdresserPerson(
-            bostedsadresser =
+            bostedsadresse =
                 listOf(
                     Bostedsadresse(
                         gyldigFraOgMed = LocalDate.of(2025, 1, 1),
@@ -94,7 +94,7 @@ class AutovedtakFinnmarkstilleggTaskOppretterTest {
 
     private val bostedsadresseIOslo =
         PdlAdresserPerson(
-            bostedsadresser =
+            bostedsadresse =
                 listOf(
                     Bostedsadresse(
                         gyldigFraOgMed = LocalDate.of(2025, 1, 1),

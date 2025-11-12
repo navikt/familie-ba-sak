@@ -166,7 +166,7 @@ class VilkårsvurderingSteg(
             if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
                 opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(
                     fagsakId = behandling.fagsak.id,
-                    beskrivelse = "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\nDet finnes perioder der søker er bosatt i Finnmark/Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark/Nord-Troms.",
+                    beskrivelse = "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring. Det finnes perioder der søker er bosatt i Finnmark/Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark/Nord-Troms.\nEndring av Finnmarkstillegg må håndteres manuelt.",
                 )
             }
         }
