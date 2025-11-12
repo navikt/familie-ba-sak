@@ -82,7 +82,7 @@ class AutovedtakFinnmarkstilleggService(
             sisteVedtatteBehandlingHarFinnmarkstilleggAndeler || minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg
 
         if (skalBehandleFinnmarkstillegg && sisteVedtatteBehandling.kategori == BehandlingKategori.EØS) {
-            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av Finnmarkstillegg kan ikke gjennomføres for EØS-saker.\nEndring av Finnmarkstillegg må håndteres manuelt.")
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av Finnmarkstillegg kan ikke gjennomføres for EØS-saker.\nRett til Finnmarkstillegg må håndteres manuelt.")
         }
 
         return skalBehandleFinnmarkstillegg

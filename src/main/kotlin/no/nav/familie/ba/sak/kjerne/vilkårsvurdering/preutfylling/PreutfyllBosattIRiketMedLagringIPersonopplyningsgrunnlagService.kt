@@ -503,7 +503,7 @@ private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandling
             .any { it.verdi == true }
 
     if (harDeltBostedIFinnmarkOgOppholdsadressePåSvalbardISammePeriode) {
-        throw AutovedtakMåBehandlesManueltFeil(beskrivelse = "${behandling.opprettetÅrsak.visningsnavn} kan ikke behandles automatisk som følge av adresseendring. Barn har delt bosted i Finnmark/Nord-Troms og oppholdsadresse på Svalbard.\nEdnring av ${behandling.opprettetÅrsak.visningsnavn} må håndteres manuelt.")
+        throw AutovedtakMåBehandlesManueltFeil(beskrivelse = "${behandling.opprettetÅrsak.visningsnavn} kan ikke behandles automatisk som følge av adresseendring. Barn har delt bosted i Finnmark/Nord-Troms og oppholdsadresse på Svalbard.\nEndring av ${behandling.opprettetÅrsak.visningsnavn} må håndteres manuelt.")
     }
 }
 

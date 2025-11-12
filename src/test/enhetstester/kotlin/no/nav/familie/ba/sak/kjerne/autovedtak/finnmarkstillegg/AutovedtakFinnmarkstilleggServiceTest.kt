@@ -226,7 +226,7 @@ class AutovedtakFinnmarkstilleggServiceTest {
                 }
 
             // Assert
-            assertThat(feil.message).isEqualTo("Automatisk behandling av Finnmarkstillegg kan ikke gjennomføres for EØS-saker.\nEndring av Finnmarkstillegg må håndteres manuelt.")
+            assertThat(feil.message).isEqualTo("Automatisk behandling av Finnmarkstillegg kan ikke gjennomføres for EØS-saker.\nRett til Finnmarkstillegg må håndteres manuelt.")
         }
     }
 

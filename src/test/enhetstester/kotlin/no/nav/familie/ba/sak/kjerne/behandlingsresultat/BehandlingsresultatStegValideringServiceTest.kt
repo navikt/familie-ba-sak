@@ -511,7 +511,7 @@ class BehandlingsresultatStegValideringServiceTest {
 
             assertThat(feil.message).isEqualTo(
                 "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
-                    "Automatisk behandling fører til endringer i annen sats enn Finnmarkstillegg.\nEndring av Finnmarkstillegg må håndteres manuelt",
+                    "Automatisk behandling fører til endringer i annen sats enn Finnmarkstillegg.\nEndring av Finnmarkstillegg må håndteres manuelt.",
             )
         }
 
@@ -915,7 +915,7 @@ class BehandlingsresultatStegValideringServiceTest {
 
             assertThat(feil.message).isEqualTo(
                 "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
-                    "Automatisk behandling fører til endringer i annen sats enn Svalbardtillegg.\nEndring av Finnmarkstillegg må håndteres manuelt",
+                    "Automatisk behandling fører til endringer i annen sats enn Svalbardtillegg.\nEndring av Svalbardtillegg må håndteres manuelt.",
             )
         }
 
@@ -967,7 +967,7 @@ class BehandlingsresultatStegValideringServiceTest {
 
             assertThat(feil.message).isEqualTo(
                 "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
-                    "Automatisk behandling fører til endringer i annen sats enn Svalbardtillegg.\nEndring av Finnmarkstillegg må håndteres manuelt",
+                    "Automatisk behandling fører til endringer i annen sats enn Svalbardtillegg.\nEndring av Svalbardtillegg må håndteres manuelt.",
             )
         }
 
@@ -1115,7 +1115,7 @@ class BehandlingsresultatStegValideringServiceTest {
 
             assertThat(feil.message).isEqualTo(
                 "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
-                    "Automatisk behandling fører til innvilgelse av Svalbardtillegg mer enn én måned fram i tid.",
+                    "Automatisk behandling fører til innvilgelse av Svalbardtillegg mer enn én måned fram i tid.\nEndring av Svalbardtillegg må håndteres manuelt.",
             )
         }
 
@@ -1192,7 +1192,7 @@ class BehandlingsresultatStegValideringServiceTest {
 
             assertThat(feil.message).isEqualTo(
                 "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
-                    "Automatisk behandling fører til innvilgelse av Svalbardtillegg mer enn én måned fram i tid.",
+                    "Automatisk behandling fører til innvilgelse av Svalbardtillegg mer enn én måned fram i tid.\nEndring av Svalbardtillegg må håndteres manuelt.",
             )
         }
 
