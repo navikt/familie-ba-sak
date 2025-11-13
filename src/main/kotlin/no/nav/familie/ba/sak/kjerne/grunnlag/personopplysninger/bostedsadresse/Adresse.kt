@@ -63,7 +63,7 @@ data class Adresse(
     companion object {
         fun opprettFra(bostedsadresse: Bostedsadresse) =
             Adresse(
-                gyldigFraOgMed = bostedsadresse.gyldigFraOgMed,
+                gyldigFraOgMed = bostedsadresse.angittFlyttedato ?: bostedsadresse.gyldigFraOgMed,
                 gyldigTilOgMed = bostedsadresse.gyldigTilOgMed,
                 vegadresse = bostedsadresse.vegadresse,
                 matrikkeladresse = bostedsadresse.matrikkeladresse,
