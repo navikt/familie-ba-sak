@@ -49,10 +49,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrDeltBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -592,9 +589,9 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     }
 
     /**
-     * Mulige verdier: | AktørId | Fra dato | Til dato | Bostedskommune | Adressetype |
+     * Mulige verdier: | AktørId | Angitt flyttedato | Fra dato | Til dato | Kommunenummer | Adressetype |
      *
-     * Adressetype kan være "Bostedsadresse" eller "Delt bosted"
+     * Adressetype kan være "Bostedsadresse", "Delt bosted" eller "Oppholdsadresse"
      */
     @Og("med adressekommuner")
     fun `med adressekommuner`(dataTable: DataTable) {

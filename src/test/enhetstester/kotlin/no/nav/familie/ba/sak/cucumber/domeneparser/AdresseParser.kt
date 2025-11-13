@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.cucumber.domeneparser
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepAdresse.ADRESSETYPE
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepAdresse.ANGITT_FLYTTEDATO
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepAdresse.KOMMUNENUMMER
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag.AKTØR_ID
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørId
@@ -39,11 +40,13 @@ fun parseAdresser(
 
             val bostedsadresser =
                 bostedsadresseRad.map { rad ->
+                    val angittFlyttedato = parseValgfriDato(ANGITT_FLYTTEDATO, rad)
                     val fraDato = parseDato(Domenebegrep.FRA_DATO, rad)
                     val tilDato = parseValgfriDato(Domenebegrep.TIL_DATO, rad)
                     val kommunenummer = parseString(KOMMUNENUMMER, rad)
 
                     Bostedsadresse(
+                        angittFlyttedato = angittFlyttedato,
                         gyldigFraOgMed = fraDato,
                         gyldigTilOgMed = tilDato,
                         vegadresse =
