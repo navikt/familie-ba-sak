@@ -19,8 +19,9 @@ class PreutfyllVilkårService(
     fun preutfyllVilkår(vilkårsvurdering: Vilkårsvurdering) {
         if (vilkårsvurdering.behandling.kategori == BehandlingKategori.EØS) return
 
-        val behandlingId = vilkårsvurdering.behandling.id
-        persongrunnlagService.oppdaterRegisteropplysninger(behandlingId)
+        if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
+            persongrunnlagService.oppdaterRegisteropplysninger(vilkårsvurdering.behandling.id)
+        }
 
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR)) {
             preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)

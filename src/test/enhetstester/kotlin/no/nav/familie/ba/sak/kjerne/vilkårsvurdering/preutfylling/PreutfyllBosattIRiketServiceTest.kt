@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
+import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagSøknad
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVegadresse
@@ -21,7 +22,6 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -1388,6 +1388,40 @@ class PreutfyllBosattIRiketServiceTest {
     fun `skal ikke preutfylle bosatt i riket om personen har ukrainsk statsborgerskap`() {
         // Arrange
         val aktør = randomAktør()
+        val persongrunnlag =
+            lagPersonopplysningGrunnlag {
+                setOf(
+                    lagPerson(
+                        personIdent = PersonIdent(aktør.aktivFødselsnummer()),
+                        aktør = aktør,
+                    ).also { person ->
+                        person.bostedsadresser =
+                            mutableListOf(
+                                GrBostedsadresse.fraBostedsadresse(
+                                    Bostedsadresse(
+                                        gyldigFraOgMed = LocalDate.now().minusYears(1),
+                                        gyldigTilOgMed = null,
+                                        vegadresse = lagVegadresse(12345L),
+                                    ),
+                                    person = person,
+                                ),
+                            )
+                        person.statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "UKR",
+                                    gyldigPeriode =
+                                        DatoIntervallEntitet(
+                                            fom = LocalDate.now().minusYears(10),
+                                            tom = null,
+                                        ),
+                                    person = person,
+                                ),
+                            )
+                    },
+                )
+            }
+
         val vilkårsvurdering =
             lagVilkårsvurdering(
                 lagPersonResultater = {
@@ -1402,27 +1436,7 @@ class PreutfyllBosattIRiketServiceTest {
                 },
             )
 
-        every { systemOnlyPdlRestKlient.hentStatsborgerskap(any()) } returns
-            listOf(
-                Statsborgerskap(land = "UKR", gyldigFraOgMed = LocalDate.now().minusYears(10), gyldigTilOgMed = null, bekreftelsesdato = null),
-            )
-
-        every { systemOnlyPdlRestKlient.hentAdresserForPersoner(any()) } answers {
-            val identer = firstArg<List<String>>()
-            identer.associateWith {
-                PdlAdresserPerson(
-                    bostedsadresse =
-                        listOf(
-                            Bostedsadresse(
-                                gyldigFraOgMed = LocalDate.now().minusYears(1),
-                                gyldigTilOgMed = null,
-                                vegadresse = lagVegadresse(12345L),
-                            ),
-                        ),
-                    deltBosted = emptyList(),
-                )
-            }
-        }
+        every { persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id) } returns persongrunnlag
 
         // Act
         preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering = vilkårsvurdering)
