@@ -311,12 +311,7 @@ class PersongrunnlagService(
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
             }
 
-        val filtrerAdresser =
-            if (featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)) {
-                true
-            } else {
-                false
-            }
+        val filtrerAdresser = featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
 
         return Person(
             type = personType,
@@ -414,12 +409,7 @@ class PersongrunnlagService(
     fun oppdaterAdresserPåPersoner(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) {
-        val filtrerAdresser =
-            if (featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)) {
-                true
-            } else {
-                false
-            }
+        val filtrerAdresser = featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
 
         personopplysningGrunnlag.personer.forEach { person ->
             val (bostedsadresse, oppholdsadresse, deltBosted) =
