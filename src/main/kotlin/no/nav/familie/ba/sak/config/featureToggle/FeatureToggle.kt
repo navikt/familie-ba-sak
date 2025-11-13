@@ -82,5 +82,5 @@ enum class FeatureToggle(
 
     NY_PREUTFYLLING_FOR_BOSATT_I_RIKET_VILKÅR_VED_AUTOVEDTAK_FINNMARK_SVALBARD("familie-ba-sak.ny-preutfylling-for-bosatt-i-riket-vilkaar-ved-autovedtak-finnmark-svalbard"),
 
-    FILTRER_ADRESSE_PÅ_CUTOFF("familie-ba-sak.filtrer-adresse-paa-cutoff"),
+    FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO("familie-ba-sak.filtrer-adresse-for-soker-paa-eldste-barns-fodselsdato"),
 }
