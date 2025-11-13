@@ -110,6 +110,7 @@ object VedtaksperiodeMedBegrunnelserParser {
     enum class DomenebegrepAdresse(
         override val nøkkel: String,
     ) : Domenenøkkel {
+        ANGITT_FLYTTEDATO("Angitt flyttedato"),
         ADRESSETYPE("Adressetype"),
         KOMMUNENUMMER("Kommunenummer"),
     }
