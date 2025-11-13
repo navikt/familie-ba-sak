@@ -99,7 +99,7 @@ class FakePdlRestKlient(
             bostedsadresse: Bostedsadresse,
         ) {
             personIdenter.forEach { personIdent ->
-                bostedsadresser[personIdent]?.add(bostedsadresse) ?: run { bostedsadresser[personIdent] = mutableListOf(bostedsadresse) }
+                bostedsadresser.getOrPut(personIdent, { mutableListOf() }).add(bostedsadresse)
             }
         }
 
@@ -108,7 +108,7 @@ class FakePdlRestKlient(
             deltBosted: DeltBosted,
         ) {
             personIdenter.forEach { personIdent ->
-                deltBosteder[personIdent]?.add(deltBosted) ?: run { deltBosteder[personIdent] = mutableListOf(deltBosted) }
+                deltBosteder.getOrPut(personIdent, { mutableListOf() }).add(deltBosted)
             }
         }
 
@@ -117,7 +117,7 @@ class FakePdlRestKlient(
             oppholdsadresse: Oppholdsadresse,
         ) {
             personIdenter.forEach { personIdent ->
-                oppholdsadresser[personIdent]?.add(oppholdsadresse) ?: run { oppholdsadresser[personIdent] = mutableListOf(oppholdsadresse) }
+                oppholdsadresser.getOrPut(personIdent, { mutableListOf() }).add(oppholdsadresse)
             }
         }
     }

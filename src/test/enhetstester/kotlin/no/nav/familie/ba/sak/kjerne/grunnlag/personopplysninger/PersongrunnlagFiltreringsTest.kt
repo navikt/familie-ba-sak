@@ -14,13 +14,13 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class PersongrunnlagFiltreringsTest {
+    val søkerFnr = randomFnr()
+    val barnFnr = randomFnr()
+    val behandling = lagBehandling()
+
     @Test
     fun `skal filtrere bort bostedsadresser med til-og-med dato før eldste barns fødselsdato`() {
         // Arrange
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
-        val behandling = lagBehandling()
-
         val grunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandlingId = behandling.id,
@@ -48,10 +48,6 @@ class PersongrunnlagFiltreringsTest {
     @Test
     fun `skal filtrere bort oppholdsadresser med til-og-med dato før eldste barns fødselsdato`() {
         // Arrange
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
-        val behandling = lagBehandling()
-
         val grunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandlingId = behandling.id,
@@ -79,17 +75,6 @@ class PersongrunnlagFiltreringsTest {
     @Test
     fun `skal filtrere bort delt bosted hos søker`() {
         // Arrange
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
-        val behandling = lagBehandling()
-
-        val grunnlag =
-            lagTestPersonopplysningGrunnlag(
-                behandlingId = behandling.id,
-                søkerPersonIdent = søkerFnr,
-                barnasIdenter = listOf(barnFnr),
-                barnasFødselsdatoer = listOf(LocalDate.of(2019, 1, 1)),
-            )
 
         val delteBostederFør =
             listOf(
