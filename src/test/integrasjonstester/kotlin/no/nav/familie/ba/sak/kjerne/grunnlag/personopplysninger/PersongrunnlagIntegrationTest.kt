@@ -334,4 +334,156 @@ class PersongrunnlagIntegrationTest(
             assertThat(oppholdsadresseForSøker.kommunenummer).isEqualTo("9601")
         }
     }
+
+    @Test
+    fun `Skal oppdatere og filtrere adresser på eldste barns fødselsdato på søker med det nyeste fra PDL`() {
+        // Arrange
+        val søkerfødselsdato = randomSøkerFødselsdato()
+        val fødselsnrMor =
+            leggTilPersonInfo(
+                søkerfødselsdato,
+                PersonInfo(
+                    fødselsdato = LocalDate.of(1990, 1, 1),
+                    bostedsadresser = emptyList(),
+                ),
+            )
+        val morAktør = personidentService.hentOgLagreAktør(fødselsnrMor, true)
+
+        val barnFødselsdato = LocalDate.of(2018, 1, 2)
+        val fødselsnrBarn =
+            leggTilPersonInfo(
+                barnFødselsdato,
+                PersonInfo(
+                    fødselsdato = barnFødselsdato,
+                    bostedsadresser = emptyList(),
+                ),
+            )
+
+        val barnAktør = personidentService.hentOgLagreAktør(fødselsnrBarn, true)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morAktør.aktivFødselsnummer()))
+        val behandling =
+            behandlingService.opprettBehandling(
+                NyBehandling(
+                    skalBehandlesAutomatisk = true,
+                    søkersIdent = morAktør.aktivFødselsnummer(),
+                    behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    fagsakId = fagsak.data!!.id,
+                    barnasIdenter = listOf(barnAktør.aktivFødselsnummer()),
+                ),
+            )
+
+        val personopplysningGrunnlag =
+            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                aktør = morAktør,
+                barnFraInneværendeBehandling = listOf(barnAktør),
+                behandling = behandling,
+                målform = Målform.NB,
+            )
+
+        val søker = personopplysningGrunnlag.personer.single { it.type == PersonType.SØKER }
+        assertThat(søker.bostedsadresser).isEmpty()
+        assertThat(søker.oppholdsadresser).isEmpty()
+        assertThat(søker.deltBosted).isEmpty()
+
+        FakePdlRestKlient.leggTilBostedsadresseIPDL(
+            personIdenter =
+                listOf(
+                    fødselsnrMor,
+                    fødselsnrBarn,
+                ),
+            lagBostedsadresse(
+                gyldigFraOgMed = LocalDate.of(2018, 1, 1),
+                gyldigTilOgMed = null,
+                vegadresse = lagVegadresse(kommunenummer = "9601"),
+            ),
+        )
+
+        FakePdlRestKlient.leggTilBostedsadresseIPDL(
+            personIdenter =
+                listOf(
+                    fødselsnrMor,
+                ),
+            lagBostedsadresse(
+                gyldigTilOgMed = LocalDate.of(2018, 1, 1),
+                gyldigFraOgMed = LocalDate.of(2016, 1, 1),
+                vegadresse = lagVegadresse(kommunenummer = "9601"),
+            ),
+        )
+
+        FakePdlRestKlient.leggTilOppholdsadresseIPDL(
+            personIdenter =
+                listOf(
+                    fødselsnrMor,
+                    fødselsnrBarn,
+                ),
+            lagOppholdsadresse(
+                gyldigTilOgMed = LocalDate.of(2020, 1, 1),
+                gyldigFraOgMed = LocalDate.of(2018, 1, 1),
+                vegadresse = lagVegadresse(kommunenummer = "9601"),
+            ),
+        )
+
+        FakePdlRestKlient.leggTilOppholdsadresseIPDL(
+            personIdenter =
+                listOf(
+                    fødselsnrMor,
+                ),
+            lagOppholdsadresse(
+                gyldigTilOgMed = LocalDate.of(2018, 1, 1),
+                gyldigFraOgMed = LocalDate.of(2016, 1, 1),
+                vegadresse = lagVegadresse(kommunenummer = "9601"),
+            ),
+        )
+
+        FakePdlRestKlient.leggTilDeltBostedIPDL(
+            personIdenter =
+                listOf(
+                    fødselsnrMor,
+                    fødselsnrBarn,
+                ),
+            lagDeltBosted(
+                sluttdatoForKontrakt = LocalDate.of(2020, 1, 1),
+                startdatoForKontrakt = LocalDate.of(2018, 1, 1),
+                vegadresse = lagVegadresse(kommunenummer = "9601"),
+            ),
+        )
+
+        FakePdlRestKlient.leggTilDeltBostedIPDL(
+            personIdenter =
+                listOf(
+                    fødselsnrMor,
+                ),
+            lagDeltBosted(
+                sluttdatoForKontrakt = LocalDate.of(2018, 1, 1),
+                startdatoForKontrakt = LocalDate.of(2016, 1, 1),
+                vegadresse = lagVegadresse(kommunenummer = "9601"),
+            ),
+        )
+        // Act
+        persongrunnlagService.oppdaterAdresserPåPersoner(personopplysningGrunnlag)
+
+        // Assert
+        val søkerOppdatert = personopplysningGrunnlag.personer.single { it.type == PersonType.SØKER }
+        val barnOppdatert = personopplysningGrunnlag.personer.single { it.type == PersonType.BARN }
+
+        val bostedsadresseForSøker = søkerOppdatert.bostedsadresser
+        val oppholdsadresseForSøker = søkerOppdatert.oppholdsadresser
+        val deltBostedForSøker = søkerOppdatert.deltBosted
+
+        val bostedsadresseForBarn = barnOppdatert.bostedsadresser
+        val oppholdsadresseForBarn = barnOppdatert.oppholdsadresser
+        val deltBostedForBarn = barnOppdatert.deltBosted
+
+        assertThat(bostedsadresseForSøker).hasSize(1)
+        assertThat(oppholdsadresseForSøker).hasSize(1)
+        assertThat(deltBostedForSøker).isEmpty()
+
+        assertThat(bostedsadresseForBarn).hasSize(1)
+        assertThat(oppholdsadresseForBarn).hasSize(1)
+        assertThat(deltBostedForBarn).hasSize(1)
+    }
 }
