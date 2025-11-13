@@ -4,6 +4,7 @@ query($identer: [ID!]!) {
         ident
         person {
             bostedsadresse(historikk: true) {
+                angittFlyttedato
                 gyldigFraOgMed
                 gyldigTilOgMed
                 vegadresse {
