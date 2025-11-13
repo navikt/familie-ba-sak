@@ -57,7 +57,7 @@ class AdresseKtTest {
     @Nested
     inner class FinnAdressehistorikkFraOgMedDato {
         @Test
-        fun `skal finne adressehistorikk fra og med dato'`() {
+        fun `skal finne adressehistorikk fra og med dato`() {
             // Arrange
             val dagensDato = LocalDate.of(2025, 9, 12)
 
@@ -99,6 +99,27 @@ class AdresseKtTest {
             // Assert
             assertThat(funnetAdresser).hasSize(2)
             assertThat(funnetAdresser).containsAll(listOf(adresse4, adresse5))
+        }
+
+        @Test
+        fun `skal finne adressehistorikk fra og med dato hvis alle addresser er etter dato`() {
+            // Arrange
+            val dagensDato = LocalDate.of(2025, 9, 30)
+
+            val adresse =
+                lagAdresse(
+                    gyldigFraOgMed = dagensDato.plusDays(1),
+                    gyldigTilOgMed = dagensDato.plusDays(2),
+                )
+
+            val adresser = listOf(adresse)
+
+            // Act
+            val funnetAdresser = finnAdressehistorikkFraOgMedDato(adresser, dagensDato)
+
+            // Assert
+            assertThat(funnetAdresser).hasSize(1)
+            assertThat(funnetAdresser).containsExactly(adresse)
         }
     }
 }
