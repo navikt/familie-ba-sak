@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.eøs.util.barn
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse
@@ -300,7 +301,6 @@ class PersongrunnlagIntegrationTest(
             val søker = personopplysningGrunnlag.personer.single { it.type == PersonType.SØKER }
             assertThat(søker.bostedsadresser).isEmpty()
             assertThat(søker.oppholdsadresser).isEmpty()
-            assertThat(søker.deltBosted).isEmpty()
 
             FakePdlRestKlient.leggTilBostedsadresseIPDL(
                 personIdenter =
@@ -321,16 +321,6 @@ class PersongrunnlagIntegrationTest(
                 ),
             )
 
-            FakePdlRestKlient.leggTilDeltBostedIPDL(
-                personIdenter =
-                    listOf(
-                        fødselsnrMor,
-                    ),
-                lagDeltBosted(
-                    vegadresse = lagVegadresse(kommunenummer = "9601"),
-                ),
-            )
-
             // Act
             persongrunnlagService.oppdaterAdresserPåPersoner(personopplysningGrunnlag)
 
@@ -339,11 +329,9 @@ class PersongrunnlagIntegrationTest(
 
             val bostedsadresseForSøker = søkerOppdatert.bostedsadresser.single() as GrVegadresseBostedsadresse
             val oppholdsadresseForSøker = søkerOppdatert.oppholdsadresser.single() as GrVegadresseOppholdsadresse
-            val deltBostedForSøker = søkerOppdatert.deltBosted.single() as GrVegadresseDeltBosted
 
             assertThat(bostedsadresseForSøker.kommunenummer).isEqualTo("9601")
             assertThat(oppholdsadresseForSøker.kommunenummer).isEqualTo("9601")
-            assertThat(deltBostedForSøker.kommunenummer).isEqualTo("9601")
         }
     }
 }
