@@ -10,7 +10,6 @@ import mockAutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
@@ -505,7 +504,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         val faktiskeBegrunnelser =
             vedtaksperiodeMedBegrunnelser.flatMap { vedtaksperiodeMedBegrunnelser ->
                 vedtaksperiodeMedBegrunnelser
-                    .lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER, mockFeatureToggleService().isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE))!!
+                    .lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER)!!
                     .begrunnelser
                     .filterIsInstance<BegrunnelseMedData>()
             }
@@ -533,7 +532,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
 
         val faktiskeBrevperioder: List<BrevPeriode> =
             vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.mapNotNull {
-                it.lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER, mockFeatureToggleService().isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE))
+                it.lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER)
             }
 
         val forvendtedeBrevperioder = parseBrevPerioder(dataTable)

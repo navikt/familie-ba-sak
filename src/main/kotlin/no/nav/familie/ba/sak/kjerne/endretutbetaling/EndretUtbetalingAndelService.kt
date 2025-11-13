@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -77,8 +76,7 @@ class EndretUtbetalingAndelService(
                 andelTilkjentYtelser = andelTilkjentYtelser,
             )
 
-        val toggleErPå = featureToggleService.isEnabled(FeatureToggle.SKAL_SPLITTE_ENDRET_UTBETALING_ANDELER)
-        if (skalSplitteEndretUtbetalingAndel(toggleErPå, endretUtbetalingAndel, gyldigTomDatoPerAktør)) {
+        if (skalSplitteEndretUtbetalingAndel(endretUtbetalingAndel, gyldigTomDatoPerAktør)) {
             splittValiderOgLagreEndretUtbetalingAndeler(
                 endretUtbetalingAndel = endretUtbetalingAndel,
                 gyldigTomDatoPerAktør = gyldigTomDatoPerAktør,
