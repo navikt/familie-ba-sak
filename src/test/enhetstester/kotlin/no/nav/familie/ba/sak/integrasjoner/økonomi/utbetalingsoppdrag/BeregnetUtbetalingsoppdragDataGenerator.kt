@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
-import no.nav.familie.ba.sak.integrasjoner.økonomi.lagUtbetalingsperiode
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.Opphør

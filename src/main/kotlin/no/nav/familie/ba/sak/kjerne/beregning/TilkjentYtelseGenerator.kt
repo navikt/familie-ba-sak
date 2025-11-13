@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndretUtbetalingGenerator.lagAndelerMedEndretUtbetalingAndeler
@@ -67,12 +66,7 @@ class TilkjentYtelseGenerator(
                     )
                 }
 
-        val endretUtbetalingAndelÅrsakerSomSkalInkluderes =
-            if (featureToggleService.isEnabled(FeatureToggle.SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER)) {
-                listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND, Årsak.ENDRE_MOTTAKER)
-            } else {
-                listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND)
-            }
+        val endretUtbetalingAndelÅrsakerSomSkalInkluderes = listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND, Årsak.ENDRE_MOTTAKER)
 
         val barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer =
             lagAndelerMedEndretUtbetalingAndeler(

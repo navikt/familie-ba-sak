@@ -47,10 +47,10 @@ class VilkårsvurderingSteg(
     private val månedligValutajusteringService: MånedligValutajusteringService,
     private val clockProvider: ClockProvider,
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
-    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val featureToggleService: FeatureToggleService,
     private val opprettTaskService: OpprettTaskService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 ) : BehandlingSteg<List<String>?> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -113,9 +113,7 @@ class VilkårsvurderingSteg(
 
         beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling, personopplysningGrunnlag)
 
-        if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_ENDRET_UTBETALING_3ÅR_ELLER_3MND)) {
-            endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling)
-        }
+        endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling)
 
         if (!behandling.erSatsendring()) {
             tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
