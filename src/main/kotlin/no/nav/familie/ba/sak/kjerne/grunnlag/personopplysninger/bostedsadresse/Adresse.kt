@@ -101,5 +101,9 @@ fun finnAdressehistorikkFraOgMedDato(
 ): List<Adresse> {
     val sorterteAdresser = adresser.filter { it.gyldigFraOgMed != null }.sortedBy { it.gyldigFraOgMed }
     val sisteAdresseSomOverlapperDato = sorterteAdresser.lastOrNull { it.overlapperMedDato(dato) }
-    return sorterteAdresser.dropWhile { it != sisteAdresseSomOverlapperDato }
+    return if (sisteAdresseSomOverlapperDato == null) {
+        adresser
+    } else {
+        sorterteAdresser.dropWhile { it != sisteAdresseSomOverlapperDato }
+    }
 }
