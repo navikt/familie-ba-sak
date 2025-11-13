@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.task
 
 import io.micrometer.core.instrument.Metrics
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling

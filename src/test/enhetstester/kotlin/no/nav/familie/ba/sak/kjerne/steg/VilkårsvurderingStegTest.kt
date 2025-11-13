@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.justRun
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -60,10 +61,10 @@ class VilkårsvurderingStegTest {
     private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService = mockk()
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService = mockk()
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService = mockk()
-    private val endretUtbetalingAndelService: EndretUtbetalingAndelService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val opprettTaskService: OpprettTaskService = mockk()
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>(relaxed = true)
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService = mockk()
 
     private val vilkårsvurderingSteg: VilkårsvurderingSteg =
         VilkårsvurderingSteg(
@@ -78,10 +79,10 @@ class VilkårsvurderingStegTest {
             månedligValutajusteringService = mockk(),
             clockProvider = TestClockProvider(),
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
-            endretUtbetalingAndelService = endretUtbetalingAndelService,
             featureToggleService = featureToggleService,
             opprettTaskService = opprettTaskService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            endretUtbetalingAndelService = endretUtbetalingAndelService,
         )
 
     val behandling =
@@ -108,7 +109,7 @@ class VilkårsvurderingStegTest {
 
         every { tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id)) } just Runs
         justRun { automatiskOppdaterValutakursService.oppdaterAndelerMedValutakurser(any()) }
-        every { featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_ENDRET_UTBETALING_3ÅR_ELLER_3MND) } returns false
+        every { endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(any()) } just runs
     }
 
     @Test

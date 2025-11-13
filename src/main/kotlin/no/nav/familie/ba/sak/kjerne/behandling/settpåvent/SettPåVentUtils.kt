@@ -15,7 +15,6 @@ fun validerBehandlingKanSettesPåVent(
     årsak: SettPåVentÅrsak,
     frist: LocalDate,
     behandling: Behandling,
-    kanBrukeUlovfestetMotregning: Boolean,
 ) {
     if (gammelSettPåVent != null) {
         throw FunksjonellFeil(
@@ -26,11 +25,7 @@ fun validerBehandlingKanSettesPåVent(
 
     validerFristErFremITiden(behandling, frist)
     if (årsak == AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING) {
-        if (kanBrukeUlovfestetMotregning) {
-            validerFristForUlovfestetMotregning(behandling, frist)
-        } else {
-            throw FunksjonellFeil("Funksjonalitet for ulovfestet motregning er ikke tilgjengelig.")
-        }
+        validerFristForUlovfestetMotregning(behandling, frist)
     }
 
     if (behandling.status != BehandlingStatus.UTREDES) {

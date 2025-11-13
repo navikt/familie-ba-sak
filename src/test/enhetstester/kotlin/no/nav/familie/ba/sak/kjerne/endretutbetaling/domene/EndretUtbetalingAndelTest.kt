@@ -248,23 +248,11 @@ internal class EndretUtbetalingAndelTest {
         private val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = 0)
 
         @Test
-        fun `skal returnere false hvis toggle er av`() {
-            assertThat(
-                skalSplitteEndretUtbetalingAndel(
-                    toggleErPå = false,
-                    endretUtbetalingAndel = endretUtbetalingAndel,
-                    gyldigTomDatoPerAktør = mockk(),
-                ),
-            ).isFalse()
-        }
-
-        @Test
         fun `skal returnere false hvis tom ikke er null`() {
             val endretUtbetalingAndel = endretUtbetalingAndel.copy(tom = YearMonth.of(2025, 12))
 
             assertThat(
                 skalSplitteEndretUtbetalingAndel(
-                    toggleErPå = true,
                     endretUtbetalingAndel = endretUtbetalingAndel,
                     gyldigTomDatoPerAktør = mockk(),
                 ),
@@ -284,7 +272,6 @@ internal class EndretUtbetalingAndelTest {
 
             assertThat(
                 skalSplitteEndretUtbetalingAndel(
-                    toggleErPå = true,
                     endretUtbetalingAndel = endretUtbetalingAndel,
                     gyldigTomDatoPerAktør = gyldigTomEtterDagensDatoPerAktør,
                 ),
@@ -304,7 +291,6 @@ internal class EndretUtbetalingAndelTest {
 
             assertThat(
                 skalSplitteEndretUtbetalingAndel(
-                    toggleErPå = true,
                     endretUtbetalingAndel = endretUtbetalingAndel,
                     gyldigTomDatoPerAktør = gyldigTomEtterDagensDatoPerAktør,
                 ),
