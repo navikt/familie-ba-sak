@@ -102,9 +102,7 @@ class StegService(
         val behandling = behandlingService.opprettBehandling(nyBehandling)
 
         // Aktiverer minside for fagsak-aktør
-        if (featureToggleService.isEnabled(FeatureToggle.MINSIDE_AKTIVERING)) {
-            opprettTaskService.opprettAktiverMinsideTask(behandling.fagsak.aktør)
-        }
+        opprettTaskService.opprettAktiverMinsideTask(behandling.fagsak.aktør)
 
         val barnasIdenter =
             when {

@@ -1,15 +1,27 @@
-query($identer: [ID!]!){
+query($identer: [ID!]!) {
     personBolk: hentPersonBolk(identer: $identer) {
         code
         ident
         person {
             bostedsadresse(historikk: true) {
+                angittFlyttedato
                 gyldigFraOgMed
                 gyldigTilOgMed
                 vegadresse {
+                    matrikkelId
+                    husnummer
+                    husbokstav
+                    bruksenhetsnummer
+                    adressenavn
                     kommunenummer
+                    tilleggsnavn
+                    postnummer
                 }
                 matrikkeladresse {
+                    matrikkelId
+                    bruksenhetsnummer
+                    tilleggsnavn
+                    postnummer
                     kommunenummer
                 }
                 ukjentBosted {
@@ -20,9 +32,20 @@ query($identer: [ID!]!){
                 startdatoForKontrakt
                 sluttdatoForKontrakt
                 vegadresse {
+                    matrikkelId
+                    husnummer
+                    husbokstav
+                    bruksenhetsnummer
+                    adressenavn
                     kommunenummer
+                    tilleggsnavn
+                    postnummer
                 }
                 matrikkeladresse {
+                    matrikkelId
+                    bruksenhetsnummer
+                    tilleggsnavn
+                    postnummer
                     kommunenummer
                 }
                 ukjentBosted {
@@ -34,10 +57,30 @@ query($identer: [ID!]!){
                 gyldigTilOgMed
                 oppholdAnnetSted
                 vegadresse {
+                    matrikkelId
+                    husnummer
+                    husbokstav
+                    bruksenhetsnummer
+                    adressenavn
                     kommunenummer
+                    tilleggsnavn
+                    postnummer
                 }
                 matrikkeladresse {
+                    matrikkelId
+                    bruksenhetsnummer
+                    tilleggsnavn
+                    postnummer
                     kommunenummer
+                }
+                utenlandskAdresse {
+                    adressenavnNummer
+                    bygningEtasjeLeilighet
+                    postboksNummerNavn
+                    postkode
+                    bySted
+                    regionDistriktOmraade
+                    landkode
                 }
                 folkeregistermetadata {
                     opphoerstidspunkt

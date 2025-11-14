@@ -65,12 +65,10 @@ fun beregnGyldigTomPerAktør(
 }
 
 fun skalSplitteEndretUtbetalingAndel(
-    toggleErPå: Boolean,
     endretUtbetalingAndel: EndretUtbetalingAndel,
     gyldigTomDatoPerAktør: Map<Aktør, YearMonth?>,
 ): Boolean =
-    toggleErPå &&
-        endretUtbetalingAndel.tom == null &&
+    endretUtbetalingAndel.tom == null &&
         gyldigTomDatoPerAktør.values.distinctBy { it }.size > 1
 
 fun splittEndretUbetalingAndel(

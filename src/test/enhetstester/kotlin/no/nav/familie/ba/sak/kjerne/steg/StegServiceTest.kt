@@ -113,7 +113,6 @@ class StegServiceTest {
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId) } returns forrigeBehandling
             every { behandlingService.erLøpende(forrigeBehandling) } returns false
             every { behandlingService.opprettBehandling(nyBehandling) } returns opprettetBehandling
-            every { featureToggleService.isEnabled(FeatureToggle.MINSIDE_AKTIVERING) } returns true
             every { opprettTaskService.opprettAktiverMinsideTask(opprettetBehandling.fagsak.aktør) } just runs
             every { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(opprettetBehandling.id, any()) } returns opprettetBehandling
             every { mocketRegistrerPersongrunnlag.stegType() } returns StegType.REGISTRERE_PERSONGRUNNLAG
@@ -182,7 +181,6 @@ class StegServiceTest {
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId) } returns forrigeBehandling
             every { behandlingService.erLøpende(forrigeBehandling) } returns false
             every { behandlingService.opprettBehandling(nyBehandling) } returns opprettetBehandling
-            every { featureToggleService.isEnabled(FeatureToggle.MINSIDE_AKTIVERING) } returns true
             every { opprettTaskService.opprettAktiverMinsideTask(opprettetBehandling.fagsak.aktør) } just runs
             every { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(opprettetBehandling.id, any()) } returns opprettetBehandling
             every { mocketRegistrerPersongrunnlag.stegType() } returns StegType.REGISTRERE_PERSONGRUNNLAG
