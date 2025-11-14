@@ -15,9 +15,7 @@ object PersonopplysningsgrunnlagFiltreringUtils {
 
         val eldsteBarnsFødselsdato = personOpplysningGrunnlag.barna.minOfOrNull { it.fødselsdato } ?: return this
 
-        val filtrerteAdresser = this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
-
-        return filtrerteAdresser
+        return this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
     }
 
     fun List<Oppholdsadresse>.filtrerBortOppholdsadresserFørEldsteBarn(
@@ -28,9 +26,7 @@ object PersonopplysningsgrunnlagFiltreringUtils {
 
         val eldsteBarnsFødselsdato = personOpplysningGrunnlag.barna.minOfOrNull { it.fødselsdato } ?: return this
 
-        val filtrerteAdresser = this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
-
-        return filtrerteAdresser
+        return this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
     }
 
     fun List<DeltBosted>.filtrerBortDeltBostedForSøker(
