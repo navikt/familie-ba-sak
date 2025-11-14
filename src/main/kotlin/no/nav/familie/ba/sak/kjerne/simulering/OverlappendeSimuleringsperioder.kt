@@ -20,7 +20,7 @@ fun finnOverlappendePerioder(
     økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
     fagsakId: Long,
 ): List<OverlappendePerioderMedAndreFagsaker> {
-    val tidSimuleringHentet = økonomiSimuleringMottakere.first().opprettetTidspunkt.toLocalDate()
+    val tidSimuleringHentet = økonomiSimuleringMottakere.singleOrNull()?.opprettetTidspunkt?.toLocalDate() ?: return emptyList()
 
     val posteringer = økonomiSimuleringMottakere.flatMap { it.økonomiSimuleringPostering }.filter { it.fagsakId != null }
     val posteringerPerFagsak = posteringer.groupBy { it.fagsakId!! }
