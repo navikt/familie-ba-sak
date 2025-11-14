@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SvalbardtilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -204,6 +205,29 @@ class AutovedtakSvalbardtilleggServiceTest {
             // Assert
             assertThat(skalAutovedtakBehandles).isTrue()
         }
+
+        @Test
+        fun `skal kaste feil når minst en person bor i tilleggssone, men siste vedtatte behandling er av kategori EØS`() {
+            // Arrange
+            val behandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns behandling
+            every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns lagTilkjentYtelse { emptySet() }
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+            every { pdlRestKlient.hentAdresserForPersoner(listOf(søkerIdent, barnIdent)) } returns
+                mapOf(
+                    søkerIdent to PdlAdresserPerson(oppholdsadresse = listOf(oppholsadressePåSvalbard), deltBosted = emptyList()),
+                    barnIdent to PdlAdresserPerson(oppholdsadresse = listOf(oppholdsadresseUtenforSvalbard), deltBosted = emptyList()),
+                )
+
+            // Act
+            val feil =
+                assertThrows<AutovedtakMåBehandlesManueltFeil> {
+                    autovedtakSvalbardtilleggService.skalAutovedtakBehandles(SvalbardtilleggData(fagsakId = fagsak.id))
+                }
+
+            // Assert
+            assertThat(feil.message).isEqualTo("Automatisk behandling av Svalbardtillegg kan ikke gjennomføres for EØS-saker.\nRett til Svalbardtillegg må håndteres manuelt.")
+        }
     }
 
     @Nested
@@ -231,7 +255,7 @@ class AutovedtakSvalbardtilleggServiceTest {
                     autovedtakSvalbardtilleggService.kjørBehandling(SvalbardtilleggData(fagsakId = fagsak.id))
                 }
 
-            assertThat(feil.message).isEqualTo("Automatisk behandling av svalbardtillegg fører til feilutbetaling.")
+            assertThat(feil.message).isEqualTo("Automatisk behandling av Svalbardtillegg fører til feilutbetaling.\nEndring av Svalbardtillegg må håndteres manuelt.")
         }
 
         @Test

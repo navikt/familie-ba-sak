@@ -60,8 +60,6 @@ class AutovedtakSvalbardtilleggService(
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandlingsdata.fagsakId)
                 ?: return false
 
-        if (sisteVedtatteBehandling.kategori == BehandlingKategori.EØS) return false
-
         val sisteVedtatteBehandlingHarSvalbardtilleggAndeler =
             beregningService
                 .hentTilkjentYtelseForBehandling(sisteVedtatteBehandling.id)
@@ -80,7 +78,12 @@ class AutovedtakSvalbardtilleggService(
                         .any { it.value.harAdresserSomErRelevantForSvalbardtillegg() }
                 }
 
-        return sisteVedtatteBehandlingHarSvalbardtilleggAndeler || minstÈnAktørHarAdresseSomErRelevantForSvalbardtillegg
+        val skalBehandleSvalbardtillegg = sisteVedtatteBehandlingHarSvalbardtilleggAndeler || minstÈnAktørHarAdresseSomErRelevantForSvalbardtillegg
+
+        if (skalBehandleSvalbardtillegg && sisteVedtatteBehandling.kategori == BehandlingKategori.EØS) {
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av Svalbardtillegg kan ikke gjennomføres for EØS-saker.\nRett til Svalbardtillegg må håndteres manuelt.")
+        }
+        return skalBehandleSvalbardtillegg
     }
 
     @Transactional
@@ -101,7 +104,7 @@ class AutovedtakSvalbardtilleggService(
 
         val feilutbetaling = simuleringService.hentFeilutbetaling(behandlingEtterBehandlingsresultat.id)
         if (feilutbetaling > BigDecimal.ZERO) {
-            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av svalbardtillegg fører til feilutbetaling.")
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av Svalbardtillegg fører til feilutbetaling.\nEndring av Svalbardtillegg må håndteres manuelt.")
         }
 
         if (behandlingEtterBehandlingsresultat.steg == StegType.IVERKSETT_MOT_OPPDRAG) {
