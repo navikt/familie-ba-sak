@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 
@@ -51,5 +52,16 @@ object PersonopplysningsgrunnlagFiltreringUtils {
         val eldsteBarnsFødselsdato = personOpplysningGrunnlag.barna.minOfOrNull { it.fødselsdato } ?: return this
 
         return this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
+    }
+
+    fun List<Opphold>.filtrerBortOppholdFørEldsteBarn(
+        personOpplysningGrunnlag: PersonopplysningGrunnlag,
+        filtrerOpphold: Boolean,
+    ): List<Opphold> {
+        if (!filtrerOpphold) return this
+
+        val eldsteBarnsFødselsdato = personOpplysningGrunnlag.barna.minOfOrNull { it.fødselsdato } ?: return this
+
+        return this.filter { it.oppholdTil?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
     }
 }
