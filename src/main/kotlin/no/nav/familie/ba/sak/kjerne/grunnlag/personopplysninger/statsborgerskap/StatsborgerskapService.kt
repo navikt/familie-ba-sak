@@ -37,7 +37,7 @@ class StatsborgerskapService(
 
         val eøsMedlemskapsPerioderForValgtLand = kodeverkService.henteEøsMedlemskapsPerioderForValgtLand(statsborgerskap.land)
 
-        var datoFra = statsborgerskap.hentFom()
+        val datoFra = statsborgerskap.hentFom()
 
         return if (datoFra == null && statsborgerskap.gyldigTilOgMed == null) {
             val idag = LocalDate.now()

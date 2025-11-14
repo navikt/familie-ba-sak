@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.fake.FakePdlRestKlient.Companion.leggTilBostedsadresseIPDL
-import no.nav.familie.ba.sak.fake.FakePdlRestKlient.Companion.leggTilOppholdsadresseIPDL
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilBostedsadresserIPersonInfo
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilOppholdsadresserIPersonInfo
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilRelasjonIPersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
@@ -253,14 +253,9 @@ class FødselshendelseTest(
             bostedsadresser = listOf(bostedsadresse),
         )
 
-        leggTilBostedsadresseIPDL(
+        leggTilOppholdsadresserIPersonInfo(
             personIdenter = listOf(søkerFnr, barnFnr),
-            bostedsadresse = bostedsadresse,
-        )
-
-        leggTilOppholdsadresseIPDL(
-            personIdenter = listOf(søkerFnr, barnFnr),
-            oppholdsadresse = oppholdsadressePåSvalbard,
+            oppholdsadresser = listOf(oppholdsadressePåSvalbard),
         )
 
         // Act
@@ -330,18 +325,13 @@ class FødselshendelseTest(
         )
 
         leggTilBostedsadresserIPersonInfo(
-            personIdenter = listOf(søkerFnr, yngsteBarnFnr),
+            personIdenter = listOf(søkerFnr, eldsteBarnFnr, yngsteBarnFnr),
             bostedsadresser = listOf(bostedsadresse),
         )
 
-        leggTilBostedsadresseIPDL(
+        leggTilOppholdsadresserIPersonInfo(
             personIdenter = listOf(søkerFnr, eldsteBarnFnr, yngsteBarnFnr),
-            bostedsadresse = bostedsadresse,
-        )
-
-        leggTilOppholdsadresseIPDL(
-            personIdenter = listOf(søkerFnr, eldsteBarnFnr, yngsteBarnFnr),
-            oppholdsadresse = oppholdsadressePåSvalbard,
+            oppholdsadresser = listOf(oppholdsadressePåSvalbard),
         )
 
         val forrigeBehandling =

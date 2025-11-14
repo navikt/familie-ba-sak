@@ -77,7 +77,7 @@ class SystemOnlyPdlRestKlient(
         val pdlPersonRequest =
             PdlPersonBolkRequest(
                 variables = PdlPersonBolkRequestVariables(identer),
-                query = hentGraphqlQuery("bostedsadresse-og-delt-bosted"),
+                query = hentGraphqlQuery("bolk-kommunenr-matrikkel-bostedsadresse-og-delt-bosted"),
             )
 
         val pdlResponse: PdlBolkResponse<PdlAdresserPerson> =
@@ -96,7 +96,7 @@ class SystemOnlyPdlRestKlient(
         val pdlPersonRequest =
             PdlPersonBolkRequest(
                 variables = PdlPersonBolkRequestVariables(identer),
-                query = hentGraphqlQuery("bostedsadresse-delt-bosted-oppholdsadresse"),
+                query = hentGraphqlQuery("bolk-kommunenr-alle-adressetyper"),
             )
 
         val pdlResponse: PdlBolkResponse<PdlAdresserPerson> =

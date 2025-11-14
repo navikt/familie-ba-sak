@@ -1,16 +1,20 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
 import no.nav.familie.ba.sak.datagenerator.lagMockRestJournalføring
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.TilknyttetBehandling
+import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Journalføringsbehandlingstype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
+import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -26,6 +30,8 @@ class InnkommendeJournalføringServiceIntegrationTest(
     private val innkommendeJournalføringService: InnkommendeJournalføringService,
     @Autowired
     private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
+    @Autowired
+    private val integrasjonsKlient: FakeIntegrasjonKlient,
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `journalfør skal opprette en førstegangsbehandling fra journalføring og lagre ned søknadsinfo`() {
@@ -81,7 +87,19 @@ class InnkommendeJournalføringServiceIntegrationTest(
         val request =
             lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
                 .copy(fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG)
-        val fagsakId = innkommendeJournalføringService.journalfør(request, "123", "mockEnhet", "1")
+
+        val journalpostId = "123"
+        integrasjonsKlient.leggTilVersjonertBarnetrygdSøknad(
+            journalpostId,
+            VersjonertBarnetrygdSøknadV9(
+                lagBarnetrygdSøknadV9(
+                    søkerFnr = request.bruker.id,
+                    barnFnr = emptyList(),
+                ),
+            ),
+        )
+
+        val fagsakId = innkommendeJournalføringService.journalfør(request, journalpostId, "mockEnhet", "1")
         val behandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId.toLong())
 
         assertNotNull(behandling)

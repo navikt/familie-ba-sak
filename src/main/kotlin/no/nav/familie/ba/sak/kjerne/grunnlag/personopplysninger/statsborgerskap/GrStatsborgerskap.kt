@@ -89,6 +89,8 @@ fun Statsborgerskap.fom() = this.gyldigFraOgMed ?: this.bekreftelsesdato
 
 fun GrStatsborgerskap.iNordiskLand() = Norden.entries.map { it.name }.contains(this.landkode)
 
+fun List<GrStatsborgerskap>.iUkraina() = this.any { it.landkode == "UKR" }
+
 fun List<GrStatsborgerskap>.filtrerGjeldendeNå(): List<GrStatsborgerskap> = this.filter { it.gjeldendeNå() }
 
 fun List<GrStatsborgerskap>.hentSterkesteMedlemskap(): Medlemskap? {
