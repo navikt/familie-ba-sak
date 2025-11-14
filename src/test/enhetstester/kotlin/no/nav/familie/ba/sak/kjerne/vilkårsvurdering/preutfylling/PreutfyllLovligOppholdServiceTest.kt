@@ -34,7 +34,7 @@ class PreutfyllLovligOppholdServiceTest {
         private val statsborgerskapService = mockk<StatsborgerskapService>(relaxed = true)
         private val systemOnlyIntegrasjonKlient: SystemOnlyIntegrasjonKlient = mockk(relaxed = true)
         private val persongrunnlagService: PersongrunnlagService = mockk(relaxed = true)
-        private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService = PreutfyllLovligOppholdService(pdlRestKlient, statsborgerskapService, systemOnlyIntegrasjonKlient, persongrunnlagService)
+        private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService = PreutfyllLovligOppholdService(pdlRestKlient, statsborgerskapService, systemOnlyIntegrasjonKlient, persongrunnlagService, featureToggleService)
 
         @Test
         fun `skal preutfylle oppfylt lovlig opphold vilkår basert på norsk eller nordisk statsborgerskap`() {

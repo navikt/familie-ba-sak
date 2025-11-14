@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
@@ -27,17 +25,13 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class PreutfyllLovligOppholdService(
+class PreutfyllLovligOppholdMedLagringIPersongrunnlagService(
     private val pdlRestKlient: SystemOnlyPdlRestKlient,
     private val statsborgerskapService: StatsborgerskapService,
     private val systemOnlyIntegrasjonKlient: SystemOnlyIntegrasjonKlient,
     private val persongrunnlagService: PersongrunnlagService,
-    private val preutfyllLovligOppholdMedPersongrunnlagService: PreutfyllLovligOppholdMedLagringIPersongrunnlagService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     fun preutfyllLovligOpphold(vilkårsvurdering: Vilkårsvurdering) {
-        if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) return preutfyllLovligOppholdMedPersongrunnlagService.preutfyllLovligOpphold(vilkårsvurdering)
-
         val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
         val bostedsadresser = pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(identer)
         val søkersResultater = vilkårsvurdering.personResultater.first { it.erSøkersResultater() }
