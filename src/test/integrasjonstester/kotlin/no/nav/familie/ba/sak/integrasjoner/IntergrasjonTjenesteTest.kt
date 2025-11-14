@@ -205,7 +205,6 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                             tittel = VEDTAK_VEDLEGG_TITTEL,
                         ),
                     ),
-                behandlingId = vedtak.behandling.id,
                 eksternReferanseId = "0_${vedtak.behandling.id}_journalfør",
             )
 

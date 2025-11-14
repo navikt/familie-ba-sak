@@ -107,16 +107,16 @@ class FakePdlRestKlient(
         )
 
     companion object {
-        private val bostedsadresser = mutableMapOf<String, List<Bostedsadresse>>()
-        private val deltBosteder = mutableMapOf<String, List<DeltBosted>>()
-        private val oppholdsadresser = mutableMapOf<String, List<Oppholdsadresse>>()
+        private val bostedsadresser = mutableMapOf<String, MutableList<Bostedsadresse>>()
+        private val deltBosteder = mutableMapOf<String, MutableList<DeltBosted>>()
+        private val oppholdsadresser = mutableMapOf<String, MutableList<Oppholdsadresse>>()
 
         fun leggTilBostedsadresseIPDL(
             personIdenter: List<String>,
             bostedsadresse: Bostedsadresse,
         ) {
             personIdenter.forEach { personIdent ->
-                bostedsadresser[personIdent] = listOf(bostedsadresse)
+                bostedsadresser.getOrPut(personIdent, { mutableListOf() }).add(bostedsadresse)
             }
         }
 
@@ -125,7 +125,7 @@ class FakePdlRestKlient(
             deltBosted: DeltBosted,
         ) {
             personIdenter.forEach { personIdent ->
-                deltBosteder[personIdent] = listOf(deltBosted)
+                deltBosteder.getOrPut(personIdent, { mutableListOf() }).add(deltBosted)
             }
         }
 
@@ -134,7 +134,7 @@ class FakePdlRestKlient(
             oppholdsadresse: Oppholdsadresse,
         ) {
             personIdenter.forEach { personIdent ->
-                oppholdsadresser[personIdent] = listOf(oppholdsadresse)
+                oppholdsadresser.getOrPut(personIdent, { mutableListOf() }).add(oppholdsadresse)
             }
         }
     }

@@ -48,6 +48,7 @@ class AutovedtakSvalbardtilleggTask(
             }
 
         logger.info(resultat)
+        task.metadata["resultat"] = resultat.replace("\n", " ")
     }
 
     companion object {

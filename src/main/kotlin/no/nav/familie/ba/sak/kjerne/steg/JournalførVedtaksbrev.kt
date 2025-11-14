@@ -185,7 +185,6 @@ class JournalførVedtaksbrev(
             journalførendeEnhet = journalførendeEnhet,
             brev = brev,
             vedlegg = vedlegg,
-            behandlingId = vedtak.behandling.id,
             avsenderMottaker = mottakerInfo.tilAvsenderMottaker(),
             eksternReferanseId = eksternReferanseId,
         )
