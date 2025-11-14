@@ -125,7 +125,6 @@ class JournalførTilbakekrevingsvedtakMotregningBrevTask(
             fagsakId = fagsakId.toString(),
             journalførendeEnhet = journalførendeEnhet,
             brev = brev,
-            behandlingId = behandling.id,
             avsenderMottaker = mottakerInfo.tilAvsenderMottaker(),
             eksternReferanseId = eksternReferanseId,
         )

@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
@@ -46,6 +48,7 @@ class DokumentController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val dokumentDistribueringService: DokumentDistribueringService,
     private val pdlRestKlient: PdlRestKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
     fun genererVedtaksbrev(
@@ -128,16 +131,30 @@ class DokumentController(
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
-        dokumentService.sendManueltBrev(
-            manueltBrevRequest =
-                manueltBrevRequest.byggMottakerdataFraBehandling(
-                    behandling,
-                    persongrunnlagService,
-                    arbeidsfordelingService,
-                ),
-            behandling = behandling,
-            fagsakId = behandling.fagsak.id,
-        )
+        if (featureToggleService.isEnabled(FeatureToggle.JOURNALFOER_MANUELT_BREV_I_TASK)) {
+            dokumentService.sendManueltBrev(
+                manueltBrevRequest =
+                    manueltBrevRequest.byggMottakerdataFraBehandling(
+                        behandling,
+                        persongrunnlagService,
+                        arbeidsfordelingService,
+                    ),
+                behandling = behandling,
+                fagsakId = behandling.fagsak.id,
+            )
+        } else {
+            dokumentService.sendManueltBrevGammel(
+                manueltBrevRequest =
+                    manueltBrevRequest.byggMottakerdataFraBehandling(
+                        behandling,
+                        persongrunnlagService,
+                        arbeidsfordelingService,
+                    ),
+                behandling = behandling,
+                fagsakId = behandling.fagsak.id,
+            )
+        }
+
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
@@ -186,10 +203,18 @@ class DokumentController(
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
         val oppdatertManueltBrevRequest = manueltBrevRequest.byggMottakerdataFraFagsak(fagsak, arbeidsfordelingService, pdlRestKlient)
 
-        dokumentService.sendManueltBrev(
-            manueltBrevRequest = oppdatertManueltBrevRequest,
-            fagsakId = fagsakId,
-        )
+        if (featureToggleService.isEnabled(FeatureToggle.JOURNALFOER_MANUELT_BREV_I_TASK)) {
+            dokumentService.sendManueltBrev(
+                manueltBrevRequest = oppdatertManueltBrevRequest,
+                fagsakId = fagsakId,
+            )
+        } else {
+            dokumentService.sendManueltBrevGammel(
+                manueltBrevRequest = oppdatertManueltBrevRequest,
+                fagsakId = fagsakId,
+            )
+        }
+
         return ResponseEntity.ok(Ressurs.success(fagsakService.lagRestMinimalFagsak(fagsakId = fagsakId)))
     }
 
