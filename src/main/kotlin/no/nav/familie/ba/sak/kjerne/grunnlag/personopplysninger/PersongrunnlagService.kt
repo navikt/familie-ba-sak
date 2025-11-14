@@ -465,11 +465,14 @@ class PersongrunnlagService(
     fun oppdaterStatsborgerskapPåPersoner(
         personer: List<Person>,
     ) {
+        val filtrerStatsborgerskap = featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO)
+
         personer.forEach { person ->
             val statsborgerskap = personopplysningerService.hentHistoriskStatsborgerskap(aktør = person.aktør)
 
             person.statsborgerskap =
                 statsborgerskap
+                    .filtrerBortStatsbrogerskapFørEldsteBarn(person.personopplysningGrunnlag, filtrerStatsborgerskap)
                     .flatMap {
                         statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                             statsborgerskap = it,
