@@ -1,9 +1,9 @@
-name: Sonar
+name: Pull request
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - 'main'
+  merge_group:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -17,33 +17,52 @@ jobs:
     uses: navikt/familie-baks-gha-workflows/.github/workflows/ktlint.yaml@main # ratchet:exclude
     secrets: inherit
 
-  unit-test:
-    name: Unit test
+  enhetstest:
+    name: Enhetstest
     permissions:
       contents: read
     uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@main # ratchet:exclude
     with:
       profile: 'enhetstest'
-      with-coverage: true
+      with-coverage: ${{ github.actor != 'dependabot[bot]' && github.event_name != 'merge_group' && true || false }}
       coverage-artifact-name: 'enhetstest'
       coverage-artifact-path: 'target/coverage/enhetstest.xml'
     secrets: inherit
 
-  integration-test:
-    name: Integration test
+  integrasjonstest:
+    name: Integrasjonstest
     permissions:
       contents: read
     uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@main # ratchet:exclude
     with:
       profile: 'integrasjonstest'
-      with-coverage: true
+      with-coverage: ${{ github.actor != 'dependabot[bot]' && github.event_name != 'merge_group' && true || false }}
       coverage-artifact-name: 'integrasjonstest'
       coverage-artifact-path: 'target/coverage/integrasjonstest.xml'
     secrets: inherit
 
+  verdikjedetest-feature-toggle-av:
+    name: Verdikjedetester feature toggle av
+    permissions:
+      contents: read
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@main # ratchet:exclude
+    with:
+      profile: 'verdikjedetest-feature-toggle-av'
+    secrets: inherit
+
+  verdikjedetest-feature-toggle-paa:
+    name: Verdikjedetester feature toggle på
+    permissions:
+      contents: read
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@main # ratchet:exclude
+    with:
+      profile: 'verdikjedetest-feature-toggle-paa'
+    secrets: inherit
+
   sonar:
+    if: github.actor != 'dependabot[bot]' && github.event_name != 'merge_group'
     name: Sonar
-    needs: [ unit-test, integration-test ]
+    needs: [ enhetstest, integrasjonstest ]
     uses: navikt/familie-baks-gha-workflows/.github/workflows/sonar.yaml@main # ratchet:exclude
     with:
       unit-test-artifact-name: 'enhetstest'

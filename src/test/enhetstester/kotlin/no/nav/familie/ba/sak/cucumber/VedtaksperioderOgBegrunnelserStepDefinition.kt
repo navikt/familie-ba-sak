@@ -10,7 +10,6 @@ import mockAutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
@@ -50,10 +49,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrDeltBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -505,7 +501,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         val faktiskeBegrunnelser =
             vedtaksperiodeMedBegrunnelser.flatMap { vedtaksperiodeMedBegrunnelser ->
                 vedtaksperiodeMedBegrunnelser
-                    .lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER, mockFeatureToggleService().isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE))!!
+                    .lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER)!!
                     .begrunnelser
                     .filterIsInstance<BegrunnelseMedData>()
             }
@@ -533,7 +529,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
 
         val faktiskeBrevperioder: List<BrevPeriode> =
             vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.mapNotNull {
-                it.lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER, mockFeatureToggleService().isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE))
+                it.lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER)
             }
 
         val forvendtedeBrevperioder = parseBrevPerioder(dataTable)
@@ -593,9 +589,9 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     }
 
     /**
-     * Mulige verdier: | AktørId | Fra dato | Til dato | Bostedskommune | Adressetype |
+     * Mulige verdier: | AktørId | Angitt flyttedato | Fra dato | Til dato | Kommunenummer | Adressetype |
      *
-     * Adressetype kan være "Bostedsadresse" eller "Delt bosted"
+     * Adressetype kan være "Bostedsadresse", "Delt bosted" eller "Oppholdsadresse"
      */
     @Og("med adressekommuner")
     fun `med adressekommuner`(dataTable: DataTable) {

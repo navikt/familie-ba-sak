@@ -683,10 +683,10 @@ class CucumberMock(
             månedligValutajusteringService = månedligValutajusteringService,
             clockProvider = clockProvider,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
-            endretUtbetalingAndelService = endretUtbetalingAndelService,
             featureToggleService = featureToggleService,
             opprettTaskService = opprettTaskService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            endretUtbetalingAndelService = endretUtbetalingAndelService,
         )
 
     val stegService =

@@ -629,6 +629,7 @@
             <id>enhetstest</id>
             <properties>
                 <excludedGroups>integration,verdikjedetest</excludedGroups>
+                <kover.reportXml.path>target/coverage/enhetstest.xml</kover.reportXml.path>
             </properties>
         </profile>
         <profile>
@@ -636,17 +637,26 @@
             <properties>
                 <groups>integration</groups>
                 <excludedGroups>verdikjedetest</excludedGroups>
+                <kover.reportXml.path>target/coverage/integrasjonstest.xml</kover.reportXml.path>
             </properties>
         </profile>
         <profile>
-            <id>verdikjedetest</id>
+            <id>verdikjedetest-feature-toggle-paa</id>
             <properties>
                 <groups>verdikjedetest</groups>
+                <argLine>-DmockFeatureToggleAnswer=true</argLine>
+            </properties>
+        </profile>
+        <profile>
+            <id>verdikjedetest-feature-toggle-av</id>
+            <properties>
+                <groups>verdikjedetest</groups>
+                <argLine>-DmockFeatureToggleAnswer=false</argLine>
             </properties>
         </profile>
 
         <profile>
-            <id>kover</id>
+            <id>coverage</id>
             <build>
                 <plugins>
                     <plugin>

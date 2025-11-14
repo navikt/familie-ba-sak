@@ -22,7 +22,6 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
     grunnlag: GrunnlagForBegrunnelse,
     begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
     landkoder: Map<String, String>,
-    skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse: Boolean,
 ): List<EØSBegrunnelseData> {
     val sanityBegrunnelse = hentSanityBegrunnelse(grunnlag)
 
@@ -90,7 +89,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
             sokersAktivitet = kompetanse.søkersAktivitet,
             sokersAktivitetsland = kompetanse.søkersAktivitetsland.tilLandNavn(landkoder).navn,
             gjelderSoker = gjelderSøker,
-            erAnnenForelderOmfattetAvNorskLovgivning = if (skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse) kompetanse.erAnnenForelderOmfattetAvNorskLovgivning else false,
+            erAnnenForelderOmfattetAvNorskLovgivning = kompetanse.erAnnenForelderOmfattetAvNorskLovgivning,
         )
     }
 }

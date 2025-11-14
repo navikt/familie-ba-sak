@@ -7,6 +7,8 @@ import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -41,6 +43,7 @@ class PersongrunnlagServiceTest {
     private val loggService = mockk<LoggService>()
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val kodeverkService = mockk<KodeverkService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val persongrunnlagService =
         spyk(
@@ -57,7 +60,7 @@ class PersongrunnlagServiceTest {
                 arbeidsforholdService = mockk(),
                 vilkårsvurderingService = vilkårsvurderingService,
                 kodeverkService = kodeverkService,
-                featureToggleService = mockk(),
+                featureToggleService = featureToggleService,
             ),
         )
 
@@ -144,6 +147,8 @@ class PersongrunnlagServiceTest {
                 } returns PersonInfo(barnet.fødselsdato, barnet.navn, barnet.kjønn)
 
                 every { personopplysningGrunnlagRepository.save(nyttGrunnlag) } returns nyttGrunnlag
+
+                every { featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
 
                 persongrunnlagService
                     .hentOgLagreSøkerOgBarnINyttGrunnlag(

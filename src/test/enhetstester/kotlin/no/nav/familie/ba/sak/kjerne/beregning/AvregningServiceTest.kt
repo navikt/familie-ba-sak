@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -34,21 +32,18 @@ class AvregningServiceTest {
 
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val avregningService =
         AvregningService(
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(mar(2025)),
-            featureToggleService = featureToggleService,
         )
 
     @BeforeEach
     fun setup() {
         every { behandlingHentOgPersisterService.hent(any()) } returns inneværendeBehandling
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns sisteVedtatteBehandling
-        every { featureToggleService.isEnabled(FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING) } returns true
     }
 
     @Nested
@@ -489,52 +484,6 @@ class AvregningServiceTest {
                 )
 
             assertThat(perioderMedEtterbetalingOgFeilutbetaling).isEqualTo(forventet)
-        }
-
-        @Test
-        fun `skal returnere tom liste hvis toggle er skrudd av`() {
-            // Arrange
-            val andelerForrigeBehandling =
-                listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = jan(2025),
-                        tom = jan(2025),
-                        person = barn1,
-                        kalkulertUtbetalingsbeløp = 1000,
-                    ),
-                    lagAndelTilkjentYtelse(
-                        fom = jan(2025),
-                        tom = jan(2025),
-                        person = barn2,
-                        kalkulertUtbetalingsbeløp = 2000,
-                    ),
-                )
-            val andelerInneværendeBehandling =
-                listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = jan(2025),
-                        tom = jan(2025),
-                        person = barn1,
-                        kalkulertUtbetalingsbeløp = 2000,
-                    ),
-                    lagAndelTilkjentYtelse(
-                        fom = jan(2025),
-                        tom = jan(2025),
-                        person = barn2,
-                        kalkulertUtbetalingsbeløp = 1000,
-                    ),
-                )
-
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
-            every { featureToggleService.isEnabled(FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING) } returns false
-
-            // Act
-            val perioderMedEtterbetalingOgFeilutbetaling =
-                avregningService.hentPerioderMedAvregning(behandlingId = inneværendeBehandling.id)
-
-            // Assert
-            assertThat(perioderMedEtterbetalingOgFeilutbetaling).isEmpty()
         }
 
         @Test

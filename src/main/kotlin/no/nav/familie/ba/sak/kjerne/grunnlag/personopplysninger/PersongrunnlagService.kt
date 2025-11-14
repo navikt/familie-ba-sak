@@ -22,6 +22,9 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.SKJERMET_BARN
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortBostedsadresserFørEldsteBarn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortDeltBostedForSøker
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortOppholdsadresserFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrDeltBosted
@@ -308,6 +311,8 @@ class PersongrunnlagService(
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
             }
 
+        val filtrerAdresser = featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
+
         return Person(
             type = personType,
             personopplysningGrunnlag = personopplysningGrunnlag,
@@ -322,6 +327,7 @@ class PersongrunnlagService(
             person.bostedsadresser =
                 personinfo.bostedsadresser
                     .filtrerUtKunNorskeBostedsadresser()
+                    .filtrerBortBostedsadresserFørEldsteBarn(personopplysningGrunnlag, filtrerAdresser)
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
                             bostedsadresse = it,
@@ -331,6 +337,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.oppholdsadresser =
                 personinfo.oppholdsadresser
+                    .filtrerBortOppholdsadresserFørEldsteBarn(personopplysningGrunnlag, filtrerAdresser)
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
@@ -340,6 +347,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.deltBosted =
                 personinfo.deltBosted
+                    .filtrerBortDeltBostedForSøker(person.type, filtrerAdresser)
                     .map {
                         GrDeltBosted.fraDeltBosted(
                             deltBosted = it,
@@ -401,6 +409,8 @@ class PersongrunnlagService(
     fun oppdaterAdresserPåPersoner(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) {
+        val filtrerAdresser = featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
+
         personopplysningGrunnlag.personer.forEach { person ->
             val (bostedsadresse, oppholdsadresse, deltBosted) =
                 if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
@@ -418,6 +428,7 @@ class PersongrunnlagService(
             person.bostedsadresser =
                 bostedsadresse
                     .filtrerUtKunNorskeBostedsadresser()
+                    .filtrerBortBostedsadresserFørEldsteBarn(personopplysningGrunnlag, filtrerAdresser)
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
                             bostedsadresse = it,
@@ -427,6 +438,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.oppholdsadresser =
                 oppholdsadresse
+                    .filtrerBortOppholdsadresserFørEldsteBarn(personopplysningGrunnlag, filtrerAdresser)
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
@@ -436,6 +448,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.deltBosted =
                 deltBosted
+                    .filtrerBortDeltBostedForSøker(person.type, filtrerAdresser)
                     .map {
                         GrDeltBosted.fraDeltBosted(
                             deltBosted = it,

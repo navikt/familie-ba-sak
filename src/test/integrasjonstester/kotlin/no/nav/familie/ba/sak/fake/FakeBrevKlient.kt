@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.fake
 
-import io.mockk.mockk
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
