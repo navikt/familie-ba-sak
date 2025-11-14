@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.prosessering.domene.Task
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -201,6 +202,30 @@ internal class AutovedtakSvalbardtilleggTaskTest {
                     beskrivelse = "Feilmelding",
                 )
             }
+        }
+
+        @Test
+        fun `doTask skal sette riktig 'resultat' i metadata`() {
+            // Arrange
+            val fagsakId = 12345L
+            val aktør = randomAktør()
+
+            val task =
+                Task(
+                    type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE,
+                    payload = fagsakId.toString(),
+                )
+
+            every { fagsakService.hentAktør(fagsakId) } returns aktør
+            every {
+                autovedtakStegService.kjørBehandlingSvalbardtillegg(any(), any(), any())
+            } returns "Resultat\nmed\nlinjeskift"
+
+            // Act
+            autovedtakSvalbardtilleggTask.doTask(task)
+
+            // Assert
+            assertThat(task.metadata["resultat"]).isEqualTo("Resultat med linjeskift")
         }
     }
 }
