@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 
 object PersonopplysningsgrunnlagFiltreringUtils {
@@ -51,5 +52,31 @@ object PersonopplysningsgrunnlagFiltreringUtils {
         val eldsteBarnsFødselsdato = personOpplysningGrunnlag.barna.minOfOrNull { it.fødselsdato } ?: return this
 
         return this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
+    }
+
+    fun List<Sivilstand>.filtrerBortIkkeRelevanteSivilstand(
+        personOpplysningGrunnlag: PersonopplysningGrunnlag,
+        filtrerSivilstand: Boolean,
+    ): List<Sivilstand> {
+        if (!filtrerSivilstand) return this
+
+        val eldsteBarnsFødselsdato = personOpplysningGrunnlag.barna.minOfOrNull { it.fødselsdato } ?: return this
+
+        val sortertSivilstand = this.sortedBy { it.gyldigFraOgMed } // usikker om den er sortert fra før
+
+        return sortertSivilstand
+            .windowed(size = 2, step = 1, partialWindows = true)
+            .mapIndexedNotNull { _, window ->
+                val denne = window[0]
+                val neste = window.getOrNull(1)
+
+                if (neste != null &&
+                    (neste.gyldigFraOgMed?.isBefore(eldsteBarnsFødselsdato) == true)
+                ) {
+                    null
+                } else {
+                    denne
+                }
+            }
     }
 }
