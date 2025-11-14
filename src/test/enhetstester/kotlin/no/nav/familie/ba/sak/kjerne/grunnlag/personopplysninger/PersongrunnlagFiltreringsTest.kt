@@ -9,9 +9,8 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortBostedsadresserFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortDeltBostedForSøker
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortOppholdsadresserFørEldsteBarn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortStatsbrogerskapFørEldsteBarn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortStatsborgerskapFørEldsteBarn
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
-import org.apache.kafka.common.metrics.Stat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -131,7 +130,7 @@ class PersongrunnlagFiltreringsTest {
             )
 
         // Act
-        val statsborgerskapEtter = statsborgerskapFør.filtrerBortStatsbrogerskapFørEldsteBarn(grunnlag, true)
+        val statsborgerskapEtter = statsborgerskapFør.filtrerBortStatsborgerskapFørEldsteBarn(grunnlag, true)
 
         // Assert
         assertThat(statsborgerskapEtter).hasSize(2)

@@ -42,7 +42,7 @@ object PersonopplysningsgrunnlagFiltreringUtils {
         }
     }
 
-    fun List<Statsborgerskap>.filtrerBortStatsbrogerskapFørEldsteBarn(
+    fun List<Statsborgerskap>.filtrerBortStatsborgerskapFørEldsteBarn(
         personOpplysningGrunnlag: PersonopplysningGrunnlag,
         filtrerStatsborgerskap: Boolean,
     ): List<Statsborgerskap> {

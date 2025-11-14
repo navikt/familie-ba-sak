@@ -25,7 +25,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.SKJERMET_BARN
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortBostedsadresserFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortDeltBostedForSøker
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortOppholdsadresserFørEldsteBarn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortStatsbrogerskapFørEldsteBarn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortStatsborgerskapFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrDeltBosted
@@ -360,7 +360,7 @@ class PersongrunnlagService(
             person.sivilstander = personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }.toMutableList()
             person.statsborgerskap =
                 personinfo.statsborgerskap
-                    ?.filtrerBortStatsbrogerskapFørEldsteBarn(personopplysningGrunnlag, filtrerStatsborgerskap)
+                    ?.filtrerBortStatsborgerskapFørEldsteBarn(personopplysningGrunnlag, filtrerStatsborgerskap)
                     ?.flatMap {
                         statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                             statsborgerskap = it,
@@ -472,7 +472,7 @@ class PersongrunnlagService(
 
             person.statsborgerskap =
                 statsborgerskap
-                    .filtrerBortStatsbrogerskapFørEldsteBarn(person.personopplysningGrunnlag, filtrerStatsborgerskap)
+                    .filtrerBortStatsborgerskapFørEldsteBarn(person.personopplysningGrunnlag, filtrerStatsborgerskap)
                     .flatMap {
                         statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                             statsborgerskap = it,
