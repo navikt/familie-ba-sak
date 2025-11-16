@@ -49,7 +49,7 @@ class PorteføljejusteringService(
                 .take(antallTasks ?: oppgaverSomSkalFlyttes.size)
                 .forEach { oppgave ->
                     oppgave.id?.let {
-                        taskService.save(PorteføljejusteringTask.opprettTask(it))
+                        taskService.save(PorteføljejusteringFlyttOppgaveTask.opprettTask(it))
                         opprettedeTasks++
                     }
                 }

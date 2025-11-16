@@ -48,10 +48,10 @@ class PorteføljejusteringServiceTest {
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
         verify(exactly = 1) {
-            taskService.save(match { task -> task.type == PorteføljejusteringTask.TASK_STEP_TYPE && task.payload == "1" })
+            taskService.save(match { task -> task.type == PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE && task.payload == "1" })
         }
         verify(exactly = 1) {
-            taskService.save(match { task -> task.type == PorteføljejusteringTask.TASK_STEP_TYPE && task.payload == "2" })
+            taskService.save(match { task -> task.type == PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE && task.payload == "2" })
         }
     }
 
@@ -81,10 +81,10 @@ class PorteføljejusteringServiceTest {
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
         verify(exactly = 0) {
-            taskService.save(match { task -> task.type == PorteføljejusteringTask.TASK_STEP_TYPE && task.payload == "1" })
+            taskService.save(match { task -> task.type == PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE && task.payload == "1" })
         }
         verify(exactly = 0) {
-            taskService.save(match { task -> task.type == PorteføljejusteringTask.TASK_STEP_TYPE && task.payload == "2" })
+            taskService.save(match { task -> task.type == PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE && task.payload == "2" })
         }
     }
 
@@ -113,8 +113,8 @@ class PorteføljejusteringServiceTest {
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
-        verify(exactly = 0) { taskService.save(match { task -> task.type == PorteføljejusteringTask.TASK_STEP_TYPE && task.payload == "1" }) }
-        verify(exactly = 1) { taskService.save(match { task -> task.type == PorteføljejusteringTask.TASK_STEP_TYPE && task.payload == "2" }) }
+        verify(exactly = 0) { taskService.save(match { task -> task.type == PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE && task.payload == "1" }) }
+        verify(exactly = 1) { taskService.save(match { task -> task.type == PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE && task.payload == "2" }) }
     }
 
     @ParameterizedTest
@@ -148,7 +148,7 @@ class PorteføljejusteringServiceTest {
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
-        verify(exactly = 1) { taskService.save(match { task -> task.type == PorteføljejusteringTask.TASK_STEP_TYPE && task.payload == "1" }) }
+        verify(exactly = 1) { taskService.save(match { task -> task.type == PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE && task.payload == "1" }) }
     }
 
     @ParameterizedTest

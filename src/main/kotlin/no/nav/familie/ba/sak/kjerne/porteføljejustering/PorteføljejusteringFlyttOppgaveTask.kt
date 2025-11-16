@@ -24,12 +24,12 @@ import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = PorteføljejusteringTask.TASK_STEP_TYPE,
+    taskStepType = PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE,
     beskrivelse = "Flytt oppgave til riktig enhet",
     maxAntallFeil = 3,
     settTilManuellOppfølgning = true,
 )
-class PorteføljejusteringTask(
+class PorteføljejusteringFlyttOppgaveTask(
     private val integrasjonKlient: IntegrasjonKlient,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
     private val klageKlient: KlageKlient,
@@ -149,7 +149,7 @@ class PorteføljejusteringTask(
     }
 
     companion object {
-        const val TASK_STEP_TYPE = "porteføljejusteringTask"
+        const val TASK_STEP_TYPE = "porteføljejusteringFlyttOppgaveTask"
         private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
         fun opprettTask(oppgaveId: Long): Task =

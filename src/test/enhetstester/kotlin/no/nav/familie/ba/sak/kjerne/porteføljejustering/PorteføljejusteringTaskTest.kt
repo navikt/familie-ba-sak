@@ -5,7 +5,6 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagAktør
@@ -39,8 +38,8 @@ class PorteføljejusteringTaskTest {
     private val fagsakService: FagsakService = mockk()
     private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
 
-    private val porteføljejusteringTask =
-        PorteføljejusteringTask(
+    private val porteføljejusteringFlyttOppgaveTask =
+        PorteføljejusteringFlyttOppgaveTask(
             integrasjonKlient = integrasjonKlient,
             tilbakekrevingKlient = tilbakekrevingKlient,
             klageKlient = klageKlient,
@@ -53,7 +52,7 @@ class PorteføljejusteringTaskTest {
     @Test
     fun `Skal kaste feil dersom oppgave ikke er tilknyttet noe folkeregistrert ident`() {
         // Arrange
-        val task = PorteføljejusteringTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -66,7 +65,7 @@ class PorteføljejusteringTaskTest {
         // Act && Assert
         val exception =
             assertThrows<Feil> {
-                porteføljejusteringTask.doTask(task)
+                porteføljejusteringFlyttOppgaveTask.doTask(task)
             }
         assertThat(exception.message).isEqualTo("Oppgave med id 1 er ikke tilknyttet en ident.")
     }
@@ -74,7 +73,7 @@ class PorteføljejusteringTaskTest {
     @Test
     fun `Skal kaste feil dersom vi ikke får tilbake noen enheter på ident ved kall mot integrasjoner og videre til norg2`() {
         // Arrange
-        val task = PorteføljejusteringTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -89,7 +88,7 @@ class PorteføljejusteringTaskTest {
         // Act && Assert
         val exception =
             assertThrows<Feil> {
-                porteføljejusteringTask.doTask(task)
+                porteføljejusteringFlyttOppgaveTask.doTask(task)
             }
 
         assertThat(exception.message).isEqualTo("Fant ingen arbeidsfordelingsenhet for ident.")
@@ -98,7 +97,7 @@ class PorteføljejusteringTaskTest {
     @Test
     fun `Skal kaste feil dersom vi får tilbake flere enn 1 enhet på ident ved kall mot integrasjoner og videre til norg2`() {
         // Arrange
-        val task = PorteføljejusteringTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -117,7 +116,7 @@ class PorteføljejusteringTaskTest {
         // Act && Assert
         val exception =
             assertThrows<Feil> {
-                porteføljejusteringTask.doTask(task)
+                porteføljejusteringFlyttOppgaveTask.doTask(task)
             }
 
         assertThat(exception.message).isEqualTo("Fant flere arbeidsfordelingsenheter for ident.")
@@ -126,7 +125,7 @@ class PorteføljejusteringTaskTest {
     @Test
     fun `Skal kaste feil dersom vi får tilbake Steinkjer som enhet på ident ved kall mot integrasjoner og videre til norg2`() {
         // Arrange
-        val task = PorteføljejusteringTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -144,7 +143,7 @@ class PorteføljejusteringTaskTest {
         // Act && Assert
         val exception =
             assertThrows<Feil> {
-                porteføljejusteringTask.doTask(task)
+                porteføljejusteringFlyttOppgaveTask.doTask(task)
             }
 
         assertThat(exception.message).isEqualTo("Oppgave med id 1 tildeles fortsatt Steinkjer som enhet")
@@ -153,7 +152,7 @@ class PorteføljejusteringTaskTest {
     @Test
     fun `Skal stoppe utføringen av task hvis det er midlertidig enhet vi får tilbake ved kall mot integrasjoner og videre til norg2`() {
         // Arrange
-        val task = PorteføljejusteringTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -172,7 +171,7 @@ class PorteføljejusteringTaskTest {
             )
 
         // Act
-        porteføljejusteringTask.doTask(task)
+        porteføljejusteringFlyttOppgaveTask.doTask(task)
 
         // Assert
         verify(exactly = 0) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(any(), any(), any()) }
@@ -182,7 +181,7 @@ class PorteføljejusteringTaskTest {
     @Test
     fun `Skal oppdatere oppgaven med ny enhet og mappe og ikke mer dersom saksreferansen ikke er fylt ut`() {
         // Arrange
-        val task = PorteføljejusteringTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -205,7 +204,7 @@ class PorteføljejusteringTaskTest {
         every { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, BarnetrygdEnhet.OSLO.enhetsnummer, "100012753") } returns mockk()
 
         // Act
-        porteføljejusteringTask.doTask(task)
+        porteføljejusteringFlyttOppgaveTask.doTask(task)
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, BarnetrygdEnhet.OSLO.enhetsnummer, "100012753") }
@@ -218,7 +217,7 @@ class PorteføljejusteringTaskTest {
         oppgavetype: Oppgavetype,
     ) {
         // Arrange
-        val task = PorteføljejusteringTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -241,7 +240,7 @@ class PorteføljejusteringTaskTest {
         every { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, BarnetrygdEnhet.OSLO.enhetsnummer, "100012753") } returns mockk()
 
         // Act
-        porteføljejusteringTask.doTask(task)
+        porteføljejusteringFlyttOppgaveTask.doTask(task)
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, BarnetrygdEnhet.OSLO.enhetsnummer, "100012753") }
@@ -254,7 +253,7 @@ class PorteføljejusteringTaskTest {
         oppgavetype: Oppgavetype,
     ) {
         // Arrange
-        val task = PorteføljejusteringTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -287,7 +286,7 @@ class PorteføljejusteringTaskTest {
         every { arbeidsfordelingService.oppdaterBehandlendeEnhetPåBehandlingIForbindelseMedPorteføljejustering(behandling, BarnetrygdEnhet.OSLO.enhetsnummer) } just Runs
 
         // Act
-        porteføljejusteringTask.doTask(task)
+        porteføljejusteringFlyttOppgaveTask.doTask(task)
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, BarnetrygdEnhet.OSLO.enhetsnummer, "100012753") }
@@ -305,7 +304,7 @@ class PorteføljejusteringTaskTest {
         oppgavetype: Oppgavetype,
     ) {
         // Arrange
-        val task = PorteføljejusteringTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -330,7 +329,7 @@ class PorteføljejusteringTaskTest {
         every { klageKlient.oppdaterEnhetPåÅpenBehandling(183421813, "4833") } returns "TODO"
 
         // Act
-        porteføljejusteringTask.doTask(task)
+        porteføljejusteringFlyttOppgaveTask.doTask(task)
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, BarnetrygdEnhet.OSLO.enhetsnummer, "100012753") }
@@ -343,7 +342,7 @@ class PorteføljejusteringTaskTest {
         oppgavetype: Oppgavetype,
     ) {
         // Arrange
-        val task = PorteføljejusteringTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -368,7 +367,7 @@ class PorteføljejusteringTaskTest {
         every { tilbakekrevingKlient.oppdaterEnhetPåÅpenBehandling(183421813, "4833") } returns "TODO"
 
         // Act
-        porteføljejusteringTask.doTask(task)
+        porteføljejusteringFlyttOppgaveTask.doTask(task)
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, BarnetrygdEnhet.OSLO.enhetsnummer, "100012753") }
