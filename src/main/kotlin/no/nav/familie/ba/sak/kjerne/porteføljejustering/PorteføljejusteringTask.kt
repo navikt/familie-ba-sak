@@ -4,8 +4,16 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.klage.KlageKlient
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -23,17 +31,68 @@ import java.util.Properties
 )
 class PorteføljejusteringTask(
     private val integrasjonKlient: IntegrasjonKlient,
+    private val tilbakekrevingKlient: TilbakekrevingKlient,
+    private val klageKlient: KlageKlient,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val personidentService: PersonidentService,
+    private val fagsakService: FagsakService,
+    private val arbeidsfordelingService: ArbeidsfordelingService,
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
         val oppgaveId = task.payload.toLong()
         val oppgave = integrasjonKlient.finnOppgaveMedId(oppgaveId)
 
-        val ident = oppgave.identer?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
-        if (ident == null) {
-            throw Feil("Oppgave med id $oppgaveId er ikke tilknyttet en ident.")
+        val ident = oppgave.identer?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident ?: throw Feil("Oppgave med id $oppgaveId er ikke tilknyttet en ident.")
+        val nyEnhetId = validerOgHentNyEnhetForOppgave(ident, oppgaveId) ?: return
+        val nyMappeId =
+            oppgave.mappeId?.let {
+                hentMappeIdHosOsloEllerVadsøSomTilsvarerMappeISteinkjer(
+                    it.toInt(),
+                    nyEnhetId,
+                )
+            }
+
+        val skalOppdatereEnhetEllerMappe = nyMappeId != oppgave.mappeId?.toInt() || nyEnhetId != oppgave.tildeltEnhetsnr
+
+        if (skalOppdatereEnhetEllerMappe) { // Vi oppdaterer bare hvis det er forskjell på enhet eller mappe. Kaster ikke feil grunnet ønsket om idempotens.
+            integrasjonKlient.tilordneEnhetOgMappeForOppgave(
+                oppgaveId = oppgaveId,
+                nyEnhet = nyEnhetId,
+                nyMappe = nyMappeId.toString(),
+            )
+            logger.info(
+                "Oppdatert oppgave med id $oppgaveId." +
+                    "Fra enhet ${oppgave.tildeltEnhetsnr} til ny enhet $nyEnhetId." +
+                    "Fra mappe ${oppgave.mappeId} til ny mappe $nyMappeId ",
+            )
         }
 
+        // Vi går bare videre med oppdatering i fagsystemer hvis typen er av BehandleSak, GodkjenndeVedtak eller BehandleUnderkjentVedtak
+        // og oppgaven har en tilknyttet saksreferanse
+
+        val saksreferanse = oppgave.saksreferanse
+        when {
+            saksreferanse == null -> return
+            oppgave.oppgavetype !in (listOf(Oppgavetype.BehandleSak.value, Oppgavetype.GodkjenneVedtak.value, Oppgavetype.BehandleUnderkjentVedtak.value)) -> return
+            oppgave.behandlesAvApplikasjon == "familie-ba-sak" -> {
+                oppdaterÅpenBehandlingIBaSak(oppgave, nyEnhetId)
+            }
+
+            // TODO I NAV-26753
+            oppgave.behandlesAvApplikasjon == "familie-klage" -> {
+                oppdaterEnhetPåÅpenBehandlingIKlage(saksreferanse.toLong(), nyEnhetId)
+            }
+            oppgave.behandlesAvApplikasjon == "familie-tilbake" -> {
+                oppdaterEnhetPåÅpenBehandlingITilbakekreving(saksreferanse.toLong(), nyEnhetId)
+            }
+        }
+    }
+
+    private fun validerOgHentNyEnhetForOppgave(
+        ident: String,
+        oppgaveId: Long,
+    ): String? {
         val arbeidsfordelingsenheter = integrasjonKlient.hentBehandlendeEnhet(ident)
 
         if (arbeidsfordelingsenheter.isEmpty()) {
@@ -47,16 +106,46 @@ class PorteføljejusteringTask(
             secureLogger.error("Fant flere arbeidsfordelingsenheter for ident $ident.")
             throw Feil("Fant flere arbeidsfordelingsenheter for ident.")
         }
-        val nyEnhetId = arbeidsfordelingsenheter.first().enhetId
 
-        if (nyEnhetId == BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer) {
-            logger.warn("Oppgave med id $oppgaveId tilhører midlertidig enhet, hopper ut av task.")
-            return
+        val nyEnhetId = arbeidsfordelingsenheter.single().enhetId
+
+        return when (nyEnhetId) {
+            BarnetrygdEnhet.STEINKJER.enhetsnummer -> throw Feil("Oppgave med id $oppgaveId tildeles fortsatt Steinkjer som enhet")
+            BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer -> {
+                logger.warn("Oppgave med id $oppgaveId tilhører midlertidig enhet")
+                null
+            }
+            else -> nyEnhetId
         }
+    }
 
-        val nyMappeId: String = TODO("mapping av mapper er ikke implementert")
+    private fun oppdaterÅpenBehandlingIBaSak(
+        oppgave: Oppgave,
+        nyEnhet: String,
+    ) {
+        val aktørIdPåOppgave = oppgave.aktoerId ?: throw Feil("Fant ikke aktørId på oppgave for å oppdatere åpen behandling i ba-sak")
+        val aktørPåOppgave = personidentService.hentAktør(aktørIdPåOppgave)
 
-        integrasjonKlient.tilordneEnhetOgMappeForOppgave(oppgaveId = oppgaveId, nyEnhet = nyEnhetId, nyMappe = nyMappeId)
+        val åpenBehandlingPåAktør =
+            fagsakService.hentNormalFagsak(aktørPåOppgave)?.let {
+                behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(it.id)
+            } ?: throw Feil("Fant ikke åpen behandling på aktør til oppgaveId ${oppgave.id}")
+
+        arbeidsfordelingService.oppdaterBehandlendeEnhetPåBehandlingIForbindelseMedPorteføljejustering(åpenBehandlingPåAktør, nyEnhet)
+    }
+
+    private fun oppdaterEnhetPåÅpenBehandlingITilbakekreving(
+        fagsakId: Long,
+        nyEnhetId: String,
+    ) {
+        tilbakekrevingKlient.oppdaterEnhetPåÅpenBehandling(fagsakId, nyEnhetId)
+    }
+
+    private fun oppdaterEnhetPåÅpenBehandlingIKlage(
+        fagsakId: Long,
+        nyEnhetId: String,
+    ) {
+        klageKlient.oppdaterEnhetPåÅpenBehandling(fagsakId, nyEnhetId)
     }
 
     companion object {

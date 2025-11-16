@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
+import io.mockk.Called
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
@@ -9,6 +12,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPersonEnkel
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
@@ -199,6 +203,93 @@ class ArbeidsfordelingServiceTest {
             // Assert
             verify(exactly = 0) { loggService.opprettBehandlendeEnhetEndret(any(), any(), any(), any(), any()) }
             verify(exactly = 0) { oppgaveService.endreTilordnetEnhetPåOppgaverForBehandling(any(), any()) }
+        }
+    }
+
+    @Nested
+    inner class OppdaterBehandlendeEnhetPåBehandlingIForbindelseMedPorteføljejusteringTest {
+        @Test
+        fun `Skal ikke oppdatere enhet hvis ny enhet er det samme som gamle`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val nåværendeArbeidsfordelingsenhetPåBehandling =
+                ArbeidsfordelingPåBehandling(
+                    behandlendeEnhetId = BarnetrygdEnhet.OSLO.enhetsnummer,
+                    id = 0,
+                    behandlingId = behandling.id,
+                    behandlendeEnhetNavn = BarnetrygdEnhet.OSLO.enhetsnavn,
+                )
+
+            every {
+                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any())
+            } returns nåværendeArbeidsfordelingsenhetPåBehandling
+
+            // Act
+            arbeidsfordelingService.oppdaterBehandlendeEnhetPåBehandlingIForbindelseMedPorteføljejustering(
+                behandling = behandling,
+                nyEnhetId = BarnetrygdEnhet.OSLO.enhetsnummer,
+            )
+
+            // Assert
+            verify(exactly = 0) { arbeidsfordelingPåBehandlingRepository.save(any()) }
+            verify { loggService wasNot Called }
+            verify { saksstatistikkEventPublisher wasNot Called }
+        }
+
+        @Test
+        fun `Skal oppdatere enhet, opprette logg, og publisere sakstatistikk hvis ny enhet er ulikt gammel`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val nåværendeArbeidsfordelingsenhetPåBehandling =
+                ArbeidsfordelingPåBehandling(
+                    behandlendeEnhetId = BarnetrygdEnhet.STEINKJER.enhetsnummer,
+                    id = 0,
+                    behandlingId = behandling.id,
+                    behandlendeEnhetNavn = BarnetrygdEnhet.STEINKJER.enhetsnavn,
+                )
+
+            every {
+                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any())
+            } returns nåværendeArbeidsfordelingsenhetPåBehandling
+
+            val lagretArbeidsfordelingPåBehandlingSlot = slot<ArbeidsfordelingPåBehandling>()
+            every { arbeidsfordelingPåBehandlingRepository.save(capture(lagretArbeidsfordelingPåBehandlingSlot)) } returnsArgument 0
+
+            every {
+                loggService.opprettBehandlendeEnhetEndret(
+                    behandling,
+                    fraEnhet = any(),
+                    tilEnhet = any(),
+                    manuellOppdatering = false,
+                    begrunnelse = "Porteføljejustering",
+                )
+            } just runs
+
+            every { saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id) } just runs
+
+            // Act
+            arbeidsfordelingService.oppdaterBehandlendeEnhetPåBehandlingIForbindelseMedPorteføljejustering(
+                behandling = behandling,
+                nyEnhetId = BarnetrygdEnhet.OSLO.enhetsnummer,
+            )
+
+            // Assert
+            val lagretArbeidsfordelingPåBehandling = lagretArbeidsfordelingPåBehandlingSlot.captured
+
+            assertThat(lagretArbeidsfordelingPåBehandling.behandlendeEnhetId).isEqualTo(BarnetrygdEnhet.OSLO.enhetsnummer)
+            assertThat(lagretArbeidsfordelingPåBehandling.behandlendeEnhetNavn).isEqualTo(BarnetrygdEnhet.OSLO.enhetsnavn)
+
+            verify(exactly = 1) { arbeidsfordelingPåBehandlingRepository.save(any()) }
+            verify(exactly = 1) {
+                loggService.opprettBehandlendeEnhetEndret(
+                    behandling,
+                    fraEnhet = Arbeidsfordelingsenhet(BarnetrygdEnhet.STEINKJER.enhetsnummer, BarnetrygdEnhet.STEINKJER.enhetsnavn),
+                    tilEnhet = lagretArbeidsfordelingPåBehandling,
+                    manuellOppdatering = false,
+                    begrunnelse = "Porteføljejustering",
+                )
+            }
+            verify(exactly = 1) { saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id) }
         }
     }
 }

@@ -52,4 +52,9 @@ class KlageKlient(
             getForEntity(uri)
         }
     }
+
+    fun oppdaterEnhetPåÅpenBehandling(
+        fagsakId: Long,
+        nyEnhetId: String,
+    ): String = "TODO I NAV-26753"
 }

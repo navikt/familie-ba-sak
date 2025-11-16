@@ -375,7 +375,6 @@ class IntegrasjonKlient(
         }
     }
 
-    // TODO(Legg til mappeId til endepunkt i integrasjoner)
     fun tilordneEnhetOgMappeForOppgave(
         oppgaveId: Long,
         nyEnhet: String,

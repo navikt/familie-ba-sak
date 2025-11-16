@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
+import no.nav.familie.ba.sak.common.Feil
+
 enum class BarnetrygdEnhet(
     val enhetsnummer: String,
     val enhetsnavn: String,
@@ -28,5 +30,7 @@ enum class BarnetrygdEnhet(
             )
 
         fun erGyldigBehandlendeBarnetrygdEnhet(enhetsnummer: String): Boolean = GYLDIGE_BEHANDLENDE_BARNETRYGD_ENHETER.any { it.enhetsnummer == enhetsnummer }
+
+        fun hentEnhet(enhetsnummer: String): BarnetrygdEnhet = entries.firstOrNull { it.enhetsnummer == enhetsnummer } ?: throw Feil("Finner ikke enhet med enhetsnummer $enhetsnummer")
     }
 }
