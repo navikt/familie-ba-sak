@@ -12,7 +12,7 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 
@@ -43,7 +43,7 @@ class PorteføljejusteringServiceTest {
         every { taskService.save(any()) } returns mockk()
 
         // Act
-        porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer()
+        porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer(dryRun = false)
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
@@ -51,6 +51,39 @@ class PorteføljejusteringServiceTest {
             taskService.save(match { task -> task.type == PorteføljejusteringTask.TASK_STEP_TYPE && task.payload == "1" })
         }
         verify(exactly = 1) {
+            taskService.save(match { task -> task.type == PorteføljejusteringTask.TASK_STEP_TYPE && task.payload == "2" })
+        }
+    }
+
+    @Test
+    fun `Skal ikke opprette opprette tasks hvis dryrun er satt til true`() {
+        // Arrange
+        val finnOppgaveRequestForBarSteinkjer =
+            FinnOppgaveRequest(
+                tema = Tema.BAR,
+                enhet = BarnetrygdEnhet.STEINKJER.enhetsnummer,
+            )
+        every { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) } returns
+            FinnOppgaveResponseDto(
+                antallTreffTotalt = 2,
+                oppgaver =
+                    listOf(
+                        Oppgave(id = 1, tildeltEnhetsnr = BarnetrygdEnhet.STEINKJER.enhetsnummer, mappeId = 50),
+                        Oppgave(id = 2, tildeltEnhetsnr = BarnetrygdEnhet.STEINKJER.enhetsnummer, mappeId = 50),
+                    ),
+            )
+
+        every { taskService.save(any()) } returns mockk()
+
+        // Act
+        porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer(dryRun = true)
+
+        // Assert
+        verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
+        verify(exactly = 0) {
+            taskService.save(match { task -> task.type == PorteføljejusteringTask.TASK_STEP_TYPE && task.payload == "1" })
+        }
+        verify(exactly = 0) {
             taskService.save(match { task -> task.type == PorteføljejusteringTask.TASK_STEP_TYPE && task.payload == "2" })
         }
     }
@@ -76,7 +109,7 @@ class PorteføljejusteringServiceTest {
         every { taskService.save(any()) } returns mockk()
 
         // Act
-        porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer()
+        porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer(dryRun = false)
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
@@ -111,7 +144,7 @@ class PorteføljejusteringServiceTest {
         every { taskService.save(any()) } returns mockk()
 
         // Act
-        porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer()
+        porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer(dryRun = false)
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
@@ -145,7 +178,7 @@ class PorteføljejusteringServiceTest {
         every { taskService.save(any()) } returns mockk()
 
         // Act
-        porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer()
+        porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer(dryRun = false)
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }

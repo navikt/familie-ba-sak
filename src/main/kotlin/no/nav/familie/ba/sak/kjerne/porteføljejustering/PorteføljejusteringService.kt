@@ -15,7 +15,10 @@ class PorteføljejusteringService(
     private val integrasjonKlient: IntegrasjonKlient,
     private val taskService: TaskService,
 ) {
-    fun lagTaskForOverføringAvOppgaverFraSteinkjer() {
+    fun lagTaskForOverføringAvOppgaverFraSteinkjer(
+        antallTasks: Int? = null,
+        dryRun: Boolean = true,
+    ): Pair<Int, Int> {
         val oppgaverISteinkjer =
             integrasjonKlient
                 .hentOppgaver(
@@ -26,7 +29,7 @@ class PorteføljejusteringService(
                         ),
                 ).oppgaver
 
-        logger.info("Fant ${oppgaverISteinkjer.size} oppgaver i Steinkjer")
+        logger.info("Fant ${oppgaverISteinkjer.size} barnetrygd oppgaver i Steinkjer")
 
         val oppgaverSomSkalFlyttes =
             oppgaverISteinkjer
@@ -36,13 +39,23 @@ class PorteføljejusteringService(
                         listOf(Oppgavetype.BehandleSak.value, Oppgavetype.BehandleSED.value, Oppgavetype.Journalføring.value)
                 } // Vi skal ikke flytte oppgaver som ikke har mappe id med mindre det er av type BehandleSak, BehandleSed eller Journalføring.
 
-        oppgaverSomSkalFlyttes.forEach { oppgave ->
-            oppgave.id?.let {
-                taskService.save(PorteføljejusteringTask.opprettTask(it))
-            }
+        logger.info("Fant ${oppgaverSomSkalFlyttes.size} barnetrygd oppgaver som skal flyttes")
+
+        val totalAntallOppgaverSomSkalFlyttes = oppgaverSomSkalFlyttes.size
+        var opprettedeTasks = 0
+
+        if (!dryRun) {
+            oppgaverSomSkalFlyttes
+                .take(antallTasks ?: oppgaverSomSkalFlyttes.size)
+                .forEach { oppgave ->
+                    oppgave.id?.let {
+                        taskService.save(PorteføljejusteringTask.opprettTask(it))
+                        opprettedeTasks++
+                    }
+                }
         }
 
-        logger.info("Oppretting av ${oppgaverSomSkalFlyttes.size} tasks for overføring av oppgave fullført.")
+        return totalAntallOppgaverSomSkalFlyttes to opprettedeTasks
     }
 
     companion object {
