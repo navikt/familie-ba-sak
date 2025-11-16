@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -26,6 +27,7 @@ class DokumentControllerTest(
     private val vedtakService: VedtakService = mockk(relaxed = true)
     private val fagsakService: FagsakService = mockk()
     private val tilgangService: TilgangService = mockk(relaxed = true)
+    private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
     val mockDokumentController =
         DokumentController(
             fagsakService = fagsakService,
@@ -39,6 +41,7 @@ class DokumentControllerTest(
             utvidetBehandlingService = mockk(relaxed = true),
             dokumentDistribueringService = mockk(relaxed = true),
             pdlRestKlient = mockk(relaxed = true),
+            featureToggleService = featureToggleService,
         )
 
     @Test

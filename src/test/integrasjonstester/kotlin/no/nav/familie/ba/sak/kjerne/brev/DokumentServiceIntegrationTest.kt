@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
-import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -13,6 +12,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.fake.FakeBrevKlient
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
+import no.nav.familie.ba.sak.fake.tilPayload
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -42,6 +43,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.task.JournalførManueltBrevTask
+import no.nav.familie.ba.sak.task.dto.JournalførManueltBrevDTO
 import no.nav.familie.ba.sak.testfiler.Testfil.TEST_PDF
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
@@ -87,6 +90,8 @@ class DokumentServiceIntegrationTest(
     private val dokumentGenereringService: DokumentGenereringService,
     @Autowired
     private val brevmalService: BrevmalService,
+    @Autowired
+    private val fakeTaskRepositoryWrapper: FakeTaskRepositoryWrapper,
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Hent vedtaksbrev`() {
@@ -261,39 +266,6 @@ class DokumentServiceIntegrationTest(
     }
 
     @Test
-    fun `Sjekk at send brev for trukket søknad ikke genererer forside`() {
-        val fnr = randomFnr()
-        val barn1Fnr = randomFnr()
-        val barn2Fnr = randomFnr()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
-
-        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr), true)
-        val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(
-                behandling.id,
-                fnr,
-                listOf(barn1Fnr, barn2Fnr),
-                søkerAktør = behandling.fagsak.aktør,
-                barnAktør = barnAktør,
-            )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-
-        val manueltBrevRequest =
-            ManueltBrevRequest(
-                brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
-            ).byggMottakerdataFraBehandling(
-                behandling,
-                persongrunnlagService,
-                arbeidsfordelingService,
-            )
-        dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
-
-        assertThat(fakeIntegrasjonKlient.hentJournalførteDokumenter().filter { it.fnr == fnr }).isNotEmpty()
-    }
-
-    @Test
     fun `Test sending varsel om revurdering til institusjon`() {
         val fnr = "09121079074"
         val orgNummer = "998765432"
@@ -331,17 +303,15 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        assertThat(fakeIntegrasjonKlient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
-        assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
-        assertEquals("institusjonsbarnets navn", manueltBrevRequest.vedrørende?.navn)
-        val genererteBrev = fakeBrevKlient.genererteBrev
-        assertThat(fakeBrevKlient.genererteBrev).anyMatch {
-            it.mal == Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON &&
-                it.data.flettefelter.gjelder!!
-                    .first() == "institusjonsbarnets navn" &&
-                it.data.flettefelter.organisasjonsnummer!!
-                    .first() == orgNummer
-        }
+        val lagretJournalførManueltBrevTaskPayloadForBehandling = fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(JournalførManueltBrevTask.TASK_STEP_TYPE).tilPayload<JournalførManueltBrevDTO>().single { it.behandlingId == behandling.id }
+
+        assertThat(lagretJournalførManueltBrevTaskPayloadForBehandling).isNotNull
+        val avsenderMottaker = lagretJournalførManueltBrevTaskPayloadForBehandling.mottaker.avsenderMottaker
+        val lagretBrevReuest = lagretJournalførManueltBrevTaskPayloadForBehandling.manuellBrevRequest
+        assertThat(avsenderMottaker?.id == orgNummer && avsenderMottaker.navn == "Testinstitusjon").isTrue
+        assertThat(lagretBrevReuest.vedrørende?.navn).isEqualTo("institusjonsbarnets navn")
+        assertThat(lagretBrevReuest.vedrørende?.fødselsnummer).isEqualTo(fnr)
+        assertThat(lagretBrevReuest.brevmal).isEqualTo(manueltBrevRequest.brevmal)
     }
 
     @Test
@@ -382,9 +352,14 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        assertThat(fakeIntegrasjonKlient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
-        assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
-        assertEquals("institusjonsbarnets navn", manueltBrevRequest.vedrørende?.navn)
+        val lagretJournalførManueltBrevTaskPayloadForBehandling = fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(JournalførManueltBrevTask.TASK_STEP_TYPE).tilPayload<JournalførManueltBrevDTO>().single { it.behandlingId == behandling.id }
+        assertThat(lagretJournalførManueltBrevTaskPayloadForBehandling).isNotNull
+        val avsenderMottaker = lagretJournalførManueltBrevTaskPayloadForBehandling.mottaker.avsenderMottaker
+        val lagretBrevReuest = lagretJournalførManueltBrevTaskPayloadForBehandling.manuellBrevRequest
+        assertThat(avsenderMottaker?.id == orgNummer && avsenderMottaker.navn == "Testinstitusjon").isTrue
+        assertThat(lagretBrevReuest.vedrørende?.navn).isEqualTo("institusjonsbarnets navn")
+        assertThat(lagretBrevReuest.vedrørende?.fødselsnummer).isEqualTo(fnr)
+        assertThat(lagretBrevReuest.brevmal).isEqualTo(manueltBrevRequest.brevmal)
     }
 
     @Test
@@ -425,9 +400,14 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        assertThat(fakeIntegrasjonKlient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
-        assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
-        assertEquals("institusjonsbarnets navn", manueltBrevRequest.vedrørende?.navn)
+        val lagretJournalførManueltBrevTaskPayloadForBehandling = fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(JournalførManueltBrevTask.TASK_STEP_TYPE).tilPayload<JournalførManueltBrevDTO>().single { it.behandlingId == behandling.id }
+        assertThat(lagretJournalførManueltBrevTaskPayloadForBehandling).isNotNull
+        val avsenderMottaker = lagretJournalførManueltBrevTaskPayloadForBehandling.mottaker.avsenderMottaker
+        val lagretBrevReuest = lagretJournalførManueltBrevTaskPayloadForBehandling.manuellBrevRequest
+        assertThat(avsenderMottaker?.id == orgNummer && avsenderMottaker.navn == "Testinstitusjon").isTrue
+        assertThat(lagretBrevReuest.vedrørende?.navn).isEqualTo("institusjonsbarnets navn")
+        assertThat(lagretBrevReuest.vedrørende?.fødselsnummer).isEqualTo(fnr)
+        assertThat(lagretBrevReuest.brevmal).isEqualTo(manueltBrevRequest.brevmal)
     }
 
     @Test
@@ -469,9 +449,14 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        assertThat(fakeIntegrasjonKlient.hentJournalførteDokumenter().filter { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" }).isNotEmpty()
-        assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
-        assertEquals("institusjonsbarnets navn", manueltBrevRequest.vedrørende?.navn)
+        val lagretJournalførManueltBrevTaskPayloadForBehandling = fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(JournalførManueltBrevTask.TASK_STEP_TYPE).tilPayload<JournalførManueltBrevDTO>().single { it.behandlingId == behandling.id }
+        assertThat(lagretJournalførManueltBrevTaskPayloadForBehandling).isNotNull
+        val avsenderMottaker = lagretJournalførManueltBrevTaskPayloadForBehandling.mottaker.avsenderMottaker
+        val lagretBrevReuest = lagretJournalførManueltBrevTaskPayloadForBehandling.manuellBrevRequest
+        assertThat(avsenderMottaker?.id == orgNummer && avsenderMottaker.navn == "Testinstitusjon").isTrue
+        assertThat(lagretBrevReuest.vedrørende?.navn).isEqualTo("institusjonsbarnets navn")
+        assertThat(lagretBrevReuest.vedrørende?.fødselsnummer).isEqualTo(fnr)
+        assertThat(lagretBrevReuest.brevmal).isEqualTo(manueltBrevRequest.brevmal)
     }
 
     fun lagTestPersonopplysningGrunnlagForInstitusjon(

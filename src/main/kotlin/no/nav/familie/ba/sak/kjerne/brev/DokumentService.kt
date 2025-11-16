@@ -32,7 +32,10 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.leggTilBlankAnnenVurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
+import no.nav.familie.ba.sak.task.JournalførManueltBrevTask
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.Logger
@@ -105,6 +108,72 @@ class DokumentService(
             )
         }
 
+        val fagsak = fagsakRepository.finnFagsak(fagsakId) ?: throw Feil("Finnes ikke fagsak for fagsakId=$fagsakId")
+
+        val brevmottakereFraBehandling = behandling?.let { brevmottakerService.hentBrevmottakere(it.id) } ?: emptyList()
+        val brevmottakere =
+            manueltBrevRequest.manuelleBrevmottakere + brevmottakereFraBehandling.map { ManuellBrevmottaker(it) }
+
+        if (!BrevmottakerValidering.erBrevmottakereGyldige(brevmottakere)) {
+            throw FunksjonellFeil(
+                melding = "Det finnes ugyldige brevmottakere i utsending av manuelt brev",
+                frontendFeilmelding = "Adressen som er lagt til manuelt har ugyldig format, og brevet kan ikke sendes. Du må legge til manuell adresse på nytt.",
+            )
+        }
+
+        lagMottakere(fagsak = fagsak, brevmottakere = brevmottakere)
+            .forEach { mottakerInfo ->
+                taskRepository.save(
+                    JournalførManueltBrevTask
+                        .opprettTask(
+                            behandlingId = behandling?.id,
+                            fagsakId = fagsak.id,
+                            manuellBrevRequest = manueltBrevRequest,
+                            mottakerInfo = mottakerInfo,
+                        ),
+                )
+            }
+
+        if (behandling != null && manueltBrevRequest.brevmal.førerTilOpplysningsplikt()) {
+            leggTilOpplysningspliktIVilkårsvurdering(behandling)
+        }
+
+        if (behandling != null && manueltBrevRequest.brevmal.setterBehandlingPåVent()) {
+            settPåVentService.settBehandlingPåVent(
+                behandlingId = behandling.id,
+                frist =
+                    LocalDate
+                        .now()
+                        .plusDays(
+                            manueltBrevRequest.brevmal.ventefristDager(
+                                manuellFrist = manueltBrevRequest.antallUkerSvarfrist?.let { it * 7 }?.toLong(),
+                                behandlingKategori = behandling.kategori,
+                            ),
+                        ),
+                årsak = manueltBrevRequest.brevmal.venteårsak(),
+            )
+        }
+    }
+
+    @Transactional
+    fun sendManueltBrevGammel(
+        manueltBrevRequest: ManueltBrevRequest,
+        behandling: Behandling? = null,
+        fagsakId: Long,
+    ) {
+        if (behandling == null) {
+            validerBrevmottakerService.validerAtFagsakIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+                fagsakId = fagsakId,
+                manueltBrevRequest.manuelleBrevmottakere,
+                barnLagtTilIBrev = manueltBrevRequest.barnIBrev,
+            )
+        } else {
+            validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+                behandlingId = behandling.id,
+                ekstraBarnLagtTilIBrev = manueltBrevRequest.barnIBrev,
+            )
+        }
+
         val førsteside =
             if (manueltBrevRequest.brevmal.skalGenerereForside()) {
                 Førsteside(
@@ -138,12 +207,18 @@ class DokumentService(
 
         mottakere.forEach { mottakerInfo ->
             utgåendeJournalføringService
-                .journalførManueltBrev(
+                .journalførDokument(
                     fnr = fagsak.aktør.aktivFødselsnummer(),
                     fagsakId = fagsakId.toString(),
                     journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
-                    brev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest, fagsak),
-                    dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
+                    brev =
+                        listOf(
+                            Dokument(
+                                dokument = dokumentGenereringService.genererManueltBrev(manueltBrevRequest, fagsak),
+                                filtype = Filtype.PDFA,
+                                dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
+                            ),
+                        ),
                     førsteside = førsteside,
                     eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsakId, behandling?.id, mottakerInfo),
                     avsenderMottaker = mottakerInfo.tilAvsenderMottaker(),

@@ -63,7 +63,7 @@ data class Adresse(
     companion object {
         fun opprettFra(bostedsadresse: Bostedsadresse) =
             Adresse(
-                gyldigFraOgMed = bostedsadresse.gyldigFraOgMed,
+                gyldigFraOgMed = bostedsadresse.angittFlyttedato ?: bostedsadresse.gyldigFraOgMed,
                 gyldigTilOgMed = bostedsadresse.gyldigTilOgMed,
                 vegadresse = bostedsadresse.vegadresse,
                 matrikkeladresse = bostedsadresse.matrikkeladresse,
@@ -101,5 +101,9 @@ fun finnAdressehistorikkFraOgMedDato(
 ): List<Adresse> {
     val sorterteAdresser = adresser.filter { it.gyldigFraOgMed != null }.sortedBy { it.gyldigFraOgMed }
     val sisteAdresseSomOverlapperDato = sorterteAdresser.lastOrNull { it.overlapperMedDato(dato) }
-    return sorterteAdresser.dropWhile { it != sisteAdresseSomOverlapperDato }
+    return if (sisteAdresseSomOverlapperDato == null) {
+        adresser
+    } else {
+        sorterteAdresser.dropWhile { it != sisteAdresseSomOverlapperDato }
+    }
 }

@@ -49,10 +49,10 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import java.time.LocalDate
 
-interface Person {
-    val navn: String
-    val fødselsnummer: String
-}
+data class Person(
+    val navn: String,
+    val fødselsnummer: String,
+)
 
 data class ManuellBrevmottaker(
     val type: MottakerType,
@@ -144,11 +144,7 @@ fun ManueltBrevRequest.byggMottakerdataFraBehandling(
             this.copy(
                 enhet = enhet,
                 mottakerMålform = person.målform,
-                vedrørende =
-                    object : Person {
-                        override val fødselsnummer = fødselsnummerPåPerson
-                        override val navn = person.navn
-                    },
+                vedrørende = Person(navn = person.navn, fødselsnummer = fødselsnummerPåPerson),
             )
         }
 
@@ -188,11 +184,7 @@ fun ManueltBrevRequest.byggMottakerdataFraFagsak(
 
             this.copy(
                 enhet = enhet,
-                vedrørende =
-                    object : Person {
-                        override val fødselsnummer = aktør.aktivFødselsnummer()
-                        override val navn = personNavn
-                    },
+                vedrørende = Person(navn = personNavn, fødselsnummer = aktør.aktivFødselsnummer()),
             )
         }
 

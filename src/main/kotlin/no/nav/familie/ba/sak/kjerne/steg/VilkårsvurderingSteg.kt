@@ -174,7 +174,7 @@ class VilkårsvurderingSteg(
             if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
                 opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(
                     fagsakId = behandling.fagsak.id,
-                    beskrivelse = "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\nDet finnes perioder der søker er bosatt på Svalbard samtidig som et barn med delt barnetrygd ikke er bosatt på Svalbard.",
+                    beskrivelse = "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring. Det finnes perioder der søker er bosatt på Svalbard samtidig som et barn med delt barnetrygd ikke er bosatt på Svalbard.\nEndring av Svalbardtillegg må håndteres manuelt.",
                 )
             }
         }
