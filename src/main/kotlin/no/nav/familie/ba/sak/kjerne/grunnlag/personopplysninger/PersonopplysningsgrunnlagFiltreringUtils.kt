@@ -77,7 +77,7 @@ object PersonopplysningsgrunnlagFiltreringUtils {
 
         if (personType == PersonType.BARN) return this
 
-        if (underkategori == BehandlingUnderkategori.ORDINÆR) return this
+        if (underkategori == BehandlingUnderkategori.ORDINÆR) return emptyList()
 
         val eldsteBarnsFødselsdato = personOpplysningGrunnlag.barna.minOfOrNull { it.fødselsdato } ?: return this
 
