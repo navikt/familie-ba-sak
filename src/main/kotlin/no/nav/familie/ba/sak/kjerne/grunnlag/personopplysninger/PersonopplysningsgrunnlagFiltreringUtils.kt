@@ -62,7 +62,7 @@ object PersonopplysningsgrunnlagFiltreringUtils {
 
         val eldsteBarnsFødselsdato = personOpplysningGrunnlag.barna.minOfOrNull { it.fødselsdato } ?: return this
 
-        val sortertSivilstand = this.sortedBy { it.gyldigFraOgMed } // usikker om den er sortert fra før
+        val sortertSivilstand = this.sortedBy { it.gyldigFraOgMed }
 
         return sortertSivilstand
             .windowed(size = 2, step = 1, partialWindows = true)
