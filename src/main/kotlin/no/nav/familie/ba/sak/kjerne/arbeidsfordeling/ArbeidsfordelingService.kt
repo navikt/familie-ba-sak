@@ -89,7 +89,7 @@ class ArbeidsfordelingService(
             arbeidsfordelingPåBehandlingRepository.save(
                 aktivArbeidsfordelingPåBehandling.copy(
                     behandlendeEnhetId = nyEnhetId,
-                    behandlendeEnhetNavn = BarnetrygdEnhet.hentEnhet(nyEnhetId).enhetsnavn,
+                    behandlendeEnhetNavn = BarnetrygdEnhet.fraEnhetsnummer(nyEnhetId).enhetsnavn,
                 ),
             )
 

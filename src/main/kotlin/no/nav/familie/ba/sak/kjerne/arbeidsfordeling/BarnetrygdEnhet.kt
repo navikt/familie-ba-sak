@@ -31,6 +31,6 @@ enum class BarnetrygdEnhet(
 
         fun erGyldigBehandlendeBarnetrygdEnhet(enhetsnummer: String): Boolean = GYLDIGE_BEHANDLENDE_BARNETRYGD_ENHETER.any { it.enhetsnummer == enhetsnummer }
 
-        fun hentEnhet(enhetsnummer: String): BarnetrygdEnhet = entries.firstOrNull { it.enhetsnummer == enhetsnummer } ?: throw Feil("Finner ikke enhet med enhetsnummer $enhetsnummer")
+        fun fraEnhetsnummer(enhetsnummer: String): BarnetrygdEnhet = entries.firstOrNull { it.enhetsnummer == enhetsnummer } ?: throw Feil("Finner ikke enhet med enhetsnummer $enhetsnummer")
     }
 }
