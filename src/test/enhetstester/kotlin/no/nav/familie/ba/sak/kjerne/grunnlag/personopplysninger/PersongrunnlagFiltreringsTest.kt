@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.datagenerator.lagDeltBosted
 import no.nav.familie.ba.sak.datagenerator.lagOppholdsadresse
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortBostedsadresserFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortDeltBostedForSøker
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortIkkeRelevanteSivilstand
@@ -183,8 +184,8 @@ class PersongrunnlagFiltreringsTest {
             )
 
         // Act
-        val sivilstandSøkerEtter = sivilstandSøkerFør.filtrerBortIkkeRelevanteSivilstand(grunnlag, true)
-        val sivilstandBarnEtter = sivilstandBarnFør.filtrerBortIkkeRelevanteSivilstand(grunnlag, true)
+        val sivilstandSøkerEtter = sivilstandSøkerFør.filtrerBortIkkeRelevanteSivilstand(grunnlag, true, BehandlingUnderkategori.UTVIDET, PersonType.SØKER)
+        val sivilstandBarnEtter = sivilstandBarnFør.filtrerBortIkkeRelevanteSivilstand(grunnlag, true, BehandlingUnderkategori.ORDINÆR, PersonType.BARN)
 
         // Assert
         assertThat(sivilstandSøkerEtter).hasSize(2)

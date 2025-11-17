@@ -361,7 +361,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.sivilstander =
                 personinfo.sivilstander
-                    .filtrerBortIkkeRelevanteSivilstand(personopplysningGrunnlag, filtrerSivilstand)
+                    .filtrerBortIkkeRelevanteSivilstand(personopplysningGrunnlag, filtrerSivilstand, behandlingHentOgPersisterService.hent(personopplysningGrunnlag.behandlingId).underkategori, personType)
                     .map { GrSivilstand.fraSivilstand(it, person) }
                     .toMutableList()
             person.statsborgerskap =
