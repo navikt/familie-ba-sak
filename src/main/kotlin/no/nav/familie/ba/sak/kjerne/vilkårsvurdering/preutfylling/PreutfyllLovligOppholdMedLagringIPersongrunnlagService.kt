@@ -1,9 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -13,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_ARBEIDSFORHOLD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_OPPHOLDSTILLATELSE
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
@@ -32,16 +34,19 @@ class PreutfyllLovligOppholdMedLagringIPersongrunnlagService(
     private val persongrunnlagService: PersongrunnlagService,
 ) {
     fun preutfyllLovligOpphold(vilkårsvurdering: Vilkårsvurdering) {
-        val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
-        val bostedsadresser = pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(identer)
-        val søkersResultater = vilkårsvurdering.personResultater.first { it.erSøkersResultater() }
+        val personOpplysningsgrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id)
 
-        val bostedsadresserSøker = bostedsadresser[søkersResultater.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
+        val søkersResultater = vilkårsvurdering.personResultater.first { it.erSøkersResultater() }
+        val søkerPersonInfo = personOpplysningsgrunnlag.personer.find { it.aktør == søkersResultater.aktør } ?: throw Feil("Aktør ${søkersResultater.aktør.aktørId} har personresultat men ikke persongrunnlag")
+        val bostedsadresserSøker = Adresser.opprettFra(søkerPersonInfo).bostedsadresser
+
         val fomDatoForBeskjæring = finnFomDatoForBeskjæring(søkersResultater, vilkårsvurdering, bostedsadresserSøker) ?: PRAKTISK_TIDLIGSTE_DAG
         val erEØSBorgerOgHarArbeidsforholdTidslinjeSøker = lagErEØSBorgerOgHarArbeidsforholdTidslinje(søkersResultater, fomDatoForBeskjæring)
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
-            val bostedsadresserForPerson = bostedsadresser[personResultat.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
+            val personInfo = personOpplysningsgrunnlag.personer.find { it.aktør == personResultat.aktør } ?: throw Feil("Aktør ${personResultat.aktør.aktørId} har personresultat men ikke persongrunnlag")
+            val bostedsadresserForPerson = Adresser.opprettFra(personInfo).bostedsadresser
+
             val lovligOppholdVilkårResultat =
                 genererLovligOppholdVilkårResultat(personResultat, erEØSBorgerOgHarArbeidsforholdTidslinjeSøker, bostedsadresserForPerson)
 
@@ -55,7 +60,7 @@ class PreutfyllLovligOppholdMedLagringIPersongrunnlagService(
     private fun genererLovligOppholdVilkårResultat(
         personResultat: PersonResultat,
         erEØSBorgerOgHarArbeidsforholdTidslinje: Tidslinje<Boolean>,
-        bostedsadresserForPerson: List<Bostedsadresse>,
+        bostedsadresserForPerson: List<Adresse>,
     ): Set<VilkårResultat> {
         val erNordiskStatsborgerTidslinje = pdlRestKlient.lagErNordiskStatsborgerTidslinje(personResultat)
 
@@ -95,7 +100,7 @@ class PreutfyllLovligOppholdMedLagringIPersongrunnlagService(
     private fun finnFomDatoForBeskjæring(
         personResultat: PersonResultat,
         vilkårsvurdering: Vilkårsvurdering,
-        bostedsadresser: List<Bostedsadresse>,
+        bostedsadresser: List<Adresse>,
     ): LocalDate? {
         val førsteBostedFomDato =
             bostedsadresser
