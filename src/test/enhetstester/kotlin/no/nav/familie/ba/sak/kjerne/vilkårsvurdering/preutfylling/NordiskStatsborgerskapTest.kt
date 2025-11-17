@@ -10,7 +10,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Folkeregistermetadata
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.net.URI
 import java.time.LocalDate
