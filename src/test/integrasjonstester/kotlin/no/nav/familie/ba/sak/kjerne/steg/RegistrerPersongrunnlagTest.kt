@@ -51,7 +51,7 @@ class RegistrerPersongrunnlagTest(
         Assertions.assertTrue(grunnlag1.personer.any { it.aktør.aktivFødselsnummer() == barn1Id })
         Assertions.assertTrue(grunnlag1.personer.any { it.aktør.aktivFødselsnummer() == barn2Id })
         Assertions.assertEquals(
-            2,
+            0,
             grunnlag1.personer
                 .first { it.type == PersonType.SØKER }
                 .sivilstander.size,
