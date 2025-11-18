@@ -239,7 +239,7 @@ class PersongrunnlagService(
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering()
+        val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering() || behandling.erFinnmarksEllerSvalbardtillegg()
         val søker =
             hentPerson(
                 aktør = aktør,
@@ -464,27 +464,6 @@ class PersongrunnlagService(
                             poststed = it.poststed(),
                         )
                     }.toMutableList()
-        }
-    }
-
-    fun oppdaterStatsborgerskapPåPersoner(
-        personer: List<Person>,
-    ) {
-        val filtrerStatsborgerskap = featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO)
-
-        personer.forEach { person ->
-            val statsborgerskap = personopplysningerService.hentHistoriskStatsborgerskap(aktør = person.aktør)
-
-            person.statsborgerskap =
-                statsborgerskap
-                    .filtrerBortStatsborgerskapFørEldsteBarn(person.personopplysningGrunnlag, filtrerStatsborgerskap)
-                    .flatMap {
-                        statsborgerskapService.hentStatsborgerskapMedMedlemskap(
-                            statsborgerskap = it,
-                            person = person,
-                        )
-                    }.sortedBy { it.gyldigPeriode?.fom }
-                    .toMutableList()
         }
     }
 

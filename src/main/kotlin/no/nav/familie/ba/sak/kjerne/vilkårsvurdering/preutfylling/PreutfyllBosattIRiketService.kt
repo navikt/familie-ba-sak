@@ -61,7 +61,6 @@ class PreutfyllBosattIRiketService(
             return preutfyllBosattIRIketMedLagringIPersonopplysningsgrunnlagService.preutfyllBosattIRiket(
                 vilkårsvurdering,
                 identerVilkårSkalPreutfyllesFor,
-                cutOffFomDato,
             )
         }
 
