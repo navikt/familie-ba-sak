@@ -67,7 +67,7 @@ object PersonopplysningsgrunnlagFiltreringUtils {
         return this.filter { it.oppholdTil?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
     }
 
-    fun List<Sivilstand>.filtrerBortIkkeRelevanteSivilstand(
+    fun List<Sivilstand>.filtrerBortIkkeRelevanteSivilstander(
         personOpplysningGrunnlag: PersonopplysningGrunnlag,
         filtrerSivilstand: Boolean,
         underkategori: BehandlingUnderkategori,
