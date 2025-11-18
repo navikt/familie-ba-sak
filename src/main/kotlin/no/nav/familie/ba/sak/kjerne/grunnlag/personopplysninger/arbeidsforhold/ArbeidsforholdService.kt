@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import org.springframework.stereotype.Service
@@ -9,13 +9,16 @@ import java.time.LocalDate
 
 @Service
 class ArbeidsforholdService(
-    private val integrasjonKlient: IntegrasjonKlient,
+    private val systemOnlyIntegrasjonKlient: SystemOnlyIntegrasjonKlient,
 ) {
-    fun hentArbeidsforhold(person: Person): List<GrArbeidsforhold> {
-        val arbeidsforholdForSisteFemÅr =
-            integrasjonKlient.hentArbeidsforhold(person.aktør.aktivFødselsnummer(), LocalDate.now().minusYears(5))
+    fun hentArbeidsforholdForFødselshendelser(
+        person: Person,
+        ansettelsesperiodeFom: LocalDate,
+    ): List<GrArbeidsforhold> {
+        val arbeidsforhold =
+            systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(person.aktør.aktivFødselsnummer(), ansettelsesperiodeFom)
 
-        return arbeidsforholdForSisteFemÅr.map {
+        return arbeidsforhold.map {
             val periode = DatoIntervallEntitet(it.ansettelsesperiode?.periode?.fom, it.ansettelsesperiode?.periode?.tom)
             val arbeidsgiverId =
                 when (it.arbeidsgiver?.type) {

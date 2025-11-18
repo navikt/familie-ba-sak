@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -10,20 +11,20 @@ import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Ansettelsesperiode
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
-import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -41,9 +42,6 @@ class PreutfyllLovligOppholdServiceTest {
         private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
         private val preutfyllLovligOppholdMedLagringIPersongrunnlagService =
             PreutfyllLovligOppholdMedLagringIPersongrunnlagService(
-                pdlRestKlient,
-                statsborgerskapService,
-                systemOnlyIntegrasjonKlient,
                 persongrunnlagService,
             )
         private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService =
@@ -133,17 +131,16 @@ class PreutfyllLovligOppholdServiceTest {
                                         person = this,
                                     ),
                                 )
+                            statsborgerskap =
+                                mutableListOf(
+                                    GrStatsborgerskap(landkode = "ES", gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusYears(2)), medlemskap = Medlemskap.EØS, person = this),
+                                    GrStatsborgerskap(landkode = "NOR", gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(2).plusDays(1), tom = null), medlemskap = Medlemskap.NORDEN, person = this),
+                                )
                         },
                     )
                 }
 
             every { persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id) } returns persongrunnlag
-
-            every { pdlRestKlient.hentStatsborgerskap(aktør, historikk = true) } returns
-                listOf(
-                    Statsborgerskap("ES", LocalDate.now().minusYears(5), LocalDate.now().minusYears(2), null),
-                    Statsborgerskap("NOR", LocalDate.now().minusYears(2).plusDays(1), null, null),
-                )
 
             // Act
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
@@ -183,17 +180,16 @@ class PreutfyllLovligOppholdServiceTest {
                                         person = this,
                                     ),
                                 )
+                            statsborgerskap =
+                                mutableListOf(
+                                    GrStatsborgerskap(landkode = "ES", gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(10), tom = LocalDate.now().minusYears(5)), medlemskap = Medlemskap.EØS, person = this),
+                                    GrStatsborgerskap(landkode = "NOR", gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(5).plusDays(1), tom = null), medlemskap = Medlemskap.NORDEN, person = this),
+                                )
                         },
                     )
                 }
 
             every { persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id) } returns persongrunnlag
-
-            every { pdlRestKlient.hentStatsborgerskap(aktør, historikk = true) } returns
-                listOf(
-                    Statsborgerskap("ES", LocalDate.now().minusYears(10), LocalDate.now().minusYears(5), null),
-                    Statsborgerskap("NOR", LocalDate.now().minusYears(5).plusDays(1), null, null),
-                )
 
             // Act
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
@@ -238,16 +234,15 @@ class PreutfyllLovligOppholdServiceTest {
                                         person = this,
                                     ),
                                 )
+                            statsborgerskap =
+                                mutableListOf(
+                                    GrStatsborgerskap(landkode = "SWE", gyldigPeriode = DatoIntervallEntitet(fom = null, tom = null), medlemskap = Medlemskap.NORDEN, person = this),
+                                )
                         },
                     )
                 }
 
             every { persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id) } returns persongrunnlag
-
-            every { pdlRestKlient.hentStatsborgerskap(aktør, historikk = true) } returns
-                listOf(
-                    Statsborgerskap("SWE", null, null, null),
-                )
 
             // Act
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
@@ -287,16 +282,15 @@ class PreutfyllLovligOppholdServiceTest {
                                         person = this,
                                     ),
                                 )
+                            statsborgerskap =
+                                mutableListOf(
+                                    GrStatsborgerskap(landkode = "NOR", gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(10), tom = null), medlemskap = Medlemskap.NORDEN, person = this),
+                                )
                         },
                     )
                 }
 
             every { persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id) } returns persongrunnlag
-
-            every { pdlRestKlient.hentStatsborgerskap(aktør, historikk = true) } returns
-                listOf(
-                    Statsborgerskap("NOR", LocalDate.now().minusYears(10), null, null),
-                )
 
             // Act
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
@@ -336,21 +330,16 @@ class PreutfyllLovligOppholdServiceTest {
                                         person = this,
                                     ),
                                 )
+                            statsborgerskap =
+                                mutableListOf(
+                                    GrStatsborgerskap(landkode = "BE", gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(20), tom = null), medlemskap = Medlemskap.EØS, person = this),
+                                )
+                            arbeidsforhold = mutableListOf(GrArbeidsforhold(arbeidsgiverId = null, periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(10), tom = null), person = this, arbeidsgiverType = ArbeidsgiverType.Person.name))
                         },
                     )
                 }
 
             every { persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id) } returns persongrunnlag
-
-            every { pdlRestKlient.hentStatsborgerskap(aktør, historikk = true) } returns
-                listOf(
-                    Statsborgerskap("BE", LocalDate.now().minusYears(20), null, null),
-                )
-
-            every { statsborgerskapService.hentSterkesteMedlemskap(Statsborgerskap("BE", LocalDate.now().minusYears(20), null, null)) } returns Medlemskap.EØS
-
-            every { systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(any(), LocalDate.now().minusYears(10)) } returns
-                listOf(Arbeidsforhold(arbeidsgiver = null, ansettelsesperiode = Ansettelsesperiode(Periode(LocalDate.now().minusYears(10), null))))
 
             // Act
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
@@ -390,21 +379,16 @@ class PreutfyllLovligOppholdServiceTest {
                                         person = this,
                                     ),
                                 )
+                            statsborgerskap =
+                                mutableListOf(
+                                    GrStatsborgerskap(landkode = "BE", gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(20), tom = null), medlemskap = Medlemskap.EØS, person = this),
+                                )
+                            arbeidsforhold = mutableListOf(GrArbeidsforhold(arbeidsgiverId = null, periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(10), tom = null), person = this, arbeidsgiverType = ArbeidsgiverType.Person.name))
                         },
                     )
                 }
 
             every { persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id) } returns persongrunnlag
-
-            every { pdlRestKlient.hentStatsborgerskap(aktør, historikk = true) } returns
-                listOf(
-                    Statsborgerskap("BE", LocalDate.now().minusYears(20), null, null),
-                )
-
-            every { statsborgerskapService.hentSterkesteMedlemskap(Statsborgerskap("BE", LocalDate.now().minusYears(20), null, null)) } returns Medlemskap.EØS
-
-            every { systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(any(), LocalDate.now().minusYears(10)) } returns
-                listOf(Arbeidsforhold(arbeidsgiver = null, ansettelsesperiode = Ansettelsesperiode(Periode(LocalDate.now().minusYears(10), null))))
 
             // Act
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
@@ -445,14 +429,15 @@ class PreutfyllLovligOppholdServiceTest {
                                         person = this,
                                     ),
                                 )
+                            opphold =
+                                mutableListOf(
+                                    GrOpphold(type = OPPHOLDSTILLATELSE.PERMANENT, gyldigPeriode = DatoIntervallEntitet(fom = null, tom = null), person = this),
+                                )
                         },
                     )
                 }
 
             every { persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id) } returns persongrunnlag
-
-            every { pdlRestKlient.hentOppholdstillatelse(aktør, true) } returns
-                listOf(Opphold(OPPHOLDSTILLATELSE.PERMANENT, null, null))
 
             // Act
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
@@ -492,14 +477,15 @@ class PreutfyllLovligOppholdServiceTest {
                                         person = this,
                                     ),
                                 )
+                            opphold =
+                                mutableListOf(
+                                    GrOpphold(type = OPPHOLDSTILLATELSE.MIDLERTIDIG, gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().plusYears(5)), person = this),
+                                )
                         },
                     )
                 }
 
             every { persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id) } returns persongrunnlag
-
-            every { pdlRestKlient.hentOppholdstillatelse(aktør, true) } returns
-                listOf(Opphold(OPPHOLDSTILLATELSE.MIDLERTIDIG, LocalDate.now().minusYears(5), LocalDate.now().plusYears(5)))
 
             // Act
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)

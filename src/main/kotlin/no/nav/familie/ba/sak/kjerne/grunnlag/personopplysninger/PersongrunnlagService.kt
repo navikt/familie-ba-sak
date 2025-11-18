@@ -125,7 +125,9 @@ class PersongrunnlagService(
             ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling $behandlingId")
 
     @Transactional
-    fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
+    fun oppdaterRegisteropplysninger(
+        behandlingId: Long,
+    ): PersonopplysningGrunnlag {
         val nåværendeGrunnlag = hentAktivThrows(behandlingId = behandlingId)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
@@ -251,7 +253,6 @@ class PersongrunnlagService(
                         BARN_ENSLIG_MINDREÅRIG, INSTITUSJON -> PersonType.BARN
                     },
                 skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
-                hentArbeidsforhold = behandling.skalBehandlesAutomatisk,
             )
         personopplysningGrunnlag.personer.add(søker)
 
@@ -276,7 +277,6 @@ class PersongrunnlagService(
                         målform = målform,
                         personType = PersonType.ANNENPART,
                         skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
-                        hentArbeidsforhold = true,
                     ),
                 )
             }
@@ -304,7 +304,6 @@ class PersongrunnlagService(
         målform: Målform,
         personType: PersonType,
         skalHenteEnkelPersonInfo: Boolean = false,
-        hentArbeidsforhold: Boolean = false,
     ): Person {
         val personinfo =
             if (skalHenteEnkelPersonInfo) {
@@ -379,11 +378,23 @@ class PersongrunnlagService(
                     dødsfallDatoFraPdl = personinfo.dødsfall?.dødsdato,
                     dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo?.adresse,
                 )
-            if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
+
+            val personErSøker = person.type == PersonType.SØKER
+            val harStatsborgerskapIEØS = person.statsborgerskap.any { it.medlemskap == Medlemskap.EØS }
+            if (personErSøker && harStatsborgerskapIEØS) {
+                val behandling = behandlingHentOgPersisterService.hent(personopplysningGrunnlag.behandlingId)
+                val ansettelsesperiodeFom =
+                    if (!behandling.skalBehandlesAutomatisk) { // Skal kun komme hit under preutfylling
+                        personopplysningGrunnlag.personer.filter { it.type == PersonType.BARN }.minOf { it.fødselsdato }
+                    } else {
+                        LocalDate.now().minusYears(5)
+                    }
+
                 person.arbeidsforhold =
                     arbeidsforholdService
-                        .hentArbeidsforhold(
+                        .hentArbeidsforholdForFødselshendelser(
                             person = person,
+                            ansettelsesperiodeFom = ansettelsesperiodeFom,
                         ).toMutableList()
             }
         }
