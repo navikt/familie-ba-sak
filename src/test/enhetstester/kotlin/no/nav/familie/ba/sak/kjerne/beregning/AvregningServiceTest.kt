@@ -569,11 +569,11 @@ class AvregningServiceTest {
                     ),
                 )
 
-            val eøsBehandling = lagBehandling(behandlingKategori = BehandlingKategori.NASJONAL, årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO)
+            val endreMigreringsdatoBehandling = lagBehandling(behandlingKategori = BehandlingKategori.NASJONAL, årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO)
 
-            every { behandlingHentOgPersisterService.hent(any()) } returns eøsBehandling
+            every { behandlingHentOgPersisterService.hent(any()) } returns endreMigreringsdatoBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(eøsBehandling.id) } returns andelerInneværendeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(endreMigreringsdatoBehandling.id) } returns andelerInneværendeBehandling
 
             // Act
             val perioderMedEtterbetalingOgFeilutbetaling =
