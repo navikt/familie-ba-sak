@@ -1,48 +1,98 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
-import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.kjerne.simulering.domene.OverlappendePerioderMedAndreFagsaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
+import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPostering
 import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.filtrerIkkeNull
+import no.nav.familie.tidslinje.mapVerdi
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.tomTidslinje
+import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
+import java.math.BigDecimal
+import java.time.LocalDate
 
 fun finnOverlappendePerioder(
     økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
     fagsakId: Long,
 ): List<OverlappendePerioderMedAndreFagsaker> {
-    val fagsakPerioder =
-        økonomiSimuleringMottakere
-            .flatMap { mottaker ->
-                mottaker.økonomiSimuleringPostering.mapNotNull { postering ->
-                    postering.fagsakId?.let {
-                        Periode(it, postering.fom, postering.tom)
-                    }
-                }
-            }.distinct()
+    val tidSimuleringHentet = økonomiSimuleringMottakere.singleOrNull()?.opprettetTidspunkt?.toLocalDate() ?: return emptyList()
 
-    val perioderForForskjelligeFagsaker = fagsakPerioder.groupBy { it.verdi }
-    val fagsakMedPosteringTidslinjer = perioderForForskjelligeFagsaker.mapValues { (_, perioder) -> perioder.tilTidslinje() }
+    val posteringerMedFagsakId = økonomiSimuleringMottakere.flatMap { it.økonomiSimuleringPostering }.filter { it.fagsakId != null }
+    val posteringerPerFagsak = posteringerMedFagsakId.groupBy { it.fagsakId!! }
+    val fagsakTilTidslinje =
+        posteringerPerFagsak.mapValues { (fagsakId, posteringerForFagsak) ->
+            val perioderForFagsak = posteringerForFagsak.groupBy { it.fom to it.tom }
+            val tidslinjeMedFeilOgEtterbetalingForFagsak =
+                perioderForFagsak
+                    .map { (fomOgTom, posteringForFagsakIPeriode) ->
+                        posteringForFagsakIPeriode.lagPerioderMedFeilOgEtterbetalinger(tidSimuleringHentet, fagsakId, fomOgTom)
+                    }.tilTidslinje()
+            tidslinjeMedFeilOgEtterbetalingForFagsak
+        }
 
-    val kombinertTidslinje =
-        fagsakMedPosteringTidslinjer
+    val originalFagsakUtenVerdierForFeilOgEtterbetaling =
+        fagsakTilTidslinje[fagsakId]
+            ?.mapVerdi {
+                FagsakerMedFeilOgEtterbetalinger(emptyList(), emptyList())
+            }?.filtrerIkkeNull() ?: tomTidslinje()
+
+    val feilOgEtterbetalingerForAndreFagsakerOverTid =
+        fagsakTilTidslinje
+            .filterNot { it.key == fagsakId }
             .values
-            .fold(tomTidslinje<List<Long>>()) { kombinertTidslinje, tidslinje ->
-                kombinertTidslinje.kombinerMed(tidslinje) { kombinert, annen ->
-                    kombinert.orEmpty() + listOfNotNull(annen)
+            .fold(
+                originalFagsakUtenVerdierForFeilOgEtterbetaling,
+            ) { kombinerteTidslinjer, nyTidslinje ->
+                kombinerteTidslinjer.kombinerMed(nyTidslinje) { eksisterendePeriode, nyPeriode ->
+                    eksisterendePeriode?.copy(
+                        fagsakerMedFeilutbetaling = eksisterendePeriode.fagsakerMedFeilutbetaling + (nyPeriode?.fagsakerMedFeilutbetaling ?: emptyList()),
+                        fagsakerMedEtterbetaling = eksisterendePeriode.fagsakerMedEtterbetaling + (nyPeriode?.fagsakerMedEtterbetaling ?: emptyList()),
+                    )
                 }
             }
-    return kombinertTidslinje
+
+    return feilOgEtterbetalingerForAndreFagsakerOverTid
         .tilPerioder()
-        .filter { (it.verdi?.size ?: 0) > 1 } // Må være overlappende perioder
-        .filter { it.verdi?.contains(fagsakId) == true } // Må overlappe med fagsakIden som er sendt inn
+        .filtrerIkkeNull()
         .map { periode ->
             OverlappendePerioderMedAndreFagsaker(
-                fom = periode.fom ?: throw Feil("ØkonomiSimuleringPostering for fagsaker ${periode.verdi} skal ikke kunne ha null som fom-verdi"),
-                tom = periode.tom ?: throw Feil("ØkonomiSimuleringPostering for fagsaker ${periode.verdi} skal ikke kunne ha null som fom-verdi"),
-                fagsaker = periode.verdi!!.filterNot { it == fagsakId },
+                fom = periode.fom ?: TIDENES_MORGEN,
+                tom = periode.tom ?: TIDENES_ENDE,
+                fagsakerMedFeilutbetaling = periode.verdi.fagsakerMedFeilutbetaling,
+                fagsakerMedEtterbetaling = periode.verdi.fagsakerMedEtterbetaling,
             )
+        }.filterNot {
+            it.fagsakerMedFeilutbetaling.isEmpty() && it.fagsakerMedEtterbetaling.isEmpty()
         }
 }
+
+private fun List<ØkonomiSimuleringPostering>.lagPerioderMedFeilOgEtterbetalinger(
+    tidSimuleringHentet: LocalDate,
+    fagsakId: Long,
+    fomOgTom: Pair<LocalDate, LocalDate>,
+): Periode<FagsakerMedFeilOgEtterbetalinger> {
+    val feilutbetalinger = hentPositivFeilbetalingIPeriode(this)
+    val etterbetalinger = hentEtterbetalingIPeriode(this, tidSimuleringHentet)
+
+    val fagsakerMedFeilOgEtterbetalinger =
+        FagsakerMedFeilOgEtterbetalinger(
+            fagsakerMedFeilutbetaling = listOfNotNull(fagsakId.takeIf { feilutbetalinger != BigDecimal.ZERO }),
+            fagsakerMedEtterbetaling = listOfNotNull(fagsakId.takeIf { etterbetalinger != BigDecimal.ZERO }),
+        )
+
+    return Periode(
+        fom = fomOgTom.first,
+        tom = fomOgTom.second,
+        verdi = fagsakerMedFeilOgEtterbetalinger,
+    )
+}
+
+private data class FagsakerMedFeilOgEtterbetalinger(
+    val fagsakerMedFeilutbetaling: List<Long>,
+    val fagsakerMedEtterbetaling: List<Long>,
+)
