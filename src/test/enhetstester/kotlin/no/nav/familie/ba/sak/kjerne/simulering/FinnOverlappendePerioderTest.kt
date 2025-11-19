@@ -60,8 +60,8 @@ class FinnOverlappendePerioderTest {
         val fagsakerSomOverlapperFor6MånederSiden = overlappendePerioder.finnPeriodeForDato(for6MånederSiden)?.fagsakerMedFeilutbetaling
         assertThat(fagsakerSomOverlapperFor6MånederSiden).isEqualTo(listOf(2L, 3L))
 
-        assertThat(overlappendePerioder.none { it.fagsakerMedFeilutbetaling.contains(1L) }).`as`("listen skal ikke inneholde fagsaken det er søkt for").isTrue()
-        assertThat(overlappendePerioder.none { it.fagsakerMedFeilutbetaling.contains(4L) }).`as`("listen skal ikke inneholde fagsak som ikke overlapper").isTrue()
+        assertThat(overlappendePerioder.none { it.fagsakerMedFeilutbetaling.contains(1L) }).`as`("Genererer overlappende perioder for samme fagsak det skal finnes overlapp for").isTrue()
+        assertThat(overlappendePerioder.none { it.fagsakerMedFeilutbetaling.contains(4L) }).`as`("Genererer overlappende perioder for fagsak som ikke skal overlappe").isTrue()
     }
 
     @Test
@@ -126,8 +126,8 @@ class FinnOverlappendePerioderTest {
         val fagsakerSomOverlapperPåEtterbetalingFor6MånederSiden = overlappendePerioder.finnPeriodeForDato(for6MånederSiden)?.fagsakerMedEtterbetaling
         assertThat(fagsakerSomOverlapperPåEtterbetalingFor6MånederSiden).isEqualTo(listOf(3L))
 
-        assertThat(overlappendePerioder.none { it.fagsakerMedFeilutbetaling.contains(1L) }).`as`("listen skal ikke inneholde fagsaken det er søkt for").isTrue()
-        assertThat(overlappendePerioder.none { it.fagsakerMedFeilutbetaling.contains(4L) }).`as`("listen skal ikke inneholde fagsak som ikke overlapper").isTrue()
+        assertThat(overlappendePerioder.none { it.fagsakerMedFeilutbetaling.contains(1L) }).`as`("Genererer overlappende perioder for samme fagsak det skal finnes overlapp for").isTrue()
+        assertThat(overlappendePerioder.none { it.fagsakerMedFeilutbetaling.contains(4L) }).`as`("Genererer overlappende perioder for fagsak som ikke skal overlappe").isTrue()
     }
 
     @Test
