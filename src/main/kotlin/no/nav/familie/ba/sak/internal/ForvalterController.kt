@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
+import no.nav.familie.ba.sak.kjerne.porteføljejustering.PorteføljejusteringService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
@@ -104,6 +105,7 @@ class ForvalterController(
     private val envService: EnvService,
     private val autovedtakSvalbardtilleggTaskOppretter: AutovedtakSvalbardtilleggTaskOppretter,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+    private val porteføljejusteringService: PorteføljejusteringService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -598,6 +600,28 @@ class ForvalterController(
         opprettTaskService.opprettAutovedtakSvalbardtilleggTasker(fagsakIder)
 
         return ResponseEntity.ok("Tasker for autovedtak av Svalbardtillegg opprettet")
+    }
+
+    @PostMapping("/opprett-tasker-for-flytting-av-steinkjer-oppgaver")
+    @Operation(
+        summary = "Oppretter tasker flytting av steinkjer oppgaver",
+    )
+    fun opprettTaskerForFlyttingAvSteinkjerOppgaver(
+        @RequestParam("antallFlytteTasks") antallFlytteTasks: Int? = null,
+        @RequestParam("dryRun") dryRun: Boolean = true,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett tasker for flytting av steinkjer oppgaver",
+        )
+
+        if (!featureToggleService.isEnabled(FeatureToggle.PORTEFØLJEJUSTERING)) {
+            return ResponseEntity.ok("Toggle for porteføljejustering er skrudd av")
+        }
+
+        val (antallOppgaverTotalt, antallFlytteTasksOpprettet) = porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer(antallFlytteTasks, dryRun)
+
+        return ResponseEntity.ok("Antall oppgaver totalt:$antallOppgaverTotalt, Antall tasks opprettet for flytting:$antallFlytteTasksOpprettet")
     }
 
     @PostMapping("/opprett-tasker-for-autovedtak-svalbardtillegg/{antallBehandlinger}")

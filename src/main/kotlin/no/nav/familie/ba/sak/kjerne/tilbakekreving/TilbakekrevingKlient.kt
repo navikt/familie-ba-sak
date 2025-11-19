@@ -117,6 +117,11 @@ class TilbakekrevingKlient(
         ) { postForEntity(uri, request) }
     }
 
+    fun oppdaterEnhetPåÅpenBehandling(
+        fagsakId: Long,
+        nyEnhetId: String,
+    ): String = "TODO I NAV-26753"
+
     companion object {
         const val FAMILIE_TILBAKE = "familie-tilbake"
     }
