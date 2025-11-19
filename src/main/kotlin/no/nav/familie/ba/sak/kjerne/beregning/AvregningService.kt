@@ -36,7 +36,8 @@ class AvregningService(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         if (behandling.kategori == BehandlingKategori.EØS || behandling.type == BehandlingType.TEKNISK_ENDRING ||
-            behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
+            behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+        ) {
             return emptyList()
         }
 
