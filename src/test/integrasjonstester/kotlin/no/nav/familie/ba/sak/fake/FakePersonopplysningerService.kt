@@ -28,6 +28,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROL
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE.FAR
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE.MEDMOR
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
+import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
@@ -194,6 +195,15 @@ class FakePersonopplysningerService(
             }
         }
 
+        fun leggTilOppholdsadresserIPersonInfo(
+            personIdenter: List<String>,
+            oppholdsadresser: List<Oppholdsadresse>,
+        ) {
+            personIdenter.forEach {
+                personInfo[it] = personInfo[it]!!.copy(oppholdsadresser = oppholdsadresser)
+            }
+        }
+
         fun settPersonInfoStatsborgerskap(
             personIdent: String,
             statsborgerskap: Statsborgerskap,
@@ -251,6 +261,7 @@ private val bostedsadresse =
                 postnummer = "0202",
                 kommunenummer = "2231",
             ),
+        gyldigFraOgMed = LocalDate.now().minusDays(15),
     )
 
 private val bostedsadresseHistorikk =

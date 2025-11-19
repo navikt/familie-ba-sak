@@ -70,4 +70,6 @@ enum class FeatureToggle(
     FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO("familie-ba-sak.filtrer-statsborgerskap-paa-eldste-barns-fodselsdato"),
 
     PORTEFØLJEJUSTERING("familie-ba-sak.portefoljejustering"),
+
+    FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO("familie-ba-sak.filtrer-opphold-paa-eldste-barns-fodselsdato"),
 }
