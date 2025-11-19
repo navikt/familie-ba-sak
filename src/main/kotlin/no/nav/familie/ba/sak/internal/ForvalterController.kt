@@ -615,6 +615,10 @@ class ForvalterController(
             handling = "Opprett tasker for flytting av steinkjer oppgaver",
         )
 
+        if (!featureToggleService.isEnabled(FeatureToggle.PORTEFØLJEJUSTERING)) {
+            return ResponseEntity.ok("Toggle for porteføljejustering er skrudd av")
+        }
+
         val (antallOppgaverTotalt, antallFlytteTasksOpprettet) = porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer(antallFlytteTasks, dryRun)
 
         return ResponseEntity.ok("Antall oppgaver totalt:$antallOppgaverTotalt, Antall tasks opprettet for flytting:$antallFlytteTasksOpprettet")

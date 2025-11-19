@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.klage.KlageKlient
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
+import no.nav.familie.ba.sak.task.PorteføljejusteringTask
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -152,11 +153,20 @@ class PorteføljejusteringFlyttOppgaveTask(
         const val TASK_STEP_TYPE = "porteføljejusteringFlyttOppgaveTask"
         private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-        fun opprettTask(oppgaveId: Long): Task =
+        fun opprettTask(
+            oppgaveId: Long,
+            enhetId: String?,
+            mappeId: String?,
+        ): Task =
             Task(
                 type = TASK_STEP_TYPE,
                 payload = oppgaveId.toString(),
-                properties = Properties().apply { this["oppgaveId"] = oppgaveId.toString() },
+                properties =
+                    Properties().apply {
+                        this["oppgaveId"] = oppgaveId.toString()
+                        this["enhetId"] = enhetId
+                        this["mappeId"] = mappeId
+                    },
             )
     }
 }
