@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -34,7 +35,8 @@ class AvregningService(
     fun hentPerioderMedAvregning(behandlingId: Long): List<AvregningPeriode> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
-        if (behandling.kategori == BehandlingKategori.EØS || behandling.type == BehandlingType.TEKNISK_ENDRING) {
+        if (behandling.kategori == BehandlingKategori.EØS || behandling.type == BehandlingType.TEKNISK_ENDRING ||
+            behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
             return emptyList()
         }
 
