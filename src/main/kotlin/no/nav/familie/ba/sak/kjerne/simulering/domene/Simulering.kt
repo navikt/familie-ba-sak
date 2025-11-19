@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.simulering.domene
 
-import no.nav.familie.tidslinje.Periode
-import no.nav.familie.tidslinje.Tidslinje
-import no.nav.familie.tidslinje.tilTidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -75,5 +72,3 @@ data class OverlappendePerioderMedAndreFagsaker(
     val fagsakerMedFeilutbetaling: List<Long>,
     val fagsakerMedEtterbetaling: List<Long>,
 )
-
-fun List<OverlappendePerioderMedAndreFagsaker>.tilTidslinje(): Tidslinje<OverlappendePerioderMedAndreFagsaker> = this.map { Periode(it, it.fom, it.tom) }.tilTidslinje()
