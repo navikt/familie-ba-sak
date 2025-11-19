@@ -164,8 +164,8 @@ class PorteføljejusteringFlyttOppgaveTask(
                 properties =
                     Properties().apply {
                         this["oppgaveId"] = oppgaveId.toString()
-                        this["enhetId"] = enhetId
-                        this["mappeId"] = mappeId
+                        enhetId?.let { this["enhetId"] = it }
+                        mappeId?.let { this["mappeId"] = it }
                     },
             )
     }
