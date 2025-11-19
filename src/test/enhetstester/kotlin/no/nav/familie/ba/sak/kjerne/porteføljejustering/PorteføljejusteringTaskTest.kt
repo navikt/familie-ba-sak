@@ -52,7 +52,7 @@ class PorteføljejusteringTaskTest {
     @Test
     fun `Skal kaste feil dersom oppgave ikke er tilknyttet noe folkeregistrert ident`() {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -73,7 +73,7 @@ class PorteføljejusteringTaskTest {
     @Test
     fun `Skal kaste feil dersom vi ikke får tilbake noen enheter på ident ved kall mot integrasjoner og videre til norg2`() {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -97,7 +97,7 @@ class PorteføljejusteringTaskTest {
     @Test
     fun `Skal kaste feil dersom vi får tilbake flere enn 1 enhet på ident ved kall mot integrasjoner og videre til norg2`() {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -125,7 +125,7 @@ class PorteføljejusteringTaskTest {
     @Test
     fun `Skal kaste feil dersom vi får tilbake Steinkjer som enhet på ident ved kall mot integrasjoner og videre til norg2`() {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -152,7 +152,7 @@ class PorteføljejusteringTaskTest {
     @Test
     fun `Skal stoppe utføringen av task hvis det er midlertidig enhet vi får tilbake ved kall mot integrasjoner og videre til norg2`() {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -181,7 +181,7 @@ class PorteføljejusteringTaskTest {
     @Test
     fun `Skal oppdatere oppgaven med ny enhet og mappe og ikke mer dersom saksreferansen ikke er fylt ut`() {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -217,7 +217,7 @@ class PorteføljejusteringTaskTest {
         oppgavetype: Oppgavetype,
     ) {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -253,7 +253,7 @@ class PorteføljejusteringTaskTest {
         oppgavetype: Oppgavetype,
     ) {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -304,7 +304,7 @@ class PorteføljejusteringTaskTest {
         oppgavetype: Oppgavetype,
     ) {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -342,7 +342,7 @@ class PorteføljejusteringTaskTest {
         oppgavetype: Oppgavetype,
     ) {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1)
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
