@@ -375,6 +375,32 @@ class IntegrasjonKlient(
         }
     }
 
+    fun tilordneEnhetOgMappeForOppgave(
+        oppgaveId: Long,
+        nyEnhet: String,
+        nyMappe: String?,
+    ): OppgaveResponse {
+        val baseUri = URI.create("$integrasjonUri/oppgave/$oppgaveId/enhet/$nyEnhet")
+        val uri =
+            UriComponentsBuilder
+                .fromUri(baseUri)
+                .queryParam("nullstillTilordnetRessurs", true)
+                .queryParam("mappeId", nyMappe)
+                .build()
+                .toUri()
+
+        return kallEksternTjenesteRessurs(
+            tjeneste = "oppgave",
+            uri = uri,
+            formål = "Bytt enhet og mappe",
+        ) {
+            patchForEntity(
+                uri,
+                HttpHeaders().medContentTypeJsonUTF8(),
+            )
+        }
+    }
+
     fun finnOppgaveMedId(oppgaveId: Long): Oppgave {
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId")
 

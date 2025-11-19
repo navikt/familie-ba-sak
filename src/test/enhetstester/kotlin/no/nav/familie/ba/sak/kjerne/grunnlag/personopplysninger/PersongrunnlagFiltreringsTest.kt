@@ -8,7 +8,12 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortBostedsadresserFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortDeltBostedForSøker
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortOppholdFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortOppholdsadresserFørEldsteBarn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortStatsborgerskapFørEldsteBarn
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -92,5 +97,89 @@ class PersongrunnlagFiltreringsTest {
         assertThat(deltBostedBarnEtter.last().sluttdatoForKontrakt).isNull()
 
         assert(deltBostedSøkerEtter.isEmpty())
+    }
+
+    @Test
+    fun `skal filtrere bort statsborgerskap før eldste barns fødselsdato`() {
+        // Arrange
+        val statsborgerskapFør =
+            listOf(
+                Statsborgerskap(
+                    gyldigFraOgMed = LocalDate.of(2000, 1, 1),
+                    gyldigTilOgMed = LocalDate.of(2010, 1, 1),
+                    land = "POL",
+                    bekreftelsesdato = null,
+                ),
+                Statsborgerskap(
+                    gyldigFraOgMed = LocalDate.of(2010, 1, 1),
+                    gyldigTilOgMed = LocalDate.of(2020, 1, 1),
+                    land = "NOR",
+                    bekreftelsesdato = null,
+                ),
+                Statsborgerskap(
+                    gyldigFraOgMed = LocalDate.of(2020, 1, 1),
+                    gyldigTilOgMed = null,
+                    land = "SWE",
+                    bekreftelsesdato = null,
+                ),
+            )
+
+        val grunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søkerFnr,
+                barnasIdenter = listOf(barnFnr),
+                barnasFødselsdatoer = listOf(LocalDate.of(2019, 1, 1)),
+            )
+
+        // Act
+        val statsborgerskapEtter = statsborgerskapFør.filtrerBortStatsborgerskapFørEldsteBarn(grunnlag, true)
+
+        // Assert
+        assertThat(statsborgerskapEtter).hasSize(2)
+        assertThat(statsborgerskapEtter.first().gyldigFraOgMed).isEqualTo(LocalDate.of(2010, 1, 1))
+        assertThat(statsborgerskapEtter.first().gyldigTilOgMed).isEqualTo(LocalDate.of(2020, 1, 1))
+        assertThat(statsborgerskapEtter.last().gyldigFraOgMed).isEqualTo(LocalDate.of(2020, 1, 1))
+        assertThat(statsborgerskapEtter.last().gyldigTilOgMed).isNull()
+    }
+
+    @Test
+    fun `skal filtrer bort opphold før eldste barns sin fødselsdato`() {
+        // Arrange
+        val oppholdFør =
+            listOf(
+                Opphold(
+                    oppholdFra = LocalDate.of(2000, 1, 1),
+                    oppholdTil = LocalDate.of(2010, 1, 1),
+                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                ),
+                Opphold(
+                    oppholdFra = LocalDate.of(2010, 1, 1),
+                    oppholdTil = LocalDate.of(2020, 1, 1),
+                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                ),
+                Opphold(
+                    oppholdFra = LocalDate.of(2020, 1, 1),
+                    oppholdTil = null,
+                    type = OPPHOLDSTILLATELSE.PERMANENT,
+                ),
+            )
+
+        val grunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søkerFnr,
+                barnasIdenter = listOf(barnFnr),
+                barnasFødselsdatoer = listOf(LocalDate.of(2019, 1, 1)),
+            )
+
+        // Act
+        val oppholdEtter = oppholdFør.filtrerBortOppholdFørEldsteBarn(grunnlag, true)
+        // Assert
+        assertThat(oppholdEtter).hasSize(2)
+        assertThat(oppholdEtter.first().oppholdFra).isEqualTo(LocalDate.of(2010, 1, 1))
+        assertThat(oppholdEtter.first().oppholdTil).isEqualTo(LocalDate.of(2020, 1, 1))
+        assertThat(oppholdEtter.last().oppholdFra).isEqualTo(LocalDate.of(2020, 1, 1))
+        assertThat(oppholdEtter.last().oppholdTil).isNull()
     }
 }

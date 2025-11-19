@@ -47,7 +47,7 @@ class JournalførTilbakekrevingsvedtakMotregningBrevTaskTest {
         every { mockBehandlingService.hent(behandling.id) } returns behandling
         every { mockArbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id) } returns arbeidsfordelingPåBehandling
         every { mockOrganisasjonService.hentOrganisasjon(any()) } returns Organisasjon("orgNummer", "orgNavn")
-        every { mockUtgåendeJournalføringService.journalførDokument(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returnsMany listOf("1", "2", "3", "4", "5", "6", "7", "8")
+        every { mockUtgåendeJournalføringService.journalførDokument(any(), any(), any(), any(), any(), any(), any(), any()) } returnsMany listOf("1", "2", "3", "4", "5", "6", "7", "8")
         every { mockTaskRepository.save(any()) } returnsArgument 0
     }
 
@@ -82,7 +82,6 @@ class JournalførTilbakekrevingsvedtakMotregningBrevTaskTest {
                 brev = any(),
                 vedlegg = any(),
                 førsteside = any(),
-                behandlingId = any(),
                 avsenderMottaker = null,
                 eksternReferanseId = any(),
             )

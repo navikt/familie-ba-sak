@@ -149,6 +149,8 @@ class PersongrunnlagServiceTest {
                 every { personopplysningGrunnlagRepository.save(nyttGrunnlag) } returns nyttGrunnlag
 
                 every { featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+                every { featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+                every { featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
 
                 persongrunnlagService
                     .hentOgLagreSøkerOgBarnINyttGrunnlag(

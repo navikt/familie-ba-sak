@@ -63,7 +63,7 @@ class ManueltBrevRequestTest {
                     .copy(
                         brevmal = Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON,
                         vedrørende =
-                            PersonITest(
+                            Person(
                                 fødselsnummer = "testident",
                                 navn = "testnavn",
                             ),
@@ -95,7 +95,7 @@ class ManueltBrevRequestTest {
                 baseRequest.copy(
                     brevmal = Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
                     vedrørende =
-                        PersonITest(
+                        Person(
                             fødselsnummer = fnr,
                             navn = "navn tilhørende $fnr",
                         ),
@@ -183,7 +183,7 @@ class ManueltBrevRequestTest {
                 baseRequest.copy(
                     brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON,
                     vedrørende =
-                        PersonITest(
+                        Person(
                             fødselsnummer = fnr,
                             navn = "navn tilhørende $fnr",
                         ),
@@ -360,9 +360,4 @@ class ManueltBrevRequestTest {
             assertThat(result.vedrørende?.navn).isEqualTo("Navn navnesen")
         }
     }
-
-    class PersonITest(
-        override val fødselsnummer: String,
-        override val navn: String,
-    ) : Person
 }
