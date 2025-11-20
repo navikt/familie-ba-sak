@@ -288,6 +288,6 @@ class AutovedtakFødselshendelseService(
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(BehandleFødselshendelseTask::class.java)
+        private val logger = LoggerFactory.getLogger(AutovedtakFødselshendelseService::class.java)
     }
 }
