@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -44,6 +45,7 @@ class PersongrunnlagServiceTest {
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val kodeverkService = mockk<KodeverkService>()
     private val featureToggleService = mockk<FeatureToggleService>()
+    private val systemOnlyIntegrasjonKlient = mockk<SystemOnlyIntegrasjonKlient>()
 
     private val persongrunnlagService =
         spyk(
@@ -61,6 +63,7 @@ class PersongrunnlagServiceTest {
                 vilkårsvurderingService = vilkårsvurderingService,
                 kodeverkService = kodeverkService,
                 featureToggleService = featureToggleService,
+                systemOnlyIntegrasjonKlient = systemOnlyIntegrasjonKlient,
             ),
         )
 

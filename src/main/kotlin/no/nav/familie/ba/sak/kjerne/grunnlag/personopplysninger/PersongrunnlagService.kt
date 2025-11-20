@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -64,6 +65,7 @@ class PersongrunnlagService(
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val kodeverkService: KodeverkService,
+    private val systemOnlyIntegrasjonKlient: SystemOnlyIntegrasjonKlient,
     private val featureToggleService: FeatureToggleService,
 ) {
     fun mapTilRestPersonMedStatsborgerskapLand(
@@ -382,20 +384,13 @@ class PersongrunnlagService(
             val personErSøker = person.type == PersonType.SØKER
             val harStatsborgerskapIEØS = person.statsborgerskap.any { it.medlemskap == Medlemskap.EØS }
             if (personErSøker && harStatsborgerskapIEØS) {
-                val behandling = behandlingHentOgPersisterService.hent(personopplysningGrunnlag.behandlingId)
-                val ansettelsesperiodeFom =
-                    if (!behandling.skalBehandlesAutomatisk) { // Skal kun komme hit under preutfylling
-                        personopplysningGrunnlag.personer.filter { it.type == PersonType.BARN }.minOf { it.fødselsdato }
-                    } else {
-                        LocalDate.now().minusYears(5)
-                    }
-
-                person.arbeidsforhold =
-                    arbeidsforholdService
-                        .hentArbeidsforholdForFødselshendelser(
-                            person = person,
-                            ansettelsesperiodeFom = ansettelsesperiodeFom,
-                        ).toMutableList()
+                val arbeidsforholdForPerson =
+                    arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
+                        statsborgerskap = person.statsborgerskap,
+                        person = person,
+                        eldsteBarnsFødselsdato = personopplysningGrunnlag.eldsteBarnSinFødselsdato,
+                    )
+                person.arbeidsforhold = arbeidsforholdForPerson.toMutableList()
             }
         }
     }
