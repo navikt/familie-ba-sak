@@ -388,7 +388,7 @@ class PersongrunnlagService(
                     arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
                         statsborgerskap = person.statsborgerskap,
                         person = person,
-                        eldsteBarnsFødselsdato = personopplysningGrunnlag.eldsteBarnSinFødselsdato,
+                        eldsteBarnsFødselsdato = personinfo.eldsteBarnsFødselsdato() ?: person.fødselsdato, // hvis det ikke er noen barn antar vi enslig mindreårig
                     )
                 person.arbeidsforhold = arbeidsforholdForPerson.toMutableList()
             }
