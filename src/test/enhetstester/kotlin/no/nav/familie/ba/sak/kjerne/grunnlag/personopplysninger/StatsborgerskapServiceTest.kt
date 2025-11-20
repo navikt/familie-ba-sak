@@ -154,9 +154,9 @@ internal class StatsborgerskapServiceTest {
         val medlemskapUkjent = listOf(Medlemskap.UKJENT)
         val medlemskapIngen = emptyList<Medlemskap>()
 
-        assertEquals(Medlemskap.NORDEN, finnSterkesteMedlemskap(medlemskapNorden))
-        assertEquals(Medlemskap.UKJENT, finnSterkesteMedlemskap(medlemskapUkjent))
-        assertEquals(null, finnSterkesteMedlemskap(medlemskapIngen))
+        assertEquals(Medlemskap.NORDEN, medlemskapNorden.finnSterkesteMedlemskap())
+        assertEquals(Medlemskap.UKJENT, medlemskapUkjent.finnSterkesteMedlemskap())
+        assertEquals(null, medlemskapIngen.finnSterkesteMedlemskap())
     }
 
     @Test

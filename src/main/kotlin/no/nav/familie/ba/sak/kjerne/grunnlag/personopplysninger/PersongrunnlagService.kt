@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -64,6 +65,7 @@ class PersongrunnlagService(
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val kodeverkService: KodeverkService,
+    private val systemOnlyIntegrasjonKlient: SystemOnlyIntegrasjonKlient,
     private val featureToggleService: FeatureToggleService,
 ) {
     fun mapTilRestPersonMedStatsborgerskapLand(
@@ -125,7 +127,9 @@ class PersongrunnlagService(
             ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling $behandlingId")
 
     @Transactional
-    fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
+    fun oppdaterRegisteropplysninger(
+        behandlingId: Long,
+    ): PersonopplysningGrunnlag {
         val nåværendeGrunnlag = hentAktivThrows(behandlingId = behandlingId)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
@@ -379,12 +383,27 @@ class PersongrunnlagService(
                     dødsfallDatoFraPdl = personinfo.dødsfall?.dødsdato,
                     dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo?.adresse,
                 )
-            if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
-                person.arbeidsforhold =
-                    arbeidsforholdService
-                        .hentArbeidsforhold(
+
+            if (featureToggleService.isEnabled(FeatureToggle.ARBEIDSFORHOLD_STRENGERE_NEDHENTING)) {
+                if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
+                    person.arbeidsforhold =
+                        arbeidsforholdService
+                            .hentArbeidsforhold(
+                                person = person,
+                            ).toMutableList()
+                }
+            } else {
+                val personErSøker = person.type == PersonType.SØKER
+                val harStatsborgerskapIEØS = person.statsborgerskap.any { it.medlemskap == Medlemskap.EØS }
+                if (personErSøker && harStatsborgerskapIEØS) {
+                    val arbeidsforholdForPerson =
+                        arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
+                            statsborgerskap = person.statsborgerskap,
                             person = person,
-                        ).toMutableList()
+                            eldsteBarnsFødselsdato = personinfo.eldsteBarnsFødselsdato() ?: person.fødselsdato, // hvis det ikke er noen barn antar vi enslig mindreårig
+                        )
+                    person.arbeidsforhold = arbeidsforholdForPerson.toMutableList()
+                }
             }
         }
     }

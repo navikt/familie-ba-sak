@@ -28,6 +28,7 @@ class SystemOnlyIntegrasjonKlient(
     fun hentArbeidsforholdMedSystembruker(
         ident: String,
         ansettelsesperiodeFom: LocalDate,
+        ansettelsesperiodeTom: LocalDate? = null,
     ): List<Arbeidsforhold> {
         val uri =
             UriComponentsBuilder
@@ -41,7 +42,7 @@ class SystemOnlyIntegrasjonKlient(
             uri = uri,
             formål = "Hent arbeidsforhold",
         ) {
-            postForEntity(uri, ArbeidsforholdRequest(ident, ansettelsesperiodeFom))
+            postForEntity(uri, ArbeidsforholdRequest(ident, ansettelsesperiodeFom, ansettelsesperiodeTom))
         }
     }
 }

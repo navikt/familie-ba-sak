@@ -160,7 +160,7 @@ data class Person(
 
     fun hentSterkesteMedlemskap(): Medlemskap? {
         val nåværendeMedlemskap = finnNåværendeMedlemskap(statsborgerskap)
-        return finnSterkesteMedlemskap(nåværendeMedlemskap)
+        return nåværendeMedlemskap.finnSterkesteMedlemskap()
     }
 }
 

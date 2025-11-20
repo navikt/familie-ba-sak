@@ -49,7 +49,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import java.time.LocalDate
 
-data class Person(
+data class PersonForManueltBrevRequest(
     val navn: String,
     val fødselsnummer: String,
 )
@@ -100,7 +100,7 @@ data class ManueltBrevRequest(
     val antallUkerSvarfrist: Int? = null,
     val barnasFødselsdager: List<LocalDate>? = null,
     val behandlingKategori: BehandlingKategori? = null,
-    val vedrørende: Person? = null,
+    val vedrørende: PersonForManueltBrevRequest? = null,
     val mottakerlandSed: List<String> = emptyList(),
     val manuelleBrevmottakere: List<ManuellBrevmottaker> = emptyList(),
     val fritekstAvsnitt: String? = null,
@@ -144,7 +144,7 @@ fun ManueltBrevRequest.byggMottakerdataFraBehandling(
             this.copy(
                 enhet = enhet,
                 mottakerMålform = person.målform,
-                vedrørende = Person(navn = person.navn, fødselsnummer = fødselsnummerPåPerson),
+                vedrørende = PersonForManueltBrevRequest(navn = person.navn, fødselsnummer = fødselsnummerPåPerson),
             )
         }
 
@@ -184,7 +184,7 @@ fun ManueltBrevRequest.byggMottakerdataFraFagsak(
 
             this.copy(
                 enhet = enhet,
-                vedrørende = Person(navn = personNavn, fødselsnummer = aktør.aktivFødselsnummer()),
+                vedrørende = PersonForManueltBrevRequest(navn = personNavn, fødselsnummer = aktør.aktivFødselsnummer()),
             )
         }
 

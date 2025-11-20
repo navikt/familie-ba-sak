@@ -48,7 +48,7 @@ data class GrOpphold(
 
     fun gjeldendeNå(): Boolean {
         if (gyldigPeriode == null) return true
-        return gyldigPeriode.erInnenfor(LocalDate.now())
+        return LocalDate.now().erInnenfor(gyldigPeriode)
     }
 
     override fun equals(other: Any?): Boolean {

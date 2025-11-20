@@ -17,6 +17,7 @@ enum class FeatureToggle(
     PREUTFYLLING_VILKÅR_LOVLIG_OPPHOLD("familie-ba-sak.preutfylling-lovlig-opphold"),
     PREUTFYLLING_BOR_HOS_SØKER("familie-ba-sak.preutfylling-bor-hos-soker"),
     PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG("familie-ba-sak.preutfylling-personopplysningsgrunnlag"),
+    ARBEIDSFORHOLD_STRENGERE_NEDHENTING("familie-ba-sak.arbeidsforhold-strengere-nedhenting"),
 
     AUTOMAITSK_REGISTRER_SØKNAD("familie-ba-sak.automatisk-registrer-soknad"),
 

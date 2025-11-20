@@ -14,6 +14,8 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
@@ -42,6 +44,24 @@ data class GrArbeidsforhold(
     val person: Person,
 ) : BaseEntitet() {
     fun tilKopiForNyPerson(nyPerson: Person) = copy(id = 0, person = nyPerson)
+
+    companion object {
+        fun Arbeidsforhold.tilGrArbeidsforhold(person: Person): GrArbeidsforhold {
+            val arbeidsgiverId =
+                when (this.arbeidsgiver?.type) {
+                    ArbeidsgiverType.Organisasjon -> this.arbeidsgiver.organisasjonsnummer
+                    ArbeidsgiverType.Person -> this.arbeidsgiver.offentligIdent
+                    else -> null
+                }
+
+            return GrArbeidsforhold(
+                periode = DatoIntervallEntitet(ansettelsesperiode?.periode?.fom, ansettelsesperiode?.periode?.tom),
+                arbeidsgiverType = this.arbeidsgiver?.type?.name,
+                arbeidsgiverId = arbeidsgiverId,
+                person = person,
+            )
+        }
+    }
 }
 
 fun List<GrArbeidsforhold>.harLøpendeArbeidsforhold(): Boolean =
