@@ -21,6 +21,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.Properties
+import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(
@@ -84,7 +85,7 @@ class PorteføljejusteringFlyttOppgaveTask(
                 oppdaterEnhetPåÅpenBehandlingIKlage(oppgaveId, nyEnhetId)
             }
             oppgave.behandlesAvApplikasjon == "familie-tilbake" -> {
-                oppdaterEnhetPåÅpenBehandlingITilbakekreving(saksreferanse.toLong(), nyEnhetId)
+                oppdaterEnhetPåÅpenBehandlingITilbakekreving(UUID.fromString(saksreferanse), nyEnhetId)
             }
         }
     }
@@ -135,10 +136,10 @@ class PorteføljejusteringFlyttOppgaveTask(
     }
 
     private fun oppdaterEnhetPåÅpenBehandlingITilbakekreving(
-        fagsakId: Long,
+        behandlingEksternBrukId: UUID,
         nyEnhetId: String,
     ) {
-        tilbakekrevingKlient.oppdaterEnhetPåÅpenBehandling(fagsakId, nyEnhetId)
+        tilbakekrevingKlient.oppdaterEnhetPåÅpenBehandling(behandlingEksternBrukId, nyEnhetId)
     }
 
     private fun oppdaterEnhetPåÅpenBehandlingIKlage(

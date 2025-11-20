@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.util.UUID
 
 class PorteføljejusteringTaskTest {
     private val integrasjonKlient: IntegrasjonKlient = mockk()
@@ -345,6 +346,7 @@ class PorteføljejusteringTaskTest {
     ) {
         // Arrange
         val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
+        val behandlingEksternBrukId = UUID.randomUUID()
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -353,7 +355,7 @@ class PorteføljejusteringTaskTest {
                         OppgaveIdentV2("1234", IdentGruppe.FOLKEREGISTERIDENT),
                     ),
                 tildeltEnhetsnr = BarnetrygdEnhet.STEINKJER.enhetsnummer,
-                saksreferanse = "183421813",
+                saksreferanse = behandlingEksternBrukId.toString(),
                 oppgavetype = oppgavetype.value,
                 mappeId = 100027793,
                 behandlesAvApplikasjon = "familie-tilbake",
@@ -366,13 +368,13 @@ class PorteføljejusteringTaskTest {
             )
 
         every { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, BarnetrygdEnhet.OSLO.enhetsnummer, "100012753") } returns mockk()
-        every { tilbakekrevingKlient.oppdaterEnhetPåÅpenBehandling(183421813, "4833") } returns "TODO"
+        every { tilbakekrevingKlient.oppdaterEnhetPåÅpenBehandling(behandlingEksternBrukId, "4833") } returns "TODO"
 
         // Act
         porteføljejusteringFlyttOppgaveTask.doTask(task)
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, BarnetrygdEnhet.OSLO.enhetsnummer, "100012753") }
-        verify(exactly = 1) { tilbakekrevingKlient.oppdaterEnhetPåÅpenBehandling(183421813, BarnetrygdEnhet.OSLO.enhetsnummer) }
+        verify(exactly = 1) { tilbakekrevingKlient.oppdaterEnhetPåÅpenBehandling(behandlingEksternBrukId, BarnetrygdEnhet.OSLO.enhetsnummer) }
     }
 }
