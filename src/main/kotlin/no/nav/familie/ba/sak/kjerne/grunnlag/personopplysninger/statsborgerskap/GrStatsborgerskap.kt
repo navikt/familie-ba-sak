@@ -95,13 +95,13 @@ fun List<GrStatsborgerskap>.filtrerGjeldendeNå(): List<GrStatsborgerskap> = thi
 
 fun List<GrStatsborgerskap>.hentSterkesteMedlemskap(): Medlemskap? {
     val nåværendeMedlemskap = finnNåværendeMedlemskap(this)
-    return finnSterkesteMedlemskap(nåværendeMedlemskap)
+    return nåværendeMedlemskap.finnSterkesteMedlemskap()
 }
 
 fun finnNåværendeMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): List<Medlemskap> = statsborgerskap?.filtrerGjeldendeNå()?.map { it.medlemskap } ?: emptyList()
 
-fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? =
-    with(medlemskap) {
+fun List<Medlemskap>.finnSterkesteMedlemskap(): Medlemskap? =
+    with(this) {
         when {
             contains(Medlemskap.NORDEN) -> Medlemskap.NORDEN
             contains(Medlemskap.EØS) -> Medlemskap.EØS

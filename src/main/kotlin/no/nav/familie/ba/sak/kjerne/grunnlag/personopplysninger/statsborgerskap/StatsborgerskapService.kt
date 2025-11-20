@@ -113,7 +113,7 @@ class StatsborgerskapService(
                         )
                 }
 
-            finnSterkesteMedlemskap(alleMedlemskap.toList())
+            alleMedlemskap.toList().finnSterkesteMedlemskap()
         }
     }
 
