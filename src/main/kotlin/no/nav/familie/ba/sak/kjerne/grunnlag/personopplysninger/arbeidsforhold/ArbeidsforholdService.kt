@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold
 
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold.Companion.tilGrArbeidsforhold
@@ -18,6 +20,29 @@ import java.time.LocalDate
 class ArbeidsforholdService(
     private val systemOnlyIntegrasjonKlient: SystemOnlyIntegrasjonKlient,
 ) {
+    fun hentArbeidsforhold(person: Person): List<GrArbeidsforhold> {
+        val arbeidsforholdForSisteFemÅr =
+            systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(person.aktør.aktivFødselsnummer(), LocalDate.now().minusYears(5))
+        systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(person.aktør.aktivFødselsnummer(), LocalDate.now().minusYears(5))
+
+        return arbeidsforholdForSisteFemÅr.map {
+            val periode = DatoIntervallEntitet(it.ansettelsesperiode?.periode?.fom, it.ansettelsesperiode?.periode?.tom)
+            val arbeidsgiverId =
+                when (it.arbeidsgiver?.type) {
+                    ArbeidsgiverType.Organisasjon -> it.arbeidsgiver.organisasjonsnummer
+                    ArbeidsgiverType.Person -> it.arbeidsgiver.offentligIdent
+                    else -> null
+                }
+
+            GrArbeidsforhold(
+                periode = periode,
+                arbeidsgiverType = it.arbeidsgiver?.type?.name,
+                arbeidsgiverId = arbeidsgiverId,
+                person = person,
+            )
+        }
+    }
+
     fun hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
         statsborgerskap: List<GrStatsborgerskap>,
         person: Person,

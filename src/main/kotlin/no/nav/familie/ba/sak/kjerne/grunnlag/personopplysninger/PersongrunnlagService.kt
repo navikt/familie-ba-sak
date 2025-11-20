@@ -255,6 +255,7 @@ class PersongrunnlagService(
                         BARN_ENSLIG_MINDREÅRIG, INSTITUSJON -> PersonType.BARN
                     },
                 skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
+                hentArbeidsforhold = behandling.skalBehandlesAutomatisk,
             )
         personopplysningGrunnlag.personer.add(søker)
 
@@ -279,6 +280,7 @@ class PersongrunnlagService(
                         målform = målform,
                         personType = PersonType.ANNENPART,
                         skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
+                        hentArbeidsforhold = true,
                     ),
                 )
             }
@@ -306,6 +308,7 @@ class PersongrunnlagService(
         målform: Målform,
         personType: PersonType,
         skalHenteEnkelPersonInfo: Boolean = false,
+        hentArbeidsforhold: Boolean = false,
     ): Person {
         val personinfo =
             if (skalHenteEnkelPersonInfo) {
@@ -381,16 +384,26 @@ class PersongrunnlagService(
                     dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo?.adresse,
                 )
 
-            val personErSøker = person.type == PersonType.SØKER
-            val harStatsborgerskapIEØS = person.statsborgerskap.any { it.medlemskap == Medlemskap.EØS }
-            if (personErSøker && harStatsborgerskapIEØS) {
-                val arbeidsforholdForPerson =
-                    arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
-                        statsborgerskap = person.statsborgerskap,
-                        person = person,
-                        eldsteBarnsFødselsdato = personinfo.eldsteBarnsFødselsdato() ?: person.fødselsdato, // hvis det ikke er noen barn antar vi enslig mindreårig
-                    )
-                person.arbeidsforhold = arbeidsforholdForPerson.toMutableList()
+            if (featureToggleService.isEnabled(FeatureToggle.ARBEIDSFORHOLD_STRENGERE_NEDHENTING)) {
+                if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
+                    person.arbeidsforhold =
+                        arbeidsforholdService
+                            .hentArbeidsforhold(
+                                person = person,
+                            ).toMutableList()
+                }
+            } else {
+                val personErSøker = person.type == PersonType.SØKER
+                val harStatsborgerskapIEØS = person.statsborgerskap.any { it.medlemskap == Medlemskap.EØS }
+                if (personErSøker && harStatsborgerskapIEØS) {
+                    val arbeidsforholdForPerson =
+                        arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
+                            statsborgerskap = person.statsborgerskap,
+                            person = person,
+                            eldsteBarnsFødselsdato = personinfo.eldsteBarnsFødselsdato() ?: person.fødselsdato, // hvis det ikke er noen barn antar vi enslig mindreårig
+                        )
+                    person.arbeidsforhold = arbeidsforholdForPerson.toMutableList()
+                }
             }
         }
     }
