@@ -83,6 +83,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.Tilba
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.OppdaterBosattIRiketMedFinnmarkOgSvalbardService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService
@@ -560,7 +561,6 @@ class CucumberMock(
         PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
             søknadService = mockk(),
             persongrunnlagService = persongrunnlagService,
-            featureToggleService = featureToggleService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
 
@@ -574,6 +574,12 @@ class CucumberMock(
             preutfyllBosattIRIketMedLagringIPersonopplysningsgrunnlagService = preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService,
         )
 
+    val oppdaterBosattIRiketMedFinnmarkOgSvalbardService =
+        OppdaterBosattIRiketMedFinnmarkOgSvalbardService(
+            persongrunnlagService = persongrunnlagService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+        )
+
     val preutfyllVilkårService =
         PreutfyllVilkårService(
             preutfyllLovligOppholdService = mockk(),
@@ -581,6 +587,7 @@ class CucumberMock(
             featureToggleService = featureToggleService,
             preutfyllBorHosSøkerService = mockk(),
             persongrunnlagService = persongrunnlagService,
+            oppdaterBosattIRiketMedFinnmarkOgSvalbardService = oppdaterBosattIRiketMedFinnmarkOgSvalbardService,
         )
 
     val vilkårsvurderingForNyBehandlingService =
