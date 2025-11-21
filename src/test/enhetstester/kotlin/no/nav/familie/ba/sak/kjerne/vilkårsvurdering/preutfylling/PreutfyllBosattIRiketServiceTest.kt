@@ -53,7 +53,6 @@ class PreutfyllBosattIRiketServiceTest {
         PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
             søknadService = søknadService,
             persongrunnlagService = persongrunnlagService,
-            featureToggleService = featureToggleService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
 
