@@ -93,6 +93,14 @@ data class Adresse(
     }
 }
 
+fun Adresse.erSammeAdresse(annen: Adresse?): Boolean =
+    when {
+        annen == null -> false
+        this.vegadresse != null -> this.vegadresse == annen.vegadresse
+        this.matrikkeladresse != null -> this.matrikkeladresse == annen.matrikkeladresse
+        else -> false
+    }
+
 fun List<Adresse>.hentForDato(dato: LocalDate): Adresse? = finnAdressehistorikkFraOgMedDato(this, dato).firstOrNull()
 
 fun finnAdressehistorikkFraOgMedDato(
