@@ -40,7 +40,7 @@ class PreutfyllVilkårService(
         cutOffFomDato: LocalDate,
     ) {
         if (featureToggleService.isEnabled(FeatureToggle.NY_PREUTFYLLING_FOR_BOSATT_I_RIKET_VILKÅR_VED_AUTOVEDTAK_FINNMARK_SVALBARD)) {
-            oppdaterBosattIRiketMedFinnmarkOgSvalbardService.preutfyllBosattIRiket(
+            oppdaterBosattIRiketMedFinnmarkOgSvalbardService.oppdaterBosattIRiketMedFinnmarkOgSvalbardMerking(
                 vilkårsvurdering = vilkårsvurdering,
             )
         } else {

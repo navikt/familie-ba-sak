@@ -37,7 +37,7 @@ class OppdaterBosattIRiketMedFinnmarkOgSvalbardService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
-    fun preutfyllBosattIRiket(
+    fun oppdaterBosattIRiketMedFinnmarkOgSvalbardMerking(
         vilkårsvurdering: Vilkårsvurdering,
         identerVilkårSkalPreutfyllesFor: List<String>? = null,
     ) {
