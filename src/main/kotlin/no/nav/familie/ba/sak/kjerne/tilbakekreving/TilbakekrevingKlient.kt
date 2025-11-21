@@ -18,6 +18,7 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import java.net.URI
+import java.util.UUID
 
 typealias TilbakekrevingId = String
 
@@ -118,9 +119,30 @@ class TilbakekrevingKlient(
     }
 
     fun oppdaterEnhetPåÅpenBehandling(
-        fagsakId: Long,
+        behandlingEksternBrukId: UUID,
         nyEnhetId: String,
-    ): String = "TODO I NAV-26753"
+    ): String {
+        val uri = URI.create("$familieTilbakeUri/baks/portefoljejustering/oppdater-behandlende-enhet")
+
+        val request =
+            OppdaterBehandlendeEnhetRequest(
+                behandlingEksternBrukId = behandlingEksternBrukId,
+                nyEnhet = nyEnhetId,
+            )
+
+        return kallEksternTjenesteRessurs(
+            tjeneste = FAMILIE_TILBAKE,
+            uri = uri,
+            formål = "Oppdater enhet på åpen tilbakekrevingsbehandling",
+        ) {
+            putForEntity(uri, request)
+        }
+    }
+
+    data class OppdaterBehandlendeEnhetRequest(
+        val behandlingEksternBrukId: UUID,
+        val nyEnhet: String,
+    )
 
     companion object {
         const val FAMILIE_TILBAKE = "familie-tilbake"

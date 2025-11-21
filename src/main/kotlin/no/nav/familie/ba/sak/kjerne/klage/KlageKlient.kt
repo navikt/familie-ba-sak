@@ -54,7 +54,35 @@ class KlageKlient(
     }
 
     fun oppdaterEnhetPåÅpenBehandling(
-        fagsakId: Long,
+        oppgaveId: Long,
         nyEnhetId: String,
-    ): String = "TODO I NAV-26753"
+    ): String {
+        val uri =
+            UriComponentsBuilder
+                .fromUri(familieKlageUri)
+                .pathSegment("api/portefoljejustering/oppdater-behandlende-enhet")
+                .build()
+                .toUri()
+
+        val request =
+            OppdaterBehandlendeEnhetIKlageRequest(
+                oppgaveId = oppgaveId,
+                nyEnhet = nyEnhetId,
+                fagsystem = Fagsystem.BA,
+            )
+
+        return kallEksternTjenesteRessurs(
+            tjeneste = "klage",
+            uri = uri,
+            formål = "Oppdater enhet på åpen klagebehandling",
+        ) {
+            putForEntity(uri, request)
+        }
+    }
+
+    data class OppdaterBehandlendeEnhetIKlageRequest(
+        val oppgaveId: Long,
+        val nyEnhet: String,
+        val fagsystem: Fagsystem,
+    )
 }
