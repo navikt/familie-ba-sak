@@ -281,6 +281,7 @@ Kjør så:
 
 ## Les også
 * [vilkårsperiodeProdusent - README](src%2Fmain%2Fkotlin%2Fno%2Fnav%2Ffamilie%2Fba%2Fsak%2Fkjerne%2Fvedtak%2Fvedtaksperiode%2Fprodusent%2FREADME.md)
+* [fødselshendelser - README](src%2Fmain%2Fkotlin%2Fno%2Fnav%2Ffamilie%2Fba%2Fsak%2Fkjerne%2Fautovedtak%2Ff%C3%B8dselshendelse%2FREADME.md)
 
 ## Kontaktinformasjon
 
