@@ -25,7 +25,11 @@ import java.time.LocalDate
 class PreutfyllBorHosSøkerServiceTest {
     private val pdlRestKlient: SystemOnlyPdlRestKlient = mockk(relaxed = true)
     private val persongrunnlagService: PersongrunnlagService = mockk(relaxed = true)
-    private val preutfyllBorHosSøkerService: PreutfyllBorHosSøkerService = PreutfyllBorHosSøkerService(pdlRestKlient)
+    private val preutfyllBorHosSøkerService: PreutfyllBorHosSøkerService =
+        PreutfyllBorHosSøkerService(
+            pdlRestKlient,
+            featureToggleService,
+        )
 
     @Test
     fun `skal preutfylle bor fast hos søker vilkår til oppfylt om barn bor på samme adresse som søker`() {
