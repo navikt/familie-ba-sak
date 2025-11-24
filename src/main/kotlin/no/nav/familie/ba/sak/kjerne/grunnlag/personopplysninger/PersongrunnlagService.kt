@@ -385,14 +385,6 @@ class PersongrunnlagService(
                 )
 
             if (featureToggleService.isEnabled(FeatureToggle.ARBEIDSFORHOLD_STRENGERE_NEDHENTING)) {
-                if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
-                    person.arbeidsforhold =
-                        arbeidsforholdService
-                            .hentArbeidsforhold(
-                                person = person,
-                            ).toMutableList()
-                }
-            } else {
                 val personErSøker = person.type == PersonType.SØKER
                 val harStatsborgerskapIEØS = person.statsborgerskap.any { it.medlemskap == Medlemskap.EØS }
                 if (personErSøker && harStatsborgerskapIEØS) {
@@ -403,6 +395,14 @@ class PersongrunnlagService(
                             eldsteBarnsFødselsdato = personinfo.eldsteBarnsFødselsdato() ?: person.fødselsdato, // hvis det ikke er noen barn antar vi enslig mindreårig
                         )
                     person.arbeidsforhold = arbeidsforholdForPerson.toMutableList()
+                }
+            } else {
+                if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
+                    person.arbeidsforhold =
+                        arbeidsforholdService
+                            .hentArbeidsforhold(
+                                person = person,
+                            ).toMutableList()
                 }
             }
         }

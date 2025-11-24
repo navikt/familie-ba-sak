@@ -101,15 +101,13 @@ fun List<GrStatsborgerskap>.hentSterkesteMedlemskap(): Medlemskap? {
 fun finnNåværendeMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): List<Medlemskap> = statsborgerskap?.filtrerGjeldendeNå()?.map { it.medlemskap } ?: emptyList()
 
 fun List<Medlemskap>.finnSterkesteMedlemskap(): Medlemskap? =
-    with(this) {
-        when {
-            contains(Medlemskap.NORDEN) -> Medlemskap.NORDEN
-            contains(Medlemskap.EØS) -> Medlemskap.EØS
-            contains(Medlemskap.TREDJELANDSBORGER) -> Medlemskap.TREDJELANDSBORGER
-            contains(Medlemskap.STATSLØS) -> Medlemskap.STATSLØS
-            contains(Medlemskap.UKJENT) -> Medlemskap.UKJENT
-            else -> null
-        }
+    when {
+        contains(Medlemskap.NORDEN) -> Medlemskap.NORDEN
+        contains(Medlemskap.EØS) -> Medlemskap.EØS
+        contains(Medlemskap.TREDJELANDSBORGER) -> Medlemskap.TREDJELANDSBORGER
+        contains(Medlemskap.STATSLØS) -> Medlemskap.STATSLØS
+        contains(Medlemskap.UKJENT) -> Medlemskap.UKJENT
+        else -> null
     }
 
 fun lagErNordiskStatsborgerTidslinje(statsborgerskap: List<GrStatsborgerskap>): Tidslinje<Boolean> {

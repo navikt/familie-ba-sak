@@ -39,6 +39,7 @@ class ArbeidsforholdServiceTest {
             systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(
                 ident = person.aktør.aktivFødselsnummer(),
                 ansettelsesperiodeFom = any(),
+                ansettelsesperiodeTom = any(),
             )
         } answers {
             val ansettelsesperiodeFom = secondArg<LocalDate?>()

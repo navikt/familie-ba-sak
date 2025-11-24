@@ -48,7 +48,10 @@ data class PersonInfo(
 ) : PersonInfoBase {
     fun erBarn(): Boolean = Period.between(fødselsdato, LocalDate.now()).years < 18
 
-    fun eldsteBarnsFødselsdato(): LocalDate? = forelderBarnRelasjon.filter { it.fødselsdato != null && it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN }.minOfOrNull { it.fødselsdato!! }
+    fun eldsteBarnsFødselsdato(): LocalDate? =
+        forelderBarnRelasjon
+            .filter { it.fødselsdato != null && it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN }
+            .minOfOrNull { it.fødselsdato!! }
 }
 
 fun List<Bostedsadresse>.filtrerUtKunNorskeBostedsadresser() = this.filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }

@@ -21,9 +21,7 @@ class ArbeidsforholdService(
     private val systemOnlyIntegrasjonKlient: SystemOnlyIntegrasjonKlient,
 ) {
     fun hentArbeidsforhold(person: Person): List<GrArbeidsforhold> {
-        val arbeidsforholdForSisteFemÅr =
-            systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(person.aktør.aktivFødselsnummer(), LocalDate.now().minusYears(5))
-        systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(person.aktør.aktivFødselsnummer(), LocalDate.now().minusYears(5))
+        val arbeidsforholdForSisteFemÅr = systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(person.aktør.aktivFødselsnummer(), LocalDate.now().minusYears(5))
 
         return arbeidsforholdForSisteFemÅr.map {
             val periode = DatoIntervallEntitet(it.ansettelsesperiode?.periode?.fom, it.ansettelsesperiode?.periode?.tom)
@@ -53,7 +51,7 @@ class ArbeidsforholdService(
                 statsborgerskap.landkode
             }
 
-        val medlesmkapTidslinjeForHvertLand =
+        val medlemskapTidslinjeForHvertLand =
             statsborgerskapGruppertPåLand
                 .map { (_, statsborgerskap) ->
                     statsborgerskap
@@ -66,10 +64,10 @@ class ArbeidsforholdService(
                         }.tilTidslinje()
                 }
         val sterkesteMedlemskapPerioder =
-            medlesmkapTidslinjeForHvertLand
+            medlemskapTidslinjeForHvertLand
                 .fold(tomTidslinje<Medlemskap>()) { sterkesteMedlemskapTidslinje, medlemskapTidslinje ->
-                    sterkesteMedlemskapTidslinje.kombinerMed(medlemskapTidslinje) { sterkesteMedlemskap, nyttMedlesmkap ->
-                        listOfNotNull(sterkesteMedlemskap, nyttMedlesmkap).finnSterkesteMedlemskap()
+                    sterkesteMedlemskapTidslinje.kombinerMed(medlemskapTidslinje) { sterkesteMedlemskap, nyttMedlemskap ->
+                        listOfNotNull(sterkesteMedlemskap, nyttMedlemskap).finnSterkesteMedlemskap()
                     }
                 }.tilPerioderIkkeNull()
 
