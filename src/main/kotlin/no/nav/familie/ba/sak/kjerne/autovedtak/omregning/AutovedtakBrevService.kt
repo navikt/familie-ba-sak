@@ -145,17 +145,21 @@ class AutovedtakBrevService(
 
 private fun BehandlingÅrsak.tilBrevkoder(): List<InfotrygdBrevkode> =
     when (this) {
-        BehandlingÅrsak.OMREGNING_18ÅR ->
+        BehandlingÅrsak.OMREGNING_18ÅR -> {
             listOf(
                 InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_18_ÅR,
                 InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_18_ÅR,
             )
+        }
 
-        BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG ->
+        BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG -> {
             listOf(
                 InfotrygdBrevkode.BREV_BATCH_OPPHØR_SMÅBARNSTILLLEGG,
                 InfotrygdBrevkode.BREV_MANUELL_OPPHØR_SMÅBARNSTILLLEGG,
             )
+        }
 
-        else -> emptyList()
+        else -> {
+            emptyList()
+        }
     }

@@ -116,8 +116,9 @@ class DokumentGenereringService(
 
     private fun finnSøkerEllerInstitusjonsNavn(fagsak: Fagsak): String =
         when (fagsak.type) {
-            FagsakType.NORMAL, FagsakType.BARN_ENSLIG_MINDREÅRIG ->
+            FagsakType.NORMAL, FagsakType.BARN_ENSLIG_MINDREÅRIG -> {
                 personopplysningerService.hentPersoninfoEnkel(fagsak.aktør).navn ?: throw Feil("Klarte ikke hente navn på fagsak.aktør fra pdl")
+            }
 
             FagsakType.INSTITUSJON -> {
                 val orgnummer = fagsak.institusjon?.orgNummer ?: throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")

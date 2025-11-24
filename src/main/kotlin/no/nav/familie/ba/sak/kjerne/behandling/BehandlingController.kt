@@ -167,10 +167,12 @@ data class NyBehandling(
 ) {
     init { // Initiell validering på request
         when {
-            søkersIdent.isBlank() -> throw Feil(
-                message = "Søkers ident kan ikke være blank",
-                frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker.",
-            )
+            søkersIdent.isBlank() -> {
+                throw Feil(
+                    message = "Søkers ident kan ikke være blank",
+                    frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker.",
+                )
+            }
 
             BehandlingType.MIGRERING_FRA_INFOTRYGD == behandlingType &&
                 behandlingÅrsak.erManuellMigreringsårsak() &&

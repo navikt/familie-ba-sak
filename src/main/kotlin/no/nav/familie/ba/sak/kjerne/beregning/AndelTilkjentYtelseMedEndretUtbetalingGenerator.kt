@@ -52,17 +52,20 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
                 when (ytelseType) {
                     YtelseType.ORDINÆR_BARNETRYGD,
                     YtelseType.UTVIDET_BARNETRYGD,
-                    ->
+                    -> {
                         lagAndelerMedEndretUtbetalingAndelerForPerson(
                             andelerAvTypeForPerson = andelerForAktørOgType,
                             endretUtbetalingAndelerForPerson = endringerPerAktør.getOrDefault(aktør, emptyList()),
                             tilkjentYtelse = tilkjentYtelse,
                         )
+                    }
+
                     YtelseType.SMÅBARNSTILLEGG,
                     YtelseType.FINNMARKSTILLEGG,
                     YtelseType.SVALBARDTILLEGG,
-                    ->
+                    -> {
                         throw Feil("${ytelseType.name} kan ikke oppdateres med endret utbetaling andeler i behandling=${tilkjentYtelse.behandling.id}")
+                    }
                 }
             }
 

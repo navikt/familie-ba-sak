@@ -47,13 +47,16 @@ sealed interface VedtaksperiodeGrunnlagForPerson {
         vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode> = this.vilkårResultaterForVedtaksperiode,
     ): VedtaksperiodeGrunnlagForPerson =
         when (this) {
-            is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget ->
+            is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> {
                 this.copy(
                     person,
                     vilkårResultaterForVedtaksperiode,
                 )
+            }
 
-            is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> this.copy(person, vilkårResultaterForVedtaksperiode)
+            is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> {
+                this.copy(person, vilkårResultaterForVedtaksperiode)
+            }
         }
 }
 

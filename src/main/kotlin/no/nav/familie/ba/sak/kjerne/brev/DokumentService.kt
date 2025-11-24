@@ -263,12 +263,15 @@ class DokumentService(
                 )
             }
 
-            brevmottakere.isNotEmpty() ->
+            brevmottakere.isNotEmpty() -> {
                 brevmottakerService.lagMottakereFraBrevMottakere(
                     brevmottakere,
                 )
+            }
 
-            else -> listOf(Bruker)
+            else -> {
+                listOf(Bruker)
+            }
         }
 
     private fun leggTilOpplysningspliktIVilkårsvurdering(behandling: Behandling) {

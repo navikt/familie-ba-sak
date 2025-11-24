@@ -64,7 +64,7 @@ class BrevmalService(
                 "Meld sak i Porten slik at vi kan se nærmere på saken."
 
         return when (behandlingType) {
-            BehandlingType.FØRSTEGANGSBEHANDLING ->
+            BehandlingType.FØRSTEGANGSBEHANDLING -> {
                 if (erInstitusjon) {
                     when (behandlingsresultat) {
                         Behandlingsresultat.INNVILGET,
@@ -136,8 +136,9 @@ class BrevmalService(
                         )
                     }
                 }
+            }
 
-            BehandlingType.REVURDERING ->
+            BehandlingType.REVURDERING -> {
                 if (erInstitusjon) {
                     when (behandlingsresultat) {
                         Behandlingsresultat.INNVILGET,
@@ -203,6 +204,7 @@ class BrevmalService(
                         -> Brevmal.VEDTAK_FORTSATT_INNVILGET
 
                         Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
+
                         Behandlingsresultat.ENDRET_UTEN_UTBETALING,
                         Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
                         Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
@@ -216,14 +218,17 @@ class BrevmalService(
                         )
                     }
                 }
+            }
 
             BehandlingType.MIGRERING_FRA_INFOTRYGD,
             BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
             BehandlingType.TEKNISK_ENDRING,
-            -> throw FunksjonellFeil(
-                melding = feilmelidingBehandlingType,
-                frontendFeilmelding = frontendFeilmelding,
-            )
+            -> {
+                throw FunksjonellFeil(
+                    melding = feilmelidingBehandlingType,
+                    frontendFeilmelding = frontendFeilmelding,
+                )
+            }
         }
     }
 }

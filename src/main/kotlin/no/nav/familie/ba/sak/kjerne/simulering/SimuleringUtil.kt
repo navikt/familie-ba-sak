@@ -185,8 +185,11 @@ fun hentEtterbetalingIPeriode(
     val resultat = hentResultatIPeriode(periodeMedForfallFørTidSimuleringHentet)
 
     return when {
-        periodeHarPositivFeilutbetaling -> BigDecimal.ZERO
-        else ->
+        periodeHarPositivFeilutbetaling -> {
+            BigDecimal.ZERO
+        }
+
+        else -> {
             maxOf(
                 BigDecimal.ZERO,
                 // Vi justerer etterbetalingsbeløp med negativ feilutbetaling i periode (redusert feilutbetaling).
@@ -195,6 +198,7 @@ fun hentEtterbetalingIPeriode(
                 // https://confluence.adeo.no/display/TFA/Tolkning+av+simulerte+posteringer+fra+oppdragsystemet
                 (resultat + hentNegativFeilutbetalingIPeriode(periodeMedForfallFørTidSimuleringHentet)),
             )
+        }
     }
 }
 

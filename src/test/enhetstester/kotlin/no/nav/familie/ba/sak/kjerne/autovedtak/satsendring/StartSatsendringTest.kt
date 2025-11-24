@@ -182,15 +182,17 @@ internal class StartSatsendringTest {
             every { autovedtakSatsendringService.kjørBehandling(any()) } returns it
 
             when (it) {
-                SatsendringSvar.SATSENDRING_KJØRT_OK ->
+                SatsendringSvar.SATSENDRING_KJØRT_OK -> {
                     assertDoesNotThrow {
                         startSatsendring.gjennomførSatsendringManuelt(0L)
                     }
+                }
 
-                else ->
+                else -> {
                     assertThrows<Exception> {
                         startSatsendring.gjennomførSatsendringManuelt(0L)
                     }
+                }
             }
         }
     }

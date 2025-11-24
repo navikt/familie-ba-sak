@@ -96,7 +96,9 @@ class AutovedtakSatsendringRollbackService(
                     )
                 }
 
-                else -> throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} ved satsendring for fagsak=$fagsakId")
+                else -> {
+                    throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} ved satsendring for fagsak=$fagsakId")
+                }
             }
 
         taskRepository.save(task)
@@ -107,11 +109,17 @@ class AutovedtakSatsendringRollbackService(
     ): SatsendringSvar {
         val status = aktivOgÅpenBehandling.status
         return when {
-            status != BehandlingStatus.UTREDES && status != BehandlingStatus.SATT_PÅ_VENT ->
+            status != BehandlingStatus.UTREDES && status != BehandlingStatus.SATT_PÅ_VENT -> {
                 SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG
+            }
 
-            snikeIKøenService.kanSnikeForbi(aktivOgÅpenBehandling) -> SatsendringSvar.BEHANDLING_KAN_SNIKES_FORBI
-            else -> SatsendringSvar.BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT
+            snikeIKøenService.kanSnikeForbi(aktivOgÅpenBehandling) -> {
+                SatsendringSvar.BEHANDLING_KAN_SNIKES_FORBI
+            }
+
+            else -> {
+                SatsendringSvar.BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT
+            }
         }
     }
 }

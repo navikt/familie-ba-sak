@@ -142,12 +142,15 @@ class TilkjentYtelseBuilder(
 
                     val begrensetAndelTilkjentYtelseTidslinje =
                         when (type) {
-                            YtelseType.ORDINÆR_BARNETRYGD ->
+                            YtelseType.ORDINÆR_BARNETRYGD -> {
                                 andelTilkjentYtelseTidslinje.beskjærEtter(
                                     erUnder18ÅrVilkårTidslinje(person.fødselsdato),
                                 )
+                            }
 
-                            else -> andelTilkjentYtelseTidslinje
+                            else -> {
+                                andelTilkjentYtelseTidslinje
+                            }
                         }
 
                     begrensetAndelTilkjentYtelseTidslinje.kombinerUtenNullMed(satsTidslinje(person)) { aty, sats ->

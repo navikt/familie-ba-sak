@@ -55,20 +55,27 @@ class StatusFraOppdrag(
             }
 
             when (nesteSteg) {
-                StegType.JOURNALFØR_VEDTAKSBREV ->
+                StegType.JOURNALFØR_VEDTAKSBREV -> {
                     opprettTaskJournalførVedtaksbrev(
                         statusFraOppdragDTO.vedtaksId,
                         task,
                     )
+                }
 
-                StegType.IVERKSETT_MOT_FAMILIE_TILBAKE ->
+                StegType.IVERKSETT_MOT_FAMILIE_TILBAKE -> {
                     opprettTaskIverksettMotTilbake(
                         statusFraOppdragDTO.behandlingsId,
                         task.metadata,
                     )
+                }
 
-                StegType.FERDIGSTILLE_BEHANDLING -> opprettFerdigstillBehandling(statusFraOppdragDTO)
-                else -> throw Feil("Neste task er ikke implementert.")
+                StegType.FERDIGSTILLE_BEHANDLING -> {
+                    opprettFerdigstillBehandling(statusFraOppdragDTO)
+                }
+
+                else -> {
+                    throw Feil("Neste task er ikke implementert.")
+                }
             }
         }
 

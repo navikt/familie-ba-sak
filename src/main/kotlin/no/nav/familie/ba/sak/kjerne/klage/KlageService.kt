@@ -61,12 +61,16 @@ class KlageService(
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
         val resultat = utledKanOppretteRevurdering(fagsak)
         return when (resultat) {
-            is KanOppretteRevurdering -> KanOppretteRevurderingResponse(true, null)
-            is KanIkkeOppretteRevurdering ->
+            is KanOppretteRevurdering -> {
+                KanOppretteRevurderingResponse(true, null)
+            }
+
+            is KanIkkeOppretteRevurdering -> {
                 KanOppretteRevurderingResponse(
                     false,
                     resultat.årsak.kanIkkeOppretteRevurderingÅrsak,
                 )
+            }
         }
     }
 

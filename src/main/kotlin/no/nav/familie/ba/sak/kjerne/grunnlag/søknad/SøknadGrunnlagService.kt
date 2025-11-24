@@ -56,9 +56,17 @@ class SøknadGrunnlagService(
                     barnFraSøknad + utvidetBarnetrygdSøker
                 }
 
-                behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling).map { it.aktør }
-                behandling.erManuellMigrering() || behandling.opprettetÅrsak == BehandlingÅrsak.KLAGE -> persongrunnlagService.hentAktivThrows(behandling.id).personer.map { it.aktør }
-                else -> emptyList()
+                behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> {
+                    persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling).map { it.aktør }
+                }
+
+                behandling.erManuellMigrering() || behandling.opprettetÅrsak == BehandlingÅrsak.KLAGE -> {
+                    persongrunnlagService.hentAktivThrows(behandling.id).personer.map { it.aktør }
+                }
+
+                else -> {
+                    emptyList()
+                }
             }
 
         return personerFremstiltKravFor.distinct()

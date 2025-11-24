@@ -36,7 +36,9 @@ class AutobrevScheduler(
                 )
             }
 
-            false -> logger.info("Poden er ikke satt opp som leader - oppretter ikke task")
+            false -> {
+                logger.info("Poden er ikke satt opp som leader - oppretter ikke task")
+            }
         }
     }
 

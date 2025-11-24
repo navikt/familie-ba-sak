@@ -74,8 +74,14 @@ class PorteføljejusteringFlyttOppgaveTask(
 
         val saksreferanse = oppgave.saksreferanse
         when {
-            saksreferanse == null -> return
-            oppgave.oppgavetype !in (listOf(Oppgavetype.BehandleSak.value, Oppgavetype.GodkjenneVedtak.value, Oppgavetype.BehandleUnderkjentVedtak.value)) -> return
+            saksreferanse == null -> {
+                return
+            }
+
+            oppgave.oppgavetype !in (listOf(Oppgavetype.BehandleSak.value, Oppgavetype.GodkjenneVedtak.value, Oppgavetype.BehandleUnderkjentVedtak.value)) -> {
+                return
+            }
+
             oppgave.behandlesAvApplikasjon == "familie-ba-sak" -> {
                 oppdaterÅpenBehandlingIBaSak(oppgave, nyEnhetId)
             }
@@ -84,6 +90,7 @@ class PorteføljejusteringFlyttOppgaveTask(
             oppgave.behandlesAvApplikasjon == "familie-klage" -> {
                 oppdaterEnhetPåÅpenBehandlingIKlage(oppgaveId, nyEnhetId)
             }
+
             oppgave.behandlesAvApplikasjon == "familie-tilbake" -> {
                 oppdaterEnhetPåÅpenBehandlingITilbakekreving(UUID.fromString(saksreferanse), nyEnhetId)
             }
@@ -111,12 +118,18 @@ class PorteføljejusteringFlyttOppgaveTask(
         val nyEnhetId = arbeidsfordelingsenheter.single().enhetId
 
         return when (nyEnhetId) {
-            BarnetrygdEnhet.STEINKJER.enhetsnummer -> throw Feil("Oppgave med id $oppgaveId tildeles fortsatt Steinkjer som enhet")
+            BarnetrygdEnhet.STEINKJER.enhetsnummer -> {
+                throw Feil("Oppgave med id $oppgaveId tildeles fortsatt Steinkjer som enhet")
+            }
+
             BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer -> {
                 logger.warn("Oppgave med id $oppgaveId tilhører midlertidig enhet")
                 null
             }
-            else -> nyEnhetId
+
+            else -> {
+                nyEnhetId
+            }
         }
     }
 

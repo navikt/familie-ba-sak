@@ -15,7 +15,6 @@ sealed interface BrevBegrunnelse : Comparable<BrevBegrunnelse> {
             other.vedtakBegrunnelseType == null -> Int.MIN_VALUE
             erFinnmarkEllerSvalbardBegrunnelse(this) && !erFinnmarkEllerSvalbardBegrunnelse(other) -> Int.MAX_VALUE
             !erFinnmarkEllerSvalbardBegrunnelse(this) && erFinnmarkEllerSvalbardBegrunnelse(other) -> Int.MIN_VALUE
-
             else -> this.vedtakBegrunnelseType!!.sorteringsrekkefølge - other.vedtakBegrunnelseType!!.sorteringsrekkefølge
         }
 }

@@ -87,11 +87,17 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
         .outerJoin(barnasKompetanseTidslinjer) { upb, kompetanse ->
             val utbetalingsland = kompetanse?.utbetalingsland()
             when {
-                kompetanse == null -> null
-                upb == null || upb.utbetalingsland != utbetalingsland ->
-                    UtenlandskPeriodebeløp.NULL.copy(utbetalingsland = utbetalingsland)
+                kompetanse == null -> {
+                    null
+                }
 
-                else -> upb
+                upb == null || upb.utbetalingsland != utbetalingsland -> {
+                    UtenlandskPeriodebeløp.NULL.copy(utbetalingsland = utbetalingsland)
+                }
+
+                else -> {
+                    upb
+                }
             }
         }.mapValues { (_, tidslinje) ->
             tidslinje.forlengFremtidTilUendelig(tidspunktForUendelighet = inneværendeMåned.sisteDagIInneværendeMåned())

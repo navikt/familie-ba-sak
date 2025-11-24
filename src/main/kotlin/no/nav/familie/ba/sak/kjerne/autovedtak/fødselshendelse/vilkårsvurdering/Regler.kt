@@ -140,13 +140,17 @@ data class VurderBarnErUgift(
         val sivilstanderMedGyldigFom = sivilstander.filter { it.harGyldigFom() }
 
         return when {
-            sivilstanderMedGyldigFom.singleOrNull { it.type == SIVILSTANDTYPE.UOPPGITT } != null ->
+            sivilstanderMedGyldigFom.singleOrNull { it.type == SIVILSTANDTYPE.UOPPGITT } != null -> {
                 Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_MANGLER_SIVILSTAND)
+            }
 
-            sivilstanderMedGyldigFom.any { it.type == SIVILSTANDTYPE.GIFT || it.type == SIVILSTANDTYPE.REGISTRERT_PARTNER } ->
+            sivilstanderMedGyldigFom.any { it.type == SIVILSTANDTYPE.GIFT || it.type == SIVILSTANDTYPE.REGISTRERT_PARTNER } -> {
                 Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP)
+            }
 
-            else -> Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP)
+            else -> {
+                Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP)
+            }
         }
     }
 }
@@ -170,7 +174,10 @@ data class VurderPersonHarLovligOpphold(
 ) : Vilkårsregel {
     override fun vurder(): Evaluering =
         when (morLovligOppholdFaktaEØS.statsborgerskap.hentSterkesteMedlemskap()) {
-            Medlemskap.NORDEN -> Evaluering.oppfylt(VilkårOppfyltÅrsak.NORDISK_STATSBORGER)
+            Medlemskap.NORDEN -> {
+                Evaluering.oppfylt(VilkårOppfyltÅrsak.NORDISK_STATSBORGER)
+            }
+
             Medlemskap.TREDJELANDSBORGER -> {
                 val morErUkrainskStatsborger = morLovligOppholdFaktaEØS.statsborgerskap.any { it.landkode == "UKR" }
                 // Midlertidig regel for Ukrainakonflikten
@@ -183,11 +190,12 @@ data class VurderPersonHarLovligOpphold(
                 }
             }
 
-            Medlemskap.EØS ->
+            Medlemskap.EØS -> {
                 vurderLovligOppholdForEØSBorger(
                     morLovligOppholdFaktaEØS,
                     annenForelderLovligOppholdFaktaEØS,
                 )
+            }
 
             Medlemskap.STATSLØS, Medlemskap.UKJENT -> {
                 if (opphold.gyldigGjeldendeOppholdstillatelseFødselshendelse()) {
@@ -197,7 +205,9 @@ data class VurderPersonHarLovligOpphold(
                 }
             }
 
-            else -> Evaluering.ikkeVurdert(VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_IKKE_MULIG_Å_FASTSETTE)
+            else -> {
+                Evaluering.ikkeVurdert(VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_IKKE_MULIG_Å_FASTSETTE)
+            }
         }
 }
 
@@ -222,7 +232,10 @@ private fun vurderLovligOppholdForEØSBorger(
     }
 
     return when (annenForelderLovligOppholdFaktaEØS.statsborgerskap.hentSterkesteMedlemskap()) {
-        Medlemskap.NORDEN -> Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_NORDISK)
+        Medlemskap.NORDEN -> {
+            Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_NORDISK)
+        }
+
         Medlemskap.EØS -> {
             if (annenForelderLovligOppholdFaktaEØS.arbeidsforhold.harLøpendeArbeidsforhold()) {
                 Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD)
@@ -231,9 +244,17 @@ private fun vurderLovligOppholdForEØSBorger(
             }
         }
 
-        Medlemskap.TREDJELANDSBORGER -> Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER)
-        Medlemskap.STATSLØS, Medlemskap.UKJENT -> Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS)
-        else -> Evaluering.ikkeVurdert(VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_ANNEN_FORELDER_IKKE_MULIG_Å_FASTSETTE)
+        Medlemskap.TREDJELANDSBORGER -> {
+            Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER)
+        }
+
+        Medlemskap.STATSLØS, Medlemskap.UKJENT -> {
+            Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS)
+        }
+
+        else -> {
+            Evaluering.ikkeVurdert(VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_ANNEN_FORELDER_IKKE_MULIG_Å_FASTSETTE)
+        }
     }
 }
 

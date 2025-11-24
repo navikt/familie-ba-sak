@@ -167,16 +167,21 @@ private fun Vilkårsvurdering.leggPåUtdypendeVilkår(): Vilkårsvurdering {
     this.personResultater.forEach { personresultat ->
         personresultat.vilkårResultater.forEach {
             when {
-                it.vilkårType == BOSATT_I_RIKET && personresultat.erSøkersResultater() && it.vurderesEtter == EØS_FORORDNINGEN ->
+                it.vilkårType == BOSATT_I_RIKET && personresultat.erSøkersResultater() && it.vurderesEtter == EØS_FORORDNINGEN -> {
                     it.utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger + OMFATTET_AV_NORSK_LOVGIVNING
+                }
 
-                it.vilkårType == BOSATT_I_RIKET && !personresultat.erSøkersResultater() && it.vurderesEtter == EØS_FORORDNINGEN ->
+                it.vilkårType == BOSATT_I_RIKET && !personresultat.erSøkersResultater() && it.vurderesEtter == EØS_FORORDNINGEN -> {
                     it.utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger + BARN_BOR_I_NORGE
+                }
 
-                it.vilkårType == BOR_MED_SØKER && !personresultat.erSøkersResultater() && it.vurderesEtter == EØS_FORORDNINGEN ->
+                it.vilkårType == BOR_MED_SØKER && !personresultat.erSøkersResultater() && it.vurderesEtter == EØS_FORORDNINGEN -> {
                     it.utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger + BARN_BOR_I_NORGE_MED_SØKER
+                }
 
-                else -> Any()
+                else -> {
+                    Any()
+                }
             }
         }
     }
