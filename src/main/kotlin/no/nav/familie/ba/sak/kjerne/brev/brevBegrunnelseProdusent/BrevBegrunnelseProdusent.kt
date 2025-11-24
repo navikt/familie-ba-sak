@@ -490,8 +490,7 @@ private fun erDeltBostedOgInnvilgetEllerØkningOgSkalUtbetales(
 ): Boolean =
     sanityBegrunnelse is SanityBegrunnelse &&
         (
-            sanityBegrunnelse.gjelderEndretutbetaling &&
-                sanityBegrunnelse.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger == EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES ||
+            (sanityBegrunnelse.gjelderEndretutbetaling && sanityBegrunnelse.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger == EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES) ||
                 sanityBegrunnelse.gjelderEtterEndretUtbetaling
         ) &&
         sanityBegrunnelse.endringsaarsaker.contains(Årsak.DELT_BOSTED) &&

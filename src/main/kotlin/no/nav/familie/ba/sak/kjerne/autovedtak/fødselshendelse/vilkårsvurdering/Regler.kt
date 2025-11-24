@@ -57,7 +57,7 @@ data class VurderPersonErBosattIRiket(
 
         val adresserMedGyldigFom = adresser.filter { it.harGyldigFom() }
 
-        /**
+        /*
          * En person med registrert bostedsadresse er bosatt i Norge.
          * En person som mangler registrert bostedsadresse er utflyttet.
          * See: https://navikt.github.io/pdl/#_utflytting
@@ -297,8 +297,7 @@ private fun hentMaxAvstandAvDagerMellomPerioder(
                         tom = it.tom,
                     ),
                 ) ||
-                it.fom >= fom &&
-                it.tom <= tom
+                (it.fom >= fom && it.tom <= tom)
         }
 
     if (perioderInnenAngittTidsrom.isEmpty()) return Duration.between(fom.atStartOfDay(), tom.atStartOfDay()).toDays()

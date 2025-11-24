@@ -51,9 +51,11 @@ data class GrMatrikkeladresseBostedsadresse(
         }
         val otherMatrikkeladresse = other as GrMatrikkeladresseBostedsadresse
         return this === other ||
-            matrikkelId != null &&
-            matrikkelId == otherMatrikkeladresse.matrikkelId &&
-            bruksenhetsnummer == otherMatrikkeladresse.bruksenhetsnummer
+            (
+                matrikkelId != null &&
+                    matrikkelId == otherMatrikkeladresse.matrikkelId &&
+                    bruksenhetsnummer == otherMatrikkeladresse.bruksenhetsnummer
+            )
     }
 
     override fun hashCode(): Int = Objects.hash(matrikkelId)

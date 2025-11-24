@@ -14,8 +14,7 @@ fun bestemKategoriVedOpprettelse(
 ): BehandlingKategori =
     when {
         behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING ||
-            behandlingType == BehandlingType.REVURDERING &&
-            behandlingÅrsak == BehandlingÅrsak.SØKNAD -> {
+            (behandlingType == BehandlingType.REVURDERING && behandlingÅrsak == BehandlingÅrsak.SØKNAD) -> {
             overstyrtKategori
                 ?: throw FunksjonellFeil(
                     "Behandling med type ${behandlingType.visningsnavn} " +
