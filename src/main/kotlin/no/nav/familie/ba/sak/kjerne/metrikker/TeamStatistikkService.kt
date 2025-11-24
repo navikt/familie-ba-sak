@@ -36,7 +36,7 @@ class TeamStatistikkService(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @Scheduled(initialDelay = FEM_MINUTTER_VENTETID_FØR_OPPDATERING_FØRSTE_GANG, fixedRate = OPPDATERING_HVER_DAG)
+    @Scheduled(cron = "0 0 4 * * *")
     fun utbetalinger() {
         if (!featureToggleService.isEnabled(FeatureToggle.TUNGTKJØRENDE_GRAFANA_STATISTIKK, false)) return
         if (!erLeader()) return
