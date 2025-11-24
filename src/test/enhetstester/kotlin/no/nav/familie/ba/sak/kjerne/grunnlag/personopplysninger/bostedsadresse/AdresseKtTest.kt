@@ -96,7 +96,7 @@ class AdresseKtTest {
             val adresser = listOf(adresse1, adresse2, adresse3, adresse4, adresse5)
 
             // Act
-            val funnetAdresser = finnAdressehistorikkFraOgMedDato(adresser, dagensDato)
+            val funnetAdresser = adresser.finnAdressehistorikkFraOgMedDato(dagensDato)
 
             // Assert
             assertThat(funnetAdresser).hasSize(2)
@@ -117,7 +117,7 @@ class AdresseKtTest {
             val adresser = listOf(adresse)
 
             // Act
-            val funnetAdresser = finnAdressehistorikkFraOgMedDato(adresser, dagensDato)
+            val funnetAdresser = adresser.finnAdressehistorikkFraOgMedDato(dagensDato)
 
             // Assert
             assertThat(funnetAdresser).hasSize(1)

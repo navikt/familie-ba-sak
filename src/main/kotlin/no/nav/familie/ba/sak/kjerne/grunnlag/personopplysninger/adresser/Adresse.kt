@@ -97,16 +97,15 @@ data class Adresse(
     }
 }
 
-fun List<Adresse>.hentForDato(dato: LocalDate): Adresse? = finnAdressehistorikkFraOgMedDato(this, dato).firstOrNull()
+fun List<Adresse>.hentForDato(dato: LocalDate): Adresse? = this.finnAdressehistorikkFraOgMedDato(dato).firstOrNull()
 
-fun finnAdressehistorikkFraOgMedDato(
-    adresser: List<Adresse>,
+fun List<Adresse>.finnAdressehistorikkFraOgMedDato(
     dato: LocalDate,
 ): List<Adresse> {
-    val sorterteAdresser = adresser.filter { it.gyldigFraOgMed != null }.sortedBy { it.gyldigFraOgMed }
+    val sorterteAdresser = filter { it.gyldigFraOgMed != null }.sortedBy { it.gyldigFraOgMed }
     val sisteAdresseSomOverlapperDato = sorterteAdresser.lastOrNull { it.overlapperMedDato(dato) }
     return if (sisteAdresseSomOverlapperDato == null) {
-        adresser
+        this
     } else {
         sorterteAdresser.dropWhile { it != sisteAdresseSomOverlapperDato }
     }
@@ -137,6 +136,10 @@ fun List<Adresse>.lagTidslinjeForAdresser(
     }
 }
 
+/**
+ * Filtrerer ut adresser med ugyldige kombinasjoner av fom og tom
+ * Distinkte perioder med lik fom og tom (prioriterer de som er i Finnmark eller NordTroms)
+ **/
 fun List<Adresse>.filtrereUgyldigeAdresser(): List<Adresse> {
     val filtrert =
         filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
@@ -149,6 +152,10 @@ fun List<Adresse>.filtrereUgyldigeAdresser(): List<Adresse> {
     return filtrert.forskyvTilOgMedHvisDenErLikNesteFraOgMed()
 }
 
+/**
+ * Filtrerer ut adresser med ugyldige kombinasjoner av fom og tom
+ * Distinkte perioder med lik fom og tom (prioriterer de som er på Svalbard)
+ **/
 fun List<Adresse>.filtrereUgyldigeOppholdsadresser(): List<Adresse> {
     val filtrert =
         filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }

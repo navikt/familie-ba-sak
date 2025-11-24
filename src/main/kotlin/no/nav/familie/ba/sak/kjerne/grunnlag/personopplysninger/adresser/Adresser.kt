@@ -17,12 +17,12 @@ data class Adresser(
     val oppholdsadresse: List<Adresse>,
 ) {
     fun harAdresserSomErRelevantForFinnmarkstillegg(): Boolean {
-        val harBostedsadresserRelevantForFinnmarkstillegg = finnAdressehistorikkFraOgMedDato(bostedsadresser, FØRSTE_RELEVANTE_ADRESSEDATO_FOR_FINNMARKSTILLEGG).any { it.erIFinnmarkEllerNordTroms() }
-        val harDeltBostederRelevantForFinnmarkstillegg = finnAdressehistorikkFraOgMedDato(delteBosteder, FØRSTE_RELEVANTE_ADRESSEDATO_FOR_FINNMARKSTILLEGG).any { it.erIFinnmarkEllerNordTroms() }
+        val harBostedsadresserRelevantForFinnmarkstillegg = bostedsadresser.finnAdressehistorikkFraOgMedDato(FØRSTE_RELEVANTE_ADRESSEDATO_FOR_FINNMARKSTILLEGG).any { it.erIFinnmarkEllerNordTroms() }
+        val harDeltBostederRelevantForFinnmarkstillegg = delteBosteder.finnAdressehistorikkFraOgMedDato(FØRSTE_RELEVANTE_ADRESSEDATO_FOR_FINNMARKSTILLEGG).any { it.erIFinnmarkEllerNordTroms() }
         return harBostedsadresserRelevantForFinnmarkstillegg || harDeltBostederRelevantForFinnmarkstillegg
     }
 
-    fun harAdresserSomErRelevantForSvalbardtillegg(): Boolean = finnAdressehistorikkFraOgMedDato(oppholdsadresse, FØRSTE_RELEVANTE_ADRESSEDATO_FOR_SVALBARDSTILLEGG).any { it.erPåSvalbard() }
+    fun harAdresserSomErRelevantForSvalbardtillegg(): Boolean = oppholdsadresse.finnAdressehistorikkFraOgMedDato(FØRSTE_RELEVANTE_ADRESSEDATO_FOR_SVALBARDSTILLEGG).any { it.erPåSvalbard() }
 
     fun lagErOppholdsadresserPåSvalbardTidslinje(
         personResultat: PersonResultat,
