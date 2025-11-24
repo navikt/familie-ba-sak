@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.filtrereUgyldigeAdresser
@@ -12,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.utils.erMinst12Måneder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD
@@ -30,13 +30,11 @@ import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
 @Service
 class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
     private val søknadService: SøknadService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
     fun preutfyllBosattIRiket(
         vilkårsvurdering: Vilkårsvurdering,
@@ -107,17 +105,6 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
                     }
                 }.tilPerioderIkkeNull()
                 .tilTidslinje()
-
-        val andelForAktør = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør)
-
-        if (behandling.erFinnmarksEllerSvalbardtillegg()) {
-            validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
-                behandling = behandling,
-                erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
-                erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
-                andelForAktør = andelForAktør,
-            )
-        }
 
         val erNordiskStatsborgerOgBosattINorgeTidslinje =
             erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeEllerPåSvalbardTidslinje) { erNordiskStatsborger, erBosattINorge ->
@@ -216,8 +203,6 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
 
             else -> IkkeOppfyltDelvilkår
         }
-
-    private fun Periode<*>.erMinst12Måneder(): Boolean = ChronoUnit.MONTHS.between(fom, tom ?: LocalDate.now()) >= 12
 
     private fun erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat: PersonResultat): Boolean {
         val søknad = søknadService.finnSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id) ?: return false
