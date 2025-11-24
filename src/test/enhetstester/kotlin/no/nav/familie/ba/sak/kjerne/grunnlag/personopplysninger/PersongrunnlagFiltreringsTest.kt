@@ -188,7 +188,31 @@ class PersongrunnlagFiltreringsTest {
     }
 
     @Test
-    fun `skal filtrere bort sivilstand for søker før eldste barns fødselsdato`() {
+    fun `Skal ikke filtrere bort sivilstander på barn`() {
+        // Arrange
+
+        val sivilstandBarnFør =
+            listOf(
+                Sivilstand(
+                    gyldigFraOgMed = LocalDate.of(2019, 1, 1),
+                    type = SIVILSTANDTYPE.UGIFT,
+                ),
+                Sivilstand(
+                    gyldigFraOgMed = LocalDate.of(2022, 1, 1),
+                    type = SIVILSTANDTYPE.GIFT,
+                ),
+            )
+        // Act
+        val sivilstandBarnEtter = sivilstandBarnFør.filtrerBortIkkeRelevanteSivilstander(true, BehandlingUnderkategori.ORDINÆR, PersonType.BARN)
+
+        // Assert
+        assertThat(sivilstandBarnEtter).hasSize(2)
+        assertThat(sivilstandBarnEtter.first().gyldigFraOgMed).isEqualTo(LocalDate.of(2019, 1, 1))
+        assertThat(sivilstandBarnEtter.last().gyldigFraOgMed).isEqualTo(LocalDate.of(2022, 1, 1))
+    }
+
+    @Test
+    fun `skal filtrere bort sivilstander for søker for ordinære behandlinger`() {
         // Arrange
         val sivilstandSøkerFør =
             listOf(
@@ -206,37 +230,36 @@ class PersongrunnlagFiltreringsTest {
                 ),
             )
 
-        val sivilstandBarnFør =
+        // Act
+        val sivilstandSøkerEtter = sivilstandSøkerFør.filtrerBortIkkeRelevanteSivilstander(true, BehandlingUnderkategori.ORDINÆR, PersonType.SØKER)
+
+        // Assert
+        assertThat(sivilstandSøkerEtter).hasSize(0)
+    }
+
+    @Test
+    fun `skal ikke filtrere bort sivilstander for søker for utvidet behandling`() {
+        // Arrange
+        val sivilstandSøkerFør =
             listOf(
                 Sivilstand(
-                    gyldigFraOgMed = LocalDate.of(2019, 1, 1),
+                    gyldigFraOgMed = LocalDate.of(2000, 1, 1),
                     type = SIVILSTANDTYPE.UGIFT,
                 ),
                 Sivilstand(
-                    gyldigFraOgMed = LocalDate.of(2022, 1, 1),
+                    gyldigFraOgMed = LocalDate.of(2010, 1, 1),
                     type = SIVILSTANDTYPE.GIFT,
+                ),
+                Sivilstand(
+                    gyldigFraOgMed = LocalDate.of(2020, 1, 1),
+                    type = SIVILSTANDTYPE.SKILT,
                 ),
             )
 
-        val grunnlag =
-            lagTestPersonopplysningGrunnlag(
-                behandlingId = behandling.id,
-                søkerPersonIdent = søkerFnr,
-                barnasIdenter = listOf(barnFnr),
-                barnasFødselsdatoer = listOf(LocalDate.of(2019, 1, 1)),
-            )
-
         // Act
-        val sivilstandSøkerEtter = sivilstandSøkerFør.filtrerBortIkkeRelevanteSivilstander(grunnlag, true, BehandlingUnderkategori.UTVIDET, PersonType.SØKER)
-        val sivilstandBarnEtter = sivilstandBarnFør.filtrerBortIkkeRelevanteSivilstander(grunnlag, true, BehandlingUnderkategori.ORDINÆR, PersonType.BARN)
+        val sivilstandSøkerEtter = sivilstandSøkerFør.filtrerBortIkkeRelevanteSivilstander(true, BehandlingUnderkategori.UTVIDET, PersonType.SØKER)
 
         // Assert
-        assertThat(sivilstandSøkerEtter).hasSize(2)
-        assertThat(sivilstandSøkerEtter.first().gyldigFraOgMed).isEqualTo(LocalDate.of(2010, 1, 1))
-        assertThat(sivilstandSøkerEtter.last().gyldigFraOgMed).isEqualTo(LocalDate.of(2020, 1, 1))
-
-        assertThat(sivilstandBarnEtter).hasSize(2)
-        assertThat(sivilstandBarnEtter.first().gyldigFraOgMed).isEqualTo(LocalDate.of(2019, 1, 1))
-        assertThat(sivilstandBarnEtter.last().gyldigFraOgMed).isEqualTo(LocalDate.of(2022, 1, 1))
+        assertThat(sivilstandSøkerEtter).hasSize(3)
     }
 }

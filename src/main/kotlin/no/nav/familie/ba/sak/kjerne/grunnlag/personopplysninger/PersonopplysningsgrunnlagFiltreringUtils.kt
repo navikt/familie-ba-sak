@@ -68,34 +68,16 @@ object PersonopplysningsgrunnlagFiltreringUtils {
     }
 
     fun List<Sivilstand>.filtrerBortIkkeRelevanteSivilstander(
-        personOpplysningGrunnlag: PersonopplysningGrunnlag,
         filtrerSivilstand: Boolean,
         underkategori: BehandlingUnderkategori,
         personType: PersonType,
     ): List<Sivilstand> {
         if (!filtrerSivilstand) return this
 
-        if (personType == PersonType.BARN) return this
-
-        if (underkategori == BehandlingUnderkategori.ORDINÆR) return emptyList()
-
-        val eldsteBarnsFødselsdato = personOpplysningGrunnlag.barna.minOfOrNull { it.fødselsdato } ?: return this
-
-        val sortertSivilstand = this.sortedBy { it.gyldigFraOgMed }
-
-        return sortertSivilstand
-            .windowed(size = 2, step = 1, partialWindows = true)
-            .mapIndexedNotNull { _, window ->
-                val denne = window[0]
-                val neste = window.getOrNull(1)
-
-                if (neste != null &&
-                    (neste.gyldigFraOgMed?.isBefore(eldsteBarnsFødselsdato) == true)
-                ) {
-                    null
-                } else {
-                    denne
-                }
-            }
+        return if (underkategori == BehandlingUnderkategori.ORDINÆR && personType != PersonType.BARN) {
+            emptyList()
+        } else {
+            this
+        }
     }
 }
