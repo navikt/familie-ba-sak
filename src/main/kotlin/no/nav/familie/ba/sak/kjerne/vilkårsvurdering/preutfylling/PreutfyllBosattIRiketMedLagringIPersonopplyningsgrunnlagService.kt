@@ -4,12 +4,9 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.filtrereUgyldigeAdresser
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.lagErDeltBostedIFinnmarkEllerNordTromsTidslinje
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.lagErOppholdsadresserPåSvalbardTidslinje
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.lagTidslinjeForAdresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.filtrereUgyldigeAdresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.lagTidslinjeForAdresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.iUkraina
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.lagErNordiskStatsborgerTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson

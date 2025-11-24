@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse
 
 import no.nav.familie.ba.sak.datagenerator.lagAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.finnAdressehistorikkFraOgMedDato
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.hentForDato
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

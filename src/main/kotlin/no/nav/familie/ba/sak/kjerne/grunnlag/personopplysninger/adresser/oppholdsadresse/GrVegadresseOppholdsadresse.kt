@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse
+package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse
 
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
@@ -6,7 +6,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import no.nav.familie.ba.sak.common.Utils.nullableTilString
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted.PAA_SVALBARD
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse

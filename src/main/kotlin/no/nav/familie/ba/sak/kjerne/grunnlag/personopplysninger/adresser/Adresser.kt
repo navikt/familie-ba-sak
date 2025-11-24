@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse
+package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person

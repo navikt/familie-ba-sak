@@ -2,51 +2,30 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.cucumber.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.lagAdresse
 import no.nav.familie.ba.sak.datagenerator.lagAdresser
-import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
-import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
-import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.datagenerator.lagSøknad
-import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
-import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.kontrakter.ba.finnmarkstillegg.KommunerIFinnmarkOgNordTroms
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
-import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
-import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 import no.nav.familie.kontrakter.felles.svalbard.SvalbardKommune
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.YearMonth
 
 class OppdaterBosattIRiketMedFinnmarkOgSvalbardServiceTest {
     private val systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient = mockk(relaxed = true)

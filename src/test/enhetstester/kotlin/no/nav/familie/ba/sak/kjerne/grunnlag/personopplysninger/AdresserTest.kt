@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.datagenerator.lagOppholdsadresse
 import no.nav.familie.ba.sak.datagenerator.lagUkjentBosted
 import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
 import no.nav.familie.kontrakter.ba.finnmarkstillegg.KommunerIFinnmarkOgNordTroms
 import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted
 import no.nav.familie.kontrakter.felles.svalbard.SvalbardKommune

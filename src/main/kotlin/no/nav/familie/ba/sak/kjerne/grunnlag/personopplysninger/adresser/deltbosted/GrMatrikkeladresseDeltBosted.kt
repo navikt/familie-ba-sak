@@ -1,10 +1,10 @@
-package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted
+package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.deltbosted
 
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import java.util.Objects
