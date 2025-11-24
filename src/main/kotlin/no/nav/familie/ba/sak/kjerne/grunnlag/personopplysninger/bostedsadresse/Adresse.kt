@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse
 
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.kontrakter.ba.finnmarkstillegg.kommuneErIFinnmarkEllerNordTroms
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
@@ -13,6 +14,9 @@ import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 import no.nav.familie.kontrakter.felles.personopplysning.UtenlandskAdresse
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.familie.kontrakter.felles.svalbard.erKommunePåSvalbard
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.tilTidslinje
 import java.time.LocalDate
 
 data class Adresse(
@@ -107,3 +111,68 @@ fun finnAdressehistorikkFraOgMedDato(
         sorterteAdresser.dropWhile { it != sisteAdresseSomOverlapperDato }
     }
 }
+
+fun List<Adresse>.lagTidslinjeForAdresser(
+    aktørId: String,
+    adressetype: String,
+    operator: (Adresse) -> Boolean,
+): Tidslinje<Boolean> {
+    try {
+        return windowed(size = 2, step = 1, partialWindows = true) {
+            val denne = it.first()
+            val neste = it.getOrNull(1)
+
+            Periode(
+                verdi = operator(denne),
+                fom = denne.gyldigFraOgMed,
+                tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
+            )
+        }.tilTidslinje()
+    } catch (e: IllegalStateException) {
+        secureLogger.error("Feil ved oppretting av tidslinjer for $adressetype med adresser $this for person med aktørId $aktørId", e)
+        throw e
+    } catch (e: IllegalArgumentException) {
+        secureLogger.error("Feil ved oppretting av tidslinjer for $adressetype med adresser $this for person med aktørId $aktørId", e)
+        throw e
+    }
+}
+
+fun List<Adresse>.filtrereUgyldigeAdresser(): List<Adresse> {
+    val filtrert =
+        filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
+            .groupBy { it.gyldigFraOgMed to it.gyldigTilOgMed }
+            .values
+            .map { likePerioder ->
+                likePerioder.find { it.erIFinnmarkEllerNordTroms() } ?: likePerioder.first()
+            }.sortedBy { it.gyldigFraOgMed }
+
+    return filtrert.forskyvTilOgMedHvisDenErLikNesteFraOgMed()
+}
+
+fun List<Adresse>.filtrereUgyldigeOppholdsadresser(): List<Adresse> {
+    val filtrert =
+        filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
+            .groupBy { it.gyldigFraOgMed to it.gyldigTilOgMed }
+            .values
+            .map { likePerioder ->
+                likePerioder.find { it.erPåSvalbard() } ?: likePerioder.first()
+            }.sortedBy { it.gyldigFraOgMed }
+
+    return filtrert.forskyvTilOgMedHvisDenErLikNesteFraOgMed()
+}
+
+private fun List<Adresse>.forskyvTilOgMedHvisDenErLikNesteFraOgMed(): List<Adresse> =
+    windowed(size = 2, step = 1, partialWindows = true)
+        .map { adresser ->
+            val denne = adresser.first()
+            val neste = adresser.getOrNull(1)
+
+            if (denne.gyldigTilOgMed != null &&
+                neste != null &&
+                denne.gyldigTilOgMed == neste.gyldigFraOgMed
+            ) {
+                denne.copy(gyldigTilOgMed = denne.gyldigTilOgMed.minusDays(1))
+            } else {
+                denne
+            }
+        }

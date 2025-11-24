@@ -144,7 +144,7 @@ class PreutfyllBosattIRiketService(
         val andelForAktør = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør)
 
         if (behandling.erFinnmarksEllerSvalbardtillegg()) {
-            validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
+            validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlingerForGammelLøype(
                 behandling = behandling,
                 erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
                 erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
@@ -223,7 +223,7 @@ class PreutfyllBosattIRiketService(
         val erOppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje(adresserForPerson, personResultat)
         val andelForAktør = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør)
 
-        validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
+        validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlingerForGammelLøype(
             behandling = behandling,
             erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
             erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
@@ -478,7 +478,8 @@ class PreutfyllBosattIRiketService(
             }
 }
 
-private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
+@Deprecated("Fjernes når vi skrur på toggle for å bruke personopplysningsgrunnlag")
+private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlingerForGammelLøype(
     behandling: Behandling,
     erDeltBostedIFinnmarkEllerNordTromsTidslinje: Tidslinje<Boolean>,
     erOppholdsadressePåSvalbardTidslinje: Tidslinje<Boolean>,
