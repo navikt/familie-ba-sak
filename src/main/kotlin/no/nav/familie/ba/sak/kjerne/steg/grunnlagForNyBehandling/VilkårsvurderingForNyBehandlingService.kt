@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_PREUTFYLLE_BOSATT_I_RIKET_I_FØDSELSHENDELSER
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.autovedtak.OppdaterBosattIRiketMedFinnmarkOgSvalbardService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -32,8 +33,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
-private val PREUTFYLLING_BOSATT_I_RIKET_CUT_OFF_FOM_DATO_FINNMARKS_OG_SVALBARDTILLEGG = LocalDate.of(2025, 9, 1)
-
 @Service
 class VilkårsvurderingForNyBehandlingService(
     private val vilkårsvurderingService: VilkårsvurderingService,
@@ -45,6 +44,7 @@ class VilkårsvurderingForNyBehandlingService(
     private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val preutfyllVilkårService: PreutfyllVilkårService,
     private val featureToggleService: FeatureToggleService,
+    private val oppdaterBosattIRiketMedFinnmarkOgSvalbardService: OppdaterBosattIRiketMedFinnmarkOgSvalbardService,
 ) {
     fun opprettVilkårsvurderingUtenomHovedflyt(
         behandling: Behandling,
@@ -167,10 +167,7 @@ class VilkårsvurderingForNyBehandlingService(
                     personopplysningGrunnlag = personopplysningGrunnlag,
                 ).also {
                     if (inneværendeBehandling.erFinnmarksEllerSvalbardtillegg()) {
-                        preutfyllVilkårService.preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(
-                            vilkårsvurdering = it,
-                            cutOffFomDato = PREUTFYLLING_BOSATT_I_RIKET_CUT_OFF_FOM_DATO_FINNMARKS_OG_SVALBARDTILLEGG,
-                        )
+                        oppdaterBosattIRiketMedFinnmarkOgSvalbardService.oppdaterBosattIRiketMedFinnmarkOgSvalbardMerking(vilkårsvurdering = it)
                     }
                 }
 

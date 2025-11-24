@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
+package no.nav.familie.ba.sak.kjerne.autovedtak
 
 import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.Feil
