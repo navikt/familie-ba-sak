@@ -133,7 +133,7 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
         val andelForAktør = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør)
 
         if (behandling.erFinnmarksEllerSvalbardtillegg()) {
-            validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
+            validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtilleggbehandlinger(
                 behandling = behandling,
                 erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
                 erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
@@ -212,7 +212,7 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
         val erOppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje(adresserForPerson, personResultat)
         val andelForAktør = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør)
 
-        validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
+        validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtilleggbehandlinger(
             behandling = behandling,
             erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
             erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
@@ -462,7 +462,7 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
             }
 }
 
-private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
+private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtilleggbehandlinger(
     behandling: Behandling,
     erDeltBostedIFinnmarkEllerNordTromsTidslinje: Tidslinje<Boolean>,
     erOppholdsadressePåSvalbardTidslinje: Tidslinje<Boolean>,
