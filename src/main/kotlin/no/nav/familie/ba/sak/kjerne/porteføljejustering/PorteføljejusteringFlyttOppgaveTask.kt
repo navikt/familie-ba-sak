@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.klage.KlageKlient
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
-import no.nav.familie.ba.sak.task.PorteføljejusteringTask
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -22,6 +21,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.Properties
+import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(
@@ -82,10 +82,10 @@ class PorteføljejusteringFlyttOppgaveTask(
 
             // TODO I NAV-26753
             oppgave.behandlesAvApplikasjon == "familie-klage" -> {
-                oppdaterEnhetPåÅpenBehandlingIKlage(saksreferanse.toLong(), nyEnhetId)
+                oppdaterEnhetPåÅpenBehandlingIKlage(oppgaveId, nyEnhetId)
             }
             oppgave.behandlesAvApplikasjon == "familie-tilbake" -> {
-                oppdaterEnhetPåÅpenBehandlingITilbakekreving(saksreferanse.toLong(), nyEnhetId)
+                oppdaterEnhetPåÅpenBehandlingITilbakekreving(UUID.fromString(saksreferanse), nyEnhetId)
             }
         }
     }
@@ -136,17 +136,17 @@ class PorteføljejusteringFlyttOppgaveTask(
     }
 
     private fun oppdaterEnhetPåÅpenBehandlingITilbakekreving(
-        fagsakId: Long,
+        behandlingEksternBrukId: UUID,
         nyEnhetId: String,
     ) {
-        tilbakekrevingKlient.oppdaterEnhetPåÅpenBehandling(fagsakId, nyEnhetId)
+        tilbakekrevingKlient.oppdaterEnhetPåÅpenBehandling(behandlingEksternBrukId, nyEnhetId)
     }
 
     private fun oppdaterEnhetPåÅpenBehandlingIKlage(
-        fagsakId: Long,
+        oppgaveId: Long,
         nyEnhetId: String,
     ) {
-        klageKlient.oppdaterEnhetPåÅpenBehandling(fagsakId, nyEnhetId)
+        klageKlient.oppdaterEnhetPåÅpenBehandling(oppgaveId, nyEnhetId)
     }
 
     companion object {
