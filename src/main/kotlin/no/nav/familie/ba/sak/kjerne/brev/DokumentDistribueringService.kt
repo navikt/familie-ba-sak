@@ -62,13 +62,17 @@ class DokumentDistribueringService(
             val brevmal = distribuerDokumentDTO.brevmal
 
             when {
-                mottakerErDødUtenDødsboadresse(ressursException) && behandlingId != null ->
+                mottakerErDødUtenDødsboadresse(ressursException) && behandlingId != null -> {
                     opprettLogginnslagPåBehandlingOgNyTaskSomDistribuererPåJournalpostId(distribuerDokumentDTO)
+                }
 
-                mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException) && behandlingId != null ->
+                mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException) && behandlingId != null -> {
                     loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
+                }
 
-                else -> throw ressursException
+                else -> {
+                    throw ressursException
+                }
             }
         }
     }

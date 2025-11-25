@@ -104,8 +104,14 @@ fun List<PdlKjoenn>.filtrerKjønnPåKilde(): PdlKjoenn? =
 
 fun String.kildeTilPrioritet(): Int =
     when (uppercase()) {
-        "PDL" -> 1
-        "FREG" -> 2
+        "PDL" -> {
+            1
+        }
+
+        "FREG" -> {
+            2
+        }
+
         else -> {
             logger.warn("Ukjent kilde fra PDL: $this. Bør legges til.")
             3

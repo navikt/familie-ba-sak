@@ -341,9 +341,13 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
         hentBarnMedNullutbetalingForrigePeriodeGrunnetEndretUtbetaling(begrunnelsesGrunnlagPerPerson)
 
     return when {
-        this.erAvslagUregistrerteBarnBegrunnelse() -> uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
+        this.erAvslagUregistrerteBarnBegrunnelse() -> {
+            uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
+        }
 
-        this.gjelderFinnmarkstillegg || this.gjelderSvalbardtillegg -> barnPåBegrunnelse.map { it.fødselsdato }
+        this.gjelderFinnmarkstillegg || this.gjelderSvalbardtillegg -> {
+            barnPåBegrunnelse.map { it.fødselsdato }
+        }
 
         gjelderSøker && !this.gjelderEtterEndretUtbetaling && !this.gjelderEndretutbetaling -> {
             when (this.periodeResultat) {
@@ -361,21 +365,25 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
                     )
                 }
 
-                else -> (barnMedUtbetaling + barnPåBegrunnelse).toSet().map { it.fødselsdato }
+                else -> {
+                    (barnMedUtbetaling + barnPåBegrunnelse).toSet().map { it.fødselsdato }
+                }
             }
         }
 
-        gjelderSøker && this.gjelderEtterEndretUtbetaling ->
+        gjelderSøker && this.gjelderEtterEndretUtbetaling -> {
             barnPåBegrunnelse
                 .ifEmpty { barnMedUtbetaling }
                 .map { it.fødselsdato }
+        }
 
         erDeltBostedOgInnvilgetEllerØkningOgSkalUtbetales(this) -> {
             hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson).keys.map { it.fødselsdato }
         }
 
-        erEtterEndretUtbetalingOgErIkkeAlleredeUtbetalt(this) ->
+        erEtterEndretUtbetalingOgErIkkeAlleredeUtbetalt(this) -> {
             (barnSomHaddeDeltBostedIForrigePeriodeMenIkkeDenne + barnSomNåFårUtbetalingIPeriode).distinct().map { it.fødselsdato }
+        }
 
         this.gjelderEndretutbetaling -> {
             barnPåBegrunnelse
@@ -482,8 +490,7 @@ private fun erDeltBostedOgInnvilgetEllerØkningOgSkalUtbetales(
 ): Boolean =
     sanityBegrunnelse is SanityBegrunnelse &&
         (
-            sanityBegrunnelse.gjelderEndretutbetaling &&
-                sanityBegrunnelse.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger == EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES ||
+            (sanityBegrunnelse.gjelderEndretutbetaling && sanityBegrunnelse.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger == EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES) ||
                 sanityBegrunnelse.gjelderEtterEndretUtbetaling
         ) &&
         sanityBegrunnelse.endringsaarsaker.contains(Årsak.DELT_BOSTED) &&
@@ -523,17 +530,23 @@ fun hentAntallBarnForBegrunnelse(
     val erAvslagUregistrerteBarn = begrunnelse.erAvslagUregistrerteBarnBegrunnelse()
 
     return when {
-        erAvslagUregistrerteBarn -> uregistrerteBarnPåBehandlingen.size
+        erAvslagUregistrerteBarn -> {
+            uregistrerteBarnPåBehandlingen.size
+        }
+
         gjelderSøker &&
             begrunnelse.vedtakBegrunnelseType in
             listOf(
                 VedtakBegrunnelseType.AVSLAG,
                 VedtakBegrunnelseType.OPPHØR,
             )
-        ->
+        -> {
             antallBarnGjeldendeForBegrunnelse
+        }
 
-        else -> barnasFødselsdatoer.size
+        else -> {
+            barnasFødselsdatoer.size
+        }
     }
 }
 
@@ -569,7 +582,9 @@ fun ISanityBegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
         grunnlagForPersonerIBegrunnelsen.mapNotNull { it.value.dennePerioden.endretUtbetalingAndel }
     }
 
-    else -> emptyList()
+    else -> {
+        emptyList()
+    }
 }
 
 private fun ISanityBegrunnelse.validerBrevbegrunnelse(
@@ -586,7 +601,6 @@ private fun hentSøkersRettTilUtvidet(utvidetUtbetalingsdetaljer: List<AndelForV
     when {
         utvidetUtbetalingsdetaljer.any { it.prosent > BigDecimal.ZERO } -> SøkersRettTilUtvidet.SØKER_FÅR_UTVIDET
         utvidetUtbetalingsdetaljer.isNotEmpty() && utvidetUtbetalingsdetaljer.all { it.prosent == BigDecimal.ZERO } -> SøkersRettTilUtvidet.SØKER_HAR_RETT_MEN_FÅR_IKKE
-
         else -> SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT
     }
 

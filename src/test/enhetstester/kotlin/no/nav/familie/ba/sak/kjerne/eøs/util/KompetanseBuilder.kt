@@ -23,13 +23,14 @@ class KompetanseBuilder(
         erAnnenForelderOmfattetAvNorskLovgivning: Boolean? = false,
     ) = medSkjema(k, barn.toList()) {
         when (it) {
-            '-' ->
+            '-' -> {
                 Kompetanse.NULL.copy(
                     annenForeldersAktivitetsland = annenForeldersAktivitetsland,
                     erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
                 )
+            }
 
-            'S' ->
+            'S' -> {
                 Kompetanse.NULL
                     .copy(
                         søkersAktivitet = søkersAktivitet,
@@ -40,8 +41,9 @@ class KompetanseBuilder(
                         annenForeldersAktivitetsland = annenForeldersAktivitetsland,
                         erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
                     ).fyllUt()
+            }
 
-            'P' ->
+            'P' -> {
                 Kompetanse.NULL
                     .copy(
                         søkersAktivitet = søkersAktivitet,
@@ -52,8 +54,11 @@ class KompetanseBuilder(
                         annenForeldersAktivitetsland = annenForeldersAktivitetsland,
                         erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
                     ).fyllUt()
+            }
 
-            else -> null
+            else -> {
+                null
+            }
         }
     }
 

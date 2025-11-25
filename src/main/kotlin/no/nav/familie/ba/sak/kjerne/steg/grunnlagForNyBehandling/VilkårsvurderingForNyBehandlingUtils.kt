@@ -47,11 +47,12 @@ data class VilkårsvurderingForNyBehandlingUtils(
                         )
                 }
 
-                else ->
+                else -> {
                     personResultater =
                         lagPersonResultaterForTomVilkårsvurdering(
                             vilkårsvurdering = this,
                         )
+                }
             }
         }
 
@@ -259,12 +260,15 @@ data class VilkårsvurderingForNyBehandlingUtils(
 
                             val tom: LocalDate? =
                                 when (vilkår) {
-                                    Vilkår.UNDER_18_ÅR ->
+                                    Vilkår.UNDER_18_ÅR -> {
                                         person.fødselsdato
                                             .plusYears(18)
                                             .minusDays(1)
+                                    }
 
-                                    else -> null
+                                    else -> {
+                                        null
+                                    }
                                 }
 
                             val begrunnelse = "Migrering"

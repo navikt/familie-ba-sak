@@ -95,8 +95,11 @@ fun PersonInfo.tilRestPersonInfoMedNavnOgAdresse(personIdent: String): RestPerso
         navn = this.navn,
         bostedsadresse =
             when (postnummer) {
-                null -> null
-                else ->
+                null -> {
+                    null
+                }
+
+                else -> {
                     RestBostedsadresse(
                         adresse =
                             bostedsadresse
@@ -106,6 +109,7 @@ fun PersonInfo.tilRestPersonInfoMedNavnOgAdresse(personIdent: String): RestPerso
                                 ?.trim(),
                         postnummer = postnummer,
                     )
+                }
             },
     )
 }

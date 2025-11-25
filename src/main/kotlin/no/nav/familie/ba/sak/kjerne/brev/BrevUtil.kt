@@ -72,23 +72,29 @@ fun hentAutomatiskVedtaksbrevtype(
         BehandlingÅrsak.OMREGNING_18ÅR,
         BehandlingÅrsak.SMÅBARNSTILLEGG,
         BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG,
-        -> Brevmal.AUTOVEDTAK_ENDRING
+        -> {
+            Brevmal.AUTOVEDTAK_ENDRING
+        }
 
-        BehandlingÅrsak.FINNMARKSTILLEGG ->
+        BehandlingÅrsak.FINNMARKSTILLEGG -> {
             if (skalBrukeAutovedtakEndringsbrevForFinnmarkstillegg) {
                 Brevmal.AUTOVEDTAK_ENDRING
             } else {
                 Brevmal.AUTOVEDTAK_FINNMARKSTILLEGG
             }
+        }
 
-        BehandlingÅrsak.SVALBARDTILLEGG ->
+        BehandlingÅrsak.SVALBARDTILLEGG -> {
             if (skalBrukeAutovedtakEndringsbrevForSvalbardtillegg) {
                 Brevmal.AUTOVEDTAK_ENDRING
             } else {
                 Brevmal.AUTOVEDTAK_SVALBARDTILLEGG
             }
+        }
 
-        else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
+        else -> {
+            throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
+        }
     }
 }
 
@@ -107,6 +113,7 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? =
             ).contains(behandling.resultat) -> "Vedtak om endret barnetrygd"
 
             behandling.resultat.erFortsattInnvilget() -> "Vedtak om fortsatt barnetrygd"
+
             else -> null
         }
     } else {

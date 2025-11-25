@@ -140,7 +140,9 @@ class AutovedtakFinnmarkstilleggService(
                     )
                 }
 
-                else -> throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} for behandlingsårsak $FINNMARKSTILLEGG for fagsak=${behandlingsdata.fagsakId}")
+                else -> {
+                    throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} for behandlingsårsak $FINNMARKSTILLEGG for fagsak=${behandlingsdata.fagsakId}")
+                }
             }
 
         taskService.save(task)

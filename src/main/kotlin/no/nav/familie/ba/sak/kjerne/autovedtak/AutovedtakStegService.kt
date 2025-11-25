@@ -238,8 +238,11 @@ class AutovedtakStegService(
     ): Long? =
         when (behandlingsdata) {
             is OmregningBrevData -> behandlingsdata.fagsakId
+
             is FinnmarkstilleggData -> behandlingsdata.fagsakId
+
             is SvalbardtilleggData -> behandlingsdata.fagsakId
+
             is FødselshendelseData,
             is SmåbarnstilleggData,
             -> null

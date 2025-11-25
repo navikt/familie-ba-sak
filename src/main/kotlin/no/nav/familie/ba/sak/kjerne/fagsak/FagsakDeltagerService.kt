@@ -228,8 +228,14 @@ class FagsakDeltagerService(
                         logger.warn("Filtrerer bort eier av en fagsak som ikke kan behandles i fagsystem pga ${exception.årsak}")
                         null
                     }
-                    is FunksjonellFeil -> throw exception
-                    else -> throw Feil("Feil ved henting av person fra PDL", throwable = exception)
+
+                    is FunksjonellFeil -> {
+                        throw exception
+                    }
+
+                    else -> {
+                        throw Feil("Feil ved henting av person fra PDL", throwable = exception)
+                    }
                 }
             },
         )

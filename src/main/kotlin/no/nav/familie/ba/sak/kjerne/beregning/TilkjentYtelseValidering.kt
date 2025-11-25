@@ -80,23 +80,25 @@ object TilkjentYtelseValidering {
         andelerGruppert
             .outerJoin(forrigeAndelerGruppert) { nåværendeAndel, forrigeAndel ->
                 when {
-                    forrigeAndel == null && nåværendeAndel != null ->
+                    forrigeAndel == null && nåværendeAndel != null -> {
                         throw SatsendringFeil(
                             melding =
                                 "Satsendring kan ikke legge til en andel som ikke var der i forrige behandling. " +
                                     "Satsendringen prøver å legge til en andel i perioden ${nåværendeAndel.stønadFom} - ${nåværendeAndel.stønadTom}",
                             satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
                         ).also { secureLogger.info("forrigeAndel er null, nåværendeAndel=$nåværendeAndel") }
+                    }
 
-                    forrigeAndel != null && nåværendeAndel == null ->
+                    forrigeAndel != null && nåværendeAndel == null -> {
                         throw SatsendringFeil(
                             melding =
                                 "Satsendring kan ikke fjerne en andel som fantes i forrige behandling. " +
                                     "Satsendringen prøver å fjerne andel i perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}",
                             satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
                         ).also { secureLogger.info("nåværendeAndel er null, forrigeAndel=$forrigeAndel") }
+                    }
 
-                    forrigeAndel != null && forrigeAndel.prosent != nåværendeAndel?.prosent ->
+                    forrigeAndel != null && forrigeAndel.prosent != nåværendeAndel?.prosent -> {
                         throw SatsendringFeil(
                             melding =
                                 "Satsendring kan ikke endre på prosenten til en andel. " +
@@ -104,8 +106,9 @@ object TilkjentYtelseValidering {
                                     "Prøver å endre fra ${forrigeAndel.prosent} til ${nåværendeAndel?.prosent} prosent.",
                             satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
                         ).also { secureLogger.info("nåværendeAndel=$nåværendeAndel, forrigeAndel=$forrigeAndel") }
+                    }
 
-                    forrigeAndel != null && forrigeAndel.type != nåværendeAndel?.type ->
+                    forrigeAndel != null && forrigeAndel.type != nåværendeAndel?.type -> {
                         throw SatsendringFeil(
                             melding =
                                 "Satsendring kan ikke endre YtelseType til en andel. " +
@@ -113,8 +116,11 @@ object TilkjentYtelseValidering {
                                     "Prøver å endre fra ytelsetype ${forrigeAndel.type} til ${nåværendeAndel?.type}.",
                             satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
                         ).also { secureLogger.info("nåværendeAndel=$nåværendeAndel, forrigeAndel=$forrigeAndel") }
+                    }
 
-                    else -> false
+                    else -> {
+                        false
+                    }
                 }
             }.values
             .map { it.tilPerioder() } // Må kalle på .perioder() for at feilene over skal bli kastet
@@ -385,7 +391,9 @@ private fun validerAtBeløpForPartStemmerMedSatser(
                 2
             }
 
-            else -> 2
+            else -> {
+                2
+            }
         }
 
     val maksTotalBeløp = maksBeløp(personType = person.type, fagsakType = fagsakType)

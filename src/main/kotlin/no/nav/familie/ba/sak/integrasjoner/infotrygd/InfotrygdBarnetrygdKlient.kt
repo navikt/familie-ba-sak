@@ -200,13 +200,16 @@ class InfotrygdBarnetrygdKlient(
         uri: URI,
     ) {
         when (ex) {
-            is HttpClientErrorException ->
+            is HttpClientErrorException -> {
                 secureLogger.warn(
                     "Http feil mot ${uri.path}: httpkode: ${ex.statusCode}, feilmelding ${ex.message}",
                     ex,
                 )
+            }
 
-            else -> secureLogger.warn("Feil mot ${uri.path}; melding ${ex.message}", ex)
+            else -> {
+                secureLogger.warn("Feil mot ${uri.path}; melding ${ex.message}", ex)
+            }
         }
         logger.warn("Feil mot ${uri.path}.")
     }

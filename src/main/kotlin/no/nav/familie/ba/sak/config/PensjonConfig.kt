@@ -49,8 +49,13 @@ class PensjonConfig(
                         )
                     }
 
-                    erPensjonRequest && (harForvalterRolle || erKallerPensjon) -> filterChain.doFilter(request, response)
-                    !erPensjonRequest && !erKallerPensjon -> filterChain.doFilter(request, response)
+                    erPensjonRequest && (harForvalterRolle || erKallerPensjon) -> {
+                        filterChain.doFilter(request, response)
+                    }
+
+                    !erPensjonRequest && !erKallerPensjon -> {
+                        filterChain.doFilter(request, response)
+                    }
                 }
             }
 

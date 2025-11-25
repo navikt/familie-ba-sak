@@ -166,7 +166,9 @@ class LoggService(
                     "Resultat gikk fra ${forrigeBehandlingsresultat.displayName.lowercase()} til ${nyttBehandlingsresultat.displayName.lowercase()}"
                 }
 
-                else -> return null
+                else -> {
+                    return null
+                }
             }
 
         return lagre(

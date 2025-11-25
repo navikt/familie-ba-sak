@@ -30,7 +30,10 @@ internal fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
 ): VedtaksperiodeMedBegrunnelser {
     val vedtaksperiodeSomSkalOppdateresOgBegrunnelse: Pair<VedtaksperiodeMedBegrunnelser?, Standardbegrunnelse>? =
         when {
-            innvilgetMånedPeriode == null && redusertMånedPeriode == null -> null
+            innvilgetMånedPeriode == null && redusertMånedPeriode == null -> {
+                null
+            }
+
             innvilgetMånedPeriode != null && redusertMånedPeriode == null -> {
                 Pair(
                     vedtaksperioderMedBegrunnelser.find { it.fom?.toYearMonth() == innvilgetMånedPeriode.fom && it.type == Vedtaksperiodetype.UTBETALING },
@@ -45,7 +48,9 @@ internal fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
                 )
             }
 
-            else -> null
+            else -> {
+                null
+            }
         }
 
     val vedtaksperiodeSomSkalOppdateres = vedtaksperiodeSomSkalOppdateresOgBegrunnelse?.first

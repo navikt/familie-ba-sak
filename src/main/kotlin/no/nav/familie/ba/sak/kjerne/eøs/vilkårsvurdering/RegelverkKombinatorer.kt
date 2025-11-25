@@ -49,22 +49,36 @@ fun kombinerVilkårResultaterTilRegelverkResultat(
     val erEttEllerFlereVilkårIkkeOppfylt = alleVilkårResultater.any { it.resultat == Resultat.IKKE_OPPFYLT }
 
     return when {
-        erAlleVilkårUtenResultat -> null
-        erEttEllerFlereVilkårIkkeOppfylt -> RegelverkResultat.IKKE_OPPFYLT
-        erAlleNødvendigeVilkårOppfylt ->
+        erAlleVilkårUtenResultat -> {
+            null
+        }
+
+        erEttEllerFlereVilkårIkkeOppfylt -> {
+            RegelverkResultat.IKKE_OPPFYLT
+        }
+
+        erAlleNødvendigeVilkårOppfylt -> {
             when {
-                alleVilkårResultaterMedEøs.containsAll(regelverkVilkår) ->
+                alleVilkårResultaterMedEøs.containsAll(regelverkVilkår) -> {
                     OPPFYLT_EØS_FORORDNINGEN
+                }
 
-                alleVilkårResultaterMedNasjonalt.containsAll(regelverkVilkår) ->
+                alleVilkårResultaterMedNasjonalt.containsAll(regelverkVilkår) -> {
                     OPPFYLT_NASJONALE_REGLER
+                }
 
-                (alleVilkårResultaterMedEøs + alleVilkårResultaterMedNasjonalt).isNotEmpty() ->
+                (alleVilkårResultaterMedEøs + alleVilkårResultaterMedNasjonalt).isNotEmpty() -> {
                     OPPFYLT_BLANDET_REGELVERK
+                }
 
-                else -> OPPFYLT_REGELVERK_IKKE_SATT
+                else -> {
+                    OPPFYLT_REGELVERK_IKKE_SATT
+                }
             }
+        }
 
-        else -> IKKE_FULLT_VURDERT
+        else -> {
+            IKKE_FULLT_VURDERT
+        }
     }
 }
