@@ -27,7 +27,6 @@ import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.jboss.logging.MDC
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -83,7 +82,14 @@ class JournalførManueltBrevTaskTest {
             // Arrange
             val fagsak = lagFagsak()
             val manueltBrevRequest = ManueltBrevRequest(brevmal = brevmal, enhet = Enhet(enhetId = "1234", enhetNavn = "Testenhet"))
-            val task = JournalførManueltBrevTask.opprettTask(behandlingId = null, fagsakId = fagsak.id, manuellBrevRequest = manueltBrevRequest, mottakerInfo = Bruker)
+            val task =
+                JournalførManueltBrevTask.opprettTask(
+                    behandlingId = null,
+                    fagsakId = fagsak.id,
+                    manuellBrevRequest = manueltBrevRequest,
+                    mottakerInfo = Bruker,
+                    saksbehandlerSignaturTilBrev = "Olaf Test",
+                )
 
             every { fagsakService.hentPåFagsakId(fagsak.id) } returns fagsak
 
@@ -106,7 +112,7 @@ class JournalførManueltBrevTaskTest {
                 )
             } returns "journalpostId"
 
-            every { dokumentGenereringService.genererManueltBrev(any(), any(), any()) } returns ByteArray(0)
+            every { dokumentGenereringService.genererManueltBrev(any(), any(), any(), "Olaf Test") } returns ByteArray(0)
 
             val taskSlot = slot<Task>()
 
@@ -164,7 +170,14 @@ class JournalførManueltBrevTaskTest {
             // Arrange
             val fagsak = lagFagsak()
             val manueltBrevRequest = ManueltBrevRequest(brevmal = brevmal, enhet = Enhet(enhetId = "1234", enhetNavn = "Testenhet"))
-            val task = JournalførManueltBrevTask.opprettTask(behandlingId = null, fagsakId = fagsak.id, manuellBrevRequest = manueltBrevRequest, mottakerInfo = Bruker)
+            val task =
+                JournalførManueltBrevTask.opprettTask(
+                    behandlingId = null,
+                    fagsakId = fagsak.id,
+                    manuellBrevRequest = manueltBrevRequest,
+                    mottakerInfo = Bruker,
+                    saksbehandlerSignaturTilBrev = "Olaf Test",
+                )
 
             every { fagsakService.hentPåFagsakId(fagsak.id) } returns fagsak
 
@@ -187,7 +200,7 @@ class JournalførManueltBrevTaskTest {
                 )
             } returns "journalpostId"
 
-            every { dokumentGenereringService.genererManueltBrev(any(), any(), any()) } returns ByteArray(0)
+            every { dokumentGenereringService.genererManueltBrev(any(), any(), any(), "Olaf Test") } returns ByteArray(0)
 
             val taskSlot = slot<Task>()
 
@@ -266,10 +279,17 @@ class JournalførManueltBrevTaskTest {
             // Arrange
             val fagsak = lagFagsak()
             val manueltBrevRequest = ManueltBrevRequest(brevmal = brevmal, enhet = Enhet(enhetId = "1234", enhetNavn = "Testenhet"))
-            val task = JournalførManueltBrevTask.opprettTask(behandlingId = null, fagsakId = fagsak.id, manuellBrevRequest = manueltBrevRequest, mottakerInfo = Bruker)
+            val task =
+                JournalførManueltBrevTask.opprettTask(
+                    behandlingId = null,
+                    fagsakId = fagsak.id,
+                    manuellBrevRequest = manueltBrevRequest,
+                    mottakerInfo = Bruker,
+                    saksbehandlerSignaturTilBrev = "Olaf Test",
+                )
 
             every { fagsakService.hentPåFagsakId(fagsak.id) } returns fagsak
-            every { dokumentGenereringService.genererManueltBrev(any(), any(), any()) } returns ByteArray(0)
+            every { dokumentGenereringService.genererManueltBrev(any(), any(), any(), "Olaf Test") } returns ByteArray(0)
 
             // Act & Assert
             val ikkeStøttetBrevmalFeil = assertThrows<Feil> { journalførManueltBrevTask.doTask(task) }
@@ -282,7 +302,14 @@ class JournalførManueltBrevTaskTest {
             val fagsak = lagFagsak()
             val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.SVARTIDSBREV, enhet = Enhet(enhetId = "1234", enhetNavn = "Testenhet"))
             val mottakerInfo = FullmektigEllerVerge(navn = "Fullmektig", manuellAdresseInfo = ManuellAdresseInfo("Adresseveien 1", postnummer = "1234", poststed = "Test", landkode = "NO"))
-            val task = JournalførManueltBrevTask.opprettTask(behandlingId = null, fagsakId = fagsak.id, manuellBrevRequest = manueltBrevRequest, mottakerInfo = mottakerInfo)
+            val task =
+                JournalførManueltBrevTask.opprettTask(
+                    behandlingId = null,
+                    fagsakId = fagsak.id,
+                    manuellBrevRequest = manueltBrevRequest,
+                    mottakerInfo = mottakerInfo,
+                    saksbehandlerSignaturTilBrev = "Olaf Test",
+                )
 
             every { fagsakService.hentPåFagsakId(fagsak.id) } returns fagsak
 
@@ -300,7 +327,7 @@ class JournalførManueltBrevTaskTest {
                 )
             } returns "journalpostId"
 
-            every { dokumentGenereringService.genererManueltBrev(any(), any(), any()) } returns ByteArray(0)
+            every { dokumentGenereringService.genererManueltBrev(any(), any(), any(), "Olaf Test") } returns ByteArray(0)
 
             val taskSlot = slot<Task>()
 
@@ -328,7 +355,14 @@ class JournalførManueltBrevTaskTest {
             val fagsak = lagFagsak()
             val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.SVARTIDSBREV, enhet = null)
             val mottakerInfo = Institusjon(orgNummer = "999888777", navn = "Institusjon AS")
-            val task = JournalførManueltBrevTask.opprettTask(behandlingId = null, fagsakId = fagsak.id, manuellBrevRequest = manueltBrevRequest, mottakerInfo = mottakerInfo)
+            val task =
+                JournalførManueltBrevTask.opprettTask(
+                    behandlingId = null,
+                    fagsakId = fagsak.id,
+                    manuellBrevRequest = manueltBrevRequest,
+                    mottakerInfo = mottakerInfo,
+                    saksbehandlerSignaturTilBrev = "Olaf Test",
+                )
 
             every { fagsakService.hentPåFagsakId(fagsak.id) } returns fagsak
 
@@ -346,7 +380,7 @@ class JournalførManueltBrevTaskTest {
                 )
             } returns "journalpostId"
 
-            every { dokumentGenereringService.genererManueltBrev(any(), any(), any()) } returns ByteArray(0)
+            every { dokumentGenereringService.genererManueltBrev(any(), any(), any(), "Olaf Test") } returns ByteArray(0)
 
             every { taskRepositoryWrapper.save(any()) } returns mockk()
 
@@ -380,6 +414,7 @@ class JournalførManueltBrevTaskTest {
                     fagsakId = fagsakId,
                     manuellBrevRequest = manueltBrevDto,
                     mottakerInfo = mottakerInfo,
+                    saksbehandlerSignaturTilBrev = "Olaf Test",
                 )
 
             // Assert

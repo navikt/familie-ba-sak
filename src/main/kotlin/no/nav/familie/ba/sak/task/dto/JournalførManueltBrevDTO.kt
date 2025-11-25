@@ -12,6 +12,7 @@ data class JournalførManueltBrevDTO(
     val manuellBrevRequest: ManueltBrevRequest,
     val mottaker: Mottaker,
     val eksternReferanseId: String,
+    val saksbehandlerSignaturTilBrev: String,
 ) {
     data class Mottaker(
         val avsenderMottaker: AvsenderMottaker?,

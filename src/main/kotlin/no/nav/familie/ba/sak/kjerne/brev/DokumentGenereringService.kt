@@ -73,6 +73,7 @@ class DokumentGenereringService(
         manueltBrevRequest: ManueltBrevRequest,
         fagsak: Fagsak,
         erForhåndsvisning: Boolean = false,
+        saksbehandlerSignaturTilBrev: String? = null, // Gjøres non-nullable når vi fjerner feature toggle for utsending av manuelle brev
     ): ByteArray {
         val mottakerIdent =
             when (fagsak.type) {
@@ -87,7 +88,7 @@ class DokumentGenereringService(
                 manueltBrevRequest.tilBrev(
                     mottakerIdent,
                     navnTilBrevHeader,
-                    saksbehandlerContext.hentSaksbehandlerSignaturTilBrev(),
+                    saksbehandlerSignaturTilBrev ?: saksbehandlerContext.hentSaksbehandlerSignaturTilBrev(),
                 ) { kodeverkService.hentLandkoderISO2() }
             return brevKlient.genererBrev(
                 målform = manueltBrevRequest.mottakerMålform.tilSanityFormat(),
