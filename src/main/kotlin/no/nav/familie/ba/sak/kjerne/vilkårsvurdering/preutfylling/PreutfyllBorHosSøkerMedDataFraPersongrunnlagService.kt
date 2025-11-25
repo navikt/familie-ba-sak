@@ -55,7 +55,7 @@ class PreutfyllBorHosSøkerMedDataFraPersongrunnlagService(
             lagBorHosSøkerTidslinje(
                 bostedsadresserBarn = bostedsadresserBarn.bostedsadresser,
                 bostedsadresserSøker = bostedsadresserSøker.bostedsadresser,
-                fødselsdatoForBeskjæring = hentInnflytningsdatoForBeskjæring(bostedsadresserBarn.bostedsadresser, bostedsadresserSøker.bostedsadresser),
+                cutOffFomDato = hentInnflytningsdatoForBeskjæring(bostedsadresserBarn.bostedsadresser, bostedsadresserSøker.bostedsadresser),
             )
 
         return harSammeBostedsadresseTidslinje
@@ -95,10 +95,10 @@ class PreutfyllBorHosSøkerMedDataFraPersongrunnlagService(
     private fun lagBorHosSøkerTidslinje(
         bostedsadresserBarn: List<Adresse>,
         bostedsadresserSøker: List<Adresse>,
-        fødselsdatoForBeskjæring: LocalDate,
+        cutOffFomDato: LocalDate,
     ): Tidslinje<Delvilkår> {
-        val bostedsadresserBarnTidslinje = lagBostedsadresseTidslinje(bostedsadresserBarn, fødselsdatoForBeskjæring)
-        val bostedsadresserSøkerTidslinje = lagBostedsadresseTidslinje(bostedsadresserSøker, fødselsdatoForBeskjæring)
+        val bostedsadresserBarnTidslinje = lagBostedsadresseTidslinje(bostedsadresserBarn, cutOffFomDato)
+        val bostedsadresserSøkerTidslinje = lagBostedsadresseTidslinje(bostedsadresserSøker, cutOffFomDato)
 
         return bostedsadresserBarnTidslinje.kombinerMed(bostedsadresserSøkerTidslinje) { barnAdresse, søkerAdresse ->
             if (barnAdresse != null && harVærtSammeAdresseMinst3Mnd(barnAdresse, søkerAdresse)) {
@@ -111,7 +111,7 @@ class PreutfyllBorHosSøkerMedDataFraPersongrunnlagService(
 
     private fun lagBostedsadresseTidslinje(
         bostedsadresser: List<Adresse>,
-        fødselsdatoForBeskjæring: LocalDate,
+        cutOffFomDato: LocalDate,
     ): Tidslinje<Adresse> =
         bostedsadresser
             .sortedBy { it.gyldigFraOgMed }
@@ -125,7 +125,7 @@ class PreutfyllBorHosSøkerMedDataFraPersongrunnlagService(
                     tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
                 )
             }.tilTidslinje()
-            .beskjærFraOgMed(fødselsdatoForBeskjæring)
+            .beskjærFraOgMed(cutOffFomDato)
 
     private fun harVærtSammeAdresseMinst3Mnd(
         barnAdresse: Adresse,
