@@ -48,10 +48,10 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
 @Tag("verdikjedetest")
 @EnableWireMock(
-    ConfigureWireMock(port = 1337),
+    ConfigureWireMock(name = "verdikjedetest", port = 1337),
 )
 abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
-    @InjectWireMock
+    @InjectWireMock("verdikjedetest")
     lateinit var wiremockServer: WireMockServer
 
     @AfterAll
