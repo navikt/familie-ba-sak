@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.8</version>
+        <version>4.0.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -24,9 +24,9 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20251117095517_cc54714</prosessering.version>
-        <felles.version>3.20251105152539_b03ed80</felles.version>
+        <felles.version>4.20251125150711_2fff585</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20251126091830_a5eb8fb</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20251112142340_c5baa9c</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20251124143811_cb118c1</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20251126091830_a5eb8fb</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20251126091830_a5eb8fb</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250922101633_e4c1c4d</utbetalingsgenerator.version>
@@ -35,7 +35,7 @@
         <wiremock.version>3.10.0</wiremock.version>
         <token-validation-spring.version>5.0.39</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
-        <springdoc.version>2.8.14</springdoc.version>
+        <springdoc.version>3.0.0</springdoc.version>
         <sentry.version>8.27.1</sentry.version>
         <kotlinx.version>1.10.2</kotlinx.version>
         <kotlinx-kover.version>0.9.3</kotlinx-kover.version>
@@ -72,7 +72,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.5.8</version>
+                <version>4.0.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
