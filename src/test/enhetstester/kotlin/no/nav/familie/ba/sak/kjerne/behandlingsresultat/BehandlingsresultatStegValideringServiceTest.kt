@@ -461,8 +461,8 @@ class BehandlingsresultatStegValideringServiceTest {
 
             assertThat(feil.message).isEqualTo(
                 "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
-                    "Automatisk behandling fører til endringer i annen sats enn Finnmarkstillegg.\n" +
-                    "Endring av Finnmarkstillegg må håndteres manuelt.",
+                    "Endring av Finnmarkstillegg fører også til endring av Svalbardtillegg.\n" +
+                    "Endring av Finnmarkstillegg og Svalbardtillegg må håndteres manuelt.",
             )
         }
 
@@ -516,7 +516,8 @@ class BehandlingsresultatStegValideringServiceTest {
 
             assertThat(feil.message).isEqualTo(
                 "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
-                    "Automatisk behandling fører til endringer i annen sats enn Finnmarkstillegg.\nEndring av Finnmarkstillegg må håndteres manuelt.",
+                    "Endring av Finnmarkstillegg fører også til endring av Svalbardtillegg.\n" +
+                    "Endring av Finnmarkstillegg og Svalbardtillegg må håndteres manuelt.",
             )
         }
 
@@ -973,8 +974,8 @@ class BehandlingsresultatStegValideringServiceTest {
 
             assertThat(feil.message).isEqualTo(
                 "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
-                    "Automatisk behandling fører til endringer i annen sats enn Svalbardtillegg.\n" +
-                    "Endring av Svalbardtillegg må håndteres manuelt.",
+                    "Endring av Svalbardtillegg fører også til endring av Finnmarkstillegg.\n" +
+                    "Endring av Svalbardtillegg og Finnmarkstillegg må håndteres manuelt.",
             )
         }
 
@@ -1028,8 +1029,8 @@ class BehandlingsresultatStegValideringServiceTest {
 
             assertThat(feil.message).isEqualTo(
                 "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
-                    "Automatisk behandling fører til endringer i annen sats enn Svalbardtillegg.\n" +
-                    "Endring av Svalbardtillegg må håndteres manuelt.",
+                    "Endring av Svalbardtillegg fører også til endring av Finnmarkstillegg.\n" +
+                    "Endring av Svalbardtillegg og Finnmarkstillegg må håndteres manuelt.",
             )
         }
 
