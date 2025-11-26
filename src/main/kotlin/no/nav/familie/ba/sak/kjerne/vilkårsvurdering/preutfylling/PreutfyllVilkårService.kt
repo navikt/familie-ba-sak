@@ -13,6 +13,7 @@ class PreutfyllVilkårService(
     private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService,
     private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService,
     private val preutfyllBorHosSøkerService: PreutfyllBorHosSøkerService,
+    private val preutfyllBorHosSøkerMedDataFraPersongrunnlagService: PreutfyllBorHosSøkerMedDataFraPersongrunnlagService,
     private val persongrunnlagService: PersongrunnlagService,
     private val featureToggleService: FeatureToggleService,
 ) {
@@ -30,7 +31,11 @@ class PreutfyllVilkårService(
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering)
         }
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_BOR_HOS_SØKER)) {
-            preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
+            if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
+                preutfyllBorHosSøkerMedDataFraPersongrunnlagService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
+            } else {
+                preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
+            }
         }
     }
 
