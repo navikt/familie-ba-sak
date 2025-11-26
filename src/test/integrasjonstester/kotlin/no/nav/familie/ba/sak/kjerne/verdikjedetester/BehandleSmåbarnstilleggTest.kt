@@ -56,7 +56,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
@@ -98,13 +97,9 @@ class BehandleSmåbarnstilleggTest(
                 ),
         )
 
-    @BeforeAll
-    fun init() {
-        stubScenario(scenario)
-    }
-
     @BeforeEach
     fun førHverTest() {
+        stubScenario(scenario)
         mockkObject(SatsTidspunkt)
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2024, 9, 1)
     }
