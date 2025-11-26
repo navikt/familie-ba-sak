@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.leggTilBlankAnnenVurdering
+import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
@@ -60,6 +61,7 @@ class DokumentService(
     private val dokumentGenereringService: DokumentGenereringService,
     private val brevmottakerService: BrevmottakerService,
     private val validerBrevmottakerService: ValiderBrevmottakerService,
+    private val saksbehandlerContext: SaksbehandlerContext,
 ) {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -130,6 +132,7 @@ class DokumentService(
                             fagsakId = fagsak.id,
                             manuellBrevRequest = manueltBrevRequest,
                             mottakerInfo = mottakerInfo,
+                            saksbehandlerSignaturTilBrev = saksbehandlerContext.hentSaksbehandlerSignaturTilBrev(),
                         ),
                 )
             }
