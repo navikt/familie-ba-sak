@@ -44,15 +44,16 @@ class PorteføljejusteringTask(
     private fun List<Oppgave>.tilOppgaveGrupperinger(): List<OppgaveGruppering> =
         this.map {
             when (it.saksreferanse) {
-                null ->
+                null -> {
                     // Tror disse kan oppdateres med ny enhet uten at det vil påvirke fagsystemene negativt
                     OppgaveUtenSaksreferanse(
                         id = it.id!!,
                         oppgavetype = it.oppgavetype,
                         behandlesAvApplikasjon = it.behandlesAvApplikasjon,
                     )
+                }
 
-                else ->
+                else -> {
                     // For disse må vi nok kommunisere med de ulike fagsystemene slik at de ikke kommer ut av synk ved oppdatering av enhet. Ihvertfall for BehandleSak, GodkjenneVedtak og BehandleUnderkjentVedtak.
                     // For de øvrige oppgavetypene som måtte dukke opp her er jeg usikker på om det er nødvendig. Mulig oppgavene kan oppdateres uten å "si ifra" til noen.
                     OppgaveMedSaksreferanse(
@@ -66,6 +67,7 @@ class PorteføljejusteringTask(
                             },
                         saksreferanse = it.saksreferanse!!,
                     )
+                }
             }
         }
 

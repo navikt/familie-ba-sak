@@ -70,6 +70,40 @@ class ArbeidsfordelingService(
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id)
     }
 
+    @Transactional
+    fun oppdaterBehandlendeEnhetPåBehandlingIForbindelseMedPorteføljejustering(
+        behandling: Behandling,
+        nyEnhetId: String,
+    ) {
+        val aktivArbeidsfordelingPåBehandling = arbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(behandling.id)
+
+        if (nyEnhetId == aktivArbeidsfordelingPåBehandling.behandlendeEnhetId) return
+
+        val forrigeArbeidsfordelingsenhet =
+            Arbeidsfordelingsenhet(
+                enhetId = aktivArbeidsfordelingPåBehandling.behandlendeEnhetId,
+                enhetNavn = aktivArbeidsfordelingPåBehandling.behandlendeEnhetNavn,
+            )
+
+        val oppdatertArbeidsfordelingPåBehandling =
+            arbeidsfordelingPåBehandlingRepository.save(
+                aktivArbeidsfordelingPåBehandling.copy(
+                    behandlendeEnhetId = nyEnhetId,
+                    behandlendeEnhetNavn = BarnetrygdEnhet.fraEnhetsnummer(nyEnhetId).enhetsnavn,
+                ),
+            )
+
+        loggService.opprettBehandlendeEnhetEndret(
+            behandling = behandling,
+            fraEnhet = forrigeArbeidsfordelingsenhet,
+            tilEnhet = oppdatertArbeidsfordelingPåBehandling,
+            manuellOppdatering = false,
+            begrunnelse = "Porteføljejustering",
+        )
+
+        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id)
+    }
+
     fun fastsettBehandlendeEnhet(
         behandling: Behandling,
         sisteBehandlingSomErIverksatt: Behandling? = null,
@@ -84,12 +118,15 @@ class ArbeidsfordelingService(
                 behandling.erAutomatiskOgSkalHaTidligereBehandling() && aktivArbeidsfordelingPåBehandling != null -> {
                     aktivArbeidsfordelingPåBehandling
                 }
+
                 behandling.erAutomatiskOgSkalHaTidligereBehandling() && sisteBehandlingSomErIverksatt == null -> {
                     throw Feil("Kan ikke fastsette arbeidsfordelingsenhet. Finner ikke tidligere behandling.")
                 }
+
                 behandling.erAutomatiskOgSkalHaTidligereBehandling() -> {
                     fastsettArbeidsfordelingFraTidligereBehandlinger(behandling.id, behandling.fagsak.id)
                 }
+
                 else -> {
                     fastsettArbeidsfordelingPåBehandling(behandling, aktivArbeidsfordelingPåBehandling)
                 }
@@ -138,7 +175,9 @@ class ArbeidsfordelingService(
                 )
             }
 
-            else -> aktivArbeidsfordelingPåBehandling
+            else -> {
+                aktivArbeidsfordelingPåBehandling
+            }
         }
     }
 

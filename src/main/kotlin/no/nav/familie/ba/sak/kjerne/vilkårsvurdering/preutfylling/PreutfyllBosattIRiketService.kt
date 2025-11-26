@@ -61,7 +61,6 @@ class PreutfyllBosattIRiketService(
             return preutfyllBosattIRIketMedLagringIPersonopplysningsgrunnlagService.preutfyllBosattIRiket(
                 vilkårsvurdering,
                 identerVilkårSkalPreutfyllesFor,
-                cutOffFomDato,
             )
         }
 
@@ -191,7 +190,9 @@ class PreutfyllBosattIRiketService(
                             erBosattIRiket.copy(utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger)
                         }
 
-                        else -> erBosattIRiket
+                        else -> {
+                            erBosattIRiket
+                        }
                     }
                 }.beskjærFraOgMed(maxOf(fødselsdatoForBeskjæring, førsteBosattINorgeDato))
 
@@ -308,16 +309,21 @@ class PreutfyllBosattIRiketService(
         personResultat: PersonResultat,
     ): Delvilkår =
         when {
-            erBosattINorgePeriode.erMinst12Måneder() ->
+            erBosattINorgePeriode.erMinst12Måneder() -> {
                 OppfyltDelvilkår("- Norsk bostedsadresse i minst 12 måneder.")
+            }
 
-            erFødselsdatoIPeriode(personResultat.vilkårsvurdering.behandling.id, personResultat.aktør.aktørId, erBosattINorgePeriode) ->
+            erFødselsdatoIPeriode(personResultat.vilkårsvurdering.behandling.id, personResultat.aktør.aktørId, erBosattINorgePeriode) -> {
                 OppfyltDelvilkår("- Bosatt i Norge siden fødsel.")
+            }
 
-            erBosattINorgePeriode.omfatter(LocalDate.now()) && erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat) ->
+            erBosattINorgePeriode.omfatter(LocalDate.now()) && erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat) -> {
                 OppfyltDelvilkår("- Oppgitt i søknad at planlegger å bo i Norge i minst 12 måneder.", INFORMASJON_FRA_SØKNAD)
+            }
 
-            else -> IkkeOppfyltDelvilkår
+            else -> {
+                IkkeOppfyltDelvilkår
+            }
         }
 
     private fun Periode<*>.erMinst12Måneder(): Boolean = ChronoUnit.MONTHS.between(fom, tom ?: LocalDate.now()) >= 12

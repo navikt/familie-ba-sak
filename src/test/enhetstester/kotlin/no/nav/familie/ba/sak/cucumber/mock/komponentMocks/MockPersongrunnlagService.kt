@@ -67,6 +67,21 @@ fun mockPersongrunnlagService(dataFraCucumber: VedtaksperioderOgBegrunnelserStep
         personopplysningGrunnlag
     }
 
+    every { persongrunnlagService.oppdaterRegisteropplysninger(any()) } answers {
+        val behandlingId = firstArg<Long>()
+        val persongrunnlag = dataFraCucumber.persongrunnlag[behandlingId] ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling $behandlingId")
+
+        val nyeAdresser = dataFraCucumber.adresser
+
+        persongrunnlag.personer.forEach { person ->
+            val adresseForPerson = nyeAdresser[person.aktør.aktivFødselsnummer()] ?: return@forEach
+            person.bostedsadresser = adresseForPerson.bostedsadresse.map { GrBostedsadresse.fraBostedsadresse(it, person) }.toMutableList()
+            person.oppholdsadresser = adresseForPerson.oppholdsadresse.map { GrOppholdsadresse.fraOppholdsadresse(it, person) }.toMutableList()
+            person.deltBosted = adresseForPerson.deltBosted.map { GrDeltBosted.fraDeltBosted(it, person) }.toMutableList()
+        }
+        persongrunnlag
+    }
+
     every { persongrunnlagService.oppdaterAdresserPåPersoner(any()) } answers {
         val persongrunnlag = firstArg<PersonopplysningGrunnlag>()
 

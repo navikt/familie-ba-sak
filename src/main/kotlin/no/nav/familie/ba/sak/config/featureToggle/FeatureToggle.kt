@@ -71,5 +71,7 @@ enum class FeatureToggle(
 
     FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO("familie-ba-sak.filtrer-sivilstand-for-soker-paa-eldste-barns-fodselsdato"),
 
+    PORTEFØLJEJUSTERING("familie-ba-sak.portefoljejustering"),
+
     FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO("familie-ba-sak.filtrer-opphold-paa-eldste-barns-fodselsdato"),
 }

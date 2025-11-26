@@ -220,14 +220,20 @@ internal fun ISanityBegrunnelse.skalVisesSelvOmIkkeEndring(
 ): Boolean {
     val begrunnelseMatcherVilkår =
         when (this.periodeResultat) {
-            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING, SanityPeriodeResultat.INGEN_ENDRING, SanityPeriodeResultat.REDUKSJON ->
+            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING, SanityPeriodeResultat.INGEN_ENDRING, SanityPeriodeResultat.REDUKSJON -> {
                 this.vilkår.isNotEmpty() &&
                     this.vilkår.any { vilkår ->
                         begrunnelseGrunnlagForPersonIPeriode.vilkårResultater.any { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT }
                     }
+            }
 
-            SanityPeriodeResultat.IKKE_INNVILGET, SanityPeriodeResultat.IKKE_RELEVANT -> false
-            null -> false
+            SanityPeriodeResultat.IKKE_INNVILGET, SanityPeriodeResultat.IKKE_RELEVANT -> {
+                false
+            }
+
+            null -> {
+                false
+            }
         }
     val begrunnelseSkalVisesSelvOmIkkeEndring =
         ØvrigTrigger.SKAL_VISES_SELV_OM_IKKE_ENDRING in this.øvrigeTriggere
@@ -237,6 +243,7 @@ internal fun ISanityBegrunnelse.skalVisesSelvOmIkkeEndring(
 internal fun ISanityBegrunnelse.matcherErAutomatisk(erAutomatiskBehandling: Boolean): Boolean =
     when {
         this.gjelderFinnmarkstillegg -> true
+        this.gjelderSvalbardtillegg -> true
         this.valgbarhet != Valgbarhet.AUTOMATISK -> !erAutomatiskBehandling
         ØvrigTrigger.ALLTID_AUTOMATISK in this.øvrigeTriggere -> erAutomatiskBehandling
         else -> true
@@ -269,17 +276,22 @@ fun SanityEØSBegrunnelse.erLikKompetanseIPeriode(
 ): Boolean {
     val kompetanse =
         when (this.periodeResultat) {
-            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING, SanityPeriodeResultat.INGEN_ENDRING ->
+            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING, SanityPeriodeResultat.INGEN_ENDRING -> {
                 begrunnelseGrunnlag.dennePerioden.kompetanse
                     ?: return false
+            }
 
             SanityPeriodeResultat.IKKE_INNVILGET,
             SanityPeriodeResultat.REDUKSJON,
-            -> begrunnelseGrunnlag.forrigePeriode?.kompetanse ?: return false
+            -> {
+                begrunnelseGrunnlag.forrigePeriode?.kompetanse ?: return false
+            }
 
             SanityPeriodeResultat.IKKE_RELEVANT,
             null,
-            -> return false
+            -> {
+                return false
+            }
         }
 
     return this.annenForeldersAktivitet.contains(kompetanse.annenForeldersAktivitet) &&

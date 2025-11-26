@@ -91,6 +91,7 @@ class VilkårServiceIntegrasjonTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Manuell vilkårsvurdering skal få erAutomatiskVurdert på enkelte vilkår`() {
+        // Arrange
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
@@ -109,17 +110,25 @@ class VilkårServiceIntegrasjonTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
+        // Act
         val vilkårsvurdering =
             vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
                 behandling = behandling,
                 bekreftEndringerViaFrontend = true,
                 forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt,
             )
+
+        // Assert
         vilkårsvurdering.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
                 when (vilkårResultat.vilkårType) {
-                    Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP, Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER -> assertTrue(vilkårResultat.erAutomatiskVurdert)
-                    else -> assertFalse(vilkårResultat.erAutomatiskVurdert)
+                    Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP, Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER -> {
+                        assertTrue(vilkårResultat.erAutomatiskVurdert, "Vilkår $vilkårResultat skal være automatisk vurdert")
+                    }
+
+                    else -> {
+                        assertFalse(vilkårResultat.erAutomatiskVurdert, "Vilkår $vilkårResultat skal ikke være automatisk vurdert")
+                    }
                 }
             }
         }

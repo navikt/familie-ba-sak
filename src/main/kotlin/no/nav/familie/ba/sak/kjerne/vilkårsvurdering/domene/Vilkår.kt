@@ -69,24 +69,27 @@ enum class Vilkår(
             behandlingUnderkategori: BehandlingUnderkategori,
         ): Set<Vilkår> =
             when (fagsakType) {
-                FagsakType.NORMAL, FagsakType.SKJERMET_BARN ->
+                FagsakType.NORMAL, FagsakType.SKJERMET_BARN -> {
                     when (personType) {
                         BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD)
                         SØKER -> setOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (behandlingUnderkategori == BehandlingUnderkategori.UTVIDET) setOf(UTVIDET_BARNETRYGD) else emptySet()
                         ANNENPART -> emptySet()
                     }
+                }
 
-                FagsakType.INSTITUSJON ->
+                FagsakType.INSTITUSJON -> {
                     when (personType) {
                         BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD)
                         SØKER, ANNENPART -> emptySet()
                     }
+                }
 
-                FagsakType.BARN_ENSLIG_MINDREÅRIG ->
+                FagsakType.BARN_ENSLIG_MINDREÅRIG -> {
                     when (personType) {
                         BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (behandlingUnderkategori == BehandlingUnderkategori.UTVIDET) setOf(UTVIDET_BARNETRYGD) else emptySet()
                         SØKER, ANNENPART -> emptySet()
                     }
+                }
             }
 
         fun hentFødselshendelseVilkårsreglerRekkefølge(): List<Vilkår> =
@@ -109,7 +112,9 @@ enum class Vilkår(
                 }
             }
 
-            UTVIDET_BARNETRYGD, UNDER_18_ÅR, GIFT_PARTNERSKAP -> null
+            UTVIDET_BARNETRYGD, UNDER_18_ÅR, GIFT_PARTNERSKAP -> {
+                null
+            }
         }
 
     fun vurderVilkår(
@@ -119,29 +124,33 @@ enum class Vilkår(
     ): AutomatiskVurdering {
         val vilkårsregel =
             when (this) {
-                UNDER_18_ÅR ->
+                UNDER_18_ÅR -> {
                     VurderBarnErUnder18(
                         alder = person.hentAlder(),
                     )
+                }
 
-                BOR_MED_SØKER ->
+                BOR_MED_SØKER -> {
                     VurderBarnErBosattMedSøker(
                         søkerAdresser = person.personopplysningGrunnlag.søker.bostedsadresser,
                         barnAdresser = person.bostedsadresser,
                     )
+                }
 
-                GIFT_PARTNERSKAP ->
+                GIFT_PARTNERSKAP -> {
                     VurderBarnErUgift(
                         sivilstander = person.sivilstander,
                     )
+                }
 
-                BOSATT_I_RIKET ->
+                BOSATT_I_RIKET -> {
                     VurderPersonErBosattIRiket(
                         adresser = person.bostedsadresser,
                         vurderFra = vurderFra,
                     )
+                }
 
-                LOVLIG_OPPHOLD ->
+                LOVLIG_OPPHOLD -> {
                     if (person.type == BARN) {
                         VurderBarnHarLovligOpphold(
                             aktør = person.aktør,
@@ -167,8 +176,11 @@ enum class Vilkår(
                             opphold = person.opphold,
                         )
                     }
+                }
 
-                UTVIDET_BARNETRYGD -> throw Feil("Ikke støtte for å automatisk vurdere vilkåret ${this.beskrivelse}")
+                UTVIDET_BARNETRYGD -> {
+                    throw Feil("Ikke støtte for å automatisk vurdere vilkåret ${this.beskrivelse}")
+                }
             }
 
         return AutomatiskVurdering(

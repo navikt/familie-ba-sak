@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
+import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.dto.JournalførManueltBrevDTO
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
@@ -69,6 +70,7 @@ internal class DokumentServiceTest {
                 validerBrevmottakerService = mockk(),
             ),
         )
+    private val saksbehandlerContext = mockk<SaksbehandlerContext>(relaxed = true)
 
     private val dokumentService: DokumentService =
         spyk(
@@ -85,6 +87,7 @@ internal class DokumentServiceTest {
                 dokumentGenereringService = mockk(relaxed = true),
                 brevmottakerService = brevmottakerService,
                 validerBrevmottakerService = mockk(relaxed = true),
+                saksbehandlerContext = saksbehandlerContext,
             ),
         )
 

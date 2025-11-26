@@ -99,11 +99,12 @@ class VilkårsvurderingForNyBehandlingService(
                 )
             }
 
-            else ->
+            else -> {
                 logger.info(
                     "Perioder i vilkårsvurdering generer ikke automatisk for " +
                         behandling.opprettetÅrsak.visningsnavn,
                 )
+            }
         }
     }
 

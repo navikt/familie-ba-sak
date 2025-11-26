@@ -102,7 +102,7 @@ private fun loggEndringstidspunktOgEndringer(
             }
         }
 
-        is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget ->
+        is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> {
             if (grunnlagIPeriodeMedEndringForrigeBehanlding is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget) {
                 if (!grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.erLikUtenomTom(
                         grunnlagIPeriodeMedEndringForrigeBehanlding.vilkårResultaterForVedtaksperiode,
@@ -113,8 +113,11 @@ private fun loggEndringstidspunktOgEndringer(
             } else {
                 endringer.add("Perioden var innvilget i forrige behandling, men er det ikke nå lenger")
             }
+        }
 
-        null -> endringer.add("Det er ingen vilkår på denne behandlingen i dette tidsrommet")
+        null -> {
+            endringer.add("Det er ingen vilkår på denne behandlingen i dette tidsrommet")
+        }
     }
 
     logger.info(
@@ -141,7 +144,7 @@ private fun VedtaksperiodeGrunnlagForPerson?.erLik(
     grunnlagForVedtaksperiodeForrigeBehandling: VedtaksperiodeGrunnlagForPerson?,
 ): Boolean =
     when (this) {
-        is VedtaksperiodeGrunnlagForPersonVilkårInnvilget ->
+        is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> {
             grunnlagForVedtaksperiodeForrigeBehandling is VedtaksperiodeGrunnlagForPersonVilkårInnvilget &&
                 this.vilkårResultaterForVedtaksperiode.erLikUtenomTom(
                     grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode,
@@ -151,12 +154,16 @@ private fun VedtaksperiodeGrunnlagForPerson?.erLik(
                 this.endretUtbetalingAndel == grunnlagForVedtaksperiodeForrigeBehandling.endretUtbetalingAndel &&
                 this.overgangsstønad == grunnlagForVedtaksperiodeForrigeBehandling.overgangsstønad &&
                 andeler.erLik(grunnlagForVedtaksperiodeForrigeBehandling.andeler)
+        }
 
-        is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget ->
+        is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> {
             grunnlagForVedtaksperiodeForrigeBehandling is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget &&
                 this.vilkårResultaterForVedtaksperiode.erLikUtenomTom(grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode)
+        }
 
-        null -> grunnlagForVedtaksperiodeForrigeBehandling == null
+        null -> {
+            grunnlagForVedtaksperiodeForrigeBehandling == null
+        }
     }
 
 private fun Iterable<AndelForVedtaksobjekt>.erLik(andreAndeler: Iterable<AndelForVedtaksobjekt>) = this.toSet() == andreAndeler.toSet()

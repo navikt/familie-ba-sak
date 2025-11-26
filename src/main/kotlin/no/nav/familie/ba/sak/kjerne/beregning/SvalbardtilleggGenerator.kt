@@ -45,9 +45,11 @@ object SvalbardtilleggGenerator {
         val svalbardtilleggSatsTidslinje = satstypeTidslinje(SatsType.SVALBARDTILLEGG)
 
         return when (behandling.fagsak.type) {
-            SKJERMET_BARN -> throw Feil("Svalbardtillegg er ikke implementert for skjermet barn")
+            SKJERMET_BARN -> {
+                throw Feil("Svalbardtillegg er ikke implementert for skjermet barn")
+            }
 
-            INSTITUSJON, BARN_ENSLIG_MINDREÅRIG ->
+            INSTITUSJON, BARN_ENSLIG_MINDREÅRIG -> {
                 lagAndeler(
                     barnetsAndelerTidslinje = barnasAndeler.tilTidslinje(),
                     barnHarRettTilSvalbardtilleggTidslinje = søkerBosattISvalbardTidslinje.mapVerdi { it != null },
@@ -55,8 +57,9 @@ object SvalbardtilleggGenerator {
                     personResultat = søkersPersonResultat,
                     tilkjentYtelse = tilkjentYtelse,
                 )
+            }
 
-            NORMAL ->
+            NORMAL -> {
                 vilkårsvurdering
                     .personResultater
                     .filterNot { it.erSøkersResultater() }
@@ -82,6 +85,7 @@ object SvalbardtilleggGenerator {
                             tilkjentYtelse = tilkjentYtelse,
                         )
                     }
+            }
         }
     }
 

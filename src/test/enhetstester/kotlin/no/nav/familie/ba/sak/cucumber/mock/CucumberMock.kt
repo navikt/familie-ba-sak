@@ -83,6 +83,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.Tilba
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBorHosSøkerMedDataFraPersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService
@@ -558,7 +559,6 @@ class CucumberMock(
 
     val preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService =
         PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
-            pdlRestKlient = systemOnlyPdlRestKlient,
             søknadService = mockk(),
             persongrunnlagService = persongrunnlagService,
             featureToggleService = featureToggleService,
@@ -575,12 +575,19 @@ class CucumberMock(
             preutfyllBosattIRIketMedLagringIPersonopplysningsgrunnlagService = preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService,
         )
 
+    val preutfyllBorHosSøkerMedDataFraPersongrunnlagService =
+        PreutfyllBorHosSøkerMedDataFraPersongrunnlagService(
+            persongrunnlagService = persongrunnlagService,
+        )
+
     val preutfyllVilkårService =
         PreutfyllVilkårService(
             preutfyllLovligOppholdService = mockk(),
             preutfyllBosattIRiketService = preutfyllBosattIRiketService,
             featureToggleService = featureToggleService,
             preutfyllBorHosSøkerService = mockk(),
+            persongrunnlagService = persongrunnlagService,
+            preutfyllBorHosSøkerMedDataFraPersongrunnlagService = preutfyllBorHosSøkerMedDataFraPersongrunnlagService,
         )
 
     val vilkårsvurderingForNyBehandlingService =

@@ -127,7 +127,9 @@ fun tilpassKompetanserTilRegelverk(
             .tilBarnasEøsRegelverkTidslinjer()
             .leftJoin(endredeUtbetalingPerioderSomKreverKompetanseTidlinjer) { regelverk, endretUtbetalingPeriodeSomKreverKompetanse ->
                 when (endretUtbetalingPeriodeSomKreverKompetanse) {
-                    false -> null // Endrede utbetalingsperioder fører til at vi ikke krever kompetanse
+                    false -> null
+
+                    // Endrede utbetalingsperioder fører til at vi ikke krever kompetanse
                     else -> regelverk // Ingen endrede utbetalingsperioder eller de endrede utbetalingsperiodene fører til at vi krever kompetanse
                 }
             }

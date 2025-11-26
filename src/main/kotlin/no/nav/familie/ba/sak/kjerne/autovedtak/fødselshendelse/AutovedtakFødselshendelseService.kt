@@ -30,7 +30,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -288,6 +287,6 @@ class AutovedtakFødselshendelseService(
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(BehandleFødselshendelseTask::class.java)
+        private val logger = LoggerFactory.getLogger(AutovedtakFødselshendelseService::class.java)
     }
 }

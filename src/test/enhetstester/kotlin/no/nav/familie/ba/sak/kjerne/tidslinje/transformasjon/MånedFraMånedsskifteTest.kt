@@ -52,7 +52,9 @@ internal class MånedFraMånedsskifteTest {
                 .tilCharTidslinje(28.nov(2021))
                 .mapIkkeNull {
                     when (it) {
-                        'c', 'd', '4', '5' -> null // 30/11, 1/12, 31/12 og 1/1 mangler verdi
+                        'c', 'd', '4', '5' -> null
+
+                        // 30/11, 1/12, 31/12 og 1/1 mangler verdi
                         else -> it
                     }
                 }
@@ -71,7 +73,9 @@ internal class MånedFraMånedsskifteTest {
                 .tilCharTidslinje(28.nov(2021))
                 .mapIkkeNull {
                     when (it) {
-                        'c', '5' -> null // 30/11 og 1/1 mangler verdi
+                        'c', '5' -> null
+
+                        // 30/11 og 1/1 mangler verdi
                         else -> it
                     }
                 }

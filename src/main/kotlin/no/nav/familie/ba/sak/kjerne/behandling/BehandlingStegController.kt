@@ -233,16 +233,23 @@ enum class HenleggÅrsak(
 
     fun tilBehandlingsresultat(opprettetÅrsak: BehandlingÅrsak) =
         when (this) {
-            FEILAKTIG_OPPRETTET -> Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
+            FEILAKTIG_OPPRETTET -> {
+                Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
+            }
 
-            SØKNAD_TRUKKET -> Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET
+            SØKNAD_TRUKKET -> {
+                Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET
+            }
 
-            AUTOMATISK_HENLAGT ->
+            AUTOMATISK_HENLAGT -> {
                 when (opprettetÅrsak) {
                     BehandlingÅrsak.SMÅBARNSTILLEGG, BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID -> Behandlingsresultat.HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG
                     else -> Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
                 }
+            }
 
-            TEKNISK_VEDLIKEHOLD -> Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD
+            TEKNISK_VEDLIKEHOLD -> {
+                Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD
+            }
         }
 }

@@ -114,46 +114,52 @@ class VelgFagSystemService(
 
         val (fagsystemUtfall: FagsystemUtfall, fagsystem: FagsystemRegelVurdering) =
             when {
-                morHarLøpendeEllerTidligereUtbetalinger(fagsak) ->
+                morHarLøpendeEllerTidligereUtbetalinger(fagsak) -> {
                     Pair(
                         IVERKSATTE_BEHANDLINGER_I_BA_SAK,
                         SEND_TIL_BA,
                     )
+                }
 
                 morEllerBarnHarLøpendeSakIInfotrygd(
                     nyBehandlingHendelse.morsIdent,
                     nyBehandlingHendelse.barnasIdenter,
-                ) ->
+                ) -> {
                     Pair(
                         LØPENDE_SAK_I_INFOTRYGD,
                         SEND_TIL_INFOTRYGD,
                     )
+                }
 
-                fagsak != null ->
+                fagsak != null -> {
                     Pair(
                         FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK,
                         SEND_TIL_BA,
                     )
+                }
 
-                morHarSakerMenIkkeLøpendeIInfotrygd(nyBehandlingHendelse.morsIdent) ->
+                morHarSakerMenIkkeLøpendeIInfotrygd(nyBehandlingHendelse.morsIdent) -> {
                     Pair(
                         SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER,
                         SEND_TIL_INFOTRYGD,
                     )
+                }
 
                 !harMorGyldigStatsborgerskapForAutomatiskVurdering(
                     morsAktør,
-                ) ->
+                ) -> {
                     Pair(
                         MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING,
                         SEND_TIL_INFOTRYGD,
                     )
+                }
 
-                else ->
+                else -> {
                     Pair(
                         STØTTET_I_BA_SAK,
                         SEND_TIL_BA,
                     )
+                }
             }
 
         secureLogger.info("Sender fødselshendelse for ${nyBehandlingHendelse.morsIdent} til $fagsystem med utfall $fagsystemUtfall")
