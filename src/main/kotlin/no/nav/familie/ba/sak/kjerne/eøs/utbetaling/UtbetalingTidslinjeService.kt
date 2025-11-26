@@ -44,8 +44,12 @@ class UtbetalingTidslinjeService(
         return ingenUtbetalingAvOrdinærBarnetrygdForBarnEllerUtvidetBarnetrygdForSøkerTidslinjePerBarn
             .leftJoin(ingenUtbetalingAvOrdinærBarentrygdForBarnMenUtvidetBarnetrygdForSøkerOgKreverKompetanseTidslinjePerBarn) { ingenUtbetalingOrdinærEllerUtvidet, ingenUtbetalingOrdinærMenUtvidetOgKreverKompetanse ->
                 when (ingenUtbetalingOrdinærEllerUtvidet) {
-                    true -> false // Ingen utbetaling av ordinær eller utvidet og kompetanse kreves ikke
-                    false -> ingenUtbetalingOrdinærMenUtvidetOgKreverKompetanse // Krever kompetanse i noen tilfeller dersom ingen utbetaling av ordinær men utbetaling av utvidet
+                    true -> false
+
+                    // Ingen utbetaling av ordinær eller utvidet og kompetanse kreves ikke
+                    false -> ingenUtbetalingOrdinærMenUtvidetOgKreverKompetanse
+
+                    // Krever kompetanse i noen tilfeller dersom ingen utbetaling av ordinær men utbetaling av utvidet
                     null -> null
                 }
             }.mapValues { it.value.filtrerIkkeNull() }

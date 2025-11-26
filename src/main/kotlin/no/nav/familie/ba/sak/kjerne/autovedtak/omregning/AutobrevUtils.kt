@@ -6,13 +6,16 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 object AutobrevUtils {
     fun hentStandardbegrunnelserReduksjonForAlder(alder: Int): List<Standardbegrunnelse> =
         when (alder) {
-            Alder.ATTEN.år ->
+            Alder.ATTEN.år -> {
                 listOf(
                     Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK,
                     Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR,
                 )
+            }
 
-            else -> throw Feil("Alder må være oppgitt til 18 år.")
+            else -> {
+                throw Feil("Alder må være oppgitt til 18 år.")
+            }
         }
 
     fun hentGjeldendeVedtakbegrunnelseReduksjonForAlder(alder: Int): Standardbegrunnelse =

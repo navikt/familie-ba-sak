@@ -128,7 +128,9 @@ class AutovedtakMånedligValutajusteringService(
                     )
                 }
 
-                else -> throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} ved månedlig valutajustering for fagsak=$fagsakId")
+                else -> {
+                    throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} ved månedlig valutajustering for fagsak=$fagsakId")
+                }
             }
         taskRepository.save(task)
     }
@@ -137,7 +139,7 @@ class AutovedtakMånedligValutajusteringService(
         when (åpenBehandling.status) {
             BehandlingStatus.UTREDES,
             BehandlingStatus.SATT_PÅ_VENT,
-            ->
+            -> {
                 if (snikeIKøenService.kanSnikeForbi(åpenBehandling)) {
                     snikeIKøenService.settAktivBehandlingPåMaskinellVent(
                         åpenBehandling.id,
@@ -149,13 +151,16 @@ class AutovedtakMånedligValutajusteringService(
                         triggerTid = nesteVirkedag(LocalDate.now()).atTime(6, 0),
                     )
                 }
+            }
 
             BehandlingStatus.IVERKSETTER_VEDTAK,
             BehandlingStatus.SATT_PÅ_MASKINELL_VENT,
-            -> throw RekjørSenereException(
-                årsak = "Åpen behandling har status ${åpenBehandling.status}. Prøver igjen om én time",
-                triggerTid = LocalDateTime.now().plusHours(1),
-            )
+            -> {
+                throw RekjørSenereException(
+                    årsak = "Åpen behandling har status ${åpenBehandling.status}. Prøver igjen om én time",
+                    triggerTid = LocalDateTime.now().plusHours(1),
+                )
+            }
 
             BehandlingStatus.FATTER_VEDTAK,
             -> {
@@ -166,7 +171,9 @@ class AutovedtakMånedligValutajusteringService(
                 )
             }
 
-            else -> throw Feil("Ikke håndtert feilsituasjon på $åpenBehandling")
+            else -> {
+                throw Feil("Ikke håndtert feilsituasjon på $åpenBehandling")
+            }
         }
     }
 }

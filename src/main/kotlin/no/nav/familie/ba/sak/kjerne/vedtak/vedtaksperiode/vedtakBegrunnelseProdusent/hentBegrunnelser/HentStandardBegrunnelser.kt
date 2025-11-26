@@ -69,7 +69,7 @@ internal fun hentStandardBegrunnelser(
             val begrunnelseErGjeldendeForEndretUtbetaling = it.endringsaarsaker.isNotEmpty()
 
             when {
-                begrunnelseErGjeldendeForUtgjørendeVilkår && begrunnelseErGjeldendeForEndretUtbetaling ->
+                begrunnelseErGjeldendeForUtgjørendeVilkår && begrunnelseErGjeldendeForEndretUtbetaling -> {
                     filtrerPåVilkår(
                         it,
                         begrunnelseGrunnlag,
@@ -77,16 +77,20 @@ internal fun hentStandardBegrunnelser(
                         utvidetVilkårPåSøkerIForrigePeriode,
                     ) &&
                         filtrerPåEndretUtbetaling(it, endretUtbetalingDennePerioden)
+                }
 
-                begrunnelseErGjeldendeForUtgjørendeVilkår ->
+                begrunnelseErGjeldendeForUtgjørendeVilkår -> {
                     filtrerPåVilkår(
                         it,
                         begrunnelseGrunnlag,
                         utvidetVilkårPåSøkerIPeriode,
                         utvidetVilkårPåSøkerIForrigePeriode,
                     )
+                }
 
-                else -> it.erEndretUtbetaling(endretUtbetalingDennePerioden)
+                else -> {
+                    it.erEndretUtbetaling(endretUtbetalingDennePerioden)
+                }
             }
         }
 

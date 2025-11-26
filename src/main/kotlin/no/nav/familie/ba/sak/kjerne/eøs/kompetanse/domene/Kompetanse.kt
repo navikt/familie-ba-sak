@@ -280,10 +280,13 @@ fun IUtfyltKompetanse.utbetalingsland(): String {
         }
 
     return when (utbetalingsland) {
-        "NO" ->
+        "NO" -> {
             // Unntak. Finner landet som er registrert på kompetansen som ikke er Norge.
             setOf(this.søkersAktivitetsland, this.annenForeldersAktivitetsland, this.barnetsBostedsland).filterNotNull().singleOrNull { it != "NO" } ?: utbetalingsland
+        }
 
-        else -> utbetalingsland
+        else -> {
+            utbetalingsland
+        }
     }
 }

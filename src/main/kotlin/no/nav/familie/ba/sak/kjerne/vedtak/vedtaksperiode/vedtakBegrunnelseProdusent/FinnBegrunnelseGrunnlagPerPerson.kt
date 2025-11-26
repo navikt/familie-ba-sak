@@ -47,16 +47,22 @@ fun VedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerson(
             grunnlagMedForrigePeriodeOgBehandlingTidslinje.tilPerioder().mapNotNull { it.verdi }
 
         when (this.type) {
-            Vedtaksperiodetype.OPPHØR -> begrunnelseperioderIVedtaksperiode.first()
-            Vedtaksperiodetype.FORTSATT_INNVILGET ->
+            Vedtaksperiodetype.OPPHØR -> {
+                begrunnelseperioderIVedtaksperiode.first()
+            }
+
+            Vedtaksperiodetype.FORTSATT_INNVILGET -> {
                 if (this.fom == null && this.tom == null) {
                     val perioder = grunnlagMedForrigePeriodeOgBehandlingTidslinje.tilPerioder()
                     perioder.single { grunnlag.nåDato.toYearMonth() in (it.fom?.toYearMonth() ?: MIN_MÅNED)..(it.tom?.toYearMonth() ?: MAX_MÅNED) }.verdi!!
                 } else {
                     begrunnelseperioderIVedtaksperiode.first()
                 }
+            }
 
-            else -> begrunnelseperioderIVedtaksperiode.first()
+            else -> {
+                begrunnelseperioderIVedtaksperiode.first()
+            }
         }
     }
 }

@@ -315,11 +315,13 @@ class OppgaveService(
             val oppgaveErAvsluttet = gammelOppgave.ferdigstiltTidspunkt != null
 
             when {
-                gammelOppgave.id == null ->
+                gammelOppgave.id == null -> {
                     logger.warn("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
+                }
 
-                gammelOppgave.fristFerdigstillelse == null ->
+                gammelOppgave.fristFerdigstillelse == null -> {
                     logger.warn("Oppgave ${dbOppgave.gsakId} har ingen oppgavefrist ved oppdatering av frist")
+                }
 
                 oppgaveErAvsluttet -> {
                     logger.info("Oppgave ${dbOppgave.gsakId} er allerede avsluttet")
@@ -368,8 +370,12 @@ class OppgaveService(
             val oppgaveErAvsluttet = gammelOppgave.ferdigstiltTidspunkt != null
 
             when {
-                gammelOppgave.id == null -> logger.warn("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
+                gammelOppgave.id == null -> {
+                    logger.warn("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
+                }
+
                 oppgaveErAvsluttet -> {}
+
                 else -> {
                     val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString())
                     integrasjonKlient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)

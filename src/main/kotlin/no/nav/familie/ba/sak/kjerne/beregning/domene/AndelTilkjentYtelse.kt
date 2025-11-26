@@ -215,10 +215,22 @@ enum class YtelseType(
                     else -> setOf(SatsType.TILLEGG_ORBA, SatsType.ORBA)
                 }
             }
-            UTVIDET_BARNETRYGD -> setOf(SatsType.UTVIDET_BARNETRYGD)
-            SMÅBARNSTILLEGG -> setOf(SatsType.SMA)
-            FINNMARKSTILLEGG -> setOf(SatsType.FINNMARKSTILLEGG)
-            SVALBARDTILLEGG -> setOf(SatsType.SVALBARDTILLEGG)
+
+            UTVIDET_BARNETRYGD -> {
+                setOf(SatsType.UTVIDET_BARNETRYGD)
+            }
+
+            SMÅBARNSTILLEGG -> {
+                setOf(SatsType.SMA)
+            }
+
+            FINNMARKSTILLEGG -> {
+                setOf(SatsType.FINNMARKSTILLEGG)
+            }
+
+            SVALBARDTILLEGG -> {
+                setOf(SatsType.SVALBARDTILLEGG)
+            }
         }
 }
 

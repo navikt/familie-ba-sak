@@ -104,7 +104,9 @@ class PdlRestKlient(
                             }.toSet()
                     }
 
-                    else -> emptySet()
+                    else -> {
+                        emptySet()
+                    }
                 }
 
             pdlPerson.person.let {

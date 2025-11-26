@@ -92,7 +92,9 @@ data class RestJournalføring(
         if (underkategori is BehandlingUnderkategori) return underkategori
         return when {
             journalpostTittel?.contains("ordinær") == true -> BehandlingUnderkategori.ORDINÆR
+
             journalpostTittel?.contains("utvidet") == true -> BehandlingUnderkategori.UTVIDET
+
             // Defaulter til ordinær inntil videre.
             else -> BehandlingUnderkategori.ORDINÆR
         }

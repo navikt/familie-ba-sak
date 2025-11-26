@@ -20,20 +20,18 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
 
     fun sjekkOmharKravPåFinnmarkstilleggIForrigeBehandlingPeriode() =
         sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.FINNMARKSTILLEGG } == true ||
-            sammePeriodeForrigeBehandling?.vilkårResultater?.any {
-                it.vilkårType == Vilkår.BOSATT_I_RIKET &&
-                    it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
-            } == true &&
-            sammePeriodeForrigeBehandling?.erOrdinæreVilkårInnvilget() == true
+            sammePeriodeForrigeBehandling?.let { sammePeriodeForrigeBehandling ->
+                sammePeriodeForrigeBehandling.vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET && it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS) } &&
+                    sammePeriodeForrigeBehandling.erOrdinæreVilkårInnvilget()
+            } ?: false
 
     fun sjekkOmHarKravPåFinnmarkstilleggDennePeriode() =
         dennePerioden.andeler.any { it.type == YtelseType.FINNMARKSTILLEGG } ||
-            dennePerioden.vilkårResultater
-                .any {
-                    it.vilkårType == Vilkår.BOSATT_I_RIKET &&
-                        it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
-                } &&
-            dennePerioden.erOrdinæreVilkårInnvilget()
+            (
+                dennePerioden.vilkårResultater
+                    .any { it.vilkårType == Vilkår.BOSATT_I_RIKET && it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS) } &&
+                    dennePerioden.erOrdinæreVilkårInnvilget()
+            )
 
     fun sjekkOmHarKravPåFinnmarkstilleggForrigePeriode(vedtaksperiode: VedtaksperiodeMedBegrunnelser): Boolean {
         val startdatoForFinnmarkstillegg =
@@ -47,14 +45,14 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
         }
 
         return forrigePeriode?.andeler?.any { it.type == YtelseType.FINNMARKSTILLEGG } == true ||
-            forrigePeriode
-                ?.vilkårResultater
-                ?.any {
-                    it.vilkårType == Vilkår.BOSATT_I_RIKET &&
-                        it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS) &&
-                        (it.tom == null || it.tom >= startdatoForFinnmarkstillegg)
-                } == true &&
-            forrigePeriode?.erOrdinæreVilkårInnvilget() == true
+            forrigePeriode?.let { forrigePeriode ->
+                forrigePeriode.vilkårResultater
+                    .any {
+                        it.vilkårType == Vilkår.BOSATT_I_RIKET &&
+                            it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS) &&
+                            (it.tom == null || it.tom >= startdatoForFinnmarkstillegg)
+                    } && forrigePeriode.erOrdinæreVilkårInnvilget()
+            } ?: false
     }
 
     fun sjekkOmharKravPåSvalbardtilleggIForrigeBehandlingPeriode(): Boolean {
@@ -87,12 +85,10 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
 
     fun sjekkOmHarKravPåSvalbardtilleggDennePeriode() =
         dennePerioden.andeler.any { it.type == YtelseType.SVALBARDTILLEGG } ||
-            dennePerioden.vilkårResultater
-                .any {
-                    it.vilkårType == Vilkår.BOSATT_I_RIKET &&
-                        it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
-                } &&
-            dennePerioden.erOrdinæreVilkårInnvilget()
+            (
+                dennePerioden.vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET && it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD) } &&
+                    dennePerioden.erOrdinæreVilkårInnvilget()
+            )
 
     fun sjekkOmHarKravPåSvalbardtilleggForrigePeriode(vedtaksperiode: VedtaksperiodeMedBegrunnelser): Boolean {
         val startdatoForSvalbardtillegg =
@@ -106,14 +102,14 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
         }
 
         return forrigePeriode?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true ||
-            forrigePeriode
-                ?.vilkårResultater
-                ?.any {
-                    it.vilkårType == Vilkår.BOSATT_I_RIKET &&
-                        it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD) &&
-                        (it.tom == null || it.tom >= startdatoForSvalbardtillegg)
-                } == true &&
-            forrigePeriode?.erOrdinæreVilkårInnvilget() == true
+            forrigePeriode?.let { forrigePeriode ->
+                forrigePeriode.vilkårResultater
+                    .any {
+                        it.vilkårType == Vilkår.BOSATT_I_RIKET &&
+                            it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD) &&
+                            (it.tom == null || it.tom >= startdatoForSvalbardtillegg)
+                    } && forrigePeriode.erOrdinæreVilkårInnvilget()
+            } ?: false
     }
 
     companion object {

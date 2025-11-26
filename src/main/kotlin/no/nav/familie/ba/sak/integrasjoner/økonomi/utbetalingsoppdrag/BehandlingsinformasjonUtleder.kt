@@ -57,11 +57,15 @@ class BehandlingsinformasjonUtleder(
         when (fagsak.type) {
             FagsakType.NORMAL,
             FagsakType.BARN_ENSLIG_MINDREÅRIG,
-            -> fagsak.aktør.aktivFødselsnummer()
+            -> {
+                fagsak.aktør.aktivFødselsnummer()
+            }
+
             FagsakType.SKJERMET_BARN,
-            ->
+            -> {
                 fagsak.skjermetBarnSøker?.aktør?.aktivFødselsnummer()
                     ?: throw Feil("Barnetrygd skal utbetales til søker av barnet, men søker er ikke registrert på fagsak ${fagsak.id}")
+            }
 
             FagsakType.INSTITUSJON,
             -> {

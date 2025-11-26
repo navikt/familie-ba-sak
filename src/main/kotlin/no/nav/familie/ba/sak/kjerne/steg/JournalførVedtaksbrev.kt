@@ -54,7 +54,7 @@ class JournalførVedtaksbrev(
         val fagsakId = "${vedtak.behandling.fagsak.id}"
         val fagsak = fagsakRepository.finnFagsak(vedtak.behandling.fagsak.id)
 
-        if (fagsak == null || fagsak.type == FagsakType.INSTITUSJON && fagsak.institusjon == null) {
+        if (fagsak == null || (fagsak.type == FagsakType.INSTITUSJON && fagsak.institusjon == null)) {
             throw Feil("Journalfør vedtaksbrev feil: fagsak er null eller institusjon fagsak har ikke institusjonsinformasjon")
         }
 

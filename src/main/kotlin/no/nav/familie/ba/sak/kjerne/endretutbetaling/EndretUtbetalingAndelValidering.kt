@@ -157,13 +157,16 @@ object EndretUtbetalingAndelValidering {
 
             Årsak.ETTERBETALING_3MND,
             Årsak.ETTERBETALING_3ÅR,
-            ->
+            -> {
                 validerEtterbetalingMaks3ÅrEller3MndFørSøknadstidspunkt(
                     endretUtbetalingAndel = endretUtbetalingAndel,
                     behandlingOpprettetTidspunkt = vilkårsvurdering?.behandling?.opprettetTidspunkt?.toLocalDate(),
                 )
+            }
 
-            Årsak.ALLEREDE_UTBETALT -> validerAlleredeUtbetalt(endretUtbetalingAndel = endretUtbetalingAndel)
+            Årsak.ALLEREDE_UTBETALT -> {
+                validerAlleredeUtbetalt(endretUtbetalingAndel = endretUtbetalingAndel)
+            }
 
             Årsak.ENDRE_MOTTAKER -> {}
         }

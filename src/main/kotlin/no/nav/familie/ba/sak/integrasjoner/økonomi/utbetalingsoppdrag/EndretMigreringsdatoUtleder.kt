@@ -36,7 +36,7 @@ class EndretMigreringsdatoUtleder(
         val førsteBehandlingErMigrering = behandlingerIFagsak.minBy { it.aktivertTidspunkt }.type == BehandlingType.MIGRERING_FRA_INFOTRYGD
 
         // Dersom det det ikke finnes noen migreringsbehandlinger i fagsak eller det kun finnes 1, og dette er den første behandlingen, vil det ikke være behov for å opphøre fra migreringsdato.
-        if (migreringsBehandlingerIFagsak.isEmpty() || migreringsBehandlingerIFagsak.size <= 1 && førsteBehandlingErMigrering) {
+        if (migreringsBehandlingerIFagsak.isEmpty() || (migreringsBehandlingerIFagsak.size <= 1 && førsteBehandlingErMigrering)) {
             return null
         }
 

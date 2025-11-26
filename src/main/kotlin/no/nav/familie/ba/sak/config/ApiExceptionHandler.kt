@@ -78,8 +78,13 @@ class ApiExceptionHandler {
                 )
             }
 
-            is FunksjonellFeil -> funksjonellFeil(mostSpecificCause)
-            else -> illegalState(mostSpecificCause.message.toString(), mostSpecificCause)
+            is FunksjonellFeil -> {
+                funksjonellFeil(mostSpecificCause)
+            }
+
+            else -> {
+                illegalState(mostSpecificCause.message.toString(), mostSpecificCause)
+            }
         }
     }
 

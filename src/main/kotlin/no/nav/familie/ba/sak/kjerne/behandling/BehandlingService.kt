@@ -131,7 +131,7 @@ class BehandlingService(
                 BehandlingLoggRequest(behandling = lagretBehandling, barnasIdenter = nyBehandling.barnasIdenter),
             )
             if (lagretBehandling.opprettBehandleSakOppgave()) {
-                /**
+                /*
                  * Oppretter oppgave via task slik at dersom noe feiler i forbindelse med opprettelse
                  * av behandling så rulles også tasken tilbake og vi forhindrer å opprette oppgave
                  */
@@ -233,8 +233,7 @@ class BehandlingService(
                 behandling.fagsak.aktør.personidenter
                     .map { it.fødselsnummer }
             return infotrygdService.harÅpenSakIInfotrygd(søkerIdenter) ||
-                !behandling.erMigrering() &&
-                infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter)
+                (!behandling.erMigrering() && infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter))
         }
         logger.warn("Infotrygd-sjekk er skrudd av")
         return false
