@@ -71,9 +71,9 @@ class OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService(
         adresserForPerson: Adresser,
         behandling: Behandling,
     ): List<VilkårResultat> {
-        val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = adresserForPerson.lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(personResultat)
-        val erDeltBostedIFinnmarkEllerNordTromsTidslinje = adresserForPerson.lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(personResultat.aktør.aktørId)
-        val erOppholdsadressePåSvalbardTidslinje = adresserForPerson.lagErOppholdsadresserPåSvalbardTidslinje(personResultat)
+        val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = adresserForPerson.lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje()
+        val erDeltBostedIFinnmarkEllerNordTromsTidslinje = adresserForPerson.lagErDeltBostedIFinnmarkEllerNordTromsTidslinje()
+        val erOppholdsadressePåSvalbardTidslinje = adresserForPerson.lagErOppholdsadresserPåSvalbardTidslinje()
         val andelForAktør = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør)
 
         validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(

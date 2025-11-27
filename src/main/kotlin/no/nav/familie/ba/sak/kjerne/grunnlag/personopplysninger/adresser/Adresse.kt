@@ -120,7 +120,6 @@ fun List<Adresse>.finnAdressehistorikkFraOgMedDato(
 }
 
 fun List<Adresse>.lagTidslinjeForAdresser(
-    aktørId: String,
     adressetype: String,
     operator: (Adresse) -> Boolean,
 ): Tidslinje<Boolean> {
@@ -136,10 +135,10 @@ fun List<Adresse>.lagTidslinjeForAdresser(
             )
         }.tilTidslinje()
     } catch (e: IllegalStateException) {
-        secureLogger.error("Feil ved oppretting av tidslinjer for $adressetype med adresser $this for person med aktørId $aktørId", e)
+        secureLogger.error("Feil ved oppretting av tidslinjer for $adressetype med adresser $this", e)
         throw e
     } catch (e: IllegalArgumentException) {
-        secureLogger.error("Feil ved oppretting av tidslinjer for $adressetype med adresser $this for person med aktørId $aktørId", e)
+        secureLogger.error("Feil ved oppretting av tidslinjer for $adressetype med adresser $this", e)
         throw e
     }
 }

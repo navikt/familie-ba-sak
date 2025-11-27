@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tomTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
@@ -24,9 +23,7 @@ data class Adresser(
 
     fun harAdresserSomErRelevantForSvalbardtillegg(): Boolean = oppholdsadresse.finnAdressehistorikkFraOgMedDato(FØRSTE_RELEVANTE_ADRESSEDATO_FOR_SVALBARDSTILLEGG).any { it.erPåSvalbard() }
 
-    fun lagErOppholdsadresserPåSvalbardTidslinje(
-        personResultat: PersonResultat,
-    ): Tidslinje<Boolean> {
+    fun lagErOppholdsadresserPåSvalbardTidslinje(): Tidslinje<Boolean> {
         val adresserPåSvalbard = oppholdsadresse.filter { it.erPåSvalbard() }
 
         if (adresserPåSvalbard.isEmpty()) {
@@ -35,16 +32,14 @@ data class Adresser(
 
         val filtrerteAdresser = adresserPåSvalbard.filtrereUgyldigeOppholdsadresser()
 
-        return filtrerteAdresser.lagTidslinjeForAdresser(personResultat.aktør.aktørId, "Oppholdsadresse") { it.erPåSvalbard() }
+        return filtrerteAdresser.lagTidslinjeForAdresser("Oppholdsadresse") { it.erPåSvalbard() }
     }
 
-    fun lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(
-        aktørId: String,
-    ): Tidslinje<Boolean> {
+    fun lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(): Tidslinje<Boolean> {
         val filtrerteAdresser = delteBosteder.filtrereUgyldigeAdresser()
         val tidslinjer =
             filtrerteAdresser.map { adresse ->
-                listOf(adresse).lagTidslinjeForAdresser(aktørId, "Delt bostedadresse") { it.erIFinnmarkEllerNordTroms() }
+                listOf(adresse).lagTidslinjeForAdresser("Delt bostedadresse") { it.erIFinnmarkEllerNordTroms() }
             }
 
         val deltBostedTidslinje =
@@ -56,11 +51,9 @@ data class Adresser(
         return deltBostedTidslinje
     }
 
-    fun lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(
-        personResultat: PersonResultat,
-    ): Tidslinje<Boolean> {
+    fun lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(): Tidslinje<Boolean> {
         val filtrerteAdresser = bostedsadresser.filtrereUgyldigeAdresser()
-        return filtrerteAdresser.lagTidslinjeForAdresser(personResultat.aktør.aktørId, "Bostedadresse") { it.erIFinnmarkEllerNordTroms() }
+        return filtrerteAdresser.lagTidslinjeForAdresser("Bostedadresse") { it.erIFinnmarkEllerNordTroms() }
     }
 
     companion object {

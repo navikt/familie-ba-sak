@@ -88,14 +88,13 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
 
         val erBosattINorgeTidslinje =
             adresserForPerson.bostedsadresser.filtrereUgyldigeAdresser().lagTidslinjeForAdresser(
-                personResultat.aktør.aktørId,
                 "Bostedadresse",
             ) { adresse -> adresse.erINorge() }
 
         val erNordiskStatsborgerTidslinje = lagErNordiskStatsborgerTidslinje(person.statsborgerskap)
-        val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = adresserForPerson.lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje(personResultat)
-        val erDeltBostedIFinnmarkEllerNordTromsTidslinje = adresserForPerson.lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(personResultat.aktør.aktørId)
-        val erOppholdsadressePåSvalbardTidslinje = adresserForPerson.lagErOppholdsadresserPåSvalbardTidslinje(personResultat)
+        val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = adresserForPerson.lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje()
+        val erDeltBostedIFinnmarkEllerNordTromsTidslinje = adresserForPerson.lagErDeltBostedIFinnmarkEllerNordTromsTidslinje()
+        val erOppholdsadressePåSvalbardTidslinje = adresserForPerson.lagErOppholdsadresserPåSvalbardTidslinje()
 
         val erBosattINorgeEllerPåSvalbardTidslinje =
             erBosattINorgeTidslinje
