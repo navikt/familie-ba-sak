@@ -49,7 +49,6 @@ data class PersonopplysningGrunnlag(
     val yngsteBarnSinFødselsdato: LocalDate
         get() = barna.maxOf { it.fødselsdato }
 
-    // TODO: avsjekk hva vi gjør når barn er voksent og om vi faktisk vil defaulte til søker
     val eldsteBarnSinFødselsdato: LocalDate?
         get() = barna.minOfOrNull { it.fødselsdato }
 
