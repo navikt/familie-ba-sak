@@ -579,7 +579,6 @@ class CucumberMock(
             persongrunnlagService = persongrunnlagService,
         )
 
-
     val oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService =
         OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService(
             persongrunnlagService = persongrunnlagService,
