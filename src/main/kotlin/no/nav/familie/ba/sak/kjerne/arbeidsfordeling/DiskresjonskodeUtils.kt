@@ -37,6 +37,8 @@ fun finnPersonMedStrengesteAdressebeskyttelse(personer: List<IdentMedAdressebesk
                         neste
                     }
 
-                    else -> null
+                    else -> {
+                        null
+                    }
                 },
         )?.ident

@@ -129,7 +129,7 @@ class BrevService(
         }
 
         return when (brevmal) {
-            Brevmal.VEDTAK_FØRSTEGANGSVEDTAK ->
+            Brevmal.VEDTAK_FØRSTEGANGSVEDTAK -> {
                 Førstegangsvedtak(
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetaling = hentEtterbetaling(vedtak),
@@ -141,15 +141,17 @@ class BrevService(
                     informasjonOmUtbetaling = skalInkludereInformasjonOmUtbetaling,
                     utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelter.utbetalingerPerMndEøs),
                 )
+            }
 
-            Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON ->
+            Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON -> {
                 Førstegangsvedtak(
                     mal = Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON,
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
                 )
+            }
 
-            Brevmal.VEDTAK_ENDRING ->
+            Brevmal.VEDTAK_ENDRING -> {
                 VedtakEndring(
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetaling = hentEtterbetaling(vedtak),
@@ -167,8 +169,9 @@ class BrevService(
                     informasjonOmUtbetaling = skalInkludereInformasjonOmUtbetaling,
                     utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelter.utbetalingerPerMndEøs),
                 )
+            }
 
-            Brevmal.VEDTAK_ENDRING_INSTITUSJON ->
+            Brevmal.VEDTAK_ENDRING_INSTITUSJON -> {
                 VedtakEndring(
                     mal = Brevmal.VEDTAK_ENDRING_INSTITUSJON,
                     vedtakFellesfelter = vedtakFellesfelter,
@@ -177,21 +180,24 @@ class BrevService(
                     erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
                     informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
                 )
+            }
 
-            Brevmal.VEDTAK_OPPHØRT ->
+            Brevmal.VEDTAK_OPPHØRT -> {
                 Opphørt(
                     vedtakFellesfelter = vedtakFellesfelter,
                     erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
                 )
+            }
 
-            Brevmal.VEDTAK_OPPHØRT_INSTITUSJON ->
+            Brevmal.VEDTAK_OPPHØRT_INSTITUSJON -> {
                 Opphørt(
                     mal = Brevmal.VEDTAK_OPPHØRT_INSTITUSJON,
                     vedtakFellesfelter = vedtakFellesfelter,
                     erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
                 )
+            }
 
-            Brevmal.VEDTAK_OPPHØR_MED_ENDRING ->
+            Brevmal.VEDTAK_OPPHØR_MED_ENDRING -> {
                 OpphørMedEndring(
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetaling = hentEtterbetaling(vedtak),
@@ -201,8 +207,9 @@ class BrevService(
                     erKlage = behandling.erKlage(),
                     utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelter.utbetalingerPerMndEøs),
                 )
+            }
 
-            Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON ->
+            Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON -> {
                 OpphørMedEndring(
                     mal = Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
                     vedtakFellesfelter = vedtakFellesfelter,
@@ -210,15 +217,20 @@ class BrevService(
                     erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
                     erKlage = behandling.erKlage(),
                 )
+            }
 
-            Brevmal.VEDTAK_AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
-            Brevmal.VEDTAK_AVSLAG_INSTITUSJON ->
+            Brevmal.VEDTAK_AVSLAG -> {
+                Avslag(vedtakFellesfelter = vedtakFellesfelter)
+            }
+
+            Brevmal.VEDTAK_AVSLAG_INSTITUSJON -> {
                 Avslag(
                     mal = Brevmal.VEDTAK_AVSLAG_INSTITUSJON,
                     vedtakFellesfelter = vedtakFellesfelter,
                 )
+            }
 
-            Brevmal.VEDTAK_FORTSATT_INNVILGET ->
+            Brevmal.VEDTAK_FORTSATT_INNVILGET -> {
                 ForsattInnvilget(
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetaling = hentEtterbetaling(vedtak),
@@ -230,45 +242,54 @@ class BrevService(
                     informasjonOmUtbetaling = skalInkludereInformasjonOmUtbetaling,
                     utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelter.utbetalingerPerMndEøs),
                 )
+            }
 
-            Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON ->
+            Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON -> {
                 ForsattInnvilget(
                     mal = Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
                 )
+            }
 
-            Brevmal.AUTOVEDTAK_ENDRING ->
+            Brevmal.AUTOVEDTAK_ENDRING -> {
                 AutovedtakEndring(
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetaling = hentEtterbetaling(vedtak),
                     innvilgetSvalbardtillegg = sjekkOmDetErNyInnvilgetSvalbardtilleggIBehandling(behandling),
                     innvilgetFinnmarkstillegg = sjekkOmDetErNyInnvilgetFinnmarkstilleggIBehandling(behandling),
                 )
+            }
 
-            Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN ->
+            Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN -> {
                 AutovedtakNyfødtFørsteBarn(
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetaling = hentEtterbetaling(vedtak),
                 )
+            }
 
-            Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR ->
+            Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> {
                 AutovedtakNyfødtBarnFraFør(
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetaling = hentEtterbetaling(vedtak),
                 )
+            }
 
-            Brevmal.AUTOVEDTAK_FINNMARKSTILLEGG ->
+            Brevmal.AUTOVEDTAK_FINNMARKSTILLEGG -> {
                 AutovedtakFinnmarkstillegg(
                     vedtakFellesfelter = vedtakFellesfelter,
                 )
+            }
 
-            Brevmal.AUTOVEDTAK_SVALBARDTILLEGG ->
+            Brevmal.AUTOVEDTAK_SVALBARDTILLEGG -> {
                 AutovedtakSvalbardtillegg(
                     vedtakFellesfelter = vedtakFellesfelter,
                 )
+            }
 
-            else -> throw Feil("Forsøker å hente vedtaksbrevdata for brevmal ${brevmal.visningsTekst}")
+            else -> {
+                throw Feil("Forsøker å hente vedtaksbrevdata for brevmal ${brevmal.visningsTekst}")
+            }
         }
     }
 
@@ -470,7 +491,9 @@ class BrevService(
                 )
             }
 
-            else -> throw Feil("Brevmalen $brevmal er ikke støttet for sammensatte kontrollsaker")
+            else -> {
+                throw Feil("Brevmalen $brevmal er ikke støttet for sammensatte kontrollsaker")
+            }
         }
     }
 
@@ -613,7 +636,10 @@ class BrevService(
         val endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandling.id)
 
         return when {
-            behandling.opprettetÅrsak != BehandlingÅrsak.ÅRLIG_KONTROLL || endringstidspunkt.isBefore(førsteJanuarIFjor) -> endringstidspunkt
+            behandling.opprettetÅrsak != BehandlingÅrsak.ÅRLIG_KONTROLL || endringstidspunkt.isBefore(førsteJanuarIFjor) -> {
+                endringstidspunkt
+            }
+
             else -> {
                 val endretutbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.id)
                 val tidligsteUtbetaling =

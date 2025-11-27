@@ -214,20 +214,32 @@ fun hentNesteSteg(
     }
 
     return when (behandlingÅrsak) {
-        BehandlingÅrsak.MIGRERING -> throw Feil("Maskinell migrering er ikke mulig å behandle lenger")
+        BehandlingÅrsak.MIGRERING -> {
+            throw Feil("Maskinell migrering er ikke mulig å behandle lenger")
+        }
 
         BehandlingÅrsak.HELMANUELL_MIGRERING -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
+
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
+
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+
                 BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
+
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
+
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+
                 else -> throw Feil(
                     "StegType ${utførendeStegType.displayName()} " +
                         "er ugyldig ved manuell migreringsbehandling",
@@ -238,13 +250,21 @@ fun hentNesteSteg(
         BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
+
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
+
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+
                 BESLUTTE_VEDTAK -> FERDIGSTILLE_BEHANDLING
+
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+
                 else -> throw Feil(
                     "StegType ${utførendeStegType.displayName()} " +
                         "er ugyldig ved migreringsbehandling med endre migreringsdato",
@@ -309,9 +329,15 @@ fun hentNesteSteg(
 
         BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID -> {
             when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT ->
+                REGISTRERE_PERSONGRUNNLAG -> {
+                    VILKÅRSVURDERING
+                }
+
+                VILKÅRSVURDERING -> {
+                    BEHANDLINGSRESULTAT
+                }
+
+                BEHANDLINGSRESULTAT -> {
                     if (behandling.skalBehandlesAutomatisk &&
                         behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET &&
                         behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK
@@ -320,22 +346,52 @@ fun hentNesteSteg(
                     } else {
                         VURDER_TILBAKEKREVING
                     }
+                }
 
-                VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
-                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling)
-                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
-                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for småbarnstillegg")
+                VURDER_TILBAKEKREVING -> {
+                    SEND_TIL_BESLUTTER
+                }
+
+                SEND_TIL_BESLUTTER -> {
+                    BESLUTTE_VEDTAK
+                }
+
+                BESLUTTE_VEDTAK -> {
+                    hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling)
+                }
+
+                IVERKSETT_MOT_OPPDRAG -> {
+                    VENTE_PÅ_STATUS_FRA_ØKONOMI
+                }
+
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> {
+                    FERDIGSTILLE_BEHANDLING
+                }
+
+                FERDIGSTILLE_BEHANDLING -> {
+                    BEHANDLING_AVSLUTTET
+                }
+
+                BEHANDLING_AVSLUTTET -> {
+                    BEHANDLING_AVSLUTTET
+                }
+
+                else -> {
+                    throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for småbarnstillegg")
+                }
             }
         }
 
         BehandlingÅrsak.SMÅBARNSTILLEGG -> {
             when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                REGISTRERE_PERSONGRUNNLAG -> {
+                    VILKÅRSVURDERING
+                }
+
+                VILKÅRSVURDERING -> {
+                    BEHANDLINGSRESULTAT
+                }
+
                 BEHANDLINGSRESULTAT -> {
                     if (!behandling.skalBehandlesAutomatisk) {
                         VURDER_TILBAKEKREVING
@@ -346,17 +402,49 @@ fun hentNesteSteg(
                     }
                 }
 
-                VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
-                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling)
-                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                VENTE_PÅ_STATUS_FRA_ØKONOMI -> IVERKSETT_MOT_FAMILIE_TILBAKE
-                IVERKSETT_MOT_FAMILIE_TILBAKE -> JOURNALFØR_VEDTAKSBREV
-                JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
-                DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
-                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for småbarnstillegg")
+                VURDER_TILBAKEKREVING -> {
+                    SEND_TIL_BESLUTTER
+                }
+
+                SEND_TIL_BESLUTTER -> {
+                    BESLUTTE_VEDTAK
+                }
+
+                BESLUTTE_VEDTAK -> {
+                    hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling)
+                }
+
+                IVERKSETT_MOT_OPPDRAG -> {
+                    VENTE_PÅ_STATUS_FRA_ØKONOMI
+                }
+
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> {
+                    IVERKSETT_MOT_FAMILIE_TILBAKE
+                }
+
+                IVERKSETT_MOT_FAMILIE_TILBAKE -> {
+                    JOURNALFØR_VEDTAKSBREV
+                }
+
+                JOURNALFØR_VEDTAKSBREV -> {
+                    DISTRIBUER_VEDTAKSBREV
+                }
+
+                DISTRIBUER_VEDTAKSBREV -> {
+                    FERDIGSTILLE_BEHANDLING
+                }
+
+                FERDIGSTILLE_BEHANDLING -> {
+                    BEHANDLING_AVSLUTTET
+                }
+
+                BEHANDLING_AVSLUTTET -> {
+                    BEHANDLING_AVSLUTTET
+                }
+
+                else -> {
+                    throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for småbarnstillegg")
+                }
             }
         }
 
@@ -364,8 +452,14 @@ fun hentNesteSteg(
         BehandlingÅrsak.SVALBARDTILLEGG,
         -> {
             when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                REGISTRERE_PERSONGRUNNLAG -> {
+                    VILKÅRSVURDERING
+                }
+
+                VILKÅRSVURDERING -> {
+                    BEHANDLINGSRESULTAT
+                }
+
                 BEHANDLINGSRESULTAT -> {
                     if (endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING) {
                         IVERKSETT_MOT_OPPDRAG
@@ -374,13 +468,33 @@ fun hentNesteSteg(
                     }
                 }
 
-                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
-                JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
-                DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
-                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
+                IVERKSETT_MOT_OPPDRAG -> {
+                    VENTE_PÅ_STATUS_FRA_ØKONOMI
+                }
+
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> {
+                    JOURNALFØR_VEDTAKSBREV
+                }
+
+                JOURNALFØR_VEDTAKSBREV -> {
+                    DISTRIBUER_VEDTAKSBREV
+                }
+
+                DISTRIBUER_VEDTAKSBREV -> {
+                    FERDIGSTILLE_BEHANDLING
+                }
+
+                FERDIGSTILLE_BEHANDLING -> {
+                    BEHANDLING_AVSLUTTET
+                }
+
+                BEHANDLING_AVSLUTTET -> {
+                    BEHANDLING_AVSLUTTET
+                }
+
+                else -> {
+                    throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
+                }
             }
         }
 
@@ -388,9 +502,15 @@ fun hentNesteSteg(
         BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING,
         -> {
             when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT ->
+                REGISTRERE_PERSONGRUNNLAG -> {
+                    VILKÅRSVURDERING
+                }
+
+                VILKÅRSVURDERING -> {
+                    BEHANDLINGSRESULTAT
+                }
+
+                BEHANDLINGSRESULTAT -> {
                     if (endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING) {
                         IVERKSETT_MOT_OPPDRAG
                     } else if (behandling.kategori == BehandlingKategori.EØS && endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING) {
@@ -398,12 +518,27 @@ fun hentNesteSteg(
                     } else {
                         throw Feil("Behandlingen har ingen endringer i utbetaling.")
                     }
+                }
 
-                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
-                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
+                IVERKSETT_MOT_OPPDRAG -> {
+                    VENTE_PÅ_STATUS_FRA_ØKONOMI
+                }
+
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> {
+                    FERDIGSTILLE_BEHANDLING
+                }
+
+                FERDIGSTILLE_BEHANDLING -> {
+                    BEHANDLING_AVSLUTTET
+                }
+
+                BEHANDLING_AVSLUTTET -> {
+                    BEHANDLING_AVSLUTTET
+                }
+
+                else -> {
+                    throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
+                }
             }
         }
 

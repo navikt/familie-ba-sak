@@ -104,18 +104,23 @@ object VilkårsvurderingUtils {
             personSomEndres.vilkårResultater.filter { it.vilkårType == vilkårSomEndres.vilkårType && it.id != vilkårSomEndres.id }
         when {
             // For bor med søker-vilkåret kan avslag og innvilgelse være overlappende, da man kan f.eks. avslå full barnetrygd, men innvilge delt
-            vilkårSomEndres.vilkårType == Vilkår.BOR_MED_SØKER -> return
-            vilkårSomEndres.erAvslagUtenPeriode() && resultaterPåVilkår.any { it.resultat == Resultat.OPPFYLT && it.harFremtidigTom() } ->
+            vilkårSomEndres.vilkårType == Vilkår.BOR_MED_SØKER -> {
+                return
+            }
+
+            vilkårSomEndres.erAvslagUtenPeriode() && resultaterPåVilkår.any { it.resultat == Resultat.OPPFYLT && it.harFremtidigTom() } -> {
                 throw FunksjonellFeil(
                     "Finnes løpende oppfylt ved forsøk på å legge til avslag uten periode ",
                     "Du kan ikke legge til avslag uten datoer fordi det finnes oppfylt løpende periode på vilkåret.",
                 )
+            }
 
-            vilkårSomEndres.harFremtidigTom() && resultaterPåVilkår.any { it.erEksplisittAvslagUtenPeriode() } ->
+            vilkårSomEndres.harFremtidigTom() && resultaterPåVilkår.any { it.erEksplisittAvslagUtenPeriode() } -> {
                 throw FunksjonellFeil(
                     "Finnes avslag uten periode ved forsøk på å legge til løpende oppfylt",
                     "Du kan ikke legge til løpende periode fordi det er vurdert avslag uten datoer på vilkåret.",
                 )
+            }
         }
     }
 
@@ -507,9 +512,15 @@ private fun utledBegrunnelse(
     vilkår: Vilkår,
     person: Person,
 ) = when {
-    person.erDød() -> "Dødsfall"
-    vilkår == Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
-    vilkår == Vilkår.GIFT_PARTNERSKAP ->
+    person.erDød() -> {
+        "Dødsfall"
+    }
+
+    vilkår == Vilkår.UNDER_18_ÅR -> {
+        "Vurdert og satt automatisk"
+    }
+
+    vilkår == Vilkår.GIFT_PARTNERSKAP -> {
         if (person.sivilstander
                 .sisteSivilstand()
                 ?.type
@@ -520,8 +531,11 @@ private fun utledBegrunnelse(
         } else {
             ""
         }
+    }
 
-    else -> ""
+    else -> {
+        ""
+    }
 }
 
 fun validerVilkårStarterIkkeFørMigreringsdatoForMigreringsbehandling(

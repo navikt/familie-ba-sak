@@ -201,7 +201,9 @@ class PensjonService(
                 infotrygdBarnetrygdKlient.hentPersonerMedBarnetrygdTilPensjon(år).random()
             }
 
-            else -> null
+            else -> {
+                null
+            }
         }
     }
 
@@ -219,7 +221,9 @@ class PensjonService(
                 }
             }
 
-            else -> this
+            else -> {
+                this
+            }
         }
 
     fun YtelseType.tilPensjonYtelsesType(): YtelseTypeEkstern =

@@ -87,15 +87,21 @@ class TestVerktøyService(
         personType: PersonType?,
     ): List<UtdypendeVilkårsvurdering> =
         when (vilkår) {
-            Vilkår.BOSATT_I_RIKET ->
+            Vilkår.BOSATT_I_RIKET -> {
                 when (personType) {
                     PersonType.SØKER -> listOf(UtdypendeVilkårsvurdering.OMFATTET_AV_NORSK_LOVGIVNING)
                     PersonType.BARN -> listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE)
                     else -> emptyList()
                 }
+            }
 
-            Vilkår.BOR_MED_SØKER -> listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE_MED_SØKER)
-            else -> emptyList()
+            Vilkår.BOR_MED_SØKER -> {
+                listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE_MED_SØKER)
+            }
+
+            else -> {
+                emptyList()
+            }
         }
 
     fun hentBegrunnelsetest(behandlingId: Long): String {

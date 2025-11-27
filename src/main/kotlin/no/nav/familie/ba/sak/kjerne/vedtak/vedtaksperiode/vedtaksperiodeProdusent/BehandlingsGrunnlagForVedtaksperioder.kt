@@ -379,7 +379,7 @@ private fun List<VilkårResultat>.hentForskjøvedeVilkårResultaterForPersonsAnd
     val forskjøvedeVilkårResultaterForPerson = this.tilForskjøvedeVilkårTidslinjer(person.fødselsdato).kombiner()
 
     return when (vilkårRolle) {
-        PersonType.SØKER ->
+        PersonType.SØKER -> {
             forskjøvedeVilkårResultaterForPerson
                 .mapVerdi { vilkårResultater ->
                     if (bareSøkerOgUregistrertBarn) {
@@ -390,8 +390,9 @@ private fun List<VilkårResultat>.hentForskjøvedeVilkårResultaterForPersonsAnd
                 }.kombinerMed(erMinstEttBarnMedUtbetalingTidslinje) { vilkårResultaterForSøker, erMinstEttBarnMedUtbetaling ->
                     vilkårResultaterForSøker?.takeIf { erMinstEttBarnMedUtbetaling == true || vilkårResultaterForSøker.any { it.erEksplisittAvslagPåSøknad == true } }
                 }
+        }
 
-        PersonType.BARN ->
+        PersonType.BARN -> {
             if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG || fagsakType == FagsakType.INSTITUSJON) {
                 forskjøvedeVilkårResultaterForPerson.mapVerdi { it?.toList() }
             } else {
@@ -400,13 +401,15 @@ private fun List<VilkårResultat>.hentForskjøvedeVilkårResultaterForPersonsAnd
                         slåSammenHvisMulig(vilkårResultaterBarn, vilkårResultaterSøker)?.toList()
                     }
             }
+        }
 
-        PersonType.ANNENPART ->
+        PersonType.ANNENPART -> {
             if (this.isNotEmpty()) {
                 throw Feil("Ikke implementert for annenpart")
             } else {
                 tomTidslinje()
             }
+        }
     }
 }
 

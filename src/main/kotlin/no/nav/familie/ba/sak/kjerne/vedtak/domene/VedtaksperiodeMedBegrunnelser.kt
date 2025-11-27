@@ -129,7 +129,9 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
 
     return when (this.type) {
         Vedtaksperiodetype.AVSLAG,
-        -> emptyList()
+        -> {
+            emptyList()
+        }
 
         Vedtaksperiodetype.FORTSATT_INNVILGET -> {
             val løpendeUtbetalingsperiode =
@@ -145,14 +147,16 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
         Vedtaksperiodetype.UTBETALING,
         Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
         Vedtaksperiodetype.ENDRET_UTBETALING,
-        ->
+        -> {
             finnUtbetalingsperioderRelevantForVedtaksperiode(utbetalingsperiodeDetaljer)?.toList() ?: throw Feil(
                 "Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom})}",
             )
+        }
 
-        Vedtaksperiodetype.OPPHØR ->
+        Vedtaksperiodetype.OPPHØR -> {
             finnUtbetalingsperioderRelevantForOpphørVedtaksperiode(utbetalingsperiodeDetaljer)?.toList()
                 ?: emptyList()
+        }
     }
 }
 
@@ -213,16 +217,31 @@ fun hentBrevPeriodeType(
     erUtbetalingEllerDeltBostedIPeriode: Boolean,
 ): BrevPeriodeType =
     when (vedtaksperiodetype) {
-        Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET
-        Vedtaksperiodetype.UTBETALING ->
+        Vedtaksperiodetype.FORTSATT_INNVILGET -> {
+            BrevPeriodeType.FORTSATT_INNVILGET
+        }
+
+        Vedtaksperiodetype.UTBETALING -> {
             when {
                 erUtbetalingEllerDeltBostedIPeriode -> BrevPeriodeType.UTBETALING
                 else -> BrevPeriodeType.INGEN_UTBETALING
             }
+        }
 
-        Vedtaksperiodetype.AVSLAG -> if (fom != null) BrevPeriodeType.INGEN_UTBETALING else BrevPeriodeType.INGEN_UTBETALING_UTEN_PERIODE
-        Vedtaksperiodetype.OPPHØR -> BrevPeriodeType.INGEN_UTBETALING
-        Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> BrevPeriodeType.UTBETALING
+        Vedtaksperiodetype.AVSLAG -> {
+            if (fom != null) BrevPeriodeType.INGEN_UTBETALING else BrevPeriodeType.INGEN_UTBETALING_UTEN_PERIODE
+        }
+
+        Vedtaksperiodetype.OPPHØR -> {
+            BrevPeriodeType.INGEN_UTBETALING
+        }
+
+        Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> {
+            BrevPeriodeType.UTBETALING
+        }
+
         Vedtaksperiodetype.ENDRET_UTBETALING,
-        -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
+        -> {
+            throw Feil("Endret utbetaling skal ikke benyttes lenger.")
+        }
     }

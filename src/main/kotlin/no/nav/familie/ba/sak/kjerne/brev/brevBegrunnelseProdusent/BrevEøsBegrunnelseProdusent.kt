@@ -120,21 +120,23 @@ private fun hentKompetanserForPeriodeResultat(
     return when (periodeResultat) {
         SanityPeriodeResultat.INNVILGET_ELLER_ØKNING,
         SanityPeriodeResultat.INGEN_ENDRING,
-        ->
+        -> {
             hentRelevanteKompetanserVedInnvilgetEllerIngenEndring(
                 periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
             )
+        }
 
         SanityPeriodeResultat.IKKE_INNVILGET,
         SanityPeriodeResultat.REDUKSJON,
-        ->
+        -> {
             hentRelevanteKompetanserVedIkkeInnvilgetEllerReduksjon(
                 begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling = begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling,
                 begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
                 periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
             )
+        }
 
-        SanityPeriodeResultat.IKKE_RELEVANT ->
+        SanityPeriodeResultat.IKKE_RELEVANT -> {
             hentRelevanteKompetanserVedInnvilgetEllerIngenEndring(
                 periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
             ) +
@@ -143,8 +145,11 @@ private fun hentKompetanserForPeriodeResultat(
                     begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
                     periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
                 )
+        }
 
-        else -> throw Feil("Feltet 'periode'")
+        else -> {
+            throw Feil("Feltet 'periode'")
+        }
     }
 }
 

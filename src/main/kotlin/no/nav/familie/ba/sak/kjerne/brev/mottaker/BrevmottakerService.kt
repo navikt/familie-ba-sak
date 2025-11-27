@@ -71,7 +71,10 @@ class BrevmottakerService(
         manueltRegistrerteMottakere: List<ManuellBrevmottaker>,
     ): List<MottakerInfo> =
         when {
-            manueltRegistrerteMottakere.isEmpty() -> listOf(Bruker)
+            manueltRegistrerteMottakere.isEmpty() -> {
+                listOf(Bruker)
+            }
+
             manueltRegistrerteMottakere.any { it.type == MottakerType.DØDSBO } -> {
                 val dodsbo = manueltRegistrerteMottakere.single { it.type == MottakerType.DØDSBO }
                 listOf(Dødsbo(navn = dodsbo.navn, manuellAdresseInfo = lagManuellAdresseInfo(dodsbo)))

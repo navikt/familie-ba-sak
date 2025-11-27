@@ -66,7 +66,9 @@ class UtgåendeJournalføringService(
                         hentEksisterendeJournalpost(eksternReferanseId, fnr)
                     }
 
-                    else -> throw ressursException
+                    else -> {
+                        throw ressursException
+                    }
                 }
             }
 

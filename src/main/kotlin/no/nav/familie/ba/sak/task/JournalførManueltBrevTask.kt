@@ -41,7 +41,14 @@ class JournalførManueltBrevTask(
         logger.info("Journalfører manuelt brev for fagsak=${journalførManueltBrevDTO.fagsakId} og behandling=${journalførManueltBrevDTO.behandlingId}")
 
         val fagsak = fagsakService.hentPåFagsakId(journalførManueltBrevDTO.fagsakId)
-        val generertBrev = dokumentGenereringService.genererManueltBrev(journalførManueltBrevDTO.manuellBrevRequest, fagsak)
+        val saksbehandlerSignaturTilBrev = journalførManueltBrevDTO.saksbehandlerSignaturTilBrev
+
+        val generertBrev =
+            dokumentGenereringService.genererManueltBrev(
+                manueltBrevRequest = journalførManueltBrevDTO.manuellBrevRequest,
+                fagsak = fagsak,
+                saksbehandlerSignaturTilBrev = saksbehandlerSignaturTilBrev,
+            )
 
         val førsteside =
             if (journalførManueltBrevDTO.manuellBrevRequest.brevmal.skalGenerereForside()) {
@@ -105,6 +112,7 @@ class JournalførManueltBrevTask(
             fagsakId: Long,
             manuellBrevRequest: ManueltBrevRequest,
             mottakerInfo: MottakerInfo,
+            saksbehandlerSignaturTilBrev: String,
         ): Task =
             Task(
                 TASK_STEP_TYPE,
@@ -115,6 +123,7 @@ class JournalførManueltBrevTask(
                         manuellBrevRequest = manuellBrevRequest,
                         mottaker = JournalførManueltBrevDTO.Mottaker.opprettFra(mottakerInfo),
                         eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsakId, behandlingId, mottakerInfo),
+                        saksbehandlerSignaturTilBrev = saksbehandlerSignaturTilBrev,
                     ),
                 ),
                 properties =

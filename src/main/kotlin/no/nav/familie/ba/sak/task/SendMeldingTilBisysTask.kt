@@ -94,11 +94,19 @@ class SendMeldingTilBisysTask(
             forrigeAndelTilkjentYtelseTidslinjerPerAktørOgType
                 .outerJoin(andelTilkjentYtelseTidslinjerPerAktørOgType) { forrigeAtyIPeriode, nyAtyIPeriode ->
                     when {
-                        forrigeAtyIPeriode != null && nyAtyIPeriode == null ->
-                            BarnetrygdEndretType.RO // Opphør
-                        forrigeAtyIPeriode != null && nyAtyIPeriode != null && nyAtyIPeriode.prosent < forrigeAtyIPeriode.prosent ->
-                            BarnetrygdEndretType.RR // Reduksjon
-                        else -> null
+                        forrigeAtyIPeriode != null && nyAtyIPeriode == null -> {
+                            BarnetrygdEndretType.RO
+                        }
+
+                        // Opphør
+                        forrigeAtyIPeriode != null && nyAtyIPeriode != null && nyAtyIPeriode.prosent < forrigeAtyIPeriode.prosent -> {
+                            BarnetrygdEndretType.RR
+                        }
+
+                        // Reduksjon
+                        else -> {
+                            null
+                        }
                     }
                 }.flatMap { (aktørOgType, tidslinje) ->
                     tidslinje.slåSammenLikePerioder().tilPerioderIkkeNull().map { endretPeriodeForAktør ->

@@ -130,6 +130,7 @@ enum class KompetanseAktivitet(
 
     MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN(true, true),
     MOTTAR_PENSJON(true, true),
+    NASJONAL_RETT_DIFFERANSEBEREGNING(true, true),
     INAKTIV(true, true),
 
     I_ARBEID(false, true),
@@ -279,10 +280,13 @@ fun IUtfyltKompetanse.utbetalingsland(): String {
         }
 
     return when (utbetalingsland) {
-        "NO" ->
+        "NO" -> {
             // Unntak. Finner landet som er registrert på kompetansen som ikke er Norge.
             setOf(this.søkersAktivitetsland, this.annenForeldersAktivitetsland, this.barnetsBostedsland).filterNotNull().singleOrNull { it != "NO" } ?: utbetalingsland
+        }
 
-        else -> utbetalingsland
+        else -> {
+            utbetalingsland
+        }
     }
 }

@@ -73,6 +73,7 @@ class DokumentGenereringService(
         manueltBrevRequest: ManueltBrevRequest,
         fagsak: Fagsak,
         erForhåndsvisning: Boolean = false,
+        saksbehandlerSignaturTilBrev: String? = null, // Gjøres non-nullable når vi fjerner feature toggle for utsending av manuelle brev
     ): ByteArray {
         val mottakerIdent =
             when (fagsak.type) {
@@ -87,7 +88,7 @@ class DokumentGenereringService(
                 manueltBrevRequest.tilBrev(
                     mottakerIdent,
                     navnTilBrevHeader,
-                    saksbehandlerContext.hentSaksbehandlerSignaturTilBrev(),
+                    saksbehandlerSignaturTilBrev ?: saksbehandlerContext.hentSaksbehandlerSignaturTilBrev(),
                 ) { kodeverkService.hentLandkoderISO2() }
             return brevKlient.genererBrev(
                 målform = manueltBrevRequest.mottakerMålform.tilSanityFormat(),
@@ -116,8 +117,9 @@ class DokumentGenereringService(
 
     private fun finnSøkerEllerInstitusjonsNavn(fagsak: Fagsak): String =
         when (fagsak.type) {
-            FagsakType.NORMAL, FagsakType.BARN_ENSLIG_MINDREÅRIG ->
+            FagsakType.NORMAL, FagsakType.BARN_ENSLIG_MINDREÅRIG -> {
                 personopplysningerService.hentPersoninfoEnkel(fagsak.aktør).navn ?: throw Feil("Klarte ikke hente navn på fagsak.aktør fra pdl")
+            }
 
             FagsakType.INSTITUSJON -> {
                 val orgnummer = fagsak.institusjon?.orgNummer ?: throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")

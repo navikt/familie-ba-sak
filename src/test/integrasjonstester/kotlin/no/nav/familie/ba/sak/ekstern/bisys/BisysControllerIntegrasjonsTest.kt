@@ -6,7 +6,9 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.verify
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -14,7 +16,6 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.core.io.ClassPathResource
@@ -26,6 +27,9 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.postForEntity
+import org.wiremock.spring.ConfigureWireMock
+import org.wiremock.spring.EnableWireMock
+import org.wiremock.spring.InjectWireMock
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.time.LocalDate
@@ -42,26 +46,23 @@ import java.time.temporal.ChronoUnit
     "mock-ident-klient",
     "mock-brev-klient",
 )
+@EnableWireMock(
+    ConfigureWireMock(name = "bisystest", port = 28085),
+)
 class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
-    // Trenger fast port for at klienten i ba-sak kan kalle wiremock'en
-    private val wireMockServer = WireMockServer(28085)
-
-    @BeforeEach
-    fun setUp() {
-        wireMockServer.start()
-    }
+    @InjectWireMock("bisystest")
+    lateinit var wiremockServer: WireMockServer
 
     @AfterEach
     fun after() {
-        wireMockServer.resetAll()
-        wireMockServer.stop()
+        wiremockServer.resetAll()
     }
 
     @Test
     fun `Skal kaste gode feilmeldinger ved feil mot infotrygd-barnetrygd`() {
         val fnr = randomFnr()
 
-        wireMockServer.stubFor(
+        stubFor(
             post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .willReturn(
                     aResponse()
@@ -101,7 +102,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
     fun `Skal returnere tom periode hvis det ikke er noen utbetalinger i infotrygd-barnetrygd`() {
         val fnr = randomFnr()
 
-        wireMockServer.stubFor(
+        stubFor(
             post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .willReturn(
                     aResponse()
@@ -124,7 +125,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
                 requestEntity,
             )
-        wireMockServer.verify(
+        verify(
             postRequestedFor(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .withRequestBody(
                     equalToJson(
@@ -144,7 +145,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
     fun `Skal returnere perioder hvis det er noen utbetalinger i infotrygd-barnetrygd`() {
         val fnr = randomFnr()
 
-        wireMockServer.stubFor(
+        stubFor(
             post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .willReturn(
                     aResponse()
@@ -154,7 +155,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 ),
         )
 
-        wireMockServer.stubFor(
+        stubFor(
             post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .withRequestBody(
                     equalToJson(
@@ -206,7 +207,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
     fun `Skal også returnere gamle perioder hvis det er noen utbetalinger i infotrygd-barnetrygd`() {
         val fnr = randomFnr()
 
-        wireMockServer.stubFor(
+        stubFor(
             post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .willReturn(
                     aResponse()
@@ -216,7 +217,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 ),
         )
 
-        wireMockServer.stubFor(
+        stubFor(
             post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .withRequestBody(
                     equalToJson(

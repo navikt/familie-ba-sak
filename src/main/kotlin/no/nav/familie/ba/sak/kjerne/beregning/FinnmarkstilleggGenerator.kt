@@ -45,9 +45,11 @@ object FinnmarkstilleggGenerator {
         val finnmarkstilleggSatsTidslinje = satstypeTidslinje(SatsType.FINNMARKSTILLEGG)
 
         return when (behandling.fagsak.type) {
-            SKJERMET_BARN -> throw Feil("Finnmarkstillegg er ikke implementert for skjermet barn")
+            SKJERMET_BARN -> {
+                throw Feil("Finnmarkstillegg er ikke implementert for skjermet barn")
+            }
 
-            INSTITUSJON, BARN_ENSLIG_MINDREÅRIG ->
+            INSTITUSJON, BARN_ENSLIG_MINDREÅRIG -> {
                 lagAndeler(
                     barnetsAndelerTidslinje = barnasAndeler.tilTidslinje(),
                     barnHarRettTilFinnmarkstilleggTidslinje = søkerBosattIFinnmarkTidslinje.mapVerdi { it != null },
@@ -55,8 +57,9 @@ object FinnmarkstilleggGenerator {
                     personResultat = søkersPersonResultat,
                     tilkjentYtelse = tilkjentYtelse,
                 )
+            }
 
-            NORMAL ->
+            NORMAL -> {
                 vilkårsvurdering
                     .personResultater
                     .filterNot { it.erSøkersResultater() }
@@ -82,6 +85,7 @@ object FinnmarkstilleggGenerator {
                             tilkjentYtelse = tilkjentYtelse,
                         )
                     }
+            }
         }
     }
 

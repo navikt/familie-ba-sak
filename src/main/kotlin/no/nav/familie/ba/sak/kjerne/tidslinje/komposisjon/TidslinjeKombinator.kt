@@ -24,10 +24,13 @@ fun <V, H, R> Tidslinje<V>.kombinerUtenNullMed(
 ): Tidslinje<R> =
     this.biFunksjon(høyreTidslinje) { periodeverdiVenstre, periodeverdiHøyre ->
         when {
-            periodeverdiVenstre is Verdi && periodeverdiHøyre is Verdi ->
+            periodeverdiVenstre is Verdi && periodeverdiHøyre is Verdi -> {
                 kombineringsfunksjon(periodeverdiVenstre.verdi, periodeverdiHøyre.verdi).tilPeriodeVerdi()
+            }
 
-            else -> Null()
+            else -> {
+                Null()
+            }
         }
     }
 

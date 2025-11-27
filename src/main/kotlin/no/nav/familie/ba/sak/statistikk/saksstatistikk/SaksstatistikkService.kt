@@ -58,7 +58,9 @@ class SaksstatistikkService(
                     behandlingSøknadsinfoService.hentSøknadMottattDato(behandlingId) ?: behandling.opprettetTidspunkt
                 }
 
-                else -> behandling.opprettetTidspunkt
+                else -> {
+                    behandling.opprettetTidspunkt
+                }
             }
 
         val behandlendeEnhetsKode =
@@ -85,14 +87,18 @@ class SaksstatistikkService(
             behandlingKategori =
                 when (behandling.underkategori) {
                     // Gjøres pga. tilpasning til DVH-modell
-                    BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET ->
+                    BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET -> {
                         behandling.underkategori.name
+                    }
                 },
             behandlingUnderkategori =
                 when (behandling.fagsak.type) { // <-'
                     NORMAL -> null
+
                     BARN_ENSLIG_MINDREÅRIG -> ENSLIG_MINDREÅRIG_KODE
+
                     INSTITUSJON -> INSTITUSJON.name
+
                     SKJERMET_BARN -> SKJERMET_BARN.name
                 },
             behandlingAarsak = behandling.opprettetÅrsak.name,
@@ -193,11 +199,15 @@ class SaksstatistikkService(
 
     private fun Behandling.resultatBegrunnelser(vedtak: Vedtak?): List<ResultatBegrunnelseDVH> =
         when (resultat) {
-            HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> emptyList()
-            else ->
+            HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> {
+                emptyList()
+            }
+
+            else -> {
                 vedtak
                     ?.hentResultatBegrunnelserFraVedtaksbegrunnelser()
                     ?: emptyList()
+            }
         }
 
     private fun Vedtak.hentResultatBegrunnelserFraVedtaksbegrunnelser(): List<ResultatBegrunnelseDVH> =
