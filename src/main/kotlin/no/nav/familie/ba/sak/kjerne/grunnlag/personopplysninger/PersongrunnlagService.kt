@@ -125,7 +125,9 @@ class PersongrunnlagService(
             ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling $behandlingId")
 
     @Transactional
-    fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
+    fun oppdaterRegisteropplysninger(
+        behandlingId: Long,
+    ): PersonopplysningGrunnlag {
         val nåværendeGrunnlag = hentAktivThrows(behandlingId = behandlingId)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
@@ -239,7 +241,7 @@ class PersongrunnlagService(
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering() || behandling.erFinnmarksEllerSvalbardtillegg()
+        val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering()
         val søker =
             hentPerson(
                 aktør = aktør,
@@ -379,12 +381,27 @@ class PersongrunnlagService(
                     dødsfallDatoFraPdl = personinfo.dødsfall?.dødsdato,
                     dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo?.adresse,
                 )
-            if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
-                person.arbeidsforhold =
-                    arbeidsforholdService
-                        .hentArbeidsforhold(
+
+            if (featureToggleService.isEnabled(FeatureToggle.ARBEIDSFORHOLD_STRENGERE_NEDHENTING)) {
+                val personErSøker = person.type == PersonType.SØKER
+                val harStatsborgerskapIEØS = person.statsborgerskap.any { it.medlemskap == Medlemskap.EØS }
+                if (personErSøker && harStatsborgerskapIEØS) {
+                    val arbeidsforholdForPerson =
+                        arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
+                            statsborgerskap = person.statsborgerskap,
                             person = person,
-                        ).toMutableList()
+                            cutOffFomDato = personinfo.eldsteBarnsFødselsdato() ?: person.fødselsdato, // hvis det ikke er noen barn antar vi enslig mindreårig
+                        )
+                    person.arbeidsforhold = arbeidsforholdForPerson.toMutableList()
+                }
+            } else {
+                if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
+                    person.arbeidsforhold =
+                        arbeidsforholdService
+                            .hentArbeidsforhold(
+                                person = person,
+                            ).toMutableList()
+                }
             }
         }
     }

@@ -32,4 +32,5 @@ class ArbeidsforholdRequest(
     // Trengs i requesten, så overser klaging på at den aldri blir brukt
     @Suppress("UNUSED")
     val ansettelsesperiodeFom: LocalDate,
+    val ansettelsesperiodeTom: LocalDate? = null,
 )
