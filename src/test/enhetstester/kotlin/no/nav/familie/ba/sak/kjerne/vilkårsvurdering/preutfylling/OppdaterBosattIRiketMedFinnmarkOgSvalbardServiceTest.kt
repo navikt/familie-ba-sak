@@ -93,8 +93,6 @@ class OppdaterBosattIRiketMedFinnmarkOgSvalbardServiceTest {
 
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } returns emptyList()
-
             // Act
             oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(vilkårsvurdering)
 
@@ -169,8 +167,6 @@ class OppdaterBosattIRiketMedFinnmarkOgSvalbardServiceTest {
 
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } returns emptyList()
-
             // Act
             oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(vilkårsvurdering)
 
@@ -244,8 +240,6 @@ class OppdaterBosattIRiketMedFinnmarkOgSvalbardServiceTest {
                 }
 
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
 
             // Act
             oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(vilkårsvurdering)
@@ -330,8 +324,6 @@ class OppdaterBosattIRiketMedFinnmarkOgSvalbardServiceTest {
                 }
 
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
 
             // Act
             oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(vilkårsvurdering)
@@ -437,8 +429,6 @@ class OppdaterBosattIRiketMedFinnmarkOgSvalbardServiceTest {
 
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
-
             // Act
             oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(vilkårsvurdering)
 
@@ -532,8 +522,6 @@ class OppdaterBosattIRiketMedFinnmarkOgSvalbardServiceTest {
                 }
 
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
 
             // Act
             oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(vilkårsvurdering)
