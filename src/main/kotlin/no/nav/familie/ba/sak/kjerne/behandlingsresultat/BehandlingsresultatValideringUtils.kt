@@ -185,26 +185,50 @@ object BehandlingsresultatValideringUtils {
         andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
         ytelseType: YtelseType,
     ): Boolean {
-        val andelerUtenomYtelseTypeDenneBehandling = andelerNåværendeBehandling.filterNot { it.type == ytelseType }
-        val andelerUtenomYtelseTypeForrigeBehandling = andelerForrigeBehandling.filterNot { it.type == ytelseType }
+        val (tilleggsandelerUtenomYtelsetypeDenneBehandling, andelerUtenomFinnmarksOgSvalbardtilleggDenneBehandling) =
+            andelerNåværendeBehandling
+                .filterNot { it.type == ytelseType }
+                .partition { it.erFinnmarkstillegg() || it.erSvalbardtillegg() }
 
-        val erEndringIUtbetalingUtenomYtelseType =
+        val (tilleggsandelerUtenomYtelsetypeForrigeBehandling, andelerUtenomFinnmarksOgSvalbardtilleggForrigeBehandling) =
+            andelerForrigeBehandling
+                .filterNot { it.type == ytelseType }
+                .partition { it.erFinnmarkstillegg() || it.erSvalbardtillegg() }
+
+        val erEndringIAndelerUtenomFinnmarkstilleggOgSvalbardtillegg =
             EndringIUtbetalingUtil
                 .lagEndringIUtbetalingTidslinje(
-                    nåværendeAndeler = andelerUtenomYtelseTypeDenneBehandling,
-                    forrigeAndeler = andelerUtenomYtelseTypeForrigeBehandling,
+                    nåværendeAndeler = andelerUtenomFinnmarksOgSvalbardtilleggDenneBehandling,
+                    forrigeAndeler = andelerUtenomFinnmarksOgSvalbardtilleggForrigeBehandling,
                 ).tilPerioder()
                 .any { it.verdi == true }
 
-        if (erEndringIUtbetalingUtenomYtelseType) {
+        if (erEndringIAndelerUtenomFinnmarkstilleggOgSvalbardtillegg) {
             secureLogger.info(
                 "Det er en uforventet endring i andeler. Kun $ytelseType kan endres i denne behandlingen.\n" +
-                    "Andeler utenom $ytelseType for denne behandlingen: $andelerUtenomYtelseTypeDenneBehandling\n" +
-                    "Andeler utenom $ytelseType for forrige behandling: $andelerUtenomYtelseTypeForrigeBehandling",
+                    "Andeler for denne behandlingen: $andelerNåværendeBehandling\n" +
+                    "Andeler for forrige behandling: $andelerForrigeBehandling",
+            )
+            throw Feil("Det er en uforventet endring i andeler utenom Finnmarkstillegg og Svalbardtillegg i en $ytelseType-behandling.")
+        }
+
+        val erEndringITilleggUtenomYtelseType =
+            EndringIUtbetalingUtil
+                .lagEndringIUtbetalingTidslinje(
+                    nåværendeAndeler = tilleggsandelerUtenomYtelsetypeDenneBehandling,
+                    forrigeAndeler = tilleggsandelerUtenomYtelsetypeForrigeBehandling,
+                ).tilPerioder()
+                .any { it.verdi == true }
+
+        if (erEndringITilleggUtenomYtelseType) {
+            secureLogger.info(
+                "Det er en uforventet endring i andeler. Kun $ytelseType kan endres i denne behandlingen.\n" +
+                    "Andeler denne behandlingen: $andelerNåværendeBehandling\n" +
+                    "Andeler forrige behandling: $andelerForrigeBehandling",
             )
         }
 
-        return erEndringIUtbetalingUtenomYtelseType
+        return erEndringITilleggUtenomYtelseType
     }
 
     fun andelerMedYtelseTypeErInnvilgetInneværendeMånedOgToMånederFramITid(

@@ -144,7 +144,7 @@ class PreutfyllBosattIRiketService(
         val andelForAktør = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør)
 
         if (behandling.erFinnmarksEllerSvalbardtillegg()) {
-            validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
+            validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtilleggbehandlinger(
                 behandling = behandling,
                 erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
                 erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
@@ -225,7 +225,7 @@ class PreutfyllBosattIRiketService(
         val erOppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje(adresserForPerson, personResultat)
         val andelForAktør = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør)
 
-        validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
+        validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtilleggbehandlinger(
             behandling = behandling,
             erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
             erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
@@ -485,7 +485,7 @@ class PreutfyllBosattIRiketService(
             }
 }
 
-private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlinger(
+private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtilleggbehandlinger(
     behandling: Behandling,
     erDeltBostedIFinnmarkEllerNordTromsTidslinje: Tidslinje<Boolean>,
     erOppholdsadressePåSvalbardTidslinje: Tidslinje<Boolean>,
@@ -505,7 +505,7 @@ private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandling
             .any { it.verdi == true }
 
     if (harDeltBostedIFinnmarkOgOppholdsadressePåSvalbardISammePeriode) {
-        throw AutovedtakMåBehandlesManueltFeil(beskrivelse = "${behandling.opprettetÅrsak.visningsnavn} kan ikke behandles automatisk som følge av adresseendring. Barn har delt bosted i Finnmark/Nord-Troms og oppholdsadresse på Svalbard.\nEndring av ${behandling.opprettetÅrsak.visningsnavn} må håndteres manuelt.")
+        throw AutovedtakMåBehandlesManueltFeil(beskrivelse = "${behandling.opprettetÅrsak.visningsnavn} kan ikke behandles automatisk som følge av adresseendring.\nBarn har delt bosted i Finnmark/Nord-Troms og oppholdsadresse på Svalbard.\nEndring av ${behandling.opprettetÅrsak.visningsnavn} må håndteres manuelt.")
     }
 }
 
