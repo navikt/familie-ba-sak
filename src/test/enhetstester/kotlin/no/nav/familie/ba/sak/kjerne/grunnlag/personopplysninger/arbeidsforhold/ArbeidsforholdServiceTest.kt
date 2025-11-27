@@ -152,4 +152,49 @@ class ArbeidsforholdServiceTest {
         assertThat(arbeidsforhold.single().arbeidsgiverId).isEqualTo(nåværendeArbeidsforhold.arbeidsgiver?.organisasjonsnummer)
         assertThat(arbeidsforhold.single().periode?.fom).isEqualTo(LocalDate.now().minusYears(5))
     }
+
+    @Test
+    fun `flere statsborgerskap uten tom og fom på samme land skaper ikke tidslinjeproblemer`() {
+        // Arrange
+        val statsborgerskap =
+            listOf(
+                GrStatsborgerskap(
+                    gyldigPeriode = DatoIntervallEntitet(fom = null, tom = null),
+                    landkode = "POL",
+                    medlemskap = Medlemskap.EØS,
+                    person = person,
+                ),
+                GrStatsborgerskap(
+                    gyldigPeriode = DatoIntervallEntitet(fom = null, tom = null),
+                    landkode = "POL",
+                    medlemskap = Medlemskap.EØS,
+                    person = person,
+                ),
+                GrStatsborgerskap(
+                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(20), tom = null),
+                    landkode = "POL",
+                    medlemskap = Medlemskap.EØS,
+                    person = person,
+                ),
+                GrStatsborgerskap(
+                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(10), tom = null),
+                    landkode = "AFG",
+                    medlemskap = Medlemskap.TREDJELANDSBORGER,
+                    person = person,
+                ),
+            )
+
+        // Act
+        val arbeidsforhold =
+            arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
+                statsborgerskap,
+                person,
+                LocalDate.now().minusYears(4),
+            )
+
+        // Assert
+        assertThat(arbeidsforhold).`as`("Forventer å finne ett arbeidsforhold").hasSize(1)
+        assertThat(arbeidsforhold.single().arbeidsgiverId).isEqualTo(nåværendeArbeidsforhold.arbeidsgiver?.organisasjonsnummer)
+        assertThat(arbeidsforhold.single().periode?.fom).isEqualTo(LocalDate.now().minusYears(5))
+    }
 }

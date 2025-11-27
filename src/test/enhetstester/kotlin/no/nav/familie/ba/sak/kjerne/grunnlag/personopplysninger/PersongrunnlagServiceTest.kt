@@ -64,7 +64,6 @@ class PersongrunnlagServiceTest {
                 vilkårsvurderingService = vilkårsvurderingService,
                 kodeverkService = kodeverkService,
                 featureToggleService = featureToggleService,
-                systemOnlyIntegrasjonKlient = systemOnlyIntegrasjonKlient,
             ),
         )
 

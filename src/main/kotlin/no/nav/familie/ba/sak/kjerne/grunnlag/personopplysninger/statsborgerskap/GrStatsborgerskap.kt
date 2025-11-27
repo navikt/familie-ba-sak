@@ -100,7 +100,7 @@ fun List<GrStatsborgerskap>.hentSterkesteMedlemskap(): Medlemskap? {
 
 fun finnNåværendeMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): List<Medlemskap> = statsborgerskap?.filtrerGjeldendeNå()?.map { it.medlemskap } ?: emptyList()
 
-fun List<Medlemskap>.finnSterkesteMedlemskap(): Medlemskap? =
+fun Iterable<Medlemskap>.finnSterkesteMedlemskap(): Medlemskap? =
     when {
         contains(Medlemskap.NORDEN) -> Medlemskap.NORDEN
         contains(Medlemskap.EØS) -> Medlemskap.EØS

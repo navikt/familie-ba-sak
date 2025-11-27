@@ -37,17 +37,17 @@ class PreutfyllLovligOppholdMedLagringIPersongrunnlagService(
         val personOpplysningsgrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id)
 
         val søkersResultater = vilkårsvurdering.personResultater.first { it.erSøkersResultater() }
-        val søkerPersonInfo = personOpplysningsgrunnlag.personer.find { it.aktør == søkersResultater.aktør } ?: throw Feil("Aktør ${søkersResultater.aktør.aktørId} har personresultat men ikke persongrunnlag")
-        val bostedsadresserSøker = Adresser.opprettFra(søkerPersonInfo).bostedsadresser
+        val søker = personOpplysningsgrunnlag.personer.find { it.aktør == søkersResultater.aktør } ?: throw Feil("Aktør ${søkersResultater.aktør.aktørId} har personresultat men ikke persongrunnlag")
+        val bostedsadresserSøker = Adresser.opprettFra(søker).bostedsadresser
 
         val fomDatoForBeskjæring = finnFomDatoForBeskjæring(søkersResultater, vilkårsvurdering, bostedsadresserSøker) ?: PRAKTISK_TIDLIGSTE_DAG
-        val erEØSBorgerOgHarArbeidsforholdTidslinjeSøker = lagErEØSBorgerOgHarArbeidsforholdTidslinje(søkerPersonInfo.statsborgerskap.toList(), søkerPersonInfo.arbeidsforhold.toList(), fomDatoForBeskjæring)
+        val erEØSBorgerOgHarArbeidsforholdTidslinjeSøker = lagErEØSBorgerOgHarArbeidsforholdTidslinje(søker.statsborgerskap.toList(), søker.arbeidsforhold.toList(), fomDatoForBeskjæring)
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
-            val personInfo = personOpplysningsgrunnlag.personer.find { it.aktør == personResultat.aktør } ?: throw Feil("Aktør ${personResultat.aktør.aktørId} har personresultat men ikke persongrunnlag")
+            val person = personOpplysningsgrunnlag.personer.find { it.aktør == personResultat.aktør } ?: throw Feil("Aktør ${personResultat.aktør.aktørId} har personresultat men ikke persongrunnlag")
 
             val lovligOppholdVilkårResultat =
-                genererLovligOppholdVilkårResultat(personResultat, personInfo, erEØSBorgerOgHarArbeidsforholdTidslinjeSøker)
+                genererLovligOppholdVilkårResultat(personResultat, person, erEØSBorgerOgHarArbeidsforholdTidslinjeSøker)
 
             if (lovligOppholdVilkårResultat.isNotEmpty()) {
                 personResultat.vilkårResultater.removeIf { it.vilkårType == LOVLIG_OPPHOLD }

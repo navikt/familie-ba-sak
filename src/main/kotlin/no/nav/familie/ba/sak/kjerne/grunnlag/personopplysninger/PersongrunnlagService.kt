@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -65,7 +64,6 @@ class PersongrunnlagService(
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val kodeverkService: KodeverkService,
-    private val systemOnlyIntegrasjonKlient: SystemOnlyIntegrasjonKlient,
     private val featureToggleService: FeatureToggleService,
 ) {
     fun mapTilRestPersonMedStatsborgerskapLand(
@@ -243,7 +241,7 @@ class PersongrunnlagService(
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering() || behandling.erFinnmarksEllerSvalbardtillegg()
+        val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering()
         val søker =
             hentPerson(
                 aktør = aktør,
@@ -392,7 +390,7 @@ class PersongrunnlagService(
                         arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
                             statsborgerskap = person.statsborgerskap,
                             person = person,
-                            eldsteBarnsFødselsdato = personinfo.eldsteBarnsFødselsdato() ?: person.fødselsdato, // hvis det ikke er noen barn antar vi enslig mindreårig
+                            cutOffFomDato = personinfo.eldsteBarnsFødselsdato() ?: person.fødselsdato, // hvis det ikke er noen barn antar vi enslig mindreårig
                         )
                     person.arbeidsforhold = arbeidsforholdForPerson.toMutableList()
                 }

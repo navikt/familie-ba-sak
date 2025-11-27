@@ -8,10 +8,10 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold.Companion.tilGrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnSterkesteMedlemskap
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
-import no.nav.familie.tidslinje.tomTidslinje
-import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -44,7 +44,7 @@ class ArbeidsforholdService(
     fun hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
         statsborgerskap: List<GrStatsborgerskap>,
         person: Person,
-        eldsteBarnsFødselsdato: LocalDate,
+        cutOffFomDato: LocalDate,
     ): List<GrArbeidsforhold> {
         val statsborgerskapGruppertPåLand =
             statsborgerskap.groupBy { statsborgerskap ->
@@ -56,20 +56,21 @@ class ArbeidsforholdService(
                 .map { (_, statsborgerskap) ->
                     statsborgerskap
                         .map {
-                            Periode(
-                                fom = it.gyldigPeriode?.fom,
-                                tom = it.gyldigPeriode?.tom,
-                                verdi = it.medlemskap,
-                            )
-                        }.tilTidslinje()
+                            listOf(
+                                Periode(
+                                    fom = it.gyldigPeriode?.fom,
+                                    tom = it.gyldigPeriode?.tom,
+                                    verdi = it.medlemskap,
+                                ),
+                            ).tilTidslinje()
+                        }.kombiner { it.finnSterkesteMedlemskap() }
                 }
+
         val sterkesteMedlemskapPerioder =
             medlemskapTidslinjeForHvertLand
-                .fold(tomTidslinje<Medlemskap>()) { sterkesteMedlemskapTidslinje, medlemskapTidslinje ->
-                    sterkesteMedlemskapTidslinje.kombinerMed(medlemskapTidslinje) { sterkesteMedlemskap, nyttMedlemskap ->
-                        listOfNotNull(sterkesteMedlemskap, nyttMedlemskap).finnSterkesteMedlemskap()
-                    }
-                }.tilPerioderIkkeNull()
+                .kombiner { it.finnSterkesteMedlemskap() }
+                .beskjærFraOgMed(cutOffFomDato)
+                .tilPerioderIkkeNull()
 
         return sterkesteMedlemskapPerioder
             .filter { it.verdi == Medlemskap.EØS }
@@ -77,7 +78,7 @@ class ArbeidsforholdService(
                 val arbeidsforhold =
                     systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(
                         ident = person.aktør.aktivFødselsnummer(),
-                        ansettelsesperiodeFom = medlemskapPeriode.fom ?: eldsteBarnsFødselsdato,
+                        ansettelsesperiodeFom = medlemskapPeriode.fom ?: cutOffFomDato,
                         ansettelsesperiodeTom = medlemskapPeriode.tom,
                     )
                 arbeidsforhold.map { it.tilGrArbeidsforhold(person) }
