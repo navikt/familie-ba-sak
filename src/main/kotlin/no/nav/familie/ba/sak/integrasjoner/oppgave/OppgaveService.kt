@@ -185,7 +185,7 @@ class OppgaveService(
                 enhetsnummer = arbeidsfordelingsenhet.enhetId,
                 behandlingstema = sisteVedtatteBehandling.tilOppgaveBehandlingTema().value,
                 behandlingstype = sisteVedtatteBehandling.kategori.tilOppgavebehandlingType().value,
-                behandlesAvApplikasjon = "familie-ba-sak",
+                behandlesAvApplikasjon = null,
             )
         val opprettetOppgaveId = integrasjonKlient.opprettOppgave(opprettOppgave).oppgaveId.toString()
 
