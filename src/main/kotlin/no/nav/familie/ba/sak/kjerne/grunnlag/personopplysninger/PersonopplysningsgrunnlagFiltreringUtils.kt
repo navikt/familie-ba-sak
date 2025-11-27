@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 
 object PersonopplysningsgrunnlagFiltreringUtils {
@@ -63,5 +65,19 @@ object PersonopplysningsgrunnlagFiltreringUtils {
         val eldsteBarnsFødselsdato = personOpplysningGrunnlag.barna.minOfOrNull { it.fødselsdato } ?: return this
 
         return this.filter { it.oppholdTil?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
+    }
+
+    fun List<Sivilstand>.filtrerBortIkkeRelevanteSivilstander(
+        filtrerSivilstand: Boolean,
+        underkategori: BehandlingUnderkategori,
+        personType: PersonType,
+    ): List<Sivilstand> {
+        if (!filtrerSivilstand) return this
+
+        return if (underkategori == BehandlingUnderkategori.ORDINÆR && personType != PersonType.BARN) {
+            emptyList()
+        } else {
+            this
+        }
     }
 }
