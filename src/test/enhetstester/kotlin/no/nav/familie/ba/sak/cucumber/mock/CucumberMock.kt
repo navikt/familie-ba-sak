@@ -26,7 +26,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.Utbetalin
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
-import no.nav.familie.ba.sak.kjerne.autovedtak.OppdaterBosattIRiketMedFinnmarkOgSvalbardService
+import no.nav.familie.ba.sak.kjerne.autovedtak.OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggBegrunnelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
@@ -573,8 +573,8 @@ class CucumberMock(
             preutfyllBosattIRIketMedLagringIPersonopplysningsgrunnlagService = preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService,
         )
 
-    val oppdaterBosattIRiketMedFinnmarkOgSvalbardService =
-        OppdaterBosattIRiketMedFinnmarkOgSvalbardService(
+    val oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService =
+        OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService(
             persongrunnlagService = persongrunnlagService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
@@ -586,7 +586,6 @@ class CucumberMock(
             featureToggleService = featureToggleService,
             preutfyllBorHosSøkerService = mockk(),
             persongrunnlagService = persongrunnlagService,
-            oppdaterBosattIRiketMedFinnmarkOgSvalbardService = oppdaterBosattIRiketMedFinnmarkOgSvalbardService,
         )
 
     val vilkårsvurderingForNyBehandlingService =
@@ -599,7 +598,8 @@ class CucumberMock(
             vilkårsvurderingMetrics = mockk(),
             andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             preutfyllVilkårService = preutfyllVilkårService,
-            oppdaterBosattIRiketMedFinnmarkOgSvalbardService = oppdaterBosattIRiketMedFinnmarkOgSvalbardService,
+            oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService = oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService,
+            preutfyllBosattIRiketService = preutfyllBosattIRiketService,
             featureToggleService = featureToggleService,
         )
 

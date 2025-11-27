@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.datagenerator
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrMatrikkeladresseBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrVegadresseBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.deltbosted.GrMatrikkeladresseDeltBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse.GrMatrikkeladresseOppholdsadresse
@@ -192,6 +193,23 @@ fun lagGrMatrikkelOppholdsadresse(
     periode: DatoIntervallEntitet? = null,
     poststed: String? = null,
 ) = GrMatrikkeladresseOppholdsadresse(
+    matrikkelId = matrikkelId,
+    bruksenhetsnummer = bruksenhetsnummer,
+    kommunenummer = kommunenummer,
+    tilleggsnavn = tilleggsnavn,
+    postnummer = postnummer,
+    poststed = poststed,
+).also { it.periode = periode }
+
+fun lagGrMatrikkelBostedsadresse(
+    matrikkelId: Long? = null,
+    bruksenhetsnummer: String? = null,
+    kommunenummer: String? = null,
+    tilleggsnavn: String? = null,
+    postnummer: String? = null,
+    periode: DatoIntervallEntitet? = null,
+    poststed: String? = null,
+) = GrMatrikkeladresseBostedsadresse(
     matrikkelId = matrikkelId,
     bruksenhetsnummer = bruksenhetsnummer,
     kommunenummer = kommunenummer,

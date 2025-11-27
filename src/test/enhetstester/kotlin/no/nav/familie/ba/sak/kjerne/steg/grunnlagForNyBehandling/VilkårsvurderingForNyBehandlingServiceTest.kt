@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingMedOverstyrendeResultater
-import no.nav.familie.ba.sak.kjerne.autovedtak.OppdaterBosattIRiketMedFinnmarkOgSvalbardService
+import no.nav.familie.ba.sak.kjerne.autovedtak.OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -33,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -51,7 +52,8 @@ class VilkårsvurderingForNyBehandlingServiceTest {
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val preutfyllVilkårService = mockk<PreutfyllVilkårService>()
-    private val oppdaterBosattIRiketMedFinnmarkOgSvalbardService = mockk<OppdaterBosattIRiketMedFinnmarkOgSvalbardService>()
+    private val preutfyllBosattIRiketService = mockk<PreutfyllBosattIRiketService>()
+    private val oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService = mockk<OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService>()
 
     private val vilkårsvurderingForNyBehandlingService =
         VilkårsvurderingForNyBehandlingService(
@@ -63,7 +65,8 @@ class VilkårsvurderingForNyBehandlingServiceTest {
             vilkårsvurderingMetrics = vilkårsvurderingMetrics,
             andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             preutfyllVilkårService = preutfyllVilkårService,
-            oppdaterBosattIRiketMedFinnmarkOgSvalbardService = oppdaterBosattIRiketMedFinnmarkOgSvalbardService,
+            oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService = oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService,
+            preutfyllBosattIRiketService = preutfyllBosattIRiketService,
             featureToggleService = featureToggleService,
         )
 
@@ -383,7 +386,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                 every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
                 every { vilkårsvurderingService.hentAktivForBehandling(forrigeBehandling.id) } returns forrigeVilkårsvurdering
                 every {
-                    oppdaterBosattIRiketMedFinnmarkOgSvalbardService.oppdaterBosattIRiketMedFinnmarkOgSvalbardMerking(
+                    oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(
                         vilkårsvurdering = any<Vilkårsvurdering>(),
                     )
                 } just runs
@@ -512,7 +515,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                 every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
                 every { vilkårsvurderingService.hentAktivForBehandling(forrigeBehandling.id) } returns forrigeVilkårsvurdering
                 every {
-                    oppdaterBosattIRiketMedFinnmarkOgSvalbardService.oppdaterBosattIRiketMedFinnmarkOgSvalbardMerking(
+                    oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(
                         vilkårsvurdering = any<Vilkårsvurdering>(),
                     )
                 } just runs

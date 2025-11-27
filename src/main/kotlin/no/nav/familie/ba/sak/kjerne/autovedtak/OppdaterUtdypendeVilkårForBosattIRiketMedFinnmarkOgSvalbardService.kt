@@ -30,11 +30,11 @@ import java.time.LocalDate
 private val FINNMARK_OG_SVALBARD_MERKING_CUT_OFF_FOM_DATO = LocalDate.of(2025, 9, 1)
 
 @Service
-class OppdaterBosattIRiketMedFinnmarkOgSvalbardService(
+class OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
-    fun oppdaterBosattIRiketMedFinnmarkOgSvalbardMerking(
+    fun oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(
         vilkårsvurdering: Vilkårsvurdering,
         identerVilkårSkalPreutfyllesFor: List<String>? = null,
     ) {
@@ -50,15 +50,12 @@ class OppdaterBosattIRiketMedFinnmarkOgSvalbardService(
             .filter { it.aktør.aktivFødselsnummer() in identer }
             .forEach { personResultat ->
                 val personOpplysningsgrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
-                val personInfo = personOpplysningsgrunnlag.personer.find { it.aktør == personResultat.aktør } ?: throw Feil("Aktør ${personResultat.aktør.aktørId} har personresultat men ikke persongrunnlag")
-
-                val adresserForPerson =
-                    Adresser.opprettFra(personInfo)
+                val person = personOpplysningsgrunnlag.personer.find { it.aktør == personResultat.aktør } ?: throw Feil("Aktør ${personResultat.aktør.aktørId} har personresultat men ikke persongrunnlag")
 
                 val nyeBosattIRiketVilkårResultater =
-                    oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
+                    oppdaterUtdypendeVilkårForEttEnkeltVilkårResultat(
                         personResultat = personResultat,
-                        adresserForPerson = adresserForPerson,
+                        adresserForPerson = Adresser.opprettFra(person),
                         behandling = behandling,
                     )
 
@@ -69,7 +66,7 @@ class OppdaterBosattIRiketMedFinnmarkOgSvalbardService(
             }
     }
 
-    fun oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
+    private fun oppdaterUtdypendeVilkårForEttEnkeltVilkårResultat(
         personResultat: PersonResultat,
         adresserForPerson: Adresser,
         behandling: Behandling,

@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.kjerne.autovedtak.OppdaterBosattIRiketMedFinnmarkOgSvalbardService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -13,7 +12,6 @@ class PreutfyllVilkårService(
     private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService,
     private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService,
     private val preutfyllBorHosSøkerService: PreutfyllBorHosSøkerService,
-    private val oppdaterBosattIRiketMedFinnmarkOgSvalbardService: OppdaterBosattIRiketMedFinnmarkOgSvalbardService,
     private val persongrunnlagService: PersongrunnlagService,
     private val featureToggleService: FeatureToggleService,
 ) {

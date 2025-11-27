@@ -2,9 +2,10 @@ package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_PREUTFYLLE_BOSATT_I_RIKET_I_FØDSELSHENDELSER
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.kjerne.autovedtak.OppdaterBosattIRiketMedFinnmarkOgSvalbardService
+import no.nav.familie.ba.sak.kjerne.autovedtak.OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -28,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -44,7 +46,8 @@ class VilkårsvurderingForNyBehandlingService(
     private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val preutfyllVilkårService: PreutfyllVilkårService,
     private val featureToggleService: FeatureToggleService,
-    private val oppdaterBosattIRiketMedFinnmarkOgSvalbardService: OppdaterBosattIRiketMedFinnmarkOgSvalbardService,
+    private val oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService: OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService,
+    private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService,
 ) {
     fun opprettVilkårsvurderingUtenomHovedflyt(
         behandling: Behandling,
@@ -167,7 +170,14 @@ class VilkårsvurderingForNyBehandlingService(
                     personopplysningGrunnlag = personopplysningGrunnlag,
                 ).also {
                     if (inneværendeBehandling.erFinnmarksEllerSvalbardtillegg()) {
-                        oppdaterBosattIRiketMedFinnmarkOgSvalbardService.oppdaterBosattIRiketMedFinnmarkOgSvalbardMerking(vilkårsvurdering = it)
+                        if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
+                            oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(vilkårsvurdering = it)
+                        } else {
+                            preutfyllBosattIRiketService.preutfyllBosattIRiket(
+                                vilkårsvurdering = it,
+                                cutOffFomDato = FINNMARK_OG_SVALBARD_MERKING_CUT_OFF_FOM_DATO,
+                            )
+                        }
                     }
                 }
 
@@ -351,5 +361,7 @@ class VilkårsvurderingForNyBehandlingService(
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
+
+        private val FINNMARK_OG_SVALBARD_MERKING_CUT_OFF_FOM_DATO = LocalDate.of(2025, 9, 1)
     }
 }

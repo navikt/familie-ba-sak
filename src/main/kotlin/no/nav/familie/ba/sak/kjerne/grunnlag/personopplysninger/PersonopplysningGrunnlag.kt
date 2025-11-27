@@ -49,8 +49,9 @@ data class PersonopplysningGrunnlag(
     val yngsteBarnSinFødselsdato: LocalDate
         get() = barna.maxOf { it.fødselsdato }
 
-    val eldsteBarnSinFødselsdato: LocalDate
-        get() = barna.minOfOrNull { it.fødselsdato } ?: søker.fødselsdato
+    // TODO: avsjekk hva vi gjør når barn er voksent og om vi faktisk vil defaulte til søker
+    val eldsteBarnSinFødselsdato: LocalDate?
+        get() = barna.minOfOrNull { it.fødselsdato }
 
     val søker: Person
         get() =

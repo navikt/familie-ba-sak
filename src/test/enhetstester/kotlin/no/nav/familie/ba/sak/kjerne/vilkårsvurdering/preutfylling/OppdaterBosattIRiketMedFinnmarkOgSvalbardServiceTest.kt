@@ -2,14 +2,17 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.datagenerator.lagAdresse
-import no.nav.familie.ba.sak.datagenerator.lagAdresser
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
-import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
+import no.nav.familie.ba.sak.datagenerator.lagGrMatrikkelBostedsadresse
+import no.nav.familie.ba.sak.datagenerator.lagGrMatrikkelDeltBosted
+import no.nav.familie.ba.sak.datagenerator.lagGrMatrikkelOppholdsadresse
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.autovedtak.OppdaterBosattIRiketMedFinnmarkOgSvalbardService
+import no.nav.familie.ba.sak.kjerne.autovedtak.OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -28,8 +31,8 @@ class OppdaterBosattIRiketMedFinnmarkOgSvalbardServiceTest {
     private val persongrunnlagService: PersongrunnlagService = mockk(relaxed = true)
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
 
-    private val oppdaterBosattIRiketMedFinnmarkOgSvalbardService =
-        OppdaterBosattIRiketMedFinnmarkOgSvalbardService(
+    private val oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService =
+        OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService(
             persongrunnlagService = persongrunnlagService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
@@ -45,48 +48,59 @@ class OppdaterBosattIRiketMedFinnmarkOgSvalbardServiceTest {
         fun `skal oppdatere utvidet vilkårsvurderinger for 'Bosatt i riket'-vilkåret for person som har oppholdsadresse på Svalbard`() {
             // Arrange
             val behandling = lagBehandling()
+            val søkerAktør = lagAktør()
 
-            val personResultat =
-                lagPersonResultat(
-                    vilkårsvurdering = lagVilkårsvurdering(behandling = behandling),
-                    lagVilkårResultater = {
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling).also { vurdering ->
+                    vurdering.personResultater =
                         setOf(
-                            lagVilkårResultat(
-                                personResultat = it,
-                                vilkårType = Vilkår.BOSATT_I_RIKET,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = LocalDate.of(2021, 1, 1),
-                                periodeTom = null,
-                                behandlingId = behandling.id,
-                                utdypendeVilkårsvurderinger = emptyList(),
+                            lagPersonResultat(
+                                vilkårsvurdering = vurdering,
+                                aktør = søkerAktør,
+                                lagVilkårResultater = {
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = it,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2021, 1, 1),
+                                            periodeTom = null,
+                                            behandlingId = behandling.id,
+                                            utdypendeVilkårsvurderinger = emptyList(),
+                                        ),
+                                    )
+                                },
                             ),
                         )
-                    },
-                )
+                }
 
-            val adresser =
-                lagAdresser(
-                    oppholdsadresse =
-                        listOf(
-                            lagAdresse(
-                                gyldigFraOgMed = LocalDate.of(2022, 1, 1),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(kommunenummer = SvalbardKommune.SVALBARD.kommunenummer),
+            val persongrunnlag =
+                lagTestPersonopplysningGrunnlag(
+                    behandlingId = behandling.id,
+                    søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
+                    barnasIdenter = emptyList(),
+                    barnasFødselsdatoer = emptyList(),
+                ).also { grunnlag ->
+                    grunnlag.søker.oppholdsadresser =
+                        mutableListOf(
+                            lagGrMatrikkelOppholdsadresse(
+                                periode = DatoIntervallEntitet(fom = LocalDate.of(2022, 1, 1), tom = null),
+                                matrikkelId = 1234L,
+                                kommunenummer = SvalbardKommune.SVALBARD.kommunenummer,
                             ),
-                        ),
-                )
+                        )
+                }
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } returns emptyList()
 
             // Act
-            val vilkårresultat =
-                oppdaterBosattIRiketMedFinnmarkOgSvalbardService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
-                    personResultat = personResultat,
-                    adresserForPerson = adresser,
-                    behandling = behandling,
-                )
+            oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(vilkårsvurdering)
 
             // Assert
+            val vilkårresultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater
+
             assertThat(vilkårresultat).hasSize(2)
             assertThat(vilkårresultat).anySatisfy {
                 assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
@@ -110,49 +124,59 @@ class OppdaterBosattIRiketMedFinnmarkOgSvalbardServiceTest {
         fun `skal oppdatere utvidet vilkårsvurderinger for 'Bosatt i riket'-vilkåret for person som har bostedsadresse i Finnmark eller Nord-Troms`() {
             // Arrange
             val behandling = lagBehandling()
+            val søkerAktør = lagAktør()
 
-            val personResultat =
-                lagPersonResultat(
-                    vilkårsvurdering = lagVilkårsvurdering(behandling = behandling),
-                    lagVilkårResultater = {
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling).also { vurdering ->
+                    vurdering.personResultater =
                         setOf(
-                            lagVilkårResultat(
-                                personResultat = it,
-                                vilkårType = Vilkår.BOSATT_I_RIKET,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = LocalDate.of(2021, 1, 1),
-                                periodeTom = null,
-                                behandlingId = behandling.id,
-                                utdypendeVilkårsvurderinger = emptyList(),
-                                begrunnelse = "Begrunnelse som ikke skal endres",
+                            lagPersonResultat(
+                                vilkårsvurdering = vurdering,
+                                aktør = søkerAktør,
+                                lagVilkårResultater = {
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = it,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2021, 1, 1),
+                                            periodeTom = null,
+                                            behandlingId = behandling.id,
+                                            utdypendeVilkårsvurderinger = emptyList(),
+                                        ),
+                                    )
+                                },
                             ),
                         )
-                    },
-                )
+                }
 
-            val adresser =
-                lagAdresser(
-                    bostedsadresser =
-                        listOf(
-                            lagAdresse(
-                                gyldigFraOgMed = LocalDate.of(2022, 1, 1),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(kommunenummer = KommunerIFinnmarkOgNordTroms.KARASJOK.kommunenummer),
+            val persongrunnlag =
+                lagTestPersonopplysningGrunnlag(
+                    behandlingId = behandling.id,
+                    søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
+                    barnasIdenter = emptyList(),
+                    barnasFødselsdatoer = emptyList(),
+                ).also { grunnlag ->
+                    grunnlag.søker.bostedsadresser =
+                        mutableListOf(
+                            lagGrMatrikkelBostedsadresse(
+                                matrikkelId = 1234L,
+                                kommunenummer = KommunerIFinnmarkOgNordTroms.KARASJOK.kommunenummer,
+                                periode = DatoIntervallEntitet(fom = LocalDate.of(2022, 1, 1), tom = null),
                             ),
-                        ),
-                )
+                        )
+                }
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(any(), any()) } returns emptyList()
 
             // Act
-            val vilkårresultat =
-                oppdaterBosattIRiketMedFinnmarkOgSvalbardService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
-                    personResultat = personResultat,
-                    adresserForPerson = adresser,
-                    behandling = behandling,
-                )
+            oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(vilkårsvurdering)
 
             // Assert
+            val vilkårresultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater
+
             assertThat(vilkårresultat).hasSize(2)
             assertThat(vilkårresultat).anySatisfy {
                 assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
@@ -176,48 +200,58 @@ class OppdaterBosattIRiketMedFinnmarkOgSvalbardServiceTest {
         fun `skal oppdatere utvidet vilkårsvurderinger for 'Bosatt i riket'-vilkåret for person som har delt bosted i Finnmark eller Nord-Troms`() {
             // Arrange
             val behandling = lagBehandling()
+            val søkerAktør = lagAktør()
 
-            val personResultat =
-                lagPersonResultat(
-                    vilkårsvurdering = lagVilkårsvurdering(behandling = behandling),
-                    lagVilkårResultater = {
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling).also { vurdering ->
+                    vurdering.personResultater =
                         setOf(
-                            lagVilkårResultat(
-                                personResultat = it,
-                                vilkårType = Vilkår.BOSATT_I_RIKET,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = LocalDate.of(2021, 1, 1),
-                                periodeTom = null,
-                                behandlingId = behandling.id,
-                                utdypendeVilkårsvurderinger = emptyList(),
+                            lagPersonResultat(
+                                vilkårsvurdering = vurdering,
+                                aktør = søkerAktør,
+                                lagVilkårResultater = {
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = it,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2021, 1, 1),
+                                            periodeTom = null,
+                                            behandlingId = behandling.id,
+                                            utdypendeVilkårsvurderinger = emptyList(),
+                                        ),
+                                    )
+                                },
                             ),
                         )
-                    },
-                )
+                }
 
-            val adresser =
-                lagAdresser(
-                    delteBosteder =
-                        listOf(
-                            lagAdresse(
-                                gyldigFraOgMed = LocalDate.of(2021, 1, 1),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(kommunenummer = KommunerIFinnmarkOgNordTroms.KARASJOK.kommunenummer),
+            val persongrunnlag =
+                lagTestPersonopplysningGrunnlag(
+                    behandlingId = behandling.id,
+                    søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
+                    barnasIdenter = emptyList(),
+                    barnasFødselsdatoer = emptyList(),
+                ).also { grunnlag ->
+                    grunnlag.søker.deltBosted =
+                        mutableListOf(
+                            lagGrMatrikkelDeltBosted(
+                                periode = DatoIntervallEntitet(fom = LocalDate.of(2022, 1, 1), tom = null),
+                                matrikkelId = 1234L,
+                                kommunenummer = KommunerIFinnmarkOgNordTroms.KARASJOK.kommunenummer,
                             ),
-                        ),
-                )
+                        )
+                }
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
 
             // Act
-            val vilkårresultat =
-                oppdaterBosattIRiketMedFinnmarkOgSvalbardService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
-                    personResultat = personResultat,
-                    adresserForPerson = adresser,
-                    behandling = behandling,
-                )
-
+            oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(vilkårsvurdering)
             // Assert
+            val vilkårresultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater
+
             assertThat(vilkårresultat).hasSize(2)
             assertThat(vilkårresultat).anySatisfy {
                 assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
@@ -241,59 +275,69 @@ class OppdaterBosattIRiketMedFinnmarkOgSvalbardServiceTest {
         fun `skal oppdatere utvidet vilkårsvurderinger for 'Bosatt i riket'-vilkåret om man har flyttet bort fra Svalbard`() {
             // Arrange
             val behandling = lagBehandling()
+            val søkerAktør = lagAktør()
 
-            val personResultat =
-                lagPersonResultat(
-                    vilkårsvurdering = lagVilkårsvurdering(behandling = behandling),
-                    lagVilkårResultater = {
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling).also { vurdering ->
+                    vurdering.personResultater =
                         setOf(
-                            lagVilkårResultat(
-                                personResultat = it,
-                                vilkårType = Vilkår.BOSATT_I_RIKET,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = LocalDate.of(2020, 1, 1),
-                                periodeTom = LocalDate.of(2020, 12, 31),
-                                behandlingId = behandling.id,
-                                utdypendeVilkårsvurderinger = listOf(),
-                                begrunnelse = "Begrunnelse som ikke skal endres",
-                            ),
-                            lagVilkårResultat(
-                                personResultat = it,
-                                vilkårType = Vilkår.BOSATT_I_RIKET,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = LocalDate.of(2021, 1, 1),
-                                periodeTom = null,
-                                behandlingId = behandling.id,
-                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
-                                begrunnelse = "Begrunnelse som skal endres",
+                            lagPersonResultat(
+                                vilkårsvurdering = vurdering,
+                                aktør = søkerAktør,
+                                lagVilkårResultater = {
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = it,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2020, 1, 1),
+                                            periodeTom = LocalDate.of(2020, 12, 31),
+                                            behandlingId = behandling.id,
+                                            utdypendeVilkårsvurderinger = listOf(),
+                                            begrunnelse = "Begrunnelse som ikke skal endres",
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = it,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2021, 1, 1),
+                                            periodeTom = null,
+                                            behandlingId = behandling.id,
+                                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
+                                            begrunnelse = "Begrunnelse som skal endres",
+                                        ),
+                                    )
+                                },
                             ),
                         )
-                    },
-                )
+                }
 
-            val adresser =
-                lagAdresser(
-                    oppholdsadresse =
-                        listOf(
-                            lagAdresse(
-                                gyldigFraOgMed = LocalDate.of(2021, 1, 1),
-                                gyldigTilOgMed = LocalDate.of(2025, 10, 15),
-                                matrikkeladresse = lagMatrikkeladresse(kommunenummer = SvalbardKommune.SVALBARD.kommunenummer),
+            val persongrunnlag =
+                lagTestPersonopplysningGrunnlag(
+                    behandlingId = behandling.id,
+                    søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
+                    barnasIdenter = emptyList(),
+                    barnasFødselsdatoer = emptyList(),
+                ).also { grunnlag ->
+                    grunnlag.søker.oppholdsadresser =
+                        mutableListOf(
+                            lagGrMatrikkelOppholdsadresse(
+                                periode = DatoIntervallEntitet(fom = LocalDate.of(2021, 1, 1), tom = LocalDate.of(2025, 10, 15)),
+                                matrikkelId = 1234L,
+                                kommunenummer = SvalbardKommune.SVALBARD.kommunenummer,
                             ),
-                        ),
-                )
+                        )
+                }
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
 
             // Act
-            val vilkårresultat =
-                oppdaterBosattIRiketMedFinnmarkOgSvalbardService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
-                    personResultat = personResultat,
-                    adresserForPerson = adresser,
-                    behandling = behandling,
-                )
+            oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(vilkårsvurdering)
 
             // Assert
+            val vilkårresultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater
             assertThat(vilkårresultat).hasSize(4)
             assertThat(vilkårresultat).anySatisfy {
                 assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
@@ -333,59 +377,73 @@ class OppdaterBosattIRiketMedFinnmarkOgSvalbardServiceTest {
         fun `skal oppdatere utvidet vilkårsvurderinger for 'Bosatt i riket'-vilkåret om man har flyttet bort fra Finnmark eller Nord-Troms`() {
             // Arrange
             val behandling = lagBehandling()
+            val søkerAktør = lagAktør()
 
-            val personResultat =
-                lagPersonResultat(
-                    vilkårsvurdering = lagVilkårsvurdering(behandling = behandling),
-                    lagVilkårResultater = {
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling).also { vurdering ->
+                    vurdering.personResultater =
                         setOf(
-                            lagVilkårResultat(
-                                personResultat = it,
-                                vilkårType = Vilkår.BOSATT_I_RIKET,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = LocalDate.of(2020, 1, 1),
-                                periodeTom = LocalDate.of(2020, 12, 31),
-                                behandlingId = behandling.id,
-                                utdypendeVilkårsvurderinger = listOf(),
-                                begrunnelse = "Begrunnelse som ikke skal endres",
-                            ),
-                            lagVilkårResultat(
-                                personResultat = it,
-                                vilkårType = Vilkår.BOSATT_I_RIKET,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = LocalDate.of(2021, 1, 1),
-                                periodeTom = null,
-                                behandlingId = behandling.id,
-                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
-                                begrunnelse = "Begrunnelse som skal endres",
+                            lagPersonResultat(
+                                vilkårsvurdering = vurdering,
+                                aktør = søkerAktør,
+                                lagVilkårResultater = {
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = it,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2020, 1, 1),
+                                            periodeTom = LocalDate.of(2020, 12, 31),
+                                            behandlingId = behandling.id,
+                                            utdypendeVilkårsvurderinger = listOf(),
+                                            begrunnelse = "Begrunnelse som ikke skal endres",
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = it,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2021, 1, 1),
+                                            periodeTom = null,
+                                            behandlingId = behandling.id,
+                                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
+                                            begrunnelse = "Begrunnelse som skal endres",
+                                        ),
+                                    )
+                                },
                             ),
                         )
-                    },
-                )
+                }
 
-            val adresser =
-                lagAdresser(
-                    bostedsadresser =
-                        listOf(
-                            lagAdresse(
-                                gyldigFraOgMed = LocalDate.of(2021, 1, 1),
-                                gyldigTilOgMed = LocalDate.of(2025, 10, 15),
-                                matrikkeladresse = lagMatrikkeladresse(kommunenummer = KommunerIFinnmarkOgNordTroms.ALTA.kommunenummer),
+            val persongrunnlag =
+                lagTestPersonopplysningGrunnlag(
+                    behandlingId = behandling.id,
+                    søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
+                    barnasIdenter = emptyList(),
+                    barnasFødselsdatoer = emptyList(),
+                ).also { grunnlag ->
+                    grunnlag.søker.bostedsadresser =
+                        mutableListOf(
+                            lagGrMatrikkelBostedsadresse(
+                                periode =
+                                    DatoIntervallEntitet(
+                                        fom = LocalDate.of(2021, 1, 1),
+                                        tom = LocalDate.of(2025, 10, 15),
+                                    ),
+                                matrikkelId = 1234L,
+                                kommunenummer = KommunerIFinnmarkOgNordTroms.ALTA.kommunenummer,
                             ),
-                        ),
-                )
+                        )
+                }
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
 
             // Act
-            val vilkårresultat =
-                oppdaterBosattIRiketMedFinnmarkOgSvalbardService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
-                    personResultat = personResultat,
-                    adresserForPerson = adresser,
-                    behandling = behandling,
-                )
+            oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(vilkårsvurdering)
 
             // Assert
+            val vilkårresultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater
             assertThat(vilkårresultat).hasSize(4)
             assertThat(vilkårresultat).anySatisfy {
                 assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
@@ -425,51 +483,70 @@ class OppdaterBosattIRiketMedFinnmarkOgSvalbardServiceTest {
         fun `skal ikke endre 'Bosatt i riket'-vilkåret hvis personen hverken bor på Svalbard eller i Finnmark eller Nord-Troms`() {
             // Arrange
             val behandling = lagBehandling()
+            val søkerAktør = lagAktør()
 
-            val personResultat =
-                lagPersonResultat(
-                    vilkårsvurdering = lagVilkårsvurdering(behandling = behandling),
-                    lagVilkårResultater = {
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling).also { vurdering ->
+                    vurdering.personResultater =
                         setOf(
-                            lagVilkårResultat(
-                                personResultat = it,
-                                vilkårType = Vilkår.BOSATT_I_RIKET,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = LocalDate.of(2021, 1, 1),
-                                periodeTom = null,
-                                behandlingId = behandling.id,
-                                utdypendeVilkårsvurderinger = emptyList(),
-                                begrunnelse = "Begrunnelse som ikke skal endres",
+                            lagPersonResultat(
+                                vilkårsvurdering = vurdering,
+                                aktør = søkerAktør,
+                                lagVilkårResultater = {
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = it,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2021, 1, 1),
+                                            periodeTom = null,
+                                            behandlingId = behandling.id,
+                                            utdypendeVilkårsvurderinger = emptyList(),
+                                            begrunnelse = "Begrunnelse som ikke skal endres",
+                                        ),
+                                    )
+                                },
                             ),
                         )
-                    },
-                )
+                }
 
-            val adresser =
-                lagAdresser(
-                    bostedsadresser =
-                        listOf(
-                            lagAdresse(
-                                gyldigFraOgMed = LocalDate.of(2021, 1, 1),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = lagMatrikkeladresse(kommunenummer = "0301"),
+            val persongrunnlag =
+                lagTestPersonopplysningGrunnlag(
+                    behandlingId = behandling.id,
+                    søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
+                    barnasIdenter = emptyList(),
+                    barnasFødselsdatoer = emptyList(),
+                ).also { grunnlag ->
+                    grunnlag.søker.bostedsadresser =
+                        mutableListOf(
+                            lagGrMatrikkelBostedsadresse(
+                                periode =
+                                    DatoIntervallEntitet(
+                                        fom = LocalDate.of(2021, 1, 1),
+                                        tom = null,
+                                    ),
+                                matrikkelId = 1234L,
+                                kommunenummer = "0301",
                             ),
-                        ),
-                )
+                        )
+                }
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, any()) } returns emptyList()
 
             // Act
-            val vilkårresultat =
-                oppdaterBosattIRiketMedFinnmarkOgSvalbardService.oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
-                    personResultat = personResultat,
-                    adresserForPerson = adresser,
-                    behandling = behandling,
-                )
+            oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(vilkårsvurdering)
 
             // Assert
+            val vilkårresultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater
             assertThat(vilkårresultat).hasSize(1)
-            assertThat(vilkårresultat.single()).isEqualTo(personResultat.vilkårResultater.first())
+            assertThat(vilkårresultat?.single()).isEqualTo(
+                vilkårsvurdering.personResultater
+                    .single()
+                    .vilkårResultater
+                    .first(),
+            )
         }
     }
 }

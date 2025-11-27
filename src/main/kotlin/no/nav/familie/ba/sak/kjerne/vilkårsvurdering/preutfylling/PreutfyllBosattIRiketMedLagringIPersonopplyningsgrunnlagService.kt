@@ -60,10 +60,12 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
 
                 val adresserForPerson = Adresser.opprettFra(person)
 
+                val fødselsdatoForBeskjæring = if (personResultat.erSøkersResultater()) (personOpplysningsgrunnlag.eldsteBarnSinFødselsdato ?: personOpplysningsgrunnlag.søker.fødselsdato) else person.fødselsdato
+
                 val nyeBosattIRiketVilkårResultater =
                     genererBosattIRiketVilkårResultat(
                         personResultat = personResultat,
-                        fødselsdatoForBeskjæring = if (personResultat.erSøkersResultater()) personOpplysningsgrunnlag.eldsteBarnSinFødselsdato else person.fødselsdato,
+                        fødselsdatoForBeskjæring = fødselsdatoForBeskjæring,
                         adresserForPerson = adresserForPerson,
                         behandling = behandling,
                     )
