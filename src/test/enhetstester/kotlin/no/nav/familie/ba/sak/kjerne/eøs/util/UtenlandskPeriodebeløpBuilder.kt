@@ -19,12 +19,16 @@ class UtenlandskPeriodebeløpBuilder(
         vararg barn: Person,
     ) = medSkjema(k, barn.toList()) {
         when {
-            it == '-' -> UtenlandskPeriodebeløp.NULL.copy(utbetalingsland = utbetalingsland)
-            it == '$' ->
+            it == '-' -> {
+                UtenlandskPeriodebeløp.NULL.copy(utbetalingsland = utbetalingsland)
+            }
+
+            it == '$' -> {
                 UtenlandskPeriodebeløp.NULL.copy(
                     valutakode = valutakode,
                     utbetalingsland = utbetalingsland,
                 )
+            }
 
             it?.isDigit() ?: false -> {
                 UtenlandskPeriodebeløp.NULL.copy(
@@ -36,7 +40,9 @@ class UtenlandskPeriodebeløpBuilder(
                 )
             }
 
-            else -> null
+            else -> {
+                null
+            }
         }
     }
 

@@ -298,6 +298,14 @@ private val sivilstandHistorisk =
         Sivilstand(type = SIVILSTANDTYPE.SKILT, gyldigFraOgMed = LocalDate.now().minusMonths(4)),
     )
 
+private val statsborgerskap =
+    Statsborgerskap(
+        land = "NOR",
+        bekreftelsesdato = LocalDate.of(1965, 2, 19),
+        gyldigFraOgMed = LocalDate.of(1965, 2, 19),
+        gyldigTilOgMed = null,
+    )
+
 private val personInfoSøker1 =
     PersonInfo(
         fødselsdato = LocalDate.of(1990, 2, 19),
@@ -385,4 +393,5 @@ private val personInfoIntegrasjonerFnr =
         kjønn = Kjønn.KVINNE,
         navn = "Mor Integrasjon person",
         sivilstander = sivilstandHistorisk,
+        statsborgerskap = listOf(statsborgerskap),
     )

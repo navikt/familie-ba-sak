@@ -76,11 +76,17 @@ internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
         .tilSeparateTidslinjerForBarna()
         .outerJoin(barnasUtenlandskePeriodebeløpTidslinjer) { valutakurs, utenlandskPeriodebeløp ->
             when {
-                utenlandskPeriodebeløp == null -> null
-                valutakurs == null || valutakurs.valutakode != utenlandskPeriodebeløp.valutakode ->
-                    Valutakurs.NULL.copy(valutakode = utenlandskPeriodebeløp.valutakode)
+                utenlandskPeriodebeløp == null -> {
+                    null
+                }
 
-                else -> valutakurs
+                valutakurs == null || valutakurs.valutakode != utenlandskPeriodebeløp.valutakode -> {
+                    Valutakurs.NULL.copy(valutakode = utenlandskPeriodebeløp.valutakode)
+                }
+
+                else -> {
+                    valutakurs
+                }
             }
         }.mapValues { (_, tidslinje) ->
             tidslinje.forlengFremtidTilUendelig(tidspunktForUendelighet = inneværendeMåned.sisteDagIInneværendeMåned())

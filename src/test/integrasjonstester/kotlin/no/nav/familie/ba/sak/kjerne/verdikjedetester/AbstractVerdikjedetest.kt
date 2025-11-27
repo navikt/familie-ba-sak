@@ -1,17 +1,19 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Tag
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.support.TestPropertySourceUtils
 import org.springframework.web.client.RestOperations
+import org.wiremock.spring.ConfigureWireMock
+import org.wiremock.spring.EnableWireMock
+import org.wiremock.spring.InjectWireMock
 
 class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextInitializer<ConfigurableApplicationContext?> {
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
@@ -45,11 +47,16 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
 )
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
 @Tag("verdikjedetest")
-@AutoConfigureWireMock(port = 1337)
+@EnableWireMock(
+    ConfigureWireMock(name = "verdikjedetest", port = 1337),
+)
 abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
+    @InjectWireMock("verdikjedetest")
+    lateinit var wiremockServer: WireMockServer
+
     @AfterAll
     fun tearDownSuper() {
-        WireMock.reset()
+        wiremockServer.resetAll()
     }
 
     @Autowired

@@ -22,6 +22,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SVALBARDTILLEGG
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
@@ -108,14 +110,14 @@ class BehandlingsresultatStegValideringService(
     fun validerFinnmarkstilleggBehandling(tilkjentYtelse: TilkjentYtelse) {
         validerFinnmarksOgSvalbardtilleggBehandling(
             tilkjentYtelse = tilkjentYtelse,
-            ytelseType = YtelseType.FINNMARKSTILLEGG,
+            ytelseType = FINNMARKSTILLEGG,
         )
     }
 
     fun validerSvalbardtilleggBehandling(tilkjentYtelse: TilkjentYtelse) {
         validerFinnmarksOgSvalbardtilleggBehandling(
             tilkjentYtelse = tilkjentYtelse,
-            ytelseType = YtelseType.SVALBARDTILLEGG,
+            ytelseType = SVALBARDTILLEGG,
         )
     }
 
@@ -132,13 +134,28 @@ class BehandlingsresultatStegValideringService(
         val andelerNåværendeBehandling = tilkjentYtelse.andelerTilkjentYtelse.toList()
         val andelerForrigeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
         val inneværendeMåned = YearMonth.now(clockProvider.get())
+        val ytelseTypeFormatert = ytelseType.toString().storForbokstav()
 
-        val erEndringIUtbetalingUtenomYtelseType =
+        val erEndringITilleggUtenomYtelseType =
             erEndringIUtbetalingUtenomYtelseType(
                 andelerNåværendeBehandling = andelerNåværendeBehandling,
                 andelerForrigeBehandling = andelerForrigeBehandling,
                 ytelseType = ytelseType,
             )
+
+        if (erEndringITilleggUtenomYtelseType) {
+            val motsattTilleggFormatert = (if (ytelseType == FINNMARKSTILLEGG) SVALBARDTILLEGG else FINNMARKSTILLEGG).toString().storForbokstav()
+            val begrunnelse =
+                "$ytelseTypeFormatert kan ikke behandles automatisk som følge av adresseendring.\n" +
+                    "Endring av $ytelseTypeFormatert fører også til endring av $motsattTilleggFormatert.\n" +
+                    "Endring av $ytelseTypeFormatert og $motsattTilleggFormatert må håndteres manuelt."
+
+            if (featureToggleService.isEnabled(OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
+                throw AutovedtakMåBehandlesManueltFeil(begrunnelse)
+            } else {
+                throw Feil(begrunnelse)
+            }
+        }
 
         val andelerMedYtelseTypeErInnvilgetInneværendeMånedOgToMånederFramITid =
             andelerMedYtelseTypeErInnvilgetInneværendeMånedOgToMånederFramITid(
@@ -148,14 +165,11 @@ class BehandlingsresultatStegValideringService(
                 inneværendeMåned = inneværendeMåned,
             )
 
-        if (erEndringIUtbetalingUtenomYtelseType || andelerMedYtelseTypeErInnvilgetInneværendeMånedOgToMånederFramITid) {
+        if (andelerMedYtelseTypeErInnvilgetInneværendeMånedOgToMånederFramITid) {
             val begrunnelse =
-                "${ytelseType.toString().storForbokstav()} kan ikke behandles automatisk som følge av adresseendring.\n" +
-                    if (erEndringIUtbetalingUtenomYtelseType) {
-                        "Automatisk behandling fører til endringer i annen sats enn ${ytelseType.toString().storForbokstav()}.\nEndring av ${ytelseType.toString().storForbokstav()} må håndteres manuelt."
-                    } else {
-                        "Automatisk behandling fører til innvilgelse av ${ytelseType.toString().storForbokstav()} mer enn én måned fram i tid.\nEndring av ${ytelseType.toString().storForbokstav()} må håndteres manuelt."
-                    }
+                "$ytelseTypeFormatert kan ikke behandles automatisk som følge av adresseendring.\n" +
+                    "Automatisk behandling fører til innvilgelse av $ytelseTypeFormatert mer enn én måned fram i tid.\n" +
+                    "Endring av $ytelseTypeFormatert må håndteres manuelt."
 
             if (featureToggleService.isEnabled(OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
                 throw AutovedtakMåBehandlesManueltFeil(begrunnelse)

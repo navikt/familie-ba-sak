@@ -31,7 +31,7 @@ fun erForskjellMellomAndelerOgOppdrag(
         hentForskjellIAndelerOgUtbetalingsoppdrag(utbetalingsperioder, andeler)
 
     when (forskjellMellomAndeleneOgUtbetalingsoppdraget) {
-        is UtbetalingsperioderUtenTilsvarendeAndel ->
+        is UtbetalingsperioderUtenTilsvarendeAndel -> {
             secureLogger.info(
                 "Fagsak $fagsakId har sendt utbetalingsperiode(r) til økonomi som ikke har tilsvarende andel tilkjent ytelse." +
                     "\nDet er differanse i perioden(e) ${forskjellMellomAndeleneOgUtbetalingsoppdraget.utbetalingsperioder.tilTidStrenger()}." +
@@ -40,8 +40,11 @@ fun erForskjellMellomAndelerOgOppdrag(
                     "\n\nAndelene i siste behandling som er sendt til økonomi er:" +
                     "\n${andeler.joinToString("\n")} ",
             )
+        }
 
-        is IngenForskjell -> Unit
+        is IngenForskjell -> {
+            Unit
+        }
     }
 
     return forskjellMellomAndeleneOgUtbetalingsoppdraget !is IngenForskjell

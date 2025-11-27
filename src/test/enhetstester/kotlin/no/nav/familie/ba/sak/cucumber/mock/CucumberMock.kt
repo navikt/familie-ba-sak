@@ -84,6 +84,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.Tilba
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBorHosSøkerMedDataFraPersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService
@@ -573,6 +574,12 @@ class CucumberMock(
             preutfyllBosattIRIketMedLagringIPersonopplysningsgrunnlagService = preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService,
         )
 
+    val preutfyllBorHosSøkerMedDataFraPersongrunnlagService =
+        PreutfyllBorHosSøkerMedDataFraPersongrunnlagService(
+            persongrunnlagService = persongrunnlagService,
+        )
+
+
     val oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService =
         OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService(
             persongrunnlagService = persongrunnlagService,
@@ -586,6 +593,7 @@ class CucumberMock(
             featureToggleService = featureToggleService,
             preutfyllBorHosSøkerService = mockk(),
             persongrunnlagService = persongrunnlagService,
+            preutfyllBorHosSøkerMedDataFraPersongrunnlagService = preutfyllBorHosSøkerMedDataFraPersongrunnlagService,
         )
 
     val vilkårsvurderingForNyBehandlingService =

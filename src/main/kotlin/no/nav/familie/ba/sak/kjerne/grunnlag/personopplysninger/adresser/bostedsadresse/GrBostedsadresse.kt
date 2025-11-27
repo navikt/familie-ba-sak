@@ -70,7 +70,7 @@ abstract class GrBostedsadresse(
 
     fun gjeldendeNå(): Boolean {
         if (periode == null) return true
-        return periode!!.erInnenfor(LocalDate.now())
+        return LocalDate.now().erInnenfor(periode!!)
     }
 
     fun tilRestRegisteropplysning() =

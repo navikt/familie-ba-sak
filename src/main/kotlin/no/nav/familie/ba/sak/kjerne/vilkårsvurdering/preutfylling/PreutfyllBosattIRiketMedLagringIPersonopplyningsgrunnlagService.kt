@@ -146,7 +146,9 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
                             erBosattIRiket.copy(utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger)
                         }
 
-                        else -> erBosattIRiket
+                        else -> {
+                            erBosattIRiket
+                        }
                     }
                 }.beskjærFraOgMed(maxOf(fødselsdatoForBeskjæring, førsteBosattINorgeDato))
 
@@ -194,16 +196,21 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
         personFødselsdato: LocalDate,
     ): Delvilkår =
         when {
-            erBosattINorgePeriode.erMinst12Måneder() ->
+            erBosattINorgePeriode.erMinst12Måneder() -> {
                 OppfyltDelvilkår("- Norsk bostedsadresse i minst 12 måneder.")
+            }
 
-            erBosattINorgePeriode.omfatter(personFødselsdato) ->
+            erBosattINorgePeriode.omfatter(personFødselsdato) -> {
                 OppfyltDelvilkår("- Bosatt i Norge siden fødsel.")
+            }
 
-            erBosattINorgePeriode.omfatter(LocalDate.now()) && erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat) ->
+            erBosattINorgePeriode.omfatter(LocalDate.now()) && erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat) -> {
                 OppfyltDelvilkår("- Oppgitt i søknad at planlegger å bo i Norge i minst 12 måneder.", INFORMASJON_FRA_SØKNAD)
+            }
 
-            else -> IkkeOppfyltDelvilkår
+            else -> {
+                IkkeOppfyltDelvilkår
+            }
         }
 
     private fun erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat: PersonResultat): Boolean {

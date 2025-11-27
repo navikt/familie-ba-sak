@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -47,7 +47,7 @@ class HenleggelseTest(
                 ),
         )
 
-    @BeforeAll
+    @BeforeEach
     fun init() {
         stubScenario(scenario = restScenario)
     }

@@ -174,7 +174,9 @@ class BeslutteVedtak(
                 }
             }
 
-            else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på 'beslutte vedtak'-steg")
+            else -> {
+                throw Feil("Neste steg '$nesteSteg' er ikke implementert på 'beslutte vedtak'-steg")
+            }
         }
         return nesteSteg
     }

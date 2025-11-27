@@ -128,7 +128,9 @@ class FagsakService(
                     fagsakRepository.finnFagsakForSkjermetBarnSøker(aktør, søkersAktør)
                 }
 
-                else -> fagsakRepository.finnFagsakForAktør(aktør, type)
+                else -> {
+                    fagsakRepository.finnFagsakForAktør(aktør, type)
+                }
             }
         if (eksisterendeFagsak != null) return eksisterendeFagsak
 

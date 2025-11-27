@@ -52,17 +52,22 @@ fun <T : PeriodeOgBarnSkjemaEntitet<T>> T.somInversOppdateringEllersNull(gjelden
             }.singleOrNull()
 
     return when {
-        skjemaetDerTilOgMedForkortesOgBarnFjernes != null ->
+        skjemaetDerTilOgMedForkortesOgBarnFjernes != null -> {
             oppdatering
                 .medBarnaSomForsvinnerFra(skjemaetDerTilOgMedForkortesOgBarnFjernes)
                 .utenInnholdTilOgMed(skjemaetDerTilOgMedForkortesOgBarnFjernes.tom)
+        }
 
-        skjemaetDerBarnFjernes != null ->
+        skjemaetDerBarnFjernes != null -> {
             oppdatering.medBarnaSomForsvinnerFra(skjemaetDerBarnFjernes).utenInnhold()
+        }
 
-        skjemaetDerTilOgMedForkortes != null ->
+        skjemaetDerTilOgMedForkortes != null -> {
             oppdatering.utenInnholdTilOgMed(skjemaetDerTilOgMedForkortes.tom)
+        }
 
-        else -> null
+        else -> {
+            null
+        }
     }
 }

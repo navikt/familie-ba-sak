@@ -49,7 +49,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import java.time.LocalDate
 
-data class Person(
+data class PersonForManueltBrevRequest(
     val navn: String,
     val fødselsnummer: String,
 )
@@ -100,7 +100,7 @@ data class ManueltBrevRequest(
     val antallUkerSvarfrist: Int? = null,
     val barnasFødselsdager: List<LocalDate>? = null,
     val behandlingKategori: BehandlingKategori? = null,
-    val vedrørende: Person? = null,
+    val vedrørende: PersonForManueltBrevRequest? = null,
     val mottakerlandSed: List<String> = emptyList(),
     val manuelleBrevmottakere: List<ManuellBrevmottaker> = emptyList(),
     val fritekstAvsnitt: String? = null,
@@ -144,7 +144,7 @@ fun ManueltBrevRequest.byggMottakerdataFraBehandling(
             this.copy(
                 enhet = enhet,
                 mottakerMålform = person.målform,
-                vedrørende = Person(navn = person.navn, fødselsnummer = fødselsnummerPåPerson),
+                vedrørende = PersonForManueltBrevRequest(navn = person.navn, fødselsnummer = fødselsnummerPåPerson),
             )
         }
 
@@ -184,16 +184,17 @@ fun ManueltBrevRequest.byggMottakerdataFraFagsak(
 
             this.copy(
                 enhet = enhet,
-                vedrørende = Person(navn = personNavn, fødselsnummer = aktør.aktivFødselsnummer()),
+                vedrørende = PersonForManueltBrevRequest(navn = personNavn, fødselsnummer = aktør.aktivFødselsnummer()),
             )
         }
 
         FagsakType.NORMAL,
         FagsakType.BARN_ENSLIG_MINDREÅRIG,
-        ->
+        -> {
             this.copy(
                 enhet = enhet,
             )
+        }
     }
 }
 
@@ -215,7 +216,7 @@ fun ManueltBrevRequest.tilBrev(
             ?.let { FritekstAvsnitt(it) }
 
     return when (this.brevmal) {
-        Brevmal.INFORMASJONSBREV_DELT_BOSTED ->
+        Brevmal.INFORMASJONSBREV_DELT_BOSTED -> {
             InformasjonsbrevDeltBostedBrev(
                 data =
                     InformasjonsbrevDeltBostedData(
@@ -231,6 +232,7 @@ fun ManueltBrevRequest.tilBrev(
                             ),
                     ),
             )
+        }
 
         Brevmal.INFORMASJONSBREV_TIL_FORELDER_MED_SELVSTENDIG_RETT_VI_HAR_FÅTT_F016_KAN_SØKE_OM_BARNETRYGD,
         Brevmal.INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_FÅTT_EN_SØKNAD_FRA_ANNEN_FORELDER,
@@ -238,7 +240,7 @@ fun ManueltBrevRequest.tilBrev(
         Brevmal.INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_VARSEL_OM_ÅRLIG_KONTROLL,
         Brevmal.INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HENTER_IKKE_REGISTEROPPLYSNINGER,
         Brevmal.INFORMASJONSBREV_KAN_HA_RETT_TIL_PENGESTØTTE_FRA_NAV,
-        ->
+        -> {
             InformasjonsbrevTilForelderBrev(
                 mal = this.brevmal,
                 data =
@@ -255,10 +257,11 @@ fun ManueltBrevRequest.tilBrev(
                             ),
                     ),
             )
+        }
 
         Brevmal.INNHENTE_OPPLYSNINGER,
         Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
-        ->
+        -> {
             InnhenteOpplysningerBrev(
                 mal = brevmal,
                 data =
@@ -278,6 +281,7 @@ fun ManueltBrevRequest.tilBrev(
                             ),
                     ),
             )
+        }
 
         Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE,
         Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON,
@@ -305,7 +309,7 @@ fun ManueltBrevRequest.tilBrev(
             )
         }
 
-        Brevmal.UTBETALING_ETTER_KA_VEDTAK ->
+        Brevmal.UTBETALING_ETTER_KA_VEDTAK -> {
             UtbetalingEtterKAVedtak(
                 mal = Brevmal.UTBETALING_ETTER_KA_VEDTAK,
                 data =
@@ -324,8 +328,9 @@ fun ManueltBrevRequest.tilBrev(
                         fritekst = this.fritekstAvsnitt,
                     ),
             )
+        }
 
-        Brevmal.HENLEGGE_TRUKKET_SØKNAD ->
+        Brevmal.HENLEGGE_TRUKKET_SØKNAD -> {
             HenleggeTrukketSøknadBrev(
                 mal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
                 data =
@@ -338,8 +343,9 @@ fun ManueltBrevRequest.tilBrev(
                             ),
                     ),
             )
+        }
 
-        Brevmal.HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON ->
+        Brevmal.HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON -> {
             HenleggeTrukketSøknadBrev(
                 mal = Brevmal.HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON,
                 data =
@@ -354,8 +360,9 @@ fun ManueltBrevRequest.tilBrev(
                             ),
                     ),
             )
+        }
 
-        Brevmal.VARSEL_OM_REVURDERING ->
+        Brevmal.VARSEL_OM_REVURDERING -> {
             VarselbrevMedÅrsaker(
                 mal = Brevmal.VARSEL_OM_REVURDERING,
                 navn = mottakerNavn,
@@ -364,8 +371,9 @@ fun ManueltBrevRequest.tilBrev(
                 enhet = this.enhetNavn(),
                 saksbehandlerNavn = saksbehandlerNavn,
             )
+        }
 
-        Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON ->
+        Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON -> {
             VarselbrevMedÅrsaker(
                 mal = Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON,
                 navn = mottakerNavn,
@@ -376,8 +384,9 @@ fun ManueltBrevRequest.tilBrev(
                 gjelder = this.vedrørende?.navn,
                 saksbehandlerNavn = saksbehandlerNavn,
             )
+        }
 
-        Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 ->
+        Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 -> {
             VarselOmRevurderingDeltBostedParagraf14Brev(
                 data =
                     VarselOmRevurderingDeltBostedParagraf14Data(
@@ -390,6 +399,7 @@ fun ManueltBrevRequest.tilBrev(
                             ),
                     ),
             )
+        }
 
         Brevmal.VARSEL_OM_REVURDERING_SAMBOER -> {
             if (this.datoAvtale == null) {
@@ -412,7 +422,7 @@ fun ManueltBrevRequest.tilBrev(
             )
         }
 
-        Brevmal.VARSEL_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_SØKT ->
+        Brevmal.VARSEL_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_SØKT -> {
             VarselbrevMedÅrsakerOgBarn(
                 mal = Brevmal.VARSEL_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_SØKT,
                 navn = mottakerNavn,
@@ -422,8 +432,9 @@ fun ManueltBrevRequest.tilBrev(
                 enhet = this.enhetNavn(),
                 saksbehandlerNavn = saksbehandlerNavn,
             )
+        }
 
-        Brevmal.SVARTIDSBREV ->
+        Brevmal.SVARTIDSBREV -> {
             Svartidsbrev(
                 navn = mottakerNavn,
                 fodselsnummer = mottakerIdent,
@@ -432,8 +443,9 @@ fun ManueltBrevRequest.tilBrev(
                 erEøsBehandling = erEøsBehandling(behandlingKategori),
                 saksbehandlerNavn = saksbehandlerNavn,
             )
+        }
 
-        Brevmal.SVARTIDSBREV_INSTITUSJON ->
+        Brevmal.SVARTIDSBREV_INSTITUSJON -> {
             Svartidsbrev(
                 navn = mottakerNavn,
                 fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
@@ -444,10 +456,11 @@ fun ManueltBrevRequest.tilBrev(
                 gjelder = this.vedrørende?.navn,
                 saksbehandlerNavn = saksbehandlerNavn,
             )
+        }
 
         Brevmal.FORLENGET_SVARTIDSBREV,
         Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON,
-        ->
+        -> {
             ForlengetSvartidsbrev(
                 mal = brevmal,
                 navn = mottakerNavn,
@@ -463,8 +476,9 @@ fun ManueltBrevRequest.tilBrev(
                 gjelder = this.vedrørende?.navn,
                 saksbehandlerNavn = saksbehandlerNavn,
             )
+        }
 
-        Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG ->
+        Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> {
             EnkeltInformasjonsbrev(
                 navn = mottakerNavn,
                 fodselsnummer = mottakerIdent,
@@ -472,8 +486,9 @@ fun ManueltBrevRequest.tilBrev(
                 mal = Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG,
                 saksbehandlerNavn = saksbehandlerNavn,
             )
+        }
 
-        Brevmal.INFORMASJONSBREV_FØDSEL_VERGEMÅL ->
+        Brevmal.INFORMASJONSBREV_FØDSEL_VERGEMÅL -> {
             EnkeltInformasjonsbrev(
                 navn = mottakerNavn,
                 fodselsnummer = mottakerIdent,
@@ -481,8 +496,9 @@ fun ManueltBrevRequest.tilBrev(
                 mal = Brevmal.INFORMASJONSBREV_FØDSEL_VERGEMÅL,
                 saksbehandlerNavn = saksbehandlerNavn,
             )
+        }
 
-        Brevmal.INFORMASJONSBREV_FØDSEL_GENERELL ->
+        Brevmal.INFORMASJONSBREV_FØDSEL_GENERELL -> {
             EnkeltInformasjonsbrev(
                 navn = mottakerNavn,
                 fodselsnummer = mottakerIdent,
@@ -490,8 +506,9 @@ fun ManueltBrevRequest.tilBrev(
                 mal = Brevmal.INFORMASJONSBREV_FØDSEL_GENERELL,
                 saksbehandlerNavn = saksbehandlerNavn,
             )
+        }
 
-        Brevmal.INFORMASJONSBREV_KAN_SØKE ->
+        Brevmal.INFORMASJONSBREV_KAN_SØKE -> {
             InformasjonsbrevKanSøke(
                 navn = mottakerNavn,
                 fodselsnummer = mottakerIdent,
@@ -499,8 +516,9 @@ fun ManueltBrevRequest.tilBrev(
                 dokumentliste = this.multiselectVerdier,
                 saksbehandlerNavn = saksbehandlerNavn,
             )
+        }
 
-        Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED ->
+        Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> {
             VarselbrevMedÅrsakerOgBarn(
                 mal = Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
                 navn = mottakerNavn,
@@ -511,8 +529,9 @@ fun ManueltBrevRequest.tilBrev(
                 saksbehandlerNavn = saksbehandlerNavn,
                 fritekstAvsnitt = fritekstAvsnitt,
             )
+        }
 
-        Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS ->
+        Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS -> {
             VarselbrevMedÅrsaker(
                 mal = Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
                 navn = mottakerNavn,
@@ -521,8 +540,9 @@ fun ManueltBrevRequest.tilBrev(
                 enhet = this.enhetNavn(),
                 saksbehandlerNavn = saksbehandlerNavn,
             )
+        }
 
-        Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS ->
+        Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS -> {
             VarselbrevÅrlegKontrollEøs(
                 mal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS,
                 navn = mottakerNavn,
@@ -531,8 +551,9 @@ fun ManueltBrevRequest.tilBrev(
                 mottakerlandSed = this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }.slåSammen(),
                 saksbehandlerNavn = saksbehandlerNavn,
             )
+        }
 
-        Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER ->
+        Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER -> {
             VarselbrevÅrlegKontrollEøs(
                 mal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
                 navn = mottakerNavn,
@@ -542,8 +563,9 @@ fun ManueltBrevRequest.tilBrev(
                 dokumentliste = this.multiselectVerdier,
                 saksbehandlerNavn = saksbehandlerNavn,
             )
+        }
 
-        Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED ->
+        Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED -> {
             InnhenteOpplysningerOmBarn(
                 mal = Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
                 navn = mottakerNavn,
@@ -554,8 +576,9 @@ fun ManueltBrevRequest.tilBrev(
                 saksbehandlerNavn = saksbehandlerNavn,
                 fritekstAvsnitt = this.fritekstAvsnitt,
             )
+        }
 
-        Brevmal.INNHENTE_OPPLYSNINGER_OG_INFORMASJON_OM_AT_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_HAR_SØKT ->
+        Brevmal.INNHENTE_OPPLYSNINGER_OG_INFORMASJON_OM_AT_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_HAR_SØKT -> {
             InnhenteOpplysningerOmBarn(
                 mal = Brevmal.INNHENTE_OPPLYSNINGER_OG_INFORMASJON_OM_AT_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_HAR_SØKT,
                 navn = mottakerNavn,
@@ -565,8 +588,9 @@ fun ManueltBrevRequest.tilBrev(
                 barnasFødselsdager = this.barnasFødselsdager.tilFormaterteFødselsdager(),
                 saksbehandlerNavn = saksbehandlerNavn,
             )
+        }
 
-        Brevmal.INFORMASJONSBREV_KAN_SØKE_EØS ->
+        Brevmal.INFORMASJONSBREV_KAN_SØKE_EØS -> {
             EnkeltInformasjonsbrev(
                 navn = mottakerNavn,
                 fodselsnummer = mottakerIdent,
@@ -574,6 +598,7 @@ fun ManueltBrevRequest.tilBrev(
                 mal = Brevmal.INFORMASJONSBREV_KAN_SØKE_EØS,
                 saksbehandlerNavn = saksbehandlerNavn,
             )
+        }
 
         Brevmal.VEDTAK_FØRSTEGANGSVEDTAK,
         Brevmal.VEDTAK_ENDRING,
@@ -595,7 +620,9 @@ fun ManueltBrevRequest.tilBrev(
         Brevmal.AUTOVEDTAK_FINNMARKSTILLEGG,
         Brevmal.AUTOVEDTAK_SVALBARDTILLEGG,
         Brevmal.TILBAKEKREVINGSVEDTAK_MOTREGNING,
-        -> throw Feil("Kan ikke mappe fra manuel brevrequest til ${this.brevmal}.")
+        -> {
+            throw Feil("Kan ikke mappe fra manuel brevrequest til ${this.brevmal}.")
+        }
     }
 }
 

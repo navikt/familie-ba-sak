@@ -13,7 +13,6 @@ import no.nav.person.pdl.aktor.v2.Type
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import kotlin.collections.filter
 
 @Service
 class BisysService(
@@ -28,7 +27,7 @@ class BisysService(
         fraDato: LocalDate,
     ): BisysUtvidetBarnetrygdResponse {
         val identerFraPdl = personidentService.hentIdenter(personIdent, false)
-        if (identerFraPdl.filter { it.gruppe == Type.FOLKEREGISTERIDENT.name }.isEmpty()) {
+        if (identerFraPdl.none { it.gruppe == Type.FOLKEREGISTERIDENT.name }) {
             secureLogger.info("Fant ikke gyldig fnr i PDL for $personIdent - $identerFraPdl. Returnerer tom liste til Bisys")
             return BisysUtvidetBarnetrygdResponse(emptyList())
         }

@@ -175,7 +175,9 @@ class ArbeidsfordelingService(
                 )
             }
 
-            else -> aktivArbeidsfordelingPåBehandling
+            else -> {
+                aktivArbeidsfordelingPåBehandling
+            }
         }
     }
 

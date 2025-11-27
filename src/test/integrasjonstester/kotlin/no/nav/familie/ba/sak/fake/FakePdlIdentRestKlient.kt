@@ -20,13 +20,14 @@ class FakePdlIdentRestKlient(
         identMap[personIdent]?.let { return it }
 
         return when {
-            historikk ->
+            historikk -> {
                 listOf(
                     IdentInformasjon(personIdent, historisk = false, gruppe = "FOLKEREGISTERIDENT"),
                     IdentInformasjon(randomFnr(), historisk = true, gruppe = "FOLKEREGISTERIDENT"),
                 )
+            }
 
-            else ->
+            else -> {
                 listOf(
                     IdentInformasjon(
                         ident = personIdent.substring(0, min(11, personIdent.length)),
@@ -39,6 +40,7 @@ class FakePdlIdentRestKlient(
                         gruppe = "AKTORID",
                     ),
                 )
+            }
         }
     }
 

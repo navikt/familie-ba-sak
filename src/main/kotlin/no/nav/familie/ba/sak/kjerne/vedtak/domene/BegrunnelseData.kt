@@ -15,7 +15,6 @@ sealed interface BrevBegrunnelse : Comparable<BrevBegrunnelse> {
             other.vedtakBegrunnelseType == null -> Int.MIN_VALUE
             erFinnmarkEllerSvalbardBegrunnelse(this) && !erFinnmarkEllerSvalbardBegrunnelse(other) -> Int.MAX_VALUE
             !erFinnmarkEllerSvalbardBegrunnelse(this) && erFinnmarkEllerSvalbardBegrunnelse(other) -> Int.MIN_VALUE
-
             else -> this.vedtakBegrunnelseType!!.sorteringsrekkefølge - other.vedtakBegrunnelseType!!.sorteringsrekkefølge
         }
 }
@@ -27,8 +26,8 @@ enum class Begrunnelsetype {
 }
 
 private fun erFinnmarkEllerSvalbardBegrunnelse(begrunnelse: BrevBegrunnelse): Boolean =
-    begrunnelse is BegrunnelseMedData && begrunnelse.apiNavn.lowercase().contains("finnmarkstillegg") ||
-        begrunnelse is BegrunnelseMedData && begrunnelse.apiNavn.lowercase().contains("svalbardtillegg")
+    (begrunnelse is BegrunnelseMedData && begrunnelse.apiNavn.lowercase().contains("finnmarkstillegg")) ||
+        (begrunnelse is BegrunnelseMedData && begrunnelse.apiNavn.lowercase().contains("svalbardtillegg"))
 
 interface BegrunnelseMedData : BrevBegrunnelse {
     val apiNavn: String

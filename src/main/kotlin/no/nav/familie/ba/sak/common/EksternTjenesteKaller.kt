@@ -108,8 +108,13 @@ fun handleException(
             exception
         }
 
-        is HttpClientErrorException -> exception
-        else -> opprettIntegrasjonsException(tjeneste, uri, exception, formål)
+        is HttpClientErrorException -> {
+            exception
+        }
+
+        else -> {
+            opprettIntegrasjonsException(tjeneste, uri, exception, formål)
+        }
     }
 
 private fun opprettIntegrasjonsException(

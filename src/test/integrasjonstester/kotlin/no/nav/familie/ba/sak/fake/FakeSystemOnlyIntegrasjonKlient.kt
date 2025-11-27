@@ -17,6 +17,7 @@ class FakeSystemOnlyIntegrasjonKlient :
     override fun hentArbeidsforholdMedSystembruker(
         ident: String,
         ansettelsesperiodeFom: LocalDate,
+        ansettelsesperiodeTom: LocalDate?,
     ): List<Arbeidsforhold> =
         listOf(
             Arbeidsforhold(

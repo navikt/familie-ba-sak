@@ -436,16 +436,21 @@ private fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>>.tilVedtaksper
     val erAvslagsperiode = this.verdi.all { it.gjeldende?.erEksplisittAvslag(personerFremstiltKravFor) == true }
 
     return when {
-        erUtbetalingsperiode ->
+        erUtbetalingsperiode -> {
             if (this.verdi.any { it.erReduksjonSidenForrigeBehandling }) {
                 Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
             } else {
                 Vedtaksperiodetype.UTBETALING
             }
+        }
 
-        erAvslagsperiode -> Vedtaksperiodetype.AVSLAG
+        erAvslagsperiode -> {
+            Vedtaksperiodetype.AVSLAG
+        }
 
-        else -> Vedtaksperiodetype.OPPHØR
+        else -> {
+            Vedtaksperiodetype.OPPHØR
+        }
     }
 }
 

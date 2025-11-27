@@ -97,7 +97,7 @@ class AutovedtakFødselshendelseBegrunnelseService(
             vedtaksperiodeMedBegrunnelser.settBegrunnelser(begrunnelser)
             vedtaksperiodeHentOgPersisterService.lagre(vedtaksperiodeMedBegrunnelser)
 
-            /**
+            /*
              * Hvis barn(a) er født før desember påvirkes vedtaket av satsendring januar 2022
              * og vi må derfor også automatisk begrunne satsendringen
              */
