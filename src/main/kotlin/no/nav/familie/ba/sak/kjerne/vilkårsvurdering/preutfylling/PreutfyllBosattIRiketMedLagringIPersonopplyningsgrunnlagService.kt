@@ -1,14 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.filtrereUgyldigeAdresser
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.lagTidslinjeForAdresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.iUkraina
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.lagErNordiskStatsborgerTidslinje
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.utils.erMinst12Måneder
@@ -47,27 +45,25 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
                 .map { it.aktør.aktivFødselsnummer() }
                 .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
 
+        val personOpplysningsgrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+
         vilkårsvurdering
             .personResultater
             .filter { it.aktør.aktivFødselsnummer() in identer }
             .forEach { personResultat ->
-                val personOpplysningsgrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
                 val person = personOpplysningsgrunnlag.personer.find { it.aktør == personResultat.aktør } ?: throw Feil("Aktør ${personResultat.aktør.aktørId} har personresultat men ikke persongrunnlag")
 
                 if (person.statsborgerskap.iUkraina()) {
                     return@forEach
                 }
 
-                val adresserForPerson = Adresser.opprettFra(person)
-
-                val fødselsdatoForBeskjæring = if (personResultat.erSøkersResultater()) (personOpplysningsgrunnlag.eldsteBarnSinFødselsdato ?: personOpplysningsgrunnlag.søker.fødselsdato) else person.fødselsdato
+                val fødselsdatoForBeskjæring = if (person.type == PersonType.SØKER) (personOpplysningsgrunnlag.eldsteBarnSinFødselsdato ?: person.fødselsdato) else person.fødselsdato
 
                 val nyeBosattIRiketVilkårResultater =
                     genererBosattIRiketVilkårResultat(
                         personResultat = personResultat,
                         fødselsdatoForBeskjæring = fødselsdatoForBeskjæring,
-                        adresserForPerson = adresserForPerson,
-                        behandling = behandling,
+                        person = person,
                     )
 
                 if (nyeBosattIRiketVilkårResultater.isNotEmpty()) {
@@ -79,17 +75,12 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
 
     fun genererBosattIRiketVilkårResultat(
         personResultat: PersonResultat,
-        fødselsdatoForBeskjæring: LocalDate = LocalDate.MIN,
-        adresserForPerson: Adresser,
-        behandling: Behandling,
+        fødselsdatoForBeskjæring: LocalDate,
+        person: Person,
     ): Set<VilkårResultat> {
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
-        val person = personResultat.aktør.tilPerson(personopplysningGrunnlag)
+        val adresserForPerson = Adresser.opprettFra(person)
 
-        val erBosattINorgeTidslinje =
-            adresserForPerson.bostedsadresser.filtrereUgyldigeAdresser().lagTidslinjeForAdresser(
-                "Bostedadresse",
-            ) { adresse -> adresse.erINorge() }
+        val erBosattINorgeTidslinje = adresserForPerson.lagErBosattINorgeTidslinje()
 
         val erNordiskStatsborgerTidslinje = lagErNordiskStatsborgerTidslinje(person.statsborgerskap)
         val erBostedsadresseIFinnmarkEllerNordTromsTidslinje = adresserForPerson.lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje()

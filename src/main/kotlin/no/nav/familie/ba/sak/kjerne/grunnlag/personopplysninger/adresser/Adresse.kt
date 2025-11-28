@@ -154,7 +154,7 @@ fun List<Adresse>.filtrereUgyldigeAdresser(): List<Adresse> {
             .values
             .map { likePerioder ->
                 likePerioder.find { it.erIFinnmarkEllerNordTroms() } ?: likePerioder.first()
-            }.sortedBy { it.gyldigFraOgMed }
+            }
 
     return filtrert.forskyvTilOgMedHvisDenErLikNesteFraOgMed()
 }
@@ -170,13 +170,14 @@ fun List<Adresse>.filtrereUgyldigeOppholdsadresser(): List<Adresse> {
             .values
             .map { likePerioder ->
                 likePerioder.find { it.erPåSvalbard() } ?: likePerioder.first()
-            }.sortedBy { it.gyldigFraOgMed }
+            }
 
     return filtrert.forskyvTilOgMedHvisDenErLikNesteFraOgMed()
 }
 
 private fun List<Adresse>.forskyvTilOgMedHvisDenErLikNesteFraOgMed(): List<Adresse> =
-    windowed(size = 2, step = 1, partialWindows = true)
+    sortedBy { it.gyldigFraOgMed }
+        .windowed(size = 2, step = 1, partialWindows = true)
         .map { adresser ->
             val denne = adresser.first()
             val neste = adresser.getOrNull(1)

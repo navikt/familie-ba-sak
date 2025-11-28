@@ -56,6 +56,11 @@ data class Adresser(
         return filtrerteAdresser.lagTidslinjeForAdresser("Bostedadresse") { it.erIFinnmarkEllerNordTroms() }
     }
 
+    fun lagErBosattINorgeTidslinje(): Tidslinje<Boolean> =
+        bostedsadresser
+            .filtrereUgyldigeAdresser()
+            .lagTidslinjeForAdresser("Bostedadresse") { adresse -> adresse.erINorge() }
+
     companion object {
         fun opprettFra(pdlAdresser: PdlAdresserPerson?): Adresser =
             Adresser(
