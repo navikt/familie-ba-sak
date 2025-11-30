@@ -3,8 +3,10 @@ package no.nav.familie.ba.sak.integrasjoner.oppgave
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.slot
+import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.lagArbeidsfordelingPåBehandling
@@ -29,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.kontrakter.felles.Behandlingstema
@@ -40,7 +43,9 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -68,6 +73,11 @@ class OppgaveServiceTest {
             tilpassArbeidsfordelingService = mockedTilpassArbeidsfordelingService,
             arbeidsfordelingPåBehandlingRepository = mockedArbeidsfordelingPåBehandlingRepository,
         )
+
+    @AfterEach
+    fun afterEach() {
+        unmockkObject(SikkerhetContext)
+    }
 
     @Test
     fun `Opprett oppgave skal lage oppgave med enhetsnummer fra behandlingen`() {
@@ -292,6 +302,158 @@ class OppgaveServiceTest {
                 "1002602;10018798;21.01.23\n" +
                 "1002602;10018798;21.01.23\n",
         ).isEqualTo(frister)
+    }
+
+    @Test
+    fun `settNyFristPåOppgaver skal oppdatere frist men skal ikke endre endretAvEnhet når det er systemet som gjør kallet`() {
+        // Arrange
+        val behandlingId = 123L
+        val nyFrist = LocalDate.now().plusDays(7)
+        val gammelFrist = "2024-12-31"
+
+        val dbOppgave = lagTestOppgave()
+
+        val gammelOppgave =
+            Oppgave(
+                id = OPPGAVE_ID.toLong(),
+                fristFerdigstillelse = gammelFrist,
+                ferdigstiltTidspunkt = null,
+            )
+
+        every { mockedOppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId) } returns listOf(dbOppgave)
+        every { mockedIntegrasjonKlient.finnOppgaveMedId(OPPGAVE_ID.toLong()) } returns gammelOppgave
+
+        val oppdaterOppgaveSlot = slot<Oppgave>()
+        every { mockedIntegrasjonKlient.oppdaterOppgave(OPPGAVE_ID.toLong(), capture(oppdaterOppgaveSlot)) } just runs
+
+        // Act
+        oppgaveService.settNyFristPåOppgaver(behandlingId, nyFrist)
+
+        // Assert
+        verify(exactly = 1) { mockedIntegrasjonKlient.finnOppgaveMedId(OPPGAVE_ID.toLong()) }
+        verify(exactly = 1) { mockedIntegrasjonKlient.oppdaterOppgave(OPPGAVE_ID.toLong(), any()) }
+
+        assertThat(oppdaterOppgaveSlot.captured.id).isEqualTo(OPPGAVE_ID.toLong())
+        assertThat(oppdaterOppgaveSlot.captured.fristFerdigstillelse).isEqualTo(nyFrist.toString())
+        assertThat(oppdaterOppgaveSlot.captured.endretAvEnhetsnr).isNull()
+    }
+
+    @Test
+    fun `settNyFristPåOppgaver skal oppdatere frist med endretAvEnhetsnr når saksbehandler utfører er den som gjør kallet`() {
+        // Arrange
+        val behandlingId = 123L
+        val nyFrist = LocalDate.now().plusDays(7)
+        val gammelFrist = "2024-12-31"
+        val saksbehandlerIdent = "Z999999"
+        val saksbehandlerEnhet = "4820"
+
+        val dbOppgave = lagTestOppgave()
+
+        val gammelOppgave =
+            Oppgave(
+                id = OPPGAVE_ID.toLong(),
+                fristFerdigstillelse = gammelFrist,
+                ferdigstiltTidspunkt = null,
+            )
+
+        every { mockedOppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId) } returns listOf(dbOppgave)
+        every { mockedIntegrasjonKlient.finnOppgaveMedId(OPPGAVE_ID.toLong()) } returns gammelOppgave
+        every { mockedIntegrasjonKlient.hentSaksbehandler(saksbehandlerIdent) } returns
+            mockk {
+                every { enhet } returns saksbehandlerEnhet
+            }
+
+        val oppdaterOppgaveSlot = slot<Oppgave>()
+        every { mockedIntegrasjonKlient.oppdaterOppgave(OPPGAVE_ID.toLong(), capture(oppdaterOppgaveSlot)) } just runs
+
+        mockkObject(SikkerhetContext)
+        every { SikkerhetContext.hentSaksbehandler() } returns saksbehandlerIdent
+
+        // Act
+        oppgaveService.settNyFristPåOppgaver(behandlingId, nyFrist)
+
+        // Assert
+        verify(exactly = 1) { mockedIntegrasjonKlient.finnOppgaveMedId(OPPGAVE_ID.toLong()) }
+        verify(exactly = 1) { mockedIntegrasjonKlient.oppdaterOppgave(OPPGAVE_ID.toLong(), any()) }
+
+        assertThat(oppdaterOppgaveSlot.captured.id).isEqualTo(OPPGAVE_ID.toLong())
+        assertThat(oppdaterOppgaveSlot.captured.fristFerdigstillelse).isEqualTo(nyFrist.toString())
+        assertThat(oppdaterOppgaveSlot.captured.endretAvEnhetsnr).isEqualTo(saksbehandlerEnhet)
+    }
+
+    @Test
+    fun `settFristÅpneOppgaverPåBehandlingTil skal oppdatere frist med endretAvEnhetsnr når saksbehandler gjør kallet`() {
+        // Arrange
+        val behandlingId = 123L
+        val nyFrist = LocalDate.now().plusDays(7)
+        val gammelFrist = "2024-12-31"
+        val saksbehandlerIdent = "Z999999"
+        val saksbehandlerEnhet = "4820"
+        val dbOppgave = lagTestOppgave()
+        val gammelOppgave =
+            Oppgave(
+                id = OPPGAVE_ID.toLong(),
+                fristFerdigstillelse = gammelFrist,
+                ferdigstiltTidspunkt = null,
+            )
+
+        every { mockedOppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId) } returns listOf(dbOppgave)
+        every { mockedIntegrasjonKlient.finnOppgaveMedId(OPPGAVE_ID.toLong()) } returns gammelOppgave
+        every { mockedIntegrasjonKlient.hentSaksbehandler(saksbehandlerIdent) } returns
+            mockk {
+                every { enhet } returns saksbehandlerEnhet
+            }
+
+        val oppdaterOppgaveSlot = slot<Oppgave>()
+        every { mockedIntegrasjonKlient.oppdaterOppgave(OPPGAVE_ID.toLong(), capture(oppdaterOppgaveSlot)) } just runs
+
+        mockkObject(SikkerhetContext)
+        every { SikkerhetContext.hentSaksbehandler() } returns saksbehandlerIdent
+
+        // Act
+        oppgaveService.settFristÅpneOppgaverPåBehandlingTil(behandlingId, nyFrist)
+
+        // Assert
+        verify(exactly = 1) { mockedIntegrasjonKlient.finnOppgaveMedId(OPPGAVE_ID.toLong()) }
+        verify(exactly = 1) { mockedIntegrasjonKlient.oppdaterOppgave(OPPGAVE_ID.toLong(), any()) }
+
+        assertThat(oppdaterOppgaveSlot.captured.id).isEqualTo(OPPGAVE_ID.toLong())
+        assertThat(oppdaterOppgaveSlot.captured.fristFerdigstillelse).isEqualTo(nyFrist.toString())
+        assertThat(oppdaterOppgaveSlot.captured.endretAvEnhetsnr).isEqualTo(saksbehandlerEnhet)
+    }
+
+    @Test
+    fun `settFristÅpneOppgaverPåBehandlingTil skal oppdatere frist men ikke oppdatere endretAvEnhetsnr når det er systemet som gjør kallet`() {
+        // Arrange
+        val behandlingId = 123L
+        val nyFrist = LocalDate.now().plusDays(7)
+        val gammelFrist = "2024-12-31"
+
+        val dbOppgave = lagTestOppgave()
+
+        val gammelOppgave =
+            Oppgave(
+                id = OPPGAVE_ID.toLong(),
+                fristFerdigstillelse = gammelFrist,
+                ferdigstiltTidspunkt = null,
+            )
+
+        every { mockedOppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId) } returns listOf(dbOppgave)
+        every { mockedIntegrasjonKlient.finnOppgaveMedId(OPPGAVE_ID.toLong()) } returns gammelOppgave
+
+        val oppdaterOppgaveSlot = slot<Oppgave>()
+        every { mockedIntegrasjonKlient.oppdaterOppgave(OPPGAVE_ID.toLong(), capture(oppdaterOppgaveSlot)) } just runs
+
+        // Act
+        oppgaveService.settFristÅpneOppgaverPåBehandlingTil(behandlingId, nyFrist)
+
+        // Assert
+        verify(exactly = 1) { mockedIntegrasjonKlient.finnOppgaveMedId(OPPGAVE_ID.toLong()) }
+        verify(exactly = 1) { mockedIntegrasjonKlient.oppdaterOppgave(OPPGAVE_ID.toLong(), any()) }
+
+        assertThat(oppdaterOppgaveSlot.captured.id).isEqualTo(OPPGAVE_ID.toLong())
+        assertThat(oppdaterOppgaveSlot.captured.fristFerdigstillelse).isEqualTo(nyFrist.toString())
+        assertThat(oppdaterOppgaveSlot.captured.endretAvEnhetsnr).isNull()
     }
 
     private fun lagTestBehandling(aktørId: String = "1234567891000"): Behandling =
