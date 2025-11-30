@@ -43,7 +43,6 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
-import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -324,14 +323,14 @@ class OppgaveServiceTest {
         every { mockedIntegrasjonKlient.finnOppgaveMedId(OPPGAVE_ID.toLong()) } returns gammelOppgave
 
         val oppdaterOppgaveSlot = slot<Oppgave>()
-        every { mockedIntegrasjonKlient.oppdaterOppgave(OPPGAVE_ID.toLong(), capture(oppdaterOppgaveSlot)) } just runs
+        every { mockedIntegrasjonKlient.oppdaterOppgave(capture(oppdaterOppgaveSlot)) } just runs
 
         // Act
         oppgaveService.settNyFristPåOppgaver(behandlingId, nyFrist)
 
         // Assert
         verify(exactly = 1) { mockedIntegrasjonKlient.finnOppgaveMedId(OPPGAVE_ID.toLong()) }
-        verify(exactly = 1) { mockedIntegrasjonKlient.oppdaterOppgave(OPPGAVE_ID.toLong(), any()) }
+        verify(exactly = 1) { mockedIntegrasjonKlient.oppdaterOppgave(any()) }
 
         assertThat(oppdaterOppgaveSlot.captured.id).isEqualTo(OPPGAVE_ID.toLong())
         assertThat(oppdaterOppgaveSlot.captured.fristFerdigstillelse).isEqualTo(nyFrist.toString())
@@ -364,7 +363,7 @@ class OppgaveServiceTest {
             }
 
         val oppdaterOppgaveSlot = slot<Oppgave>()
-        every { mockedIntegrasjonKlient.oppdaterOppgave(OPPGAVE_ID.toLong(), capture(oppdaterOppgaveSlot)) } just runs
+        every { mockedIntegrasjonKlient.oppdaterOppgave(capture(oppdaterOppgaveSlot)) } just runs
 
         mockkObject(SikkerhetContext)
         every { SikkerhetContext.hentSaksbehandler() } returns saksbehandlerIdent
@@ -374,7 +373,7 @@ class OppgaveServiceTest {
 
         // Assert
         verify(exactly = 1) { mockedIntegrasjonKlient.finnOppgaveMedId(OPPGAVE_ID.toLong()) }
-        verify(exactly = 1) { mockedIntegrasjonKlient.oppdaterOppgave(OPPGAVE_ID.toLong(), any()) }
+        verify(exactly = 1) { mockedIntegrasjonKlient.oppdaterOppgave(any()) }
 
         assertThat(oppdaterOppgaveSlot.captured.id).isEqualTo(OPPGAVE_ID.toLong())
         assertThat(oppdaterOppgaveSlot.captured.fristFerdigstillelse).isEqualTo(nyFrist.toString())
@@ -405,7 +404,7 @@ class OppgaveServiceTest {
             }
 
         val oppdaterOppgaveSlot = slot<Oppgave>()
-        every { mockedIntegrasjonKlient.oppdaterOppgave(OPPGAVE_ID.toLong(), capture(oppdaterOppgaveSlot)) } just runs
+        every { mockedIntegrasjonKlient.oppdaterOppgave(capture(oppdaterOppgaveSlot)) } just runs
 
         mockkObject(SikkerhetContext)
         every { SikkerhetContext.hentSaksbehandler() } returns saksbehandlerIdent
@@ -415,7 +414,7 @@ class OppgaveServiceTest {
 
         // Assert
         verify(exactly = 1) { mockedIntegrasjonKlient.finnOppgaveMedId(OPPGAVE_ID.toLong()) }
-        verify(exactly = 1) { mockedIntegrasjonKlient.oppdaterOppgave(OPPGAVE_ID.toLong(), any()) }
+        verify(exactly = 1) { mockedIntegrasjonKlient.oppdaterOppgave(any()) }
 
         assertThat(oppdaterOppgaveSlot.captured.id).isEqualTo(OPPGAVE_ID.toLong())
         assertThat(oppdaterOppgaveSlot.captured.fristFerdigstillelse).isEqualTo(nyFrist.toString())
@@ -442,14 +441,14 @@ class OppgaveServiceTest {
         every { mockedIntegrasjonKlient.finnOppgaveMedId(OPPGAVE_ID.toLong()) } returns gammelOppgave
 
         val oppdaterOppgaveSlot = slot<Oppgave>()
-        every { mockedIntegrasjonKlient.oppdaterOppgave(OPPGAVE_ID.toLong(), capture(oppdaterOppgaveSlot)) } just runs
+        every { mockedIntegrasjonKlient.oppdaterOppgave(capture(oppdaterOppgaveSlot)) } just runs
 
         // Act
         oppgaveService.settFristÅpneOppgaverPåBehandlingTil(behandlingId, nyFrist)
 
         // Assert
         verify(exactly = 1) { mockedIntegrasjonKlient.finnOppgaveMedId(OPPGAVE_ID.toLong()) }
-        verify(exactly = 1) { mockedIntegrasjonKlient.oppdaterOppgave(OPPGAVE_ID.toLong(), any()) }
+        verify(exactly = 1) { mockedIntegrasjonKlient.oppdaterOppgave(any()) }
 
         assertThat(oppdaterOppgaveSlot.captured.id).isEqualTo(OPPGAVE_ID.toLong())
         assertThat(oppdaterOppgaveSlot.captured.fristFerdigstillelse).isEqualTo(nyFrist.toString())
