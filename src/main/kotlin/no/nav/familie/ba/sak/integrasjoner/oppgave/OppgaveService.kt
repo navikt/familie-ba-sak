@@ -334,7 +334,11 @@ class OppgaveService(
                 }
 
                 else -> {
-                    val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString(), endretAvEnhetsnr = endretAvEnhetsnr)
+                    val nyOppgave =
+                        gammelOppgave.copy(
+                            fristFerdigstillelse = nyFrist.toString(),
+                            endretAvEnhetsnr = endretAvEnhetsnr ?: gammelOppgave.endretAvEnhetsnr,
+                        )
                     logger.info("Oppgave ${dbOppgave.gsakId} endrer frist fra ${gammelOppgave.fristFerdigstillelse} til $nyFrist")
                     integrasjonKlient.oppdaterOppgave(nyOppgave)
                 }
@@ -388,7 +392,11 @@ class OppgaveService(
                 oppgaveErAvsluttet -> {}
 
                 else -> {
-                    val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString(), endretAvEnhetsnr = endretAvEnhetsnr)
+                    val nyOppgave =
+                        gammelOppgave.copy(
+                            fristFerdigstillelse = nyFrist.toString(),
+                            endretAvEnhetsnr = endretAvEnhetsnr ?: gammelOppgave.endretAvEnhetsnr,
+                        )
                     integrasjonKlient.oppdaterOppgave(nyOppgave)
                 }
             }
