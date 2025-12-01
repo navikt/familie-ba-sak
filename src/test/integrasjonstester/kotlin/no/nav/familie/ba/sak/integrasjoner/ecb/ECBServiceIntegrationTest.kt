@@ -65,30 +65,6 @@ class ECBServiceIntegrationTest(
         }
     }
 
-//    private fun createECBResponse(
-//        frequency: Frequency,
-//        exchangeRates: List<Pair<String, BigDecimal>>,
-//        exchangeRateDate: String,
-//    ): ECBExchangeRatesData =
-//        ECBExchangeRatesData(
-//            ECBExchangeRatesDataSet(
-//                exchangeRates.map {
-//                    ECBExchangeRatesForCurrency(
-//                        listOf(
-//                            ECBExchangeRateKey("CURRENCY", it.first),
-//                            ECBExchangeRateKey("FREQ", frequency.toFrequencyParam()),
-//                        ),
-//                        listOf(
-//                            ECBExchangeRate(
-//                                ECBExchangeRateDate(exchangeRateDate),
-//                                ECBExchangeRateValue((it.second)),
-//                            ),
-//                        ),
-//                    )
-//                },
-//            ),
-//        )
-
     private fun createECBResponse(
         frequency: Frequency,
         exchangeRates: List<Pair<String, BigDecimal>>,
