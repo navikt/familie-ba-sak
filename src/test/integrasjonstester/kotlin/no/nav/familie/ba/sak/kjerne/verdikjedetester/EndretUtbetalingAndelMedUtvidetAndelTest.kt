@@ -27,7 +27,7 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Skal teste at endret utbetalingsandeler for ordinær og utvidet endrer utbetaling for søker og barn`() {
-        val barnFødselsdato = LocalDate.now().minusYears(3)
+        val barnFødselsdato = LocalDate.of(2022, 10, 15)
 
         val scenario =
             RestScenario(
