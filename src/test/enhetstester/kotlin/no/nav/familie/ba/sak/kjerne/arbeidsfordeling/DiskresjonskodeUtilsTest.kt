@@ -1,25 +1,35 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService.IdentMedAdressebeskyttelse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class DiskresjonskodeUtilsTest {
-    val personUtenDiskresjonskode =
+    val personBarnUtenDiskresjonskode =
         IdentMedAdressebeskyttelse(
-            ident = "IDENT_UTEN",
+            ident = "BARN_IDENT_UTEN",
             adressebeskyttelsegradering = null,
+            personType = PersonType.BARN,
         )
-    val personFortrolig =
+    val personBarnFortrolig =
         IdentMedAdressebeskyttelse(
-            ident = "IDENT_FORTROLIG",
+            ident = "BARN_IDENT_FORTROLIG",
             adressebeskyttelsegradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG,
+            personType = PersonType.BARN,
         ) // Kode 7
-    val personStrengtFortrolig =
+    val personBarnStrengtFortrolig =
         IdentMedAdressebeskyttelse(
-            ident = "IDENT_STRENGT_FORTROLIG",
+            ident = "BARN_IDENT_STRENGT_FORTROLIG",
             adressebeskyttelsegradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
+            personType = PersonType.BARN,
+        ) // Kode 6
+    val personSøkerStrengtFortrolig =
+        IdentMedAdressebeskyttelse(
+            ident = "SØKER_IDENT_STRENGT_FORTROLIG",
+            adressebeskyttelsegradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
+            personType = PersonType.SØKER,
         ) // Kode 6
 
     @Test
@@ -28,8 +38,8 @@ class DiskresjonskodeUtilsTest {
             null,
             finnPersonMedStrengesteAdressebeskyttelse(
                 listOf(
-                    personUtenDiskresjonskode,
-                    personUtenDiskresjonskode,
+                    personBarnUtenDiskresjonskode,
+                    personBarnUtenDiskresjonskode,
                 ),
             ),
         )
@@ -38,12 +48,26 @@ class DiskresjonskodeUtilsTest {
     @Test
     fun `en har adressebeskyttelse STRENGT_FORTROLIG, en har adressebeskyttelse FORTROLIG, en har ingen adressebeskyttelse - skal gi adressebeskyttelse STRENGT_FORTROLIG`() {
         assertEquals(
-            "IDENT_STRENGT_FORTROLIG",
+            "BARN_IDENT_STRENGT_FORTROLIG",
             finnPersonMedStrengesteAdressebeskyttelse(
                 listOf(
-                    personFortrolig,
-                    personStrengtFortrolig,
-                    personUtenDiskresjonskode,
+                    personBarnFortrolig,
+                    personBarnStrengtFortrolig,
+                    personBarnUtenDiskresjonskode,
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `barn har adressebeskyttelse STRENGT_FORTROLIG, barn har adressebeskyttelse FORTROLIG, søker har adressebeskyttelse STRENGT_FORTROLIG - skal gi søker med adressebeskyttelse STRENGT_FORTROLIG`() {
+        assertEquals(
+            "SØKER_IDENT_STRENGT_FORTROLIG",
+            finnPersonMedStrengesteAdressebeskyttelse(
+                listOf(
+                    personBarnStrengtFortrolig,
+                    personSøkerStrengtFortrolig,
+                    personBarnFortrolig,
                 ),
             ),
         )
@@ -52,11 +76,11 @@ class DiskresjonskodeUtilsTest {
     @Test
     fun `en har adressebeskyttelse FORTROLIG, en har ingen adressebeskyttelse - skal gi adressebeskyttelse FORTROLIG`() {
         assertEquals(
-            "IDENT_FORTROLIG",
+            "BARN_IDENT_FORTROLIG",
             finnPersonMedStrengesteAdressebeskyttelse(
                 listOf(
-                    personUtenDiskresjonskode,
-                    personFortrolig,
+                    personBarnUtenDiskresjonskode,
+                    personBarnFortrolig,
                 ),
             ),
         )

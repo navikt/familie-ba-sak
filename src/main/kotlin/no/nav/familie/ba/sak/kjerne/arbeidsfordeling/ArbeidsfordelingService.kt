@@ -12,10 +12,10 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåB
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.tilArbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
@@ -236,15 +236,19 @@ class ArbeidsfordelingService(
             ?: throw Feil("Finner ikke tilknyttet arbeidsfordeling på behandling med id $behandlingId")
 
     fun hentArbeidsfordelingsenhet(behandling: Behandling): Arbeidsfordelingsenhet {
-        val søker: IdentMedAdressebeskyttelse = identMedAdressebeskyttelse(behandling.fagsak.aktør)
+        val søker =
+            identMedAdressebeskyttelse(
+                ident = behandling.fagsak.aktør.aktivFødselsnummer(),
+                personType = PersonType.SØKER,
+            )
 
-        val personinfoliste: List<IdentMedAdressebeskyttelse> =
+        val personIdentMedAdresseBeskyttelseListe =
             personopplysningGrunnlagRepository
                 .finnSøkerOgBarnAktørerTilAktiv(behandling.id)
                 .barn()
                 .mapNotNull {
                     try {
-                        identMedAdressebeskyttelse(it.aktør)
+                        identMedAdressebeskyttelse(it.aktør.aktivFødselsnummer(), personType = PersonType.BARN)
                     } catch (e: PdlPersonKanIkkeBehandlesIFagsystem) {
                         logger.warn("Ignorerer barn fra hentArbeidsfordelingsenhet for behandling ${behandling.id} : ${e.årsak}")
                         secureLogger.warn("Ignorerer barn ${it.aktør.aktivFødselsnummer()} hentArbeidsfordelingsenhet for behandling ${behandling.id}: ${e.årsak}")
@@ -252,7 +256,7 @@ class ArbeidsfordelingService(
                     }
                 }.plus(søker)
 
-        val identMedStrengeste = finnPersonMedStrengesteAdressebeskyttelse(personinfoliste)
+        val identMedStrengeste = finnPersonMedStrengesteAdressebeskyttelse(personIdentMedAdresseBeskyttelseListe)
 
         return integrasjonKlient.hentBehandlendeEnhet(identMedStrengeste ?: søker.ident).singleOrNull()
             ?: throw Feil(message = "Fant flere eller ingen enheter på behandling.")
@@ -263,31 +267,32 @@ class ArbeidsfordelingService(
         barnIdenter: List<String>,
     ): Arbeidsfordelingsenhet {
         val identMedStrengeste =
-            finnPersonMedStrengesteAdressebeskyttelse((barnIdenter + søkerIdent).map { identMedAdressebeskyttelse(it) })
+            finnPersonMedStrengesteAdressebeskyttelse(
+                barnIdenter.map { identMedAdressebeskyttelse(it, personType = PersonType.BARN) } +
+                    identMedAdressebeskyttelse(søkerIdent, personType = PersonType.SØKER),
+            )
 
         return integrasjonKlient.hentBehandlendeEnhet(identMedStrengeste ?: søkerIdent).singleOrNull()
             ?: throw Feil(message = "Fant flere eller ingen enheter på behandling.")
     }
 
-    private fun identMedAdressebeskyttelse(ident: String) =
-        IdentMedAdressebeskyttelse(
-            ident = ident,
-            adressebeskyttelsegradering =
-                personopplysningerService
-                    .hentPersoninfoEnkel(
-                        personidentService.hentAktør(ident),
-                    ).adressebeskyttelseGradering,
-        )
-
-    private fun identMedAdressebeskyttelse(aktør: Aktør) =
-        IdentMedAdressebeskyttelse(
-            ident = aktør.aktivFødselsnummer(),
-            adressebeskyttelsegradering = personopplysningerService.hentPersoninfoEnkel(aktør).adressebeskyttelseGradering,
-        )
+    private fun identMedAdressebeskyttelse(
+        ident: String,
+        personType: PersonType,
+    ) = IdentMedAdressebeskyttelse(
+        ident = ident,
+        adressebeskyttelsegradering =
+            personopplysningerService
+                .hentPersoninfoEnkel(
+                    personidentService.hentAktør(ident),
+                ).adressebeskyttelseGradering,
+        personType = personType,
+    )
 
     data class IdentMedAdressebeskyttelse(
         val ident: String,
         val adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING?,
+        val personType: PersonType,
     )
 
     companion object {
