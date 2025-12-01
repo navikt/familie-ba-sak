@@ -16,6 +16,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.kontrakter.felles.NavIdent
@@ -307,7 +309,12 @@ class OppgaveService(
         behandlingId: Long,
         nyFrist: LocalDate,
     ) {
-        val dbOppgaver = oppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId)
+        val dbOppgaver = oppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId).ifEmpty { return }
+
+        val endretAvEnhetsnr =
+            SikkerhetContext.hentSaksbehandler().takeIf { it != SYSTEM_FORKORTELSE }?.let {
+                integrasjonKlient.hentSaksbehandler(it).enhet
+            }
 
         dbOppgaver.forEach { dbOppgave ->
             val gammelOppgave = hentOppgave(dbOppgave.gsakId.toLong())
@@ -327,9 +334,13 @@ class OppgaveService(
                 }
 
                 else -> {
-                    val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString())
+                    val nyOppgave =
+                        gammelOppgave.copy(
+                            fristFerdigstillelse = nyFrist.toString(),
+                            endretAvEnhetsnr = endretAvEnhetsnr ?: gammelOppgave.endretAvEnhetsnr,
+                        )
                     logger.info("Oppgave ${dbOppgave.gsakId} endrer frist fra ${gammelOppgave.fristFerdigstillelse} til $nyFrist")
-                    integrasjonKlient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
+                    integrasjonKlient.oppdaterOppgave(nyOppgave)
                 }
             }
         }
@@ -362,7 +373,12 @@ class OppgaveService(
         behandlingId: Long,
         nyFrist: LocalDate,
     ) {
-        val dbOppgaver = oppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId)
+        val dbOppgaver = oppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId).ifEmpty { return }
+
+        val endretAvEnhetsnr =
+            SikkerhetContext.hentSaksbehandler().takeIf { it != SYSTEM_FORKORTELSE }?.let {
+                integrasjonKlient.hentSaksbehandler(it).enhet
+            }
 
         dbOppgaver.forEach { dbOppgave ->
             val gammelOppgave = hentOppgave(dbOppgave.gsakId.toLong())
@@ -376,8 +392,12 @@ class OppgaveService(
                 oppgaveErAvsluttet -> {}
 
                 else -> {
-                    val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString())
-                    integrasjonKlient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
+                    val nyOppgave =
+                        gammelOppgave.copy(
+                            fristFerdigstillelse = nyFrist.toString(),
+                            endretAvEnhetsnr = endretAvEnhetsnr ?: gammelOppgave.endretAvEnhetsnr,
+                        )
+                    integrasjonKlient.oppdaterOppgave(nyOppgave)
                 }
             }
         }
