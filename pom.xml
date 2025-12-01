@@ -318,6 +318,7 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>valutakurs-klient</artifactId>
+            <version>3.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>

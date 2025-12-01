@@ -5,10 +5,12 @@ import no.nav.familie.ba.sak.common.saner
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCache
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCacheRepository
-import no.nav.familie.valutakurs.Frequency
+import no.nav.familie.valutakurs.NorgesBankValutakursRestKlient
 import no.nav.familie.valutakurs.ValutakursRestClient
-import no.nav.familie.valutakurs.domene.ExchangeRate
+import no.nav.familie.valutakurs.domene.Valutakurs
+import no.nav.familie.valutakurs.domene.ecb.Frequency
 import no.nav.familie.valutakurs.domene.exchangeRateForCurrency
+import no.nav.familie.valutakurs.domene.norgesbank.Frekvens
 import no.nav.familie.valutakurs.exception.ValutakursClientException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -18,9 +20,10 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 @Service
-@Import(ValutakursRestClient::class)
+@Import(ValutakursRestClient::class, NorgesBankValutakursRestKlient::class)
 class ECBService(
     private val ecbClient: ValutakursRestClient,
+    private val norgesBankValutakursRestKlient: NorgesBankValutakursRestKlient,
     private val ecbValutakursCacheRepository: ECBValutakursCacheRepository,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ECBService::class.java)
@@ -39,36 +42,52 @@ class ECBService(
         if (valutakurs == null) {
             logger.info("Henter valutakurs for ${utenlandskValuta.saner()} på $kursDato")
             try {
-                val exchangeRates =
+                val valutakurser =
                     ecbClient.hentValutakurs(Frequency.Daily, listOf(ECBConstants.NOK, utenlandskValuta), kursDato)
-                validateExchangeRates(utenlandskValuta, kursDato, exchangeRates)
-                val valutakursNOK = exchangeRates.exchangeRateForCurrency(ECBConstants.NOK)!!
-                if (utenlandskValuta == ECBConstants.EUR) {
-                    ecbValutakursCacheRepository.save(ECBValutakursCache(kurs = valutakursNOK.exchangeRate, valutakode = utenlandskValuta, valutakursdato = kursDato))
-                    return valutakursNOK.exchangeRate
-                }
-                val valutakursUtenlandskValuta = exchangeRates.exchangeRateForCurrency(utenlandskValuta)!!
-                ecbValutakursCacheRepository.save(
-                    ECBValutakursCache(
-                        kurs =
-                            beregnValutakurs(
-                                valutakursUtenlandskValuta.exchangeRate,
-                                valutakursNOK.exchangeRate,
+                validateExchangeRates(utenlandskValuta, kursDato, valutakurser)
+                val valutakursNOK = valutakurser.exchangeRateForCurrency(ECBConstants.NOK)!!
+                val lagretValutakurs =
+                    if (utenlandskValuta == ECBConstants.EUR) {
+                        ecbValutakursCacheRepository.save(ECBValutakursCache(kurs = valutakursNOK.kurs, valutakode = utenlandskValuta, valutakursdato = kursDato))
+                    } else {
+                        val valutakursUtenlandskValuta = valutakurser.exchangeRateForCurrency(utenlandskValuta)!!
+                        ecbValutakursCacheRepository.save(
+                            ECBValutakursCache(
+                                kurs = beregnValutakursINOK(valutakursUtenlandskValuta.kurs, valutakursNOK.kurs),
+                                valutakode = utenlandskValuta,
+                                valutakursdato = kursDato,
                             ),
-                        valutakode = utenlandskValuta,
-                        valutakursdato = kursDato,
-                    ),
-                )
-                return beregnValutakurs(valutakursUtenlandskValuta.exchangeRate, valutakursNOK.exchangeRate)
+                        )
+                    }
+
+                loggValutakursSammenligning(eCBValutakursCache = lagretValutakurs)
+                return lagretValutakurs.kurs
             } catch (e: ValutakursClientException) {
                 throw ECBServiceException(e.message, e)
             }
         }
         logger.info("Valutakurs ble hentet fra cache for ${utenlandskValuta.saner()} på $kursDato")
+        loggValutakursSammenligning(eCBValutakursCache = valutakurs)
         return valutakurs.kurs
     }
 
-    private fun beregnValutakurs(
+    private fun loggValutakursSammenligning(eCBValutakursCache: ECBValutakursCache) {
+        try {
+            val valutakursHentetMedNorgesBankKlient =
+                norgesBankValutakursRestKlient.hentValutakurs(Frekvens.VIRKEDAG, eCBValutakursCache.valutakode!!, eCBValutakursCache.valutakursdato!!)
+            val differanse = eCBValutakursCache.kurs.minus(valutakursHentetMedNorgesBankKlient.kurs).abs()
+            if (differanse > BigDecimal(0)) {
+                logger.info("Differanse i valutakurs ved sammenligning av valutakurs-klienter. ECBKlient: ${eCBValutakursCache.kurs} vs NorgesBankKlient: ${valutakursHentetMedNorgesBankKlient.kurs}, for valuta ${eCBValutakursCache.valutakode} på dato ${eCBValutakursCache.valutakursdato}")
+            } else {
+                logger.info("Ingen differanse i valutakurs ved sammenligning av valutakurs-klienter. ECBKlient: ${eCBValutakursCache.kurs} vs NorgesBankKlient: ${valutakursHentetMedNorgesBankKlient.kurs}, for valuta ${eCBValutakursCache.valutakode} på dato ${eCBValutakursCache.valutakursdato}")
+            }
+        } catch (e: Exception) {
+            // Ønsker ikke å feile henting av valutakurs pga sammenligning, så logger kun ut exception dersom henting fra Norges Bank feiler.
+            logger.warn("Feil ved sammenligning av valutakurs-klienter", e)
+        }
+    }
+
+    private fun beregnValutakursINOK(
         valutakursUtenlandskValuta: BigDecimal,
         valutakursNOK: BigDecimal,
     ) = valutakursNOK.del(valutakursUtenlandskValuta, 10)
@@ -76,7 +95,7 @@ class ECBService(
     private fun validateExchangeRates(
         currency: String,
         exchangeRateDate: LocalDate,
-        exchangeRates: List<ExchangeRate>,
+        exchangeRates: List<Valutakurs>,
     ) {
         val expectedSize = if (currency != ECBConstants.EUR) 2 else 1
         val currencies =
@@ -88,13 +107,13 @@ class ECBService(
     }
 
     private fun isValid(
-        exchangeRates: List<ExchangeRate>,
+        exchangeRates: List<Valutakurs>,
         currencies: List<String>,
         exchangeRateDate: LocalDate,
         expectedSize: Int,
     ) = exchangeRates.size == expectedSize &&
-        exchangeRates.all { it.date == exchangeRateDate } &&
-        exchangeRates.map { it.currency }.containsAll(currencies)
+        exchangeRates.all { it.kursDato == exchangeRateDate } &&
+        exchangeRates.map { it.valuta }.containsAll(currencies)
 
     private fun throwValidationException(
         currency: String,
