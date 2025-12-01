@@ -73,7 +73,7 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
             }
     }
 
-    fun genererBosattIRiketVilkårResultat(
+    private fun genererBosattIRiketVilkårResultat(
         personResultat: PersonResultat,
         fødselsdatoForBeskjæring: LocalDate,
         person: Person,
