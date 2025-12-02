@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
@@ -238,7 +239,7 @@ class ArbeidsfordelingService(
     fun hentArbeidsfordelingsenhet(behandling: Behandling): Arbeidsfordelingsenhet {
         val søker =
             identMedAdressebeskyttelse(
-                ident = behandling.fagsak.aktør.aktivFødselsnummer(),
+                aktør = behandling.fagsak.aktør,
                 personType = PersonType.SØKER,
             )
 
@@ -248,7 +249,7 @@ class ArbeidsfordelingService(
                 .barn()
                 .mapNotNull {
                     try {
-                        identMedAdressebeskyttelse(it.aktør.aktivFødselsnummer(), personType = PersonType.BARN)
+                        identMedAdressebeskyttelse(it.aktør, personType = PersonType.BARN)
                     } catch (e: PdlPersonKanIkkeBehandlesIFagsystem) {
                         logger.warn("Ignorerer barn fra hentArbeidsfordelingsenhet for behandling ${behandling.id} : ${e.årsak}")
                         secureLogger.warn("Ignorerer barn ${it.aktør.aktivFødselsnummer()} hentArbeidsfordelingsenhet for behandling ${behandling.id}: ${e.årsak}")
@@ -286,6 +287,15 @@ class ArbeidsfordelingService(
                 .hentPersoninfoEnkel(
                     personidentService.hentAktør(ident),
                 ).adressebeskyttelseGradering,
+        personType = personType,
+    )
+
+    private fun identMedAdressebeskyttelse(
+        aktør: Aktør,
+        personType: PersonType,
+    ) = IdentMedAdressebeskyttelse(
+        ident = aktør.aktivFødselsnummer(),
+        adressebeskyttelsegradering = personopplysningerService.hentPersoninfoEnkel(aktør).adressebeskyttelseGradering,
         personType = personType,
     )
 
