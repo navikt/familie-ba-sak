@@ -1,44 +1,22 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService.IdentMedAdressebeskyttelse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 
-fun finnPersonMedStrengesteAdressebeskyttelse(personer: List<IdentMedAdressebeskyttelse>): String? =
+fun finnPersonMedStrengesteAdressebeskyttelse(
+    personer: List<IdentMedAdressebeskyttelse>,
+): String? =
     personer
-        .fold(
-            null,
-            @Suppress("ktlint:standard:blank-line-before-declaration")
-            fun(
-                person: IdentMedAdressebeskyttelse?,
-                neste: IdentMedAdressebeskyttelse,
-            ): IdentMedAdressebeskyttelse? =
-                when {
-                    person?.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG -> {
-                        person
-                    }
+        .sortedByDescending { it.personType == PersonType.SØKER }
+        .maxByOrNull { it.adressebeskyttelsegradering.strenghet() }
+        ?.takeIf { it.adressebeskyttelsegradering.strenghet() > 0 }
+        ?.ident
 
-                    neste.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG -> {
-                        neste
-                    }
-
-                    person?.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND -> {
-                        person
-                    }
-
-                    neste.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND -> {
-                        neste
-                    }
-
-                    person?.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.FORTROLIG -> {
-                        person
-                    }
-
-                    neste.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.FORTROLIG -> {
-                        neste
-                    }
-
-                    else -> {
-                        null
-                    }
-                },
-        )?.ident
+private fun ADRESSEBESKYTTELSEGRADERING?.strenghet(): Int =
+    when (this) {
+        ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG -> 3
+        ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND -> 2
+        ADRESSEBESKYTTELSEGRADERING.FORTROLIG -> 1
+        else -> 0
+    }
