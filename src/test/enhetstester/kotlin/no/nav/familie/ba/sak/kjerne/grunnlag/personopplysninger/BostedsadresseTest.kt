@@ -3,11 +3,11 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagPerson
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresseBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.filtrerGjeldendeNå
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.vurderOmPersonerBorSammen
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrMatrikkeladresseBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.filtrerGjeldendeNå
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.vurderOmPersonerBorSammen
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import org.junit.jupiter.api.Assertions

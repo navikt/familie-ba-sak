@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class PreutfyllVilkårService(
@@ -37,16 +36,6 @@ class PreutfyllVilkårService(
                 preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
             }
         }
-    }
-
-    fun preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(
-        vilkårsvurdering: Vilkårsvurdering,
-        cutOffFomDato: LocalDate,
-    ) {
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(
-            vilkårsvurdering = vilkårsvurdering,
-            cutOffFomDato = cutOffFomDato,
-        )
     }
 
     fun preutfyllBosattIRiketForFødselshendelseBehandlinger(

@@ -10,11 +10,11 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurderin
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.filtrerGjeldendeNå
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.vurderOmPersonerBorSammen
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.harLøpendeArbeidsforhold
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.filtrerGjeldendeNå
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.vurderOmPersonerBorSammen
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.gyldigGjeldendeOppholdstillatelseFødselshendelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand

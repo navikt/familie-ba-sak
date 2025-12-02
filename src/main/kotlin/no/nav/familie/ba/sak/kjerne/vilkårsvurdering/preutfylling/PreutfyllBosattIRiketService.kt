@@ -12,8 +12,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.erUkraina
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
@@ -86,7 +86,7 @@ class PreutfyllBosattIRiketService(
                 val adresserForPerson = Adresser.opprettFra(adresser[personResultat.aktør.aktivFødselsnummer()])
 
                 val nyeBosattIRiketVilkårResultater =
-                    if (behandling.erFinnmarksEllerSvalbardtillegg() && featureToggleService.isEnabled(FeatureToggle.NY_PREUTFYLLING_FOR_BOSATT_I_RIKET_VILKÅR_VED_AUTOVEDTAK_FINNMARK_SVALBARD)) {
+                    if (behandling.erFinnmarksEllerSvalbardtillegg()) {
                         oppdaterFinnmarkOgSvalbardmerkingPåBosattIRiketVilkårResultat(
                             personResultat = personResultat,
                             adresserForPerson = adresserForPerson,
@@ -144,7 +144,7 @@ class PreutfyllBosattIRiketService(
         val andelForAktør = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør)
 
         if (behandling.erFinnmarksEllerSvalbardtillegg()) {
-            validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtilleggbehandlinger(
+            validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlingerForGammelLøype(
                 behandling = behandling,
                 erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
                 erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
@@ -225,7 +225,7 @@ class PreutfyllBosattIRiketService(
         val erOppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje(adresserForPerson, personResultat)
         val andelForAktør = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, personResultat.aktør)
 
-        validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtilleggbehandlinger(
+        validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlingerForGammelLøype(
             behandling = behandling,
             erDeltBostedIFinnmarkEllerNordTromsTidslinje = erDeltBostedIFinnmarkEllerNordTromsTidslinje,
             erOppholdsadressePåSvalbardTidslinje = erOppholdsadressePåSvalbardTidslinje,
@@ -485,7 +485,8 @@ class PreutfyllBosattIRiketService(
             }
 }
 
-private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtilleggbehandlinger(
+@Deprecated("Fjernes når vi skrur på toggle for å bruke personopplysningsgrunnlag")
+private fun validerKombinasjonerAvAdresserForFinnmarksOgSvalbardtileggbehandlingerForGammelLøype(
     behandling: Behandling,
     erDeltBostedIFinnmarkEllerNordTromsTidslinje: Tidslinje<Boolean>,
     erOppholdsadressePåSvalbardTidslinje: Tidslinje<Boolean>,

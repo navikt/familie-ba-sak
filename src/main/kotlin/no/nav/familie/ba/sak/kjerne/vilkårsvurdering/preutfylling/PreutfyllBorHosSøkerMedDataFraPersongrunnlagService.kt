@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.erSammeAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.erSammeAdresse
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER

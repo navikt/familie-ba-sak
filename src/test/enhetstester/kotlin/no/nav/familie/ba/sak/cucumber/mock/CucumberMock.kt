@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.Utbetalin
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggBegrunnelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
@@ -561,8 +562,6 @@ class CucumberMock(
         PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
             søknadService = mockk(),
             persongrunnlagService = persongrunnlagService,
-            featureToggleService = featureToggleService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
 
     val preutfyllBosattIRiketService =
@@ -578,6 +577,12 @@ class CucumberMock(
     val preutfyllBorHosSøkerMedDataFraPersongrunnlagService =
         PreutfyllBorHosSøkerMedDataFraPersongrunnlagService(
             persongrunnlagService = persongrunnlagService,
+        )
+
+    val oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService =
+        OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService(
+            persongrunnlagService = persongrunnlagService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
 
     val preutfyllVilkårService =
@@ -600,6 +605,8 @@ class CucumberMock(
             vilkårsvurderingMetrics = mockk(),
             andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             preutfyllVilkårService = preutfyllVilkårService,
+            oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService = oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService,
+            preutfyllBosattIRiketService = preutfyllBosattIRiketService,
             featureToggleService = featureToggleService,
         )
 

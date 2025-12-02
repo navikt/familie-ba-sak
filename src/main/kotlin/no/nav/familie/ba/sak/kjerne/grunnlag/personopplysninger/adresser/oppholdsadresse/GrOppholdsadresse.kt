@@ -1,10 +1,13 @@
-package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted
+package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorColumn
 import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -16,29 +19,29 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrMatrikkeladresseDeltBosted.Companion.fraMatrikkeladresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrUkjentBostedDeltBosted.Companion.fraUkjentBosted
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrVegadresseDeltBosted.Companion.fraVegadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse.GrMatrikkeladresseOppholdsadresse.Companion.fraMatrikkeladresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse.GrUtenlandskAdresseOppholdsadresse.Companion.fraUtenlandskAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse.GrVegadresseOppholdsadresse.Companion.fraVegadresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
+import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted
+import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 import java.time.LocalDate
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "GrDeltBosted")
+@Entity(name = "GrOppholdsadresse")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type")
-@Table(name = "PO_DELT_BOSTED")
-abstract class GrDeltBosted(
+@Table(name = "PO_OPPHOLDSADRESSE")
+abstract class GrOppholdsadresse(
     // Alle attributter må være open ellers kastes feil ved oppstart.
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "po_delt_bosted_seq_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "po_oppholdsadresse_seq_generator")
     @SequenceGenerator(
-        name = "po_delt_bosted_seq_generator",
-        sequenceName = "po_delt_bosted_seq",
+        name = "po_oppholdsadresse_seq_generator",
+        sequenceName = "po_oppholdsadresse_seq",
         allocationSize = 50,
     )
     open val id: Long = 0,
@@ -48,19 +51,25 @@ abstract class GrDeltBosted(
     @ManyToOne
     @JoinColumn(name = "fk_po_person_id")
     open var person: Person? = null,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "opphold_annet_sted")
+    open var oppholdAnnetSted: OppholdAnnetSted? = null,
 ) : BaseEntitet() {
     abstract fun toSecureString(): String
 
     abstract fun tilFrontendString(): String
 
+    abstract fun erPåSvalbard(): Boolean
+
     abstract fun tilAdresse(): Adresse
 
-    protected abstract fun tilKopiForNyPerson(): GrDeltBosted
+    protected abstract fun tilKopiForNyPerson(): GrOppholdsadresse
 
-    fun tilKopiForNyPerson(nyPerson: Person): GrDeltBosted =
+    fun tilKopiForNyPerson(nyPerson: Person): GrOppholdsadresse =
         tilKopiForNyPerson().also {
             it.periode = periode
             it.person = nyPerson
+            it.oppholdAnnetSted = oppholdAnnetSted
         }
 
     fun tilRestRegisteropplysning() =
@@ -75,19 +84,20 @@ abstract class GrDeltBosted(
         // Det er en feil i Freg, som har arvet mangelfulle data fra DSF.
         val fregManglendeFlytteDato = LocalDate.of(1, 1, 1)
 
-        fun fraDeltBosted(
-            deltBosted: DeltBosted,
+        fun fraOppholdsadresse(
+            oppholdsadresse: Oppholdsadresse,
             person: Person,
             poststed: String? = null,
-        ): GrDeltBosted =
+        ): GrOppholdsadresse =
             when {
-                deltBosted.vegadresse != null -> fraVegadresse(deltBosted.vegadresse!!, poststed)
-                deltBosted.matrikkeladresse != null -> fraMatrikkeladresse(deltBosted.matrikkeladresse!!, poststed)
-                deltBosted.ukjentBosted != null -> fraUkjentBosted(deltBosted.ukjentBosted!!)
-                else -> throw Feil("Vegadresse, matrikkeladresse og ukjent bosted har verdi null ved mapping fra delt bosted")
+                oppholdsadresse.vegadresse != null -> fraVegadresse(oppholdsadresse.vegadresse!!, poststed)
+                oppholdsadresse.matrikkeladresse != null -> fraMatrikkeladresse(oppholdsadresse.matrikkeladresse!!, poststed)
+                oppholdsadresse.utenlandskAdresse != null -> fraUtenlandskAdresse(oppholdsadresse.utenlandskAdresse!!)
+                else -> GrUkjentAdresseOppholdsadresse()
             }.also {
                 it.person = person
-                it.periode = DatoIntervallEntitet(deltBosted.startdatoForKontrakt, deltBosted.sluttdatoForKontrakt)
+                it.periode = DatoIntervallEntitet(oppholdsadresse.gyldigFraOgMed, oppholdsadresse.gyldigTilOgMed)
+                it.oppholdAnnetSted = OppholdAnnetSted.parse(oppholdsadresse.oppholdAnnetSted)
             }
     }
 }

@@ -1,20 +1,18 @@
-package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse
+package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.deltbosted
 
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
-import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted.PAA_SVALBARD
-import no.nav.familie.kontrakter.felles.svalbard.erKommunePåSvalbard
 import java.util.Objects
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "GrMatrikkeladresseOppholdsadresse")
+@Entity(name = "GrMatrikkeladresseDeltBosted")
 @DiscriminatorValue("Matrikkeladresse")
-data class GrMatrikkeladresseOppholdsadresse(
+data class GrMatrikkeladresseDeltBosted(
     @Column(name = "matrikkel_id")
     val matrikkelId: Long?,
     @Column(name = "bruksenhetsnummer")
@@ -27,9 +25,9 @@ data class GrMatrikkeladresseOppholdsadresse(
     val poststed: String?,
     @Column(name = "kommunenummer")
     val kommunenummer: String?,
-) : GrOppholdsadresse() {
-    override fun tilKopiForNyPerson(): GrOppholdsadresse =
-        GrMatrikkeladresseOppholdsadresse(
+) : GrDeltBosted() {
+    override fun tilKopiForNyPerson(): GrDeltBosted =
+        GrMatrikkeladresseDeltBosted(
             matrikkelId,
             bruksenhetsnummer,
             tilleggsnavn,
@@ -39,32 +37,28 @@ data class GrMatrikkeladresseOppholdsadresse(
         )
 
     override fun toSecureString(): String =
-        "GrMatrikkeladresseOppholdsadresse(" +
+        "GrMatrikkeladresseDeltBosted(" +
             "matrikkelId=$matrikkelId, " +
             "bruksenhetsnummer=$bruksenhetsnummer, " +
             "tilleggsnavn=$tilleggsnavn, " +
             "postnummer=$postnummer, " +
             "poststed=$poststed, " +
-            "kommunenummer=$kommunenummer, " +
-            "oppholdAnnetSted=$oppholdAnnetSted" +
+            "kommunenummer=$kommunenummer" +
             ")"
 
-    override fun toString(): String = "GrMatrikkeladresseOppholdsadresse(detaljer skjult)"
+    override fun toString(): String = "GrMatrikkeladresseDeltBosted(detaljer skjult)"
 
     override fun tilFrontendString(): String {
         val postnummer = postnummer?.let { "Postnummer $postnummer" }
         val poststed = poststed?.let { ", $poststed" } ?: ""
-        val oppholdAnnetSted = oppholdAnnetSted.takeIf { it == PAA_SVALBARD }?.let { ", $it" } ?: ""
-        return postnummer?.let { "$postnummer$poststed$oppholdAnnetSted" } ?: "Ukjent adresse$oppholdAnnetSted"
+        return postnummer?.let { "$postnummer$poststed" } ?: "Ukjent adresse"
     }
-
-    override fun erPåSvalbard(): Boolean = (kommunenummer != null && erKommunePåSvalbard(kommunenummer)) || oppholdAnnetSted == PAA_SVALBARD
 
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
             return false
         }
-        val otherMatrikkeladresse = other as GrMatrikkeladresseOppholdsadresse
+        val otherMatrikkeladresse = other as GrMatrikkeladresseDeltBosted
         return this === other ||
             (
                 matrikkelId != null &&
@@ -79,7 +73,6 @@ data class GrMatrikkeladresseOppholdsadresse(
         Adresse(
             gyldigFraOgMed = periode?.fom,
             gyldigTilOgMed = periode?.tom,
-            oppholdAnnetSted = oppholdAnnetSted,
             matrikkeladresse =
                 Matrikkeladresse(
                     matrikkelId = matrikkelId,
@@ -94,8 +87,8 @@ data class GrMatrikkeladresseOppholdsadresse(
         fun fraMatrikkeladresse(
             matrikkeladresse: Matrikkeladresse,
             poststed: String?,
-        ): GrMatrikkeladresseOppholdsadresse =
-            GrMatrikkeladresseOppholdsadresse(
+        ): GrMatrikkeladresseDeltBosted =
+            GrMatrikkeladresseDeltBosted(
                 matrikkelId = matrikkeladresse.matrikkelId,
                 bruksenhetsnummer = matrikkeladresse.bruksenhetsnummer.takeUnless { it.isNullOrBlank() },
                 tilleggsnavn = matrikkeladresse.tilleggsnavn.takeUnless { it.isNullOrBlank() },
