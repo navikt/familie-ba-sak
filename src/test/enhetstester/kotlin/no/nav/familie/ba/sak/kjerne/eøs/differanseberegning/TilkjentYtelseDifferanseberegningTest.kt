@@ -219,7 +219,7 @@ class TilkjentYtelseDifferanseberegningTest {
     }
 
     @Test
-    fun `Skal trekke fra finnmarkstillegg andel og ikke ordinær andel ved differanseberegning hvis det er nok med finnmarkstillegget`() {
+    fun `Skal aldri trekke videre fra finnmarkstillegg andel ved differanseberegning`() {
         // Arrange
         val barnsFødselsdato = 13.jan(2020)
         val barn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato)
@@ -248,11 +248,11 @@ class TilkjentYtelseDifferanseberegningTest {
                     fom = YearMonth.of(2025, 10),
                     tom = YearMonth.of(2025, 12),
                     barnAktører = setOf(barn.aktør),
-                    beløp = BigDecimal(200),
+                    beløp = BigDecimal(50000),
                     valutakode = "SEK",
                     intervall = Intervall.MÅNEDLIG,
                     utbetalingsland = "NOR",
-                    kalkulertMånedligBeløp = BigDecimal.valueOf(200),
+                    kalkulertMånedligBeløp = BigDecimal.valueOf(50000),
                 ),
             )
 
@@ -280,73 +280,7 @@ class TilkjentYtelseDifferanseberegningTest {
         val ordinærAndel = andelerEtterDifferanseBeregning.single { it.type == YtelseType.ORDINÆR_BARNETRYGD }
         val finnmarkstilleggAndel = andelerEtterDifferanseBeregning.single { it.type == YtelseType.FINNMARKSTILLEGG }
 
-        assertThat(finnmarkstilleggAndel.kalkulertUtbetalingsbeløp).isEqualTo(300)
-        assertThat(ordinærAndel.kalkulertUtbetalingsbeløp).isEqualTo(1000)
-    }
-
-    @Test
-    fun `Skal trekke videre fra ordinær andel ved differanseberegning hvis det ikke er nok med finnmarkstillegget`() {
-        // Arrange
-        val barnsFødselsdato = 13.jan(2020)
-        val barn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato)
-
-        val andelerForBarn =
-            listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2025, 10),
-                    tom = YearMonth.of(2025, 12),
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    beløp = 1000,
-                    person = barn,
-                ),
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2025, 10),
-                    tom = YearMonth.of(2025, 12),
-                    ytelseType = YtelseType.FINNMARKSTILLEGG,
-                    beløp = 500,
-                    person = barn,
-                ),
-            )
-
-        val utenlandskPeriodeBeløpIPeriode =
-            listOf(
-                UtenlandskPeriodebeløp(
-                    fom = YearMonth.of(2025, 10),
-                    tom = YearMonth.of(2025, 12),
-                    barnAktører = setOf(barn.aktør),
-                    beløp = BigDecimal(700),
-                    valutakode = "SEK",
-                    intervall = Intervall.MÅNEDLIG,
-                    utbetalingsland = "NOR",
-                    kalkulertMånedligBeløp = BigDecimal.valueOf(700),
-                ),
-            )
-
-        val valutakursIPeriode =
-            listOf(
-                Valutakurs(
-                    fom = YearMonth.of(2025, 10),
-                    tom = YearMonth.of(2025, 12),
-                    barnAktører = setOf(barn.aktør),
-                    valutakode = "SEK",
-                    vurderingsform = Vurderingsform.AUTOMATISK,
-                    kurs = BigDecimal(1),
-                ),
-            )
-
-        // Act
-        val andelerEtterDifferanseBeregning =
-            beregnDifferanse(
-                andelerForBarn,
-                utenlandskePeriodebeløp = utenlandskPeriodeBeløpIPeriode,
-                valutakurser = valutakursIPeriode,
-            )
-
-        // Assert
-        val ordinærAndel = andelerEtterDifferanseBeregning.single { it.type == YtelseType.ORDINÆR_BARNETRYGD }
-        val finnmarkstilleggAndel = andelerEtterDifferanseBeregning.single { it.type == YtelseType.FINNMARKSTILLEGG }
-
-        assertThat(finnmarkstilleggAndel.kalkulertUtbetalingsbeløp).isEqualTo(0)
-        assertThat(ordinærAndel.kalkulertUtbetalingsbeløp).isEqualTo(800)
+        assertThat(finnmarkstilleggAndel.kalkulertUtbetalingsbeløp).isEqualTo(500)
+        assertThat(ordinærAndel.kalkulertUtbetalingsbeløp).isEqualTo(0)
     }
 }
