@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak.ETTERBETALING_3MND
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak.ETTERBETALING_3ÅR
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -50,7 +51,7 @@ class EndretUtbetalingAndelService(
             restEndretUtbetalingAndel.personIdenter.takeUnless { it.isNullOrEmpty() }
                 ?: throw FunksjonellFeil("Endret utbetalingsperiode må gjelde minst én person")
 
-        val personer =
+        val personerIEndretUtbetalingAndel =
             persongrunnlagService
                 .hentPersonerPåBehandling(personerPåEndretUtbetalingAndel, behandling)
                 .filter { personerPåEndretUtbetalingAndel.contains(it.aktør.aktivFødselsnummer()) }
@@ -61,7 +62,7 @@ class EndretUtbetalingAndelService(
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
-        endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, personer.toSet())
+        endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, personerIEndretUtbetalingAndel.toSet())
 
         val andreEndredeAndelerPåBehandling =
             endretUtbetalingAndelHentOgPersisterService
@@ -75,6 +76,8 @@ class EndretUtbetalingAndelService(
                 endretUtbetalingAndel = endretUtbetalingAndel,
                 andelTilkjentYtelser = andelTilkjentYtelser,
             )
+
+        validerAtIngenTomDatoErFørFomDato(endretUtbetalingAndel, gyldigTomDatoPerAktør, personerIEndretUtbetalingAndel)
 
         if (skalSplitteEndretUtbetalingAndel(endretUtbetalingAndel, gyldigTomDatoPerAktør)) {
             splittValiderOgLagreEndretUtbetalingAndeler(
@@ -94,6 +97,24 @@ class EndretUtbetalingAndelService(
         }
 
         oppdaterBehandlingMedBeregningOgVarsleAbonnenter(behandling)
+    }
+
+    private fun validerAtIngenTomDatoErFørFomDato(
+        endretUtbetalingAndel: EndretUtbetalingAndel,
+        gyldigTomDatoPerAktør: Map<Aktør, YearMonth?>,
+        personerIBehandling: List<Person>,
+    ) {
+        gyldigTomDatoPerAktør.forEach { (aktør, tomDato) ->
+            val fomDatoPåEndretUtbetalingAndel = endretUtbetalingAndel.fom
+            if (tomDato?.isBefore(fomDatoPåEndretUtbetalingAndel) == true) {
+                val personenDetGjelder = personerIBehandling.single { it.aktør == aktør }
+
+                throw FunksjonellFeil(
+                    "Person med fødselsdato ${personenDetGjelder.fødselsdato} er ikke gyldig for denne " +
+                        "endret utbetalingsperioden da den siste andelen personen har er i $tomDato som er før $fomDatoPåEndretUtbetalingAndel.",
+                )
+            }
+        }
     }
 
     @Transactional
