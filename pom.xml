@@ -24,7 +24,7 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20251117095517_cc54714</prosessering.version>
-        <felles.version>3.20251105152539_b03ed80</felles.version>
+        <felles.version>3.20251202144928_31b3e0f</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20251126091830_a5eb8fb</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20251112142340_c5baa9c</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20251126091830_a5eb8fb</familie.kontrakter.saksstatistikk>
@@ -318,7 +318,6 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>valutakurs-klient</artifactId>
-            <version>3.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>

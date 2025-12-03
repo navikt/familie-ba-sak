@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.common.saner
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCache
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCacheRepository
+import no.nav.familie.valutakurs.ECBValutakursRestKlient
 import no.nav.familie.valutakurs.NorgesBankValutakursRestKlient
-import no.nav.familie.valutakurs.ValutakursRestClient
 import no.nav.familie.valutakurs.domene.Valutakurs
 import no.nav.familie.valutakurs.domene.ecb.Frequency
 import no.nav.familie.valutakurs.domene.exchangeRateForCurrency
@@ -20,9 +20,9 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 @Service
-@Import(ValutakursRestClient::class, NorgesBankValutakursRestKlient::class)
+@Import(ECBValutakursRestKlient::class, NorgesBankValutakursRestKlient::class)
 class ECBService(
-    private val ecbClient: ValutakursRestClient,
+    private val ecbValutakursRestKlient: ECBValutakursRestKlient,
     private val norgesBankValutakursRestKlient: NorgesBankValutakursRestKlient,
     private val ecbValutakursCacheRepository: ECBValutakursCacheRepository,
 ) {
@@ -43,7 +43,7 @@ class ECBService(
             logger.info("Henter valutakurs for ${utenlandskValuta.saner()} på $kursDato")
             try {
                 val valutakurser =
-                    ecbClient.hentValutakurs(Frequency.Daily, listOf(ECBConstants.NOK, utenlandskValuta), kursDato)
+                    ecbValutakursRestKlient.hentValutakurs(Frequency.Daily, listOf(ECBConstants.NOK, utenlandskValuta), kursDato)
                 validateExchangeRates(utenlandskValuta, kursDato, valutakurser)
                 val valutakursNOK = valutakurser.exchangeRateForCurrency(ECBConstants.NOK)!!
                 val lagretValutakurs =
@@ -112,7 +112,7 @@ class ECBService(
         exchangeRateDate: LocalDate,
         expectedSize: Int,
     ) = exchangeRates.size == expectedSize &&
-        exchangeRates.all { it.kursDato == exchangeRateDate } &&
+        exchangeRates.all { it.kursDato.isEqual(exchangeRateDate) } &&
         exchangeRates.map { it.valuta }.containsAll(currencies)
 
     private fun throwValidationException(

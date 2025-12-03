@@ -2,12 +2,11 @@ package no.nav.familie.ba.sak.integrasjoner.ecb
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCache
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCacheRepository
+import no.nav.familie.valutakurs.ECBValutakursRestKlient
 import no.nav.familie.valutakurs.NorgesBankValutakursRestKlient
-import no.nav.familie.valutakurs.ValutakursRestClient
 import no.nav.familie.valutakurs.domene.ecb.ECBValutakursData
 import no.nav.familie.valutakurs.domene.ecb.Frequency
 import no.nav.familie.valutakurs.domene.ecb.toExchangeRates
@@ -27,11 +26,11 @@ import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ECBServiceTest {
-    private val ecbClient = mockk<ValutakursRestClient>()
+    private val ecbValutakursRestKlient = mockk<ECBValutakursRestKlient>()
     private val ecbValutakursCacheRepository = mockk<ECBValutakursCacheRepository>()
     private val norgesBankValutakursRestKlient = mockk<NorgesBankValutakursRestKlient>(relaxed = true)
 
-    private val ecbService = ECBService(ecbClient, norgesBankValutakursRestKlient, ecbValutakursCacheRepository)
+    private val ecbService = ECBService(ecbValutakursRestKlient, norgesBankValutakursRestKlient, ecbValutakursCacheRepository)
 
     @AfterAll
     fun tearDown() {
@@ -53,7 +52,7 @@ class ECBServiceTest {
         every { ecbValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns emptyList()
         every { ecbValutakursCacheRepository.save(any()) } answers { firstArg() }
         every {
-            ecbClient.hentValutakurs(
+            ecbValutakursRestKlient.hentValutakurs(
                 Frequency.Daily,
                 listOf("NOK", "SEK"),
                 valutakursDato,
@@ -74,7 +73,7 @@ class ECBServiceTest {
             )
         every { ecbValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns emptyList()
         every {
-            ecbClient.hentValutakurs(
+            ecbValutakursRestKlient.hentValutakurs(
                 Frequency.Daily,
                 listOf("NOK", "SEK"),
                 valutakursDato,
@@ -94,7 +93,7 @@ class ECBServiceTest {
             )
         every { ecbValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns emptyList()
         every {
-            ecbClient.hentValutakurs(
+            ecbValutakursRestKlient.hentValutakurs(
                 Frequency.Daily,
                 listOf("NOK", "SEK"),
                 valutakursDato,
@@ -116,7 +115,7 @@ class ECBServiceTest {
         every { ecbValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns emptyList()
         every { ecbValutakursCacheRepository.save(any()) } returns ECBValutakursCache(kurs = BigDecimal.valueOf(9.4567), valutakode = "EUR", valutakursdato = valutakursDato)
         every {
-            ecbClient.hentValutakurs(
+            ecbValutakursRestKlient.hentValutakurs(
                 Frequency.Daily,
                 listOf("NOK", "EUR"),
                 valutakursDato,
