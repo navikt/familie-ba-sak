@@ -5,16 +5,17 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCacheRepository
-import no.nav.familie.valutakurs.Frequency
-import no.nav.familie.valutakurs.ValutakursRestClient
-import no.nav.familie.valutakurs.domene.ECBExchangeRate
-import no.nav.familie.valutakurs.domene.ECBExchangeRateDate
-import no.nav.familie.valutakurs.domene.ECBExchangeRateKey
-import no.nav.familie.valutakurs.domene.ECBExchangeRateValue
-import no.nav.familie.valutakurs.domene.ECBExchangeRatesData
-import no.nav.familie.valutakurs.domene.ECBExchangeRatesDataSet
-import no.nav.familie.valutakurs.domene.ECBExchangeRatesForCurrency
-import no.nav.familie.valutakurs.domene.toExchangeRates
+import no.nav.familie.valutakurs.ECBValutakursRestKlient
+import no.nav.familie.valutakurs.NorgesBankValutakursRestKlient
+import no.nav.familie.valutakurs.domene.ecb.ECBValutakursData
+import no.nav.familie.valutakurs.domene.ecb.Frequency
+import no.nav.familie.valutakurs.domene.ecb.toExchangeRates
+import no.nav.familie.valutakurs.domene.sdmx.SDMXExchangeRate
+import no.nav.familie.valutakurs.domene.sdmx.SDMXExchangeRateDate
+import no.nav.familie.valutakurs.domene.sdmx.SDMXExchangeRateKey
+import no.nav.familie.valutakurs.domene.sdmx.SDMXExchangeRateValue
+import no.nav.familie.valutakurs.domene.sdmx.SDMXExchangeRatesDataSet
+import no.nav.familie.valutakurs.domene.sdmx.SDMXExchangeRatesForCurrency
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,9 +25,10 @@ import java.time.LocalDate
 class ECBServiceIntegrationTest(
     @Autowired private val ecbValutakursCacheRepository: ECBValutakursCacheRepository,
 ) : AbstractSpringIntegrationTest() {
-    private val ecbClient = mockk<ValutakursRestClient>()
+    private val ecbValutakursRestKlient = mockk<ECBValutakursRestKlient>()
+    private val norgesBankValutakursRestKlient = mockk<NorgesBankValutakursRestKlient>(relaxed = true)
 
-    private val ecbService = ECBService(ecbClient = ecbClient, ecbValutakursCacheRepository = ecbValutakursCacheRepository)
+    private val ecbService = ECBService(ecbValutakursRestKlient = ecbValutakursRestKlient, norgesBankValutakursRestKlient = norgesBankValutakursRestKlient, ecbValutakursCacheRepository = ecbValutakursCacheRepository)
 
     @Test
     fun `Skal teste at valutakurs hentes fra cache dersom valutakursen allerede er hentet fra ECB`() {
@@ -39,7 +41,7 @@ class ECBServiceIntegrationTest(
                 valutakursDato.toString(),
             )
         every {
-            ecbClient.hentValutakurs(
+            ecbValutakursRestKlient.hentValutakurs(
                 Frequency.Daily,
                 listOf("NOK", "EUR"),
                 valutakursDato,
@@ -55,7 +57,7 @@ class ECBServiceIntegrationTest(
 
         ecbService.hentValutakurs("EUR", valutakursDato)
         verify(exactly = 1) {
-            ecbClient.hentValutakurs(
+            ecbValutakursRestKlient.hentValutakurs(
                 any(),
                 any(),
                 any(),
@@ -67,19 +69,20 @@ class ECBServiceIntegrationTest(
         frequency: Frequency,
         exchangeRates: List<Pair<String, BigDecimal>>,
         exchangeRateDate: String,
-    ): ECBExchangeRatesData =
-        ECBExchangeRatesData(
-            ECBExchangeRatesDataSet(
+    ): ECBValutakursData =
+        ECBValutakursData(
+            SDMXExchangeRatesDataSet(
                 exchangeRates.map {
-                    ECBExchangeRatesForCurrency(
+                    SDMXExchangeRatesForCurrency(
                         listOf(
-                            ECBExchangeRateKey("CURRENCY", it.first),
-                            ECBExchangeRateKey("FREQ", frequency.toFrequencyParam()),
+                            SDMXExchangeRateKey("CURRENCY", it.first),
+                            SDMXExchangeRateKey("FREQ", frequency.toFrequencyParam()),
                         ),
+                        listOf(),
                         listOf(
-                            ECBExchangeRate(
-                                ECBExchangeRateDate(exchangeRateDate),
-                                ECBExchangeRateValue((it.second)),
+                            SDMXExchangeRate(
+                                SDMXExchangeRateDate(exchangeRateDate),
+                                SDMXExchangeRateValue((it.second)),
                             ),
                         ),
                     )

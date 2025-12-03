@@ -41,7 +41,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
     "mock-unleash",
     "mock-infotrygd-barnetrygd",
     "fake-integrasjon-klient",
-    "fake-valutakurs-rest-klient",
+    "fake-ecb-valutakurs-rest-klient",
     "fake-økonomi-klient",
     "fake-task-repository",
 )

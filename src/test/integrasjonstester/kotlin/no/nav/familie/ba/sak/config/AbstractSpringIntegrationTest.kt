@@ -28,7 +28,7 @@ import org.springframework.test.context.ActiveProfiles
     "mock-unleash",
     "mock-system-only-integrasjon-klient",
     "fake-integrasjon-klient",
-    "fake-valutakurs-rest-klient",
+    "fake-ecb-valutakurs-rest-klient",
     "fake-økonomi-klient",
     "fake-env-service",
     "fake-task-repository",
