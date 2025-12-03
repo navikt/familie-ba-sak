@@ -134,6 +134,7 @@ spec:
         - host: sentry.gc.nav.no
         - host: data-api.ecb.europa.eu
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
+        - host: data.norges-bank.no
         # Sanity IPs https://www.sanity.io/docs/api-cdn#5fa01dfe1285 (Fjernes når feilen er rettet av platform teamet https://nav-it.slack.com/archives/C5KUST8N6/p1719994144462539)
         - ipv4: 35.241.31.122
         - ipv4: 35.190.70.79

@@ -130,6 +130,7 @@ spec:
         - host: sentry.gc.nav.no
         - host: data-api.ecb.europa.eu
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
+        - host: data.norges-bank.no
   replicas:
     min: 2
     max: 2
