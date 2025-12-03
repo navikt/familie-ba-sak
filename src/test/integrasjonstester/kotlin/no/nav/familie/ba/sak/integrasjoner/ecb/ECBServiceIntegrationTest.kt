@@ -28,7 +28,7 @@ class ECBServiceIntegrationTest(
     private val ecbValutakursRestKlient = mockk<ECBValutakursRestKlient>()
     private val norgesBankValutakursRestKlient = mockk<NorgesBankValutakursRestKlient>(relaxed = true)
 
-    private val ecbService = ECBService(ecbValutakursRestKlient = ecbValutakursRestKlient, norgesBankValutakursRestKlient, ecbValutakursCacheRepository = ecbValutakursCacheRepository)
+    private val ecbService = ECBService(ecbValutakursRestKlient = ecbValutakursRestKlient, norgesBankValutakursRestKlient = norgesBankValutakursRestKlient, ecbValutakursCacheRepository = ecbValutakursCacheRepository)
 
     @Test
     fun `Skal teste at valutakurs hentes fra cache dersom valutakursen allerede er hentet fra ECB`() {
