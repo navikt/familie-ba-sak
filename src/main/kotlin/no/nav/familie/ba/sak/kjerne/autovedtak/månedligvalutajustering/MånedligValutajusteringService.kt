@@ -1,5 +1,6 @@
 ﻿package no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering
 
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
@@ -21,31 +22,32 @@ import java.time.YearMonth
 class MånedligValutajusteringService(
     private val ecbService: ECBService,
     private val valutakursService: ValutakursService,
+    private val clockProvider: ClockProvider,
 ) {
-    val logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    fun oppdaterValutakurserFraOgMedMåned(
+    fun oppdaterValutakurserFraOgMedInneværendeMåned(
         behandlingId: BehandlingId,
-        valutajusteringMåned: YearMonth,
     ) {
-        logger.info("Oppdaterer valutakurser fra og med $valutajusteringMåned for behandlingId=${behandlingId.id}")
+        val inneværendeMåned = YearMonth.now(clockProvider.get())
+        logger.info("Oppdaterer valutakurser fra og med $inneværendeMåned for behandlingId=${behandlingId.id}")
 
         val valutakurser = valutakursService.hentValutakurser(BehandlingId(behandlingId.id))
         val valutakurserSomMåOppdateres =
             valutakurser
                 .map { it.tilIValutakurs() }
                 .filterIsInstance<UtfyltValutakurs>()
-                .filter { valutakurs -> valutakurs.tom == null || valutakurs.tom.isSameOrAfter(valutajusteringMåned) }
+                .filter { valutakurs -> valutakurs.tom == null || valutakurs.tom.isSameOrAfter(inneværendeMåned) }
 
-        val sisteVirkedagForrigeMåned = valutajusteringMåned.minusMonths(1).tilSisteVirkedag()
+        val sisteVirkedagForrigeMåned = inneværendeMåned.minusMonths(1).tilSisteVirkedag()
 
         val nyeValutaKurser =
             valutakurserSomMåOppdateres.map { valutakurs ->
                 val nyKurs = ecbService.hentValutakurs(valutakurs.valutakode, sisteVirkedagForrigeMåned)
 
                 Valutakurs(
-                    fom = maxOf(valutajusteringMåned, valutakurs.fom),
+                    fom = maxOf(inneværendeMåned, valutakurs.fom),
                     tom = valutakurs.tom,
                     barnAktører = valutakurs.barnAktører,
                     valutakursdato = sisteVirkedagForrigeMåned,

@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
@@ -32,7 +31,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIngenVilkårSattEtt
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.YearMonth
 
 @Service
 class VilkårsvurderingSteg(
@@ -45,7 +43,6 @@ class VilkårsvurderingSteg(
     private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService,
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
     private val månedligValutajusteringService: MånedligValutajusteringService,
-    private val clockProvider: ClockProvider,
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
     private val featureToggleService: FeatureToggleService,
     private val opprettTaskService: OpprettTaskService,
@@ -127,7 +124,7 @@ class VilkårsvurderingSteg(
         }
 
         if (behandling.erMånedligValutajustering()) {
-            månedligValutajusteringService.oppdaterValutakurserFraOgMedMåned(BehandlingId(behandling.id), YearMonth.now(clockProvider.get()))
+            månedligValutajusteringService.oppdaterValutakurserFraOgMedInneværendeMåned(BehandlingId(behandling.id))
         }
 
         automatiskOppdaterValutakursService.oppdaterAndelerMedValutakurser(BehandlingId(behandling.id))
