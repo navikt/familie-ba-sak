@@ -127,7 +127,7 @@ class VilkårsvurderingSteg(
         }
 
         if (behandling.erMånedligValutajustering()) {
-            månedligValutajusteringService.oppdaterValutakurserForMåned(BehandlingId(behandling.id), YearMonth.now(clockProvider.get()))
+            månedligValutajusteringService.oppdaterValutakurserFraOgMedMåned(BehandlingId(behandling.id), YearMonth.now(clockProvider.get()))
         }
 
         automatiskOppdaterValutakursService.oppdaterAndelerMedValutakurser(BehandlingId(behandling.id))

@@ -25,18 +25,18 @@ class MånedligValutajusteringService(
     val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    fun oppdaterValutakurserForMåned(
+    fun oppdaterValutakurserFraOgMedMåned(
         behandlingId: BehandlingId,
         valutajusteringMåned: YearMonth,
     ) {
-        logger.info("Oppdaterer valutakurser for behandlingId=${behandlingId.id} og valutajusteringMåned=$valutajusteringMåned")
+        logger.info("Oppdaterer valutakurser fra og med $valutajusteringMåned for behandlingId=${behandlingId.id}")
 
         val valutakurser = valutakursService.hentValutakurser(BehandlingId(behandlingId.id))
         val valutakurserSomMåOppdateres =
             valutakurser
                 .map { it.tilIValutakurs() }
                 .filterIsInstance<UtfyltValutakurs>()
-                .filter { valutakurs -> valutakurs.periodeInneholder(valutajusteringMåned) }
+                .filter { valutakurs -> valutakurs.tom == null || valutakurs.tom.isSameOrAfter(valutajusteringMåned) }
 
         val sisteVirkedagForrigeMåned = valutajusteringMåned.minusMonths(1).tilSisteVirkedag()
 
@@ -45,7 +45,7 @@ class MånedligValutajusteringService(
                 val nyKurs = ecbService.hentValutakurs(valutakurs.valutakode, sisteVirkedagForrigeMåned)
 
                 Valutakurs(
-                    fom = valutajusteringMåned,
+                    fom = maxOf(valutajusteringMåned, valutakurs.fom),
                     tom = valutakurs.tom,
                     barnAktører = valutakurs.barnAktører,
                     valutakursdato = sisteVirkedagForrigeMåned,
