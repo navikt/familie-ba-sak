@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandling.behandlingstema
 import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -18,6 +19,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.EØS_FORO
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.NASJONALE_REGLER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.tidslinje.utvidelser.verdiPåTidspunkt
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -31,6 +34,7 @@ class BehandlingstemaService(
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val clockProvider: ClockProvider,
+    private val integrasjonKlient: IntegrasjonKlient,
 ) {
     @Transactional
     fun oppdaterBehandlingstemaFraRegistrereSøknadSteg(
@@ -172,9 +176,15 @@ class BehandlingstemaService(
             val behandlingstemaErEndret = it.behandlingstema != behandling.tilOppgaveBehandlingTema().value
             val behandlingstypeErEndret = it.behandlingstype != behandling.kategori.tilOppgavebehandlingType().value
             if (behandlingstemaErEndret || behandlingstypeErEndret) {
+                val endretAvEnhetsnr =
+                    SikkerhetContext.hentSaksbehandler().takeIf { it != SYSTEM_FORKORTELSE }?.let {
+                        integrasjonKlient.hentSaksbehandler(it).enhet
+                    }
+
                 it.copy(
                     behandlingstema = behandling.tilOppgaveBehandlingTema().value,
                     behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
+                    endretAvEnhetsnr = endretAvEnhetsnr ?: it.endretAvEnhetsnr,
                 )
             } else {
                 null
