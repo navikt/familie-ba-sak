@@ -34,6 +34,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerF
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.erNorgeSekundærLand
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilUtfylteKompetanserEtterEndringstidpunktPerAktør
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utbetalingsland
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
@@ -157,7 +158,7 @@ fun hentLandOgStartdatoForUtbetalingstabell(
 ): UtbetalingstabellAutomatiskValutajustering {
     val utfylteSekundærlandsKompetanserEtterEndringstidspunkt =
         kompetanser
-            .filter { it.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
+            .filter { it.erNorgeSekundærLand()}
             .tilUtfylteKompetanserEtterEndringstidpunktPerAktør(endringstidspunkt)
 
     if (utfylteSekundærlandsKompetanserEtterEndringstidspunkt.isEmpty()) {

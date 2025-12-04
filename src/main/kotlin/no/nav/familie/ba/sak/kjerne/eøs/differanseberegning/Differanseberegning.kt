@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilMånedlig
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat.NORGE_ER_SEKUNDÆRLAND
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.erNorgeSekundærLand
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -185,7 +185,7 @@ fun Map<Aktør, Tidslinje<AndelTilkjentYtelse>>.kunReneSekundærlandsperioder(
     val barnasErSekundærlandTidslinjer =
         this.leftJoin(barnasKompetanseTidslinjer) { andel, kompetanse ->
             when {
-                andel != null && kompetanse?.resultat == NORGE_ER_SEKUNDÆRLAND -> true
+                andel != null && kompetanse?.erNorgeSekundærLand() == true -> true
                 andel != null -> false
                 else -> null
             }

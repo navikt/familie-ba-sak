@@ -130,7 +130,6 @@ enum class KompetanseAktivitet(
 
     MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN(true, true),
     MOTTAR_PENSJON(true, true),
-    NASJONAL_RETT_DIFFERANSEBEREGNING(true, true),
     INAKTIV(true, true),
 
     I_ARBEID(false, true),
@@ -143,6 +142,7 @@ enum class KompetanseResultat {
     NORGE_ER_PRIMÆRLAND,
     NORGE_ER_SEKUNDÆRLAND,
     TO_PRIMÆRLAND,
+    NASJONAL_RETT_DIFFERANSEBEREGNING
 }
 
 sealed interface IKompetanse {
@@ -267,6 +267,9 @@ fun Kompetanse.utbetalingsland(): String? {
         is TomKompetanse -> null
     }
 }
+
+fun Kompetanse.erNorgeSekundærLand() =
+    this.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND || this.resultat == KompetanseResultat.NASJONAL_RETT_DIFFERANSEBEREGNING
 
 fun IUtfyltKompetanse.utbetalingsland(): String {
     if (this.resultat == KompetanseResultat.NORGE_ER_PRIMÆRLAND) return "NO"
