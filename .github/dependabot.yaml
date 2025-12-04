@@ -30,6 +30,8 @@ updates:
       prod-avhengigheter:
         dependency-type: "production"
         exclude-patterns:
+          - "org.springframework*:*"
+          - "org.springdoc:*"
           - "no.nav.security*:*"
       utvikler-avhengigheter:
         dependency-type: "development"
