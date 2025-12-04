@@ -27,10 +27,12 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.util.VirkedagerProvider
 import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -196,7 +198,7 @@ class OpprettTaskService(
                         },
                 ).run {
                     if (envService.erProd() && featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG)) {
-                        medTriggerTid(LocalDateTime.now().plusHours(1))
+                        medTriggerTid(utledNesteTriggerTidIHverdagerForTask(minimumForsinkelse = Duration.ofHours(1)))
                     } else {
                         this
                     }
@@ -223,7 +225,7 @@ class OpprettTaskService(
                             },
                     ).apply {
                         if (envService.erProd() && featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_ADRESSEHENDELSELØYPE_SVALBARDTILLEGG)) {
-                            medTriggerTid(LocalDateTime.now().plusHours(1))
+                            medTriggerTid(utledNesteTriggerTidIHverdagerForTask(minimumForsinkelse = Duration.ofHours(1)))
                         }
                     },
                 )

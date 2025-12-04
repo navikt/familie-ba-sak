@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse
+package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.DiscriminatorColumn
@@ -24,9 +24,10 @@ import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresseBostedsadresse.Companion.fraMatrikkeladresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBostedBostedsadresse.Companion.fraUkjentBosted
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse.Companion.fraVegadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrMatrikkeladresseBostedsadresse.Companion.fraMatrikkeladresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrUkjentBostedBostedsadresse.Companion.fraUkjentBosted
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrVegadresseBostedsadresse.Companion.fraVegadresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import java.time.LocalDate
@@ -69,7 +70,7 @@ abstract class GrBostedsadresse(
 
     fun gjeldendeNå(): Boolean {
         if (periode == null) return true
-        return periode!!.erInnenfor(LocalDate.now())
+        return LocalDate.now().erInnenfor(periode!!)
     }
 
     fun tilRestRegisteropplysning() =

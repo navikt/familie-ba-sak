@@ -6,7 +6,9 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
+import java.time.LocalDate
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 
 fun <V> Periode<V>.splitPerMåned(tilOgMedMåned: YearMonth): List<Periode<V>> {
     val førsteMåned = (this.fom ?: PRAKTISK_TIDLIGSTE_DAG).toYearMonth()
@@ -19,3 +21,5 @@ fun <V> Periode<V>.splitPerMåned(tilOgMedMåned: YearMonth): List<Periode<V>> {
         )
     }
 }
+
+fun Periode<*>.erMinst12Måneder(): Boolean = ChronoUnit.MONTHS.between(fom, tom ?: LocalDate.now()) >= 12

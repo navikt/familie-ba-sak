@@ -145,6 +145,7 @@ FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag/api
 SANITY_FAMILIE_API_URL: https://xsrv1mh6.apicdn.sanity.io/v2021-06-07/data/query/ba-brev
 ECB_API_URL: https://data-api.ecb.europa.eu/service/data/EXR/
+NORGES_BANK_API_URL: https://data.norges-bank.no/api/data/EXR/
 CRON_FAGSAKSTATUS_SCHEDULER: "0 0 6 1 * *"
 
 # Swagger

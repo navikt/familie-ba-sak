@@ -8,6 +8,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingMedOverstyrendeResultater
+import no.nav.familie.ba.sak.kjerne.autovedtak.OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -32,8 +34,10 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -50,6 +54,8 @@ class VilkårsvurderingForNyBehandlingServiceTest {
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val preutfyllVilkårService = mockk<PreutfyllVilkårService>()
+    private val preutfyllBosattIRiketService = mockk<PreutfyllBosattIRiketService>()
+    private val oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService = mockk<OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService>()
 
     private val vilkårsvurderingForNyBehandlingService =
         VilkårsvurderingForNyBehandlingService(
@@ -61,8 +67,15 @@ class VilkårsvurderingForNyBehandlingServiceTest {
             vilkårsvurderingMetrics = vilkårsvurderingMetrics,
             andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             preutfyllVilkårService = preutfyllVilkårService,
+            oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService = oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService,
+            preutfyllBosattIRiketService = preutfyllBosattIRiketService,
             featureToggleService = featureToggleService,
         )
+
+    @BeforeEach()
+    fun setup() {
+        every { featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG) } returns true
+    }
 
     @Nested
     inner class OpprettVilkårsvurderingUtenomHovedflyt {
@@ -379,7 +392,11 @@ class VilkårsvurderingForNyBehandlingServiceTest {
 
                 every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
                 every { vilkårsvurderingService.hentAktivForBehandling(forrigeBehandling.id) } returns forrigeVilkårsvurdering
-                every { preutfyllVilkårService.preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(any(), any()) } just runs
+                every {
+                    oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(
+                        vilkårsvurdering = any<Vilkårsvurdering>(),
+                    )
+                } just runs
                 every { endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(behandling, forrigeBehandling) } just runs
                 every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(capture(vilkårsvurderingSlot)) } returnsArgument 0
 
@@ -504,7 +521,11 @@ class VilkårsvurderingForNyBehandlingServiceTest {
 
                 every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
                 every { vilkårsvurderingService.hentAktivForBehandling(forrigeBehandling.id) } returns forrigeVilkårsvurdering
-                every { preutfyllVilkårService.preutfyllBosattIRiketForFinnmarksOgSvalbardtilleggBehandlinger(any(), any()) } just runs
+                every {
+                    oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(
+                        vilkårsvurdering = any<Vilkårsvurdering>(),
+                    )
+                } just runs
                 every { endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(behandling, forrigeBehandling) } just runs
                 every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(capture(vilkårsvurderingSlot)) } returnsArgument 0
 

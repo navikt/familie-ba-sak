@@ -1,31 +1,31 @@
 package no.nav.familie.ba.sak.fake
 
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBConstants
-import no.nav.familie.valutakurs.Frequency
-import no.nav.familie.valutakurs.ValutakursRestClient
-import no.nav.familie.valutakurs.domene.ExchangeRate
+import no.nav.familie.valutakurs.ECBValutakursRestKlient
+import no.nav.familie.valutakurs.domene.Valutakurs
+import no.nav.familie.valutakurs.domene.ecb.Frequency
 import org.springframework.web.client.RestOperations
 import java.math.BigDecimal
 import java.time.LocalDate
 
-class FakeValutakursRestClient(
+class FakeECBValutakursRestKlient(
     restOperations: RestOperations,
-) : ValutakursRestClient(restOperations = restOperations) {
+) : ECBValutakursRestKlient(restOperations = restOperations) {
     override fun hentValutakurs(
         frequency: Frequency,
         currencies: List<String>,
         exchangeRateDate: LocalDate,
-    ): List<ExchangeRate> {
+    ): List<Valutakurs> {
         val exchangeRates =
             currencies.map {
-                ExchangeRate(
-                    currency = it,
-                    exchangeRate = BigDecimal(10),
-                    date = exchangeRateDate,
+                Valutakurs(
+                    valuta = it,
+                    kurs = BigDecimal(10),
+                    kursDato = exchangeRateDate,
                 )
             }
         return if (ECBConstants.EUR in currencies) {
-            exchangeRates.filter { it.currency == ECBConstants.NOK }
+            exchangeRates.filter { it.valuta == ECBConstants.NOK }
         } else {
             exchangeRates
         }

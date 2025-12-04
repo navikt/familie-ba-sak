@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.config
 
 import no.nav.familie.ba.sak.fake.FakeBrevKlient
+import no.nav.familie.ba.sak.fake.FakeECBValutakursRestKlient
 import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
 import no.nav.familie.ba.sak.fake.FakeEnvService
 import no.nav.familie.ba.sak.fake.FakeFeatureToggleService
@@ -14,7 +15,6 @@ import no.nav.familie.ba.sak.fake.FakeSanityKlient
 import no.nav.familie.ba.sak.fake.FakeSystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
 import no.nav.familie.ba.sak.fake.FakeTilbakekrevingKlient
-import no.nav.familie.ba.sak.fake.FakeValutakursRestClient
 import no.nav.familie.ba.sak.fake.FakeØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
@@ -42,8 +42,8 @@ class FakeConfig {
 
     @Bean
     @Primary
-    @Profile("fake-valutakurs-rest-klient")
-    fun fakeValutakursRestKlient(restOperations: RestOperations): FakeValutakursRestClient = FakeValutakursRestClient(restOperations)
+    @Profile("fake-ecb-valutakurs-rest-klient")
+    fun fakeECBValutakursRestKlient(restOperations: RestOperations): FakeECBValutakursRestKlient = FakeECBValutakursRestKlient(restOperations)
 
     @Bean
     @Primary

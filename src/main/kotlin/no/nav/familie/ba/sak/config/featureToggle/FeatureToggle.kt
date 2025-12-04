@@ -17,6 +17,7 @@ enum class FeatureToggle(
     PREUTFYLLING_VILKÅR_LOVLIG_OPPHOLD("familie-ba-sak.preutfylling-lovlig-opphold"),
     PREUTFYLLING_BOR_HOS_SØKER("familie-ba-sak.preutfylling-bor-hos-soker"),
     PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG("familie-ba-sak.preutfylling-personopplysningsgrunnlag"),
+    ARBEIDSFORHOLD_STRENGERE_NEDHENTING("familie-ba-sak.arbeidsforhold-strengere-nedhenting"),
 
     AUTOMAITSK_REGISTRER_SØKNAD("familie-ba-sak.automatisk-registrer-soknad"),
 
@@ -60,8 +61,6 @@ enum class FeatureToggle(
 
     // Toggle for å kunne skru av tungtkjørende statistikk for grafana når man f.eks. kjører autovedtak som satsendring/finnmarkstillegg
     TUNGTKJØRENDE_GRAFANA_STATISTIKK("familie-ba-sak.generer-grafana-statistikk"),
-
-    NY_PREUTFYLLING_FOR_BOSATT_I_RIKET_VILKÅR_VED_AUTOVEDTAK_FINNMARK_SVALBARD("familie-ba-sak.ny-preutfylling-for-bosatt-i-riket-vilkaar-ved-autovedtak-finnmark-svalbard"),
 
     JOURNALFOER_MANUELT_BREV_I_TASK("familie-ba-sak.journalfoer-manuelt-brev-i-task"),
 

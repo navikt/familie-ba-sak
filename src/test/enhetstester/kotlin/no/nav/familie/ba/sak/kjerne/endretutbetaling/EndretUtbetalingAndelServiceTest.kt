@@ -217,6 +217,60 @@ class EndretUtbetalingAndelServiceTest {
         assertThat(slettetEndretUtbetalingAndel).isEqualTo(endretUtbetalingAndel.endretUtbetalingAndel)
     }
 
+    @Test
+    fun `Skal kaste funksjonell feil hvis gyldig tom dato for en av personene er før ønsket fom på endret utbetaling andel`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(1998, 11, 1))
+        val barn2 = lagPerson(type = PersonType.BARN)
+
+        val endretUtbetalingAndel =
+            lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                behandlingId = behandling.id,
+                personer = setOf(barn1, barn2),
+                prosent = BigDecimal.ZERO,
+                årsak = Årsak.ENDRE_MOTTAKER,
+                fom = YearMonth.of(2025, 11),
+                tom = null,
+            )
+
+        val restEndretUtbetalingAndel = endretUtbetalingAndel.tilRestEndretUtbetalingAndel()
+
+        val andelerTilkjentYtelse =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    person = barn1,
+                    fom = YearMonth.of(2015, 11),
+                    tom = YearMonth.of(2016, 11),
+                ),
+                lagAndelTilkjentYtelse(
+                    person = barn2,
+                    fom = YearMonth.now().minusYears(1),
+                    tom = YearMonth.now().plusYears(2),
+                ),
+            )
+
+        every { mockEndretUtbetalingAndelRepository.getReferenceById(any()) } returns EndretUtbetalingAndel(behandlingId = behandling.id)
+        every { mockPersongrunnlagService.hentPersonerPåBehandling(any(), behandling) } returns listOf(barn1, barn2)
+        every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns lagTestPersonopplysningGrunnlag(behandling.id, barn1, barn2)
+        every { mockAndelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id) } returns andelerTilkjentYtelse
+        every { mockEndretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = behandling.id) } returns emptyList()
+        every { mockVilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id) } returns mockk()
+
+        // Act && Assert
+        val feilmelding =
+            assertThrows<FunksjonellFeil> {
+                endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+                    behandling = behandling,
+                    endretUtbetalingAndelId = endretUtbetalingAndel.id,
+                    restEndretUtbetalingAndel = restEndretUtbetalingAndel,
+                )
+            }.frontendFeilmelding
+
+        // Assert
+        assertThat(feilmelding).isEqualTo("Person med fødselsdato 1998-11-01 er ikke gyldig for denne endret utbetalingsperioden da den siste andelen personen har er i 2016-11 som er før 2025-11.")
+    }
+
     @Nested
     inner class GenererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd {
         private val behandling = lagBehandling()

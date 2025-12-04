@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -30,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -45,6 +47,7 @@ class PersongrunnlagServiceTest {
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val kodeverkService = mockk<KodeverkService>()
     private val featureToggleService = mockk<FeatureToggleService>()
+    private val systemOnlyIntegrasjonKlient = mockk<SystemOnlyIntegrasjonKlient>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
 
     private val persongrunnlagService =
@@ -65,6 +68,11 @@ class PersongrunnlagServiceTest {
                 featureToggleService = featureToggleService,
             ),
         )
+
+    @BeforeEach
+    fun setup() {
+        every { featureToggleService.isEnabled(FeatureToggle.ARBEIDSFORHOLD_STRENGERE_NEDHENTING) } returns true
+    }
 
     @Test
     fun `Skal sende med barna fra forrige behandling ved førstegangsbehandling nummer to`() {
@@ -153,9 +161,6 @@ class PersongrunnlagServiceTest {
                 every { featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
                 every { featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
                 every { featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
-                every { featureToggleService.isEnabled(FeatureToggle.FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
-
-                every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
 
                 persongrunnlagService
                     .hentOgLagreSøkerOgBarnINyttGrunnlag(

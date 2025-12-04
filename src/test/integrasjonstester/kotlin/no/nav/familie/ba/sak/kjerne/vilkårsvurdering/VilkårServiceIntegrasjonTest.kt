@@ -123,11 +123,11 @@ class VilkårServiceIntegrasjonTest(
             personResultat.vilkårResultater.forEach { vilkårResultat ->
                 when (vilkårResultat.vilkårType) {
                     Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP, Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER -> {
-                        assertTrue(vilkårResultat.erAutomatiskVurdert, "Vilkår $vilkårResultat skal være automatisk vurdert")
+                        assertTrue(vilkårResultat.erAutomatiskVurdert, "Vilkår ${vilkårResultat.vilkårType} skal være automatisk vurdert")
                     }
 
                     else -> {
-                        assertFalse(vilkårResultat.erAutomatiskVurdert, "Vilkår $vilkårResultat skal ikke være automatisk vurdert")
+                        assertFalse(vilkårResultat.erAutomatiskVurdert, "Vilkår ${vilkårResultat.vilkårType} skal ikke være automatisk vurdert")
                     }
                 }
             }

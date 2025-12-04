@@ -1,14 +1,17 @@
 package no.nav.familie.ba.sak.datagenerator
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresser
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrMatrikkeladresseDeltBosted
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrMatrikkeladresseOppholdsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrUkjentAdresseOppholdsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrUtenlandskAdresseOppholdsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrVegadresseOppholdsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrMatrikkeladresseBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrUkjentBostedBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrVegadresseBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.deltbosted.GrMatrikkeladresseDeltBosted
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.deltbosted.GrVegadresseDeltBosted
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse.GrMatrikkeladresseOppholdsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse.GrUkjentAdresseOppholdsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse.GrUtenlandskAdresseOppholdsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse.GrVegadresseOppholdsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
 import no.nav.familie.kontrakter.felles.personopplysning.Folkeregistermetadata
@@ -183,6 +186,52 @@ fun lagGrVegadresseOppholdsadresse(
     poststed = poststed,
 ).also { it.periode = periode }
 
+fun lagGrVegadresseBostedsadresse(
+    matrikkelId: Long? = null,
+    husnummer: String? = null,
+    husbokstav: String? = null,
+    bruksenhetsnummer: String? = null,
+    adressenavn: String? = null,
+    kommunenummer: String? = null,
+    tilleggsnavn: String? = null,
+    postnummer: String? = null,
+    periode: DatoIntervallEntitet? = null,
+    poststed: String? = null,
+) = GrVegadresseBostedsadresse(
+    matrikkelId = matrikkelId,
+    husnummer = husnummer,
+    husbokstav = husbokstav,
+    bruksenhetsnummer = bruksenhetsnummer,
+    adressenavn = adressenavn,
+    kommunenummer = kommunenummer,
+    tilleggsnavn = tilleggsnavn,
+    postnummer = postnummer,
+    poststed = poststed,
+).also { it.periode = periode }
+
+fun lagGrVegadresseDeltBosted(
+    matrikkelId: Long? = null,
+    husnummer: String? = null,
+    husbokstav: String? = null,
+    bruksenhetsnummer: String? = null,
+    adressenavn: String? = null,
+    kommunenummer: String? = null,
+    tilleggsnavn: String? = null,
+    postnummer: String? = null,
+    periode: DatoIntervallEntitet? = null,
+    poststed: String? = null,
+) = GrVegadresseDeltBosted(
+    matrikkelId = matrikkelId,
+    husnummer = husnummer,
+    husbokstav = husbokstav,
+    bruksenhetsnummer = bruksenhetsnummer,
+    adressenavn = adressenavn,
+    kommunenummer = kommunenummer,
+    tilleggsnavn = tilleggsnavn,
+    postnummer = postnummer,
+    poststed = poststed,
+).also { it.periode = periode }
+
 fun lagGrMatrikkelOppholdsadresse(
     matrikkelId: Long? = null,
     bruksenhetsnummer: String? = null,
@@ -192,6 +241,23 @@ fun lagGrMatrikkelOppholdsadresse(
     periode: DatoIntervallEntitet? = null,
     poststed: String? = null,
 ) = GrMatrikkeladresseOppholdsadresse(
+    matrikkelId = matrikkelId,
+    bruksenhetsnummer = bruksenhetsnummer,
+    kommunenummer = kommunenummer,
+    tilleggsnavn = tilleggsnavn,
+    postnummer = postnummer,
+    poststed = poststed,
+).also { it.periode = periode }
+
+fun lagGrMatrikkelBostedsadresse(
+    matrikkelId: Long? = null,
+    bruksenhetsnummer: String? = null,
+    kommunenummer: String? = null,
+    tilleggsnavn: String? = null,
+    postnummer: String? = null,
+    periode: DatoIntervallEntitet? = null,
+    poststed: String? = null,
+) = GrMatrikkeladresseBostedsadresse(
     matrikkelId = matrikkelId,
     bruksenhetsnummer = bruksenhetsnummer,
     kommunenummer = kommunenummer,
@@ -246,6 +312,13 @@ fun lagGrUkjentAdresseOppholdsadresse(
 ) = GrUkjentAdresseOppholdsadresse().also {
     it.periode = periode
     it.oppholdAnnetSted = oppholdAnnetSted
+}
+
+fun lagGrUkjentBostedBostedsadresse(
+    periode: DatoIntervallEntitet? = null,
+    bostedskommune: String,
+) = GrUkjentBostedBostedsadresse(bostedskommune).also {
+    it.periode = periode
 }
 
 fun lagFolkeregistermetadata(

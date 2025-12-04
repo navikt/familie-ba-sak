@@ -111,7 +111,6 @@ class FakeIntegrasjonKlient(
     }
 
     override fun oppdaterOppgave(
-        oppgaveId: Long,
         oppdatertOppgave: Oppgave,
     ) {
         return

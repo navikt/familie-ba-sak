@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.common.Utils.tilEtterfølgendePar
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrVegadresseBostedsadresse
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer.er11Siffer
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import org.assertj.core.api.Assertions.assertThat

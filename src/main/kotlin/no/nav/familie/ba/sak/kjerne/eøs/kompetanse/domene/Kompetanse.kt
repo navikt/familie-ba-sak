@@ -130,6 +130,7 @@ enum class KompetanseAktivitet(
 
     MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN(true, true),
     MOTTAR_PENSJON(true, true),
+    NASJONAL_RETT_DIFFERANSEBEREGNING(true, true),
     INAKTIV(true, true),
 
     I_ARBEID(false, true),

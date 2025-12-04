@@ -263,10 +263,9 @@ class IntegrasjonKlient(
     }
 
     fun oppdaterOppgave(
-        oppgaveId: Long,
         oppdatertOppgave: Oppgave,
     ) {
-        val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId/oppdater")
+        val uri = URI.create("$integrasjonUri/oppgave/${oppdatertOppgave.id}/oppdater")
 
         kallEksternTjenesteUtenRespons(
             tjeneste = "oppgave",

@@ -1,7 +1,8 @@
-package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse
+package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser
 
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.kontrakter.ba.finnmarkstillegg.kommuneErIFinnmarkEllerNordTroms
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
@@ -13,6 +14,9 @@ import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 import no.nav.familie.kontrakter.felles.personopplysning.UtenlandskAdresse
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.familie.kontrakter.felles.svalbard.erKommunePåSvalbard
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.tilTidslinje
 import java.time.LocalDate
 
 data class Adresse(
@@ -101,17 +105,89 @@ fun Adresse.erSammeAdresse(annen: Adresse?): Boolean =
         else -> false
     }
 
-fun List<Adresse>.hentForDato(dato: LocalDate): Adresse? = finnAdressehistorikkFraOgMedDato(this, dato).firstOrNull()
+fun List<Adresse>.hentForDato(dato: LocalDate): Adresse? = finnAdressehistorikkFraOgMedDato(dato).firstOrNull()
 
-fun finnAdressehistorikkFraOgMedDato(
-    adresser: List<Adresse>,
+fun List<Adresse>.finnAdressehistorikkFraOgMedDato(
     dato: LocalDate,
 ): List<Adresse> {
-    val sorterteAdresser = adresser.filter { it.gyldigFraOgMed != null }.sortedBy { it.gyldigFraOgMed }
+    val sorterteAdresser = filter { it.gyldigFraOgMed != null }.sortedBy { it.gyldigFraOgMed }
     val sisteAdresseSomOverlapperDato = sorterteAdresser.lastOrNull { it.overlapperMedDato(dato) }
     return if (sisteAdresseSomOverlapperDato == null) {
-        adresser
+        this
     } else {
         sorterteAdresser.dropWhile { it != sisteAdresseSomOverlapperDato }
     }
 }
+
+fun List<Adresse>.lagTidslinjeForAdresser(
+    adressetype: String,
+    operator: (Adresse) -> Boolean,
+): Tidslinje<Boolean> {
+    try {
+        return windowed(size = 2, step = 1, partialWindows = true) {
+            val denne = it.first()
+            val neste = it.getOrNull(1)
+
+            Periode(
+                verdi = operator(denne),
+                fom = denne.gyldigFraOgMed,
+                tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
+            )
+        }.tilTidslinje()
+    } catch (e: IllegalStateException) {
+        secureLogger.error("Feil ved oppretting av tidslinjer for $adressetype med adresser $this", e)
+        throw e
+    } catch (e: IllegalArgumentException) {
+        secureLogger.error("Feil ved oppretting av tidslinjer for $adressetype med adresser $this", e)
+        throw e
+    }
+}
+
+/**
+ * Filtrerer ut adresser med ugyldige kombinasjoner av fom og tom
+ * Distinkte perioder med lik fom og tom (prioriterer de som er i Finnmark eller NordTroms)
+ **/
+fun List<Adresse>.filtrereUgyldigeAdresser(): List<Adresse> {
+    val filtrert =
+        filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
+            .groupBy { it.gyldigFraOgMed to it.gyldigTilOgMed }
+            .values
+            .map { likePerioder ->
+                likePerioder.find { it.erIFinnmarkEllerNordTroms() } ?: likePerioder.first()
+            }
+
+    return filtrert.forskyvTilOgMedHvisDenErLikNesteFraOgMed()
+}
+
+/**
+ * Filtrerer ut adresser med ugyldige kombinasjoner av fom og tom
+ * Distinkte perioder med lik fom og tom (prioriterer de som er på Svalbard)
+ **/
+fun List<Adresse>.filtrereUgyldigeOppholdsadresser(): List<Adresse> {
+    val filtrert =
+        filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
+            .groupBy { it.gyldigFraOgMed to it.gyldigTilOgMed }
+            .values
+            .map { likePerioder ->
+                likePerioder.find { it.erPåSvalbard() } ?: likePerioder.first()
+            }
+
+    return filtrert.forskyvTilOgMedHvisDenErLikNesteFraOgMed()
+}
+
+private fun List<Adresse>.forskyvTilOgMedHvisDenErLikNesteFraOgMed(): List<Adresse> =
+    sortedBy { it.gyldigFraOgMed }
+        .windowed(size = 2, step = 1, partialWindows = true)
+        .map { adresser ->
+            val denne = adresser.first()
+            val neste = adresser.getOrNull(1)
+
+            if (denne.gyldigTilOgMed != null &&
+                neste != null &&
+                denne.gyldigTilOgMed == neste.gyldigFraOgMed
+            ) {
+                denne.copy(gyldigTilOgMed = denne.gyldigTilOgMed.minusDays(1))
+            } else {
+                denne
+            }
+        }

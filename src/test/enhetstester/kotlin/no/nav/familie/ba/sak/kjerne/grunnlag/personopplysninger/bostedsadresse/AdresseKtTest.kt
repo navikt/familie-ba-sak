@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse
 
 import no.nav.familie.ba.sak.datagenerator.lagAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.finnAdressehistorikkFraOgMedDato
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.hentForDato
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -94,7 +96,7 @@ class AdresseKtTest {
             val adresser = listOf(adresse1, adresse2, adresse3, adresse4, adresse5)
 
             // Act
-            val funnetAdresser = finnAdressehistorikkFraOgMedDato(adresser, dagensDato)
+            val funnetAdresser = adresser.finnAdressehistorikkFraOgMedDato(dagensDato)
 
             // Assert
             assertThat(funnetAdresser).hasSize(2)
@@ -115,7 +117,7 @@ class AdresseKtTest {
             val adresser = listOf(adresse)
 
             // Act
-            val funnetAdresser = finnAdressehistorikkFraOgMedDato(adresser, dagensDato)
+            val funnetAdresser = adresser.finnAdressehistorikkFraOgMedDato(dagensDato)
 
             // Assert
             assertThat(funnetAdresser).hasSize(1)

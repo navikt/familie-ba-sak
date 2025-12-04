@@ -29,11 +29,11 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortOppholdFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortOppholdsadresserFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortStatsborgerskapFørEldsteBarn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.deltbosted.GrDeltBosted
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse.GrOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.deltbosted.GrDeltBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -127,7 +127,9 @@ class PersongrunnlagService(
             ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling $behandlingId")
 
     @Transactional
-    fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
+    fun oppdaterRegisteropplysninger(
+        behandlingId: Long,
+    ): PersonopplysningGrunnlag {
         val nåværendeGrunnlag = hentAktivThrows(behandlingId = behandlingId)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
@@ -241,7 +243,7 @@ class PersongrunnlagService(
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering() || behandling.erFinnmarksEllerSvalbardtillegg()
+        val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering()
         val søker =
             hentPerson(
                 aktør = aktør,
@@ -390,12 +392,27 @@ class PersongrunnlagService(
                     dødsfallDatoFraPdl = personinfo.dødsfall?.dødsdato,
                     dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo?.adresse,
                 )
-            if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
-                person.arbeidsforhold =
-                    arbeidsforholdService
-                        .hentArbeidsforhold(
+
+            if (featureToggleService.isEnabled(FeatureToggle.ARBEIDSFORHOLD_STRENGERE_NEDHENTING)) {
+                val personErSøker = person.type == PersonType.SØKER
+                val harStatsborgerskapIEØS = person.statsborgerskap.any { it.medlemskap == Medlemskap.EØS }
+                if (personErSøker && harStatsborgerskapIEØS) {
+                    val arbeidsforholdForPerson =
+                        arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
+                            statsborgerskap = person.statsborgerskap,
                             person = person,
-                        ).toMutableList()
+                            cutOffFomDato = personinfo.eldsteBarnsFødselsdato() ?: person.fødselsdato, // hvis det ikke er noen barn antar vi enslig mindreårig
+                        )
+                    person.arbeidsforhold = arbeidsforholdForPerson.toMutableList()
+                }
+            } else {
+                if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
+                    person.arbeidsforhold =
+                        arbeidsforholdService
+                            .hentArbeidsforhold(
+                                person = person,
+                            ).toMutableList()
+                }
             }
         }
     }

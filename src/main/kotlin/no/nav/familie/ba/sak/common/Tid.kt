@@ -193,12 +193,12 @@ fun VilkårResultat.toPeriode(): Periode =
         this.erEksplisittAvslagPåSøknad,
     )
 
-fun DatoIntervallEntitet.erInnenfor(dato: LocalDate): Boolean =
+fun LocalDate.erInnenfor(periode: DatoIntervallEntitet): Boolean =
     when {
-        fom == null && tom == null -> true
-        fom == null -> dato.isSameOrBefore(tom!!)
-        tom == null -> dato.isSameOrAfter(fom)
-        else -> dato.isSameOrAfter(fom) && dato.isSameOrBefore(tom)
+        periode.fom == null && periode.tom == null -> true
+        periode.fom == null -> isSameOrBefore(periode.tom!!)
+        periode.tom == null -> isSameOrAfter(periode.fom)
+        else -> isSameOrAfter(periode.fom) && isSameOrBefore(periode.tom)
     }
 
 class YearMonthIterator(
