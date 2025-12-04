@@ -64,6 +64,7 @@ class BehandlingsresultatSteg(
         if (!behandling.erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg()) {
             behandlingsresultatstegValideringService.validerEndredeUtbetalingsandeler(tilkjentYtelse)
             behandlingsresultatstegValideringService.validerKompetanse(behandling.id)
+            behandlingsresultatstegValideringService.validerAtDetIkkeFinnesPerioderMedSekundærlandKompetanseUtenUtenlandskbeløpEllerValutakurs(behandling.id)
         }
 
         if (behandling.erMånedligValutajustering()) {

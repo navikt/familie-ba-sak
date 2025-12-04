@@ -107,6 +107,7 @@ class BehandlingsresultatStegTest {
             justRun { behandlingsresultatstegValideringService.validerSvalbardtilleggBehandling(any()) }
             justRun { behandlingsresultatstegValideringService.validerEndredeUtbetalingsandeler(any()) }
             justRun { behandlingsresultatstegValideringService.validerKompetanse(any()) }
+            justRun { behandlingsresultatstegValideringService.validerAtDetIkkeFinnesPerioderMedSekundærlandKompetanseUtenUtenlandskbeløpEllerValutakurs(any()) }
             justRun { behandlingsresultatstegValideringService.validerIngenEndringTilbakeITid(any()) }
             justRun { behandlingsresultatstegValideringService.validerSatsErUendret(any()) }
             justRun { behandlingsresultatstegValideringService.validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(any()) }
@@ -203,6 +204,7 @@ class BehandlingsresultatStegTest {
             verify(exactly = 1) {
                 behandlingsresultatstegValideringService.validerEndredeUtbetalingsandeler(any())
                 behandlingsresultatstegValideringService.validerKompetanse(any())
+                behandlingsresultatstegValideringService.validerAtDetIkkeFinnesPerioderMedSekundærlandKompetanseUtenUtenlandskbeløpEllerValutakurs(any())
             }
         }
 
