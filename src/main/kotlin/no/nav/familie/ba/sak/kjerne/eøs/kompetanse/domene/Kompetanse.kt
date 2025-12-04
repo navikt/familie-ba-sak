@@ -142,7 +142,7 @@ enum class KompetanseResultat {
     NORGE_ER_PRIMÆRLAND,
     NORGE_ER_SEKUNDÆRLAND,
     TO_PRIMÆRLAND,
-    NASJONAL_RETT_DIFFERANSEBEREGNING
+    NASJONAL_RETT_DIFFERANSEBEREGNING,
 }
 
 sealed interface IKompetanse {
@@ -268,8 +268,7 @@ fun Kompetanse.utbetalingsland(): String? {
     }
 }
 
-fun Kompetanse.erNorgeSekundærLand() =
-    this.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND || this.resultat == KompetanseResultat.NASJONAL_RETT_DIFFERANSEBEREGNING
+fun Kompetanse.erNorgeSekundærLand() = this.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND || this.resultat == KompetanseResultat.NASJONAL_RETT_DIFFERANSEBEREGNING
 
 fun IUtfyltKompetanse.utbetalingsland(): String {
     if (this.resultat == KompetanseResultat.NORGE_ER_PRIMÆRLAND) return "NO"
