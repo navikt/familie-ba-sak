@@ -193,9 +193,9 @@ class BehandlingsresultatStegValideringServiceTest {
     }
 
     @Nested
-    inner class ValiderAtDetIkkeFinnesPerioderMedSekundærlandKompetanseUtenUtenlandskbeløpEllerValutakursTest {
+    inner class ValiderSekundærlandKompetanseTest {
         @Test
-        fun `Kast feil ved sekundærland kompetanser uten utenlandskperiode beløp eller valutakurs`() {
+        fun `Skal kaste funksjonell feil ved sekundærland kompetanser uten utenlandskperiode beløp eller valutakurs`() {
             // Arrange
             val sekundærlandKompetanse =
                 lagKompetanse(
@@ -236,7 +236,7 @@ class BehandlingsresultatStegValideringServiceTest {
             every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandling.id) } returns listOf(utenlandskPeriodebeløp)
 
             // Act & Assert
-            val feil = assertThrows<FunksjonellFeil> { behandlingsresultatStegValideringService.validerAtDetIkkeFinnesPerioderMedSekundærlandKompetanseUtenUtenlandskbeløpEllerValutakurs(behandling.id) }
+            val feil = assertThrows<FunksjonellFeil> { behandlingsresultatStegValideringService.validerSekundærlandKompetanse(behandling.id) }
 
             assertThat(feil.melding).isEqualTo(
                 """
@@ -247,7 +247,7 @@ class BehandlingsresultatStegValideringServiceTest {
         }
 
         @Test
-        fun `Kast annen feilmelding ved feil i samme måned eller før`() {
+        fun `Skal kaste annen feilmelding ved feil i samme måned eller før`() {
             // Arrange
             val sekundærlandKompetanse =
                 lagKompetanse(
@@ -288,7 +288,7 @@ class BehandlingsresultatStegValideringServiceTest {
             every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandling.id) } returns listOf(utenlandskPeriodebeløp)
 
             // Act & Assert
-            val feil = assertThrows<FunksjonellFeil> { behandlingsresultatStegValideringService.validerAtDetIkkeFinnesPerioderMedSekundærlandKompetanseUtenUtenlandskbeløpEllerValutakurs(behandling.id) }
+            val feil = assertThrows<FunksjonellFeil> { behandlingsresultatStegValideringService.validerSekundærlandKompetanse(behandling.id) }
 
             assertThat(feil.melding).isEqualTo(
                 """

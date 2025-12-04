@@ -246,7 +246,7 @@ class BehandlingsresultatStegValideringService(
         )
     }
 
-    fun validerAtDetIkkeFinnesPerioderMedSekundærlandKompetanseUtenUtenlandskbeløpEllerValutakurs(
+    fun validerSekundærlandKompetanse(
         behandlingId: Long,
     ) {
         val sekundærlandKompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId).filter { it.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
@@ -285,9 +285,5 @@ class BehandlingsresultatStegValideringService(
                 )
             }
         }
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(BehandlingsresultatStegValideringService::class.java)
     }
 }
