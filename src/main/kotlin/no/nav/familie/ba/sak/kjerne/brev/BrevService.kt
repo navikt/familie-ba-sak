@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.Companion.AUTOMATISK_BEHANDLING_BREVSIGNATUR
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.finnInnvilgedeOgReduserteFinnmarkstilleggPerioder
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.finnInnvilgedeOgReduserteSvalbardtilleggPerioder
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -622,7 +623,14 @@ class BrevService(
                 behandling = behandling,
                 totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id),
             )
-        val enhet = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn
+
+        val enhet =
+            if (behandling.skalBehandlesAutomatisk) {
+                AUTOMATISK_BEHANDLING_BREVSIGNATUR
+            } else {
+                arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn
+            }
+
         return GrunnlagOgSignaturData(
             grunnlag = personopplysningGrunnlag,
             saksbehandler = saksbehandler,

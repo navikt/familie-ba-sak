@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
+import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -11,13 +13,20 @@ import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.fake.FakeBrevKlient
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
+import no.nav.familie.ba.sak.fake.FakePdlRestKlient
+import no.nav.familie.ba.sak.fake.FakePdlRestKlient.Companion.leggTilBostedsadresseIPDL
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
+import no.nav.familie.ba.sak.fake.FakeØkonomiKlient.Companion.leggTilSimuleringResultat
 import no.nav.familie.ba.sak.fake.tilPayload
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
+import no.nav.familie.ba.sak.kjerne.autovedtak.FinnmarkstilleggData
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdataFraBehandling
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -48,6 +57,7 @@ import no.nav.familie.ba.sak.task.dto.JournalførManueltBrevDTO
 import no.nav.familie.ba.sak.testfiler.Testfil.TEST_PDF
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
+import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -92,6 +102,10 @@ class DokumentServiceIntegrationTest(
     private val brevmalService: BrevmalService,
     @Autowired
     private val fakeTaskRepositoryWrapper: FakeTaskRepositoryWrapper,
+    @Autowired
+    private val autovedtakFinnmarkstilleggService: AutovedtakFinnmarkstilleggService,
+    @Autowired
+    private val fakePdlRestKlient: FakePdlRestKlient,
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Hent vedtaksbrev`() {
@@ -195,7 +209,7 @@ class DokumentServiceIntegrationTest(
 
         val vedtaksbrevFellesFelter = brevService.lagVedtaksbrevFellesfelter(vedtak)
 
-        assertEquals("NAV Familie- og pensjonsytelser Oslo 1", vedtaksbrevFellesFelter.enhet)
+        assertEquals("Nav Familie- og pensjonsytelser Oslo 1", vedtaksbrevFellesFelter.enhet)
         assertEquals("System", vedtaksbrevFellesFelter.saksbehandler)
         assertEquals("Beslutter", vedtaksbrevFellesFelter.beslutter)
 
@@ -234,6 +248,55 @@ class DokumentServiceIntegrationTest(
 
         assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterVedtakBesluttet.saksbehandler)
         assertEquals(mockBeslutter, vedtaksbrevFellesFelterEtterVedtakBesluttet.beslutter)
+    }
+
+    @Test
+    fun `Skal ekskludere navn på enhet i signatur i brev for automatisk behandling`() {
+        val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+
+        val forrigeBehandling =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.BEHANDLING_AVSLUTTET,
+                søkerFnr = søkerFnr,
+                barnasIdenter = listOf(barnFnr),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
+
+        fakeIntegrasjonKlient.leggTilBehandlendeEnhet(
+            ident = søkerFnr,
+            enheter = listOf(BarnetrygdEnhet.MIDLERTIDIG_ENHET),
+        )
+
+        leggTilBostedsadresseIPDL(
+            personIdenter = listOf(søkerFnr, barnFnr),
+            bostedsadresse = lagBostedsadresse(vegadresse = lagVegadresse(kommunenummer = "5601")),
+        )
+
+        leggTilSimuleringResultat(
+            fagsakId = forrigeBehandling.fagsak.id.toString(),
+            simuleringResultat = DetaljertSimuleringResultat(simuleringMottaker = emptyList()),
+        )
+
+        autovedtakFinnmarkstilleggService.kjørBehandling(FinnmarkstilleggData(forrigeBehandling.fagsak.id))
+
+        val automatiskBehandlingMedVedtaksbrev = behandlingHentOgPersisterService.hentBehandlinger(forrigeBehandling.fagsak.id).first { it.aktiv }
+
+        assertEquals(automatiskBehandlingMedVedtaksbrev.opprettetÅrsak, BehandlingÅrsak.FINNMARKSTILLEGG)
+
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = automatiskBehandlingMedVedtaksbrev.id)!!
+
+        val vedtaksbrevFellesFelter = brevService.lagVedtaksbrevFellesfelter(vedtak)
+
+        assertEquals("Nav Familie- og pensjonsytelser", vedtaksbrevFellesFelter.enhet)
+        assertEquals("System", vedtaksbrevFellesFelter.saksbehandler)
+        assertEquals("System", vedtaksbrevFellesFelter.beslutter)
     }
 
     @Test
