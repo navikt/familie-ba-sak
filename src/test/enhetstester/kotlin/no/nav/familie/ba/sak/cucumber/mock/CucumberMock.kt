@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockTilbakekrevingsved
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategiForValutakurserRepository
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestKlient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
@@ -154,6 +155,7 @@ class CucumberMock(
     val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
     val behandlingSøknadsinfoRepository = mockBehandlingSøknadsinfoRepository()
     val systemOnlyPdlRestKlient = mockSystemOnlyPdlRestKlient(dataFraCucumber)
+    val integrasjonKlient = mockk<IntegrasjonKlient>()
 
     init {
         dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
@@ -174,6 +176,7 @@ class CucumberMock(
             vilkårsvurderingTidslinjeService = vilkårsvurderingTidslinjeService,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
             clockProvider = clockProvider,
+            integrasjonKlient = integrasjonKlient,
         )
 
     val overgangsstønadService =

@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -57,6 +58,7 @@ class BehandlingstemaServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val tidslinjeService = mockk<VilkårsvurderingTidslinjeService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
+    private val integrasjonKlient = mockk<IntegrasjonKlient>()
 
     private val dagensDato = LocalDate.of(2024, 10, 1)
 
@@ -69,6 +71,7 @@ class BehandlingstemaServiceTest {
             vilkårsvurderingTidslinjeService = tidslinjeService,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
             clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(dagensDato),
+            integrasjonKlient = integrasjonKlient,
         )
 
     private val fagsak = defaultFagsak()
