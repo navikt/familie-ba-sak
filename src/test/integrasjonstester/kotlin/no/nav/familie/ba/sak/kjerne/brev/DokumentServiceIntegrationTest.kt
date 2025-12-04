@@ -251,7 +251,7 @@ class DokumentServiceIntegrationTest(
     }
 
     @Test
-    fun `Skal bruke riktig signatur i automatisk behandling med brev`() {
+    fun `Skal ekskludere navn på enhet i signatur i brev for automatisk behandling`() {
         val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
         val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
 
