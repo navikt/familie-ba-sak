@@ -21,22 +21,22 @@ updates:
     groups:
       interne-avhengigheter:
         patterns:
-          - "no.nav.familie*:*"
+          - "no.nav.familie*"
       spring-med-avhengigheter:
         patterns:
-          - "org.springframework*:*"
-          - "no.nav.security:*"
-          - "org.springdoc:*"
+          - "org.springframework*"
+          - "no.nav.security*"
+          - "org.springdoc*"
       prod-avhengigheter:
         dependency-type: "production"
         exclude-patterns:
-          - "org.springframework*:*"
-          - "org.springdoc:*"
-          - "no.nav.security*:*"
+          - "org.springframework*"
+          - "org.springdoc*"
+          - "no.nav.security*"
       utvikler-avhengigheter:
         dependency-type: "development"
         exclude-patterns:
-          - "no.nav.security*:*"
+          - "no.nav.security*"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
