@@ -142,6 +142,8 @@ enum class KompetanseResultat {
     NORGE_ER_PRIMÆRLAND,
     NORGE_ER_SEKUNDÆRLAND,
     TO_PRIMÆRLAND,
+
+    // Dette defineres også som at Norge er sekundærland.
     NASJONAL_RETT_DIFFERANSEBEREGNING,
 }
 
