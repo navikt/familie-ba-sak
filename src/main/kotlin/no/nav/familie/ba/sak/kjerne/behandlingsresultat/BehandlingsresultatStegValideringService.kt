@@ -248,13 +248,13 @@ class BehandlingsresultatStegValideringService(
     fun validerSekundærlandKompetanse(
         behandlingId: Long,
     ) {
-        val sekundærlandKompetansePerBarn = kompetanseRepository.finnFraBehandlingId(behandlingId).tilSeparateTidslinjerForBarna()
+        val kompetansePerBarn = kompetanseRepository.finnFraBehandlingId(behandlingId).tilSeparateTidslinjerForBarna()
         val utenlandskPeriodebeløpPerBarn = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandlingId).tilSeparateTidslinjerForBarna()
         val valutakursPerBarn = valutakursRepository.finnFraBehandlingId(behandlingId = behandlingId).tilSeparateTidslinjerForBarna()
 
         val dagensDato = YearMonth.now(clockProvider.get())
 
-        sekundærlandKompetansePerBarn
+        kompetansePerBarn
             .outerJoin(utenlandskPeriodebeløpPerBarn, valutakursPerBarn) { kompetanse, utenlandskPeriodebeløp, valutakurs ->
                 kompetanse?.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND && (utenlandskPeriodebeløp == null || valutakurs == null)
             }.forEach { (_, perioderMedSekundærlandKompetanseUtenUtenlandskBeløpEllerValutakurs) ->
