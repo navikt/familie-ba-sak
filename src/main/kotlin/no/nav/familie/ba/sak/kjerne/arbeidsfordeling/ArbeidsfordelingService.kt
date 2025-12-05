@@ -3,10 +3,14 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.HENT_ARBEIDSFORDELING_FOR_AUTOMATISK_BEHANDLING_ETTER_PORTEFØLJEJUSTERING
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.MIDLERTIDIG_ENHET
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.STEINKJER
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
@@ -37,6 +41,7 @@ class ArbeidsfordelingService(
     private val personopplysningerService: PersonopplysningerService,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     @Transactional
     fun manueltOppdaterBehandlendeEnhet(
@@ -125,7 +130,7 @@ class ArbeidsfordelingService(
                 }
 
                 behandling.erAutomatiskOgSkalHaTidligereBehandling() -> {
-                    fastsettArbeidsfordelingFraTidligereBehandlinger(behandling.id, behandling.fagsak.id)
+                    fastsettArbeidsfordelingFraTidligereBehandlinger(behandling)
                 }
 
                 else -> {
@@ -183,27 +188,43 @@ class ArbeidsfordelingService(
     }
 
     private fun fastsettArbeidsfordelingFraTidligereBehandlinger(
-        behandlingId: Long,
-        fagsakId: Long,
+        behandling: Behandling,
     ): ArbeidsfordelingPåBehandling {
-        val sisteGyldigeArbeidsfordeling = arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(fagsakId)
+        val sisteGyldigeArbeidsfordeling = arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(behandling.fagsak.id)
 
-        if (sisteGyldigeArbeidsfordeling == null) {
-            return arbeidsfordelingPåBehandlingRepository.save(
-                ArbeidsfordelingPåBehandling(
-                    behandlingId = behandlingId,
-                    behandlendeEnhetNavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
-                    behandlendeEnhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
-                ),
+        val skalHenteArbeidsfordelingsenhet =
+            featureToggleService.isEnabled(HENT_ARBEIDSFORDELING_FOR_AUTOMATISK_BEHANDLING_ETTER_PORTEFØLJEJUSTERING) && (
+                sisteGyldigeArbeidsfordeling == null ||
+                    sisteGyldigeArbeidsfordeling.behandlendeEnhetId == MIDLERTIDIG_ENHET.enhetsnummer ||
+                    sisteGyldigeArbeidsfordeling.behandlendeEnhetId == STEINKJER.enhetsnummer
             )
-        }
 
-        return arbeidsfordelingPåBehandlingRepository.save(
-            sisteGyldigeArbeidsfordeling.copy(
-                id = 0,
-                behandlingId = behandlingId,
-            ),
-        )
+        val arbeidsfordelingPåBehandling =
+            if (skalHenteArbeidsfordelingsenhet) {
+                val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
+                if (arbeidsfordelingsenhet.enhetId == STEINKJER.enhetsnummer) {
+                    throw Feil("Kan ikke sette behandlende enhet til '${STEINKJER.enhetsnavn}' etter porteføljejustering.")
+                }
+
+                ArbeidsfordelingPåBehandling(
+                    behandlingId = behandling.id,
+                    behandlendeEnhetId = arbeidsfordelingsenhet.enhetId,
+                    behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn,
+                )
+            } else {
+                sisteGyldigeArbeidsfordeling?.copy(
+                    id = 0,
+                    behandlingId = behandling.id,
+                )
+                    // Dette kan slettes når toggle fjernes
+                    ?: ArbeidsfordelingPåBehandling(
+                        behandlingId = behandling.id,
+                        behandlendeEnhetId = MIDLERTIDIG_ENHET.enhetsnummer,
+                        behandlendeEnhetNavn = MIDLERTIDIG_ENHET.enhetsnavn,
+                    )
+            }
+
+        return arbeidsfordelingPåBehandlingRepository.save(arbeidsfordelingPåBehandling)
     }
 
     private fun postFastsattBehandlendeEnhet(
