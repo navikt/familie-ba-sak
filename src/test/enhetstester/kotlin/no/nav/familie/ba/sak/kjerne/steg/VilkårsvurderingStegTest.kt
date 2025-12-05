@@ -7,7 +7,6 @@ import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
@@ -77,7 +76,6 @@ class VilkårsvurderingStegTest {
             tilpassKompetanserTilRegelverkService = tilpassKompetanserTilRegelverkService,
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             månedligValutajusteringService = mockk(),
-            clockProvider = TestClockProvider(),
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             featureToggleService = featureToggleService,
             opprettTaskService = opprettTaskService,

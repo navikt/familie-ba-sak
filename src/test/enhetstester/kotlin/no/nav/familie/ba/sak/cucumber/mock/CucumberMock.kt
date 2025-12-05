@@ -622,7 +622,12 @@ class CucumberMock(
             vilkårService = vilkårService,
         )
 
-    val månedligValutajusteringService = MånedligValutajusteringService(ecbService = ecbService, valutakursService = valutakursService)
+    val månedligValutajusteringService =
+        MånedligValutajusteringService(
+            ecbService = ecbService,
+            valutakursService = valutakursService,
+            clockProvider = clockProvider,
+        )
 
     val autovedtakFinnmarkstilleggBegrunnelseService =
         AutovedtakFinnmarkstilleggBegrunnelseService(
@@ -698,7 +703,6 @@ class CucumberMock(
             tilpassKompetanserTilRegelverkService = tilpassKompetanserTilRegelverkService,
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             månedligValutajusteringService = månedligValutajusteringService,
-            clockProvider = clockProvider,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             featureToggleService = featureToggleService,
             opprettTaskService = opprettTaskService,

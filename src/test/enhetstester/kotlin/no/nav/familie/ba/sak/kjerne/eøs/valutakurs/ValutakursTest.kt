@@ -3,6 +3,7 @@
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagValutakurs
 import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.tilSisteVirkedag
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -132,6 +133,7 @@ class ValutakursTest {
                     fom = måned,
                     tom = null,
                     valutakode = "SEK",
+                    valutakursdato = måned.minusMonths(1).tilSisteVirkedag(),
                 )
 
             val valutakurs2 =
@@ -139,6 +141,7 @@ class ValutakursTest {
                     fom = måned,
                     tom = null,
                     valutakode = "EUR",
+                    valutakursdato = måned.minusMonths(1).tilSisteVirkedag(),
                 )
 
             val valutakurser = listOf(valutakurs1, valutakurs2)
@@ -155,6 +158,7 @@ class ValutakursTest {
                     fom = måned.minusMonths(1),
                     tom = null,
                     valutakode = "SEK",
+                    valutakursdato = måned.minusMonths(2).tilSisteVirkedag(),
                 )
 
             val valutakurs2 =
@@ -162,9 +166,27 @@ class ValutakursTest {
                     fom = måned,
                     tom = null,
                     valutakode = "EUR",
+                    valutakursdato = måned.minusMonths(2).tilSisteVirkedag(),
                 )
 
             val valutakurser = listOf(valutakurs1, valutakurs2)
+
+            assertThat(valutakurser.måValutakurserOppdateresForMåned(måned)).isTrue()
+        }
+
+        @Test
+        fun `gir true når en valutakurs har feil valutakursdato for gitt måned`() {
+            val måned = LocalDate.now().toYearMonth()
+
+            val valutakurs =
+                lagValutakurs(
+                    fom = måned,
+                    tom = null,
+                    valutakode = "SEK",
+                    valutakursdato = måned.minusMonths(2).tilSisteVirkedag(),
+                )
+
+            val valutakurser = listOf(valutakurs)
 
             assertThat(valutakurser.måValutakurserOppdateresForMåned(måned)).isTrue()
         }
