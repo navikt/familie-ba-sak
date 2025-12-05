@@ -190,6 +190,31 @@ class BehandlingsresultatStegValideringServiceTest {
             // Act & Assert
             assertDoesNotThrow { behandlingsresultatStegValideringService.validerKompetanse(behandling.id) }
         }
+
+        @Test
+        fun `skal kaste feil dersom det finnes sekundærland kompetanser med fom senere enn inneværende måned`() {
+            // Arrange
+            val enMånedFramITid = YearMonth.now().plusMonths(1)
+            val gyldigKompetanse =
+                lagKompetanse(
+                    behandlingId = behandling.id,
+                    kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
+                    søkersAktivitetsland = "NO",
+                    barnetsBostedsland = "SE",
+                    annenForeldersAktivitetsland = "NO",
+                    barnAktører = setOf(barn.aktør),
+                    fom = enMånedFramITid,
+                )
+
+            every { kompetanseRepository.finnFraBehandlingId(behandling.id) } returns listOf(gyldigKompetanse)
+
+            // Act & Assert
+            val feil = assertThrows<FunksjonellFeil> { behandlingsresultatStegValideringService.validerKompetanse(behandling.id) }
+
+            assertThat(feil.melding).isEqualTo(
+                "Det er kompetanse som starter lengre fram i tid enn inneværende måned. Det er ikke mulig å hente inn valutakurs for perioder fram i tid, og du må derfor vente til 2026-01 før du får gått videre i denne behandlingen.",
+            )
+        }
     }
 
     @Nested
