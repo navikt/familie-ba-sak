@@ -23,13 +23,13 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20251117095517_cc54714</prosessering.version>
-        <felles.version>3.20251202144928_31b3e0f</felles.version>
-        <eksterne-kontrakter-bisys.version>2.0_20251126091830_a5eb8fb</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20251112142340_c5baa9c</felles-kontrakter.version>
-        <familie.kontrakter.saksstatistikk>2.0_20251126091830_a5eb8fb</familie.kontrakter.saksstatistikk>
-        <familie.kontrakter.stønadsstatistikk>2.0_20251126091830_a5eb8fb</familie.kontrakter.stønadsstatistikk>
-        <utbetalingsgenerator.version>1.0_20250922101633_e4c1c4d</utbetalingsgenerator.version>
+        <prosessering.version>2.20251205101334_e75fc2d</prosessering.version>
+        <felles.version>4.20251203153147_ca40cc5</felles.version>
+        <eksterne-kontrakter-bisys.version>2.0_20251128100708_76c822e</eksterne-kontrakter-bisys.version>
+        <felles-kontrakter.version>3.0_20251128100735_eaf6aa1</felles-kontrakter.version>
+        <familie.kontrakter.saksstatistikk>2.0_20251128100708_76c822e</familie.kontrakter.saksstatistikk>
+        <familie.kontrakter.stønadsstatistikk>2.0_20251128100708_76c822e</familie.kontrakter.stønadsstatistikk>
+        <utbetalingsgenerator.version>1.0_20251127080440_b935966</utbetalingsgenerator.version>
         <cucumber.version>7.32.0</cucumber.version>
         <mockk.version>1.14.6</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
@@ -46,7 +46,7 @@
         <testcontainers.postgresql.version>1.21.3</testcontainers.postgresql.version>
         <maven.model.version>3.9.11</maven.model.version>
         <avro.version>1.12.1</avro.version>
-        <confluent.version>8.1.0</confluent.version>
+        <confluent.version>8.1.1</confluent.version>
         <sonar.organization>navikt</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.sources>src/main</sonar.sources>
