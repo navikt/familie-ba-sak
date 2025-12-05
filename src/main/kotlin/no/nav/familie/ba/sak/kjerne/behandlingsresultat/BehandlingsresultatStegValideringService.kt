@@ -40,7 +40,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 
