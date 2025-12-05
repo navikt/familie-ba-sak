@@ -30,7 +30,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
@@ -38,7 +38,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.tidslinje.Tidslinje
-import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
 import java.time.YearMonth
@@ -248,41 +248,31 @@ class BehandlingsresultatStegValideringService(
     fun validerSekundærlandKompetanse(
         behandlingId: Long,
     ) {
-        val sekundærlandKompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId).filter { it.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
-        val utenlandskPeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandlingId)
-        val valutakurs = valutakursRepository.finnFraBehandlingId(behandlingId = behandlingId)
-        val personerMedSekundærlandKompetanse = sekundærlandKompetanser.flatMap { it.barnAktører }.distinct()
+        val sekundærlandKompetansePerBarn = kompetanseRepository.finnFraBehandlingId(behandlingId).tilSeparateTidslinjerForBarna()
+        val utenlandskPeriodebeløpPerBarn = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandlingId).tilSeparateTidslinjerForBarna()
+        val valutakursPerBarn = valutakursRepository.finnFraBehandlingId(behandlingId = behandlingId).tilSeparateTidslinjerForBarna()
 
         val dagensDato = YearMonth.now(clockProvider.get())
 
-        personerMedSekundærlandKompetanse.forEach { aktør ->
-            val kompetanseTidslinjeForPerson = sekundærlandKompetanser.filter { aktør in it.barnAktører }.tilTidslinje()
-            val utenlandskPeriodebeløpTidslinjeForPerson = utenlandskPeriodebeløp.filter { aktør in it.barnAktører }.tilTidslinje()
-            val valutakursTidslinjeForPerson = valutakurs.filter { aktør in it.barnAktører }.tilTidslinje()
-
-            val perioderMedSekundærlandKompetanseUtenUtenlandskBeløpEllerValutakurs =
-                kompetanseTidslinjeForPerson.kombinerMed(utenlandskPeriodebeløpTidslinjeForPerson, valutakursTidslinjeForPerson) { kompetanse, utenlandskBeløp, kurs ->
-
-                    kompetanse != null && (utenlandskBeløp == null || kurs == null)
+        sekundærlandKompetansePerBarn
+            .outerJoin(utenlandskPeriodebeløpPerBarn, valutakursPerBarn) { kompetanse, utenlandskPeriodebeløp, valutakurs ->
+                kompetanse?.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND && (utenlandskPeriodebeløp == null || valutakurs == null)
+            }.forEach { (_, perioderMedSekundærlandKompetanseUtenUtenlandskBeløpEllerValutakurs) ->
+                perioderMedSekundærlandKompetanseUtenUtenlandskBeløpEllerValutakurs.tilPerioder().firstOrNull { it.verdi == true }?.let { periode ->
+                    val periodeMedManglendeBeløpEllerKurs = periode.fom?.toYearMonth() ?: return@forEach
+                    val meldingTilSaksbehandler =
+                        if (periodeMedManglendeBeløpEllerKurs.isSameOrBefore(dagensDato)) {
+                            "Gå tilbake til vilkårsvurderingen og trykk 'Neste' for å hente inn manglende utenlandskperiode beløp og valutakurs."
+                        } else {
+                            "Dette er en måned som er lengre fram i tid enn inneværende måned, og du må vente til $periodeMedManglendeBeløpEllerKurs før du kan fortsette behandlingen."
+                        }
+                    throw FunksjonellFeil(
+                        """
+                        For perioden $periodeMedManglendeBeløpEllerKurs finnes det sekundærland kompetanse som enda ikke har fått utenlandskperiode beløp eller valutakurs. 
+                        $meldingTilSaksbehandler
+                        """.trimIndent(),
+                    )
                 }
-
-            perioderMedSekundærlandKompetanseUtenUtenlandskBeløpEllerValutakurs.tilPerioder().firstOrNull { it.verdi == true }?.let { periode ->
-                val periodeMedManglendeBeløpEllerKurs = periode.fom?.toYearMonth() ?: return@forEach
-
-                val meldingTilSaksbehandler =
-                    if (periodeMedManglendeBeløpEllerKurs.isSameOrBefore(dagensDato)) {
-                        "Gå tilbake til vilkårsvurderingen og trykk 'Neste' for å hente inn manglende utenlandskperiode beløp og valutakurs."
-                    } else {
-                        "Dette er en måned som er lengre fram i tid enn inneværende måned, og du må vente til $periodeMedManglendeBeløpEllerKurs før du kan fortsette behandlingen."
-                    }
-
-                throw FunksjonellFeil(
-                    """
-                    For perioden $periodeMedManglendeBeløpEllerKurs finnes det sekundærland kompetanse som enda ikke har fått utenlandskperiode beløp eller valutakurs. 
-                    $meldingTilSaksbehandler
-                    """.trimIndent(),
-                )
             }
-        }
     }
 }
