@@ -212,7 +212,9 @@ class BehandlingsresultatStegValideringServiceTest {
             val feil = assertThrows<FunksjonellFeil> { behandlingsresultatStegValideringService.validerKompetanse(behandling.id) }
 
             assertThat(feil.melding).isEqualTo(
-                "Det er kompetanse som starter lengre fram i tid enn inneværende måned. Det er ikke mulig å hente inn valutakurs for perioder fram i tid, og du må derfor vente til 2026-01 før du får gått videre i denne behandlingen.",
+                "Det er kompetanse som starter lengre fram i tid enn inneværende måned." +
+                    " Det er ikke mulig å hente inn valutakurs for perioder fram i tid," +
+                    " og du må derfor vente til januar 2026 før du kan fortsette behandlingen.",
             )
         }
     }
@@ -265,8 +267,8 @@ class BehandlingsresultatStegValideringServiceTest {
 
             assertThat(feil.melding).isEqualTo(
                 """
-                For perioden 2025-12 finnes det sekundærland kompetanse som enda ikke har fått utenlandskperiode beløp eller valutakurs. 
-                Dette er en måned som er lengre fram i tid enn inneværende måned, og du må vente til 2025-12 før du kan fortsette behandlingen.
+                For perioden desember 2025 finnes det sekundærland kompetanse med endret utbetaling i det andre landet en måned som er lengre fram i tid enn inneværende måned.
+                Det er ikke mulig å hente inn valutakurs for perioder fram i tid, og du må derfor vente til desember 2025 før du kan fortsette behandlingen.
                 """.trimIndent(),
             )
         }
@@ -317,7 +319,7 @@ class BehandlingsresultatStegValideringServiceTest {
 
             assertThat(feil.melding).isEqualTo(
                 """
-                For perioden 2025-10 finnes det sekundærland kompetanse som enda ikke har fått utenlandskperiode beløp eller valutakurs. 
+                For perioden oktober 2025 finnes det sekundærland kompetanse som enda ikke har fått utenlandskperiode beløp eller valutakurs.
                 Gå tilbake til vilkårsvurderingen og trykk 'Neste' for å hente inn manglende utenlandskperiode beløp og valutakurs.
                 """.trimIndent(),
             )

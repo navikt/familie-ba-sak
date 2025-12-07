@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
@@ -262,16 +263,17 @@ class BehandlingsresultatStegValideringService(
                     val periodeMedManglendeBeløpEllerKurs = periode.fom?.toYearMonth() ?: return@forEach
                     val meldingTilSaksbehandler =
                         if (periodeMedManglendeBeløpEllerKurs.isSameOrBefore(dagensDato)) {
-                            "Gå tilbake til vilkårsvurderingen og trykk 'Neste' for å hente inn manglende utenlandskperiode beløp og valutakurs."
+                            """
+                            For perioden ${periodeMedManglendeBeløpEllerKurs.tilMånedÅr()} finnes det sekundærland kompetanse som enda ikke har fått utenlandskperiode beløp eller valutakurs.
+                            Gå tilbake til vilkårsvurderingen og trykk 'Neste' for å hente inn manglende utenlandskperiode beløp og valutakurs.
+                            """.trimIndent()
                         } else {
-                            "Dette er en måned som er lengre fram i tid enn inneværende måned, og du må vente til $periodeMedManglendeBeløpEllerKurs før du kan fortsette behandlingen."
+                            """
+                            For perioden ${periodeMedManglendeBeløpEllerKurs.tilMånedÅr()} finnes det sekundærland kompetanse med endret utbetaling i det andre landet en måned som er lengre fram i tid enn inneværende måned.
+                            Det er ikke mulig å hente inn valutakurs for perioder fram i tid, og du må derfor vente til ${periodeMedManglendeBeløpEllerKurs.tilMånedÅr()} før du kan fortsette behandlingen.
+                            """.trimIndent()
                         }
-                    throw FunksjonellFeil(
-                        """
-                        For perioden $periodeMedManglendeBeløpEllerKurs finnes det sekundærland kompetanse som enda ikke har fått utenlandskperiode beløp eller valutakurs. 
-                        $meldingTilSaksbehandler
-                        """.trimIndent(),
-                    )
+                    throw FunksjonellFeil(melding = meldingTilSaksbehandler)
                 }
             }
     }
