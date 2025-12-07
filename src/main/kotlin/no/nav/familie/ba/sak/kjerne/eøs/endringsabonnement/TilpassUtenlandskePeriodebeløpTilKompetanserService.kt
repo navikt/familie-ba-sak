@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerF
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utbetalingsland
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -106,5 +105,5 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
 
 private fun Map<Aktør, Tidslinje<Kompetanse>>.filtrerSekundærland() =
     this.mapValues { (_, tidslinje) ->
-        tidslinje.filtrer { it?.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
+        tidslinje.filtrer { it?.erNorgeSekundærland() == true }
     }
