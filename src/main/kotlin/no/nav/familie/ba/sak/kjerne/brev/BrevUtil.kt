@@ -158,7 +158,7 @@ fun hentLandOgStartdatoForUtbetalingstabell(
 ): UtbetalingstabellAutomatiskValutajustering {
     val utfylteSekundærlandsKompetanserEtterEndringstidspunkt =
         kompetanser
-            .filter { it.erNorgeSekundærLand() }
+            .filter { it.erNorgeSekundærland() }
             .tilUtfylteKompetanserEtterEndringstidpunktPerAktør(endringstidspunkt)
 
     if (utfylteSekundærlandsKompetanserEtterEndringstidspunkt.isEmpty()) {

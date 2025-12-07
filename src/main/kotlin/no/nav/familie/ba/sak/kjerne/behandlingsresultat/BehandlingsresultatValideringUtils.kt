@@ -173,9 +173,19 @@ object BehandlingsresultatValideringUtils {
         kompetanser: Collection<Kompetanse>,
     ) {
         kompetanser.forEach { kompetanse ->
-            val erNorgeSekundærland = kompetanse.erNorgeSekundærLand()
+            val erNorgeSekundærland = kompetanse.erNorgeSekundærland()
+
             if (erNorgeSekundærland && setOf(kompetanse.søkersAktivitetsland, kompetanse.annenForeldersAktivitetsland, kompetanse.barnetsBostedsland).all { it == "NO" }) {
                 throw FunksjonellFeil("Dersom Norge er sekundærland, må søkers aktivitetsland, annen forelders aktivitetsland eller barnets bostedsland være satt til noe annet enn Norge")
+            }
+
+            kompetanse.fom?.let {
+                if (erNorgeSekundærland && it.isAfter(YearMonth.now())) {
+                    throw FunksjonellFeil(
+                        "Det er kompetanse som starter lengre fram i tid enn inneværende måned." +
+                            " Det er ikke mulig å hente inn valutakurs for perioder fram i tid, og du må derfor vente til $it før du får gått videre i denne behandlingen.",
+                    )
+                }
             }
         }
     }

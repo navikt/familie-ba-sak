@@ -185,7 +185,7 @@ fun Map<Aktør, Tidslinje<AndelTilkjentYtelse>>.kunReneSekundærlandsperioder(
     val barnasErSekundærlandTidslinjer =
         this.leftJoin(barnasKompetanseTidslinjer) { andel, kompetanse ->
             when {
-                andel != null && kompetanse?.erNorgeSekundærLand() == true -> true
+                andel != null && kompetanse?.erNorgeSekundærland() == true -> true
                 andel != null -> false
                 else -> null
             }
