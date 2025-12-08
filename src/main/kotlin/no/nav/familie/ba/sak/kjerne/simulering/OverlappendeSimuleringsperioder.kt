@@ -20,8 +20,6 @@ fun finnOverlappendePerioder(
     økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
     fagsakId: Long,
 ): List<OverlappendePerioderMedAndreFagsaker> {
-    val tidSimuleringHentet = økonomiSimuleringMottakere.singleOrNull()?.opprettetTidspunkt?.toLocalDate() ?: return emptyList()
-
     val posteringerMedFagsakId = økonomiSimuleringMottakere.flatMap { it.økonomiSimuleringPostering }.filter { it.fagsakId != null }
     val posteringerPerFagsak = posteringerMedFagsakId.groupBy { it.fagsakId!! }
     val fagsakTilTidslinje =
@@ -30,7 +28,11 @@ fun finnOverlappendePerioder(
             val tidslinjeMedFeilOgEtterbetalingForFagsak =
                 perioderForFagsak
                     .map { (fomOgTom, posteringForFagsakIPeriode) ->
-                        posteringForFagsakIPeriode.lagPerioderMedFeilOgEtterbetalinger(tidSimuleringHentet, fagsakId, fomOgTom)
+                        posteringForFagsakIPeriode.lagPerioderMedFeilOgEtterbetalinger(
+                            tidSimuleringHentet = økonomiSimuleringMottakere.first().opprettetTidspunkt.toLocalDate(),
+                            fagsakId = fagsakId,
+                            fomOgTom = fomOgTom,
+                        )
                     }.tilTidslinje()
             tidslinjeMedFeilOgEtterbetalingForFagsak
         }

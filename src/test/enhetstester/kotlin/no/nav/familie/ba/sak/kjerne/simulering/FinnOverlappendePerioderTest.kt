@@ -65,6 +65,81 @@ class FinnOverlappendePerioderTest {
     }
 
     @Test
+    fun `finnOverlappendePerioder finner overlappende perioder selv hvis det er forskjellige mottakere på samme behandling`() {
+        // Arrange
+        val økonomiSimuleringMottakere =
+            listOf(
+                lagØkonomiSimuleringMottaker(
+                    økonomiSimuleringPostering =
+                        listOf(
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.of(2025, 8, 1),
+                                tom = LocalDate.of(2025, 8, 31),
+                                posteringType = PosteringType.YTELSE,
+                                beløp = 984,
+                                fagsakId = 1,
+                            ),
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.of(2025, 8, 1),
+                                tom = LocalDate.of(2025, 8, 31),
+                                posteringType = PosteringType.JUSTERING,
+                                beløp = -984,
+                                fagsakId = 1,
+                            ),
+                        ),
+                ),
+                lagØkonomiSimuleringMottaker(
+                    økonomiSimuleringPostering =
+                        listOf(
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.of(2025, 8, 1),
+                                tom = LocalDate.of(2025, 8, 31),
+                                posteringType = PosteringType.YTELSE,
+                                beløp = 984,
+                                fagsakId = 2,
+                            ),
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.of(2025, 8, 1),
+                                tom = LocalDate.of(2025, 8, 31),
+                                posteringType = PosteringType.FEILUTBETALING,
+                                beløp = 984,
+                                fagsakId = 2,
+                            ),
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.of(2025, 8, 1),
+                                tom = LocalDate.of(2025, 8, 31),
+                                posteringType = PosteringType.JUSTERING,
+                                beløp = -984,
+                                fagsakId = 2,
+                            ),
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.of(2025, 8, 1),
+                                tom = LocalDate.of(2025, 8, 31),
+                                posteringType = PosteringType.MOTP,
+                                beløp = -984,
+                                fagsakId = 2,
+                            ),
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.of(2025, 8, 1),
+                                tom = LocalDate.of(2025, 8, 31),
+                                posteringType = PosteringType.YTELSE,
+                                beløp = -1968,
+                                fagsakId = 2,
+                            ),
+                        ),
+                ),
+            )
+
+        // Act
+        val overlappendePerioder = finnOverlappendePerioder(økonomiSimuleringMottakere = økonomiSimuleringMottakere, 1)
+
+        // Assert
+        assertThat(overlappendePerioder).hasSize(1)
+        val overlappendeFagsak = overlappendePerioder.singleOrNull()?.fagsakerMedFeilutbetaling?.singleOrNull()
+        assertThat(overlappendeFagsak).isEqualTo(2L)
+    }
+
+    @Test
     fun `finnOverlappendePerioder finner overlappende perioder i forskjellige fagsaker med både feilutbetaling og etterbetaling`() {
         // Arrange
         val økonomiSimuleringMottakere =
