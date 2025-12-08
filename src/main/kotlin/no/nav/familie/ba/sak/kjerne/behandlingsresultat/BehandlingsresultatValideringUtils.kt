@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT
@@ -182,7 +183,8 @@ object BehandlingsresultatValideringUtils {
                 if (erNorgeSekundærland && it.isAfter(YearMonth.now())) {
                     throw FunksjonellFeil(
                         "Det er kompetanse som starter lengre fram i tid enn inneværende måned." +
-                            " Det er ikke mulig å hente inn valutakurs for perioder fram i tid, og du må derfor vente til $it før du får gått videre i denne behandlingen.",
+                            " Det er ikke mulig å hente inn valutakurs for perioder fram i tid," +
+                            " og du må derfor vente til ${it.tilMånedÅr()} før du kan fortsette behandlingen.",
                     )
                 }
             }
