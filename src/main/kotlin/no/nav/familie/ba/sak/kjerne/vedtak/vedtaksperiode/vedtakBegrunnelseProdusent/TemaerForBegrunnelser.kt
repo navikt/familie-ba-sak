@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent
 
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
@@ -27,11 +28,21 @@ fun hentTemaSomPeriodeErVurdertEtter(
     val vurdertEtterEøsDennePerioden =
         begrunnelseGrunnlag.dennePerioden.vilkårResultater.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
 
+    val harIkkeInnvilgetEøsVilkårDennePerioden =
+        begrunnelseGrunnlag.dennePerioden.vilkårResultater.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN && it.resultat == Resultat.IKKE_OPPFYLT }
+
     val regelverkSomBlirBorte =
         listOfNotNull(regelverkSomBlirBorteFraForrigePeriode, regelverkSomBlirBorteFraForrigeBehandling).toSet()
 
+    val temaerForOpphør =
+        regelverkSomBlirBorte
+            .ifEmpty { setOf(Tema.NASJONAL) }
+            .let { regelverkSomBlirBorte ->
+                if (harIkkeInnvilgetEøsVilkårDennePerioden) regelverkSomBlirBorte + Tema.EØS else regelverkSomBlirBorte
+            }
+
     return TemaerForBegrunnelser(
-        temaerForOpphør = regelverkSomBlirBorte.ifEmpty { setOf(Tema.NASJONAL) },
+        temaerForOpphør = temaerForOpphør,
         temaForUtbetaling = if (vurdertEtterEøsDennePerioden) Tema.EØS else Tema.NASJONAL,
     )
 }
