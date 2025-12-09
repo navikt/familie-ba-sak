@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -47,6 +48,7 @@ class PersongrunnlagServiceTest {
     private val kodeverkService = mockk<KodeverkService>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val systemOnlyIntegrasjonKlient = mockk<SystemOnlyIntegrasjonKlient>()
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
 
     private val persongrunnlagService =
         spyk(
@@ -57,7 +59,7 @@ class PersongrunnlagServiceTest {
                 personopplysningerService = personopplysningerService,
                 personidentService = personidentService,
                 saksstatistikkEventPublisher = mockk(relaxed = true),
-                behandlingHentOgPersisterService = mockk(),
+                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
                 andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
                 loggService = loggService,
                 arbeidsforholdService = mockk(),
@@ -159,6 +161,7 @@ class PersongrunnlagServiceTest {
                 every { featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
                 every { featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
                 every { featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+                every { featureToggleService.isEnabled(FeatureToggle.FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
 
                 persongrunnlagService
                     .hentOgLagreSøkerOgBarnINyttGrunnlag(

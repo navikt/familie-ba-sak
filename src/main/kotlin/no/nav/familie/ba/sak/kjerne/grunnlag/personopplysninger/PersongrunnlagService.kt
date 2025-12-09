@@ -16,6 +16,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsa
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
@@ -24,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.SKJERMET_BARN
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortBostedsadresserFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortDeltBostedForSøker
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortIkkeRelevanteSivilstander
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortOppholdFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortOppholdsadresserFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortStatsborgerskapFørEldsteBarn
@@ -252,6 +255,8 @@ class PersongrunnlagService(
                         NORMAL, SKJERMET_BARN -> PersonType.SØKER
                         BARN_ENSLIG_MINDREÅRIG, INSTITUSJON -> PersonType.BARN
                     },
+                behandlingKategori = behandling.kategori,
+                behandlingUnderkategori = behandling.underkategori,
                 skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                 hentArbeidsforhold = behandling.skalBehandlesAutomatisk,
             )
@@ -264,6 +269,8 @@ class PersongrunnlagService(
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     målform = målform,
                     personType = PersonType.BARN,
+                    behandlingKategori = behandling.kategori,
+                    behandlingUnderkategori = behandling.underkategori,
                     skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                 ),
             )
@@ -277,6 +284,8 @@ class PersongrunnlagService(
                         personopplysningGrunnlag = personopplysningGrunnlag,
                         målform = målform,
                         personType = PersonType.ANNENPART,
+                        behandlingKategori = behandling.kategori,
+                        behandlingUnderkategori = behandling.underkategori,
                         skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                         hentArbeidsforhold = true,
                     ),
@@ -305,6 +314,8 @@ class PersongrunnlagService(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         målform: Målform,
         personType: PersonType,
+        behandlingKategori: BehandlingKategori,
+        behandlingUnderkategori: BehandlingUnderkategori,
         skalHenteEnkelPersonInfo: Boolean = false,
         hentArbeidsforhold: Boolean = false,
     ): Person {
@@ -318,6 +329,7 @@ class PersongrunnlagService(
         val filtrerAdresser = featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
         val filtrerStatsborgerskap = featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO)
         val filtrerOpphold = featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO)
+        val filtrerSivilstand = featureToggleService.isEnabled(FeatureToggle.FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
 
         return Person(
             type = personType,
@@ -364,7 +376,11 @@ class PersongrunnlagService(
                             poststed = it.poststed(),
                         )
                     }.toMutableList()
-            person.sivilstander = personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }.toMutableList()
+            person.sivilstander =
+                personinfo.sivilstander
+                    .filtrerBortIkkeRelevanteSivilstander(filtrerSivilstand, behandlingKategori, behandlingUnderkategori, personType)
+                    .map { GrSivilstand.fraSivilstand(it, person) }
+                    .toMutableList()
             person.statsborgerskap =
                 personinfo.statsborgerskap
                     ?.filtrerBortStatsborgerskapFørEldsteBarn(personopplysningGrunnlag, filtrerStatsborgerskap)
