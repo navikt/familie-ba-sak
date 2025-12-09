@@ -89,22 +89,24 @@ class FakePdlRestKlient(
 
     override fun hentVergemaalEllerFremtidsfullmakt(aktør: Aktør): List<VergemaalEllerFremtidsfullmakt> = emptyList()
 
-    override fun hentAdresser(ident: String): PdlAdresserPerson? =
-        PdlAdresserPerson(
-            bostedsadresse =
-                bostedsadresser[ident]
-                    ?: listOf(
-                        Bostedsadresse(
-                            gyldigFraOgMed = LocalDate.now().minusYears(1),
-                            gyldigTilOgMed = null,
-                            vegadresse = null,
-                            matrikkeladresse = lagMatrikkeladresse(1234L),
-                            ukjentBosted = null,
+    override fun hentAdresser(identer: List<String>): Map<String, PdlAdresserPerson> =
+        identer.associateWith { ident ->
+            PdlAdresserPerson(
+                bostedsadresse =
+                    bostedsadresser[ident]
+                        ?: listOf(
+                            Bostedsadresse(
+                                gyldigFraOgMed = LocalDate.now().minusYears(1),
+                                gyldigTilOgMed = null,
+                                vegadresse = null,
+                                matrikkeladresse = lagMatrikkeladresse(1234L),
+                                ukjentBosted = null,
+                            ),
                         ),
-                    ),
-            deltBosted = deltBosteder[ident] ?: emptyList(),
-            oppholdsadresse = oppholdsadresser[ident] ?: emptyList(),
-        )
+                deltBosted = deltBosteder[ident] ?: emptyList(),
+                oppholdsadresse = oppholdsadresser[ident] ?: emptyList(),
+            )
+        }
 
     companion object {
         private val bostedsadresser = mutableMapOf<String, MutableList<Bostedsadresse>>()

@@ -378,7 +378,7 @@ class ArbeidsfordelingServiceTest {
                 }
 
             // Assert
-            assertThat(feil.message).isEqualTo("Kan ikke sette behandlende enhet til 'Nav Familie- og pensjonsytelser Steinkjer' etter porteføljejustering.")
+            assertThat(feil.message).isEqualTo("Kan ikke sette behandlende enhet til 'Nav familie- og pensjonsytelser Steinkjer' etter porteføljejustering.")
         }
     }
 
