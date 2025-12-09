@@ -439,10 +439,7 @@ class PersongrunnlagService(
         personopplysningGrunnlag.personer.forEach { person ->
             val (bostedsadresse, oppholdsadresse, deltBosted) =
                 if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
-                    val adresserForPersoner = personopplysningerService.hentAdresserForPersoner(personopplysningGrunnlag.personer.map { it.aktør.aktivFødselsnummer() })
-                    val adresser =
-                        adresserForPersoner[person.aktør.aktivFødselsnummer()]
-                            ?: return@forEach
+                    val adresser = personopplysningerService.hentAdresserForPerson(person.aktør.aktivFødselsnummer()) ?: return@forEach
                     Triple(adresser.bostedsadresse, adresser.oppholdsadresse, adresser.deltBosted)
                 } else {
                     val aktør = person.aktør
