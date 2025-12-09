@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.datagenerator.lagDeltBosted
 import no.nav.familie.ba.sak.datagenerator.lagOppholdsadresse
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortBostedsadresserFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortDeltBostedForSøker
@@ -203,7 +204,7 @@ class PersongrunnlagFiltreringsTest {
                 ),
             )
         // Act
-        val sivilstandBarnEtter = sivilstandBarnFør.filtrerBortIkkeRelevanteSivilstander(true, BehandlingUnderkategori.ORDINÆR, PersonType.BARN)
+        val sivilstandBarnEtter = sivilstandBarnFør.filtrerBortIkkeRelevanteSivilstander(true, BehandlingKategori.NASJONAL, BehandlingUnderkategori.ORDINÆR, PersonType.BARN)
 
         // Assert
         assertThat(sivilstandBarnEtter).hasSize(2)
@@ -212,7 +213,7 @@ class PersongrunnlagFiltreringsTest {
     }
 
     @Test
-    fun `skal filtrere bort sivilstander for søker for ordinære behandlinger`() {
+    fun `skal filtrere bort sivilstander for søker for ordinære nasjonale behandlinger`() {
         // Arrange
         val sivilstandSøkerFør =
             listOf(
@@ -231,7 +232,7 @@ class PersongrunnlagFiltreringsTest {
             )
 
         // Act
-        val sivilstandSøkerEtter = sivilstandSøkerFør.filtrerBortIkkeRelevanteSivilstander(true, BehandlingUnderkategori.ORDINÆR, PersonType.SØKER)
+        val sivilstandSøkerEtter = sivilstandSøkerFør.filtrerBortIkkeRelevanteSivilstander(true, BehandlingKategori.NASJONAL, BehandlingUnderkategori.ORDINÆR, PersonType.SØKER)
 
         // Assert
         assertThat(sivilstandSøkerEtter).hasSize(0)
@@ -257,7 +258,33 @@ class PersongrunnlagFiltreringsTest {
             )
 
         // Act
-        val sivilstandSøkerEtter = sivilstandSøkerFør.filtrerBortIkkeRelevanteSivilstander(true, BehandlingUnderkategori.UTVIDET, PersonType.SØKER)
+        val sivilstandSøkerEtter = sivilstandSøkerFør.filtrerBortIkkeRelevanteSivilstander(true, BehandlingKategori.NASJONAL, BehandlingUnderkategori.UTVIDET, PersonType.SØKER)
+
+        // Assert
+        assertThat(sivilstandSøkerEtter).hasSize(3)
+    }
+
+    @Test
+    fun `skal ikke filtrere bort sivilstander for søker for EØS behandling`() {
+        // Arrange
+        val sivilstandSøkerFør =
+            listOf(
+                Sivilstand(
+                    gyldigFraOgMed = LocalDate.of(2000, 1, 1),
+                    type = SIVILSTANDTYPE.UGIFT,
+                ),
+                Sivilstand(
+                    gyldigFraOgMed = LocalDate.of(2010, 1, 1),
+                    type = SIVILSTANDTYPE.GIFT,
+                ),
+                Sivilstand(
+                    gyldigFraOgMed = LocalDate.of(2020, 1, 1),
+                    type = SIVILSTANDTYPE.SKILT,
+                ),
+            )
+
+        // Act
+        val sivilstandSøkerEtter = sivilstandSøkerFør.filtrerBortIkkeRelevanteSivilstander(true, BehandlingKategori.EØS, BehandlingUnderkategori.ORDINÆR, PersonType.SØKER)
 
         // Assert
         assertThat(sivilstandSøkerEtter).hasSize(3)

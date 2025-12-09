@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsa
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -254,6 +255,7 @@ class PersongrunnlagService(
                         NORMAL, SKJERMET_BARN -> PersonType.SØKER
                         BARN_ENSLIG_MINDREÅRIG, INSTITUSJON -> PersonType.BARN
                     },
+                behandlingKategori = behandling.kategori,
                 behandlingUnderkategori = behandling.underkategori,
                 skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                 hentArbeidsforhold = behandling.skalBehandlesAutomatisk,
@@ -267,6 +269,7 @@ class PersongrunnlagService(
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     målform = målform,
                     personType = PersonType.BARN,
+                    behandlingKategori = behandling.kategori,
                     behandlingUnderkategori = behandling.underkategori,
                     skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                 ),
@@ -281,6 +284,7 @@ class PersongrunnlagService(
                         personopplysningGrunnlag = personopplysningGrunnlag,
                         målform = målform,
                         personType = PersonType.ANNENPART,
+                        behandlingKategori = behandling.kategori,
                         behandlingUnderkategori = behandling.underkategori,
                         skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                         hentArbeidsforhold = true,
@@ -310,6 +314,7 @@ class PersongrunnlagService(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         målform: Målform,
         personType: PersonType,
+        behandlingKategori: BehandlingKategori,
         behandlingUnderkategori: BehandlingUnderkategori,
         skalHenteEnkelPersonInfo: Boolean = false,
         hentArbeidsforhold: Boolean = false,
@@ -373,7 +378,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.sivilstander =
                 personinfo.sivilstander
-                    .filtrerBortIkkeRelevanteSivilstander(filtrerSivilstand, behandlingUnderkategori, personType)
+                    .filtrerBortIkkeRelevanteSivilstander(filtrerSivilstand, behandlingKategori, behandlingUnderkategori, personType)
                     .map { GrSivilstand.fraSivilstand(it, person) }
                     .toMutableList()
             person.statsborgerskap =
