@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT
@@ -25,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgTyp
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
@@ -173,9 +173,20 @@ object BehandlingsresultatValideringUtils {
         kompetanser: Collection<Kompetanse>,
     ) {
         kompetanser.forEach { kompetanse ->
-            val erNorgeSekundærland = kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND
+            val erNorgeSekundærland = kompetanse.erNorgeSekundærland()
+
             if (erNorgeSekundærland && setOf(kompetanse.søkersAktivitetsland, kompetanse.annenForeldersAktivitetsland, kompetanse.barnetsBostedsland).all { it == "NO" }) {
                 throw FunksjonellFeil("Dersom Norge er sekundærland, må søkers aktivitetsland, annen forelders aktivitetsland eller barnets bostedsland være satt til noe annet enn Norge")
+            }
+
+            kompetanse.fom?.let {
+                if (erNorgeSekundærland && it.isAfter(YearMonth.now())) {
+                    throw FunksjonellFeil(
+                        "Det er kompetanse som starter lengre fram i tid enn inneværende måned." +
+                            " Det er ikke mulig å hente inn valutakurs for perioder fram i tid," +
+                            " og du må derfor vente til ${it.tilMånedÅr()} før du kan fortsette behandlingen.",
+                    )
+                }
             }
         }
     }

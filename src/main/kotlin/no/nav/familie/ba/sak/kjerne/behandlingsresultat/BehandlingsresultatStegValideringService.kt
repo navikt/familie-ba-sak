@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
@@ -29,14 +31,16 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 
@@ -242,7 +246,35 @@ class BehandlingsresultatStegValideringService(
         )
     }
 
-    companion object {
-        private val logger = LoggerFactory.getLogger(BehandlingsresultatStegValideringService::class.java)
+    fun validerSekundærlandKompetanse(
+        behandlingId: Long,
+    ) {
+        val kompetansePerBarn = kompetanseRepository.finnFraBehandlingId(behandlingId).tilSeparateTidslinjerForBarna()
+        val utenlandskPeriodebeløpPerBarn = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandlingId).tilSeparateTidslinjerForBarna()
+        val valutakursPerBarn = valutakursRepository.finnFraBehandlingId(behandlingId = behandlingId).tilSeparateTidslinjerForBarna()
+
+        val dagensDato = YearMonth.now(clockProvider.get())
+
+        kompetansePerBarn
+            .outerJoin(utenlandskPeriodebeløpPerBarn, valutakursPerBarn) { kompetanse, utenlandskPeriodebeløp, valutakurs ->
+                kompetanse?.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND && (utenlandskPeriodebeløp == null || valutakurs == null)
+            }.forEach { (_, perioderMedSekundærlandKompetanseUtenUtenlandskBeløpEllerValutakurs) ->
+                perioderMedSekundærlandKompetanseUtenUtenlandskBeløpEllerValutakurs.tilPerioder().firstOrNull { it.verdi == true }?.let { periode ->
+                    val periodeMedManglendeBeløpEllerKurs = periode.fom?.toYearMonth() ?: return@forEach
+                    val meldingTilSaksbehandler =
+                        if (periodeMedManglendeBeløpEllerKurs.isSameOrBefore(dagensDato)) {
+                            """
+                            For perioden ${periodeMedManglendeBeløpEllerKurs.tilMånedÅr()} finnes det sekundærland kompetanse som enda ikke har fått utenlandskperiode beløp eller valutakurs.
+                            Gå tilbake til vilkårsvurderingen og trykk 'Neste' for å hente inn manglende utenlandskperiode beløp og valutakurs.
+                            """.trimIndent()
+                        } else {
+                            """
+                            For perioden ${periodeMedManglendeBeløpEllerKurs.tilMånedÅr()} finnes det sekundærland kompetanse med endret utbetaling i det andre landet en måned som er lengre fram i tid enn inneværende måned.
+                            Det er ikke mulig å hente inn valutakurs for perioder fram i tid, og du må derfor vente til ${periodeMedManglendeBeløpEllerKurs.tilMånedÅr()} før du kan fortsette behandlingen.
+                            """.trimIndent()
+                        }
+                    throw FunksjonellFeil(melding = meldingTilSaksbehandler)
+                }
+            }
     }
 }

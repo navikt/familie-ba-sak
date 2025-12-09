@@ -190,6 +190,186 @@ class BehandlingsresultatStegValideringServiceTest {
             // Act & Assert
             assertDoesNotThrow { behandlingsresultatStegValideringService.validerKompetanse(behandling.id) }
         }
+
+        @Test
+        fun `skal kaste feil dersom det finnes sekundærland kompetanser med fom senere enn inneværende måned`() {
+            // Arrange
+            val enMånedFramITid = YearMonth.now().plusMonths(1)
+            val gyldigKompetanse =
+                lagKompetanse(
+                    behandlingId = behandling.id,
+                    kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
+                    søkersAktivitetsland = "NO",
+                    barnetsBostedsland = "SE",
+                    annenForeldersAktivitetsland = "NO",
+                    barnAktører = setOf(barn.aktør),
+                    fom = enMånedFramITid,
+                )
+
+            every { kompetanseRepository.finnFraBehandlingId(behandling.id) } returns listOf(gyldigKompetanse)
+
+            // Act & Assert
+            val feil = assertThrows<FunksjonellFeil> { behandlingsresultatStegValideringService.validerKompetanse(behandling.id) }
+
+            assertThat(feil.melding).isEqualTo(
+                "Det er kompetanse som starter lengre fram i tid enn inneværende måned." +
+                    " Det er ikke mulig å hente inn valutakurs for perioder fram i tid," +
+                    " og du må derfor vente til januar 2026 før du kan fortsette behandlingen.",
+            )
+        }
+    }
+
+    @Nested
+    inner class ValiderSekundærlandKompetanseTest {
+        @Test
+        fun `Skal kaste funksjonell feil ved sekundærland kompetanser uten utenlandskperiode beløp eller valutakurs`() {
+            // Arrange
+            val sekundærlandKompetanse =
+                lagKompetanse(
+                    behandlingId = behandling.id,
+                    kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
+                    søkersAktivitetsland = "NO",
+                    barnetsBostedsland = "SE",
+                    annenForeldersAktivitetsland = "SE",
+                    barnAktører = setOf(barn.aktør),
+                    fom = YearMonth.of(2021, 1),
+                    tom = YearMonth.of(2025, 12),
+                )
+
+            val valutakurs =
+                lagValutakurs(
+                    fom = YearMonth.of(2021, 1),
+                    tom = YearMonth.of(2025, 11),
+                    valutakode = "SEK",
+                    valutakursdato = LocalDate.now(),
+                    kurs = BigDecimal.valueOf(1.2),
+                    barnAktører = setOf(barn.aktør),
+                    vurderingsform = Vurderingsform.MANUELL,
+                )
+
+            val utenlandskPeriodebeløp =
+                lagUtenlandskPeriodebeløp(
+                    fom = YearMonth.of(2021, 1),
+                    tom = YearMonth.of(2025, 11),
+                    beløp = BigDecimal.valueOf(100),
+                    intervall = Intervall.MÅNEDLIG,
+                    valutakode = "SEK",
+                    utbetalingsland = "S",
+                    barnAktører = setOf(barn.aktør),
+                )
+
+            every { kompetanseRepository.finnFraBehandlingId(behandling.id) } returns listOf(sekundærlandKompetanse)
+            every { valutakursRepository.finnFraBehandlingId(behandling.id) } returns listOf(valutakurs)
+            every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandling.id) } returns listOf(utenlandskPeriodebeløp)
+
+            // Act & Assert
+            val feil = assertThrows<FunksjonellFeil> { behandlingsresultatStegValideringService.validerSekundærlandKompetanse(behandling.id) }
+
+            assertThat(feil.melding).isEqualTo(
+                """
+                For perioden desember 2025 finnes det sekundærland kompetanse med endret utbetaling i det andre landet en måned som er lengre fram i tid enn inneværende måned.
+                Det er ikke mulig å hente inn valutakurs for perioder fram i tid, og du må derfor vente til desember 2025 før du kan fortsette behandlingen.
+                """.trimIndent(),
+            )
+        }
+
+        @Test
+        fun `Skal kaste annen feilmelding ved feil i samme måned eller før`() {
+            // Arrange
+            val sekundærlandKompetanse =
+                lagKompetanse(
+                    behandlingId = behandling.id,
+                    kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
+                    søkersAktivitetsland = "NO",
+                    barnetsBostedsland = "SE",
+                    annenForeldersAktivitetsland = "SE",
+                    barnAktører = setOf(barn.aktør),
+                    fom = YearMonth.of(2021, 1),
+                    tom = YearMonth.of(2025, 10),
+                )
+
+            val valutakurs =
+                lagValutakurs(
+                    fom = YearMonth.of(2021, 1),
+                    tom = YearMonth.of(2025, 9),
+                    valutakode = "SEK",
+                    valutakursdato = LocalDate.now(),
+                    kurs = BigDecimal.valueOf(1.2),
+                    barnAktører = setOf(barn.aktør),
+                    vurderingsform = Vurderingsform.MANUELL,
+                )
+
+            val utenlandskPeriodebeløp =
+                lagUtenlandskPeriodebeløp(
+                    fom = YearMonth.of(2021, 1),
+                    tom = YearMonth.of(2025, 9),
+                    beløp = BigDecimal.valueOf(100),
+                    intervall = Intervall.MÅNEDLIG,
+                    valutakode = "SEK",
+                    utbetalingsland = "S",
+                    barnAktører = setOf(barn.aktør),
+                )
+
+            every { kompetanseRepository.finnFraBehandlingId(behandling.id) } returns listOf(sekundærlandKompetanse)
+            every { valutakursRepository.finnFraBehandlingId(behandling.id) } returns listOf(valutakurs)
+            every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandling.id) } returns listOf(utenlandskPeriodebeløp)
+
+            // Act & Assert
+            val feil = assertThrows<FunksjonellFeil> { behandlingsresultatStegValideringService.validerSekundærlandKompetanse(behandling.id) }
+
+            assertThat(feil.melding).isEqualTo(
+                """
+                For perioden oktober 2025 finnes det sekundærland kompetanse som enda ikke har fått utenlandskperiode beløp eller valutakurs.
+                Gå tilbake til vilkårsvurderingen og trykk 'Neste' for å hente inn manglende utenlandskperiode beløp og valutakurs.
+                """.trimIndent(),
+            )
+        }
+
+        @Test
+        fun `Skal ikke kaste feil ved primærland perioder uten utenlandsk beløp eller valutakurs`() {
+            // Arrange
+            // Arrange
+            val sekundærlandKompetanse =
+                lagKompetanse(
+                    behandlingId = behandling.id,
+                    kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                    søkersAktivitetsland = "NO",
+                    barnetsBostedsland = "SE",
+                    annenForeldersAktivitetsland = "NO",
+                    barnAktører = setOf(barn.aktør),
+                    fom = YearMonth.of(2021, 1),
+                    tom = YearMonth.of(2025, 10),
+                )
+
+            val valutakurs =
+                lagValutakurs(
+                    fom = YearMonth.of(2021, 1),
+                    tom = YearMonth.of(2025, 9),
+                    valutakode = "SEK",
+                    valutakursdato = LocalDate.now(),
+                    kurs = BigDecimal.valueOf(1.2),
+                    barnAktører = setOf(barn.aktør),
+                    vurderingsform = Vurderingsform.MANUELL,
+                )
+
+            val utenlandskPeriodebeløp =
+                lagUtenlandskPeriodebeløp(
+                    fom = YearMonth.of(2021, 1),
+                    tom = YearMonth.of(2025, 9),
+                    beløp = BigDecimal.valueOf(100),
+                    intervall = Intervall.MÅNEDLIG,
+                    valutakode = "SEK",
+                    utbetalingsland = "S",
+                    barnAktører = setOf(barn.aktør),
+                )
+
+            every { kompetanseRepository.finnFraBehandlingId(behandling.id) } returns listOf(sekundærlandKompetanse)
+            every { valutakursRepository.finnFraBehandlingId(behandling.id) } returns listOf(valutakurs)
+            every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandling.id) } returns listOf(utenlandskPeriodebeløp)
+
+            // Act & Assert
+            assertDoesNotThrow { behandlingsresultatStegValideringService.validerKompetanse(behandling.id) }
+        }
     }
 
     @Nested
