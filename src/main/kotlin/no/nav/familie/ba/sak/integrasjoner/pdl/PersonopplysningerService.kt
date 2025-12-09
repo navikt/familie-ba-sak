@@ -120,7 +120,7 @@ class PersonopplysningerService(
         }
     }
 
-    fun hentAdresserForPerson(ident: String) = pdlRestKlient.hentAdresser(ident)
+    fun hentAdresserForPersoner(identer: List<String>) = pdlRestKlient.hentAdresser(identer)
 
     fun hentAdressebeskyttelseSomSystembruker(aktør: Aktør): ADRESSEBESKYTTELSEGRADERING = systemOnlyPdlRestKlient.hentAdressebeskyttelse(aktør).tilAdressebeskyttelse()
 
