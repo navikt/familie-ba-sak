@@ -162,6 +162,18 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
                 }.toMutableMap()
     }
 
+    @Og("kopier persongrunnlag fra behandling {} til behandling {}")
+    fun `kopier persongrunnlag fra behandling til behandling`(
+        fraBehandlingId: Long,
+        tilBehandlingId: Long,
+    ) {
+        val persongrunnlagFraBehandling =
+            persongrunnlag[fraBehandlingId]
+                ?: throw Feil("Finner ikke persongrunnlag for behandling med id $fraBehandlingId")
+
+        persongrunnlag[tilBehandlingId] = persongrunnlagFraBehandling.copy(behandlingId = tilBehandlingId)
+    }
+
     @Og("dagens dato er {}")
     fun `dagens dato er`(dagensDatoString: String) {
         dagensDato = parseDato(dagensDatoString)
@@ -777,10 +789,10 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     ) {
         val forventedeValutakurser = lagValutakurs(dataTable.asMaps(), persongrunnlag)
 
-        assertThat(valutakurs[behandlingId]!!.sortedBy { it.valutakursdato })
+        assertThat(valutakurs[behandlingId]!!.sortedBy { it.fom })
             .usingRecursiveComparison()
             .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*id", ".*personidenter")
-            .isEqualTo(forventedeValutakurser[behandlingId]!!.sortedBy { it.valutakursdato })
+            .isEqualTo(forventedeValutakurser[behandlingId]!!.sortedBy { it.fom })
     }
 
     @Så("forvent at endringstidspunktet er {} for behandling {}")

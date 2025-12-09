@@ -15,12 +15,12 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.tilSisteVirkedag
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -163,11 +163,11 @@ fun List<UtfyltValutakurs>.tilTidslinje() =
 
 fun Collection<Valutakurs>.måValutakurserOppdateresForMåned(
     måned: YearMonth,
-) = any {
+) = none {
     val fom = it.fom ?: TIDENES_MORGEN.toYearMonth()
-    val tom = it.tom ?: TIDENES_ENDE.toYearMonth()
+    val forventetValutakursdato = fom.minusMonths(1).tilSisteVirkedag()
 
-    fom < måned && tom >= måned
+    fom == måned && it.valutakursdato == forventetValutakursdato
 }
 
 fun Collection<Valutakurs>.filtrerUtfylteValutakurser() = this.map { it.tilIValutakurs() }.filterIsInstance<UtfyltValutakurs>()
