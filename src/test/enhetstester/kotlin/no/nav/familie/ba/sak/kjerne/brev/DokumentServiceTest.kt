@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -56,7 +55,6 @@ import org.junit.jupiter.params.provider.EnumSource
 internal class DokumentServiceTest {
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>(relaxed = true)
     private val vilkårsvurderingForNyBehandlingService = mockk<VilkårsvurderingForNyBehandlingService>(relaxed = true)
-    private val utgåendeJournalføringService = mockk<UtgåendeJournalføringService>(relaxed = true)
     private val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
     private val fagsakRepository = mockk<FagsakRepository>(relaxed = true)
     private val organisasjonService = mockk<OrganisasjonService>(relaxed = true)
@@ -80,11 +78,9 @@ internal class DokumentServiceTest {
                 vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
                 rolleConfig = mockk(relaxed = true),
                 settPåVentService = mockk(relaxed = true),
-                utgåendeJournalføringService = utgåendeJournalføringService,
                 fagsakRepository = fagsakRepository,
                 organisasjonService = organisasjonService,
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-                dokumentGenereringService = mockk(relaxed = true),
                 brevmottakerService = brevmottakerService,
                 validerBrevmottakerService = mockk(relaxed = true),
                 saksbehandlerContext = saksbehandlerContext,
@@ -93,7 +89,6 @@ internal class DokumentServiceTest {
 
     @Test
     fun `sendManueltBrev skal journalføre med brukerIdType ORGNR når fagsakType er INSTITUSJON`() {
-        val avsenderMottaker = slot<AvsenderMottaker>()
         val behandling =
             lagBehandling(
                 Fagsak(
@@ -144,18 +139,6 @@ internal class DokumentServiceTest {
         val behandling = lagBehandling()
 
         every { fagsakRepository.finnFagsak(any()) } returns behandling.fagsak
-
-        every {
-            utgåendeJournalføringService.journalførDokument(
-                fnr = any(),
-                fagsakId = any(),
-                journalførendeEnhet = any(),
-                brev = any(),
-                førsteside = any(),
-                eksternReferanseId = any(),
-                avsenderMottaker = capture(avsenderMottaker),
-            )
-        } returns "mockJournalpostId"
 
         every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
 
@@ -325,24 +308,12 @@ internal class DokumentServiceTest {
         // Arrange
         val behandling = lagBehandling()
         val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.SVARTIDSBREV)
-        val avsenderMottakere = mutableListOf<AvsenderMottaker>()
 
         every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
             listOf(
                 lagBrevmottakerDb(behandlingId = behandling.id, landkode = "SE"),
                 lagBrevmottakerDb(behandlingId = behandling.id, landkode = "NO"),
             )
-        every {
-            utgåendeJournalføringService.journalførDokument(
-                fnr = any(),
-                fagsakId = any(),
-                journalførendeEnhet = any(),
-                brev = any(),
-                førsteside = any(),
-                eksternReferanseId = any(),
-                avsenderMottaker = capture(avsenderMottakere),
-            )
-        } returns "mockJournalPostId" andThen "mockJournalPostId1"
 
         every { taskRepository.save(any()) } returns mockk()
         every { fagsakRepository.finnFagsak(behandling.fagsak.id) } returns behandling.fagsak
@@ -355,17 +326,6 @@ internal class DokumentServiceTest {
 
         assertThat(exception.message).isEqualTo("Det finnes ugyldige brevmottakere i utsending av manuelt brev")
 
-        verify(exactly = 0) {
-            utgåendeJournalføringService.journalførDokument(
-                fnr = any(),
-                fagsakId = any(),
-                journalførendeEnhet = any(),
-                brev = any(),
-                førsteside = any(),
-                eksternReferanseId = any(),
-                avsenderMottaker = any(),
-            )
-        }
         verify(exactly = 0) { taskRepository.save(any()) }
     }
 
