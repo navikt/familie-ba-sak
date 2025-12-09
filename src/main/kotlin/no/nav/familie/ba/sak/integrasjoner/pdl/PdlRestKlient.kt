@@ -10,6 +10,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlDødsfallResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlGeografiskTilknytningResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlOppholdResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequest
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequestVariables
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequestVariables
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlStatsborgerskapResponse
@@ -261,14 +263,14 @@ class PdlRestKlient(
         ) { it.geografiskTilknytning }
     }
 
-    fun hentAdresser(ident: String): PdlAdresserPerson? {
+    fun hentAdresser(identer: List<String>): Map<String, PdlAdresserPerson> {
         val pdlPersonRequest =
-            PdlPersonRequest(
-                variables = PdlPersonRequestVariables(ident),
+            PdlPersonBolkRequest(
+                variables = PdlPersonBolkRequestVariables(identer),
                 query = hentGraphqlQuery("bolk-kommunenr-alle-adressetyper"),
             )
 
-        val pdlResponse: PdlBaseResponse<PdlAdresserPerson> =
+        val pdlResponse: PdlBolkResponse<PdlAdresserPerson> =
             kallEksternTjeneste(
                 tjeneste = "pdl",
                 uri = pdlUri,
@@ -277,7 +279,7 @@ class PdlRestKlient(
                 postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
             }
 
-        return feilsjekkOgReturnerData(ident = ident, pdlResponse = pdlResponse) { it }
+        return feilsjekkOgReturnerData(pdlResponse = pdlResponse)
     }
 
     fun httpHeaders(): HttpHeaders =

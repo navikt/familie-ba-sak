@@ -436,13 +436,17 @@ class PersongrunnlagService(
     ) {
         val filtrerAdresser = featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
 
+        val adresserForPersoner =
+            if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
+                personopplysningerService.hentAdresserForPersoner(personopplysningGrunnlag.personer.map { it.aktør.aktivFødselsnummer() })
+            } else {
+                emptyMap()
+            }
+
         personopplysningGrunnlag.personer.forEach { person ->
             val (bostedsadresse, oppholdsadresse, deltBosted) =
                 if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
-                    val adresserForPersoner = personopplysningerService.hentAdresserForPersoner(personopplysningGrunnlag.personer.map { it.aktør.aktivFødselsnummer() })
-                    val adresser =
-                        adresserForPersoner[person.aktør.aktivFødselsnummer()]
-                            ?: return@forEach
+                    val adresser = adresserForPersoner[person.aktør.aktivFødselsnummer()] ?: return@forEach
                     Triple(adresser.bostedsadresse, adresser.oppholdsadresse, adresser.deltBosted)
                 } else {
                     val aktør = person.aktør
