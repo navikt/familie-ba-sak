@@ -11,9 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
-import no.nav.familie.ba.sak.fake.FakeBrevKlient
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
-import no.nav.familie.ba.sak.fake.FakePdlRestKlient
 import no.nav.familie.ba.sak.fake.FakePdlRestKlient.Companion.leggTilBostedsadresseIPDL
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
@@ -95,8 +93,6 @@ class DokumentServiceIntegrationTest(
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired
-    private val fakeBrevKlient: FakeBrevKlient,
-    @Autowired
     private val dokumentGenereringService: DokumentGenereringService,
     @Autowired
     private val brevmalService: BrevmalService,
@@ -104,8 +100,6 @@ class DokumentServiceIntegrationTest(
     private val fakeTaskRepositoryWrapper: FakeTaskRepositoryWrapper,
     @Autowired
     private val autovedtakFinnmarkstilleggService: AutovedtakFinnmarkstilleggService,
-    @Autowired
-    private val fakePdlRestKlient: FakePdlRestKlient,
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Hent vedtaksbrev`() {
@@ -209,7 +203,7 @@ class DokumentServiceIntegrationTest(
 
         val vedtaksbrevFellesFelter = brevService.lagVedtaksbrevFellesfelter(vedtak)
 
-        assertEquals("Nav Familie- og pensjonsytelser Oslo 1", vedtaksbrevFellesFelter.enhet)
+        assertEquals("Nav familie- og pensjonsytelser Oslo 1", vedtaksbrevFellesFelter.enhet)
         assertEquals("System", vedtaksbrevFellesFelter.saksbehandler)
         assertEquals("Beslutter", vedtaksbrevFellesFelter.beslutter)
 
@@ -294,7 +288,7 @@ class DokumentServiceIntegrationTest(
 
         val vedtaksbrevFellesFelter = brevService.lagVedtaksbrevFellesfelter(vedtak)
 
-        assertEquals("Nav Familie- og pensjonsytelser", vedtaksbrevFellesFelter.enhet)
+        assertEquals("Nav familie- og pensjonsytelser", vedtaksbrevFellesFelter.enhet)
         assertEquals("System", vedtaksbrevFellesFelter.saksbehandler)
         assertEquals("System", vedtaksbrevFellesFelter.beslutter)
     }
