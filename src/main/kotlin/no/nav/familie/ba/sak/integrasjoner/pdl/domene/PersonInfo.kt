@@ -19,6 +19,16 @@ import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import java.time.LocalDate
 import java.time.Period
 
+sealed class PdlPersonInfo {
+    data class Person(
+        val personInfo: PersonInfo,
+    ) : PdlPersonInfo()
+
+    data class Falsk(
+        val falskIdentitet: FalskIdentitet,
+    ) : PdlPersonInfo()
+}
+
 interface PersonInfoBase {
     val fødselsdato: LocalDate?
     val navn: String?
@@ -26,6 +36,10 @@ interface PersonInfoBase {
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING?
     val erEgenAnsatt: Boolean?
 }
+
+data class FalskIdentitet(
+    val erFalsk: Boolean,
+)
 
 data class PersonInfo(
     override val fødselsdato: LocalDate,
