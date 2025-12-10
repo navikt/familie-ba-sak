@@ -13,11 +13,11 @@ data class PdlFalskIdentitetPerson(
 
 data class PdlFalskIdentitet(
     val erFalsk: Boolean,
-    val folkeregistermetadata: PdlFolkeregistermetadata?,
-    val metadata: PdlFalskIdentitetMetadata?,
-    val rettIdentitetErUkjent: Boolean?,
-    val rettIdentitetVedIdentifikasjonsnummer: String?,
-    val rettIdentitetVedOpplysninger: PdlFalskIdentitetIdentifiserendeInformasjon?,
+    val folkeregistermetadata: PdlFolkeregistermetadata? = null,
+    val metadata: PdlFalskIdentitetMetadata? = null,
+    val rettIdentitetErUkjent: Boolean? = null,
+    val rettIdentitetVedIdentifikasjonsnummer: String? = null,
+    val rettIdentitetVedOpplysninger: PdlFalskIdentitetIdentifiserendeInformasjon? = null,
 )
 
 data class PdlFolkeregistermetadata(

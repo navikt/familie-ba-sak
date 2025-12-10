@@ -38,7 +38,9 @@ internal class PersonopplysningerServiceTest(
     private val mockPersonidentService: PersonidentService,
     @Autowired
     private val fakeIntegrasjonKlient: FakeIntegrasjonKlient,
+    @Autowired
     private val falskIdentitetService: FalskIdentitetService,
+    @Autowired
     private val featureToggleService: FeatureToggleService,
 ) : AbstractSpringIntegrationTest() {
     lateinit var personopplysningerService: PersonopplysningerService
