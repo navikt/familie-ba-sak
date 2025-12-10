@@ -4,6 +4,20 @@ schema {
     query: Query
 }
 
+"This directive allows results to be deferred during execution"
+directive @defer(
+    "Deferred behaviour is controlled by this argument"
+    if: Boolean! = true,
+    "A unique label that represents the fragment being deferred"
+    label: String
+) on FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+"This directive disables error propagation when a non nullable field returns null for the given operation."
+directive @experimental_disableErrorPropagation on QUERY | MUTATION | SUBSCRIPTION
+
+"Indicates an Input Object is a OneOf Input Object."
+directive @oneOf on INPUT_OBJECT
+
 type AdresseCompletionResult {
     addressFound: CompletionAdresse
     suggestions: [String!]!
@@ -105,27 +119,17 @@ type FalskIdentitetIdentifiserendeInformasjon {
     statsborgerskap: [String!]!
 }
 
-type Foedsel {
-    foedekommune: String
-    foedeland: String
-    foedested: String
-    foedselsaar: Int
-    foedselsdato: Date
-    folkeregistermetadata: Folkeregistermetadata
-    metadata: Metadata!
-}
-
 type Foedested {
+    foedekommune: String
     foedeland: String
     foedested: String
-    foedekommune: String
     folkeregistermetadata: Folkeregistermetadata
     metadata: Metadata!
 }
 
 type Foedselsdato {
-    foedselsdato: Date
     foedselsaar: Int
+    foedselsdato: Date
     folkeregistermetadata: Folkeregistermetadata
     metadata: Metadata!
 }
@@ -172,15 +176,6 @@ type Foreldreansvar {
     metadata: Metadata!
 }
 
-type Fullmakt {
-    gyldigFraOgMed: Date!
-    gyldigTilOgMed: Date!
-    metadata: Metadata!
-    motpartsPersonident: String!
-    motpartsRolle: FullmaktsRolle!
-    omraader: [String!]!
-}
-
 type GeografiskTilknytning {
     gtBydel: String
     gtKommune: String
@@ -205,6 +200,13 @@ type IdentInformasjon {
     gruppe: IdentGruppe!
     historisk: Boolean!
     ident: String!
+}
+
+type IdentifiserendeInformasjon {
+    foedselsdato: Date
+    kjoenn: String
+    navn: Personnavn
+    statsborgerskap: [String!]
 }
 
 type Identitetsgrunnlag {
@@ -414,12 +416,20 @@ type Metadata {
 type Navn {
     etternavn: String!
     folkeregistermetadata: Folkeregistermetadata
-    forkortetNavn: String
+    forkortetNavn: String @deprecated(reason: "No longer supported")
     fornavn: String!
     gyldigFraOgMed: Date
     mellomnavn: String
     metadata: Metadata!
     originaltNavn: OriginaltNavn
+}
+
+type Navspersonidentifikator {
+    gyldigFraOgMed: Date
+    "TODO Sett som required etter oppdatering i databasen"
+    gyldigTilOgMed: Date
+    identifikasjonsnummer: String!
+    metadata: Metadata!
 }
 
 type Opphold {
@@ -455,24 +465,26 @@ type Person {
     doedfoedtBarn: [DoedfoedtBarn!]!
     doedsfall: [Doedsfall!]!
     falskIdentitet: FalskIdentitet
-    foedsel: [Foedsel!]!
+    foedested: [Foedested!]!
+    foedselsdato: [Foedselsdato!]!
     folkeregisteridentifikator(historikk: Boolean = false): [Folkeregisteridentifikator!]!
     folkeregisterpersonstatus(historikk: Boolean = false): [Folkeregisterpersonstatus!]!
     forelderBarnRelasjon: [ForelderBarnRelasjon!]!
     foreldreansvar(historikk: Boolean = false): [Foreldreansvar!]!
-    fullmakt(historikk: Boolean = false): [Fullmakt!]!
     identitetsgrunnlag(historikk: Boolean = false): [Identitetsgrunnlag!]!
     innflyttingTilNorge: [InnflyttingTilNorge!]!
     kjoenn(historikk: Boolean = false): [Kjoenn!]!
     kontaktadresse(historikk: Boolean = false): [Kontaktadresse!]!
     kontaktinformasjonForDoedsbo(historikk: Boolean = false): [KontaktinformasjonForDoedsbo!]!
     navn(historikk: Boolean = false): [Navn!]!
+    navspersonidentifikator(historikk: Boolean = false): [Navspersonidentifikator!]!
     opphold(historikk: Boolean = false): [Opphold!]!
     oppholdsadresse(historikk: Boolean = false): [Oppholdsadresse!]!
+    rettsligHandleevne(historikk: Boolean = false): [RettsligHandleevne!]!
     sikkerhetstiltak: [Sikkerhetstiltak!]!
     sivilstand(historikk: Boolean = false): [Sivilstand!]!
     statsborgerskap(historikk: Boolean = false): [Statsborgerskap!]!
-    telefonnummer: [Telefonnummer!]!
+    telefonnummer(historikk: Boolean = false): [Telefonnummer!]!
     tilrettelagtKommunikasjon: [TilrettelagtKommunikasjon!]!
     utenlandskIdentifikasjonsnummer(historikk: Boolean = false): [UtenlandskIdentifikasjonsnummer!]!
     utflyttingFraNorge: [UtflyttingFraNorge!]!
@@ -563,6 +575,12 @@ type RelatertBiPerson {
     statsborgerskap: String
 }
 
+type RettsligHandleevne {
+    folkeregistermetadata: Folkeregistermetadata
+    metadata: Metadata!
+    rettsligHandleevneomfang: String
+}
+
 type SearchMatch {
     " feltnavn med sti til feltet so ga treff."
     field: String!
@@ -614,6 +632,11 @@ type TilrettelagtKommunikasjon {
     metadata: Metadata!
     talespraaktolk: Tolk
     tegnspraaktolk: Tolk
+}
+
+type Tjenesteomraade {
+    tjenesteoppgave: String
+    tjenestevirksomhet: String
 }
 
 type Tolk {
@@ -690,10 +713,12 @@ type VegadresseResult {
 }
 
 type VergeEllerFullmektig {
+    identifiserendeInformasjon: IdentifiserendeInformasjon
     motpartsPersonident: String
-    navn: Personnavn
+    navn: Personnavn @deprecated(reason: "Erstattes av navn iidentifiserendeInformasjon")
     omfang: String
-    omfangetErInnenPersonligOmraade: Boolean!
+    omfangetErInnenPersonligOmraade: Boolean
+    tjenesteomraade: [Tjenesteomraade!]
 }
 
 type VergemaalEllerFremtidsfullmakt {
@@ -740,11 +765,6 @@ enum ForelderBarnRelasjonRolle {
     FAR
     MEDMOR
     MOR
-}
-
-enum FullmaktsRolle {
-    FULLMAKTSGIVER
-    FULLMEKTIG
 }
 
 enum GtType {
@@ -807,7 +827,7 @@ scalar Date
 "Format: YYYY-MM-DDTHH:mm:SS (ISO-8601), example: 2011-12-03T10:15:30"
 scalar DateTime
 
-"Long type"
+"A 64-bit signed integer"
 scalar Long
 
 input CompletionFieldValue {
@@ -822,8 +842,11 @@ input CompletionParameters {
 }
 
 input Criterion {
-    " Feltnavn ikludert sti til ønsket felt (Eksempel: person.navn.fornavn)"
-    fieldName: String!
+    and: [Criterion]
+    " Feltnavn inkludert sti til ønsket felt (Eksempel: person.navn.fornavn)"
+    fieldName: String
+    not: [Criterion]
+    or: [Criterion]
     """
 
     Søk i historiske data
@@ -832,7 +855,7 @@ input Criterion {
     null = søke i både historiske og gjeldende data.
     """
     searchHistorical: Boolean
-    searchRule: SearchRule!
+    searchRule: SearchRule
 }
 
 input Paging {
@@ -856,7 +879,7 @@ input SearchRule {
     " Boost brukes til å gi ett søkekriterie høyere eller lavere vektlegging en de andre søke kriteriene."
     boost: Float
     " [Flag] Kan brukes til å overstyre standard oppførsellen for søk i felter (standard er case insensitive)"
-    caseSensitive: Boolean
+    caseSensitive: Boolean @deprecated(reason: "Denne funksjonen ble lite brukt og er deprecated, dette flagget vil ikke lenger ha noe effekt og vil bli fjernet i fremtiden")
     " Gir treff når opgitt felt inneholder en eller flere ord fra input verdien."
     contains: String
     " [Flag] Brukes til å deaktivere fonetisk søk feltene som har dette som standard (Navn)"
@@ -864,7 +887,7 @@ input SearchRule {
     " Begrenser treff til kun de hvor felt har input verdi"
     equals: String
     " Sjekker om feltet finnes / at det ikke har en null verdi."
-    exists: String
+    exists: Boolean
     """
 
     Søk fra og med (se fromExcluding for bare fra men ikke med)
@@ -886,7 +909,7 @@ input SearchRule {
     " Filtrerer bort treff hvor felt inneholder input verdi"
     notEquals: String
     " Søk som gir tilfeldig poengsum til hvert treff (kun ment til generering av testdata)"
-    random: String
+    random: Float
     " Regex søk for spesielle situasjoner (Dette er en treg opprasjon og bør ikke brukes)"
     regex: String
     " Gir treff når opgitt feltstarter med opgitt verdi."
