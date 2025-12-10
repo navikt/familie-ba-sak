@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -57,6 +58,20 @@ private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() =
         adressebeskyttelseGradering = this.adressebeskyttelseGradering,
         erEgenAnsatt = this.erEgenAnsatt,
     )
+
+fun PdlPersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo =
+    when (this) {
+        is PdlPersonInfo.Person -> {
+            this.personInfo.tilRestPersonInfo(personIdent)
+        }
+
+        is PdlPersonInfo.Falsk -> {
+            RestPersonInfo(
+                personIdent = personIdent,
+                harTilgang = false,
+            )
+        }
+    }
 
 fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
     val bostedsadresse =

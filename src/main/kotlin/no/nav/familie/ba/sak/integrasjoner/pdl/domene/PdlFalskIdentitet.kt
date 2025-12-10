@@ -4,13 +4,17 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class PdlFalskIdentitetResponse(
+    val person: PdlFalskIdentitetPerson,
+)
+
+data class PdlFalskIdentitetPerson(
     val falskIdentitet: PdlFalskIdentitet?,
 )
 
 data class PdlFalskIdentitet(
     val erFalsk: Boolean,
     val folkeregistermetadata: PdlFolkeregistermetadata?,
-    val metadata: PdlMetadata,
+    val metadata: PdlFalskIdentitetMetadata?,
     val rettIdentitetErUkjent: Boolean?,
     val rettIdentitetVedIdentifikasjonsnummer: String?,
     val rettIdentitetVedOpplysninger: PdlFalskIdentitetIdentifiserendeInformasjon?,
@@ -23,6 +27,11 @@ data class PdlFolkeregistermetadata(
     val kilde: String?,
     val opphoerstidspunkt: LocalDateTime?,
     val sekvens: Int?,
+)
+
+data class PdlFalskIdentitetMetadata(
+    val master: String?,
+    val historisk: Boolean,
 )
 
 data class PdlEndring(

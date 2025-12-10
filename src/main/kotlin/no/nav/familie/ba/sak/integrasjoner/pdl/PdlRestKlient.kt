@@ -303,7 +303,7 @@ class PdlRestKlient(
             ident = ident,
             pdlResponse = pdlResponse,
         ) {
-            it.falskIdentitet?.let { pdlFalskIdentitet -> FalskIdentitet(erFalsk = pdlFalskIdentitet.erFalsk) }
+            it.person.falskIdentitet?.let { falskIdentitet -> FalskIdentitet(erFalsk = falskIdentitet.erFalsk) }
         }
     }
 
