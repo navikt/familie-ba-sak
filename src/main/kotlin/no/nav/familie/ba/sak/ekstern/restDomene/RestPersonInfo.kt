@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FalskIdentitet
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
@@ -22,6 +23,7 @@ data class RestPersonInfo(
     val dødsfallDato: String? = null,
     val bostedsadresse: RestBostedsadresse? = null,
     val erEgenAnsatt: Boolean? = null,
+    val erFalskIdentitet: Boolean = false,
 )
 
 data class RestForelderBarnRelasjon(
@@ -66,10 +68,7 @@ fun PdlPersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo =
         }
 
         is PdlPersonInfo.Falsk -> {
-            RestPersonInfo(
-                personIdent = personIdent,
-                harTilgang = false,
-            )
+            this.falskIdentitet.tilRestPersonInfo(personIdent)
         }
     }
 
@@ -98,6 +97,25 @@ fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
         kommunenummer = kommunenummer,
         dødsfallDato = dødsfallDato,
         erEgenAnsatt = this.erEgenAnsatt,
+    )
+}
+
+fun FalskIdentitet.tilRestPersonInfo(personIdent: String): RestPersonInfo {
+    val nyesteAdresse = adresser?.bostedsadresser?.filter { it.gyldigFraOgMed != null }?.maxByOrNull { it.gyldigFraOgMed!! }
+    val kommunenummer =
+        when {
+            nyesteAdresse?.vegadresse != null -> nyesteAdresse.vegadresse.kommunenummer
+            nyesteAdresse?.matrikkeladresse != null -> nyesteAdresse.matrikkeladresse.kommunenummer
+            else -> "ukjent"
+        } ?: "ukjent"
+
+    return RestPersonInfo(
+        personIdent = personIdent,
+        navn = this.navn,
+        fødselsdato = this.fødselsdato,
+        kjønn = this.kjønn,
+        kommunenummer = kommunenummer,
+        erFalskIdentitet = true,
     )
 }
 
