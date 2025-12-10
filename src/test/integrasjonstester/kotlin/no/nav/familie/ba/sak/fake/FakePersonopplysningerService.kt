@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.fake
 
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomati
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomatiskBehandlingSkalFeileFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutomatiskBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutomatiskBehandlingFnr
+import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.Fødselsnummer
@@ -41,11 +43,15 @@ class FakePersonopplysningerService(
     systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
     familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     integrasjonKlient: IntegrasjonKlient,
+    falskIdentitetService: FalskIdentitetService,
+    featureToggleService: FeatureToggleService,
 ) : PersonopplysningerService(
         pdlRestKlient,
         systemOnlyPdlRestKlient,
         familieIntegrasjonerTilgangskontrollService,
         integrasjonKlient,
+        falskIdentitetService,
+        featureToggleService,
     ) {
     init {
         settPersoninfoMedRelasjonerForPredefinerteTestpersoner()

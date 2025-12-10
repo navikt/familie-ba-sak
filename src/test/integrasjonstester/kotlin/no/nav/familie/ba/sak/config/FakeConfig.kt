@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.config
 
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.fake.FakeBrevKlient
 import no.nav.familie.ba.sak.fake.FakeECBValutakursRestKlient
 import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
@@ -23,6 +24,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.unleash.UnleashService
@@ -119,12 +121,16 @@ class FakeConfig {
         systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
         familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
         integrasjonKlient: IntegrasjonKlient,
+        falskIdentitetService: FalskIdentitetService,
+        featureToggleService: FeatureToggleService,
     ): FakePersonopplysningerService =
         FakePersonopplysningerService(
             pdlRestKlient = pdlRestKlient,
             systemOnlyPdlRestKlient = systemOnlyPdlRestKlient,
             familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
             integrasjonKlient = integrasjonKlient,
+            falskIdentitetService = falskIdentitetService,
+            featureToggleService = featureToggleService,
         )
 
     @Bean

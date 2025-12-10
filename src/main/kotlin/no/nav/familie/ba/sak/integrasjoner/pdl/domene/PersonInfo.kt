@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -38,7 +39,10 @@ interface PersonInfoBase {
 }
 
 data class FalskIdentitet(
-    val erFalsk: Boolean,
+    val navn: String?,
+    val fødselsdato: LocalDate?,
+    val kjønn: Kjønn,
+    val adresser: Adresser?,
 )
 
 data class PersonInfo(

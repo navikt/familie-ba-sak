@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.GeografiskTilknytning
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlDødsfallResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFalskIdentitet
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFalskIdentitetResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlGeografiskTilknytningResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
@@ -284,7 +285,7 @@ class PdlRestKlient(
         return feilsjekkOgReturnerData(pdlResponse = pdlResponse)
     }
 
-    fun hentFalskIdentitet(ident: String): FalskIdentitet? {
+    fun hentFalskIdentitet(ident: String): PdlFalskIdentitet? {
         val pdlPersonRequest =
             PdlPersonRequest(
                 variables = PdlPersonRequestVariables(ident),
@@ -303,7 +304,7 @@ class PdlRestKlient(
             ident = ident,
             pdlResponse = pdlResponse,
         ) {
-            it.person.falskIdentitet?.let { falskIdentitet -> FalskIdentitet(erFalsk = falskIdentitet.erFalsk) }
+            it.person.falskIdentitet
         }
     }
 
