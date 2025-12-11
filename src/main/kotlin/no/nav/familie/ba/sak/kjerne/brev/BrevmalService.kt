@@ -86,6 +86,7 @@ class BrevmalService(
                         Behandlingsresultat.ENDRET_UTBETALING,
                         Behandlingsresultat.ENDRET_UTEN_UTBETALING,
                         Behandlingsresultat.ENDRET_OG_OPPHØRT,
+                        Behandlingsresultat.ENDRET_OG_FORTSATT_OPPHØRT,
                         Behandlingsresultat.OPPHØRT,
                         Behandlingsresultat.FORTSATT_OPPHØRT,
                         Behandlingsresultat.FORTSATT_INNVILGET,
@@ -121,6 +122,7 @@ class BrevmalService(
                         Behandlingsresultat.ENDRET_UTBETALING,
                         Behandlingsresultat.ENDRET_UTEN_UTBETALING,
                         Behandlingsresultat.ENDRET_OG_OPPHØRT,
+                        Behandlingsresultat.ENDRET_OG_FORTSATT_OPPHØRT,
                         Behandlingsresultat.OPPHØRT,
                         Behandlingsresultat.FORTSATT_OPPHØRT,
                         Behandlingsresultat.FORTSATT_INNVILGET,
@@ -158,6 +160,7 @@ class BrevmalService(
 
                         Behandlingsresultat.OPPHØRT,
                         Behandlingsresultat.FORTSATT_OPPHØRT,
+                        Behandlingsresultat.ENDRET_OG_FORTSATT_OPPHØRT,
                         -> Brevmal.VEDTAK_OPPHØRT_INSTITUSJON
 
                         Behandlingsresultat.FORTSATT_INNVILGET,
@@ -197,6 +200,7 @@ class BrevmalService(
 
                         Behandlingsresultat.OPPHØRT,
                         Behandlingsresultat.FORTSATT_OPPHØRT,
+                        Behandlingsresultat.ENDRET_OG_FORTSATT_OPPHØRT,
                         -> Brevmal.VEDTAK_OPPHØRT
 
                         Behandlingsresultat.FORTSATT_INNVILGET,

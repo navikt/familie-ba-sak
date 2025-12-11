@@ -44,6 +44,7 @@ class SendMeldingTilBisysTask(
         if (behandling.resultat == Behandlingsresultat.OPPHØRT ||
             behandling.resultat == Behandlingsresultat.ENDRET_UTBETALING ||
             behandling.resultat == Behandlingsresultat.ENDRET_OG_OPPHØRT ||
+            behandling.resultat == Behandlingsresultat.ENDRET_OG_FORTSATT_OPPHØRT ||
             behandling.resultat == Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT ||
             behandling.resultat == Behandlingsresultat.INNVILGET_OG_OPPHØRT ||
             behandling.resultat == Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT ||
