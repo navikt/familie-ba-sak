@@ -36,7 +36,7 @@ internal enum class Endringsresultat {
 
 private data class EndringForPerson(
     val erEndring: Boolean,
-    val erBeløpsEndring: Boolean,
+    val erBeløpsendring: Boolean,
 )
 
 object BehandlingsresultatEndringUtils {
@@ -60,7 +60,7 @@ object BehandlingsresultatEndringUtils {
     ): Endringsresultat {
         val relevantePersoner = (personerIBehandling.map { it.aktør } + personerIForrigeBehandling.map { it.aktør }).distinct()
 
-        val endringsInfoForRelevantePersoner =
+        val endringerForRelevantePersoner =
             relevantePersoner.map { aktør ->
                 val erEndringIBeløpForPerson =
                     erEndringIBeløpForPerson(
@@ -132,16 +132,16 @@ object BehandlingsresultatEndringUtils {
 
                 EndringForPerson(
                     erEndring = erMinstEnEndringForPerson,
-                    erBeløpsEndring = erEndringIBeløpForPerson,
+                    erBeløpsendring = erEndringIBeløpForPerson,
                 )
             }
 
         return when {
-            endringsInfoForRelevantePersoner.none { it.erEndring } -> {
+            endringerForRelevantePersoner.none { it.erEndring } -> {
                 Endringsresultat.INGEN_ENDRING
             }
 
-            endringsInfoForRelevantePersoner.any { it.erBeløpsEndring } -> {
+            endringerForRelevantePersoner.any { it.erBeløpsendring } -> {
                 Endringsresultat.ENDRING
             }
 
