@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FalskIdentitet
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
@@ -40,7 +39,7 @@ class PersonopplysningerService(
         val personinfo =
             when (pdlPersoninfo) {
                 is PdlPersonInfo.Person -> pdlPersoninfo.personInfo
-                is PdlPersonInfo.Falsk -> return PdlPersonInfo.Falsk(pdlPersoninfo.falskIdentitet)
+                is PdlPersonInfo.FalskPerson -> return PdlPersonInfo.FalskPerson(pdlPersoninfo.falskIdentitetPersonInfo)
             }
         return PdlPersonInfo.Person(personinfo.medRelasjonerOgEgenAnsattInfo(aktør))
     }
@@ -50,7 +49,7 @@ class PersonopplysningerService(
         val personInfo =
             when (pdlPersoninfo) {
                 is PdlPersonInfo.Person -> pdlPersoninfo.personInfo
-                is PdlPersonInfo.Falsk -> throw FunksjonellFeil("Person har falsk identitet")
+                is PdlPersonInfo.FalskPerson -> throw FunksjonellFeil("Person har falsk identitet")
             }
         return personInfo.medRelasjonerOgEgenAnsattInfo(aktør)
     }
@@ -65,7 +64,7 @@ class PersonopplysningerService(
                 .mapNotNull {
                     if (tilgangPerIdent.getValue(it.aktør.aktivFødselsnummer()).harTilgang) {
                         try {
-                            val relasjonsinfo = hentPersoninfoEnkel(it.aktør)
+                            val relasjonsinfo = hentPdlPersonInfoEnkel(it.aktør).personInfoBase()
                             ForelderBarnRelasjon(
                                 aktør = it.aktør,
                                 relasjonsrolle = it.relasjonsrolle,
@@ -133,8 +132,8 @@ class PersonopplysningerService(
             }
             val falskIdentitet = falskIdentitetService.hentFalskIdentitet(aktør)
             if (falskIdentitet != null) {
-                PdlPersonInfo.Falsk(
-                    falskIdentitet = falskIdentitet,
+                PdlPersonInfo.FalskPerson(
+                    falskIdentitetPersonInfo = falskIdentitet,
                 )
             } else {
                 throw e

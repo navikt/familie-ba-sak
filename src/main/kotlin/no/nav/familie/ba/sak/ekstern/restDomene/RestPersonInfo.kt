@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FalskIdentitet
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FalskIdentitetPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
@@ -67,8 +67,8 @@ fun PdlPersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo =
             this.personInfo.tilRestPersonInfo(personIdent)
         }
 
-        is PdlPersonInfo.Falsk -> {
-            this.falskIdentitet.tilRestPersonInfo(personIdent)
+        is PdlPersonInfo.FalskPerson -> {
+            this.falskIdentitetPersonInfo.tilRestPersonInfo(personIdent)
         }
     }
 
@@ -100,7 +100,7 @@ fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
     )
 }
 
-fun FalskIdentitet.tilRestPersonInfo(personIdent: String): RestPersonInfo {
+fun FalskIdentitetPersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
     val nyesteAdresse = adresser?.bostedsadresser?.filter { it.gyldigFraOgMed != null }?.maxByOrNull { it.gyldigFraOgMed!! }
     val kommunenummer =
         when {

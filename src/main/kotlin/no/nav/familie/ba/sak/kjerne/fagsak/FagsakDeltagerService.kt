@@ -8,9 +8,10 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfoBase
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -31,6 +32,7 @@ class FagsakDeltagerService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val fagsakService: FagsakService,
     private val integrasjonKlient: IntegrasjonKlient,
+    private val falskIdentitetService: FalskIdentitetService,
 ) {
     private val logger = LoggerFactory.getLogger(FagsakDeltagerService::class.java)
 
@@ -42,27 +44,27 @@ class FagsakDeltagerService(
             return listOf(maskertFagsakDeltager)
         }
 
-        val personInfoForAktør = hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør) ?: return emptyList()
+        val pdlPersonInfoForAktør = hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør) ?: return emptyList()
 
         val assosierteFagsakDeltagere = mutableListOf<RestFagsakDeltager>()
 
         // Legger til alle fagsak deltakere som eier fagsaker relatert til aktør. Dette kan være aktør selv, en forelder eller en person som ikke har en direkte relasjon.
-        assosierteFagsakDeltagere.addAll(hentFagsakDeltagereSomEierFagsakerAssosiertMedAktør(aktør, personInfoForAktør))
+        assosierteFagsakDeltagere.addAll(hentFagsakDeltagereSomEierFagsakerAssosiertMedAktør(aktør, pdlPersonInfoForAktør))
 
         // Legger til fagsak deltagere for hver fagsak aktør selv står som eier, eller en default fagsak deltager dersom aktør ikke eier noen fagsak.
         assosierteFagsakDeltagere.addAll(
             hentFagsakDeltagerPerFagsakAktørEierEllerDefaultUtenFagsak(
                 aktør = aktør,
-                personInfoBase = personInfoForAktør,
+                personInfoBase = pdlPersonInfoForAktør.personInfoBase(),
                 assosierteFagsakDeltagere = assosierteFagsakDeltagere,
                 // Setter rolle til barn dersom aktør er barn, ellers ukjent da vi ikke kan vite om aktør har barn/er forelder.
-                rolle = if (personInfoForAktør.erBarn()) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
+                rolle = if (pdlPersonInfoForAktør.erBarn()) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
             ),
         )
 
-        if (personInfoForAktør.erBarn()) {
+        if (pdlPersonInfoForAktør.erBarn()) {
             // Legger til foreldre som fagsak deltagere dersom de ikke allerede er lagt til
-            assosierteFagsakDeltagere.addAll(hentForelderFagsakDeltagereSomMangler(personInfoForAktør, assosierteFagsakDeltagere))
+            assosierteFagsakDeltagere.addAll(hentForelderFagsakDeltagereSomMangler(pdlPersonInfoForAktør.personInfoBase(), assosierteFagsakDeltagere))
         }
 
         val fagsakDeltagereMedEgenAnsattStatus = settEgenAnsattStatusPåFagsakDeltagere(assosierteFagsakDeltagere)
@@ -106,7 +108,7 @@ class FagsakDeltagerService(
     }
 
     private fun hentForelderFagsakDeltagereSomMangler(
-        personInfo: PersonInfo,
+        personInfo: PersonInfoBase,
         assosierteFagsakDeltagere: MutableList<RestFagsakDeltager>,
     ): List<RestFagsakDeltager> =
         personInfo.forelderBarnRelasjon
@@ -142,7 +144,7 @@ class FagsakDeltagerService(
 
     private fun hentFagsakDeltagereSomEierFagsakerAssosiertMedAktør(
         aktør: Aktør,
-        personInfoForAktør: PersonInfo,
+        personInfoForAktør: PdlPersonInfo,
     ): Collection<RestFagsakDeltager> =
         personRepository
             .findByAktør(aktør)
@@ -157,7 +159,7 @@ class FagsakDeltagerService(
                     hentFagsakEier(
                         fagsak = behandling.fagsak,
                         aktør = aktør,
-                        personInfoMedRelasjoner = personInfoForAktør,
+                        personInfoMedRelasjoner = personInfoForAktør.personInfoBase(),
                     )
                 if (fagsakEier != null) {
                     fagsakDeltagerMap[behandling.fagsak.id] = fagsakEier
@@ -169,7 +171,7 @@ class FagsakDeltagerService(
     private fun hentFagsakEier(
         fagsak: Fagsak,
         aktør: Aktør,
-        personInfoMedRelasjoner: PersonInfo,
+        personInfoMedRelasjoner: PersonInfoBase,
     ): RestFagsakDeltager? {
         if (fagsak.aktør == aktør) {
             return RestFagsakDeltager(
@@ -207,7 +209,11 @@ class FagsakDeltagerService(
         }
 
         // Person med forelderrolle uten direkte relasjon
-        return runCatching {
+        return hentPersonMedForeldrerolle(fagsak)
+    }
+
+    private fun hentPersonMedForeldrerolle(fagsak: Fagsak): RestFagsakDeltager? =
+        runCatching {
             personopplysningerService.hentPersoninfoEnkel(fagsak.aktør)
         }.fold(
             onSuccess = {
@@ -224,7 +230,18 @@ class FagsakDeltagerService(
             onFailure = { exception ->
                 when (exception) {
                     is PdlPersonKanIkkeBehandlesIFagsystem -> {
-                        // Filtrerer midlertidig bort personer som ikke kan behandles i fagsystem, som personer med falsk ident NAV-26495. Bør fikses i NAV-26549
+                        val falskIdentitet = falskIdentitetService.hentFalskIdentitet(fagsak.aktør)
+                        if (falskIdentitet != null) {
+                            return RestFagsakDeltager(
+                                navn = falskIdentitet.navn,
+                                ident = fagsak.aktør.aktivFødselsnummer(),
+                                rolle = FagsakDeltagerRolle.FORELDER,
+                                kjønn = falskIdentitet.kjønn,
+                                fagsakId = fagsak.id,
+                                fagsakType = fagsak.type,
+                            )
+                        }
+                        // Filtrerer bort personer som ikke kan behandles i fagsystem og som ikke har falsk ident
                         logger.warn("Filtrerer bort eier av en fagsak som ikke kan behandles i fagsystem pga ${exception.årsak}")
                         null
                     }
@@ -239,7 +256,6 @@ class FagsakDeltagerService(
                 }
             },
         )
-    }
 
     private fun hentMaskertPersonVedManglendeTilgang(aktør: Aktør): RestFagsakDeltager? =
         runCatching {
@@ -257,9 +273,9 @@ class FagsakDeltagerService(
             onFailure = { sjekkStatuskodeOgHåndterFeil(throwable = it) },
         )
 
-    private fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo? =
+    private fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PdlPersonInfo? =
         runCatching {
-            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+            personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
         }.fold(
             onSuccess = { it },
             onFailure = { sjekkStatuskodeOgHåndterFeil(it) },

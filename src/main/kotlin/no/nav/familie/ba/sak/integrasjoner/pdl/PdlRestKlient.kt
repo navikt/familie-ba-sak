@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FalskIdentitet
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.GeografiskTilknytning
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
