@@ -16,16 +16,16 @@ class FalskIdentitetService(
     fun hentFalskIdentitet(aktør: Aktør): FalskIdentitetPersonInfo? {
         val pdlFalskIdentitet = pdlRestKlient.hentFalskIdentitet(aktør.aktivFødselsnummer())
         if (pdlFalskIdentitet != null && pdlFalskIdentitet.erFalsk) {
-            val person = personRepository.findByAktør(aktør).filter { it.personopplysningGrunnlag.aktiv }
-            val adresser = person.firstOrNull()?.let { Adresser.opprettFra(it) }
+            val personer = personRepository.findByAktør(aktør)
+            val person = personer.firstOrNull { it.personopplysningGrunnlag.aktiv } ?: personer.firstOrNull()
 
             // Vurdere å bruke mer informasjon fra PdlFalskIdentitet hvis tilgjengelig
             // Henter navn, fødselsdato, kjønn og adresser fra personopplysningene i stedet for PDL
             return FalskIdentitetPersonInfo(
-                navn = person.firstOrNull()?.navn ?: "Falsk identitet",
-                fødselsdato = person.firstOrNull()?.fødselsdato,
-                kjønn = person.firstOrNull()?.kjønn ?: Kjønn.UKJENT,
-                adresser = adresser,
+                navn = person?.navn ?: "Ukjent navn",
+                fødselsdato = person?.fødselsdato,
+                kjønn = person?.kjønn ?: Kjønn.UKJENT,
+                adresser = person?.let { Adresser.opprettFra(it) },
             )
         } else {
             return null
