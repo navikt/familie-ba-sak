@@ -30,8 +30,14 @@ import java.time.YearMonth
 
 internal enum class Endringsresultat {
     ENDRING,
+    ENDRING_UTEN_BELØPSENDRING,
     INGEN_ENDRING,
 }
+
+private data class EndringForPerson(
+    val erEndring: Boolean,
+    val erBeløpsEndring: Boolean,
+)
 
 object BehandlingsresultatEndringUtils {
     internal fun utledEndringsresultat(
@@ -54,8 +60,8 @@ object BehandlingsresultatEndringUtils {
     ): Endringsresultat {
         val relevantePersoner = (personerIBehandling.map { it.aktør } + personerIForrigeBehandling.map { it.aktør }).distinct()
 
-        val endringerForRelevantePersoner =
-            relevantePersoner.any { aktør ->
+        val endringsInfoForRelevantePersoner =
+            relevantePersoner.map { aktør ->
                 val erEndringIBeløpForPerson =
                     erEndringIBeløpForPerson(
                         aktør = aktør,
@@ -124,10 +130,21 @@ object BehandlingsresultatEndringUtils {
                     )
                 }
 
-                erMinstEnEndringForPerson
+                EndringForPerson(
+                    erEndring = erMinstEnEndringForPerson,
+                    erBeløpsEndring = erEndringIBeløpForPerson,
+                )
             }
 
-        return if (endringerForRelevantePersoner) Endringsresultat.ENDRING else Endringsresultat.INGEN_ENDRING
+        return when {
+            endringsInfoForRelevantePersoner.none { it.erEndring } ->
+                Endringsresultat.INGEN_ENDRING
+
+            endringsInfoForRelevantePersoner.any { it.erBeløpsEndring } ->
+                Endringsresultat.ENDRING
+
+            else -> Endringsresultat.ENDRING_UTEN_BELØPSENDRING
+        }
     }
 
     private fun loggEndringerVedEndringForPerson(
