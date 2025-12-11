@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomatiskBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomatiskBehandling2
@@ -62,6 +63,13 @@ class FakePersonopplysningerService(
         sjekkPersonIkkeFunnet(aktør.aktivFødselsnummer())
 
         return personInfo[aktør.aktivFødselsnummer()] ?: personInfo.getValue(INTEGRASJONER_FNR)
+    }
+
+    override fun hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PdlPersonInfo {
+        validerFødselsnummer(aktør.aktivFødselsnummer())
+        sjekkPersonIkkeFunnet(aktør.aktivFødselsnummer())
+
+        return PdlPersonInfo.Person(hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør))
     }
 
     override fun hentPersoninfoEnkel(aktør: Aktør): PersonInfo =
