@@ -50,10 +50,10 @@ interface PersonInfoBase {
 }
 
 data class FalskIdentitetPersonInfo(
-    override val navn: String?,
-    override val fødselsdato: LocalDate?,
-    override val kjønn: Kjønn,
-    val adresser: Adresser?,
+    override val navn: String? = "Ukjent navn",
+    override val fødselsdato: LocalDate? = null,
+    override val kjønn: Kjønn = Kjønn.UKJENT,
+    val adresser: Adresser? = null,
 ) : PersonInfoBase {
     override val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null
     override val erEgenAnsatt: Boolean? = null

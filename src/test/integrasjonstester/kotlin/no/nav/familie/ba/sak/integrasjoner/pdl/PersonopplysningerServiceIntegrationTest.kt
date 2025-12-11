@@ -26,7 +26,7 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
 
-internal class PersonopplysningerServiceTest(
+internal class PersonopplysningerServiceIntegrationTest(
     @Autowired
     @Qualifier("jwtBearer")
     private val restTemplate: RestOperations,
