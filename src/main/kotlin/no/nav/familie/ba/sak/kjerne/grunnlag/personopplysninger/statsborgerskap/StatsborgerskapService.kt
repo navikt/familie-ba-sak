@@ -200,7 +200,7 @@ class StatsborgerskapService(
     }
 }
 
-fun Statsborgerskap.hentFom() = this.bekreftelsesdato ?: this.gyldigFraOgMed
+fun Statsborgerskap.hentFom() = this.gyldigFraOgMed ?: this.bekreftelsesdato
 
 fun Statsborgerskap.iNordiskLand() = Norden.entries.map { it.name }.contains(this.land)
 
