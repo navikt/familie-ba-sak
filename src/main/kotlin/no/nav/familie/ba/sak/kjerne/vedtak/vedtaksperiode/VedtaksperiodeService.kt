@@ -503,6 +503,7 @@ class VedtaksperiodeService(
                     Behandlingsresultat.AVSLÅTT,
                     Behandlingsresultat.ENDRET_OG_OPPHØRT,
                     Behandlingsresultat.OPPHØRT,
+                    Behandlingsresultat.ENDRET_OG_FORTSATT_OPPHØRT,
                 )
 
         return annenForelderOmfattetAvNorskLovgivningErSattPåBosattIRiket && passendeBehandlingsresultat

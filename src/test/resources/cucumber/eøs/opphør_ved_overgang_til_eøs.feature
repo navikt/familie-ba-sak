@@ -9,9 +9,9 @@ Egenskap: Opphør ved overgang til EØS
       | 1        | NORMAL     | AVSLUTTET |
 
     Gitt følgende behandlinger
-      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
-      | 1            | 1        |                     | OPPHØRT             | NYE_OPPLYSNINGER | Nei                       | NASJONAL            | AVSLUTTET         |
-      | 2            | 1        | 1                   | ENDRET_UTBETALING   | NYE_OPPLYSNINGER | Nei                       | NASJONAL            | UTREDES           |
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat        | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
+      | 1            | 1        |                     | OPPHØRT                    | NYE_OPPLYSNINGER | Nei                       | NASJONAL            | AVSLUTTET         |
+      | 2            | 1        | 1                   | ENDRET_OG_FORTSATT_OPPHØRT | NYE_OPPLYSNINGER | Nei                       | NASJONAL            | UTREDES           |
 
     Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
@@ -52,6 +52,11 @@ Egenskap: Opphør ved overgang til EØS
       | 2       | 1            | 01.04.2022 | 31.05.2022 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
 
       | 2       | 2            | 01.04.2022 | 31.05.2022 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+
+
+    Og når behandlingsresultatet er utledet for behandling 2
+
+    Så forvent at behandlingsresultatet er ENDRET_OG_FORTSATT_OPPHØRT på behandling 2
 
     Når vedtaksperiodene genereres for behandling 2
 
