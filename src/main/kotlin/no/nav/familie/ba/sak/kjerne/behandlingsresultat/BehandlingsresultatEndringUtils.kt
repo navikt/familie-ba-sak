@@ -137,13 +137,17 @@ object BehandlingsresultatEndringUtils {
             }
 
         return when {
-            endringsInfoForRelevantePersoner.none { it.erEndring } ->
+            endringsInfoForRelevantePersoner.none { it.erEndring } -> {
                 Endringsresultat.INGEN_ENDRING
+            }
 
-            endringsInfoForRelevantePersoner.any { it.erBeløpsEndring } ->
+            endringsInfoForRelevantePersoner.any { it.erBeløpsEndring } -> {
                 Endringsresultat.ENDRING
+            }
 
-            else -> Endringsresultat.ENDRING_UTEN_BELØPSENDRING
+            else -> {
+                Endringsresultat.ENDRING_UTEN_BELØPSENDRING
+            }
         }
     }
 

@@ -201,7 +201,7 @@ class BrevmalService(
                         Behandlingsresultat.OPPHØRT,
                         Behandlingsresultat.FORTSATT_OPPHØRT,
                         Behandlingsresultat.ENDRET_OG_FORTSATT_OPPHØRT,
-                            -> Brevmal.VEDTAK_OPPHØRT
+                        -> Brevmal.VEDTAK_OPPHØRT
 
                         Behandlingsresultat.FORTSATT_INNVILGET,
                         Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET,
