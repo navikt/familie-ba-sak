@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfoBase
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -32,7 +31,6 @@ class FagsakDeltagerService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val fagsakService: FagsakService,
     private val integrasjonKlient: IntegrasjonKlient,
-    private val falskIdentitetService: FalskIdentitetService,
 ) {
     private val logger = LoggerFactory.getLogger(FagsakDeltagerService::class.java)
 
@@ -214,7 +212,7 @@ class FagsakDeltagerService(
 
     private fun hentPersonMedForeldrerolle(fagsak: Fagsak): RestFagsakDeltager? =
         runCatching {
-            personopplysningerService.hentPersoninfoEnkel(fagsak.aktør)
+            personopplysningerService.hentPdlPersonInfoEnkel(fagsak.aktør).personInfoBase()
         }.fold(
             onSuccess = {
                 RestFagsakDeltager(
@@ -230,17 +228,6 @@ class FagsakDeltagerService(
             onFailure = { exception ->
                 when (exception) {
                     is PdlPersonKanIkkeBehandlesIFagsystem -> {
-                        val falskIdentitet = falskIdentitetService.hentFalskIdentitet(fagsak.aktør)
-                        if (falskIdentitet != null) {
-                            return RestFagsakDeltager(
-                                navn = falskIdentitet.navn,
-                                ident = fagsak.aktør.aktivFødselsnummer(),
-                                rolle = FagsakDeltagerRolle.FORELDER,
-                                kjønn = falskIdentitet.kjønn,
-                                fagsakId = fagsak.id,
-                                fagsakType = fagsak.type,
-                            )
-                        }
                         // Filtrerer bort personer som ikke kan behandles i fagsystem og som ikke har falsk ident
                         logger.warn("Filtrerer bort eier av en fagsak som ikke kan behandles i fagsystem pga ${exception.årsak}")
                         null
