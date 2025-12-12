@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.falskidentitet
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -18,10 +20,12 @@ import java.time.LocalDate
 class FalskIdentitetServiceTest {
     private val personRepository = mockk<PersonRepository>()
     private val pdlRestKlient = mockk<PdlRestKlient>()
+    private val featureToggleService = mockk<FeatureToggleService>()
     private val falskIdentitetService =
         FalskIdentitetService(
             personRepository = personRepository,
             pdlRestKlient = pdlRestKlient,
+            featureToggleService = featureToggleService,
         )
 
     @Nested
@@ -37,6 +41,7 @@ class FalskIdentitetServiceTest {
                     kjønn = Kjønn.MANN,
                 )
 
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
             every { pdlRestKlient.hentFalskIdentitet(person.aktør.aktivFødselsnummer()) } returns PdlFalskIdentitet(erFalsk = true)
             every { personRepository.findByAktør(person.aktør) } returns listOf(person)
 
@@ -55,6 +60,7 @@ class FalskIdentitetServiceTest {
             // Arrange
             val aktør = lagAktør()
 
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
             every { pdlRestKlient.hentFalskIdentitet(aktør.aktivFødselsnummer()) } returns PdlFalskIdentitet(erFalsk = true)
             every { personRepository.findByAktør(aktør) } returns emptyList()
 
@@ -73,6 +79,7 @@ class FalskIdentitetServiceTest {
             // Arrange
             val aktør = lagAktør()
 
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
             every { pdlRestKlient.hentFalskIdentitet(aktør.aktivFødselsnummer()) } returns null
 
             // Act
@@ -87,6 +94,7 @@ class FalskIdentitetServiceTest {
             // Arrange
             val aktør = lagAktør()
 
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
             every { pdlRestKlient.hentFalskIdentitet(aktør.aktivFødselsnummer()) } returns PdlFalskIdentitet(erFalsk = false)
 
             // Act

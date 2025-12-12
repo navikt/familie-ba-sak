@@ -5,8 +5,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
@@ -32,7 +30,6 @@ class PersonopplysningerService(
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val integrasjonKlient: IntegrasjonKlient,
     private val falskIdentitetService: FalskIdentitetService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     fun hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PdlPersonInfo {
         val pdlPersoninfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
@@ -127,9 +124,6 @@ class PersonopplysningerService(
         try {
             PdlPersonInfo.Person(pdlRestKlient.hentPerson(aktør, personInfoQuery))
         } catch (e: PdlPersonKanIkkeBehandlesIFagsystem) {
-            if (!featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET)) {
-                throw e
-            }
             val falskIdentitet = falskIdentitetService.hentFalskIdentitet(aktør)
             if (falskIdentitet != null) {
                 PdlPersonInfo.FalskPerson(

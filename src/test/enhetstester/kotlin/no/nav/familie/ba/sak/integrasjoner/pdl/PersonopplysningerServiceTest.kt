@@ -3,8 +3,6 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagSystemÅrsak
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
@@ -23,8 +21,6 @@ import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 
 class PersonopplysningerServiceTest {
     private val pdlRestKlient: PdlRestKlient = mockk()
@@ -32,7 +28,6 @@ class PersonopplysningerServiceTest {
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService = mockk()
     private val integrasjonKlient: IntegrasjonKlient = mockk()
     private val falskIdentitetService: FalskIdentitetService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk()
     private val personopplysningerService: PersonopplysningerService =
         PersonopplysningerService(
             pdlRestKlient = pdlRestKlient,
@@ -40,7 +35,6 @@ class PersonopplysningerServiceTest {
             familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
             integrasjonKlient = integrasjonKlient,
             falskIdentitetService = falskIdentitetService,
-            featureToggleService = featureToggleService,
         )
 
     @Test
@@ -141,7 +135,6 @@ class PersonopplysningerServiceTest {
         val person = lagPerson()
 
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
         every { falskIdentitetService.hentFalskIdentitet(person.aktør) } returns FalskIdentitetPersonInfo()
 
         // Act
@@ -161,7 +154,6 @@ class PersonopplysningerServiceTest {
         val person = lagPerson()
 
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
         every { falskIdentitetService.hentFalskIdentitet(person.aktør) } returns null
 
         // Act & Assert
@@ -174,7 +166,6 @@ class PersonopplysningerServiceTest {
         // Arrange
         val person = lagPerson()
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
         every { falskIdentitetService.hentFalskIdentitet(person.aktør) } returns FalskIdentitetPersonInfo()
 
         // Act & Assert
@@ -187,7 +178,6 @@ class PersonopplysningerServiceTest {
         // Arrange
         val person = lagPerson()
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
         every { falskIdentitetService.hentFalskIdentitet(person.aktør) } returns null
 
         // Act & Assert
@@ -247,7 +237,6 @@ class PersonopplysningerServiceTest {
         val person = lagPerson()
 
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.ENKEL) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
         every { falskIdentitetService.hentFalskIdentitet(person.aktør) } returns FalskIdentitetPersonInfo()
 
         // Act
@@ -267,7 +256,6 @@ class PersonopplysningerServiceTest {
         val person = lagPerson()
 
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.ENKEL) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
         every { falskIdentitetService.hentFalskIdentitet(person.aktør) } returns null
 
         // Act & Assert
@@ -281,7 +269,6 @@ class PersonopplysningerServiceTest {
         val person = lagPerson()
 
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.ENKEL) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
         every { falskIdentitetService.hentFalskIdentitet(person.aktør) } returns FalskIdentitetPersonInfo()
 
         // Act & Assert
@@ -295,7 +282,6 @@ class PersonopplysningerServiceTest {
         val person = lagPerson()
 
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.ENKEL) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
         every { falskIdentitetService.hentFalskIdentitet(person.aktør) } returns null
 
         // Act & Assert
@@ -354,7 +340,6 @@ class PersonopplysningerServiceTest {
         val person = lagPerson()
 
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.NAVN_OG_ADRESSE) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
         every { falskIdentitetService.hentFalskIdentitet(person.aktør) } returns FalskIdentitetPersonInfo()
 
         // Act
@@ -374,7 +359,6 @@ class PersonopplysningerServiceTest {
         val person = lagPerson()
 
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.NAVN_OG_ADRESSE) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
         every { falskIdentitetService.hentFalskIdentitet(person.aktør) } returns FalskIdentitetPersonInfo()
 
         // Act & Assert
@@ -388,7 +372,6 @@ class PersonopplysningerServiceTest {
         val person = lagPerson()
 
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.NAVN_OG_ADRESSE) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
         every { falskIdentitetService.hentFalskIdentitet(person.aktør) } returns null
 
         // Act & Assert
@@ -402,7 +385,6 @@ class PersonopplysningerServiceTest {
         val person = lagPerson()
 
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.NAVN_OG_ADRESSE) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
         every { falskIdentitetService.hentFalskIdentitet(person.aktør) } returns null
 
         // Act & Assert

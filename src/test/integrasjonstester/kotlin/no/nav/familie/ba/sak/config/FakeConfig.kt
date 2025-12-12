@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.config
 
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.fake.FakeBrevKlient
 import no.nav.familie.ba.sak.fake.FakeECBValutakursRestKlient
 import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
@@ -122,7 +121,6 @@ class FakeConfig {
         familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
         integrasjonKlient: IntegrasjonKlient,
         falskIdentitetService: FalskIdentitetService,
-        featureToggleService: FeatureToggleService,
     ): FakePersonopplysningerService =
         FakePersonopplysningerService(
             pdlRestKlient = pdlRestKlient,
@@ -130,7 +128,6 @@ class FakeConfig {
             familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
             integrasjonKlient = integrasjonKlient,
             falskIdentitetService = falskIdentitetService,
-            featureToggleService = featureToggleService,
         )
 
     @Bean

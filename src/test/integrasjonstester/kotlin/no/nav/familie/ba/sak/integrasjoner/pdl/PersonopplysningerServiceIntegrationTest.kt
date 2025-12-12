@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
@@ -40,8 +39,6 @@ internal class PersonopplysningerServiceIntegrationTest(
     private val fakeIntegrasjonKlient: FakeIntegrasjonKlient,
     @Autowired
     private val falskIdentitetService: FalskIdentitetService,
-    @Autowired
-    private val featureToggleService: FeatureToggleService,
 ) : AbstractSpringIntegrationTest() {
     lateinit var personopplysningerService: PersonopplysningerService
 
@@ -58,7 +55,6 @@ internal class PersonopplysningerServiceIntegrationTest(
                 familieIntegrasjonerTilgangskontrollService,
                 fakeIntegrasjonKlient,
                 falskIdentitetService,
-                featureToggleService,
             )
         lagMockForPersoner()
     }

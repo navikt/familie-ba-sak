@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.fake
 
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
@@ -45,14 +44,12 @@ class FakePersonopplysningerService(
     familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     integrasjonKlient: IntegrasjonKlient,
     falskIdentitetService: FalskIdentitetService,
-    featureToggleService: FeatureToggleService,
 ) : PersonopplysningerService(
         pdlRestKlient,
         systemOnlyPdlRestKlient,
         familieIntegrasjonerTilgangskontrollService,
         integrasjonKlient,
         falskIdentitetService,
-        featureToggleService,
     ) {
     init {
         settPersoninfoMedRelasjonerForPredefinerteTestpersoner()
@@ -75,6 +72,8 @@ class FakePersonopplysningerService(
     override fun hentPersoninfoEnkel(aktør: Aktør): PersonInfo =
         personInfo[aktør.aktivFødselsnummer()]
             ?: personInfo.getValue(INTEGRASJONER_FNR)
+
+    override fun hentPdlPersonInfoEnkel(aktør: Aktør): PdlPersonInfo = PdlPersonInfo.Person(this.hentPersoninfoEnkel(aktør))
 
     override fun hentPersoninfoNavnOgAdresse(aktør: Aktør): PersonInfo = hentPersoninfoEnkel(aktør)
 
