@@ -1,0 +1,35 @@
+query($ident: ID!) {person: hentPerson(ident: $ident) {
+    falskIdentitet {
+        erFalsk,
+        folkeregistermetadata {
+            aarsak,
+            ajourholdstidspunkt,
+            gyldighetstidspunkt,
+            kilde,
+            opphoerstidspunkt,
+            sekvens
+        }
+        metadata {
+            endringer {
+                hendelseId,
+                kilde,
+                registrert,
+                registrertAv,
+                systemkilde,
+                type
+            }
+        },
+        rettIdentitetErUkjent,
+        rettIdentitetVedIdentifikasjonsnummer,
+        rettIdentitetVedOpplysninger {
+            foedselsdato,
+            kjoenn,
+            personnavn {
+                fornavn,
+                mellomnavn,
+                etternavn
+            },
+            statsborgerskap
+        }
+    }
+}}
