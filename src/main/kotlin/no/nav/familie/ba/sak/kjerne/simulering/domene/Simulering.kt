@@ -69,6 +69,5 @@ data class AvregningPeriode(
 data class OverlappendePerioderMedAndreFagsaker(
     val fom: LocalDate,
     val tom: LocalDate,
-    val fagsakerMedFeilutbetaling: List<Long>,
-    val fagsakerMedEtterbetaling: List<Long>,
+    val fagsaker: List<Long>,
 )
