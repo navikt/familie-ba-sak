@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlien
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService.Companion.PERSON_HAR_FALSK_IDENTITET
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FalskIdentitetPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
@@ -170,7 +171,7 @@ class PersonopplysningerServiceTest {
 
         // Act & Assert
         val funksjonellFeil = assertThrows<FunksjonellFeil> { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør) }
-        assertThat(funksjonellFeil.message).isEqualTo("Person har falsk identitet")
+        assertThat(funksjonellFeil.message).isEqualTo(PERSON_HAR_FALSK_IDENTITET)
     }
 
     @Test
@@ -273,7 +274,7 @@ class PersonopplysningerServiceTest {
 
         // Act & Assert
         val funksjonellFeil = assertThrows<FunksjonellFeil> { personopplysningerService.hentPersoninfoEnkel(person.aktør) }
-        assertThat(funksjonellFeil.message).isEqualTo("Person har falsk identitet")
+        assertThat(funksjonellFeil.message).isEqualTo(PERSON_HAR_FALSK_IDENTITET)
     }
 
     @Test
@@ -363,7 +364,7 @@ class PersonopplysningerServiceTest {
 
         // Act & Assert
         val result = assertThrows<FunksjonellFeil> { personopplysningerService.hentPersoninfoNavnOgAdresse(person.aktør) }
-        assertThat(result.message).isEqualTo("Person har falsk identitet")
+        assertThat(result.message).isEqualTo(PERSON_HAR_FALSK_IDENTITET)
     }
 
     @Test

@@ -46,7 +46,7 @@ class PersonopplysningerService(
         val personInfo =
             when (pdlPersoninfo) {
                 is PdlPersonInfo.Person -> pdlPersoninfo.personInfo
-                is PdlPersonInfo.FalskPerson -> throw FunksjonellFeil("Person har falsk identitet")
+                is PdlPersonInfo.FalskPerson -> throw FunksjonellFeil(PERSON_HAR_FALSK_IDENTITET)
             }
         return personInfo.medRelasjonerOgEgenAnsattInfo(aktør)
     }
@@ -103,7 +103,7 @@ class PersonopplysningerService(
         val pdlPersonInfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.ENKEL)
         when (pdlPersonInfo) {
             is PdlPersonInfo.Person -> return pdlPersonInfo.personInfo
-            else -> throw FunksjonellFeil("Person har falsk identitet")
+            else -> throw FunksjonellFeil(PERSON_HAR_FALSK_IDENTITET)
         }
     }
 
@@ -113,7 +113,7 @@ class PersonopplysningerService(
         val pdlPersonInfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.NAVN_OG_ADRESSE)
         when (pdlPersonInfo) {
             is PdlPersonInfo.Person -> return pdlPersonInfo.personInfo
-            else -> throw FunksjonellFeil("Person har falsk identitet")
+            else -> throw FunksjonellFeil(PERSON_HAR_FALSK_IDENTITET)
         }
     }
 
@@ -186,6 +186,7 @@ class PersonopplysningerService(
                 gyldigFraOgMed = null,
                 gyldigTilOgMed = null,
             )
+        const val PERSON_HAR_FALSK_IDENTITET = "Person har falsk identitet."
         private val logger: Logger =
             LoggerFactory.getLogger(PersonopplysningerService::class.java)
     }
