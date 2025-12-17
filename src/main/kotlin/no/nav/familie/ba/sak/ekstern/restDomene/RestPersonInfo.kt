@@ -23,7 +23,7 @@ data class RestPersonInfo(
     val dødsfallDato: String? = null,
     val bostedsadresse: RestBostedsadresse? = null,
     val erEgenAnsatt: Boolean? = null,
-    val erFalskIdentitet: Boolean = false,
+    val harFalskIdentitet: Boolean = false,
 )
 
 data class RestForelderBarnRelasjon(
@@ -115,7 +115,7 @@ fun FalskIdentitetPersonInfo.tilRestPersonInfo(personIdent: String): RestPersonI
         fødselsdato = this.fødselsdato,
         kjønn = this.kjønn,
         kommunenummer = kommunenummer,
-        erFalskIdentitet = true,
+        harFalskIdentitet = true,
     )
 }
 
