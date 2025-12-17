@@ -9,7 +9,7 @@ import java.time.Month
 
 val POL_EØS_FOM = LocalDate.of(2004, Month.JANUARY, 1)
 val GBR_EØS_FOM = LocalDate.of(1900, Month.JANUARY, 1)
-val GBR_EØS_TOM = LocalDate.of(2009, Month.DECEMBER, 31)
+val GBR_EØS_TOM = LocalDate.of(2020, Month.DECEMBER, 31)
 val DEU_EØS_FOM = LocalDate.of(1900, Month.JANUARY, 1)
 val DNK_EØS_FOM = LocalDate.of(1990, Month.JANUARY, 1)
 val TOM_UENDELIG = LocalDate.of(9999, Month.DECEMBER, 31)
