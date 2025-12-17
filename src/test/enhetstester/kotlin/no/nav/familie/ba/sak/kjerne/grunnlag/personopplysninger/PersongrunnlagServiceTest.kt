@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -47,7 +46,6 @@ class PersongrunnlagServiceTest {
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val kodeverkService = mockk<KodeverkService>()
     private val featureToggleService = mockk<FeatureToggleService>()
-    private val systemOnlyIntegrasjonKlient = mockk<SystemOnlyIntegrasjonKlient>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
 
     private val persongrunnlagService =
@@ -151,6 +149,8 @@ class PersongrunnlagServiceTest {
                 every {
                     persongrunnlagService.lagreOgDeaktiverGammel(any())
                 } returns nyttGrunnlag
+
+                every { personopplysningerService.hentPersoninfoEnkel(barnet.aktør) } returns PersonInfo(barnet.fødselsdato)
 
                 every {
                     personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnet.aktør)
@@ -272,6 +272,115 @@ class PersongrunnlagServiceTest {
             verify(exactly = 1) { personidentService.hentAktør(personFnr) }
             verify(exactly = 1) { loggService.loggManueltRegistrertDødsfallDato(any(), any(), "test") }
             verify(exactly = 1) { vilkårsvurderingService.oppdaterVilkårVedDødsfall(any(), any(), any()) }
+        }
+
+        @Test
+        fun `skal velge eldste barns fødselsdato i inneværende behandling`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER)
+            val eldsteBarnInneværendeBehandling = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2015, 1, 1))
+            val yngsteBarnInneværendeBehandling = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 1, 1))
+            val mellomBarnForrigeBehandling = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, 1, 1))
+
+            val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING)
+            val nyttGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+
+            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } returns nyttGrunnlag
+
+            every { personopplysningerService.hentPersoninfoEnkel(eldsteBarnInneværendeBehandling.aktør) } returns PersonInfo(eldsteBarnInneværendeBehandling.fødselsdato)
+            every { personopplysningerService.hentPersoninfoEnkel(yngsteBarnInneværendeBehandling.aktør) } returns PersonInfo(yngsteBarnInneværendeBehandling.fødselsdato)
+            every { personopplysningerService.hentPersoninfoEnkel(mellomBarnForrigeBehandling.aktør) } returns PersonInfo(mellomBarnForrigeBehandling.fødselsdato)
+
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns
+                PersonInfo(søker.fødselsdato)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eldsteBarnInneværendeBehandling.aktør) } returns
+                PersonInfo(eldsteBarnInneværendeBehandling.fødselsdato)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(yngsteBarnInneværendeBehandling.aktør) } returns
+                PersonInfo(yngsteBarnInneværendeBehandling.fødselsdato)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(mellomBarnForrigeBehandling.aktør) } returns
+                PersonInfo(mellomBarnForrigeBehandling.fødselsdato)
+
+            every { personopplysningGrunnlagRepository.save(nyttGrunnlag) } returns nyttGrunnlag
+            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+
+            // Act
+            val personopplysningGrunnlag =
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = søker.aktør,
+                    barnFraInneværendeBehandling = listOf(eldsteBarnInneværendeBehandling.aktør, yngsteBarnInneværendeBehandling.aktør),
+                    barnFraForrigeBehandling = listOf(mellomBarnForrigeBehandling.aktør),
+                    behandling = behandling,
+                    målform = Målform.NB,
+                )
+
+            verify(exactly = 1) { personopplysningerService.hentPersoninfoEnkel(eldsteBarnInneværendeBehandling.aktør) }
+            verify(exactly = 1) { personopplysningerService.hentPersoninfoEnkel(yngsteBarnInneværendeBehandling.aktør) }
+            verify(exactly = 1) { personopplysningerService.hentPersoninfoEnkel(mellomBarnForrigeBehandling.aktør) }
+            assertThat(personopplysningGrunnlag.personer).hasSize(4)
+            assertThat(personopplysningGrunnlag.barna).hasSize(3)
+            assertThat(personopplysningGrunnlag.barna.map { it.fødselsdato }).containsExactlyInAnyOrder(
+                LocalDate.of(2015, 1, 1),
+                LocalDate.of(2020, 1, 1),
+                LocalDate.of(2022, 1, 1),
+            )
+        }
+
+        @Test
+        fun `skal velge eldste barns fødselsdato i forrige behandling`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER)
+            val eldsteBarnForrigeBehandling = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2010, 1, 1))
+            val yngsteBarnForrigeBehandling = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 1, 1))
+            val mellomBarnInneværendeBehandling = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2015, 1, 1))
+
+            val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+            val nyttGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+
+            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } returns nyttGrunnlag
+
+            every { personopplysningerService.hentPersoninfoEnkel(eldsteBarnForrigeBehandling.aktør) } returns PersonInfo(eldsteBarnForrigeBehandling.fødselsdato)
+            every { personopplysningerService.hentPersoninfoEnkel(yngsteBarnForrigeBehandling.aktør) } returns PersonInfo(yngsteBarnForrigeBehandling.fødselsdato)
+            every { personopplysningerService.hentPersoninfoEnkel(mellomBarnInneværendeBehandling.aktør) } returns PersonInfo(mellomBarnInneværendeBehandling.fødselsdato)
+
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns
+                PersonInfo(søker.fødselsdato)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eldsteBarnForrigeBehandling.aktør) } returns
+                PersonInfo(eldsteBarnForrigeBehandling.fødselsdato)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(yngsteBarnForrigeBehandling.aktør) } returns
+                PersonInfo(yngsteBarnForrigeBehandling.fødselsdato)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(mellomBarnInneværendeBehandling.aktør) } returns
+                PersonInfo(mellomBarnInneværendeBehandling.fødselsdato)
+
+            every { personopplysningGrunnlagRepository.save(nyttGrunnlag) } returns nyttGrunnlag
+
+            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+
+            // Act
+            val personopplysningGrunnlag =
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = søker.aktør,
+                    barnFraInneværendeBehandling = listOf(mellomBarnInneværendeBehandling.aktør),
+                    barnFraForrigeBehandling = listOf(eldsteBarnForrigeBehandling.aktør, yngsteBarnForrigeBehandling.aktør),
+                    behandling = behandling,
+                    målform = Målform.NB,
+                )
+
+            verify(exactly = 1) { personopplysningerService.hentPersoninfoEnkel(eldsteBarnForrigeBehandling.aktør) }
+            verify(exactly = 1) { personopplysningerService.hentPersoninfoEnkel(yngsteBarnForrigeBehandling.aktør) }
+            verify(exactly = 1) { personopplysningerService.hentPersoninfoEnkel(mellomBarnInneværendeBehandling.aktør) }
+            assertThat(personopplysningGrunnlag.personer).hasSize(4)
+            assertThat(personopplysningGrunnlag.barna).hasSize(3)
+            assertThat(personopplysningGrunnlag.barna.map { it.fødselsdato }).containsExactlyInAnyOrder(
+                LocalDate.of(2010, 1, 1),
+                LocalDate.of(2020, 1, 1),
+                LocalDate.of(2015, 1, 1),
+            )
         }
 
         @Nested
