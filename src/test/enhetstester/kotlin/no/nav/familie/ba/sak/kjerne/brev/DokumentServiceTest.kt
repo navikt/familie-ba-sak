@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -56,7 +55,6 @@ import org.junit.jupiter.params.provider.EnumSource
 internal class DokumentServiceTest {
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>(relaxed = true)
     private val vilkårsvurderingForNyBehandlingService = mockk<VilkårsvurderingForNyBehandlingService>(relaxed = true)
-    private val utgåendeJournalføringService = mockk<UtgåendeJournalføringService>(relaxed = true)
     private val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
     private val fagsakRepository = mockk<FagsakRepository>(relaxed = true)
     private val organisasjonService = mockk<OrganisasjonService>(relaxed = true)
@@ -80,293 +78,258 @@ internal class DokumentServiceTest {
                 vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
                 rolleConfig = mockk(relaxed = true),
                 settPåVentService = mockk(relaxed = true),
-                utgåendeJournalføringService = utgåendeJournalføringService,
                 fagsakRepository = fagsakRepository,
                 organisasjonService = organisasjonService,
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-                dokumentGenereringService = mockk(relaxed = true),
                 brevmottakerService = brevmottakerService,
                 validerBrevmottakerService = mockk(relaxed = true),
                 saksbehandlerContext = saksbehandlerContext,
             ),
         )
 
-    @Test
-    fun `sendManueltBrev skal journalføre med brukerIdType ORGNR når fagsakType er INSTITUSJON`() {
-        val avsenderMottaker = slot<AvsenderMottaker>()
-        val behandling =
-            lagBehandling(
-                Fagsak(
-                    type = FagsakType.INSTITUSJON,
-                    aktør = randomAktør(),
-                    institusjon = Institusjon(orgNummer = "123456789", tssEksternId = "xxx"),
-                ),
-            )
-
-        every { fagsakRepository.finnFagsak(any()) } returns behandling.fagsak
-
-        val taskSlot = slot<Task>()
-        every { taskRepository.save(capture(taskSlot)) } returns mockk()
-
-        val orgNummer = behandling.fagsak.institusjon!!.orgNummer
-        every { organisasjonService.hentOrganisasjon(any()) } returns
-            Organisasjon(
-                organisasjonsnummer = orgNummer,
-                navn = "Testinstitusjon",
-            )
-        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
-
-        runCatching {
-            dokumentService.sendManueltBrev(
-                ManueltBrevRequest(
-                    brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
-                    enhet = Enhet("enhet", "enhetNavn"),
-                ),
-                behandling = behandling,
-                fagsakId = behandling.fagsak.id,
-            )
-        }
-
-        val capturedTask = taskSlot.captured
-
-        assertThat(capturedTask.metadata["mottakerType"]).isEqualTo(Institusjon::class.simpleName)
-
-        val journalførManueltBrevDTO = objectMapper.readValue(capturedTask.payload, JournalførManueltBrevDTO::class.java)
-        assertThat(journalførManueltBrevDTO.mottaker.avsenderMottaker).isNotNull
-        assertThat(journalførManueltBrevDTO.mottaker.avsenderMottaker!!.idType).isEqualTo(AvsenderMottakerIdType.ORGNR)
-        assertThat(journalførManueltBrevDTO.mottaker.avsenderMottaker.id).isEqualTo(orgNummer)
-        assertThat(journalførManueltBrevDTO.mottaker.avsenderMottaker.navn).isEqualTo("Testinstitusjon")
-    }
-
-    @Test
-    fun `sendManueltBrev skal journalføre uten eksplisitt AvsenderMottaker når mottaker er bruker`() {
-        val avsenderMottaker = slot<AvsenderMottaker>()
-        val behandling = lagBehandling()
-
-        every { fagsakRepository.finnFagsak(any()) } returns behandling.fagsak
-
-        every {
-            utgåendeJournalføringService.journalførDokument(
-                fnr = any(),
-                fagsakId = any(),
-                journalførendeEnhet = any(),
-                brev = any(),
-                førsteside = any(),
-                eksternReferanseId = any(),
-                avsenderMottaker = capture(avsenderMottaker),
-            )
-        } returns "mockJournalpostId"
-
-        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
-
-        runCatching {
-            dokumentService.sendManueltBrev(
-                ManueltBrevRequest(
-                    brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
-                    enhet = Enhet("enhet", "enhetNavn"),
-                ),
-                behandling = behandling,
-                fagsakId = behandling.fagsak.id,
-            )
-        }
-
-        assert(!avsenderMottaker.isCaptured) { "AvsenderMottaker trenger ikke være satt når mottaker er bruker" }
-    }
-
-    @Test
-    fun `sendManueltBrev skal legge til opplysningspliktvilkåret når gjeldende og forrige vilkårsvurdering mangler`() {
-        val brevSomFørerTilOpplysningsplikt = Brevmal.entries.filter { it.førerTilOpplysningsplikt() }
-
-        brevSomFørerTilOpplysningsplikt.forEach { brevmal ->
-            val behandling = lagBehandling()
-            val vilkårsvurdering = lagVilkårsvurdering(lagPerson().aktør, behandling, Resultat.IKKE_VURDERT)
-            val personResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!
-
-            // Scenario uten eksisterende vilkårsvurdering
-            every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns null
-            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
-            every {
-                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
-                    any(),
-                    any(),
-                    null,
+    @Nested
+    inner class SendManueltBrev {
+        @Test
+        fun `skal journalføre med brukerIdType ORGNR når fagsakType er INSTITUSJON`() {
+            val behandling =
+                lagBehandling(
+                    Fagsak(
+                        type = FagsakType.INSTITUSJON,
+                        aktør = randomAktør(),
+                        institusjon = Institusjon(orgNummer = "123456789", tssEksternId = "xxx"),
+                    ),
                 )
-            } returns vilkårsvurdering
+
+            every { fagsakRepository.finnFagsak(any()) } returns behandling.fagsak
+
+            val taskSlot = slot<Task>()
+            every { taskRepository.save(capture(taskSlot)) } returns mockk()
+
+            val orgNummer = behandling.fagsak.institusjon!!.orgNummer
+            every { organisasjonService.hentOrganisasjon(any()) } returns
+                Organisasjon(
+                    organisasjonsnummer = orgNummer,
+                    navn = "Testinstitusjon",
+                )
+            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
+
+            runCatching {
+                dokumentService.sendManueltBrev(
+                    ManueltBrevRequest(
+                        brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
+                        enhet = Enhet("enhet", "enhetNavn"),
+                    ),
+                    behandling = behandling,
+                    fagsakId = behandling.fagsak.id,
+                )
+            }
+
+            val capturedTask = taskSlot.captured
+
+            assertThat(capturedTask.metadata["mottakerType"]).isEqualTo(Institusjon::class.simpleName)
+
+            val journalførManueltBrevDTO = objectMapper.readValue(capturedTask.payload, JournalførManueltBrevDTO::class.java)
+            assertThat(journalførManueltBrevDTO.mottaker.avsenderMottaker).isNotNull
+            assertThat(journalførManueltBrevDTO.mottaker.avsenderMottaker!!.idType).isEqualTo(AvsenderMottakerIdType.ORGNR)
+            assertThat(journalførManueltBrevDTO.mottaker.avsenderMottaker.id).isEqualTo(orgNummer)
+            assertThat(journalførManueltBrevDTO.mottaker.avsenderMottaker.navn).isEqualTo("Testinstitusjon")
+        }
+
+        @Test
+        fun `skal journalføre uten eksplisitt AvsenderMottaker når mottaker er bruker`() {
+            val avsenderMottaker = slot<AvsenderMottaker>()
+            val behandling = lagBehandling()
+
+            every { fagsakRepository.finnFagsak(any()) } returns behandling.fagsak
 
             every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
 
-            sendBrev(brevmal, behandling)
-
-            assertThat(personResultat.andreVurderinger).extracting("type").containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
-            verify(exactly = 1) {
-                behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-            }
-            verify(exactly = 1) {
-                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, any(), null)
-            }
-        }
-    }
-
-    @Test
-    fun `sendManueltBrev skal legge til opplysningspliktvilkåret når gjeldende vilkårsvurdering mangler, men forrige finnes`() {
-        val brevSomFørerTilOpplysningsplikt = Brevmal.entries.filter { it.førerTilOpplysningsplikt() }
-
-        brevSomFørerTilOpplysningsplikt.forEach { brevmal ->
-            val behandling = lagBehandling()
-            val forrigeVedtatteBehandling = lagBehandling()
-            val vilkårsvurdering = lagVilkårsvurdering(lagPerson().aktør, behandling, Resultat.IKKE_VURDERT)
-            val personResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!
-
-            // Scenario uten eksisterende vilkårsvurdering
-            every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns null
-            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns forrigeVedtatteBehandling
-            every {
-                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
-                    any(),
-                    any(),
-                    forrigeVedtatteBehandling,
-                )
-            } returns vilkårsvurdering
-
-            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
-
-            sendBrev(brevmal, behandling)
-
-            assertThat(personResultat.andreVurderinger).extracting("type").containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
-            verify(exactly = 1) {
-                behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-            }
-            verify(exactly = 1) {
-                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
-                    behandling,
-                    any(),
-                    forrigeVedtatteBehandling,
+            runCatching {
+                dokumentService.sendManueltBrev(
+                    ManueltBrevRequest(
+                        brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
+                        enhet = Enhet("enhet", "enhetNavn"),
+                    ),
+                    behandling = behandling,
+                    fagsakId = behandling.fagsak.id,
                 )
             }
+
+            assert(!avsenderMottaker.isCaptured) { "AvsenderMottaker trenger ikke være satt når mottaker er bruker" }
         }
-    }
 
-    @Test
-    fun `sendManueltBrev skal legge til opplysningspliktvilkåret når vilkårsvurderingen finnes`() {
-        val brevSomFørerTilOpplysningsplikt = Brevmal.entries.filter { it.førerTilOpplysningsplikt() }
+        @Test
+        fun `skal legge til opplysningspliktvilkåret når gjeldende og forrige vilkårsvurdering mangler`() {
+            val brevSomFørerTilOpplysningsplikt = Brevmal.entries.filter { it.førerTilOpplysningsplikt() }
 
-        brevSomFørerTilOpplysningsplikt.forEach { brevmal ->
+            brevSomFørerTilOpplysningsplikt.forEach { brevmal ->
+                val behandling = lagBehandling()
+                val vilkårsvurdering = lagVilkårsvurdering(lagPerson().aktør, behandling, Resultat.IKKE_VURDERT)
+                val personResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!
+
+                // Scenario uten eksisterende vilkårsvurdering
+                every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns null
+                every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
+                every {
+                    vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+                        any(),
+                        any(),
+                        null,
+                    )
+                } returns vilkårsvurdering
+
+                every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
+
+                sendBrev(brevmal, behandling)
+
+                assertThat(personResultat.andreVurderinger).extracting("type").containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
+                verify(exactly = 1) {
+                    behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+                }
+                verify(exactly = 1) {
+                    vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, any(), null)
+                }
+            }
+        }
+
+        @Test
+        fun `skal legge til opplysningspliktvilkåret når gjeldende vilkårsvurdering mangler, men forrige finnes`() {
+            val brevSomFørerTilOpplysningsplikt = Brevmal.entries.filter { it.førerTilOpplysningsplikt() }
+
+            brevSomFørerTilOpplysningsplikt.forEach { brevmal ->
+                val behandling = lagBehandling()
+                val forrigeVedtatteBehandling = lagBehandling()
+                val vilkårsvurdering = lagVilkårsvurdering(lagPerson().aktør, behandling, Resultat.IKKE_VURDERT)
+                val personResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!
+
+                // Scenario uten eksisterende vilkårsvurdering
+                every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns null
+                every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns forrigeVedtatteBehandling
+                every {
+                    vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+                        any(),
+                        any(),
+                        forrigeVedtatteBehandling,
+                    )
+                } returns vilkårsvurdering
+
+                every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
+
+                sendBrev(brevmal, behandling)
+
+                assertThat(personResultat.andreVurderinger).extracting("type").containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
+                verify(exactly = 1) {
+                    behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+                }
+                verify(exactly = 1) {
+                    vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+                        behandling,
+                        any(),
+                        forrigeVedtatteBehandling,
+                    )
+                }
+            }
+        }
+
+        @Test
+        fun `skal legge til opplysningspliktvilkåret når vilkårsvurderingen finnes`() {
+            val brevSomFørerTilOpplysningsplikt = Brevmal.entries.filter { it.førerTilOpplysningsplikt() }
+
+            brevSomFørerTilOpplysningsplikt.forEach { brevmal ->
+                val behandling = lagBehandling()
+                val vilkårsvurdering = lagVilkårsvurdering(lagPerson().aktør, behandling, Resultat.IKKE_VURDERT)
+                val personResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!
+
+                // Scenario med eksisterende vilkårsvurdering
+                every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns vilkårsvurdering
+                every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
+
+                sendBrev(brevmal, behandling)
+
+                assertThat(personResultat.andreVurderinger).extracting("type").containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
+                verify(exactly = 0) {
+                    vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, any(), null)
+                }
+            }
+        }
+
+        @Test
+        fun `skal sende manuelt brev til FULLMEKTIG og bruker som har FULLMEKTIG manuelt brev mottaker`() {
             val behandling = lagBehandling()
-            val vilkårsvurdering = lagVilkårsvurdering(lagPerson().aktør, behandling, Resultat.IKKE_VURDERT)
-            val personResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!
+            val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.SVARTIDSBREV)
 
-            // Scenario med eksisterende vilkårsvurdering
-            every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns vilkårsvurdering
-            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
+            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+                listOf(
+                    lagBrevmottakerDb(behandlingId = behandling.id, navn = "Fullmektig navn"),
+                )
 
-            sendBrev(brevmal, behandling)
+            val lagredeTasker = mutableListOf<Task>()
 
-            assertThat(personResultat.andreVurderinger).extracting("type").containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
-            verify(exactly = 0) {
-                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, any(), null)
-            }
-        }
-    }
+            every { taskRepository.save(capture(lagredeTasker)) } returns mockk()
+            every { fagsakRepository.finnFagsak(behandling.fagsak.id) } returns behandling.fagsak
 
-    @Test
-    fun `sendManueltBrev skal sende manuelt brev til FULLMEKTIG og bruker som har FULLMEKTIG manuelt brev mottaker`() {
-        val behandling = lagBehandling()
-        val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.SVARTIDSBREV)
+            dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
-            listOf(
-                lagBrevmottakerDb(behandlingId = behandling.id, navn = "Fullmektig navn"),
-            )
-
-        val lagredeTasker = mutableListOf<Task>()
-
-        every { taskRepository.save(capture(lagredeTasker)) } returns mockk()
-        every { fagsakRepository.finnFagsak(behandling.fagsak.id) } returns behandling.fagsak
-
-        dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
-
-        verify(exactly = 2) {
-            taskRepository.save(
-                any(),
-            )
-        }
-
-        val mottakerTyper = lagredeTasker.map { it.metadata["mottakerType"] }
-        assertThat(mottakerTyper).containsExactlyInAnyOrder(Bruker::class.simpleName, FullmektigEllerVerge::class.simpleName)
-    }
-
-    @Test
-    fun `sendManueltBrev skal sende informasjonsbrev manuelt på fagsak`() {
-        val fagsak = defaultFagsak()
-        val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.INFORMASJONSBREV_KAN_SØKE)
-
-        val taskSlot = slot<Task>()
-
-        every { taskRepository.save(capture(taskSlot)) } returns mockk()
-        every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
-
-        dokumentService.sendManueltBrev(manueltBrevRequest, null, fagsak.id)
-
-        verify(exactly = 1) {
-            taskRepository.save(
-                any(),
-            )
-        }
-
-        val capturedTask = taskSlot.captured
-        assertThat(capturedTask.type).isEqualTo("journalførManueltBrev")
-        assertThat(capturedTask.metadata["fagsakId"]).isEqualTo(fagsak.id.toString())
-        assertThat(capturedTask.metadata["behandlingId"]).isEqualTo("null")
-        assertThat(capturedTask.payload).contains(Brevmal.INFORMASJONSBREV_KAN_SØKE.name)
-    }
-
-    @Test
-    fun `sendManueltBrev skal feile hvis den manuelle brevmottakeren er ugyldig`() {
-        // Arrange
-        val behandling = lagBehandling()
-        val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.SVARTIDSBREV)
-        val avsenderMottakere = mutableListOf<AvsenderMottaker>()
-
-        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
-            listOf(
-                lagBrevmottakerDb(behandlingId = behandling.id, landkode = "SE"),
-                lagBrevmottakerDb(behandlingId = behandling.id, landkode = "NO"),
-            )
-        every {
-            utgåendeJournalføringService.journalførDokument(
-                fnr = any(),
-                fagsakId = any(),
-                journalførendeEnhet = any(),
-                brev = any(),
-                førsteside = any(),
-                eksternReferanseId = any(),
-                avsenderMottaker = capture(avsenderMottakere),
-            )
-        } returns "mockJournalPostId" andThen "mockJournalPostId1"
-
-        every { taskRepository.save(any()) } returns mockk()
-        every { fagsakRepository.finnFagsak(behandling.fagsak.id) } returns behandling.fagsak
-
-        // Act & assert
-        val exception =
-            assertThrows<FunksjonellFeil> {
-                dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
+            verify(exactly = 2) {
+                taskRepository.save(
+                    any(),
+                )
             }
 
-        assertThat(exception.message).isEqualTo("Det finnes ugyldige brevmottakere i utsending av manuelt brev")
-
-        verify(exactly = 0) {
-            utgåendeJournalføringService.journalførDokument(
-                fnr = any(),
-                fagsakId = any(),
-                journalførendeEnhet = any(),
-                brev = any(),
-                førsteside = any(),
-                eksternReferanseId = any(),
-                avsenderMottaker = any(),
-            )
+            val mottakerTyper = lagredeTasker.map { it.metadata["mottakerType"] }
+            assertThat(mottakerTyper).containsExactlyInAnyOrder(Bruker::class.simpleName, FullmektigEllerVerge::class.simpleName)
         }
-        verify(exactly = 0) { taskRepository.save(any()) }
+
+        @Test
+        fun `skal sende informasjonsbrev manuelt på fagsak`() {
+            val fagsak = defaultFagsak()
+            val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.INFORMASJONSBREV_KAN_SØKE)
+
+            val taskSlot = slot<Task>()
+
+            every { taskRepository.save(capture(taskSlot)) } returns mockk()
+            every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
+
+            dokumentService.sendManueltBrev(manueltBrevRequest, null, fagsak.id)
+
+            verify(exactly = 1) {
+                taskRepository.save(
+                    any(),
+                )
+            }
+
+            val capturedTask = taskSlot.captured
+            assertThat(capturedTask.type).isEqualTo("journalførManueltBrev")
+            assertThat(capturedTask.metadata["fagsakId"]).isEqualTo(fagsak.id.toString())
+            assertThat(capturedTask.metadata["behandlingId"]).isEqualTo("null")
+            assertThat(capturedTask.payload).contains(Brevmal.INFORMASJONSBREV_KAN_SØKE.name)
+        }
+
+        @Test
+        fun `skal feile hvis den manuelle brevmottakeren er ugyldig`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.SVARTIDSBREV)
+
+            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+                listOf(
+                    lagBrevmottakerDb(behandlingId = behandling.id, landkode = "SE"),
+                    lagBrevmottakerDb(behandlingId = behandling.id, landkode = "NO"),
+                )
+
+            every { taskRepository.save(any()) } returns mockk()
+            every { fagsakRepository.finnFagsak(behandling.fagsak.id) } returns behandling.fagsak
+
+            // Act & assert
+            val exception =
+                assertThrows<FunksjonellFeil> {
+                    dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
+                }
+
+            assertThat(exception.message).isEqualTo("Det finnes ugyldige brevmottakere i utsending av manuelt brev")
+
+            verify(exactly = 0) { taskRepository.save(any()) }
+        }
     }
 
     @Nested

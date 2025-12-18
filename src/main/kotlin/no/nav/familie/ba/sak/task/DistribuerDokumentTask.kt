@@ -13,6 +13,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.Properties
 
@@ -33,6 +34,8 @@ class DistribuerDokumentTask(
             !distribuerDokumentDTO.erManueltSendt && distribuerDokumentDTO.brevmal.erVedtaksbrev
         val erTilbakekrevingsvedtakMotregning = distribuerDokumentDTO.brevmal == Brevmal.TILBAKEKREVINGSVEDTAK_MOTREGNING
 
+        logger.info("Distribuerer dokument med journalpostId=${distribuerDokumentDTO.journalpostId} for behandling ${distribuerDokumentDTO.behandlingId}")
+
         if (erManueltSendtOgIkkeVedtaksbrev && distribuerDokumentDTO.behandlingId == null) {
             dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
                 distribuerDokumentDTO = distribuerDokumentDTO,
@@ -51,6 +54,8 @@ class DistribuerDokumentTask(
         } else {
             throw Feil("erManueltSendt=${distribuerDokumentDTO.erManueltSendt} ikke støttet for brev=${distribuerDokumentDTO.brevmal.visningsTekst}")
         }
+
+        logger.info("Distribuering av dokument med journalpostId=${distribuerDokumentDTO.journalpostId} for behandling ${distribuerDokumentDTO.behandlingId} er fullført")
     }
 
     companion object {
@@ -67,6 +72,8 @@ class DistribuerDokumentTask(
             )
 
         const val TASK_STEP_TYPE = "distribuerDokument"
+
+        private val logger = LoggerFactory.getLogger(DistribuerDokumentTask::class.java)
     }
 }
 

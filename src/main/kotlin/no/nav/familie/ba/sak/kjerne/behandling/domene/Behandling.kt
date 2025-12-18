@@ -319,6 +319,7 @@ enum class Behandlingsresultat(
     ENDRET_UTBETALING(displayName = "Endret utbetaling"),
     ENDRET_UTEN_UTBETALING(displayName = "Endret, uten endret utbetaling"),
     ENDRET_OG_OPPHØRT(displayName = "Endret og opphørt"),
+    ENDRET_OG_FORTSATT_OPPHØRT(displayName = "Endret og fortsatt opphørt"),
     OPPHØRT(displayName = "Opphørt"),
     FORTSATT_OPPHØRT(displayName = "Fortsatt opphørt"),
     FORTSATT_INNVILGET(displayName = "Fortsatt innvilget"),

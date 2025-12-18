@@ -1386,7 +1386,7 @@ class BehandlingsresultatEndringUtilsTest {
         }
 
         @Test
-        fun `skal returnere ENDRING dersom det finnes endringer i vilkårsvurderingen`() {
+        fun `skal returnere ENDRING_UTEN_BELØPSENDRING dersom det finnes endringer i vilkårsvurderingen`() {
             // Arrange
             val fødselsdato = LocalDate.of(2015, 1, 1)
 
@@ -1484,11 +1484,11 @@ class BehandlingsresultatEndringUtilsTest {
                 )
 
             // Assert
-            assertThat(endringsresultat).isEqualTo(Endringsresultat.ENDRING)
+            assertThat(endringsresultat).isEqualTo(Endringsresultat.ENDRING_UTEN_BELØPSENDRING)
         }
 
         @Test
-        fun `skal returnere ENDRING dersom det finnes endringer i kompetanse`() {
+        fun `skal returnere ENDRING_UTEN_BELØPSENDRING dersom det finnes endringer i kompetanse`() {
             // Arrange
             val forrigeBehandling = lagBehandling()
             val nåværendeBehandling = lagBehandling()
@@ -1536,11 +1536,11 @@ class BehandlingsresultatEndringUtilsTest {
                 )
 
             // Assert
-            assertThat(endringsresultat).isEqualTo(Endringsresultat.ENDRING)
+            assertThat(endringsresultat).isEqualTo(Endringsresultat.ENDRING_UTEN_BELØPSENDRING)
         }
 
         @Test
-        fun `skal returnere ENDRING dersom det finnes endringer i endret utbetaling andeler`() {
+        fun `skal returnere ENDRING_UTEN_BELØPSENDRING dersom det finnes endringer i endret utbetaling andeler`() {
             // Arrange
             val barn = lagPerson(type = PersonType.BARN)
 
@@ -1576,11 +1576,11 @@ class BehandlingsresultatEndringUtilsTest {
                 )
 
             // Assert
-            assertThat(endringsresultat).isEqualTo(Endringsresultat.ENDRING)
+            assertThat(endringsresultat).isEqualTo(Endringsresultat.ENDRING_UTEN_BELØPSENDRING)
         }
 
         @Test
-        fun `skal returnere ENDRING dersom det finnes endringer i utenlandsk periodebeløp`() {
+        fun `skal returnere ENDRING_UTEN_BELØPSENDRING dersom det finnes endringer i utenlandsk periodebeløp`() {
             // Arrange
             val barnPerson = lagPerson(aktør = barn1Aktør)
 
@@ -1621,7 +1621,7 @@ class BehandlingsresultatEndringUtilsTest {
                 )
 
             // Assert
-            assertThat(endringsresultat).isEqualTo(Endringsresultat.ENDRING)
+            assertThat(endringsresultat).isEqualTo(Endringsresultat.ENDRING_UTEN_BELØPSENDRING)
         }
 
         @Test
