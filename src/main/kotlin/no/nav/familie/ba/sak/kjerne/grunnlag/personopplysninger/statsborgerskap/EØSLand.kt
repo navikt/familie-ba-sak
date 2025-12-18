@@ -10,7 +10,6 @@ enum class EØSLand(
     val fraOgMed: LocalDate,
     val tilOgMed: LocalDate?,
 ) {
-    // TODO: sjekke om dette er riktig
     BELGIA("BEL", LocalDate.of(1900, 1, 1), null),
     DANMARK("DNK", LocalDate.of(1900, 1, 1), null),
     TYSKLAND("DEU", LocalDate.of(1900, 1, 1), null),
@@ -46,20 +45,6 @@ enum class EØSLand(
     ;
 
     companion object {
-        fun erEØSLand(
-            landkode: String,
-            dato: LocalDate,
-        ): Boolean =
-            entries.any {
-                it.landkode == landkode &&
-                    !dato.isBefore(it.fraOgMed) &&
-                    (it.tilOgMed == null || !dato.isAfter(it.tilOgMed))
-            }
-
-        fun hentEøsLand(
-            landkode: String,
-        ): EØSLand? = entries.firstOrNull { it.landkode == landkode }
-
         fun hentEøsTidslinje(landkode: String): Tidslinje<Boolean> = entries.filter { it.landkode == landkode }.map { Periode(true, it.fraOgMed, it.tilOgMed) }.tilTidslinje()
     }
 }
