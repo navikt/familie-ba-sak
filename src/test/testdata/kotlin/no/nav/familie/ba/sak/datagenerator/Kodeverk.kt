@@ -7,7 +7,7 @@ import no.nav.familie.kontrakter.felles.kodeverk.KodeverkSpråk
 import java.time.LocalDate
 import java.time.Month
 
-val POL_EØS_FOM = LocalDate.of(2004, Month.JANUARY, 1)
+val POL_EØS_FOM = LocalDate.of(2004, Month.MAY, 1)
 val GBR_EØS_FOM = LocalDate.of(1900, Month.JANUARY, 1)
 val GBR_EØS_TOM = LocalDate.of(2020, Month.DECEMBER, 31)
 val DEU_EØS_FOM = LocalDate.of(1900, Month.JANUARY, 1)
