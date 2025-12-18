@@ -76,5 +76,7 @@ enum class FeatureToggle(
 
     HENT_ARBEIDSFORDELING_FOR_AUTOMATISK_BEHANDLING_ETTER_PORTEFØLJEJUSTERING("familie-ba-sak.hent-arbeidsfordeling-for-automatisk-behandling-etter-portefoljejustering"),
 
+    HARDKODET_EEAFREG_STATSBORGERSKAP("familie-ba-sak.hardkodet-eeafreg-statsborgerskap"),
+
     SKAL_HÅNDTERE_FALSK_IDENTITET("familie-ba-sak.skal-handtere-falsk-identitet"),
 }
