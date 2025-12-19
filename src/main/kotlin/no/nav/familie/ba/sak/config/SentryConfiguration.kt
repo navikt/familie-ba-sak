@@ -38,7 +38,7 @@ class SentryConfiguration(
 
                     event.setTag("metodeSomFeiler", metodeSomFeiler)
                     event.setTag("bruker", SikkerhetContext.hentSaksbehandlerEpost())
-                    event.setExtra("loggOpensearchUrl", hentKibanalenke(MDC.get("callId")))
+                    event.setExtra("logAzUrl", hentKibanalenke(MDC.get("callId")))
                     event.setExtra("grafanaUrl", hentGrafanaUrl(MDC.get("callId")))
                     event.setTag("prosess", prosess)
 
