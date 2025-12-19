@@ -38,7 +38,8 @@ class SentryConfiguration(
 
                     event.setTag("metodeSomFeiler", metodeSomFeiler)
                     event.setTag("bruker", SikkerhetContext.hentSaksbehandlerEpost())
-                    event.setTag("kibanalenke", hentKibanalenke(MDC.get("callId")))
+                    event.setTag("loggOpensearchUrl", hentKibanalenke(MDC.get("callId")))
+                    event.setTag("grafanaUrl", hentGrafanaUrl(MDC.get("callId")))
                     event.setTag("prosess", prosess)
 
                     event.fingerprints =
@@ -62,6 +63,8 @@ class SentryConfiguration(
     }
 
     private fun hentKibanalenke(callId: String) = "https://logs.az.nav.no/app/data-explorer/discover?security_tenant=navlogs#?_g=(time:(from:now-2w,to:now))&_q=(filters:!(('\$state':(store:appState),meta:(key:x_callId,params:(query:'$callId'),type:phrase),query:(match_phrase:(x_callId:'$callId'))),('\$state':(store:appState),meta:(key:application,params:(query:familie-ba-sak),type:phrase),query:(match_phrase:(application:familie-ba-sak)))))"
+
+    private fun hentGrafanaUrl(callId: String): String = "https://grafana.nav.cloud.nais.io/d/dsaSDAsadsaDSA/baks-logs?orgId=1&from=now-14d&to=now&timezone=Europe%2FOslo&var-cluster=PD969E40991D5C4A8&var-app=familie-ba-sak&var-level=\$__all&var-content=&var-Filters=callId%7C%3D%7C$callId"
 
     fun finnMetodeSomFeiler(e: Throwable?): String {
         val firstElement =
