@@ -127,7 +127,7 @@ class StatsborgerskapService(
             }.tilPerioderIkkeNull()
             .filter { it.tom == null || it.tom!! >= startDato }
             .run {
-                if (statsborgerskap.fom() == null) {
+                if (statsborgerskap.hentFom() == null) {
                     this.replaceFirst { it.copy(fom = null) }
                 } else {
                     this
