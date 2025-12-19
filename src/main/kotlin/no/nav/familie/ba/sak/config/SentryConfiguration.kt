@@ -61,7 +61,7 @@ class SentryConfiguration(
         }
     }
 
-    private fun hentKibanalenke(callId: String) = "https://logs.adeo.no/app/discover#/?_g=(time:(from:now-1M,to:now))&_a=(filters:!((query:(match_phrase:(x_callId:'$callId')))))"
+    private fun hentKibanalenke(callId: String) = "https://logs.az.nav.no/app/data-explorer/discover?security_tenant=navlogs#?_g=(time:(from:now-2w,to:now))&_q=(filters:!(('\$state':(store:appState),meta:(key:x_callId,params:(query:'$callId'),type:phrase),query:(match_phrase:(x_callId:'$callId'))),('\$state':(store:appState),meta:(key:application,params:(query:familie-ba-sak),type:phrase),query:(match_phrase:(application:familie-ba-sak)))))"
 
     fun finnMetodeSomFeiler(e: Throwable?): String {
         val firstElement =
