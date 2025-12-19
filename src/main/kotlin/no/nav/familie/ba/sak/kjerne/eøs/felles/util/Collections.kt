@@ -4,4 +4,9 @@ fun <T> Collection<T>.erEkteDelmengdeAv(mengde: Collection<T>) = this.size < men
 
 fun <T> Collection<T>.replaceLast(replacer: (T) -> T) = this.take(this.size - 1) + replacer(this.last())
 
-fun <T> Collection<T>.replaceFirst(replacer: (T) -> T) = if (this.isEmpty()) emptyList() else listOf((this.first())).plus(this.drop(1))
+fun <T> Collection<T>.replaceFirst(replacer: (T) -> T) =
+    if (this.isEmpty()) {
+        emptyList()
+    } else {
+        listOf(replacer(this.first())).plus(this.drop(1))
+    }
