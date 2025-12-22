@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -33,6 +35,10 @@ class SimuleringController(
         val fagsakId = behandlingRepository.finnBehandling(behandlingId).fagsak.id
         val overlappendePerioderMedAndreFagsaker = finnOverlappendePerioder(vedtakSimuleringMottaker, fagsakId)
 
+        if (overlappendePerioderMedAndreFagsaker.isNotEmpty()) {
+            logger.info("Fant overlappende perioder for fagsak $fagsakId. Overlapper med $overlappendePerioderMedAndreFagsaker")
+        }
+
         val simulering =
             vedtakSimuleringMottakereTilRestSimulering(
                 økonomiSimuleringMottakere = vedtakSimuleringMottaker,
@@ -41,5 +47,10 @@ class SimuleringController(
         val restSimulering =
             simulering.tilRestSimulering(avregningsperioder, overlappendePerioderMedAndreFagsaker)
         return ResponseEntity.ok(Ressurs.success(restSimulering))
+    }
+
+    companion object {
+        private val logger: Logger =
+            LoggerFactory.getLogger(SimuleringController::class.java)
     }
 }
