@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FalskIdentitetPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -21,6 +23,7 @@ data class RestPersonInfo(
     val dødsfallDato: String? = null,
     val bostedsadresse: RestBostedsadresse? = null,
     val erEgenAnsatt: Boolean? = null,
+    val harFalskIdentitet: Boolean = false,
 )
 
 data class RestForelderBarnRelasjon(
@@ -58,6 +61,17 @@ private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() =
         erEgenAnsatt = this.erEgenAnsatt,
     )
 
+fun PdlPersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo =
+    when (this) {
+        is PdlPersonInfo.Person -> {
+            this.personInfo.tilRestPersonInfo(personIdent)
+        }
+
+        is PdlPersonInfo.FalskPerson -> {
+            this.falskIdentitetPersonInfo.tilRestPersonInfo(personIdent)
+        }
+    }
+
 fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
     val bostedsadresse =
         this.bostedsadresser.filter { it.angittFlyttedato != null }.maxByOrNull { it.angittFlyttedato!! }
@@ -83,6 +97,25 @@ fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
         kommunenummer = kommunenummer,
         dødsfallDato = dødsfallDato,
         erEgenAnsatt = this.erEgenAnsatt,
+    )
+}
+
+fun FalskIdentitetPersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
+    val nyesteAdresse = adresser?.bostedsadresser?.filter { it.gyldigFraOgMed != null }?.maxByOrNull { it.gyldigFraOgMed!! }
+    val kommunenummer =
+        when {
+            nyesteAdresse?.vegadresse != null -> nyesteAdresse.vegadresse.kommunenummer
+            nyesteAdresse?.matrikkeladresse != null -> nyesteAdresse.matrikkeladresse.kommunenummer
+            else -> "ukjent"
+        } ?: "ukjent"
+
+    return RestPersonInfo(
+        personIdent = personIdent,
+        navn = this.navn,
+        fødselsdato = this.fødselsdato,
+        kjønn = this.kjønn,
+        kommunenummer = kommunenummer,
+        harFalskIdentitet = true,
     )
 }
 
