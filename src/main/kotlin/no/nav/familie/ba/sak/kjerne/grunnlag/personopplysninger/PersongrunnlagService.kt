@@ -48,6 +48,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
+import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -244,7 +245,11 @@ class PersongrunnlagService(
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
+        val alleBarna = barnFraInneværendeBehandling.union(barnFraForrigeBehandling).toList()
+        val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarna)
+
         val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering()
+
         val søker =
             hentPerson(
                 aktør = aktør,
@@ -259,10 +264,11 @@ class PersongrunnlagService(
                 behandlingUnderkategori = behandling.underkategori,
                 skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                 hentArbeidsforhold = behandling.skalBehandlesAutomatisk,
+                eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
             )
         personopplysningGrunnlag.personer.add(søker)
 
-        barnFraInneværendeBehandling.union(barnFraForrigeBehandling).forEach { barnsAktør ->
+        alleBarna.forEach { barnsAktør ->
             personopplysningGrunnlag.personer.add(
                 hentPerson(
                     aktør = barnsAktør,
@@ -272,6 +278,7 @@ class PersongrunnlagService(
                     behandlingKategori = behandling.kategori,
                     behandlingUnderkategori = behandling.underkategori,
                     skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
+                    eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
                 ),
             )
         }
@@ -288,6 +295,7 @@ class PersongrunnlagService(
                         behandlingUnderkategori = behandling.underkategori,
                         skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                         hentArbeidsforhold = true,
+                        eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
                     ),
                 )
             }
@@ -318,6 +326,7 @@ class PersongrunnlagService(
         behandlingUnderkategori: BehandlingUnderkategori,
         skalHenteEnkelPersonInfo: Boolean = false,
         hentArbeidsforhold: Boolean = false,
+        eldsteBarnsFødselsdato: LocalDate,
     ): Person {
         val personinfo =
             if (skalHenteEnkelPersonInfo) {
@@ -342,13 +351,13 @@ class PersongrunnlagService(
         ).also { person ->
             person.opphold =
                 personinfo.opphold
-                    ?.filtrerBortOppholdFørEldsteBarn(personopplysningGrunnlag, filtrerOpphold)
+                    ?.filtrerBortOppholdFørEldsteBarn(eldsteBarnsFødselsdato, filtrerOpphold)
                     ?.map { GrOpphold.fraOpphold(it, person) }
                     ?.toMutableList() ?: mutableListOf()
             person.bostedsadresser =
                 personinfo.bostedsadresser
                     .filtrerUtKunNorskeBostedsadresser()
-                    .filtrerBortBostedsadresserFørEldsteBarn(personopplysningGrunnlag, filtrerAdresser)
+                    .filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
                             bostedsadresse = it,
@@ -358,7 +367,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.oppholdsadresser =
                 personinfo.oppholdsadresser
-                    .filtrerBortOppholdsadresserFørEldsteBarn(personopplysningGrunnlag, filtrerAdresser)
+                    .filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
@@ -383,7 +392,7 @@ class PersongrunnlagService(
                     .toMutableList()
             person.statsborgerskap =
                 personinfo.statsborgerskap
-                    ?.filtrerBortStatsborgerskapFørEldsteBarn(personopplysningGrunnlag, filtrerStatsborgerskap)
+                    ?.filtrerBortStatsborgerskapFørEldsteBarn(eldsteBarnsFødselsdato, filtrerStatsborgerskap)
                     ?.flatMap {
                         statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                             statsborgerskap = it,
@@ -406,7 +415,7 @@ class PersongrunnlagService(
                         arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
                             statsborgerskap = person.statsborgerskap,
                             person = person,
-                            cutOffFomDato = personinfo.eldsteBarnsFødselsdato() ?: person.fødselsdato, // hvis det ikke er noen barn antar vi enslig mindreårig
+                            cutOffFomDato = eldsteBarnsFødselsdato,
                         )
                     person.arbeidsforhold = arbeidsforholdForPerson.toMutableList()
                 }
@@ -421,6 +430,11 @@ class PersongrunnlagService(
             }
         }
     }
+
+    private fun finnEldstebarnsFødselsdato(alleBarn: List<Aktør>): LocalDate =
+        alleBarn.minOfOrNull {
+            personopplysningerService.hentPersoninfoEnkel(it).fødselsdato
+        } ?: PRAKTISK_TIDLIGSTE_DAG
 
     private fun hentFarEllerMedmorAktør(barna: List<Aktør>): Aktør? {
         val barnasFarEllerMedmorAktører =
@@ -451,6 +465,7 @@ class PersongrunnlagService(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) {
         val filtrerAdresser = featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
+        val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarn = personopplysningGrunnlag.barna.map { it.aktør })
 
         val adresserForPersoner =
             if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
@@ -473,7 +488,7 @@ class PersongrunnlagService(
             person.bostedsadresser =
                 bostedsadresse
                     .filtrerUtKunNorskeBostedsadresser()
-                    .filtrerBortBostedsadresserFørEldsteBarn(personopplysningGrunnlag, filtrerAdresser)
+                    .filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
                             bostedsadresse = it,
@@ -483,7 +498,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.oppholdsadresser =
                 oppholdsadresse
-                    .filtrerBortOppholdsadresserFørEldsteBarn(personopplysningGrunnlag, filtrerAdresser)
+                    .filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
