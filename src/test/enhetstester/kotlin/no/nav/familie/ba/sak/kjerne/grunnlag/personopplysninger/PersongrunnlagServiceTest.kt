@@ -12,10 +12,12 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -316,6 +318,7 @@ class PersongrunnlagServiceTest {
                     målform = Målform.NB,
                 )
 
+            // Assert
             verify(exactly = 1) { personopplysningerService.hentPersoninfoEnkel(eldsteBarnInneværendeBehandling.aktør) }
             verify(exactly = 1) { personopplysningerService.hentPersoninfoEnkel(yngsteBarnInneværendeBehandling.aktør) }
             verify(exactly = 1) { personopplysningerService.hentPersoninfoEnkel(mellomBarnForrigeBehandling.aktør) }
@@ -371,6 +374,7 @@ class PersongrunnlagServiceTest {
                     målform = Målform.NB,
                 )
 
+            // Assert
             verify(exactly = 1) { personopplysningerService.hentPersoninfoEnkel(eldsteBarnForrigeBehandling.aktør) }
             verify(exactly = 1) { personopplysningerService.hentPersoninfoEnkel(yngsteBarnForrigeBehandling.aktør) }
             verify(exactly = 1) { personopplysningerService.hentPersoninfoEnkel(mellomBarnInneværendeBehandling.aktør) }
@@ -381,6 +385,74 @@ class PersongrunnlagServiceTest {
                 LocalDate.of(2020, 1, 1),
                 LocalDate.of(2015, 1, 1),
             )
+        }
+
+        @Test
+        fun `skal bruke eldste barns fødselsdato som cutoff for å filtrere søkers bostedadresser`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 1))
+            val eldsteBarn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2015, 1, 1))
+            val yngreBarn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 1, 1))
+            val behandling = lagBehandling()
+
+            val nyttGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+
+            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } returns nyttGrunnlag
+            every { personopplysningerService.hentPersoninfoEnkel(eldsteBarn.aktør) } returns PersonInfo(eldsteBarn.fødselsdato)
+            every { personopplysningerService.hentPersoninfoEnkel(yngreBarn.aktør) } returns PersonInfo(yngreBarn.fødselsdato)
+
+            val adresseFørEldsteBarn =
+                lagBostedsadresse(
+                    gyldigFraOgMed = LocalDate.of(2000, 1, 1),
+                    gyldigTilOgMed = LocalDate.of(2014, 12, 31),
+                    vegadresse = lagVegadresse(),
+                )
+            val adresseOverlapperEldsteBarn =
+                lagBostedsadresse(
+                    gyldigFraOgMed = LocalDate.of(2014, 6, 1),
+                    gyldigTilOgMed = LocalDate.of(2016, 6, 1),
+                    vegadresse = lagVegadresse(),
+                )
+            val adresseEtterEldsteBarn =
+                lagBostedsadresse(
+                    gyldigFraOgMed = LocalDate.of(2016, 6, 2),
+                    gyldigTilOgMed = null,
+                    vegadresse = lagVegadresse(),
+                )
+
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns
+                PersonInfo(
+                    fødselsdato = søker.fødselsdato,
+                    bostedsadresser = listOf(adresseFørEldsteBarn, adresseOverlapperEldsteBarn, adresseEtterEldsteBarn),
+                )
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eldsteBarn.aktør) } returns
+                PersonInfo(eldsteBarn.fødselsdato)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(yngreBarn.aktør) } returns
+                PersonInfo(yngreBarn.fødselsdato)
+
+            every { personopplysningGrunnlagRepository.save(nyttGrunnlag) } returns nyttGrunnlag
+            every { kodeverkService.hentPoststed(any()) } returns "Oslo"
+            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+
+            // Act
+            val personopplysningGrunnlag =
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = søker.aktør,
+                    barnFraInneværendeBehandling = listOf(eldsteBarn.aktør, yngreBarn.aktør),
+                    behandling = behandling,
+                    målform = Målform.NB,
+                )
+
+            // Assert
+            val bostedadresseSøker = personopplysningGrunnlag.søker.bostedsadresser
+            assertThat(bostedadresseSøker).hasSize(2)
+
+            val sorterteAdresser = bostedadresseSøker.sortedBy { it.periode?.fom }
+            assertThat(sorterteAdresser.first().periode?.tom).isAfter(eldsteBarn.fødselsdato)
+            assertThat(sorterteAdresser.last().periode?.fom).isAfter(eldsteBarn.fødselsdato)
         }
 
         @Nested
