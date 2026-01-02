@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.SatsendringFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
@@ -214,7 +215,7 @@ class BehandlingsresultatStegValideringServiceTest {
             assertThat(feil.melding).isEqualTo(
                 "Det er kompetanse som starter lengre fram i tid enn inneværende måned." +
                     " Det er ikke mulig å hente inn valutakurs for perioder fram i tid," +
-                    " og du må derfor vente til januar 2026 før du kan fortsette behandlingen.",
+                    " og du må derfor vente til ${enMånedFramITid.tilMånedÅr()} før du kan fortsette behandlingen.",
             )
         }
     }
