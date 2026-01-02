@@ -323,6 +323,18 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
         override val sanityApiNavn = "innvilgetTilleggstekstToArbeidslandMerEnn25ProsentArbeidINorge"
     },
+    INNVILGET_TILLEGSTEKST_TO_ARBEIDSLAND_SEKUNDÆRLAND_FULL_UTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstToArbeidslandSekundarlandFullUtbetaling"
+    },
+    INNVILGET_TILLEGGSTEKST_TO_ARBEIDSLAND_SEKUNDÆRLAND_FÅR_IKKE_BA_I_ANNET_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstToArbeidslandSekundarlandFaarIkkeBaIAnnetLand"
+    },
+    INNVILGET_TILLEGGSTEKST_TO_ARBEIDSLAND_SEKUNDÆR_NULL_UTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstToArbeidslandSekundarNullUtbetaling"
+    },
     INNVILGET_TILLEGSTEKST_OVERTATT_ANSVAR_FOR_BARN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
         override val sanityApiNavn = "innvilgetTilleggstekstOvertattAnsvarForBarn"
