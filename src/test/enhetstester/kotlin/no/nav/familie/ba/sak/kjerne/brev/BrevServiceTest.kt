@@ -251,12 +251,12 @@ class BrevServiceTest {
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns TIDENES_ENDE
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
-                listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = YearMonth.of(2020, 1),
-                        tom = YearMonth.now().plusYears(1),
-                    ),
-                )
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.now().plusYears(1),
+                ),
+            )
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
 
@@ -270,12 +270,12 @@ class BrevServiceTest {
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns LocalDate.of(2024, 1, 1)
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
-                listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = YearMonth.of(2020, 1),
-                        tom = YearMonth.now().plusYears(1),
-                    ),
-                )
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.now().plusYears(1),
+                ),
+            )
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
 
@@ -289,12 +289,12 @@ class BrevServiceTest {
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns TIDENES_ENDE
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
-                listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = YearMonth.of(2024, 5),
-                        tom = YearMonth.now().plusYears(1),
-                    ),
-                )
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2024, 5),
+                    tom = YearMonth.now().plusYears(1),
+                ),
+            )
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
 
