@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.GBR_EØS_TOM
 import no.nav.familie.ba.sak.datagenerator.POL_EØS_FOM
 import no.nav.familie.ba.sak.datagenerator.lagKodeverkLand
@@ -24,13 +26,15 @@ import java.time.Month
 internal class StatsborgerskapServiceTest {
     private val integrasjonKlient = mockk<IntegrasjonKlient>()
     private val kodeverkService = KodeverkService(integrasjonKlient)
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private lateinit var statsborgerskapService: StatsborgerskapService
 
     @BeforeEach
     fun setUp() {
-        statsborgerskapService = StatsborgerskapService(kodeverkService)
+        statsborgerskapService = StatsborgerskapService(kodeverkService, featureToggleService)
         every { integrasjonKlient.hentAlleEØSLand() } returns lagKodeverkLand()
+        every { featureToggleService.isEnabled(FeatureToggle.HARDKODET_EEAFREG_STATSBORGERSKAP) } returns true
     }
 
     @Test
@@ -49,7 +53,7 @@ internal class StatsborgerskapServiceTest {
         val grStatsborgerskap =
             statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                 statsborgerskap = statsborgerskapMedGyldigFom,
-                person = lagPerson(),
+                person = lagPerson(fødselsdato = LocalDate.of(1990, Month.JANUARY, 1)),
             )
 
         assertEquals(2, grStatsborgerskap.size)
@@ -160,7 +164,7 @@ internal class StatsborgerskapServiceTest {
     }
 
     @Test
-    fun `Skal evaluere britiske statsborgere med ukjent periode som tredjelandsborgere`() {
+    fun `Skal evaluere britiske statsborgere med ukjent periode som først EØS og så tredjelandsborgere`() {
         val statsborgerStorbritanniaUtenPeriode =
             Statsborgerskap(
                 "GBR",
@@ -174,9 +178,10 @@ internal class StatsborgerskapServiceTest {
                 statsborgerskap = statsborgerStorbritanniaUtenPeriode,
                 person = lagPerson(),
             )
-        assertEquals(1, grStatsborgerskapUtenPeriode.size)
-        assertEquals(Medlemskap.TREDJELANDSBORGER, grStatsborgerskapUtenPeriode.single().medlemskap)
-        assertTrue(grStatsborgerskapUtenPeriode.single().gjeldendeNå())
+        assertEquals(2, grStatsborgerskapUtenPeriode.size)
+        assertEquals(Medlemskap.EØS, grStatsborgerskapUtenPeriode.first().medlemskap)
+        assertEquals(Medlemskap.TREDJELANDSBORGER, grStatsborgerskapUtenPeriode.last().medlemskap)
+        assertTrue(grStatsborgerskapUtenPeriode.last().gjeldendeNå())
     }
 
     @Test
@@ -201,7 +206,7 @@ internal class StatsborgerskapServiceTest {
     @Test
     fun `Skal evaluere britiske statsborgere under Brexit som først EØS, nå tredjelandsborgere`() {
         val datoFørBrexit = LocalDate.of(1989, 3, 1)
-        val datoEtterBrexit = LocalDate.of(2020, 5, 1)
+        val datoEtterBrexit = LocalDate.of(2022, 5, 1)
 
         val statsborgerStorbritanniaMedPeriodeUnderBrexit =
             Statsborgerskap(
