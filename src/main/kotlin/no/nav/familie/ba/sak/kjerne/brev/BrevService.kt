@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
@@ -107,8 +108,8 @@ class BrevService(
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val hjemmeltekstUtleder: HjemmeltekstUtleder,
     private val avregningService: AvregningService,
-    private val featureToggleService: FeatureToggleService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val clockProvider: ClockProvider,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -640,7 +641,7 @@ class BrevService(
     }
 
     fun finnStarttidspunktForUtbetalingstabell(behandling: Behandling): LocalDate {
-        val førsteJanuarIFjor = LocalDate.now().minusYears(1).withDayOfYear(1)
+        val førsteJanuarIFjor = LocalDate.now(clockProvider.get()).minusYears(1).withDayOfYear(1)
         val endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandling.id)
 
         return when {
