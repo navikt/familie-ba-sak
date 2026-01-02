@@ -30,6 +30,7 @@ jobs:
       push-image: true
       byosbom: target/classes/META-INF/sbom/application.cdx.json
       skip-tests: true
+      java-version: '25'
     secrets: inherit
   deploy-dev:
     name: Deploy dev
