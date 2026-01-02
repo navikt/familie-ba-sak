@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -46,8 +46,8 @@ class BrevServiceTest {
     val mockTotrinnskontrollService = mockk<TotrinnskontrollService>()
     val mockArbeidsfordelingService = mockk<ArbeidsfordelingService>()
     val mockAvregningService = mockk<AvregningService>()
-    val mockFeatureToggleService = mockk<FeatureToggleService>()
 
+    val clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(LocalDate.of(2025, 12, 1))
     val brevService =
         BrevService(
             totrinnskontrollService = mockTotrinnskontrollService,
@@ -69,8 +69,8 @@ class BrevServiceTest {
             endretUtbetalingAndelRepository = endretUtbetalingAndelRepository,
             hjemmeltekstUtleder = hjemmeltekstUtleder,
             avregningService = mockAvregningService,
-            featureToggleService = mockFeatureToggleService,
             behandlingHentOgPersisterService = mockk(),
+            clockProvider = clockProvider,
         )
 
     @BeforeEach
@@ -247,41 +247,41 @@ class BrevServiceTest {
     }
 
     @Test
-    fun `finnStarttidspunktForUtbetalingstabell returnerer tidligst 1 januar i fjor for behandlingsårsak ÅRLIG_KONTROLL, dersom endringstidspunkt er TIDENES_ENDE`() {
+    fun `finnStarttidspunktForUtbetalingstabell returnerer tidligst 1 januar året før for behandlingsårsak ÅRLIG_KONTROLL, dersom endringstidspunkt er TIDENES_ENDE`() {
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns TIDENES_ENDE
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
-            listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1),
-                    tom = YearMonth.now().plusYears(1),
-                ),
-            )
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.now().plusYears(1),
+                    ),
+                )
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
 
         val starttidspunkt = brevService.finnStarttidspunktForUtbetalingstabell(behandling)
 
-        assertThat(starttidspunkt).isEqualTo(LocalDate.now().minusYears(1).withDayOfYear(1))
+        assertThat(starttidspunkt).isEqualTo(LocalDate.now(clockProvider.get()).minusYears(1).withDayOfYear(1))
     }
 
     @Test
-    fun `finnStarttidspunktForUtbetalingstabell returnerer 1 januar i fjor for behandlingsårsak ÅRLIG_KONTROLL, selv om endringstidspunkt er senere`() {
+    fun `finnStarttidspunktForUtbetalingstabell returnerer 1 januar året før for behandlingsårsak ÅRLIG_KONTROLL, selv om endringstidspunkt er senere`() {
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns LocalDate.of(2024, 1, 1)
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
-            listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1),
-                    tom = YearMonth.now().plusYears(1),
-                ),
-            )
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.now().plusYears(1),
+                    ),
+                )
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
 
         val starttidspunkt = brevService.finnStarttidspunktForUtbetalingstabell(behandling)
 
-        assertThat(starttidspunkt).isEqualTo(LocalDate.now().minusYears(1).withDayOfYear(1))
+        assertThat(starttidspunkt).isEqualTo(LocalDate.now(clockProvider.get()).minusYears(1).withDayOfYear(1))
     }
 
     @Test
@@ -289,12 +289,12 @@ class BrevServiceTest {
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns TIDENES_ENDE
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
-            listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2024, 5),
-                    tom = YearMonth.now().plusYears(1),
-                ),
-            )
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2024, 5),
+                        tom = YearMonth.now().plusYears(1),
+                    ),
+                )
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
 
