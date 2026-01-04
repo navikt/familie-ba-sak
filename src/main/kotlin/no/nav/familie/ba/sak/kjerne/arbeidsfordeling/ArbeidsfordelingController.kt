@@ -28,7 +28,7 @@ class ArbeidsfordelingController(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val tilgangService: TilgangService,
 ) {
-    @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping(path = ["/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun endreBehandlendeEnhet(
         @PathVariable behandlingId: Long,
         @RequestBody
