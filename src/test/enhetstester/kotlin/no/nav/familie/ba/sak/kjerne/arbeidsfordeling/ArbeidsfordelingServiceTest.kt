@@ -95,9 +95,9 @@ class ArbeidsfordelingServiceTest {
             } returns listOf(søker, barn)
 
             every { integrasjonKlient.hentBehandlendeEnhet(søker.aktør.aktivFødselsnummer()) } returns
-                    listOf(
-                        arbeidsfordelingsenhet,
-                    )
+                listOf(
+                    arbeidsfordelingsenhet,
+                )
 
             every {
                 tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
@@ -240,20 +240,20 @@ class ArbeidsfordelingServiceTest {
 
             // Forrige enhet
             every { arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(behandling.fagsak.id) } returns
-                    ArbeidsfordelingPåBehandling(
-                        behandlingId = forrigeBehandling.id,
-                        behandlendeEnhetId = STEINKJER.enhetsnummer,
-                        behandlendeEnhetNavn = STEINKJER.enhetsnavn,
-                    )
+                ArbeidsfordelingPåBehandling(
+                    behandlingId = forrigeBehandling.id,
+                    behandlendeEnhetId = STEINKJER.enhetsnummer,
+                    behandlendeEnhetNavn = STEINKJER.enhetsnavn,
+                )
 
             // Ny enhet
             every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer()) } returns
-                    listOf(
-                        Arbeidsfordelingsenhet(
-                            enhetId = OSLO.enhetsnummer,
-                            enhetNavn = OSLO.enhetsnavn,
-                        ),
-                    )
+                listOf(
+                    Arbeidsfordelingsenhet(
+                        enhetId = OSLO.enhetsnummer,
+                        enhetNavn = OSLO.enhetsnavn,
+                    ),
+                )
 
             every { arbeidsfordelingPåBehandlingRepository.save(capture(arbeidsfordelingPåBehandlingSlot)) } answers { firstArg() }
 
@@ -279,20 +279,20 @@ class ArbeidsfordelingServiceTest {
 
             // Forrige enhet
             every { arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(behandling.fagsak.id) } returns
-                    ArbeidsfordelingPåBehandling(
-                        behandlingId = forrigeBehandling.id,
-                        behandlendeEnhetId = MIDLERTIDIG_ENHET.enhetsnummer,
-                        behandlendeEnhetNavn = MIDLERTIDIG_ENHET.enhetsnavn,
-                    )
+                ArbeidsfordelingPåBehandling(
+                    behandlingId = forrigeBehandling.id,
+                    behandlendeEnhetId = MIDLERTIDIG_ENHET.enhetsnummer,
+                    behandlendeEnhetNavn = MIDLERTIDIG_ENHET.enhetsnavn,
+                )
 
             // Ny enhet
             every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer()) } returns
-                    listOf(
-                        Arbeidsfordelingsenhet(
-                            enhetId = OSLO.enhetsnummer,
-                            enhetNavn = OSLO.enhetsnavn,
-                        ),
-                    )
+                listOf(
+                    Arbeidsfordelingsenhet(
+                        enhetId = OSLO.enhetsnummer,
+                        enhetNavn = OSLO.enhetsnavn,
+                    ),
+                )
 
             every { arbeidsfordelingPåBehandlingRepository.save(capture(arbeidsfordelingPåBehandlingSlot)) } answers { firstArg() }
 
@@ -318,20 +318,20 @@ class ArbeidsfordelingServiceTest {
 
             // Forrige enhet
             every { arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(behandling.fagsak.id) } returns
-                    ArbeidsfordelingPåBehandling(
-                        behandlingId = forrigeBehandling.id,
-                        behandlendeEnhetId = MIDLERTIDIG_ENHET.enhetsnummer,
-                        behandlendeEnhetNavn = MIDLERTIDIG_ENHET.enhetsnavn,
-                    )
+                ArbeidsfordelingPåBehandling(
+                    behandlingId = forrigeBehandling.id,
+                    behandlendeEnhetId = MIDLERTIDIG_ENHET.enhetsnummer,
+                    behandlendeEnhetNavn = MIDLERTIDIG_ENHET.enhetsnavn,
+                )
 
             // Ny enhet
             every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer()) } returns
-                    listOf(
-                        Arbeidsfordelingsenhet(
-                            enhetId = MIDLERTIDIG_ENHET.enhetsnummer,
-                            enhetNavn = MIDLERTIDIG_ENHET.enhetsnavn,
-                        ),
-                    )
+                listOf(
+                    Arbeidsfordelingsenhet(
+                        enhetId = MIDLERTIDIG_ENHET.enhetsnummer,
+                        enhetNavn = MIDLERTIDIG_ENHET.enhetsnavn,
+                    ),
+                )
 
             every { arbeidsfordelingPåBehandlingRepository.save(capture(arbeidsfordelingPåBehandlingSlot)) } answers { firstArg() }
 
@@ -355,20 +355,20 @@ class ArbeidsfordelingServiceTest {
 
             // Forrige enhet
             every { arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(behandling.fagsak.id) } returns
-                    ArbeidsfordelingPåBehandling(
-                        behandlingId = forrigeBehandling.id,
-                        behandlendeEnhetId = STEINKJER.enhetsnummer,
-                        behandlendeEnhetNavn = STEINKJER.enhetsnavn,
-                    )
+                ArbeidsfordelingPåBehandling(
+                    behandlingId = forrigeBehandling.id,
+                    behandlendeEnhetId = STEINKJER.enhetsnummer,
+                    behandlendeEnhetNavn = STEINKJER.enhetsnavn,
+                )
 
             // Ny enhet
             every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer()) } returns
-                    listOf(
-                        Arbeidsfordelingsenhet(
-                            enhetId = STEINKJER.enhetsnummer,
-                            enhetNavn = STEINKJER.enhetsnavn,
-                        ),
-                    )
+                listOf(
+                    Arbeidsfordelingsenhet(
+                        enhetId = STEINKJER.enhetsnummer,
+                        enhetNavn = STEINKJER.enhetsnavn,
+                    ),
+                )
 
             every { arbeidsfordelingPåBehandlingRepository.save(any()) } returns mockk()
 
@@ -477,17 +477,19 @@ class ArbeidsfordelingServiceTest {
             // Arrange
             val behandling = lagBehandling()
 
-            val endreBehandlendeEnhet = RestEndreBehandlendeEnhet(
-                enhetId = STEINKJER.enhetsnummer,
-                begrunnelse = "Begrunnelse for endring",
-            )
-
-            val feilmelding = assertThrows<FunksjonellFeil> {
-                arbeidsfordelingService.manueltOppdaterBehandlendeEnhet(
-                    behandling = behandling,
-                    endreBehandlendeEnhet = endreBehandlendeEnhet,
+            val endreBehandlendeEnhet =
+                RestEndreBehandlendeEnhet(
+                    enhetId = STEINKJER.enhetsnummer,
+                    begrunnelse = "Begrunnelse for endring",
                 )
-            }.melding
+
+            val feilmelding =
+                assertThrows<FunksjonellFeil> {
+                    arbeidsfordelingService.manueltOppdaterBehandlendeEnhet(
+                        behandling = behandling,
+                        endreBehandlendeEnhet = endreBehandlendeEnhet,
+                    )
+                }.melding
 
             assertThat(feilmelding).isEqualTo("Fra og med 5 Januar 2026 er det ikke lenger å mulig å endre behandlende enhet til Steinkjer.")
         }
