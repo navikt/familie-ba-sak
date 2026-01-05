@@ -75,4 +75,6 @@ enum class FeatureToggle(
     FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO("familie-ba-sak.filtrer-opphold-paa-eldste-barns-fodselsdato"),
 
     HENT_ARBEIDSFORDELING_FOR_AUTOMATISK_BEHANDLING_ETTER_PORTEFØLJEJUSTERING("familie-ba-sak.hent-arbeidsfordeling-for-automatisk-behandling-etter-portefoljejustering"),
+
+    HARDKODET_EEAFREG_STATSBORGERSKAP("familie-ba-sak.hardkodet-eeafreg-statsborgerskap"),
 }

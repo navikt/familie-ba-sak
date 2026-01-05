@@ -164,6 +164,7 @@ class PersongrunnlagServiceTest {
                 every { featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
                 every { featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
                 every { featureToggleService.isEnabled(FeatureToggle.FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+                every { featureToggleService.isEnabled(FeatureToggle.HARDKODET_EEAFREG_STATSBORGERSKAP) } returns true
 
                 persongrunnlagService
                     .hentOgLagreSøkerOgBarnINyttGrunnlag(
