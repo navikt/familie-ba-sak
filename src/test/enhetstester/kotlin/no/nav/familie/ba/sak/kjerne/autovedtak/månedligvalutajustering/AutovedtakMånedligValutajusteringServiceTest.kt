@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering
 
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -10,6 +13,8 @@ import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori.EØS
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
@@ -23,6 +28,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -52,8 +58,30 @@ class AutovedtakMånedligValutajusteringServiceTest {
     }
 
     @Test
+    fun `utførMånedligValutajustering skal avsluttes hvis siste iverksatte behandling ikke er EØS-behandling`() {
+        // Arrange
+        val logger = LoggerFactory.getLogger(AutovedtakMånedligValutajusteringService::class.java) as Logger
+        val listAppender = ListAppender<ILoggingEvent>().apply { start() }
+        logger.addAppender(listAppender)
+
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling(behandlingKategori = BehandlingKategori.NASJONAL)
+
+        // Act
+        autovedtakMånedligValutajusteringService.utførMånedligValutajustering(
+            fagsakId = 0,
+            måned = YearMonth.now(),
+        )
+
+        // Assert
+        assertThat(listAppender.list).anySatisfy {
+            assertThat(it.level.toString()).isEqualTo("WARN")
+            assertThat(it.formattedMessage).isEqualTo("Prøver å utføre månedlig valutajustering for nasjonal fagsak 0. Hopper ut")
+        }
+    }
+
+    @Test
     fun `utførMånedligValutajustering kaster Feil hvis en annen enn nåværende måned blir sendt inn`() {
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling()
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling(behandlingKategori = EØS)
         every { valutaKursService.hentValutakurser(any()) } returns
             listOf(
                 Valutakurs(
@@ -90,7 +118,7 @@ class AutovedtakMånedligValutajusteringServiceTest {
     @Test
     fun `utførMånedligValutajustering kaster Feil hvis fagsakstatus ikke er løpende`() {
         val fagsak = defaultFagsak()
-        val behandling = lagBehandling(fagsak = fagsak)
+        val behandling = lagBehandling(fagsak = fagsak, behandlingKategori = EØS)
 
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns behandling
         every { valutaKursService.hentValutakurser(any()) } returns
@@ -115,7 +143,7 @@ class AutovedtakMånedligValutajusteringServiceTest {
     @Test
     fun `utførMånedligValutajustering kaster RekjørSenereException hvis satsendring er trigget`() {
         val fagsak = defaultFagsak().apply { status = FagsakStatus.LØPENDE }
-        val behandling = lagBehandling(fagsak = fagsak)
+        val behandling = lagBehandling(fagsak = fagsak, behandlingKategori = EØS)
 
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns behandling
         every { valutaKursService.hentValutakurser(any()) } returns
@@ -141,7 +169,7 @@ class AutovedtakMånedligValutajusteringServiceTest {
     @Test
     fun `utførMånedligValutajustering kaster RekjørSenereException hvis åpen behandling har status FATTER_VEDTAK`() {
         val fagsak = defaultFagsak().apply { status = FagsakStatus.LØPENDE }
-        val behandling = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET)
+        val behandling = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET, behandlingKategori = EØS)
         val åpenBehandling = lagBehandling(fagsak = fagsak, status = BehandlingStatus.FATTER_VEDTAK)
         val klokkenSeksNesteVirkedag = (1..3).fold(LocalDate.now()) { acc, _ -> nesteVirkedag(acc) }.atTime(6, 0)
 
@@ -174,7 +202,7 @@ class AutovedtakMånedligValutajusteringServiceTest {
         behandlingStatus: BehandlingStatus,
     ) {
         val fagsak = defaultFagsak().apply { status = FagsakStatus.LØPENDE }
-        val behandling = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET)
+        val behandling = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET, behandlingKategori = EØS)
         val åpenBehandling = lagBehandling(fagsak = fagsak, status = behandlingStatus)
         val nå = LocalDateTime.now()
 
