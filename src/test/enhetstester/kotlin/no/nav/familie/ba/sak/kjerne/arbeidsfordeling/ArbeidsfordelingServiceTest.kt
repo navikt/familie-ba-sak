@@ -8,6 +8,7 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.HENT_ARBEIDSFORDELING_FOR_AUTOMATISK_BEHANDLING_ETTER_PORTEFØLJEJUSTERING
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -466,6 +467,31 @@ class ArbeidsfordelingServiceTest {
                 )
             }
             verify(exactly = 1) { saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id) }
+        }
+    }
+
+    @Nested
+    inner class ManueltOppdaterBehandlendeEnhetTest {
+        @Test
+        fun `Skal kaste feil ved forsøk på å endre behandlende enhet til Steinkjer`() {
+            // Arrange
+            val behandling = lagBehandling()
+
+            val endreBehandlendeEnhet =
+                RestEndreBehandlendeEnhet(
+                    enhetId = STEINKJER.enhetsnummer,
+                    begrunnelse = "Begrunnelse for endring",
+                )
+
+            val feilmelding =
+                assertThrows<FunksjonellFeil> {
+                    arbeidsfordelingService.manueltOppdaterBehandlendeEnhet(
+                        behandling = behandling,
+                        endreBehandlendeEnhet = endreBehandlendeEnhet,
+                    )
+                }.melding
+
+            assertThat(feilmelding).isEqualTo("Fra og med 5. januar 2026 er det ikke lenger å mulig å endre behandlende enhet til Steinkjer.")
         }
     }
 }

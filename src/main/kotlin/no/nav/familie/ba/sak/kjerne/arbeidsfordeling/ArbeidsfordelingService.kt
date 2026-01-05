@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.HENT_ARBEIDSFORDELING_FOR_AUTOMATISK_BEHANDLING_ETTER_PORTEFØLJEJUSTERING
@@ -48,6 +49,8 @@ class ArbeidsfordelingService(
         behandling: Behandling,
         endreBehandlendeEnhet: RestEndreBehandlendeEnhet,
     ) {
+        validerEndringAvBehandlendeEnhet(endreBehandlendeEnhet)
+
         val aktivArbeidsfordelingPåBehandling =
             arbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(behandling.id)
 
@@ -74,6 +77,14 @@ class ArbeidsfordelingService(
             begrunnelse = endreBehandlendeEnhet.begrunnelse,
         )
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id)
+    }
+
+    private fun validerEndringAvBehandlendeEnhet(endreBehandlendeEnhet: RestEndreBehandlendeEnhet) {
+        if (endreBehandlendeEnhet.enhetId == STEINKJER.enhetsnummer) {
+            throw FunksjonellFeil(
+                melding = "Fra og med 5. januar 2026 er det ikke lenger å mulig å endre behandlende enhet til Steinkjer.",
+            )
+        }
     }
 
     @Transactional
