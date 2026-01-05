@@ -491,7 +491,7 @@ class ArbeidsfordelingServiceTest {
                     )
                 }.melding
 
-            assertThat(feilmelding).isEqualTo("Fra og med 5 Januar 2026 er det ikke lenger å mulig å endre behandlende enhet til Steinkjer.")
+            assertThat(feilmelding).isEqualTo("Fra og med 5. januar 2026 er det ikke lenger å mulig å endre behandlende enhet til Steinkjer.")
         }
     }
 }

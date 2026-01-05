@@ -82,7 +82,7 @@ class ArbeidsfordelingService(
     private fun validerEndringAvBehandlendeEnhet(endreBehandlendeEnhet: RestEndreBehandlendeEnhet) {
         if (endreBehandlendeEnhet.enhetId == STEINKJER.enhetsnummer) {
             throw FunksjonellFeil(
-                melding = "Fra og med 5 Januar 2026 er det ikke lenger å mulig å endre behandlende enhet til Steinkjer.",
+                melding = "Fra og med 5. januar 2026 er det ikke lenger å mulig å endre behandlende enhet til Steinkjer.",
             )
         }
     }
