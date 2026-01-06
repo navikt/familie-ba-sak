@@ -44,8 +44,7 @@ class PorteføljejusteringFlyttOppgaveTask(
         val oppgaveId = task.payload.toLong()
         val oppgave = integrasjonKlient.finnOppgaveMedId(oppgaveId)
 
-        val ident = oppgave.identer?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident ?: throw Feil("Oppgave med id $oppgaveId er ikke tilknyttet en ident.")
-        val nyEnhetId = validerOgHentNyEnhetForOppgave(ident, oppgaveId) ?: return
+        val nyEnhetId = validerOgHentNyEnhetForOppgave(oppgave) ?: return
         val nyMappeId =
             oppgave.mappeId?.let {
                 hentMappeIdHosOsloEllerVadsøSomTilsvarerMappeISteinkjer(
@@ -98,9 +97,12 @@ class PorteføljejusteringFlyttOppgaveTask(
     }
 
     private fun validerOgHentNyEnhetForOppgave(
-        ident: String,
-        oppgaveId: Long,
+        oppgave: Oppgave,
     ): String? {
+        val ident =
+            oppgave.identer?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
+                ?: throw Feil("Oppgave med id ${oppgave.id} er ikke tilknyttet en ident.")
+
         val arbeidsfordelingsenheter = integrasjonKlient.hentBehandlendeEnhet(ident)
 
         if (arbeidsfordelingsenheter.isEmpty()) {
@@ -119,11 +121,11 @@ class PorteføljejusteringFlyttOppgaveTask(
 
         return when (nyEnhetId) {
             BarnetrygdEnhet.STEINKJER.enhetsnummer -> {
-                throw Feil("Oppgave med id $oppgaveId tildeles fortsatt Steinkjer som enhet")
+                throw Feil("Oppgave med id ${oppgave.id} tildeles fortsatt Steinkjer som enhet")
             }
 
             BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer -> {
-                logger.warn("Oppgave med id $oppgaveId tilhører midlertidig enhet")
+                logger.warn("Oppgave med id ${oppgave.id} tilhører midlertidig enhet")
                 null
             }
 
