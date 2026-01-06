@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.STEINKJER
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.klage.KlageKlient
@@ -43,6 +44,10 @@ class PorteføljejusteringFlyttOppgaveTask(
     override fun doTask(task: Task) {
         val oppgaveId = task.payload.toLong()
         val oppgave = integrasjonKlient.finnOppgaveMedId(oppgaveId)
+        if (oppgave.tildeltEnhetsnr != STEINKJER.enhetsnummer) {
+            logger.info("Oppgave med id $oppgaveId er ikke tildelt Steinkjer. Avbryter flytting av oppgave.")
+            return
+        }
 
         val nyEnhetId = validerOgHentNyEnhetForOppgave(oppgave) ?: return
         val nyMappeId =
