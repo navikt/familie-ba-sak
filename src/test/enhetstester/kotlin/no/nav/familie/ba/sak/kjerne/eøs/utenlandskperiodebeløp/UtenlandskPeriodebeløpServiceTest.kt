@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
@@ -11,16 +12,20 @@ import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassUtenlandskePe
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService.Companion.BULGARSK_LEV
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.time.YearMonth
 
 internal class UtenlandskPeriodebeløpServiceTest {
     val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp> =
@@ -139,5 +144,41 @@ internal class UtenlandskPeriodebeløpServiceTest {
         assertNull(faktiskUtenlandskPeriodebeløp.elementAt(1).intervall)
         assertNull(faktiskUtenlandskPeriodebeløp.elementAt(1).kalkulertMånedligBeløp)
         assertEquals("SE", faktiskUtenlandskPeriodebeløp.elementAt(1).utbetalingsland)
+    }
+
+    @Test
+    fun `Skal kaste funksjonell feil dersom det forsøkes å settes fom fra og med 1 januar 2026 med valutakode BGN`() {
+        val feilmelding =
+            assertThrows<FunksjonellFeil> {
+                utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(
+                    BehandlingId(1),
+                    UtenlandskPeriodebeløp(
+                        fom = YearMonth.of(2026, 1),
+                        tom = null,
+                        beløp = 1.0.toBigDecimal(),
+                        valutakode = BULGARSK_LEV,
+                    ),
+                )
+            }
+
+        assertThat(feilmelding.message).isEqualTo("Bulgarske lev er ikke lenger gyldig valuta fra 01.01.26")
+    }
+
+    @Test
+    fun `Skal kaste funksjonell feil dersom det forsøkes å settes tom fra og med 1 januar 2026 med valutakode BGN`() {
+        val feilmelding =
+            assertThrows<FunksjonellFeil> {
+                utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(
+                    BehandlingId(1),
+                    UtenlandskPeriodebeløp(
+                        fom = YearMonth.of(2025, 1),
+                        tom = YearMonth.of(2026, 1),
+                        beløp = 1.0.toBigDecimal(),
+                        valutakode = BULGARSK_LEV,
+                    ),
+                )
+            }
+
+        assertThat(feilmelding.message).isEqualTo("Bulgarske lev er ikke lenger gyldig valuta fra 01.01.26")
     }
 }
