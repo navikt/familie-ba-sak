@@ -15,7 +15,9 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleUnderkjentVedtak
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.GodkjenneVedtak
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -56,26 +58,20 @@ class PorteføljejusteringFlyttOppgaveTask(
             return
         }
 
-        val nyMappeId =
-            oppgave.mappeId?.let {
-                hentMappeIdHosOsloEllerVadsøSomTilsvarerMappeISteinkjer(
-                    it.toInt(),
-                    nyEnhetId,
-                )
-            }
+        val nyMappeId = hentMappeIdHosOsloEllerVadsøSomTilsvarerMappeISteinkjer(oppgave.mappeId, nyEnhetId)
 
-        val skalOppdatereEnhetEllerMappe = nyMappeId != oppgave.mappeId?.toInt() || nyEnhetId != oppgave.tildeltEnhetsnr
-
-        if (skalOppdatereEnhetEllerMappe) { // Vi oppdaterer bare hvis det er forskjell på enhet eller mappe. Kaster ikke feil grunnet ønsket om idempotens.
+        // Vi oppdaterer bare hvis det er forskjell på enhet eller mappe. Kaster ikke feil grunnet ønsket om idempotens.
+        val skalOppdatereEnhetEllerMappe = nyMappeId != oppgave.mappeId || nyEnhetId != oppgave.tildeltEnhetsnr
+        if (skalOppdatereEnhetEllerMappe) {
             integrasjonKlient.tilordneEnhetOgMappeForOppgave(
                 oppgaveId = oppgaveId,
                 nyEnhet = nyEnhetId,
                 nyMappe = nyMappeId.toString(),
             )
             logger.info(
-                "Oppdatert oppgave med id $oppgaveId." +
-                    "Fra enhet ${oppgave.tildeltEnhetsnr} til ny enhet $nyEnhetId." +
-                    "Fra mappe ${oppgave.mappeId} til ny mappe $nyMappeId ",
+                "Oppdatert oppgave med id $oppgaveId.\n" +
+                    "Fra enhet ${oppgave.tildeltEnhetsnr} til ny enhet $nyEnhetId.\n" +
+                    "Fra mappe ${oppgave.mappeId} til ny mappe $nyMappeId.",
             )
         }
 
@@ -88,7 +84,7 @@ class PorteføljejusteringFlyttOppgaveTask(
                 return
             }
 
-            oppgave.oppgavetype !in (listOf(Oppgavetype.BehandleSak.value, Oppgavetype.GodkjenneVedtak.value, Oppgavetype.BehandleUnderkjentVedtak.value)) -> {
+            oppgave.oppgavetype !in setOf(BehandleSak.value, GodkjenneVedtak.value, BehandleUnderkjentVedtak.value) -> {
                 return
             }
 
@@ -96,7 +92,6 @@ class PorteføljejusteringFlyttOppgaveTask(
                 oppdaterÅpenBehandlingIBaSak(oppgave, nyEnhetId)
             }
 
-            // TODO I NAV-26753
             oppgave.behandlesAvApplikasjon == "familie-klage" -> {
                 oppdaterEnhetPåÅpenBehandlingIKlage(oppgaveId, nyEnhetId)
             }
