@@ -16,11 +16,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 
-class PorteføljejusteringServiceTest {
+class StartPorteføljejusteringTaskTest {
     private val integrasjonKlient: IntegrasjonKlient = mockk()
     private val taskService: TaskService = mockk()
 
-    private val porteføljejusteringService = PorteføljejusteringService(integrasjonKlient, taskService)
+    private val startPorteføljejusteringTask = StartPorteføljejusteringTask(integrasjonKlient, taskService)
 
     @Test
     fun `Skal hente barnetrygd oppgaver hos enhet Steinkjer og opprette task på flytting av enhet`() {
@@ -42,8 +42,10 @@ class PorteføljejusteringServiceTest {
 
         every { taskService.save(any()) } returns mockk()
 
+        val task = StartPorteføljejusteringTask.opprettTask(dryRun = false)
+
         // Act
-        porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer(dryRun = false)
+        startPorteføljejusteringTask.doTask(task)
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
@@ -75,8 +77,10 @@ class PorteføljejusteringServiceTest {
 
         every { taskService.save(any()) } returns mockk()
 
+        val task = StartPorteføljejusteringTask.opprettTask(dryRun = true)
+
         // Act
-        porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer(dryRun = true)
+        startPorteføljejusteringTask.doTask(task)
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
@@ -108,8 +112,10 @@ class PorteføljejusteringServiceTest {
 
         every { taskService.save(any()) } returns mockk()
 
+        val task = StartPorteføljejusteringTask.opprettTask(dryRun = false)
+
         // Act
-        porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer(dryRun = false)
+        startPorteføljejusteringTask.doTask(task)
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
@@ -143,8 +149,10 @@ class PorteføljejusteringServiceTest {
 
         every { taskService.save(any()) } returns mockk()
 
+        val task = StartPorteføljejusteringTask.opprettTask(dryRun = false)
+
         // Act
-        porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer(dryRun = false)
+        startPorteføljejusteringTask.doTask(task)
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
@@ -177,8 +185,10 @@ class PorteføljejusteringServiceTest {
 
         every { taskService.save(any()) } returns mockk()
 
+        val task = StartPorteføljejusteringTask.opprettTask(dryRun = false)
+
         // Act
-        porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer(dryRun = false)
+        startPorteføljejusteringTask.doTask(task)
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
