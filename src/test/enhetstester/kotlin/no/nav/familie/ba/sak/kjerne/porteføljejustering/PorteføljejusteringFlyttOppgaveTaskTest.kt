@@ -35,7 +35,7 @@ import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE
 import java.util.UUID
 
-class PorteføljejusteringTaskTest {
+class `PorteføljejusteringFlyttOppgaveTaskTest` {
     private val integrasjonKlient: IntegrasjonKlient = mockk()
     private val tilbakekrevingKlient: TilbakekrevingKlient = mockk()
     private val klageKlient: KlageKlient = mockk()
