@@ -257,6 +257,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetEnsligMindrearigFlyttetFraFosterhjem"
     },
+    INNVILGET_ENSLIG_MINDREÅRIG_FORLENGET_OPPHOLD_ETTER_ETTÅRIG_OPPHOLDSTILLATELSE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEnsligMindrearigForlengetOppholdEtterEttarigOppholdstil"
+    },
     INNVILGET_VARETEKTSFENGSEL_GIFT {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetVaretektsfengselGift"
