@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.porteføljejustering
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
+import no.nav.familie.ba.sak.internal.BehandlesAvApplikasjon
+import no.nav.familie.ba.sak.internal.ForvalterController
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -50,6 +52,7 @@ class StartPorteføljejusteringTask(
                     it.mappeId == null && it.oppgavetype !in
                         listOf(Oppgavetype.BehandleSak.value, Oppgavetype.BehandleSED.value, Oppgavetype.Journalføring.value)
                 } // Vi skal ikke flytte oppgaver som ikke har mappe id med mindre det er av type BehandleSak, BehandleSed eller Journalføring.
+                .filter { startPorteføljejusteringTaskDto.behandlesAvApplikasjon?.let { behandlesAvApplikasjon -> it.behandlesAvApplikasjon == behandlesAvApplikasjon.verdi } ?: true } // Filtrere på applikasjon hvis satt
 
         logger.info("Fant ${oppgaverSomSkalFlyttes.size} barnetrygd oppgaver som skal flyttes")
 
@@ -82,11 +85,12 @@ class StartPorteføljejusteringTask(
 
         fun opprettTask(
             antallTasks: Int? = null,
+            behandlesAvApplikasjon: BehandlesAvApplikasjon? = null,
             dryRun: Boolean = true,
         ): Task =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(StartPorteføljejusteringTaskDto(antallTasks, dryRun)),
+                payload = objectMapper.writeValueAsString(StartPorteføljejusteringTaskDto(antallTasks, behandlesAvApplikasjon, dryRun)),
             )
     }
 }

@@ -607,6 +607,7 @@ class ForvalterController(
     )
     fun opprettTaskerForFlyttingAvSteinkjerOppgaver(
         @RequestParam("antallFlytteTasks") antallFlytteTasks: Int? = null,
+        @RequestParam("behandlesAvApplikasjon") behandlesAvApplikasjon: BehandlesAvApplikasjon? = null,
         @RequestParam("dryRun") dryRun: Boolean = true,
     ): ResponseEntity<String> {
         tilgangService.verifiserHarTilgangTilHandling(
@@ -618,7 +619,7 @@ class ForvalterController(
             return ResponseEntity.ok("Toggle for porteføljejustering er skrudd av")
         }
 
-        taskService.save(StartPorteføljejusteringTask.opprettTask(antallFlytteTasks, dryRun))
+        taskService.save(StartPorteføljejusteringTask.opprettTask(antallFlytteTasks, behandlesAvApplikasjon, dryRun))
 
         return ResponseEntity.ok("Opprettet task for flytting av Steinkjer oppgaver")
     }
@@ -753,4 +754,12 @@ class ForvalterController(
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandlingId)
         return ResponseEntity.ok("Sendt behandlingsstatistikk for behandling $behandlingId til Datavarehus")
     }
+}
+
+enum class BehandlesAvApplikasjon(
+    val verdi: String,
+) {
+    FAMILIE_BA_SAK("familie-ba-sak"),
+    FAMILIE_TILBAKE("familie-tilbake"),
+    FAMILIE_KLAGE("familie-klage"),
 }
