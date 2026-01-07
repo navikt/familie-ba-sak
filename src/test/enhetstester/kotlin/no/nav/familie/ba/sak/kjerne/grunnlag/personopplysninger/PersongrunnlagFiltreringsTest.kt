@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
 import no.nav.familie.ba.sak.datagenerator.lagDeltBosted
 import no.nav.familie.ba.sak.datagenerator.lagOppholdsadresse
-import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -31,14 +30,6 @@ class PersongrunnlagFiltreringsTest {
     @Test
     fun `skal filtrere bort bostedsadresser med til-og-med dato før eldste barns fødselsdato`() {
         // Arrange
-        val grunnlag =
-            lagTestPersonopplysningGrunnlag(
-                behandlingId = behandling.id,
-                søkerPersonIdent = søkerFnr,
-                barnasIdenter = listOf(barnFnr),
-                barnasFødselsdatoer = listOf(LocalDate.of(2019, 1, 1)),
-            )
-
         val bostedsadresserFør =
             listOf(
                 lagBostedsadresse(gyldigTilOgMed = LocalDate.of(2020, 1, 1), gyldigFraOgMed = LocalDate.of(2018, 1, 1)),
@@ -46,8 +37,10 @@ class PersongrunnlagFiltreringsTest {
                 lagBostedsadresse(gyldigTilOgMed = null, gyldigFraOgMed = LocalDate.of(2020, 1, 1)),
             )
 
+        val eldsteBarnsFødselsdato = LocalDate.of(2019, 1, 1)
+
         // Act
-        val bostedsadresserEtter = bostedsadresserFør.filtrerBortBostedsadresserFørEldsteBarn(grunnlag, true)
+        val bostedsadresserEtter = bostedsadresserFør.filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato, true)
 
         // Assert
         assertThat(bostedsadresserEtter).hasSize(2)
@@ -58,14 +51,6 @@ class PersongrunnlagFiltreringsTest {
     @Test
     fun `skal filtrere bort oppholdsadresser med til-og-med dato før eldste barns fødselsdato`() {
         // Arrange
-        val grunnlag =
-            lagTestPersonopplysningGrunnlag(
-                behandlingId = behandling.id,
-                søkerPersonIdent = søkerFnr,
-                barnasIdenter = listOf(barnFnr),
-                barnasFødselsdatoer = listOf(LocalDate.of(2019, 1, 1)),
-            )
-
         val oppholdsadresserFør =
             listOf(
                 lagOppholdsadresse(gyldigTilOgMed = LocalDate.of(2020, 1, 1), gyldigFraOgMed = LocalDate.of(2018, 1, 1)),
@@ -73,8 +58,10 @@ class PersongrunnlagFiltreringsTest {
                 lagOppholdsadresse(gyldigTilOgMed = null, gyldigFraOgMed = LocalDate.of(2020, 1, 1)),
             )
 
+        val eldsteBarnsFødselsdato = LocalDate.of(2019, 1, 1)
+
         // Act
-        val oppholdsadresserEtter = oppholdsadresserFør.filtrerBortOppholdsadresserFørEldsteBarn(grunnlag, true)
+        val oppholdsadresserEtter = oppholdsadresserFør.filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato, true)
 
         // Assert
         assertThat(oppholdsadresserEtter).hasSize(2)
@@ -85,7 +72,6 @@ class PersongrunnlagFiltreringsTest {
     @Test
     fun `skal filtrere bort delt bosted hos søker`() {
         // Arrange
-
         val delteBostederFør =
             listOf(
                 lagDeltBosted(sluttdatoForKontrakt = LocalDate.of(2020, 1, 1), startdatoForKontrakt = LocalDate.of(2019, 1, 1)),
@@ -129,16 +115,10 @@ class PersongrunnlagFiltreringsTest {
                 ),
             )
 
-        val grunnlag =
-            lagTestPersonopplysningGrunnlag(
-                behandlingId = behandling.id,
-                søkerPersonIdent = søkerFnr,
-                barnasIdenter = listOf(barnFnr),
-                barnasFødselsdatoer = listOf(LocalDate.of(2019, 1, 1)),
-            )
+        val eldsteBarnsFødselsdato = LocalDate.of(2019, 1, 1)
 
         // Act
-        val statsborgerskapEtter = statsborgerskapFør.filtrerBortStatsborgerskapFørEldsteBarn(grunnlag, true)
+        val statsborgerskapEtter = statsborgerskapFør.filtrerBortStatsborgerskapFørEldsteBarn(eldsteBarnsFødselsdato, true)
 
         // Assert
         assertThat(statsborgerskapEtter).hasSize(2)
@@ -170,16 +150,10 @@ class PersongrunnlagFiltreringsTest {
                 ),
             )
 
-        val grunnlag =
-            lagTestPersonopplysningGrunnlag(
-                behandlingId = behandling.id,
-                søkerPersonIdent = søkerFnr,
-                barnasIdenter = listOf(barnFnr),
-                barnasFødselsdatoer = listOf(LocalDate.of(2019, 1, 1)),
-            )
+        val eldsteBarnsFødselsdato = LocalDate.of(2019, 1, 1)
 
         // Act
-        val oppholdEtter = oppholdFør.filtrerBortOppholdFørEldsteBarn(grunnlag, true)
+        val oppholdEtter = oppholdFør.filtrerBortOppholdFørEldsteBarn(eldsteBarnsFødselsdato, true)
         // Assert
         assertThat(oppholdEtter).hasSize(2)
         assertThat(oppholdEtter.first().oppholdFra).isEqualTo(LocalDate.of(2010, 1, 1))

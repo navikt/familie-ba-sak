@@ -9,26 +9,23 @@ import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import java.time.LocalDate
 
 object PersonopplysningsgrunnlagFiltreringUtils {
     fun List<Bostedsadresse>.filtrerBortBostedsadresserFørEldsteBarn(
-        personOpplysningGrunnlag: PersonopplysningGrunnlag,
+        eldsteBarnsFødselsdato: LocalDate,
         filtrerAdresser: Boolean,
     ): List<Bostedsadresse> {
         if (!filtrerAdresser) return this
-
-        val eldsteBarnsFødselsdato = personOpplysningGrunnlag.barna.minOfOrNull { it.fødselsdato } ?: return this
 
         return this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
     }
 
     fun List<Oppholdsadresse>.filtrerBortOppholdsadresserFørEldsteBarn(
-        personOpplysningGrunnlag: PersonopplysningGrunnlag,
+        eldsteBarnsFødselsdato: LocalDate,
         filtrerAdresser: Boolean,
     ): List<Oppholdsadresse> {
         if (!filtrerAdresser) return this
-
-        val eldsteBarnsFødselsdato = personOpplysningGrunnlag.barna.minOfOrNull { it.fødselsdato } ?: return this
 
         return this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
     }
@@ -47,23 +44,19 @@ object PersonopplysningsgrunnlagFiltreringUtils {
     }
 
     fun List<Statsborgerskap>.filtrerBortStatsborgerskapFørEldsteBarn(
-        personOpplysningGrunnlag: PersonopplysningGrunnlag,
+        eldsteBarnsFødselsdato: LocalDate,
         filtrerStatsborgerskap: Boolean,
     ): List<Statsborgerskap> {
         if (!filtrerStatsborgerskap) return this
-
-        val eldsteBarnsFødselsdato = personOpplysningGrunnlag.barna.minOfOrNull { it.fødselsdato } ?: return this
 
         return this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
     }
 
     fun List<Opphold>.filtrerBortOppholdFørEldsteBarn(
-        personOpplysningGrunnlag: PersonopplysningGrunnlag,
+        eldsteBarnsFødselsdato: LocalDate,
         filtrerOpphold: Boolean,
     ): List<Opphold> {
         if (!filtrerOpphold) return this
-
-        val eldsteBarnsFødselsdato = personOpplysningGrunnlag.barna.minOfOrNull { it.fødselsdato } ?: return this
 
         return this.filter { it.oppholdTil?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
     }
