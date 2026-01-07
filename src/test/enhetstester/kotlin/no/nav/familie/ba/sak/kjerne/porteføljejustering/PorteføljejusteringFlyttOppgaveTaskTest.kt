@@ -207,13 +207,13 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
             )
 
         every { integrasjonKlient.hentBehandlendeEnhet("1234") } returns listOf(Arbeidsfordelingsenhet(OSLO.enhetsnummer, OSLO.enhetsnavn))
-        every { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, "100012753") } returns mockk()
+        every { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, 100012753) } returns mockk()
 
         // Act
         porteføljejusteringFlyttOppgaveTask.doTask(task)
 
         // Assert
-        verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, "100012753") }
+        verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, 100012753) }
         verify { arbeidsfordelingService wasNot Called }
     }
 
@@ -237,13 +237,13 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
             )
 
         every { integrasjonKlient.hentBehandlendeEnhet("1234") } returns listOf(Arbeidsfordelingsenhet(OSLO.enhetsnummer, OSLO.enhetsnavn))
-        every { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, "100012753") } returns mockk()
+        every { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, 100012753) } returns mockk()
 
         // Act
         porteføljejusteringFlyttOppgaveTask.doTask(task)
 
         // Assert
-        verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, "100012753") }
+        verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, 100012753) }
         verify { arbeidsfordelingService wasNot Called }
     }
 
@@ -270,7 +270,7 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
             )
 
         every { integrasjonKlient.hentBehandlendeEnhet("1234") } returns listOf(Arbeidsfordelingsenhet(OSLO.enhetsnummer, OSLO.enhetsnavn))
-        every { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1L, OSLO.enhetsnummer, "100012753") } returns mockk()
+        every { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1L, OSLO.enhetsnummer, 100012753) } returns mockk()
         every { personidentService.hentAktør("1") } returns aktørPåOppgave
         every { fagsakService.hentNormalFagsak(aktørPåOppgave) } returns lagFagsak(id = 1)
         every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(1) } returns behandling
@@ -280,7 +280,7 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
         porteføljejusteringFlyttOppgaveTask.doTask(task)
 
         // Assert
-        verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, "100012753") }
+        verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, 100012753) }
         verify(exactly = 1) { personidentService.hentAktør("1") }
         verify(exactly = 1) { fagsakService.hentNormalFagsak(aktørPåOppgave) }
         verify(exactly = 1) { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(1) }
@@ -310,14 +310,14 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
             )
 
         every { integrasjonKlient.hentBehandlendeEnhet("1234") } returns listOf(Arbeidsfordelingsenhet(OSLO.enhetsnummer, OSLO.enhetsnavn))
-        every { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, "100012753") } returns mockk()
+        every { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, 100012753) } returns mockk()
         every { klageKlient.oppdaterEnhetPåÅpenBehandling(1, OSLO.enhetsnummer) } returns "TODO"
 
         // Act
         porteføljejusteringFlyttOppgaveTask.doTask(task)
 
         // Assert
-        verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, "100012753") }
+        verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, 100012753) }
         verify(exactly = 1) { klageKlient.oppdaterEnhetPåÅpenBehandling(1L, OSLO.enhetsnummer) }
     }
 
@@ -343,14 +343,14 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
             )
 
         every { integrasjonKlient.hentBehandlendeEnhet("1234") } returns listOf(Arbeidsfordelingsenhet(OSLO.enhetsnummer, OSLO.enhetsnavn))
-        every { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1L, OSLO.enhetsnummer, "100012753") } returns mockk()
+        every { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1L, OSLO.enhetsnummer, 100012753) } returns mockk()
         every { tilbakekrevingKlient.oppdaterEnhetPåÅpenBehandling(behandlingEksternBrukId, OSLO.enhetsnummer) } returns "TODO"
 
         // Act
         porteføljejusteringFlyttOppgaveTask.doTask(task)
 
         // Assert
-        verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, "100012753") }
+        verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, 100012753) }
         verify(exactly = 1) { tilbakekrevingKlient.oppdaterEnhetPåÅpenBehandling(behandlingEksternBrukId, OSLO.enhetsnummer) }
     }
 }
