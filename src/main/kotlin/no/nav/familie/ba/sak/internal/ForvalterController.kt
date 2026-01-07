@@ -757,7 +757,7 @@ class ForvalterController(
 }
 
 enum class BehandlesAvApplikasjon(
-    val verdi: String,
+    val applikasjonNavn: String,
 ) {
     FAMILIE_BA_SAK("familie-ba-sak"),
     FAMILIE_TILBAKE("familie-tilbake"),
