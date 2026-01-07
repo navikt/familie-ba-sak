@@ -116,9 +116,13 @@ class AutovedtakMånedligValutajusteringServiceTest {
     }
 
     @Test
-    fun `utførMånedligValutajustering kaster Feil hvis fagsakstatus ikke er løpende`() {
-        val fagsak = defaultFagsak()
-        val behandling = lagBehandling(fagsak = fagsak, behandlingKategori = EØS)
+    fun `utførMånedligValutajustering skal avsluttes hvis fagsakstatus ikke er løpende`() {
+        // Arrange
+        val logger = LoggerFactory.getLogger(AutovedtakMånedligValutajusteringService::class.java) as Logger
+        val listAppender = ListAppender<ILoggingEvent>().apply { start() }
+        logger.addAppender(listAppender)
+
+        val behandling = lagBehandling(behandlingKategori = EØS)
 
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns behandling
         every { valutaKursService.hentValutakurser(any()) } returns
@@ -130,13 +134,15 @@ class AutovedtakMånedligValutajusteringServiceTest {
                 ),
             )
 
-        assertThrows<Feil> {
-            autovedtakMånedligValutajusteringService.utførMånedligValutajustering(
-                fagsakId = fagsak.id,
-                måned = YearMonth.now(),
-            )
-        }.run {
-            assertThat(message).isEqualTo("Forsøker å utføre månedlig valutajustering på ikke løpende fagsak ${fagsak.id}")
+        autovedtakMånedligValutajusteringService.utførMånedligValutajustering(
+            fagsakId = 0,
+            måned = YearMonth.now(),
+        )
+
+        // Assert
+        assertThat(listAppender.list).anySatisfy {
+            assertThat(it.level.toString()).isEqualTo("WARN")
+            assertThat(it.formattedMessage).isEqualTo("Forsøker å utføre månedlig valutajustering på ikke løpende fagsak 0. Hopper ut")
         }
     }
 
