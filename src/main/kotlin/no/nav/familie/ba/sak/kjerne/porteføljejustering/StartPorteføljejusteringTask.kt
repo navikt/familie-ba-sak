@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.porteføljejustering
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.kontrakter.felles.Tema
@@ -27,6 +28,7 @@ class StartPorteføljejusteringTask(
     private val integrasjonKlient: IntegrasjonKlient,
     private val taskService: TaskService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val startPorteføljejusteringTaskDto: StartPorteføljejusteringTaskDto = objectMapper.readValue(task.payload)
         val oppgaverISteinkjer =
