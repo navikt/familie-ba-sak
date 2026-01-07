@@ -147,6 +147,24 @@ internal class UtenlandskPeriodebeløpServiceTest {
     }
 
     @Test
+    fun `Skal kaste funksjonell feil dersom fom ikke er satt`() {
+        val feilmelding =
+            assertThrows<FunksjonellFeil> {
+                utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(
+                    BehandlingId(1),
+                    UtenlandskPeriodebeløp(
+                        fom = null,
+                        tom = null,
+                        beløp = 1.0.toBigDecimal(),
+                        valutakode = BULGARSK_LEV,
+                    ),
+                )
+            }
+
+        assertThat(feilmelding.message).isEqualTo("Fra og med dato på utenlandskperiode beløp må være satt")
+    }
+
+    @Test
     fun `Skal kaste funksjonell feil dersom det forsøkes å settes fom fra og med 1 januar 2026 med valutakode BGN`() {
         val feilmelding =
             assertThrows<FunksjonellFeil> {
