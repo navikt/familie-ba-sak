@@ -385,6 +385,7 @@ class IntegrasjonKlient(
                 .fromUri(baseUri)
                 .queryParam("nullstillTilordnetRessurs", true)
                 .queryParam("mappeId", nyMappe)
+                .queryParam("fjernMappeFraOppgave", false)
                 .build()
                 .toUri()
 
