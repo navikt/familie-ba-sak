@@ -66,7 +66,7 @@ class PorteføljejusteringFlyttOppgaveTask(
             integrasjonKlient.tilordneEnhetOgMappeForOppgave(
                 oppgaveId = oppgaveId,
                 nyEnhet = nyEnhetId,
-                nyMappe = nyMappeId.toString(),
+                nyMappe = nyMappeId,
             )
             logger.info(
                 "Oppdatert oppgave med id $oppgaveId.\n" +

@@ -56,6 +56,7 @@ import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.time.LocalDate
+import java.util.Optional
 
 const val DEFAULT_JOURNALFØRENDE_ENHET = "9999"
 
@@ -377,7 +378,7 @@ class IntegrasjonKlient(
     fun tilordneEnhetOgMappeForOppgave(
         oppgaveId: Long,
         nyEnhet: String,
-        nyMappe: String?,
+        nyMappe: Long?,
     ): OppgaveResponse {
         val baseUri = URI.create("$integrasjonUri/oppgave/$oppgaveId/enhet/$nyEnhet")
         val uri =
