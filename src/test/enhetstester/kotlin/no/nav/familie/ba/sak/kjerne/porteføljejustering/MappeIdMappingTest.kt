@@ -24,8 +24,8 @@ class MappeIdMappingTest {
         "100033711, 100033712",
     )
     fun `skal returnere korrekt mappe id for Oslo når mappe id fra Steinkjer finnes i mapping`(
-        mappeIdSteinkjer: Int,
-        forventetMappeIdOslo: Int,
+        mappeIdSteinkjer: Long,
+        forventetMappeIdOslo: Long,
     ) {
         // Act
         val result = hentMappeIdHosOsloEllerVadsøSomTilsvarerMappeISteinkjer(mappeIdSteinkjer, OSLO.enhetsnummer)
@@ -48,8 +48,8 @@ class MappeIdMappingTest {
         "100033711, 100033731",
     )
     fun `skal returnere korrekt mappe id for Vadsø når mappe id fra Steinkjer finnes i mapping`(
-        mappeIdSteinkjer: Int,
-        forventetMappeIdVadsø: Int,
+        mappeIdSteinkjer: Long,
+        forventetMappeIdVadsø: Long,
     ) {
         // Act
         val result = hentMappeIdHosOsloEllerVadsøSomTilsvarerMappeISteinkjer(mappeIdSteinkjer, VADSØ.enhetsnummer)
@@ -59,9 +59,18 @@ class MappeIdMappingTest {
     }
 
     @Test
+    fun `skal returnere null når mappe id fra Steinkjer er null`() {
+        // Act
+        val result = hentMappeIdHosOsloEllerVadsøSomTilsvarerMappeISteinkjer(null, OSLO.enhetsnummer)
+
+        // Assert
+        assertThat(result).isNull()
+    }
+
+    @Test
     fun `skal kaste Feil når mappe id fra Steinkjer ikke finnes i mapping`() {
         // Arrange
-        val ugyldigMappeIdSteinkjer = 999999
+        val ugyldigMappeIdSteinkjer = 999999L
 
         // Act & Assert
         val feil =
@@ -76,7 +85,7 @@ class MappeIdMappingTest {
     @Test
     fun `skal kaste Feil når enhetsnummer ikke finnes i mapping`() {
         // Arrange
-        val mappeIdSteinkjer = 100027793
+        val mappeIdSteinkjer = 100027793L
         val ugyldigEnhetsnummer = "9999"
 
         // Act & Assert
@@ -92,7 +101,7 @@ class MappeIdMappingTest {
     @Test
     fun `skal kaste Feil når enhetsnummer er tom string`() {
         // Arrange
-        val mappeIdSteinkjer = 100027793
+        val mappeIdSteinkjer = 100027793L
         val tomEnhetsnummer = ""
 
         // Act & Assert

@@ -5,7 +5,9 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.OSLO
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.STEINKJER
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.VADSØ
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.klage.KlageKlient
@@ -13,7 +15,9 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleUnderkjentVedtak
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.GodkjenneVedtak
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -43,29 +47,31 @@ class PorteføljejusteringFlyttOppgaveTask(
     override fun doTask(task: Task) {
         val oppgaveId = task.payload.toLong()
         val oppgave = integrasjonKlient.finnOppgaveMedId(oppgaveId)
+        if (oppgave.tildeltEnhetsnr != STEINKJER.enhetsnummer) {
+            logger.info("Oppgave med id $oppgaveId er ikke tildelt Steinkjer. Avbryter flytting av oppgave.")
+            return
+        }
 
-        val ident = oppgave.identer?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident ?: throw Feil("Oppgave med id $oppgaveId er ikke tilknyttet en ident.")
-        val nyEnhetId = validerOgHentNyEnhetForOppgave(ident, oppgaveId) ?: return
-        val nyMappeId =
-            oppgave.mappeId?.let {
-                hentMappeIdHosOsloEllerVadsøSomTilsvarerMappeISteinkjer(
-                    it.toInt(),
-                    nyEnhetId,
-                )
-            }
+        val nyEnhetId = validerOgHentNyEnhetForOppgave(oppgave)
+        if (nyEnhetId != OSLO.enhetsnummer && nyEnhetId != VADSØ.enhetsnummer) {
+            logger.info("Oppgave med id $oppgaveId skal flyttes til enhet $nyEnhetId. Avbryter flytting av oppgave.")
+            return
+        }
 
-        val skalOppdatereEnhetEllerMappe = nyMappeId != oppgave.mappeId?.toInt() || nyEnhetId != oppgave.tildeltEnhetsnr
+        val nyMappeId = hentMappeIdHosOsloEllerVadsøSomTilsvarerMappeISteinkjer(oppgave.mappeId, nyEnhetId)
 
-        if (skalOppdatereEnhetEllerMappe) { // Vi oppdaterer bare hvis det er forskjell på enhet eller mappe. Kaster ikke feil grunnet ønsket om idempotens.
+        // Vi oppdaterer bare hvis det er forskjell på enhet eller mappe. Kaster ikke feil grunnet ønsket om idempotens.
+        val skalOppdatereEnhetEllerMappe = nyMappeId != oppgave.mappeId || nyEnhetId != oppgave.tildeltEnhetsnr
+        if (skalOppdatereEnhetEllerMappe) {
             integrasjonKlient.tilordneEnhetOgMappeForOppgave(
                 oppgaveId = oppgaveId,
                 nyEnhet = nyEnhetId,
                 nyMappe = nyMappeId.toString(),
             )
             logger.info(
-                "Oppdatert oppgave med id $oppgaveId." +
-                    "Fra enhet ${oppgave.tildeltEnhetsnr} til ny enhet $nyEnhetId." +
-                    "Fra mappe ${oppgave.mappeId} til ny mappe $nyMappeId ",
+                "Oppdatert oppgave med id $oppgaveId.\n" +
+                    "Fra enhet ${oppgave.tildeltEnhetsnr} til ny enhet $nyEnhetId.\n" +
+                    "Fra mappe ${oppgave.mappeId} til ny mappe $nyMappeId.",
             )
         }
 
@@ -78,7 +84,7 @@ class PorteføljejusteringFlyttOppgaveTask(
                 return
             }
 
-            oppgave.oppgavetype !in (listOf(Oppgavetype.BehandleSak.value, Oppgavetype.GodkjenneVedtak.value, Oppgavetype.BehandleUnderkjentVedtak.value)) -> {
+            oppgave.oppgavetype !in setOf(BehandleSak.value, GodkjenneVedtak.value, BehandleUnderkjentVedtak.value) -> {
                 return
             }
 
@@ -86,7 +92,6 @@ class PorteføljejusteringFlyttOppgaveTask(
                 oppdaterÅpenBehandlingIBaSak(oppgave, nyEnhetId)
             }
 
-            // TODO I NAV-26753
             oppgave.behandlesAvApplikasjon == "familie-klage" -> {
                 oppdaterEnhetPåÅpenBehandlingIKlage(oppgaveId, nyEnhetId)
             }
@@ -98,11 +103,13 @@ class PorteføljejusteringFlyttOppgaveTask(
     }
 
     private fun validerOgHentNyEnhetForOppgave(
-        ident: String,
-        oppgaveId: Long,
-    ): String? {
-        val arbeidsfordelingsenheter = integrasjonKlient.hentBehandlendeEnhet(ident)
+        oppgave: Oppgave,
+    ): String {
+        val ident =
+            oppgave.identer?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
+                ?: throw Feil("Oppgave med id ${oppgave.id} er ikke tilknyttet en ident.")
 
+        val arbeidsfordelingsenheter = integrasjonKlient.hentBehandlendeEnhet(ident)
         if (arbeidsfordelingsenheter.isEmpty()) {
             logger.error("Fant ingen arbeidsfordelingsenheter for ident. Se SecureLogs for detaljer.")
             secureLogger.error("Fant ingen arbeidsfordelingsenheter for ident $ident.")
@@ -116,21 +123,11 @@ class PorteføljejusteringFlyttOppgaveTask(
         }
 
         val nyEnhetId = arbeidsfordelingsenheter.single().enhetId
-
-        return when (nyEnhetId) {
-            BarnetrygdEnhet.STEINKJER.enhetsnummer -> {
-                throw Feil("Oppgave med id $oppgaveId tildeles fortsatt Steinkjer som enhet")
-            }
-
-            BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer -> {
-                logger.warn("Oppgave med id $oppgaveId tilhører midlertidig enhet")
-                null
-            }
-
-            else -> {
-                nyEnhetId
-            }
+        if (nyEnhetId == STEINKJER.enhetsnummer) {
+            throw Feil("Oppgave med id ${oppgave.id} tildeles fortsatt Steinkjer som enhet")
         }
+
+        return nyEnhetId
     }
 
     private fun oppdaterÅpenBehandlingIBaSak(
