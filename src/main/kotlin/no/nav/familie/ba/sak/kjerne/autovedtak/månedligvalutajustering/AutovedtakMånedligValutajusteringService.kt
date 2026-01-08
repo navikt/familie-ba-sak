@@ -71,7 +71,8 @@ class AutovedtakMånedligValutajusteringService(
         }
 
         if (sisteVedtatteBehandling.fagsak.status != FagsakStatus.LØPENDE) {
-            throw Feil("Forsøker å utføre månedlig valutajustering på ikke løpende fagsak $fagsakId")
+            logger.warn("Forsøker å utføre månedlig valutajustering på ikke løpende fagsak $fagsakId. Hopper ut")
+            return
         }
 
         val harOpprettetSatsendring =
