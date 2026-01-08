@@ -21,6 +21,8 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatDelete
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonVilkårResultaterPut
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.EndringIPreutfyltVilkårLogg.Companion.opprettLoggForEndringIPreutfyltVilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.EndringIPreutfyltVilkårLoggRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -38,6 +40,7 @@ class VilkårService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val personidentService: PersonidentService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val endringIPreutfyltVilkårLoggRepository: EndringIPreutfyltVilkårLoggRepository,
     private val featureToggleService: FeatureToggleService,
 ) {
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? =
@@ -90,6 +93,14 @@ class VilkårService(
                         frontendFeilmelding = "Du har endret vilkåret, og må derfor fjerne den automatiske begrunnelsen og fylle inn en ny begrunnelse.",
                     )
                 }
+
+                endringIPreutfyltVilkårLoggRepository.save(
+                    opprettLoggForEndringIPreutfyltVilkår(
+                        behandling = vilkårsvurdering.behandling,
+                        forrigeVilkår = eksisterendeVilkårResultat,
+                        nyttVilkår = restVilkårResultat,
+                    ),
+                )
             }
         }
 
