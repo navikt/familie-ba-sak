@@ -563,27 +563,6 @@ class ForvalterController(
         return ResponseEntity.ok("Tasker for autovedtak av Finnmarkstillegg opprettet")
     }
 
-    @PostMapping("/opprett-tasker-for-autovedtak-finnmarkstillegg/{antallBehandlinger}")
-    @Operation(
-        summary = "Oppretter tasker for autovedtak av Finnmarkstillegg",
-    )
-    fun opprettTaskerForAutovedtakFinnmarkstillegg(
-        @PathVariable antallBehandlinger: Int,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Opprett task for autovedtak av Finnmarkstillegg",
-        )
-
-        if (!featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG)) {
-            throw Feil("Toggle for å opprette tasker for autovedtak av Finnmarkstillegg er skrudd av")
-        }
-
-        autovedtakFinnmarkstilleggTaskOppretter.opprettTasker(antallBehandlinger)
-
-        return ResponseEntity.ok("Tasker for autovedtak av Finnmarkstillegg opprettet")
-    }
-
     @PostMapping("/opprett-tasker-for-autovedtak-svalbardtillegg")
     @Operation(
         summary = "Oppretter tasker for autovedtak av Svalbardtillegg",
