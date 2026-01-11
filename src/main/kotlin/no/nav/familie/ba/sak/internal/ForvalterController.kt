@@ -101,9 +101,7 @@ class ForvalterController(
     private val hentAlleIdenterTilPsysTask: HentAlleIdenterTilPsysTask,
     private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
     private val personidentRepository: PersonidentRepository,
-    private val autovedtakFinnmarkstilleggTaskOppretter: AutovedtakFinnmarkstilleggTaskOppretter,
     private val envService: EnvService,
-    private val autovedtakSvalbardtilleggTaskOppretter: AutovedtakSvalbardtilleggTaskOppretter,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
@@ -601,27 +599,6 @@ class ForvalterController(
         taskService.save(StartPorteføljejusteringTask.opprettTask(antallFlytteTasks, behandlesAvApplikasjon, dryRun))
 
         return ResponseEntity.ok("Opprettet task for flytting av Steinkjer oppgaver")
-    }
-
-    @PostMapping("/opprett-tasker-for-autovedtak-svalbardtillegg/{antallBehandlinger}")
-    @Operation(
-        summary = "Oppretter tasker for autovedtak av Svalbardtillegg",
-    )
-    fun opprettTaskerForAutovedtakSvalbardtillegg(
-        @PathVariable antallBehandlinger: Int,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Opprett task for autovedtak av Svalbardtillegg",
-        )
-
-        if (!featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOVEDTAK_SVALBARDTILLEGG)) {
-            throw Feil("Toggle for å opprette tasker for autovedtak av Svalbardtillegg er skrudd av")
-        }
-
-        autovedtakSvalbardtilleggTaskOppretter.opprettTasker(antallBehandlinger)
-
-        return ResponseEntity.ok("Tasker for autovedtak av Svalbardtillegg opprettet")
     }
 
     @PostMapping("/opprett-tasker-som-logger-eos-fagsaker-med-barn-finnmark")

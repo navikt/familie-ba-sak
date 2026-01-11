@@ -27,7 +27,6 @@ class AutovedtakSvalbardtilleggScheduler(
         }
 
         autovedtakSvalbardtilleggTaskOppretter.opprettTasker(5000)
-
     }
 
     override fun onApplicationEvent(event: ContextClosedEvent) {

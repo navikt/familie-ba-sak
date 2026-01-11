@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.KAN_KJØRE_AUTOVEDTAK_SVALBARDTILLEGG
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggService
@@ -158,16 +157,12 @@ class AutovedtakStegService(
         mottakersAktør: Aktør,
         fagsakId: Long,
         førstegangKjørt: LocalDateTime = LocalDateTime.now(),
-    ): String {
-        if (!featureToggleService.isEnabled(KAN_KJØRE_AUTOVEDTAK_SVALBARDTILLEGG)) {
-            return "Autovedtak for Svalbardtillegg er deaktivert"
-        }
-        return kjørBehandling(
+    ): String =
+        kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = SvalbardtilleggData(fagsakId),
             førstegangKjørt = førstegangKjørt,
         )
-    }
 
     private fun kjørBehandling(
         automatiskBehandlingData: AutomatiskBehandlingData,
@@ -240,7 +235,7 @@ class AutovedtakStegService(
 
             is FødselshendelseData,
             is SmåbarnstilleggData,
-                -> null
+            -> null
         }
 
     private fun håndterÅpenBehandlingOgAvbrytAutovedtak(
@@ -263,7 +258,7 @@ class AutovedtakStegService(
         when (åpenBehandling.status) {
             BehandlingStatus.UTREDES,
             BehandlingStatus.SATT_PÅ_VENT,
-                -> {
+            -> {
                 if (snikeIKøenService.kanSnikeForbi(åpenBehandling)) {
                     snikeIKøenService.settAktivBehandlingPåMaskinellVent(
                         åpenBehandling.id,
@@ -289,7 +284,7 @@ class AutovedtakStegService(
 
             BehandlingStatus.IVERKSETTER_VEDTAK,
             BehandlingStatus.SATT_PÅ_MASKINELL_VENT,
-                -> {
+            -> {
                 throw RekjørSenereException(
                     årsak = "Åpen behandling med status ${åpenBehandling.status}, prøver igjen om 1 time",
                     triggerTid = LocalDateTime.now().plusHours(1),
