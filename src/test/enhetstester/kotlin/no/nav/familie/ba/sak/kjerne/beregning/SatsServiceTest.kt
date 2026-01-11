@@ -38,7 +38,7 @@ class SatsServiceTest {
         val ordinærTidslinje = lagOrdinærTidslinje(barn)
         val ordinærePerioder = ordinærTidslinje.tilPerioderIkkeNull().toList()
 
-        assertEquals(11, ordinærePerioder.size)
+        assertEquals(12, ordinærePerioder.size)
 
         assertPeriode(TestKrPeriode(beløp = 970, fom = "2017-04", tom = "2019-02"), ordinærePerioder[0])
         assertPeriode(TestKrPeriode(beløp = 1054, fom = "2019-03", tom = "2020-08"), ordinærePerioder[1])
@@ -50,7 +50,8 @@ class SatsServiceTest {
         assertPeriode(TestKrPeriode(beløp = 1310, fom = "2023-07", tom = "2023-12"), ordinærePerioder[7])
         assertPeriode(TestKrPeriode(beløp = 1510, fom = "2024-01", tom = "2024-08"), ordinærePerioder[8])
         assertPeriode(TestKrPeriode(beløp = 1766, fom = "2024-09", tom = "2025-04"), ordinærePerioder[9])
-        assertPeriode(TestKrPeriode(beløp = 1968, fom = "2025-05", tom = null), ordinærePerioder[10])
+        assertPeriode(TestKrPeriode(beløp = 1968, fom = "2025-05", tom = "2026-01"), ordinærePerioder[10])
+        assertPeriode(TestKrPeriode(beløp = 2012, fom = "2026-02", tom = null), ordinærePerioder[11])
     }
 
     @Test
@@ -60,10 +61,11 @@ class SatsServiceTest {
         val ordinærTidslinje = lagOrdinærTidslinje(barn)
         val ordinærePerioder = ordinærTidslinje.tilPerioderIkkeNull().toList()
 
-        assertEquals(2, ordinærePerioder.size)
+        assertEquals(3, ordinærePerioder.size)
 
         assertPeriode(TestKrPeriode(beløp = 1766, fom = "2025-01", tom = "2025-04"), ordinærePerioder[0])
-        assertPeriode(TestKrPeriode(beløp = 1968, fom = "2025-05", tom = null), ordinærePerioder[1])
+        assertPeriode(TestKrPeriode(beløp = 1968, fom = "2025-05", tom = "2026-01"), ordinærePerioder[1])
+        assertPeriode(TestKrPeriode(beløp = 2012, fom = "2026-02", tom = null), ordinærePerioder[2])
     }
 
     @Test
@@ -73,7 +75,7 @@ class SatsServiceTest {
         val ordinærTidslinje = lagOrdinærTidslinje(barn)
         val ordinærePerioder = ordinærTidslinje.tilPerioderIkkeNull().toList()
 
-        assertEquals(7, ordinærePerioder.size)
+        assertEquals(8, ordinærePerioder.size)
 
         assertPeriode(TestKrPeriode(beløp = 1054, fom = "2019-12", tom = "2020-08"), ordinærePerioder[0])
         assertPeriode(TestKrPeriode(beløp = 1354, fom = "2020-09", tom = "2021-08"), ordinærePerioder[1])
@@ -81,7 +83,8 @@ class SatsServiceTest {
         assertPeriode(TestKrPeriode(beløp = 1676, fom = "2022-01", tom = "2023-02"), ordinærePerioder[3])
         assertPeriode(TestKrPeriode(beløp = 1723, fom = "2023-03", tom = "2023-06"), ordinærePerioder[4])
         assertPeriode(TestKrPeriode(beløp = 1766, fom = "2023-07", tom = "2025-04"), ordinærePerioder[5])
-        assertPeriode(TestKrPeriode(beløp = 1968, fom = "2025-05", tom = null), ordinærePerioder[6])
+        assertPeriode(TestKrPeriode(beløp = 1968, fom = "2025-05", tom = "2026-01"), ordinærePerioder[6])
+        assertPeriode(TestKrPeriode(beløp = 2012, fom = "2026-02", tom = null), ordinærePerioder[7])
     }
 
     private fun assertPeriode(
@@ -118,7 +121,8 @@ class SatsServiceTest {
                     (jul(2023)..des(2023)).tilTidslinje { 1310 } +
                     (jan(2024)..aug(2024)).tilTidslinje { 1510 } +
                     (sep(2024)..apr(2025)).tilTidslinje { 1766 } +
-                    (mai(2025)..uendelig).tilTidslinje { 1968 }
+                    (mai(2025)..jan(2026)).tilTidslinje { 1968 } +
+                    (feb(2026)..uendelig).tilTidslinje { 2012 }
 
             val faktisk = satstypeTidslinje(ORBA)
 
@@ -146,7 +150,8 @@ class SatsServiceTest {
             val forventet =
                 (uendelig..feb(2023)).tilTidslinje { 660 } +
                     (mar(2023)..jun(2023)).tilTidslinje { 678 } +
-                    (jul(2023)..uendelig).tilTidslinje { 696 }
+                    (jul(2023)..jan(2026)).tilTidslinje { 696 } +
+                    (feb(2026)..uendelig).tilTidslinje { 712 }
 
             val faktisk = satstypeTidslinje(SMA)
 
@@ -159,7 +164,8 @@ class SatsServiceTest {
                 (uendelig..feb(2019)).tilTidslinje { 970 } +
                     (mar(2019)..feb(2023)).tilTidslinje { 1054 } +
                     (mar(2023)..jun(2023)).tilTidslinje { 2489 } +
-                    (jul(2023)..uendelig).tilTidslinje { 2516 }
+                    (jul(2023)..jan(2026)).tilTidslinje { 2516 } +
+                    (feb(2026)..uendelig).tilTidslinje { 2572 }
 
             val faktisk = satstypeTidslinje(UTVIDET_BARNETRYGD)
 
