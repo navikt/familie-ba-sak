@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service
 @Service
 class AutovedtakSvalbardtilleggScheduler(
     private val leaderClientService: LeaderClientService,
-    private val featureToggleService: FeatureToggleService,
     private val autovedtakSvalbardtilleggTaskOppretter: AutovedtakSvalbardtilleggTaskOppretter,
 ) : ApplicationListener<ContextClosedEvent> {
     @Volatile
@@ -27,9 +26,8 @@ class AutovedtakSvalbardtilleggScheduler(
             return
         }
 
-        if (featureToggleService.isEnabled(FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_SVALBARDSTILLEGG, true)) {
-            autovedtakSvalbardtilleggTaskOppretter.opprettTasker(5000)
-        }
+        autovedtakSvalbardtilleggTaskOppretter.opprettTasker(5000)
+
     }
 
     override fun onApplicationEvent(event: ContextClosedEvent) {

@@ -40,8 +40,6 @@ enum class FeatureToggle(
     // NAV-25256
     SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN("familie-ba-sak.skjermet-barn"),
 
-    AUTOMATISK_KJØRING_AV_AUTOVEDTAK_SVALBARDSTILLEGG("familie-ba-sak.kjoering-autovedtak-svalbardtillegg"),
-
     KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG("familie-ba-sak.kan-kjoere-autovedtak-finnmarkstillegg"),
 
     KAN_KJØRE_AUTOVEDTAK_SVALBARDTILLEGG("familie-ba-sak.kan-kjoere-autovedtak-svalbardtillegg"),
