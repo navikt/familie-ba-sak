@@ -105,8 +105,15 @@ class SatsendringUtilTest {
             listOf(
                 lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.of(2023, 4),
-                    tom = YearMonth.of(2030, 1),
+                    tom = YearMonth.of(2026, 1),
                     sats = 2516,
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                    person = søker,
+                ),
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                    fom = YearMonth.of(2026, 2),
+                    tom = YearMonth.of(2030, 1),
+                    sats = 2572,
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                     person = søker,
                 ),
@@ -126,10 +133,17 @@ class SatsendringUtilTest {
                 ),
                 lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.of(2025, 5),
-                    tom = YearMonth.of(2030, 1),
+                    tom = YearMonth.of(2026, 1),
                     sats = 1968,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     person = barn1,
+                ),
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                    fom = YearMonth.of(2026, 2),
+                    tom = YearMonth.of(2030, 1),
+                    sats = 2012,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    person = barn2,
                 ),
                 lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.of(2025, 4),
@@ -140,8 +154,15 @@ class SatsendringUtilTest {
                 ),
                 lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.of(2025, 5),
-                    tom = YearMonth.of(2035, 1),
+                    tom = YearMonth.of(2026, 1),
                     sats = 1968,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    person = barn2,
+                ),
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                    fom = YearMonth.of(2026, 2),
+                    tom = YearMonth.of(2035, 1),
+                    sats = 2012,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     person = barn2,
                 ),

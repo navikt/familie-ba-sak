@@ -231,10 +231,12 @@ class FødselshendelseFørstegangsbehandlingTest(
                     it.periodeFom.toYearMonth() <= ordinærSatsNesteMånedTilTester().gyldigTom.toYearMonth()
             }!!
 
+        val antallBarn = 2
+
         assertUtbetalingsperiode(
             gjeldendeUtbetalingsperiode,
-            1,
-            ordinærSatsNesteMånedTilTester().beløp,
+            antallBarn,
+            ordinærSatsNesteMånedTilTester().beløp * antallBarn,
         )
     }
 }
