@@ -14,12 +14,14 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.klage.KlageKlient
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
+import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.overstyrTaskMedNyCallId
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleUnderkjentVedtak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.GodkjenneVedtak
+import no.nav.familie.log.IdUtils
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -51,12 +53,14 @@ class PorteføljejusteringFlyttOppgaveTask(
         val oppgave = integrasjonKlient.finnOppgaveMedId(porteføljejusteringFlyttOppgaveDto.oppgaveId)
         if (oppgave.tildeltEnhetsnr != STEINKJER.enhetsnummer && oppgave.tildeltEnhetsnr != VADSØ.enhetsnummer && oppgave.tildeltEnhetsnr != OSLO.enhetsnummer) {
             logger.info("Oppgave med id ${porteføljejusteringFlyttOppgaveDto.oppgaveId} er ikke tildelt Steinkjer. Avbryter flytting av oppgave.")
+            task.metadata["status"] = "Tildelt enhet på oppgave er ikke Steinkjer, Vadsø eller Oslo"
             return
         }
 
         val nyEnhetId = validerOgHentNyEnhetForOppgave(oppgave)
         if (nyEnhetId != OSLO.enhetsnummer && nyEnhetId != VADSØ.enhetsnummer) {
             logger.info("Oppgave med id ${porteføljejusteringFlyttOppgaveDto.oppgaveId} skal flyttes til enhet $nyEnhetId. Avbryter flytting av oppgave.")
+            task.metadata["status"] = "Ny enhet for oppgave er ikke Oslo eller Vadsø"
             return
         }
 
@@ -112,6 +116,8 @@ class PorteføljejusteringFlyttOppgaveTask(
             )
             throw e
         }
+        task.metadata["status"] = "Flytting av oppgave fullført"
+        task.metadata["nyEnhetId"] = nyEnhetId
     }
 
     private fun validerOgHentNyEnhetForOppgave(
@@ -180,22 +186,24 @@ class PorteføljejusteringFlyttOppgaveTask(
             enhetId: String,
             mappeId: Long?,
         ): Task =
-            Task(
-                type = TASK_STEP_TYPE,
-                payload =
-                    objectMapper.writeValueAsString(
-                        PorteføljejusteringFlyttOppgaveDto(
-                            oppgaveId = oppgaveId,
-                            originalEnhet = enhetId,
-                            originalMappeId = mappeId,
+            overstyrTaskMedNyCallId(IdUtils.generateId()) {
+                Task(
+                    type = TASK_STEP_TYPE,
+                    payload =
+                        objectMapper.writeValueAsString(
+                            PorteføljejusteringFlyttOppgaveDto(
+                                oppgaveId = oppgaveId,
+                                originalEnhet = enhetId,
+                                originalMappeId = mappeId,
+                            ),
                         ),
-                    ),
-                properties =
-                    Properties().apply {
-                        this["oppgaveId"] = oppgaveId.toString()
-                        enhetId.let { this["enhetId"] = it }
-                        mappeId?.let { this["mappeId"] = it }
-                    },
-            )
+                    properties =
+                        Properties().apply {
+                            this["oppgaveId"] = oppgaveId.toString()
+                            enhetId.let { this["enhetId"] = it }
+                            mappeId?.let { this["mappeId"] = it }
+                        },
+                )
+            }
     }
 }
