@@ -66,8 +66,8 @@ class StartPorteføljejusteringTask(
                         taskService.save(
                             PorteføljejusteringFlyttOppgaveTask.opprettTask(
                                 oppgaveId = it,
-                                enhetId = oppgave.tildeltEnhetsnr,
-                                mappeId = oppgave.mappeId?.toString(),
+                                enhetId = oppgave.tildeltEnhetsnr!!,
+                                mappeId = oppgave.mappeId,
                             ),
                         )
                         opprettedeTasks++
