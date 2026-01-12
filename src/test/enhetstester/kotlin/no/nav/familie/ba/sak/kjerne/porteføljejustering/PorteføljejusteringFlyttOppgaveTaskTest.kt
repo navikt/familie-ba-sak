@@ -36,7 +36,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE
 import org.springframework.http.HttpStatus
-import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestClientResponseException
 import java.util.UUID
 
