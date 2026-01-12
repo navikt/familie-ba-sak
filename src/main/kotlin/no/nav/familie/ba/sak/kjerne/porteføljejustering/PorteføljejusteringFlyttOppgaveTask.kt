@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.porteføljejustering
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
@@ -13,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.klage.KlageKlient
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
@@ -45,60 +47,70 @@ class PorteføljejusteringFlyttOppgaveTask(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val oppgaveId = task.payload.toLong()
-        val oppgave = integrasjonKlient.finnOppgaveMedId(oppgaveId)
-        if (oppgave.tildeltEnhetsnr != STEINKJER.enhetsnummer) {
-            logger.info("Oppgave med id $oppgaveId er ikke tildelt Steinkjer. Avbryter flytting av oppgave.")
+        val porteføljejusteringFlyttOppgaveDto: PorteføljejusteringFlyttOppgaveDto = objectMapper.readValue(task.payload)
+        val oppgave = integrasjonKlient.finnOppgaveMedId(porteføljejusteringFlyttOppgaveDto.oppgaveId)
+        if (oppgave.tildeltEnhetsnr != STEINKJER.enhetsnummer && oppgave.tildeltEnhetsnr != VADSØ.enhetsnummer && oppgave.tildeltEnhetsnr != OSLO.enhetsnummer) {
+            logger.info("Oppgave med id ${porteføljejusteringFlyttOppgaveDto.oppgaveId} er ikke tildelt Steinkjer. Avbryter flytting av oppgave.")
             return
         }
 
         val nyEnhetId = validerOgHentNyEnhetForOppgave(oppgave)
         if (nyEnhetId != OSLO.enhetsnummer && nyEnhetId != VADSØ.enhetsnummer) {
-            logger.info("Oppgave med id $oppgaveId skal flyttes til enhet $nyEnhetId. Avbryter flytting av oppgave.")
+            logger.info("Oppgave med id ${porteføljejusteringFlyttOppgaveDto.oppgaveId} skal flyttes til enhet $nyEnhetId. Avbryter flytting av oppgave.")
             return
         }
 
         val nyMappeId = hentMappeIdHosOsloEllerVadsøSomTilsvarerMappeISteinkjer(oppgave.mappeId, nyEnhetId)
 
-        // Vi oppdaterer bare hvis det er forskjell på enhet eller mappe. Kaster ikke feil grunnet ønsket om idempotens.
-        val skalOppdatereEnhetEllerMappe = nyMappeId != oppgave.mappeId || nyEnhetId != oppgave.tildeltEnhetsnr
-        if (skalOppdatereEnhetEllerMappe) {
-            integrasjonKlient.tilordneEnhetOgMappeForOppgave(
-                oppgaveId = oppgaveId,
-                nyEnhet = nyEnhetId,
-                nyMappe = nyMappeId,
-            )
-            logger.info(
-                "Oppdatert oppgave med id $oppgaveId.\n" +
-                    "Fra enhet ${oppgave.tildeltEnhetsnr} til ny enhet $nyEnhetId.\n" +
-                    "Fra mappe ${oppgave.mappeId} til ny mappe $nyMappeId.",
-            )
-        }
+        integrasjonKlient.tilordneEnhetOgMappeForOppgave(
+            oppgaveId = porteføljejusteringFlyttOppgaveDto.oppgaveId,
+            nyEnhet = nyEnhetId,
+            nyMappe = nyMappeId,
+        )
+        logger.info(
+            "Oppdatert oppgave med id ${porteføljejusteringFlyttOppgaveDto.oppgaveId}.\n" +
+                "Fra enhet ${oppgave.tildeltEnhetsnr} til ny enhet $nyEnhetId.\n" +
+                "Fra mappe ${oppgave.mappeId} til ny mappe $nyMappeId.",
+        )
 
         // Vi går bare videre med oppdatering i fagsystemer hvis typen er av BehandleSak, GodkjenndeVedtak eller BehandleUnderkjentVedtak
         // og oppgaven har en tilknyttet saksreferanse
 
-        val saksreferanse = oppgave.saksreferanse
-        when {
-            saksreferanse == null -> {
-                return
-            }
+        try {
+            val saksreferanse = oppgave.saksreferanse
+            when {
+                saksreferanse == null -> {
+                    return
+                }
 
-            oppgave.oppgavetype !in setOf(BehandleSak.value, GodkjenneVedtak.value, BehandleUnderkjentVedtak.value) -> {
-                return
-            }
+                oppgave.oppgavetype !in setOf(BehandleSak.value, GodkjenneVedtak.value, BehandleUnderkjentVedtak.value) -> {
+                    return
+                }
 
-            oppgave.behandlesAvApplikasjon == "familie-ba-sak" -> {
-                oppdaterÅpenBehandlingIBaSak(oppgave, nyEnhetId)
-            }
+                oppgave.behandlesAvApplikasjon == "familie-ba-sak" -> {
+                    oppdaterÅpenBehandlingIBaSak(oppgave, nyEnhetId)
+                }
 
-            oppgave.behandlesAvApplikasjon == "familie-klage" -> {
-                oppdaterEnhetPåÅpenBehandlingIKlage(oppgaveId, nyEnhetId)
-            }
+                oppgave.behandlesAvApplikasjon == "familie-klage" -> {
+                    oppdaterEnhetPåÅpenBehandlingIKlage(porteføljejusteringFlyttOppgaveDto.oppgaveId, nyEnhetId)
+                }
 
-            oppgave.behandlesAvApplikasjon == "familie-tilbake" -> {
-                oppdaterEnhetPåÅpenBehandlingITilbakekreving(UUID.fromString(saksreferanse), nyEnhetId)
+                oppgave.behandlesAvApplikasjon == "familie-tilbake" -> {
+                    oppdaterEnhetPåÅpenBehandlingITilbakekreving(UUID.fromString(saksreferanse), nyEnhetId)
+                }
             }
+        } catch (e: Exception) {
+            integrasjonKlient.tilordneEnhetOgMappeForOppgave(
+                oppgaveId = porteføljejusteringFlyttOppgaveDto.oppgaveId,
+                nyEnhet = porteføljejusteringFlyttOppgaveDto.originalEnhet,
+                nyMappe = porteføljejusteringFlyttOppgaveDto.originalMappeId,
+            )
+            logger.info(
+                "Ruller oppdatert oppgave tilbake med id ${porteføljejusteringFlyttOppgaveDto.oppgaveId}.\n" +
+                    "Fra enhet $nyEnhetId til original enhet ${porteføljejusteringFlyttOppgaveDto.originalEnhet}.\n" +
+                    "Fra mappe $nyMappeId til original mappe ${porteføljejusteringFlyttOppgaveDto.originalMappeId}.",
+            )
+            throw e
         }
     }
 
@@ -165,16 +177,23 @@ class PorteføljejusteringFlyttOppgaveTask(
 
         fun opprettTask(
             oppgaveId: Long,
-            enhetId: String?,
-            mappeId: String?,
+            enhetId: String,
+            mappeId: Long?,
         ): Task =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = oppgaveId.toString(),
+                payload =
+                    objectMapper.writeValueAsString(
+                        PorteføljejusteringFlyttOppgaveDto(
+                            oppgaveId = oppgaveId,
+                            originalEnhet = enhetId,
+                            originalMappeId = mappeId,
+                        ),
+                    ),
                 properties =
                     Properties().apply {
                         this["oppgaveId"] = oppgaveId.toString()
-                        enhetId?.let { this["enhetId"] = it }
+                        enhetId.let { this["enhetId"] = it }
                         mappeId?.let { this["mappeId"] = it }
                     },
             )
