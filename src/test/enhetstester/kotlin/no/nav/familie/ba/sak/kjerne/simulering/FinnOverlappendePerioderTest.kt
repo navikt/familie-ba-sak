@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.OverlappendePerioderMedAndreFagsaker
@@ -222,6 +225,46 @@ class FinnOverlappendePerioderTest {
 
         // Assert
         assertThat(overlappendePerioder).isEmpty()
+    }
+
+    @Test
+    fun `finnOverlappendePerioder skal ikke ta med perioder som overlapper i inneværende måned eller i fremtiden`() {
+        // Arrange
+        val økonomiSimuleringMottakere =
+            listOf(
+                lagØkonomiSimuleringMottaker(
+                    økonomiSimuleringPostering =
+                        listOf(
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.now().minusYears(1),
+                                tom = LocalDate.now().sisteDagIMåned(),
+                                posteringType = PosteringType.YTELSE,
+                                beløp = 100,
+                                fagsakId = 2,
+                            ),
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.now().førsteDagINesteMåned(),
+                                tom = LocalDate.now().plusMonths(2),
+                                posteringType = PosteringType.JUSTERING,
+                                beløp = 100,
+                                fagsakId = 2,
+                            ),
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.now().minusYears(1),
+                                tom = LocalDate.now().plusMonths(2),
+                                posteringType = PosteringType.JUSTERING,
+                                beløp = 100,
+                                fagsakId = 1,
+                            ),
+                        ),
+                ),
+            )
+
+        // Act
+        val overlappendePerioder = finnOverlappendePerioder(økonomiSimuleringMottakere = økonomiSimuleringMottakere, 1)
+
+        // Assert
+        assertThat(overlappendePerioder.maxOf { it.tom }).isEqualTo(LocalDate.now().sisteDagIForrigeMåned())
     }
 
     private fun List<OverlappendePerioderMedAndreFagsaker>.finnPeriodeForDato(dato: LocalDate): OverlappendePerioderMedAndreFagsaker? =
