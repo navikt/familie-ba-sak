@@ -23,6 +23,8 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.klage.KlageKlient
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
+import no.nav.familie.http.client.RessursException
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
@@ -33,6 +35,8 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE
+import org.springframework.http.HttpStatus
+import org.springframework.web.client.RestClientResponseException
 import java.util.UUID
 
 class `PorteføljejusteringFlyttOppgaveTaskTest` {
@@ -56,14 +60,14 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
         )
 
     @Test
-    fun `Skal ikke flytte dersom oppgave ikke er tildelt Steinkjer`() {
+    fun `Skal ikke flytte dersom oppgave ikke er tildelt Steinkjer, Oslo eller Vadsø`() {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", 1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
                 id = 1,
-                tildeltEnhetsnr = OSLO.enhetsnummer,
+                tildeltEnhetsnr = DRAMMEN.enhetsnummer,
             )
 
         // Act
@@ -78,7 +82,7 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
     @Test
     fun `Skal kaste feil dersom oppgave ikke er tilknyttet en folkeregistrert ident`() {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", 1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -98,7 +102,7 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
     @Test
     fun `Skal kaste feil dersom vi ikke får tilbake noen enheter på ident fra norg`() {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", 1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -121,7 +125,7 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
     @Test
     fun `Skal kaste feil dersom vi får tilbake flere enehter på ident fra norg`() {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", 1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -148,7 +152,7 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
     @Test
     fun `Skal kaste feil dersom vi får tilbake Steinkjer som enhet på ident fra norg`() {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", 1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -172,7 +176,7 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
     @EnumSource(value = BarnetrygdEnhet::class, names = ["OSLO", "VADSØ", "STEINKJER"], mode = EXCLUDE)
     fun `Skal ikke flytte hvis ny enhet ikke er Oslo eller Vadsø`() {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", 1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -194,7 +198,7 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
     @Test
     fun `Skal oppdatere oppgaven med ny enhet og mappe, men ikke behandlingen, dersom saksreferansen ikke er fylt ut`() {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", 1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -223,7 +227,7 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
         oppgavetype: Oppgavetype,
     ) {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", 1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -253,7 +257,7 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
         oppgavetype: Oppgavetype,
     ) {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", 1)
         val aktørPåOppgave = lagAktør()
         val behandling = lagBehandling()
 
@@ -295,7 +299,7 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
         oppgavetype: Oppgavetype,
     ) {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", 1)
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
             Oppgave(
@@ -327,7 +331,7 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
         oppgavetype: Oppgavetype,
     ) {
         // Arrange
-        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", "1")
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, "1", 1)
         val behandlingEksternBrukId = UUID.randomUUID()
 
         every { integrasjonKlient.finnOppgaveMedId(1) } returns
@@ -351,6 +355,58 @@ class `PorteføljejusteringFlyttOppgaveTaskTest` {
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, 100012753) }
+        verify(exactly = 1) { tilbakekrevingKlient.oppdaterEnhetPåÅpenBehandling(behandlingEksternBrukId, OSLO.enhetsnummer) }
+    }
+
+    @ParameterizedTest
+    @EnumSource(Oppgavetype::class, names = ["BehandleSak", "GodkjenneVedtak", "BehandleUnderkjentVedtak"], mode = EnumSource.Mode.INCLUDE)
+    fun `Skal rulle oppgaven tilbake til original enhet og mappe, dersom eksternt kall for oppdatering av behandlende enhet i fagsystem feiler`(
+        oppgavetype: Oppgavetype,
+    ) {
+        // Arrange
+        val originalMappeId = 100027793L
+        val orignalEnhet = STEINKJER.enhetsnummer
+        val task = PorteføljejusteringFlyttOppgaveTask.opprettTask(1, orignalEnhet, originalMappeId)
+        val behandlingEksternBrukId = UUID.randomUUID()
+        val nyMappeId = hentMappeIdHosOsloEllerVadsøSomTilsvarerMappeISteinkjer(originalMappeId, OSLO.enhetsnummer)
+
+        every { integrasjonKlient.finnOppgaveMedId(1) } returns
+            Oppgave(
+                id = 1,
+                identer = listOf(OppgaveIdentV2("1234", IdentGruppe.FOLKEREGISTERIDENT)),
+                tildeltEnhetsnr = orignalEnhet,
+                saksreferanse = behandlingEksternBrukId.toString(),
+                oppgavetype = oppgavetype.value,
+                mappeId = originalMappeId,
+                behandlesAvApplikasjon = "familie-tilbake",
+                aktoerId = "1",
+            )
+
+        every { integrasjonKlient.hentBehandlendeEnhet("1234") } returns listOf(Arbeidsfordelingsenhet(OSLO.enhetsnummer, OSLO.enhetsnavn))
+        every { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1L, OSLO.enhetsnummer, nyMappeId) } returns mockk()
+        every { tilbakekrevingKlient.oppdaterEnhetPåÅpenBehandling(behandlingEksternBrukId, OSLO.enhetsnummer) } throws
+            RessursException(
+                ressurs = Ressurs.failure(),
+                cause =
+                    RestClientResponseException(
+                        "Feil ved oppdatering av behandlende enhet",
+                        500,
+                        "Internal Server Error",
+                        null,
+                        null,
+                        null,
+                    ),
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+            )
+
+        every { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1L, orignalEnhet, originalMappeId) } returns mockk()
+
+        // Act
+        assertThrows<Exception> { porteføljejusteringFlyttOppgaveTask.doTask(task) }
+
+        // Assert
+        verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, OSLO.enhetsnummer, nyMappeId) }
+        verify(exactly = 1) { integrasjonKlient.tilordneEnhetOgMappeForOppgave(1, orignalEnhet, originalMappeId) }
         verify(exactly = 1) { tilbakekrevingKlient.oppdaterEnhetPåÅpenBehandling(behandlingEksternBrukId, OSLO.enhetsnummer) }
     }
 }
