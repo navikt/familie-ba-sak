@@ -44,8 +44,11 @@ class StartPorteføljejusteringTask(
 
         logger.info("Fant ${oppgaverISteinkjer.size} barnetrygd oppgaver i Steinkjer")
 
+        val oppgaverMedFlytteTask = taskService.finnAlleTaskerMedType(PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE).map { objectMapper.readValue<PorteføljejusteringFlyttOppgaveDto>(it.payload).oppgaveId }.toSet()
+
         val oppgaverSomSkalFlyttes =
             oppgaverISteinkjer
+                .filterNot { oppgaverMedFlytteTask.contains(it.id) } // Filtrere bort oppgaver som allerede har en flytte-task
                 .filterNot { it.saksreferanse?.matches("\\d+[A-Z]\\d+".toRegex()) == true } // Filtrere bort infotrygd-oppgaver
                 .filterNot {
                     it.mappeId == null && it.oppgavetype !in
@@ -66,8 +69,8 @@ class StartPorteføljejusteringTask(
                         taskService.save(
                             PorteføljejusteringFlyttOppgaveTask.opprettTask(
                                 oppgaveId = it,
-                                enhetId = oppgave.tildeltEnhetsnr,
-                                mappeId = oppgave.mappeId?.toString(),
+                                enhetId = oppgave.tildeltEnhetsnr!!,
+                                mappeId = oppgave.mappeId,
                             ),
                         )
                         opprettedeTasks++
