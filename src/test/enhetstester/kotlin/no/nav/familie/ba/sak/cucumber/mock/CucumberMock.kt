@@ -636,7 +636,6 @@ class CucumberMock(
             beregningService = beregningService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
-            featureToggleService = featureToggleService,
         )
 
     val autovedtakSvalbardtilleggBegrunnelseService =
@@ -646,7 +645,6 @@ class CucumberMock(
             beregningService = beregningService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
-            featureToggleService = featureToggleService,
         )
 
     val ferdigstillBehandlingSteg =

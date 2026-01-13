@@ -53,7 +53,6 @@ import java.time.YearMonth
 
 fun hentAutomatiskVedtaksbrevtype(
     behandling: Behandling,
-    skalBrukeAutovedtakEndringsbrevForSvalbardtillegg: Boolean,
 ): Brevmal {
     val behandlingÅrsak = behandling.opprettetÅrsak
     val fagsakStatus = behandling.fagsak.status
@@ -70,21 +69,11 @@ fun hentAutomatiskVedtaksbrevtype(
         BehandlingÅrsak.OMREGNING_18ÅR,
         BehandlingÅrsak.SMÅBARNSTILLEGG,
         BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG,
-        -> {
-            Brevmal.AUTOVEDTAK_ENDRING
-        }
+        -> Brevmal.AUTOVEDTAK_ENDRING
 
-        BehandlingÅrsak.FINNMARKSTILLEGG -> {
-            Brevmal.AUTOVEDTAK_ENDRING
-        }
 
-        BehandlingÅrsak.SVALBARDTILLEGG -> {
-            if (skalBrukeAutovedtakEndringsbrevForSvalbardtillegg) {
-                Brevmal.AUTOVEDTAK_ENDRING
-            } else {
-                Brevmal.AUTOVEDTAK_SVALBARDTILLEGG
-            }
-        }
+        BehandlingÅrsak.FINNMARKSTILLEGG -> Brevmal.AUTOVEDTAK_ENDRING
+        BehandlingÅrsak.SVALBARDTILLEGG -> Brevmal.AUTOVEDTAK_ENDRING
 
         else -> {
             throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")

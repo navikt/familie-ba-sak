@@ -42,8 +42,6 @@ enum class FeatureToggle(
 
     SKAL_PREUTFYLLE_BOSATT_I_RIKET_I_FØDSELSHENDELSER("familie-ba-sak.skal-preutfylle-bosatt-i-riket-i-foedselshendelse"),
 
-    SKAL_BRUKE_ADRESSEHENDELSELØYPE_SVALBARDTILLEGG("familie-ba-sak.skal-bruke-adressehendelseloype-for-svalbardtillegg"),
-
     VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR("familie-ba-sak.valider-endring-av-preutfylte-vilkaar"),
 
     OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD("familie-ba-sak.skal-opprette-manuell-oppgave-autokjoring-finnmark-svalbard"),

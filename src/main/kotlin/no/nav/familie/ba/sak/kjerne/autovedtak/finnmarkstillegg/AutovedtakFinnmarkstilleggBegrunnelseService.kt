@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -18,7 +17,6 @@ class AutovedtakFinnmarkstilleggBegrunnelseService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     fun begrunnAutovedtakForFinnmarkstillegg(
         behandlingEtterBehandlingsresultat: Behandling,

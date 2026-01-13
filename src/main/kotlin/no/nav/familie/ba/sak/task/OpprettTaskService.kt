@@ -223,7 +223,7 @@ class OpprettTaskService(
                                 this["fagsakId"] = fagsakId.toString()
                             },
                     ).apply {
-                        if (envService.erProd() && featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_ADRESSEHENDELSELØYPE_SVALBARDTILLEGG)) {
+                        if (envService.erProd()) {
                             medTriggerTid(utledNesteTriggerTidIHverdagerForTask(minimumForsinkelse = Duration.ofHours(1)))
                         }
                     },
