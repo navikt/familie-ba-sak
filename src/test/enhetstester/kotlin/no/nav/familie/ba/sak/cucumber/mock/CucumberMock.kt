@@ -431,7 +431,6 @@ class CucumberMock(
             valutakursRepository = valutakursRepository,
             clockProvider = clockProvider,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            featureToggleService = featureToggleService,
         )
 
     val behandlingsresultatSteg =
@@ -702,7 +701,6 @@ class CucumberMock(
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             månedligValutajusteringService = månedligValutajusteringService,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
-            featureToggleService = featureToggleService,
             opprettTaskService = opprettTaskService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
