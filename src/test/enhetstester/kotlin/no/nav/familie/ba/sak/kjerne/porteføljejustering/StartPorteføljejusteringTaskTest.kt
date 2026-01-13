@@ -1,12 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.porteføljejustering
 
-import io.mockk.Called
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -40,6 +41,8 @@ class StartPorteføljejusteringTaskTest {
                     ),
             )
 
+        every { taskService.finnAlleTaskerMedType(PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE) } returns emptyList()
+
         every { taskService.save(any()) } returns mockk()
 
         val task = StartPorteføljejusteringTask.opprettTask(dryRun = false)
@@ -50,10 +53,20 @@ class StartPorteføljejusteringTaskTest {
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
         verify(exactly = 1) {
-            taskService.save(match { task -> task.type == PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE && task.payload == "1" })
+            taskService.save(
+                match { task ->
+                    val test = objectMapper.readValue<PorteføljejusteringFlyttOppgaveDto>(task.payload)
+                    test.oppgaveId == 1L && test.originalEnhet == BarnetrygdEnhet.STEINKJER.enhetsnummer && test.originalMappeId == 50L
+                },
+            )
         }
         verify(exactly = 1) {
-            taskService.save(match { task -> task.type == PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE && task.payload == "2" })
+            taskService.save(
+                match { task ->
+                    val test = objectMapper.readValue<PorteføljejusteringFlyttOppgaveDto>(task.payload)
+                    test.oppgaveId == 2L && test.originalEnhet == BarnetrygdEnhet.STEINKJER.enhetsnummer && test.originalMappeId == 50L
+                },
+            )
         }
     }
 
@@ -75,6 +88,8 @@ class StartPorteføljejusteringTaskTest {
                     ),
             )
 
+        every { taskService.finnAlleTaskerMedType(PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE) } returns emptyList()
+
         every { taskService.save(any()) } returns mockk()
 
         val task = StartPorteføljejusteringTask.opprettTask(dryRun = true)
@@ -85,10 +100,7 @@ class StartPorteføljejusteringTaskTest {
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
         verify(exactly = 0) {
-            taskService.save(match { task -> task.type == PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE && task.payload == "1" })
-        }
-        verify(exactly = 0) {
-            taskService.save(match { task -> task.type == PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE && task.payload == "2" })
+            taskService.save(any())
         }
     }
 
@@ -110,6 +122,8 @@ class StartPorteføljejusteringTaskTest {
                     ),
             )
 
+        every { taskService.finnAlleTaskerMedType(PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE) } returns emptyList()
+
         every { taskService.save(any()) } returns mockk()
 
         val task = StartPorteføljejusteringTask.opprettTask(dryRun = false)
@@ -119,8 +133,22 @@ class StartPorteføljejusteringTaskTest {
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
-        verify(exactly = 0) { taskService.save(match { task -> task.type == PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE && task.payload == "1" }) }
-        verify(exactly = 1) { taskService.save(match { task -> task.type == PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE && task.payload == "2" }) }
+        verify(exactly = 0) {
+            taskService.save(
+                match { task ->
+                    val test = objectMapper.readValue<PorteføljejusteringFlyttOppgaveDto>(task.payload)
+                    test.oppgaveId == 1L && test.originalEnhet == BarnetrygdEnhet.STEINKJER.enhetsnummer && test.originalMappeId == 50L
+                },
+            )
+        }
+        verify(exactly = 1) {
+            taskService.save(
+                match { task ->
+                    val test = objectMapper.readValue<PorteføljejusteringFlyttOppgaveDto>(task.payload)
+                    test.oppgaveId == 2L && test.originalEnhet == BarnetrygdEnhet.STEINKJER.enhetsnummer && test.originalMappeId == 50L
+                },
+            )
+        }
     }
 
     @ParameterizedTest
@@ -147,6 +175,8 @@ class StartPorteføljejusteringTaskTest {
                     ),
             )
 
+        every { taskService.finnAlleTaskerMedType(PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE) } returns emptyList()
+
         every { taskService.save(any()) } returns mockk()
 
         val task = StartPorteføljejusteringTask.opprettTask(dryRun = false)
@@ -156,7 +186,14 @@ class StartPorteføljejusteringTaskTest {
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
-        verify(exactly = 1) { taskService.save(match { task -> task.type == PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE && task.payload == "1" }) }
+        verify(exactly = 1) {
+            taskService.save(
+                match { task ->
+                    val test = objectMapper.readValue<PorteføljejusteringFlyttOppgaveDto>(task.payload)
+                    test.oppgaveId == 1L && test.originalEnhet == BarnetrygdEnhet.STEINKJER.enhetsnummer && test.originalMappeId == null
+                },
+            )
+        }
     }
 
     @ParameterizedTest
@@ -183,6 +220,8 @@ class StartPorteføljejusteringTaskTest {
                     ),
             )
 
+        every { taskService.finnAlleTaskerMedType(PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE) } returns emptyList()
+
         every { taskService.save(any()) } returns mockk()
 
         val task = StartPorteføljejusteringTask.opprettTask(dryRun = false)
@@ -192,6 +231,53 @@ class StartPorteføljejusteringTaskTest {
 
         // Assert
         verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
-        verify { taskService wasNot Called }
+        verify(exactly = 0) { taskService.save(any()) }
+    }
+
+    @Test
+    fun `Skal hente barnetrygd oppgaver hos enhet Steinkjer og opprette task dersom task for oppgave ikke allerede eksisterer`() {
+        // Arrange
+        val finnOppgaveRequestForBarSteinkjer =
+            FinnOppgaveRequest(
+                tema = Tema.BAR,
+                enhet = BarnetrygdEnhet.STEINKJER.enhetsnummer,
+            )
+        every { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) } returns
+            FinnOppgaveResponseDto(
+                antallTreffTotalt = 2,
+                oppgaver =
+                    listOf(
+                        Oppgave(id = 1, tildeltEnhetsnr = BarnetrygdEnhet.STEINKJER.enhetsnummer, mappeId = 50),
+                        Oppgave(id = 2, tildeltEnhetsnr = BarnetrygdEnhet.STEINKJER.enhetsnummer, mappeId = 50),
+                    ),
+            )
+
+        every { taskService.finnAlleTaskerMedType(PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE) } returns listOf(PorteføljejusteringFlyttOppgaveTask.opprettTask(1, BarnetrygdEnhet.STEINKJER.enhetsnummer, 50L))
+
+        every { taskService.save(any()) } returns mockk()
+
+        val task = StartPorteføljejusteringTask.opprettTask(dryRun = false)
+
+        // Act
+        startPorteføljejusteringTask.doTask(task)
+
+        // Assert
+        verify(exactly = 1) { integrasjonKlient.hentOppgaver(finnOppgaveRequestForBarSteinkjer) }
+        verify(exactly = 0) {
+            taskService.save(
+                match { task ->
+                    val test = objectMapper.readValue<PorteføljejusteringFlyttOppgaveDto>(task.payload)
+                    test.oppgaveId == 1L && test.originalEnhet == BarnetrygdEnhet.STEINKJER.enhetsnummer && test.originalMappeId == 50L
+                },
+            )
+        }
+        verify(exactly = 1) {
+            taskService.save(
+                match { task ->
+                    val test = objectMapper.readValue<PorteføljejusteringFlyttOppgaveDto>(task.payload)
+                    test.oppgaveId == 2L && test.originalEnhet == BarnetrygdEnhet.STEINKJER.enhetsnummer && test.originalMappeId == 50L
+                },
+            )
+        }
     }
 }
