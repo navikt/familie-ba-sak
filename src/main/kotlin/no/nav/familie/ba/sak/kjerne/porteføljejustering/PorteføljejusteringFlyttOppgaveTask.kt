@@ -51,6 +51,7 @@ class PorteføljejusteringFlyttOppgaveTask(
     override fun doTask(task: Task) {
         val porteføljejusteringFlyttOppgaveDto: PorteføljejusteringFlyttOppgaveDto = objectMapper.readValue(task.payload)
         val oppgave = integrasjonKlient.finnOppgaveMedId(porteføljejusteringFlyttOppgaveDto.oppgaveId)
+        oppgave.saksreferanse?.let { task.metadata["saksreferanse"] = it }
         if (oppgave.tildeltEnhetsnr != STEINKJER.enhetsnummer && oppgave.tildeltEnhetsnr != VADSØ.enhetsnummer && oppgave.tildeltEnhetsnr != OSLO.enhetsnummer) {
             logger.info("Oppgave med id ${porteføljejusteringFlyttOppgaveDto.oppgaveId} er ikke tildelt Steinkjer. Avbryter flytting av oppgave.")
             task.metadata["status"] = "Tildelt enhet på oppgave er ikke Steinkjer, Vadsø eller Oslo"
@@ -201,7 +202,7 @@ class PorteføljejusteringFlyttOppgaveTask(
                         Properties().apply {
                             this["oppgaveId"] = oppgaveId.toString()
                             enhetId.let { this["enhetId"] = it }
-                            mappeId?.let { this["mappeId"] = it }
+                            mappeId?.let { this["mappeId"] = it.toString() }
                         },
                 )
             }
