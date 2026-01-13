@@ -245,7 +245,7 @@ class AutovedtakSvalbardtilleggBegrunnelseServiceTest {
         assertThat(oppdaterteVedtaksperioder[0].begrunnelser.map { it.standardbegrunnelse })
             .contains(
                 Standardbegrunnelse.REDUKSJON_SVALBARDTILLEGG,
-                Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG_UTEN_DATO,
+                Standardbegrunnelse.INNVILGET_SVALBARDTILLEGG,
             )
     }
 }
