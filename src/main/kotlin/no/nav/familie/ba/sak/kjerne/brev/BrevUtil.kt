@@ -69,15 +69,9 @@ fun hentAutomatiskVedtaksbrevtype(
         BehandlingÅrsak.OMREGNING_18ÅR,
         BehandlingÅrsak.SMÅBARNSTILLEGG,
         BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG,
-        -> {
-            Brevmal.AUTOVEDTAK_ENDRING
-        }
-
-        BehandlingÅrsak.FINNMARKSTILLEGG -> {
-            Brevmal.AUTOVEDTAK_ENDRING
-        }
-
-        BehandlingÅrsak.SVALBARDTILLEGG -> {
+        BehandlingÅrsak.SVALBARDTILLEGG,
+        BehandlingÅrsak.FINNMARKSTILLEGG
+            -> {
             Brevmal.AUTOVEDTAK_ENDRING
         }
 
