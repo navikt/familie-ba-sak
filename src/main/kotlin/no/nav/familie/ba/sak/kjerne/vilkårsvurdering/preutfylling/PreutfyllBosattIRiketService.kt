@@ -50,7 +50,7 @@ class PreutfyllBosattIRiketService(
     private val persongrunnlagService: PersongrunnlagService,
     private val featureToggleService: FeatureToggleService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val preutfyllBosattIRIketMedLagringIPersonopplysningsgrunnlagService: PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService,
+    private val preutfyllBosattIRiketMedLagringIPersonopplysningsgrunnlagService: PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService,
 ) {
     fun preutfyllBosattIRiket(
         vilkårsvurdering: Vilkårsvurdering,
@@ -58,7 +58,7 @@ class PreutfyllBosattIRiketService(
         cutOffFomDato: LocalDate? = null,
     ) {
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
-            return preutfyllBosattIRIketMedLagringIPersonopplysningsgrunnlagService.preutfyllBosattIRiket(
+            return preutfyllBosattIRiketMedLagringIPersonopplysningsgrunnlagService.preutfyllBosattIRiket(
                 vilkårsvurdering,
                 identerVilkårSkalPreutfyllesFor,
             )
