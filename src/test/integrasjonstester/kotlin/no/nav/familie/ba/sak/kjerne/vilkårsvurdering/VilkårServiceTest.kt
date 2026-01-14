@@ -27,6 +27,9 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.EndringIPreutfyltVilkårLoggRepository
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.LOVLIG_OPPHOLD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UTVIDET_BARNETRYGD
@@ -51,6 +54,7 @@ class VilkårServiceTest(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val persongrunnlagService: PersongrunnlagService,
     @Autowired private val personidentService: PersonidentService,
+    @Autowired private val endringIPreutfyltVilkårLoggRepository: EndringIPreutfyltVilkårLoggRepository,
 ) : AbstractSpringIntegrationTest() {
     private lateinit var behandling: Behandling
     private lateinit var søkerFnr: String
@@ -398,6 +402,74 @@ class VilkårServiceTest(
             assertThat(oppdatertVilkårResultat.erAutomatiskVurdert).isFalse()
             assertThat(oppdatertVilkårResultat.erOpprinneligPreutfylt).isTrue()
             assertThat(oppdatertVilkårResultat.begrunnelse).isEqualTo("Ny begrunnelse")
+        }
+
+        @Test
+        fun `skal lagre logg når preutfylt vilkår endres`() {
+            // Arrange
+            val vilkårsvurdering =
+                vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+                    lagVilkårsvurdering(behandling = behandling) { vilkårsvurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = søkerAktør,
+                                lagVilkårResultater = {
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = it,
+                                            behandlingId = behandling.id,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                            resultat = Resultat.IKKE_OPPFYLT,
+                                            vurderesEtter = Regelverk.NASJONALE_REGLER,
+                                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
+                                            erPreutfylt = true,
+                                        ),
+                                    )
+                                },
+                            ),
+                        )
+                    },
+                )
+
+            val restPersonResultat = vilkårsvurdering.personResultater.single().tilRestPersonResultat()
+            val restVilkårResultat = restPersonResultat.vilkårResultater.single()
+
+            val restPersonResultatMedEndring =
+                restPersonResultat.copy(
+                    vilkårResultater =
+                        listOf(
+                            restVilkårResultat
+                                .copy(
+                                    periodeFom = LocalDate.of(2024, 1, 1),
+                                    begrunnelse = "Ny begrunnelse",
+                                    resultat = Resultat.OPPFYLT,
+                                    vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                                    utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
+                                ),
+                        ),
+                )
+
+            // Act
+            vilkårService.endreVilkår(
+                behandlingId = behandling.id,
+                vilkårId = restVilkårResultat.id,
+                restPersonResultat = restPersonResultatMedEndring,
+            )
+
+            // Assert
+            val endringIPreutfyltVilkårLogger = endringIPreutfyltVilkårLoggRepository.findAll().filter { it.behandling.id == behandling.id }
+
+            assertThat(endringIPreutfyltVilkårLogger).hasSize(1)
+            with(endringIPreutfyltVilkårLogger.single()) {
+                assertThat(nyResultat).isEqualTo(Resultat.OPPFYLT)
+                assertThat(forrigeResultat).isEqualTo(Resultat.IKKE_OPPFYLT)
+                assertThat(forrigeVurderesEtter).isEqualTo(Regelverk.NASJONALE_REGLER)
+                assertThat(nyVurderesEtter).isEqualTo(Regelverk.EØS_FORORDNINGEN)
+                assertThat(forrigeUtdypendeVilkårsvurdering).containsExactly(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
+                assertThat(nyUtdypendeVilkårsvurdering).containsExactly(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
+                assertThat(begrunnelse).isEqualTo("Ny begrunnelse")
+            }
         }
     }
 

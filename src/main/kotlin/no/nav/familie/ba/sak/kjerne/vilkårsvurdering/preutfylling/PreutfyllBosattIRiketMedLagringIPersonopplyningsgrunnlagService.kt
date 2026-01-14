@@ -1,10 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.gyldigGjeldendeOppholdstillatelseFødselshendelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.iUkraina
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.lagErNordiskStatsborgerTidslinje
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
@@ -18,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.omfatter
@@ -28,6 +33,7 @@ import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import kotlin.collections.filter
 
 @Service
 class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
@@ -61,6 +67,7 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
 
                 val nyeBosattIRiketVilkårResultater =
                     genererBosattIRiketVilkårResultat(
+                        behandling = behandling,
                         personResultat = personResultat,
                         fødselsdatoForBeskjæring = fødselsdatoForBeskjæring,
                         person = person,
@@ -74,6 +81,7 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
     }
 
     private fun genererBosattIRiketVilkårResultat(
+        behandling: Behandling,
         personResultat: PersonResultat,
         fødselsdatoForBeskjæring: LocalDate,
         person: Person,
@@ -107,7 +115,13 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
                 }
             }
 
-        val erØvrigeKravForBosattIRiketOppfyltTidslinje = lagErØvrigeKravForBosattIRiketOppfyltTidslinje(erBosattINorgeEllerPåSvalbardTidslinje, personResultat, person.fødselsdato)
+        val erØvrigeKravForBosattIRiketOppfyltTidslinje =
+            lagErØvrigeKravForBosattIRiketOppfyltTidslinje(
+                behandlingÅrsak = behandling.opprettetÅrsak,
+                erBosattINorgeEllerPåSvalbardTidslinje = erBosattINorgeEllerPåSvalbardTidslinje,
+                personResultat = personResultat,
+                person = person,
+            )
 
         val erBosattIFinnmarkEllerNordTromsTidslinje =
             erBostedsadresseIFinnmarkEllerNordTromsTidslinje.kombinerMed(erDeltBostedIFinnmarkEllerNordTromsTidslinje) { erBostedsadresseIFinnmarkEllerNordTroms, erDeltBostedIFinnmarkEllerNordTroms ->
@@ -162,9 +176,10 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
     }
 
     private fun lagErØvrigeKravForBosattIRiketOppfyltTidslinje(
+        behandlingÅrsak: BehandlingÅrsak,
         erBosattINorgeEllerPåSvalbardTidslinje: Tidslinje<Boolean>,
         personResultat: PersonResultat,
-        personFødselsdato: LocalDate,
+        person: Person,
     ): Tidslinje<Delvilkår> =
         erBosattINorgeEllerPåSvalbardTidslinje
             .tilPerioder()
@@ -172,7 +187,7 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
                 Periode(
                     verdi =
                         when (erBosattINorgePeriode.verdi) {
-                            true -> sjekkØvrigeKravForPeriode(erBosattINorgePeriode, personResultat, personFødselsdato)
+                            true -> sjekkØvrigeKravForPeriode(behandlingÅrsak, erBosattINorgePeriode, personResultat, person)
                             else -> IkkeOppfyltDelvilkår
                         },
                     fom = erBosattINorgePeriode.fom,
@@ -181,16 +196,17 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
             }.tilTidslinje()
 
     private fun sjekkØvrigeKravForPeriode(
+        behandlingÅrsak: BehandlingÅrsak,
         erBosattINorgePeriode: Periode<Boolean?>,
         personResultat: PersonResultat,
-        personFødselsdato: LocalDate,
+        person: Person,
     ): Delvilkår =
         when {
             erBosattINorgePeriode.erMinst12Måneder() -> {
                 OppfyltDelvilkår("- Norsk bostedsadresse i minst 12 måneder.")
             }
 
-            erBosattINorgePeriode.omfatter(personFødselsdato) -> {
+            erBosattINorgePeriode.omfatter(person.fødselsdato) -> {
                 OppfyltDelvilkår("- Bosatt i Norge siden fødsel.")
             }
 
@@ -198,10 +214,44 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
                 OppfyltDelvilkår("- Oppgitt i søknad at planlegger å bo i Norge i minst 12 måneder.", INFORMASJON_FRA_SØKNAD)
             }
 
+            behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE &&
+                harOppholdstillatelseSamtidigSomErBosattINorge(person, erBosattINorgePeriode) &&
+                person.type == PersonType.SØKER -> {
+                OppfyltDelvilkår("- Søker har oppholdstillatelse i Norge samtidig som bosatt ved fødsel.")
+            }
+
             else -> {
                 IkkeOppfyltDelvilkår
             }
         }
+
+    private fun harOppholdstillatelseSamtidigSomErBosattINorge(
+        person: Person,
+        erBosattINorgePeriode: Periode<Boolean?>,
+    ): Boolean {
+        val oppholdstillatelseTidslinjeForPerson = lagOppholdstillatelseTidslinje(person.opphold)
+
+        val harOppholdstillatelseSamtidigSomManErBosatt =
+            erBosattINorgePeriode.tilTidslinje().kombinerMed(oppholdstillatelseTidslinjeForPerson) { erBosattINorgePeriode, harOppholdstillatelse ->
+                erBosattINorgePeriode == true && harOppholdstillatelse == true
+            }
+
+        return harOppholdstillatelseSamtidigSomManErBosatt.tilPerioder().any { it.verdi == true }
+    }
+
+    private fun lagOppholdstillatelseTidslinje(
+        opphold: List<GrOpphold>,
+    ): Tidslinje<Boolean> =
+        opphold
+            .filter { it.type == OPPHOLDSTILLATELSE.PERMANENT || it.type == OPPHOLDSTILLATELSE.MIDLERTIDIG }
+            .mapIndexed { index, it ->
+                val erSiste = index == opphold.lastIndex
+                Periode(
+                    verdi = true,
+                    fom = it.gyldigPeriode?.fom,
+                    tom = if (erSiste) null else it.gyldigPeriode?.tom,
+                )
+            }.tilTidslinje()
 
     private fun erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat: PersonResultat): Boolean {
         val søknad = søknadService.finnSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id) ?: return false
