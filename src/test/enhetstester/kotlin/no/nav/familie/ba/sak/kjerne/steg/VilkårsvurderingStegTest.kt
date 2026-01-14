@@ -77,7 +77,6 @@ class VilkårsvurderingStegTest {
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             månedligValutajusteringService = mockk(),
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
-            featureToggleService = featureToggleService,
             opprettTaskService = opprettTaskService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
@@ -325,7 +324,6 @@ class VilkårsvurderingStegTest {
                 every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns
                     listOf(lagAndelTilkjentYtelse(fom = barn.fødselsdato.toYearMonth(), tom = barn.fødselsdato.plusYears(18).toYearMonth(), kalkulertUtbetalingsbeløp = 1000, aktør = barn.aktør))
                 every { vilkårService.hentVilkårsvurderingThrows(forrigeBehandling.id) } returns lagVilkårsvurdering(forrigeBehandling.id)
-                every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
                 justRun { opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(any(), any()) }
 
                 // Act
@@ -387,7 +385,6 @@ class VilkårsvurderingStegTest {
                 every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns
                     listOf(lagAndelTilkjentYtelse(fom = barn.fødselsdato.toYearMonth(), tom = barn.fødselsdato.plusYears(18).toYearMonth(), kalkulertUtbetalingsbeløp = 0, aktør = barn.aktør))
                 every { vilkårService.hentVilkårsvurderingThrows(forrigeBehandling.id) } returns lagVilkårsvurdering(forrigeBehandling.id)
-                every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
                 justRun { opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(any(), any()) }
 
                 // Act
@@ -464,7 +461,6 @@ class VilkårsvurderingStegTest {
                         lagAndelTilkjentYtelse(fom = barn2.fødselsdato.toYearMonth(), tom = barn2.fødselsdato.plusYears(18).toYearMonth(), kalkulertUtbetalingsbeløp = 1000, aktør = barn2.aktør),
                     )
                 every { vilkårService.hentVilkårsvurderingThrows(forrigeBehandling.id) } returns lagVilkårsvurdering(forrigeBehandling.id)
-                every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
                 justRun { opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(any(), any()) }
 
                 // Act
@@ -520,7 +516,6 @@ class VilkårsvurderingStegTest {
                 every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns
                     listOf(lagAndelTilkjentYtelse(fom = barn.fødselsdato.toYearMonth(), tom = barn.fødselsdato.plusYears(18).toYearMonth(), kalkulertUtbetalingsbeløp = 0, aktør = barn.aktør))
                 every { vilkårService.hentVilkårsvurderingThrows(forrigeBehandling.id) } returns lagVilkårsvurdering(forrigeBehandling.id)
-                every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
                 justRun { opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(any(), any()) }
 
                 // Act

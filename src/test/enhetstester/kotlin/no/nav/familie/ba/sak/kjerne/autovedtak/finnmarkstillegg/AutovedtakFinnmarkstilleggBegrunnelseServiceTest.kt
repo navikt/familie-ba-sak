@@ -4,8 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -33,7 +31,6 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
     private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     private val vedtakService = mockk<VedtakService>()
     private val vedtaksperiodeHentOgPersisterService = mockk<VedtaksperiodeHentOgPersisterService>()
-    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val autovedtakFinnmarkstilleggBegrunnelseService =
         AutovedtakFinnmarkstilleggBegrunnelseService(
@@ -42,7 +39,6 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
             vedtaksperiodeService = vedtaksperiodeService,
             vedtakService = vedtakService,
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
-            featureToggleService = featureToggleService,
         )
 
     private val fagsak = defaultFagsak()
@@ -83,7 +79,6 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id) } returns forrigeBehandling
         every { beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id) } returns forrigeAndeler
         every { beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandling.id) } returns nåværendeAndeler
-        every { featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG) } returns false
 
         // Act && Assert
         val feilmelding =
@@ -127,7 +122,6 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
         every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns vedtaksperiode
         every { vedtakService.hentAktivForBehandlingThrows(behandling.id) } returns mockk()
         every { vedtaksperiodeHentOgPersisterService.lagre(capture(oppdaterteVedtaksperioderSlot)) } answers { firstArg() }
-        every { featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG) } returns false
 
         // Act
         autovedtakFinnmarkstilleggBegrunnelseService.begrunnAutovedtakForFinnmarkstillegg(behandling)
@@ -135,7 +129,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
         val oppdaterteVedtaksperioder = oppdaterteVedtaksperioderSlot.captured
 
         assertThat(oppdaterteVedtaksperioder.size).isEqualTo(1)
-        assertThat(oppdaterteVedtaksperioder[0].begrunnelser.map { it.standardbegrunnelse }[0]).isEqualTo(Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG_UTEN_DATO)
+        assertThat(oppdaterteVedtaksperioder[0].begrunnelser.map { it.standardbegrunnelse }[0]).isEqualTo(Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG)
     }
 
     @Test
@@ -184,7 +178,6 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
         every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns vedtaksperiode
         every { vedtakService.hentAktivForBehandlingThrows(behandling.id) } returns mockk()
         every { vedtaksperiodeHentOgPersisterService.lagre(capture(oppdaterteVedtaksperioderSlot)) } answers { firstArg() }
-        every { featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG) } returns false
 
         // Act
         autovedtakFinnmarkstilleggBegrunnelseService.begrunnAutovedtakForFinnmarkstillegg(behandling)
@@ -241,7 +234,6 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
         every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns vedtaksperiode
         every { vedtakService.hentAktivForBehandlingThrows(behandling.id) } returns mockk()
         every { vedtaksperiodeHentOgPersisterService.lagre(capture(oppdaterteVedtaksperioderSlot)) } answers { firstArg() }
-        every { featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG) } returns false
 
         // Act
         autovedtakFinnmarkstilleggBegrunnelseService.begrunnAutovedtakForFinnmarkstillegg(behandling)
@@ -252,7 +244,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
         assertThat(oppdaterteVedtaksperioder[0].begrunnelser.map { it.standardbegrunnelse })
             .contains(
                 Standardbegrunnelse.REDUKSJON_FINNMARKSTILLEGG,
-                Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG_UTEN_DATO,
+                Standardbegrunnelse.INNVILGET_FINNMARKSTILLEGG,
             )
     }
 }

@@ -431,7 +431,6 @@ class CucumberMock(
             valutakursRepository = valutakursRepository,
             clockProvider = clockProvider,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            featureToggleService = featureToggleService,
         )
 
     val behandlingsresultatSteg =
@@ -636,7 +635,6 @@ class CucumberMock(
             beregningService = beregningService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
-            featureToggleService = featureToggleService,
         )
 
     val autovedtakSvalbardtilleggBegrunnelseService =
@@ -646,7 +644,6 @@ class CucumberMock(
             beregningService = beregningService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
-            featureToggleService = featureToggleService,
         )
 
     val ferdigstillBehandlingSteg =
@@ -687,9 +684,6 @@ class CucumberMock(
             taskRepository = taskRepository,
             satskjøringRepository = mockk(),
             envService = mockk(),
-            featureToggleService = featureToggleService,
-            finnmarkstilleggKjøringRepository = mockk(),
-            svalbardtilleggKjøringRepository = mockk(),
         )
 
     val vilkårsvurderingSteg =
@@ -704,7 +698,6 @@ class CucumberMock(
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             månedligValutajusteringService = månedligValutajusteringService,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
-            featureToggleService = featureToggleService,
             opprettTaskService = opprettTaskService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             endretUtbetalingAndelService = endretUtbetalingAndelService,

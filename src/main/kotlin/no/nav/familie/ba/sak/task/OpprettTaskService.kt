@@ -4,17 +4,10 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggTask
-import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøring
-import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggTask
-import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøring
-import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.domene.SvalbardtilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.dto.AutobrevOpphørSmåbarnstilleggDTO
@@ -27,14 +20,12 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.util.VirkedagerProvider
 import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.Properties
 
@@ -43,9 +34,6 @@ class OpprettTaskService(
     private val taskRepository: TaskRepositoryWrapper,
     private val satskjøringRepository: SatskjøringRepository,
     private val envService: EnvService,
-    private val featureToggleService: FeatureToggleService,
-    private val finnmarkstilleggKjøringRepository: FinnmarkstilleggKjøringRepository,
-    private val svalbardtilleggKjøringRepository: SvalbardtilleggKjøringRepository,
 ) {
     fun opprettOppgaveTask(
         behandlingId: Long,
@@ -197,7 +185,7 @@ class OpprettTaskService(
                             this["fagsakId"] = fagsakId.toString()
                         },
                 ).run {
-                    if (envService.erProd() && featureToggleService.isEnabled(SKAL_BRUKE_ADRESSEHENDELSELØYPE_FINNMARKSTILLEGG)) {
+                    if (envService.erProd()) {
                         medTriggerTid(utledNesteTriggerTidIHverdagerForTask(minimumForsinkelse = Duration.ofHours(1)))
                     } else {
                         this
@@ -205,8 +193,6 @@ class OpprettTaskService(
                 },
             )
         }
-
-        finnmarkstilleggKjøringRepository.save(FinnmarkstilleggKjøring(fagsakId = fagsakId))
     }
 
     @Transactional
@@ -224,14 +210,12 @@ class OpprettTaskService(
                                 this["fagsakId"] = fagsakId.toString()
                             },
                     ).apply {
-                        if (envService.erProd() && featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_ADRESSEHENDELSELØYPE_SVALBARDTILLEGG)) {
+                        if (envService.erProd()) {
                             medTriggerTid(utledNesteTriggerTidIHverdagerForTask(minimumForsinkelse = Duration.ofHours(1)))
                         }
                     },
                 )
             }
-
-            svalbardtilleggKjøringRepository.save(SvalbardtilleggKjøring(fagsakId = fagsakId))
         }
     }
 

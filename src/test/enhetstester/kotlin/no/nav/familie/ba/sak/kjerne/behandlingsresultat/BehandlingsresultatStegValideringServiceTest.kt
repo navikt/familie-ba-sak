@@ -77,7 +77,6 @@ class BehandlingsresultatStegValideringServiceTest {
             valutakursRepository = valutakursRepository,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             clockProvider = clockProvider,
-            featureToggleService = featureToggleService,
         )
 
     private val barn = lagPerson(type = PersonType.BARN)
@@ -593,61 +592,6 @@ class BehandlingsresultatStegValideringServiceTest {
         }
 
         @Test
-        fun `skal kaste Feil dersom det har vært endringer i svalbardtillegg i en finnmarkstillegg-behandling med toggle av`() {
-            // Arrange
-            val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
-            val forrigeAndeler =
-                listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = YearMonth.of(2023, 1),
-                        tom = YearMonth.of(2023, 2),
-                        behandling = forrigeBehandling,
-                        beløp = 999, // Forskjellig beløp
-                        person = barn,
-                        ytelseType = YtelseType.SVALBARDTILLEGG,
-                    ),
-                )
-
-            val behandling = lagBehandling(behandlingType = REVURDERING, årsak = FINNMARKSTILLEGG)
-            val tilkjentYtelse =
-                lagTilkjentYtelse(behandling = behandling) {
-                    setOf(
-                        lagAndelTilkjentYtelse(
-                            fom = YearMonth.of(2023, 1),
-                            tom = YearMonth.of(2023, 2),
-                            behandling = behandling,
-                            tilkjentYtelse = it,
-                            beløp = 1000, // Endret beløp som ikke skal være tillatt
-                            person = barn,
-                            ytelseType = YtelseType.SVALBARDTILLEGG,
-                        ),
-                        lagAndelTilkjentYtelse(
-                            fom = YearMonth.of(2023, 1),
-                            tom = YearMonth.of(2023, 2),
-                            behandling = behandling,
-                            tilkjentYtelse = it,
-                            beløp = 500,
-                            person = barn,
-                            ytelseType = YtelseType.FINNMARKSTILLEGG,
-                        ),
-                    )
-                }
-
-            every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns false
-            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
-
-            // Act & Assert
-            val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
-
-            assertThat(feil.message).isEqualTo(
-                "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
-                    "Endring av Finnmarkstillegg fører også til endring av Svalbardtillegg.\n" +
-                    "Endring av Finnmarkstillegg og Svalbardtillegg må håndteres manuelt.",
-            )
-        }
-
-        @Test
         fun `skal kaste AutovedtakMåBehandlesManueltFeil dersom det har vært endringer i svalbardtillegg i en finnmarkstillegg-behandling med toggle på`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
@@ -688,7 +632,6 @@ class BehandlingsresultatStegValideringServiceTest {
                     )
                 }
 
-            every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
 
@@ -741,7 +684,6 @@ class BehandlingsresultatStegValideringServiceTest {
                     )
                 }
 
-            every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns false
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
 
@@ -825,83 +767,6 @@ class BehandlingsresultatStegValideringServiceTest {
         }
 
         @Test
-        fun `skal kaste Feil dersom finnmarkstillegg er innvilget inneværende måned og om to måneder med toggle av`() {
-            // Arrange
-            val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
-            val forrigeAndeler =
-                listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = YearMonth.of(2023, 1),
-                        tom = YearMonth.of(2023, 2),
-                        behandling = forrigeBehandling,
-                        beløp = 999,
-                        person = barn,
-                    ),
-                    lagAndelTilkjentYtelse(
-                        fom = YearMonth.of(2023, 1),
-                        tom = YearMonth.of(2023, 2),
-                        behandling = forrigeBehandling,
-                        beløp = 999,
-                        person = barn2,
-                    ),
-                )
-
-            val behandling = lagBehandling(behandlingType = REVURDERING, årsak = FINNMARKSTILLEGG)
-            val tilkjentYtelse =
-                lagTilkjentYtelse(behandling = behandling) {
-                    setOf(
-                        lagAndelTilkjentYtelse(
-                            fom = YearMonth.of(2023, 1),
-                            tom = YearMonth.of(2023, 2),
-                            behandling = behandling,
-                            tilkjentYtelse = it,
-                            beløp = 999,
-                            person = barn,
-                        ),
-                        lagAndelTilkjentYtelse(
-                            fom = YearMonth.now(clockProvider.get()), // Inneværende måned
-                            tom = YearMonth.now(clockProvider.get()).plusMonths(122),
-                            behandling = behandling,
-                            tilkjentYtelse = it,
-                            beløp = 500,
-                            person = barn,
-                            ytelseType = YtelseType.FINNMARKSTILLEGG,
-                        ),
-                        lagAndelTilkjentYtelse(
-                            fom = YearMonth.of(2023, 1),
-                            tom = YearMonth.of(2023, 2),
-                            behandling = behandling,
-                            tilkjentYtelse = it,
-                            beløp = 999,
-                            person = barn2,
-                        ),
-                        lagAndelTilkjentYtelse(
-                            fom = YearMonth.now(clockProvider.get()).plusMonths(2), // Mer enn 1 måned fram i tid
-                            tom = YearMonth.now(clockProvider.get()).plusMonths(122),
-                            behandling = behandling,
-                            tilkjentYtelse = it,
-                            beløp = 500,
-                            person = barn2,
-                            ytelseType = YtelseType.FINNMARKSTILLEGG,
-                        ),
-                    )
-                }
-
-            every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns false
-            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
-            every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns mockk(relaxed = true)
-
-            // Act & Assert
-            val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse) }
-
-            assertThat(feil.message).isEqualTo(
-                "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
-                    "Automatisk behandling fører til innvilgelse av Finnmarkstillegg mer enn én måned fram i tid.\nEndring av Finnmarkstillegg må håndteres manuelt.",
-            )
-        }
-
-        @Test
         fun `skal kaste AutovedtakMåBehandlesManueltFeil dersom finnmarkstillegg er innvilget inneværende måned og om to måneder med toggle på`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
@@ -964,7 +829,6 @@ class BehandlingsresultatStegValideringServiceTest {
                     )
                 }
 
-            every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
             every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns mockk(relaxed = true)
@@ -1106,61 +970,6 @@ class BehandlingsresultatStegValideringServiceTest {
         }
 
         @Test
-        fun `skal kaste Feil dersom det har vært endringer i finnmarkstillegg i en svalbardtillegg-behandling med toggle av`() {
-            // Arrange
-            val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
-            val forrigeAndeler =
-                listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = YearMonth.of(2023, 1),
-                        tom = YearMonth.of(2023, 2),
-                        behandling = forrigeBehandling,
-                        beløp = 999, // Forskjellig beløp
-                        person = barn,
-                        ytelseType = YtelseType.FINNMARKSTILLEGG,
-                    ),
-                )
-
-            val behandling = lagBehandling(behandlingType = REVURDERING, årsak = SVALBARDTILLEGG)
-            val tilkjentYtelse =
-                lagTilkjentYtelse(behandling = behandling) {
-                    setOf(
-                        lagAndelTilkjentYtelse(
-                            fom = YearMonth.of(2023, 1),
-                            tom = YearMonth.of(2023, 2),
-                            behandling = behandling,
-                            tilkjentYtelse = it,
-                            beløp = 1000, // Endret beløp som ikke skal være tillatt
-                            person = barn,
-                            ytelseType = YtelseType.FINNMARKSTILLEGG,
-                        ),
-                        lagAndelTilkjentYtelse(
-                            fom = YearMonth.of(2023, 1),
-                            tom = YearMonth.of(2023, 2),
-                            behandling = behandling,
-                            tilkjentYtelse = it,
-                            beløp = 500,
-                            person = barn,
-                            ytelseType = YtelseType.SVALBARDTILLEGG,
-                        ),
-                    )
-                }
-
-            every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns false
-            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
-
-            // Act & Assert
-            val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
-
-            assertThat(feil.message).isEqualTo(
-                "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
-                    "Endring av Svalbardtillegg fører også til endring av Finnmarkstillegg.\n" +
-                    "Endring av Svalbardtillegg og Finnmarkstillegg må håndteres manuelt.",
-            )
-        }
-
-        @Test
         fun `skal kaste AutovedtakMåBehandlesManueltFeil dersom det har vært endringer i finnmarkstillegg i en svalbardtillegg-behandling med toggle på`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
@@ -1201,7 +1010,6 @@ class BehandlingsresultatStegValideringServiceTest {
                     )
                 }
 
-            every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
 
@@ -1254,7 +1062,6 @@ class BehandlingsresultatStegValideringServiceTest {
                     )
                 }
 
-            every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns false
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
 
@@ -1338,83 +1145,6 @@ class BehandlingsresultatStegValideringServiceTest {
         }
 
         @Test
-        fun `skal kaste Feil dersom svalbardtillegg er innvilget inneværende måned og om to måneder med toggle av`() {
-            // Arrange
-            val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
-            val forrigeAndeler =
-                listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = YearMonth.of(2023, 1),
-                        tom = YearMonth.of(2023, 2),
-                        behandling = forrigeBehandling,
-                        beløp = 999,
-                        person = barn,
-                    ),
-                    lagAndelTilkjentYtelse(
-                        fom = YearMonth.of(2023, 1),
-                        tom = YearMonth.of(2023, 2),
-                        behandling = forrigeBehandling,
-                        beløp = 999,
-                        person = barn2,
-                    ),
-                )
-
-            val behandling = lagBehandling(behandlingType = REVURDERING, årsak = SVALBARDTILLEGG)
-            val tilkjentYtelse =
-                lagTilkjentYtelse(behandling = behandling) {
-                    setOf(
-                        lagAndelTilkjentYtelse(
-                            fom = YearMonth.of(2023, 1),
-                            tom = YearMonth.of(2023, 2),
-                            behandling = behandling,
-                            tilkjentYtelse = it,
-                            beløp = 999,
-                            person = barn,
-                        ),
-                        lagAndelTilkjentYtelse(
-                            fom = YearMonth.now(clockProvider.get()), // Inneværende måned
-                            tom = YearMonth.now(clockProvider.get()).plusMonths(122),
-                            behandling = behandling,
-                            tilkjentYtelse = it,
-                            beløp = 500,
-                            person = barn,
-                            ytelseType = YtelseType.SVALBARDTILLEGG,
-                        ),
-                        lagAndelTilkjentYtelse(
-                            fom = YearMonth.of(2023, 1),
-                            tom = YearMonth.of(2023, 2),
-                            behandling = behandling,
-                            tilkjentYtelse = it,
-                            beløp = 999,
-                            person = barn2,
-                        ),
-                        lagAndelTilkjentYtelse(
-                            fom = YearMonth.now(clockProvider.get()).plusMonths(2), // Mer enn 1 måned fram i tid
-                            tom = YearMonth.now(clockProvider.get()).plusMonths(122),
-                            behandling = behandling,
-                            tilkjentYtelse = it,
-                            beløp = 500,
-                            person = barn2,
-                            ytelseType = YtelseType.SVALBARDTILLEGG,
-                        ),
-                    )
-                }
-
-            every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns false
-            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
-            every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns mockk(relaxed = true)
-
-            // Act & Assert
-            val feil = assertThrows<Feil> { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse) }
-
-            assertThat(feil.message).isEqualTo(
-                "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring.\n" +
-                    "Automatisk behandling fører til innvilgelse av Svalbardtillegg mer enn én måned fram i tid.\nEndring av Svalbardtillegg må håndteres manuelt.",
-            )
-        }
-
-        @Test
         fun `skal kaste AutovedtakMåBehandlesManueltFeil dersom svalbardtillegg er innvilget inneværende måned og om to måneder med toggle på`() {
             // Arrange
             val forrigeBehandling = lagBehandling(behandlingType = FØRSTEGANGSBEHANDLING, årsak = SØKNAD)
@@ -1477,7 +1207,6 @@ class BehandlingsresultatStegValideringServiceTest {
                     )
                 }
 
-            every { featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD) } returns true
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
             every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns mockk(relaxed = true)
