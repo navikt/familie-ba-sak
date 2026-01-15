@@ -1011,120 +1011,120 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
             assertThat(perioder[2].tom).isNull()
             assertThat(perioder[2].verdi).isTrue
         }
+    }
 
-        @Nested
-        inner class TilFinnmmarkEllerNordTromsOppholdTidslinje {
-            @Test
-            fun `skal lage perioder med tom dato satt til fom dato til neste element dersom tom dato ikke finnes`() {
-                // Arrange
-                val førsteFom = LocalDate.of(2021, 1, 1)
-                val andreFom = LocalDate.of(2022, 5, 5)
-                val tredjeFom = LocalDate.of(2023, 10, 10)
+    @Nested
+    inner class TilFinnmmarkEllerNordTromsOppholdTidslinje {
+        @Test
+        fun `skal lage perioder med tom dato satt til fom dato til neste element dersom tom dato ikke finnes`() {
+            // Arrange
+            val førsteFom = LocalDate.of(2021, 1, 1)
+            val andreFom = LocalDate.of(2022, 5, 5)
+            val tredjeFom = LocalDate.of(2023, 10, 10)
 
-                val samhandlerAdresser =
-                    listOf(
-                        SamhandlerAdresse(
-                            kommunenummer = KommunerIFinnmarkOgNordTroms.KARASJOK.kommunenummer,
-                            gyldighetsperiode = Gyldighetsperiode(fom = førsteFom, tom = null),
-                            adresselinjer = emptyList(),
-                            postNr = "",
-                            postSted = "",
-                            adresseType = "",
-                        ),
-                        SamhandlerAdresse(
-                            kommunenummer = "0000",
-                            gyldighetsperiode = Gyldighetsperiode(fom = andreFom, tom = null),
-                            adresselinjer = emptyList(),
-                            postNr = "",
-                            postSted = "",
-                            adresseType = "",
-                        ),
-                        SamhandlerAdresse(
-                            kommunenummer = KommunerIFinnmarkOgNordTroms.NORDKAPP.kommunenummer,
-                            gyldighetsperiode = Gyldighetsperiode(fom = tredjeFom, tom = null),
-                            adresselinjer = emptyList(),
-                            postNr = "",
-                            postSted = "",
-                            adresseType = "",
-                        ),
-                    )
+            val samhandlerAdresser =
+                listOf(
+                    SamhandlerAdresse(
+                        kommunenummer = KommunerIFinnmarkOgNordTroms.KARASJOK.kommunenummer,
+                        gyldighetsperiode = Gyldighetsperiode(fom = førsteFom, tom = null),
+                        adresselinjer = emptyList(),
+                        postNr = "",
+                        postSted = "",
+                        adresseType = "",
+                    ),
+                    SamhandlerAdresse(
+                        kommunenummer = "0000",
+                        gyldighetsperiode = Gyldighetsperiode(fom = andreFom, tom = null),
+                        adresselinjer = emptyList(),
+                        postNr = "",
+                        postSted = "",
+                        adresseType = "",
+                    ),
+                    SamhandlerAdresse(
+                        kommunenummer = KommunerIFinnmarkOgNordTroms.NORDKAPP.kommunenummer,
+                        gyldighetsperiode = Gyldighetsperiode(fom = tredjeFom, tom = null),
+                        adresselinjer = emptyList(),
+                        postNr = "",
+                        postSted = "",
+                        adresseType = "",
+                    ),
+                )
 
-                // Act
-                val oppholdsadresseTidslinje = samhandlerAdresser.tilFinnmmarkEllerNordTromsOppholdTidslinje()
+            // Act
+            val oppholdsadresseTidslinje = samhandlerAdresser.tilFinnmmarkEllerNordTromsOppholdTidslinje()
 
-                // Assert
-                val perioder = oppholdsadresseTidslinje.tilPerioder()
-                assertThat(perioder).hasSize(3)
+            // Assert
+            val perioder = oppholdsadresseTidslinje.tilPerioder()
+            assertThat(perioder).hasSize(3)
 
-                assertThat(perioder[0].fom).isEqualTo(førsteFom)
-                assertThat(perioder[0].tom).isEqualTo(andreFom.minusDays(1))
-                assertThat(perioder[0].verdi).isTrue
+            assertThat(perioder[0].fom).isEqualTo(førsteFom)
+            assertThat(perioder[0].tom).isEqualTo(andreFom.minusDays(1))
+            assertThat(perioder[0].verdi).isTrue
 
-                assertThat(perioder[1].fom).isEqualTo(andreFom)
-                assertThat(perioder[1].tom).isEqualTo(tredjeFom.minusDays(1))
-                assertThat(perioder[1].verdi).isFalse
+            assertThat(perioder[1].fom).isEqualTo(andreFom)
+            assertThat(perioder[1].tom).isEqualTo(tredjeFom.minusDays(1))
+            assertThat(perioder[1].verdi).isFalse
 
-                assertThat(perioder[2].fom).isEqualTo(tredjeFom)
-                assertThat(perioder[2].tom).isNull()
-                assertThat(perioder[2].verdi).isTrue
-            }
+            assertThat(perioder[2].fom).isEqualTo(tredjeFom)
+            assertThat(perioder[2].tom).isNull()
+            assertThat(perioder[2].verdi).isTrue
+        }
 
-            @Test
-            fun `skal lage perioder med tom dato dersom tom dato finnes`() {
-                // Arrange
-                val førsteFom = LocalDate.of(2021, 1, 1)
-                val førsteTom = LocalDate.of(2022, 5, 4)
-                val andreFom = LocalDate.of(2022, 5, 5)
-                val andreTom = LocalDate.of(2023, 10, 9)
-                val tredjeFom = LocalDate.of(2023, 10, 10)
+        @Test
+        fun `skal lage perioder med tom dato dersom tom dato finnes`() {
+            // Arrange
+            val førsteFom = LocalDate.of(2021, 1, 1)
+            val førsteTom = LocalDate.of(2022, 5, 4)
+            val andreFom = LocalDate.of(2022, 5, 5)
+            val andreTom = LocalDate.of(2023, 10, 9)
+            val tredjeFom = LocalDate.of(2023, 10, 10)
 
-                val samhandlerAdresser =
-                    listOf(
-                        SamhandlerAdresse(
-                            kommunenummer = KommunerIFinnmarkOgNordTroms.KARASJOK.kommunenummer,
-                            gyldighetsperiode = Gyldighetsperiode(fom = førsteFom, tom = førsteTom),
-                            adresselinjer = emptyList(),
-                            postNr = "",
-                            postSted = "",
-                            adresseType = "",
-                        ),
-                        SamhandlerAdresse(
-                            kommunenummer = "0000",
-                            gyldighetsperiode = Gyldighetsperiode(fom = andreFom, tom = andreTom),
-                            adresselinjer = emptyList(),
-                            postNr = "",
-                            postSted = "",
-                            adresseType = "",
-                        ),
-                        SamhandlerAdresse(
-                            kommunenummer = KommunerIFinnmarkOgNordTroms.NORDKAPP.kommunenummer,
-                            gyldighetsperiode = Gyldighetsperiode(fom = tredjeFom, tom = null),
-                            adresselinjer = emptyList(),
-                            postNr = "",
-                            postSted = "",
-                            adresseType = "",
-                        ),
-                    )
+            val samhandlerAdresser =
+                listOf(
+                    SamhandlerAdresse(
+                        kommunenummer = KommunerIFinnmarkOgNordTroms.KARASJOK.kommunenummer,
+                        gyldighetsperiode = Gyldighetsperiode(fom = førsteFom, tom = førsteTom),
+                        adresselinjer = emptyList(),
+                        postNr = "",
+                        postSted = "",
+                        adresseType = "",
+                    ),
+                    SamhandlerAdresse(
+                        kommunenummer = "0000",
+                        gyldighetsperiode = Gyldighetsperiode(fom = andreFom, tom = andreTom),
+                        adresselinjer = emptyList(),
+                        postNr = "",
+                        postSted = "",
+                        adresseType = "",
+                    ),
+                    SamhandlerAdresse(
+                        kommunenummer = KommunerIFinnmarkOgNordTroms.NORDKAPP.kommunenummer,
+                        gyldighetsperiode = Gyldighetsperiode(fom = tredjeFom, tom = null),
+                        adresselinjer = emptyList(),
+                        postNr = "",
+                        postSted = "",
+                        adresseType = "",
+                    ),
+                )
 
-                // Act
-                val oppholdsadresseTidslinje = samhandlerAdresser.tilFinnmmarkEllerNordTromsOppholdTidslinje()
+            // Act
+            val oppholdsadresseTidslinje = samhandlerAdresser.tilFinnmmarkEllerNordTromsOppholdTidslinje()
 
-                // Assert
-                val perioder = oppholdsadresseTidslinje.tilPerioder()
-                assertThat(perioder).hasSize(3)
+            // Assert
+            val perioder = oppholdsadresseTidslinje.tilPerioder()
+            assertThat(perioder).hasSize(3)
 
-                assertThat(perioder[0].fom).isEqualTo(førsteFom)
-                assertThat(perioder[0].tom).isEqualTo(førsteTom)
-                assertThat(perioder[0].verdi).isTrue
+            assertThat(perioder[0].fom).isEqualTo(førsteFom)
+            assertThat(perioder[0].tom).isEqualTo(førsteTom)
+            assertThat(perioder[0].verdi).isTrue
 
-                assertThat(perioder[1].fom).isEqualTo(andreFom)
-                assertThat(perioder[1].tom).isEqualTo(andreTom)
-                assertThat(perioder[1].verdi).isFalse
+            assertThat(perioder[1].fom).isEqualTo(andreFom)
+            assertThat(perioder[1].tom).isEqualTo(andreTom)
+            assertThat(perioder[1].verdi).isFalse
 
-                assertThat(perioder[2].fom).isEqualTo(tredjeFom)
-                assertThat(perioder[2].tom).isNull()
-                assertThat(perioder[2].verdi).isTrue
-            }
+            assertThat(perioder[2].fom).isEqualTo(tredjeFom)
+            assertThat(perioder[2].tom).isNull()
+            assertThat(perioder[2].verdi).isTrue
         }
     }
 }
