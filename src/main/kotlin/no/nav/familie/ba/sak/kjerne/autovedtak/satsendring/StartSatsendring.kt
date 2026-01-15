@@ -194,9 +194,9 @@ class StartSatsendring(
     }
 
     companion object {
-        fun hentAktivSatsendringstidspunkt(): YearMonth = SATSENDRINGMÅNED_MAI_2025
+        fun hentAktivSatsendringstidspunkt(): YearMonth = SATSENDRINGMÅNED_FEB_2026
 
         val logger: Logger = LoggerFactory.getLogger(StartSatsendring::class.java)
-        val SATSENDRINGMÅNED_MAI_2025: YearMonth = YearMonth.of(2025, 5)
+        val SATSENDRINGMÅNED_FEB_2026: YearMonth = YearMonth.of(2026, 2)
     }
 }

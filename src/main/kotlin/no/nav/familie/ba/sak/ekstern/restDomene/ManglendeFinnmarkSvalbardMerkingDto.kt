@@ -67,10 +67,14 @@ fun List<Person>?.tilManglendeSvalbardmerkingPerioder(personResultater: Set<Pers
                     }.tilTidslinje()
         }
 
+<<<<<<< HEAD
     val svalbardOppholdTidslinjerPerPerson =
         this.associate {
             it.aktør.aktivFødselsnummer() to Adresser.opprettFra(it).lagErOppholdsadresserPåSvalbardTidslinje()
         }
+=======
+    val svalbardOppholdTidslinjerPerPerson = this.associate { it.aktør.aktivFødselsnummer() to it.oppholdsadresser.tilSvalbardOppholdTidslinje() }
+>>>>>>> 9d2d6c45eba45b401d8e455c70252ad55113a881
 
     return bosattIRiketVilkårTidslinjePerPerson.mapNotNull { (fnr, bosattIRiketVilkårTidslinje) ->
         val svalbardOppholdTidslinje = svalbardOppholdTidslinjerPerPerson[fnr] ?: return@mapNotNull null
