@@ -938,7 +938,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                         periode = DatoIntervallEntitet(fom = førsteFom, tom = null),
                     ),
                     lagGrMatrikkelOppholdsadresse(
-                        kommunenummer = SvalbardKommune.SVALBARD.kommunenummer,
+                        kommunenummer = "0000",
                         periode = DatoIntervallEntitet(fom = andreFom, tom = null),
                     ),
                     lagGrUtenlandskOppholdsadresse(
@@ -956,12 +956,15 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
 
             assertThat(perioder[0].fom).isEqualTo(førsteFom)
             assertThat(perioder[0].tom).isEqualTo(andreFom.minusDays(1))
+            assertThat(perioder[0].verdi).isTrue
 
             assertThat(perioder[1].fom).isEqualTo(andreFom)
             assertThat(perioder[1].tom).isEqualTo(tredjeFom.minusDays(1))
+            assertThat(perioder[1].verdi).isFalse
 
             assertThat(perioder[2].fom).isEqualTo(tredjeFom)
             assertThat(perioder[2].tom).isNull()
+            assertThat(perioder[2].verdi).isTrue
         }
 
         @Test
@@ -980,7 +983,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                         periode = DatoIntervallEntitet(fom = førsteFom, tom = førsteTom),
                     ),
                     lagGrMatrikkelOppholdsadresse(
-                        kommunenummer = SvalbardKommune.SVALBARD.kommunenummer,
+                        kommunenummer = "0000",
                         periode = DatoIntervallEntitet(fom = andreFom, tom = andreTom),
                     ),
                     lagGrUtenlandskOppholdsadresse(
@@ -998,12 +1001,15 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
 
             assertThat(perioder[0].fom).isEqualTo(førsteFom)
             assertThat(perioder[0].tom).isEqualTo(førsteTom)
+            assertThat(perioder[0].verdi).isTrue
 
             assertThat(perioder[1].fom).isEqualTo(andreFom)
             assertThat(perioder[1].tom).isEqualTo(andreTom)
+            assertThat(perioder[1].verdi).isFalse
 
             assertThat(perioder[2].fom).isEqualTo(tredjeFom)
             assertThat(perioder[2].tom).isNull()
+            assertThat(perioder[2].verdi).isTrue
         }
     }
 
@@ -1027,7 +1033,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                         adresseType = "",
                     ),
                     SamhandlerAdresse(
-                        kommunenummer = KommunerIFinnmarkOgNordTroms.SØR_VARANGER.kommunenummer,
+                        kommunenummer = "0000",
                         gyldighetsperiode = Gyldighetsperiode(fom = andreFom, tom = null),
                         adresselinjer = emptyList(),
                         postNr = "",
@@ -1053,12 +1059,15 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
 
             assertThat(perioder[0].fom).isEqualTo(førsteFom)
             assertThat(perioder[0].tom).isEqualTo(andreFom.minusDays(1))
+            assertThat(perioder[0].verdi).isTrue
 
             assertThat(perioder[1].fom).isEqualTo(andreFom)
             assertThat(perioder[1].tom).isEqualTo(tredjeFom.minusDays(1))
+            assertThat(perioder[1].verdi).isFalse
 
             assertThat(perioder[2].fom).isEqualTo(tredjeFom)
             assertThat(perioder[2].tom).isNull()
+            assertThat(perioder[2].verdi).isTrue
         }
 
         @Test
@@ -1081,7 +1090,7 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
                         adresseType = "",
                     ),
                     SamhandlerAdresse(
-                        kommunenummer = KommunerIFinnmarkOgNordTroms.SØR_VARANGER.kommunenummer,
+                        kommunenummer = "0000",
                         gyldighetsperiode = Gyldighetsperiode(fom = andreFom, tom = andreTom),
                         adresselinjer = emptyList(),
                         postNr = "",
@@ -1107,12 +1116,15 @@ class ManglendeFinnmarkSvalbardMerkingDtoTest {
 
             assertThat(perioder[0].fom).isEqualTo(førsteFom)
             assertThat(perioder[0].tom).isEqualTo(førsteTom)
+            assertThat(perioder[0].verdi).isTrue
 
             assertThat(perioder[1].fom).isEqualTo(andreFom)
             assertThat(perioder[1].tom).isEqualTo(andreTom)
+            assertThat(perioder[1].verdi).isFalse
 
             assertThat(perioder[2].fom).isEqualTo(tredjeFom)
             assertThat(perioder[2].tom).isNull()
+            assertThat(perioder[2].verdi).isTrue
         }
     }
 }

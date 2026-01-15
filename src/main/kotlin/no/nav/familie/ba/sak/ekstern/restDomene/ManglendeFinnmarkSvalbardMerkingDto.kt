@@ -16,9 +16,11 @@ import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.beskjærEtter
 import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.time.LocalDate
+import kotlin.collections.map
 
 private val cutOffTomDatoForVisningAvManglendeMerkinger = LocalDate.of(2025, 9, 30)
 
@@ -39,8 +41,12 @@ fun SamhandlerInfo?.tilManglendeFinnmarkmerkingPerioder(personResultater: Set<Pe
 
     if (personResultat == null) return null
 
-    val bosattIRiketVilkårTidslinje: Tidslinje<VilkårResultat> = personResultat.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET && vilkårResultat.periodeFom != null }.tilTidslinje()
-    val finnmarkEllerNordTromsOppholdTidslinjeForInstitusjon: Tidslinje<SamhandlerAdresse> = this.adresser.tilFinnmmarkEllerNordTromsOppholdTidslinje()
+    val bosattIRiketVilkårTidslinje =
+        personResultat.vilkårResultater
+            .filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET && vilkårResultat.periodeFom != null }
+            .tilTidslinje()
+
+    val finnmarkEllerNordTromsOppholdTidslinjeForInstitusjon = this.adresser.tilFinnmmarkEllerNordTromsOppholdTidslinje()
 
     val perioderMedManglendeFinnmarkMerking = finnPerioderMedManglendeMerking(bosattIRiketVilkårTidslinje, finnmarkEllerNordTromsOppholdTidslinjeForInstitusjon, UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
 
@@ -52,8 +58,16 @@ fun SamhandlerInfo?.tilManglendeFinnmarkmerkingPerioder(personResultater: Set<Pe
 fun List<Person>?.tilManglendeSvalbardmerkingPerioder(personResultater: Set<PersonResultat>?): List<ManglendeFinnmarkSvalbardMerkingDto> {
     if (this == null || personResultater == null) return emptyList()
 
-    val bosattIRiketVilkårTidslinjePerPerson: Map<String, Tidslinje<VilkårResultat>> = personResultater.associate { it.aktør.aktivFødselsnummer() to it.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET && vilkårResultat.periodeFom != null }.tilTidslinje() }
-    val svalbardOppholdTidslinjerPerPerson: Map<String, Tidslinje<GrOppholdsadresse>> = this.associate { it.aktør.aktivFødselsnummer() to it.oppholdsadresser.tilSvalbardOppholdTidslinje() }
+    val bosattIRiketVilkårTidslinjePerPerson =
+        personResultater.associate {
+            it.aktør.aktivFødselsnummer() to
+                it.vilkårResultater
+                    .filter { vilkårResultat ->
+                        vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET && vilkårResultat.periodeFom != null
+                    }.tilTidslinje()
+        }
+
+    val svalbardOppholdTidslinjerPerPerson = this.associate { it.aktør.aktivFødselsnummer() to it.oppholdsadresser.tilSvalbardOppholdTidslinje() }
 
     return bosattIRiketVilkårTidslinjePerPerson.mapNotNull { (fnr, bosattIRiketVilkårTidslinje) ->
         val svalbardOppholdTidslinje = svalbardOppholdTidslinjerPerPerson[fnr] ?: return@mapNotNull null
@@ -75,33 +89,33 @@ private fun <T> finnPerioderMedManglendeMerking(
 
     return bosattIRiketVilkårTidslinje
         .kombinerMed(beskjærtFinnmarkEllerSvalbardTidslinje) { bosattIRiketVilkår, finnmarkEllerSvalbard ->
-            finnmarkEllerSvalbard != null && bosattIRiketVilkår != null && !bosattIRiketVilkår.utdypendeVilkårsvurderinger.contains(utdypendeVilkårsvurdering)
+            finnmarkEllerSvalbard == true && bosattIRiketVilkår != null && !bosattIRiketVilkår.utdypendeVilkårsvurderinger.contains(utdypendeVilkårsvurdering)
         }.tilPerioderIkkeNull()
         .filter { it.tom == null || it.tom!!.isSameOrAfter(cutOffTomDatoForVisningAvManglendeMerkinger) }
         .filter { it.verdi }
         .map { ManglendeFinnmarkSvalbardMerkingPeriodeDto(fom = it.fom, tom = it.tom) }
 }
 
-fun List<GrOppholdsadresse>.tilSvalbardOppholdTidslinje(): Tidslinje<GrOppholdsadresse> =
+fun List<GrOppholdsadresse>.tilSvalbardOppholdTidslinje(): Tidslinje<Boolean> =
     this
-        .filter { it.erPåSvalbard() }
         .sortedBy { it.periode?.fom }
         .tilEtterfølgendePar { grOppholdsadresse, nesteGrOppholdsadresse ->
             Periode(
-                verdi = grOppholdsadresse,
+                verdi = grOppholdsadresse.erPåSvalbard(),
                 fom = grOppholdsadresse.periode?.fom,
                 tom = grOppholdsadresse.periode?.tom ?: nesteGrOppholdsadresse?.periode?.fom?.minusDays(1),
             )
-        }.tilTidslinje()
+        }.map { it.tilTidslinje() }
+        .kombiner { samletTidslinjer -> samletTidslinjer.any { boddePåSvalbard -> boddePåSvalbard } }
 
-fun List<SamhandlerAdresse>.tilFinnmmarkEllerNordTromsOppholdTidslinje(): Tidslinje<SamhandlerAdresse> =
+fun List<SamhandlerAdresse>.tilFinnmmarkEllerNordTromsOppholdTidslinje(): Tidslinje<Boolean> =
     this
-        .filter { it.kommunenummer?.let { kommunenummer -> kommuneErIFinnmarkEllerNordTroms(kommunenummer) } ?: false }
         .sortedBy { it.gyldighetsperiode?.fom }
         .tilEtterfølgendePar { institusjonsinfo, nesteInstitusjonsinfo ->
             Periode(
-                verdi = institusjonsinfo,
+                verdi = institusjonsinfo.kommunenummer?.let { kommunenummer -> kommuneErIFinnmarkEllerNordTroms(kommunenummer) } ?: false,
                 fom = institusjonsinfo.gyldighetsperiode?.fom,
                 tom = institusjonsinfo.gyldighetsperiode?.tom ?: nesteInstitusjonsinfo?.gyldighetsperiode?.fom?.minusDays(1),
             )
-        }.tilTidslinje()
+        }.map { it.tilTidslinje() }
+        .kombiner { samletTidslinjer -> samletTidslinjer.any { boddeIFinnmarkEllerNordtroms -> boddeIFinnmarkEllerNordtroms } }
