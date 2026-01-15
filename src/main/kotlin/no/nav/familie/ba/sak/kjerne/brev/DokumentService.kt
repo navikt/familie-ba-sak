@@ -5,6 +5,9 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
@@ -34,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.leggTilBlankAnnenVurdering
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.JournalførManueltBrevTask
+import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import no.nav.familie.log.mdc.MDCConstants
@@ -60,6 +64,8 @@ class DokumentService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val pdlRestKlient: PdlRestKlient,
     private val persongrunnlagService: PersongrunnlagService,
+    private val featureToggleService: FeatureToggleService,
+    private val integrasjonKlient: IntegrasjonKlient,
 ) {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -242,14 +248,35 @@ class DokumentService(
         manueltBrevRequest: ManueltBrevRequest,
     ): ManueltBrevRequest {
         val enhet =
-            arbeidsfordelingService
-                .hentArbeidsfordelingsenhetPåIdenter(
-                    søkerIdent = fagsak.aktør.aktivFødselsnummer(),
-                    barnIdenter = manueltBrevRequest.barnIBrev,
-                    behandlingstype = null,
-                ).run {
-                    Enhet(enhetId = enhetId, enhetNavn = enhetNavn)
+            if (featureToggleService.isEnabled(FeatureToggle.HENT_ARBEIDSFORDELING_MED_BEHANDLINGSTYPE)) {
+                val enheterSomNavIdentHarTilgangTil = integrasjonKlient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(NavIdent(SikkerhetContext.hentSaksbehandler()))
+                if (enheterSomNavIdentHarTilgangTil.size == 1) {
+                    Enhet(
+                        enhetId = enheterSomNavIdentHarTilgangTil.first().enhetsnummer,
+                        enhetNavn = enheterSomNavIdentHarTilgangTil.first().enhetsnavn,
+                    )
+                } else {
+                    val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id)
+
+                    arbeidsfordelingService
+                        .hentArbeidsfordelingsenhetPåIdenter(
+                            søkerIdent = fagsak.aktør.aktivFødselsnummer(),
+                            barnIdenter = manueltBrevRequest.barnIBrev,
+                            behandlingstype = sisteVedtatteBehandling?.kategori?.tilOppgavebehandlingType(),
+                        ).run {
+                            Enhet(enhetId = enhetId, enhetNavn = enhetNavn)
+                        }
                 }
+            } else {
+                arbeidsfordelingService
+                    .hentArbeidsfordelingsenhetPåIdenter(
+                        søkerIdent = fagsak.aktør.aktivFødselsnummer(),
+                        barnIdenter = manueltBrevRequest.barnIBrev,
+                        behandlingstype = null,
+                    ).run {
+                        Enhet(enhetId = enhetId, enhetNavn = enhetNavn)
+                    }
+            }
 
         return when (fagsak.type) {
             FagsakType.INSTITUSJON,
