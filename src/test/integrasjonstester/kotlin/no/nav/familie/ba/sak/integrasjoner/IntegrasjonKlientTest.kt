@@ -15,9 +15,13 @@ import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.status
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MDCOperations
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.HENT_ARBEIDSFORDELING_MED_BEHANDLINGSTYPE
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
@@ -57,6 +61,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -80,13 +85,14 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
 
-class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
+class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
     @Autowired
     @Qualifier("jwtBearer")
     lateinit var restOperations: RestOperations
 
     lateinit var integrasjonKlient: IntegrasjonKlient
     lateinit var utgåendeJournalføringService: UtgåendeJournalføringService
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     @BeforeEach
     fun setUp() {
@@ -94,6 +100,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             IntegrasjonKlient(
                 URI.create(wireMockServer.baseUrl() + "/api"),
                 restOperations,
+                featureToggleService,
             )
         utgåendeJournalføringService =
             UtgåendeJournalføringService(
@@ -337,7 +344,8 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
 
     @Test
     @Tag("integration")
-    fun `hentBehandlendeEnhet returnerer OK`() {
+    fun `hentBehandlendeEnhet returnerer OK uten behandlingstype`() {
+        every { featureToggleService.isEnabled(HENT_ARBEIDSFORDELING_MED_BEHANDLINGSTYPE) } returns false
         wireMockServer.stubFor(
             post("/api/arbeidsfordeling/enhet/BAR")
                 .withHeader("Accept", containing("json"))
@@ -355,6 +363,31 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         )
 
         val enhet = integrasjonKlient.hentBehandlendeEnhet("1")
+        assertThat(enhet).isNotEmpty
+        assertThat(enhet.first().enhetId).isEqualTo("2")
+    }
+
+    @Test
+    @Tag("integration")
+    fun `hentBehandlendeEnhet returnerer OK med behandlingstype`() {
+        every { featureToggleService.isEnabled(HENT_ARBEIDSFORDELING_MED_BEHANDLINGSTYPE) } returns true
+        wireMockServer.stubFor(
+            post("/api/arbeidsfordeling/enhet/BAR?behandlingstype=NASJONAL")
+                .withHeader("Accept", containing("json"))
+                .willReturn(
+                    okJson(
+                        objectMapper.writeValueAsString(
+                            success(
+                                listOf(
+                                    Arbeidsfordelingsenhet("2", "foo"),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+        )
+
+        val enhet = integrasjonKlient.hentBehandlendeEnhet("1", Behandlingstype.NASJONAL)
         assertThat(enhet).isNotEmpty
         assertThat(enhet.first().enhetId).isEqualTo("2")
     }
