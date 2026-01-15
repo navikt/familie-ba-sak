@@ -27,6 +27,7 @@ jobs:
       with-coverage: true
       coverage-artifact-name: 'enhetstest'
       coverage-artifact-path: 'target/coverage/enhetstest.xml'
+      java-version: '25'
     secrets: inherit
 
   integration-test:
@@ -39,6 +40,7 @@ jobs:
       with-coverage: true
       coverage-artifact-name: 'integrasjonstest'
       coverage-artifact-path: 'target/coverage/integrasjonstest.xml'
+      java-version: '25'
     secrets: inherit
 
   sonar:
@@ -50,5 +52,6 @@ jobs:
       unit-test-artifact-path: 'coverage/enhetstest'
       integration-test-artifact-name: 'integrasjonstest'
       integration-test-artifact-path: 'coverage/integrasjonstest'
+      java-version: '25'
     secrets: inherit
 
