@@ -17,6 +17,7 @@ import no.nav.familie.kontrakter.felles.svalbard.erKommunePåSvalbard
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombiner
 import java.time.LocalDate
 
 data class Adresse(
@@ -133,7 +134,8 @@ fun List<Adresse>.lagTidslinjeForAdresser(
                 fom = denne.gyldigFraOgMed,
                 tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
             )
-        }.tilTidslinje()
+        }.map { it.tilTidslinje() }
+            .kombiner { samletTidslinjer -> samletTidslinjer.any { it } }
     } catch (e: IllegalStateException) {
         secureLogger.error("Feil ved oppretting av tidslinjer for $adressetype med adresser $this", e)
         throw e

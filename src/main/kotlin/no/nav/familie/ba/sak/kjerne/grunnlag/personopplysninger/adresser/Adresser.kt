@@ -24,13 +24,11 @@ data class Adresser(
     fun harAdresserSomErRelevantForSvalbardtillegg(): Boolean = oppholdsadresse.finnAdressehistorikkFraOgMedDato(FØRSTE_RELEVANTE_ADRESSEDATO_FOR_SVALBARDSTILLEGG).any { it.erPåSvalbard() }
 
     fun lagErOppholdsadresserPåSvalbardTidslinje(): Tidslinje<Boolean> {
-        val adresserPåSvalbard = oppholdsadresse.filter { it.erPåSvalbard() }
-
-        if (adresserPåSvalbard.isEmpty()) {
+        if (oppholdsadresse.isEmpty()) {
             return tomTidslinje()
         }
 
-        val filtrerteAdresser = adresserPåSvalbard.filtrereUgyldigeOppholdsadresser()
+        val filtrerteAdresser = oppholdsadresse.filtrereUgyldigeOppholdsadresser()
 
         return filtrerteAdresser.lagTidslinjeForAdresser("Oppholdsadresse") { it.erPåSvalbard() }
     }

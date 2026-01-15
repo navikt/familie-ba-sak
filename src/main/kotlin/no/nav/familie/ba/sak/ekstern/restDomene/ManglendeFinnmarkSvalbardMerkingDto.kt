@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 import no.nav.familie.ba.sak.common.Utils.tilEtterfølgendePar
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse.GrOppholdsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -67,7 +67,10 @@ fun List<Person>?.tilManglendeSvalbardmerkingPerioder(personResultater: Set<Pers
                     }.tilTidslinje()
         }
 
-    val svalbardOppholdTidslinjerPerPerson = this.associate { it.aktør.aktivFødselsnummer() to it.oppholdsadresser.tilSvalbardOppholdTidslinje() }
+    val svalbardOppholdTidslinjerPerPerson =
+        this.associate {
+            it.aktør.aktivFødselsnummer() to Adresser.opprettFra(it).lagErOppholdsadresserPåSvalbardTidslinje()
+        }
 
     return bosattIRiketVilkårTidslinjePerPerson.mapNotNull { (fnr, bosattIRiketVilkårTidslinje) ->
         val svalbardOppholdTidslinje = svalbardOppholdTidslinjerPerPerson[fnr] ?: return@mapNotNull null
@@ -95,18 +98,6 @@ private fun <T> finnPerioderMedManglendeMerking(
         .filter { it.verdi }
         .map { ManglendeFinnmarkSvalbardMerkingPeriodeDto(fom = it.fom, tom = it.tom) }
 }
-
-fun List<GrOppholdsadresse>.tilSvalbardOppholdTidslinje(): Tidslinje<Boolean> =
-    this
-        .sortedBy { it.periode?.fom }
-        .tilEtterfølgendePar { grOppholdsadresse, nesteGrOppholdsadresse ->
-            Periode(
-                verdi = grOppholdsadresse.erPåSvalbard(),
-                fom = grOppholdsadresse.periode?.fom,
-                tom = grOppholdsadresse.periode?.tom ?: nesteGrOppholdsadresse?.periode?.fom?.minusDays(1),
-            )
-        }.map { it.tilTidslinje() }
-        .kombiner { samletTidslinjer -> samletTidslinjer.any { boddePåSvalbard -> boddePåSvalbard } }
 
 fun List<SamhandlerAdresse>.tilFinnmmarkEllerNordTromsOppholdTidslinje(): Tidslinje<Boolean> =
     this
