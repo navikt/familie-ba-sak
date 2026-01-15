@@ -106,7 +106,7 @@ fun List<GrOppholdsadresse>.tilSvalbardOppholdTidslinje(): Tidslinje<Boolean> =
                 tom = grOppholdsadresse.periode?.tom ?: nesteGrOppholdsadresse?.periode?.fom?.minusDays(1),
             )
         }.map { it.tilTidslinje() }
-        .kombiner { it.any { it } }
+        .kombiner { samletTidslinjer -> samletTidslinjer.any { boddePåSvalbard -> boddePåSvalbard } }
 
 fun List<SamhandlerAdresse>.tilFinnmmarkEllerNordTromsOppholdTidslinje(): Tidslinje<Boolean> =
     this
@@ -118,4 +118,4 @@ fun List<SamhandlerAdresse>.tilFinnmmarkEllerNordTromsOppholdTidslinje(): Tidsli
                 tom = institusjonsinfo.gyldighetsperiode?.tom ?: nesteInstitusjonsinfo?.gyldighetsperiode?.fom?.minusDays(1),
             )
         }.map { it.tilTidslinje() }
-        .kombiner { it.any { it } }
+        .kombiner { samletTidslinjer -> samletTidslinjer.any { boddeIFinnmarkEllerNordtroms -> boddeIFinnmarkEllerNordtroms } }
