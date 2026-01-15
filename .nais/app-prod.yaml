@@ -183,8 +183,6 @@ spec:
       cpu: 886m
   ingresses:
     - https://familie-ba-sak.intern.nav.no
-  secureLogs:
-    enabled: true
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
