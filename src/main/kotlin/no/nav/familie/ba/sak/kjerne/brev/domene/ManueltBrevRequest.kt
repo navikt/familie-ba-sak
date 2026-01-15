@@ -6,10 +6,6 @@ import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -42,10 +38,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevÅrlegKontrollE�
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.VarselbrevMedÅrsakerOgBarn
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
-import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import java.time.LocalDate
 
@@ -118,83 +111,6 @@ data class ManueltBrevRequest(
         }
         return this.mottakerlandSed.takeIf { it.isNotEmpty() }
             ?: throw Feil("Finner ikke noen mottakerland for SED på manuell brevrequest")
-    }
-}
-
-fun ManueltBrevRequest.byggMottakerdataFraBehandling(
-    behandling: Behandling,
-    persongrunnlagService: PersongrunnlagService,
-    arbeidsfordelingService: ArbeidsfordelingService,
-): ManueltBrevRequest {
-    val mottakerIdent = behandling.fagsak.institusjon?.orgNummer ?: behandling.fagsak.aktør.aktivFødselsnummer()
-
-    val hentPerson = { ident: String ->
-        persongrunnlagService.hentPersonerPåBehandling(listOf(ident), behandling).singleOrNull()
-            ?: throw Feil("Fant flere eller ingen personer med angitt personident på behandlingId=${behandling.id}")
-    }
-    val enhet =
-        arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id).run {
-            Enhet(enhetId = behandlendeEnhetId, enhetNavn = behandlendeEnhetNavn)
-        }
-    return when (behandling.fagsak.type) {
-        FagsakType.INSTITUSJON -> {
-            val fødselsnummerPåPerson = behandling.fagsak.aktør.aktivFødselsnummer()
-            val person = hentPerson(fødselsnummerPåPerson)
-
-            this.copy(
-                enhet = enhet,
-                mottakerMålform = person.målform,
-                vedrørende = PersonForManueltBrevRequest(navn = person.navn, fødselsnummer = fødselsnummerPåPerson),
-            )
-        }
-
-        FagsakType.NORMAL,
-        FagsakType.BARN_ENSLIG_MINDREÅRIG,
-        FagsakType.SKJERMET_BARN,
-        -> {
-            hentPerson(mottakerIdent).let { mottakerPerson ->
-                this.copy(
-                    enhet = enhet,
-                    mottakerMålform = mottakerPerson.målform,
-                )
-            }
-        }
-    }
-}
-
-fun ManueltBrevRequest.byggMottakerdataFraFagsak(
-    fagsak: Fagsak,
-    arbeidsfordelingService: ArbeidsfordelingService,
-    pdlRestKlient: PdlRestKlient,
-): ManueltBrevRequest {
-    val enhet =
-        arbeidsfordelingService
-            .hentArbeidsfordelingsenhetPåIdenter(
-                søkerIdent = fagsak.aktør.aktivFødselsnummer(),
-                barnIdenter = barnIBrev,
-            ).run {
-                Enhet(enhetId = enhetId, enhetNavn = enhetNavn)
-            }
-
-    return when (fagsak.type) {
-        FagsakType.INSTITUSJON, FagsakType.SKJERMET_BARN -> {
-            val aktør = fagsak.skjermetBarnSøker?.aktør ?: fagsak.aktør
-
-            val personNavn = pdlRestKlient.hentPerson(aktør, PersonInfoQuery.ENKEL).navn ?: throw FunksjonellFeil("Finner ikke navn på person i PDL")
-
-            this.copy(
-                enhet = enhet,
-                vedrørende = PersonForManueltBrevRequest(navn = personNavn, fødselsnummer = aktør.aktivFødselsnummer()),
-            )
-        }
-
-        FagsakType.NORMAL,
-        FagsakType.BARN_ENSLIG_MINDREÅRIG,
-        -> {
-            this.copy(
-                enhet = enhet,
-            )
-        }
     }
 }
 

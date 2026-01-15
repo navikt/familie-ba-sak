@@ -10,14 +10,23 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagBrevmottakerDb
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.lagInstitusjon
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -30,6 +39,8 @@ import no.nav.familie.ba.sak.kjerne.brev.mottaker.FullmektigEllerVerge
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -51,6 +62,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.time.LocalDate
 
 internal class DokumentServiceTest {
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>(relaxed = true)
@@ -69,6 +81,11 @@ internal class DokumentServiceTest {
             ),
         )
     private val saksbehandlerContext = mockk<SaksbehandlerContext>(relaxed = true)
+    private val arbeidsfordelingService = mockk<ArbeidsfordelingService>(relaxed = true)
+    private val pdlRestKlient = mockk<PdlRestKlient>(relaxed = true)
+    private val persongrunnlagService = mockk<PersongrunnlagService>(relaxed = true)
+    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
+    private val integrasjonKlient = mockk<IntegrasjonKlient>(relaxed = true)
 
     private val dokumentService: DokumentService =
         spyk(
@@ -84,6 +101,11 @@ internal class DokumentServiceTest {
                 brevmottakerService = brevmottakerService,
                 validerBrevmottakerService = mockk(relaxed = true),
                 saksbehandlerContext = saksbehandlerContext,
+                arbeidsfordelingService = arbeidsfordelingService,
+                pdlRestKlient = pdlRestKlient,
+                persongrunnlagService = persongrunnlagService,
+                featureToggleService = featureToggleService,
+                integrasjonKlient = integrasjonKlient,
             ),
         )
 
@@ -391,6 +413,51 @@ internal class DokumentServiceTest {
 
             // Assert
             assertThat(vedtaksbrevPdf.data).isEqualTo(byteArray)
+        }
+    }
+
+    @Nested
+    inner class ByggMottakerdataFraFagsak {
+        @Test
+        fun `byggMottakerdataFraFagsak skal bygge korrekt informasjon om mottaker for person`() {
+            val aktør = randomAktør()
+            val fagsak = lagFagsak(aktør = aktør, type = FagsakType.NORMAL)
+
+            every { arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(any(), any(), any()) } returns
+                Arbeidsfordelingsenhet(
+                    enhetId = "enhetId",
+                    enhetNavn = "enhetNavn",
+                )
+
+            val request = ManueltBrevRequest(brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE, mottakerMålform = Målform.NB)
+            val result = dokumentService.byggMottakerdataFraFagsak(fagsak, request)
+
+            assertThat(result.enhet?.enhetId).isEqualTo("enhetId")
+            assertThat(result.enhet?.enhetNavn).isEqualTo("enhetNavn")
+            assertThat(result.mottakerMålform).isEqualTo(Målform.NB)
+        }
+
+        @Test
+        fun `byggMottakerdataFraFagsak skal bygge korrekt informasjon om mottaker for institusjon`() {
+            val institusjon = lagInstitusjon()
+            val aktør = randomAktør()
+            val fagsak = lagFagsak(aktør = aktør, institusjon = institusjon, type = FagsakType.INSTITUSJON)
+
+            every { pdlRestKlient.hentPerson(fagsak.aktør, PersonInfoQuery.ENKEL) } returns PersonInfo(fødselsdato = LocalDate.now(), navn = "Navn navnesen")
+            every { arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(any(), any(), any()) } returns
+                Arbeidsfordelingsenhet(
+                    enhetId = "enhetId",
+                    enhetNavn = "enhetNavn",
+                )
+
+            val request = ManueltBrevRequest(brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON, mottakerMålform = Målform.NB)
+            val result = dokumentService.byggMottakerdataFraFagsak(fagsak, request)
+
+            assertThat(result.enhet?.enhetId).isEqualTo("enhetId")
+            assertThat(result.enhet?.enhetNavn).isEqualTo("enhetNavn")
+            assertThat(result.mottakerMålform).isEqualTo(Målform.NB)
+            assertThat(result.vedrørende?.fødselsnummer).isEqualTo(aktør.aktivFødselsnummer())
+            assertThat(result.vedrørende?.navn).isEqualTo("Navn navnesen")
         }
     }
 

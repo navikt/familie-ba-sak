@@ -26,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
-import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdataFraBehandling
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -351,13 +350,11 @@ class DokumentServiceIntegrationTest(
         )
 
         val manueltBrevRequest =
-            ManueltBrevRequest(
-                brevmal = Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON,
-            ).byggMottakerdataFraBehandling(
-                behandling,
-                persongrunnlagService,
-                arbeidsfordelingService,
-            )
+            dokumentService
+                .byggMottakerdataFraBehandling(
+                    behandling,
+                    ManueltBrevRequest(brevmal = Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON),
+                )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
         val lagretJournalførManueltBrevTaskPayloadForBehandling = fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(JournalførManueltBrevTask.TASK_STEP_TYPE).tilPayload<JournalførManueltBrevDTO>().single { it.behandlingId == behandling.id }
@@ -400,12 +397,9 @@ class DokumentServiceIntegrationTest(
         )
 
         val manueltBrevRequest =
-            ManueltBrevRequest(
-                brevmal = Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
-            ).byggMottakerdataFraBehandling(
+            dokumentService.byggMottakerdataFraBehandling(
                 behandling,
-                persongrunnlagService,
-                arbeidsfordelingService,
+                ManueltBrevRequest(brevmal = Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON),
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
@@ -448,12 +442,9 @@ class DokumentServiceIntegrationTest(
         )
 
         val manueltBrevRequest =
-            ManueltBrevRequest(
-                brevmal = Brevmal.SVARTIDSBREV_INSTITUSJON,
-            ).byggMottakerdataFraBehandling(
+            dokumentService.byggMottakerdataFraBehandling(
                 behandling,
-                persongrunnlagService,
-                arbeidsfordelingService,
+                ManueltBrevRequest(brevmal = Brevmal.SVARTIDSBREV_INSTITUSJON),
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
@@ -496,13 +487,12 @@ class DokumentServiceIntegrationTest(
         )
 
         val manueltBrevRequest =
-            ManueltBrevRequest(
-                brevmal = Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON,
-                antallUkerSvarfrist = 3,
-            ).byggMottakerdataFraBehandling(
+            dokumentService.byggMottakerdataFraBehandling(
                 behandling,
-                persongrunnlagService,
-                arbeidsfordelingService,
+                ManueltBrevRequest(
+                    brevmal = Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON,
+                    antallUkerSvarfrist = 3,
+                ),
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
