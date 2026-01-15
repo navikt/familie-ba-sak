@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -54,6 +55,11 @@ class AutovedtakMånedligValutajusteringService(
         logger.info("Utfører månedlig valutajustering for fagsak=$fagsakId og måned=$måned")
 
         val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId) ?: throw Feil("Fant ikke siste vedtatte behandling for $fagsakId")
+        if (sisteVedtatteBehandling.kategori != BehandlingKategori.EØS) {
+            logger.warn("Prøver å utføre månedlig valutajustering for nasjonal fagsak $fagsakId. Hopper ut")
+            return
+        }
+
         val sisteValutakurser = valutakursService.hentValutakurser(BehandlingId(sisteVedtatteBehandling.id))
         if (!sisteValutakurser.måValutakurserOppdateresForMåned(måned)) {
             logger.info("Valutakursene er allerede oppdatert for fagsak $fagsakId. Hopper ut")
@@ -65,7 +71,8 @@ class AutovedtakMånedligValutajusteringService(
         }
 
         if (sisteVedtatteBehandling.fagsak.status != FagsakStatus.LØPENDE) {
-            throw Feil("Forsøker å utføre månedlig valutajustering på ikke løpende fagsak $fagsakId")
+            logger.warn("Forsøker å utføre månedlig valutajustering på ikke løpende fagsak $fagsakId. Hopper ut")
+            return
         }
 
         val harOpprettetSatsendring =

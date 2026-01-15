@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.GeografiskTilknytning
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlDødsfallResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFalskIdentitet
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFalskIdentitetResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlGeografiskTilknytningResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlOppholdResponse
@@ -280,6 +282,29 @@ class PdlRestKlient(
             }
 
         return feilsjekkOgReturnerData(pdlResponse = pdlResponse)
+    }
+
+    fun hentFalskIdentitet(ident: String): PdlFalskIdentitet? {
+        val pdlPersonRequest =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(ident),
+                query = hentGraphqlQuery("hent-falsk-identitet"),
+            )
+        val pdlResponse: PdlBaseResponse<PdlFalskIdentitetResponse> =
+            kallEksternTjeneste(
+                tjeneste = "pdl",
+                uri = pdlUri,
+                formål = "Hent falsk identitet",
+            ) {
+                postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+            }
+
+        return feilsjekkOgReturnerData(
+            ident = ident,
+            pdlResponse = pdlResponse,
+        ) {
+            it.person.falskIdentitet
+        }
     }
 
     fun httpHeaders(): HttpHeaders =

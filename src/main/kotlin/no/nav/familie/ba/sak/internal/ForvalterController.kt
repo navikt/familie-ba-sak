@@ -29,7 +29,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
-import no.nav.familie.ba.sak.kjerne.porteføljejustering.PorteføljejusteringService
+import no.nav.familie.ba.sak.kjerne.porteføljejustering.StartPorteføljejusteringTask
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
@@ -105,7 +105,6 @@ class ForvalterController(
     private val envService: EnvService,
     private val autovedtakSvalbardtilleggTaskOppretter: AutovedtakSvalbardtilleggTaskOppretter,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-    private val porteføljejusteringService: PorteføljejusteringService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -608,6 +607,7 @@ class ForvalterController(
     )
     fun opprettTaskerForFlyttingAvSteinkjerOppgaver(
         @RequestParam("antallFlytteTasks") antallFlytteTasks: Int? = null,
+        @RequestParam("behandlesAvApplikasjon") behandlesAvApplikasjon: BehandlesAvApplikasjon? = null,
         @RequestParam("dryRun") dryRun: Boolean = true,
     ): ResponseEntity<String> {
         tilgangService.verifiserHarTilgangTilHandling(
@@ -619,9 +619,9 @@ class ForvalterController(
             return ResponseEntity.ok("Toggle for porteføljejustering er skrudd av")
         }
 
-        val (antallOppgaverTotalt, antallFlytteTasksOpprettet) = porteføljejusteringService.lagTaskForOverføringAvOppgaverFraSteinkjer(antallFlytteTasks, dryRun)
+        taskService.save(StartPorteføljejusteringTask.opprettTask(antallFlytteTasks, behandlesAvApplikasjon, dryRun))
 
-        return ResponseEntity.ok("Antall oppgaver totalt:$antallOppgaverTotalt, Antall tasks opprettet for flytting:$antallFlytteTasksOpprettet")
+        return ResponseEntity.ok("Opprettet task for flytting av Steinkjer oppgaver")
     }
 
     @PostMapping("/opprett-tasker-for-autovedtak-svalbardtillegg/{antallBehandlinger}")
@@ -754,4 +754,12 @@ class ForvalterController(
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandlingId)
         return ResponseEntity.ok("Sendt behandlingsstatistikk for behandling $behandlingId til Datavarehus")
     }
+}
+
+enum class BehandlesAvApplikasjon(
+    val applikasjonNavn: String,
+) {
+    FAMILIE_BA_SAK("familie-ba-sak"),
+    FAMILIE_TILBAKE("familie-tilbake"),
+    FAMILIE_KLAGE("familie-klage"),
 }

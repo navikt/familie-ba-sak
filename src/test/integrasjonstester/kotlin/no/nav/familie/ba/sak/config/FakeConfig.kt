@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.unleash.UnleashService
@@ -119,12 +120,14 @@ class FakeConfig {
         systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
         familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
         integrasjonKlient: IntegrasjonKlient,
+        falskIdentitetService: FalskIdentitetService,
     ): FakePersonopplysningerService =
         FakePersonopplysningerService(
             pdlRestKlient = pdlRestKlient,
             systemOnlyPdlRestKlient = systemOnlyPdlRestKlient,
             familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
             integrasjonKlient = integrasjonKlient,
+            falskIdentitetService = falskIdentitetService,
         )
 
     @Bean

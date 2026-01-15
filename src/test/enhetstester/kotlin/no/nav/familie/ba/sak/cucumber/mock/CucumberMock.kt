@@ -574,7 +574,7 @@ class CucumberMock(
             persongrunnlagService = persongrunnlagService,
             featureToggleService = featureToggleService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            preutfyllBosattIRIketMedLagringIPersonopplysningsgrunnlagService = preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService,
+            preutfyllBosattIRiketMedLagringIPersonopplysningsgrunnlagService = preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService,
         )
 
     val preutfyllBorHosSøkerMedDataFraPersongrunnlagService =

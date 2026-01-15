@@ -51,7 +51,7 @@ class PersonController(
         val personinfo =
             familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
                 ?: personopplysningerService
-                    .hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+                    .hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
                     .tilRestPersonInfo(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
     }

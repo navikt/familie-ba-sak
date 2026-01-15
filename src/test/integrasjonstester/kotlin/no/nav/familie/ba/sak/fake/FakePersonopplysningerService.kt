@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomatiskBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomatiskBehandling2
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomati
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomatiskBehandlingSkalFeileFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutomatiskBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutomatiskBehandlingFnr
+import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.Fødselsnummer
@@ -41,11 +43,13 @@ class FakePersonopplysningerService(
     systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
     familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     integrasjonKlient: IntegrasjonKlient,
+    falskIdentitetService: FalskIdentitetService,
 ) : PersonopplysningerService(
         pdlRestKlient,
         systemOnlyPdlRestKlient,
         familieIntegrasjonerTilgangskontrollService,
         integrasjonKlient,
+        falskIdentitetService,
     ) {
     init {
         settPersoninfoMedRelasjonerForPredefinerteTestpersoner()
@@ -58,9 +62,18 @@ class FakePersonopplysningerService(
         return personInfo[aktør.aktivFødselsnummer()] ?: personInfo.getValue(INTEGRASJONER_FNR)
     }
 
+    override fun hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PdlPersonInfo {
+        validerFødselsnummer(aktør.aktivFødselsnummer())
+        sjekkPersonIkkeFunnet(aktør.aktivFødselsnummer())
+
+        return PdlPersonInfo.Person(hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør))
+    }
+
     override fun hentPersoninfoEnkel(aktør: Aktør): PersonInfo =
         personInfo[aktør.aktivFødselsnummer()]
             ?: personInfo.getValue(INTEGRASJONER_FNR)
+
+    override fun hentPdlPersonInfoEnkel(aktør: Aktør): PdlPersonInfo = PdlPersonInfo.Person(this.hentPersoninfoEnkel(aktør))
 
     override fun hentPersoninfoNavnOgAdresse(aktør: Aktør): PersonInfo = hentPersoninfoEnkel(aktør)
 

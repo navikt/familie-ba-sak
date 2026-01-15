@@ -28,6 +28,7 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
     }
     bostedsadresse(historikk: false) {
         angittFlyttedato
+        gyldigFraOgMed
         gyldigTilOgMed
         folkeregistermetadata {
             opphoerstidspunkt

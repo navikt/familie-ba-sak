@@ -2,14 +2,17 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import com.neovisionaries.i18n.CountryCode
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.VergeData
+import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -18,6 +21,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import kotlin.collections.getOrDefault
 
 @Service
 class PersonopplysningerService(
@@ -25,19 +29,39 @@ class PersonopplysningerService(
     private val systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val integrasjonKlient: IntegrasjonKlient,
+    private val falskIdentitetService: FalskIdentitetService,
 ) {
+    fun hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PdlPersonInfo {
+        val pdlPersoninfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
+        val personinfo =
+            when (pdlPersoninfo) {
+                is PdlPersonInfo.Person -> pdlPersoninfo.personInfo
+                is PdlPersonInfo.FalskPerson -> return PdlPersonInfo.FalskPerson(pdlPersoninfo.falskIdentitetPersonInfo)
+            }
+        return PdlPersonInfo.Person(personinfo.medRelasjonerOgEgenAnsattInfo(aktør))
+    }
+
     fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
-        val personinfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
+        val pdlPersoninfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
+        val personInfo =
+            when (pdlPersoninfo) {
+                is PdlPersonInfo.Person -> pdlPersoninfo.personInfo
+                is PdlPersonInfo.FalskPerson -> throw FunksjonellFeil(PERSON_HAR_FALSK_IDENTITET)
+            }
+        return personInfo.medRelasjonerOgEgenAnsattInfo(aktør)
+    }
+
+    private fun PersonInfo.medRelasjonerOgEgenAnsattInfo(aktør: Aktør): PersonInfo {
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<Aktør, FORELDERBARNRELASJONROLLE>>()
-        val relasjonsidenter = personinfo.forelderBarnRelasjon.mapNotNull { it.aktør.aktivFødselsnummer() }
+        val relasjonsidenter = this.forelderBarnRelasjon.map { it.aktør.aktivFødselsnummer() }
         val tilgangPerIdent = familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(relasjonsidenter)
         val egenAnsattPerIdent = integrasjonKlient.sjekkErEgenAnsattBulk(listOf(aktør.aktivFødselsnummer()) + relasjonsidenter)
         val forelderBarnRelasjon =
-            personinfo.forelderBarnRelasjon
+            this.forelderBarnRelasjon
                 .mapNotNull {
                     if (tilgangPerIdent.getValue(it.aktør.aktivFødselsnummer()).harTilgang) {
                         try {
-                            val relasjonsinfo = hentPersoninfoEnkel(it.aktør)
+                            val relasjonsinfo = hentPdlPersonInfoEnkel(it.aktør).personInfoBase()
                             ForelderBarnRelasjon(
                                 aktør = it.aktør,
                                 relasjonsrolle = it.relasjonsrolle,
@@ -66,21 +90,49 @@ class PersonopplysningerService(
                         adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first),
                     )
                 }.toSet()
-        return personinfo.copy(
+        return this.copy(
             erEgenAnsatt = egenAnsattPerIdent.getOrDefault(aktør.aktivFødselsnummer(), null),
             forelderBarnRelasjon = forelderBarnRelasjon,
             forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert,
         )
     }
 
-    fun hentPersoninfoEnkel(aktør: Aktør): PersonInfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.ENKEL)
+    fun hentPdlPersonInfoEnkel(aktør: Aktør): PdlPersonInfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.ENKEL)
 
-    fun hentPersoninfoNavnOgAdresse(aktør: Aktør): PersonInfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.NAVN_OG_ADRESSE)
+    fun hentPersoninfoEnkel(aktør: Aktør): PersonInfo {
+        val pdlPersonInfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.ENKEL)
+        when (pdlPersonInfo) {
+            is PdlPersonInfo.Person -> return pdlPersonInfo.personInfo
+            else -> throw FunksjonellFeil(PERSON_HAR_FALSK_IDENTITET)
+        }
+    }
+
+    fun hentPdlPersoninfoNavnOgAdresse(aktør: Aktør): PdlPersonInfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.NAVN_OG_ADRESSE)
+
+    fun hentPersoninfoNavnOgAdresse(aktør: Aktør): PersonInfo {
+        val pdlPersonInfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.NAVN_OG_ADRESSE)
+        when (pdlPersonInfo) {
+            is PdlPersonInfo.Person -> return pdlPersonInfo.personInfo
+            else -> throw FunksjonellFeil(PERSON_HAR_FALSK_IDENTITET)
+        }
+    }
 
     private fun hentPersoninfoMedQuery(
         aktør: Aktør,
         personInfoQuery: PersonInfoQuery,
-    ): PersonInfo = pdlRestKlient.hentPerson(aktør, personInfoQuery)
+    ): PdlPersonInfo =
+        try {
+            PdlPersonInfo.Person(pdlRestKlient.hentPerson(aktør, personInfoQuery))
+        } catch (e: PdlPersonKanIkkeBehandlesIFagsystem) {
+            val falskIdentitet = falskIdentitetService.hentFalskIdentitet(aktør)
+            if (falskIdentitet != null) {
+                PdlPersonInfo.FalskPerson(
+                    falskIdentitetPersonInfo = falskIdentitet,
+                )
+            } else {
+                throw e
+            }
+        }
 
     fun hentVergeData(aktør: Aktør): VergeData = VergeData(harVerge = harVerge(aktør).harVerge)
 
@@ -134,6 +186,7 @@ class PersonopplysningerService(
                 gyldigFraOgMed = null,
                 gyldigTilOgMed = null,
             )
+        const val PERSON_HAR_FALSK_IDENTITET = "Person har falsk identitet."
         private val logger: Logger =
             LoggerFactory.getLogger(PersonopplysningerService::class.java)
     }

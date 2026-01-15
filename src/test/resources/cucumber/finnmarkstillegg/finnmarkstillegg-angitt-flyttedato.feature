@@ -32,7 +32,8 @@ Egenskap: Innvilgelse av Finnmarkstillegg
     Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.11.2024 | 30.04.2025 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
-      | 2       | 1            | 01.05.2025 | 30.09.2042 | 1968  | ORDINÆR_BARNETRYGD | 100     | 1968 |
+      | 2       | 1            | 01.05.2025 | 31.01.2026 | 1968  | ORDINÆR_BARNETRYGD | 100     | 1968 |
+      | 2       | 1            | 01.02.2026 | 30.09.2042 | 2012  | ORDINÆR_BARNETRYGD | 100     | 2012 |
 
     Og med adressekommuner
       | AktørId | Angitt flyttedato | Fra dato   | Til dato   | Kommunenummer |

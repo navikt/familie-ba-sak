@@ -37,7 +37,8 @@ Egenskap: Svalbardtillegg autovedtak første kjøring - brev og begrunnelse
     Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Prosent | Ytelse type        |
       | 2       | 1            | 01.02.2025 | 30.04.2025 | 1766  | 100     | ORDINÆR_BARNETRYGD |
-      | 2       | 1            | 01.05.2025 | 31.12.2042 | 1968  | 100     | ORDINÆR_BARNETRYGD |
+      | 2       | 1            | 01.05.2025 | 31.01.2026 | 1968  | 100     | ORDINÆR_BARNETRYGD |
+      | 2       | 1            | 01.02.2026 | 31.12.2042 | 2012  | 100     | ORDINÆR_BARNETRYGD |
 
     Og med adressekommuner
       | AktørId | Fra dato   | Til dato | Kommunenummer | Adressetype     |
@@ -62,16 +63,19 @@ Egenskap: Svalbardtillegg autovedtak første kjøring - brev og begrunnelse
     Så forvent følgende andeler tilkjent ytelse for behandling 2
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Prosent | Ytelse type        |
       | 2       | 2            | 01.02.2025 | 30.04.2025 | 1766  | 100     | ORDINÆR_BARNETRYGD |
-      | 2       | 2            | 01.05.2025 | 31.12.2042 | 1968  | 100     | ORDINÆR_BARNETRYGD |
-      | 2       | 2            | 01.10.2025 | 31.12.2042 | 500   | 100     | SVALBARDTILLEGG    |
+      | 2       | 2            | 01.05.2025 | 31.01.2026 | 1968  | 100     | ORDINÆR_BARNETRYGD |
+      | 2       | 2            | 01.02.2026 | 31.12.2042 | 2012  | 100     | ORDINÆR_BARNETRYGD |
+      | 2       | 2            | 01.10.2025 | 31.01.2026 | 500   | 100     | SVALBARDTILLEGG    |
+      | 2       | 2            | 01.02.2026 | 31.12.2042 | 512   | 100     | SVALBARDTILLEGG    |
 
     Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype | Begrunnelser                        |
       | 01.09.2025 | 30.09.2025 | Utbetaling         |                                     |
-      | 01.10.2025 | 31.12.2042 | Utbetaling         | INNVILGET_SVALBARDTILLEGG_UTEN_DATO |
+      | 01.10.2025 | 31.01.2026 | Utbetaling         | INNVILGET_SVALBARDTILLEGG_UTEN_DATO |
+      | 01.02.2026 | 31.12.2042 | Utbetaling         | INNVILGET_SVALBARDTILLEGG_UTEN_DATO |
       | 01.01.2043 |            | Opphør             |                                     |
 
-    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.10.2025 til 31.12.2042
+    Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.10.2025 til 31.01.2026
       | Begrunnelse                         | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | INNVILGET_SVALBARDTILLEGG_UTEN_DATO | STANDARD | Ja            | 01.01.25             | 1           | september 2025                       |         | 2 468 |                  | SØKER_HAR_IKKE_RETT     |                             |
 
