@@ -20,6 +20,7 @@ jobs:
       push-image: true
       byosbom: target/classes/META-INF/sbom/application.cdx.json
       skip-tests: ${{ inputs.skip-tests }}
+      java-version: '25'
     secrets: inherit
   deploy-with-new-image:
     name: Deploy with new image
