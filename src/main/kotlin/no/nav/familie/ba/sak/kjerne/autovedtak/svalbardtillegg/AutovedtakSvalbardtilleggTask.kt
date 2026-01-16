@@ -4,14 +4,17 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.AutovedtakSkalIkkeGjennomføresFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 @TaskStepBeskrivelse(
@@ -24,6 +27,7 @@ class AutovedtakSvalbardtilleggTask(
     private val autovedtakStegService: AutovedtakStegService,
     private val fagsakService: FagsakService,
     private val opprettTaskService: OpprettTaskService,
+    private val startSatsendring: StartSatsendring,
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
@@ -31,6 +35,15 @@ class AutovedtakSvalbardtilleggTask(
         val aktør = fagsakService.hentAktør(fagsakId)
         val resultat =
             try {
+                val harOpprettetSatsendring =
+                    startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId)
+                if (harOpprettetSatsendring) {
+                    throw RekjørSenereException(
+                        "Satsendring skal kjøre ferdig før man behandler fødselsehendelse",
+                        LocalDateTime.now().plusMinutes(60),
+                    )
+                }
+
                 autovedtakStegService.kjørBehandlingSvalbardtillegg(
                     mottakersAktør = aktør,
                     fagsakId = fagsakId,
