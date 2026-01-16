@@ -8,12 +8,12 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.gyldigGjeldendeOppholdstillatelseFødselshendelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.iUkraina
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.lagErNordiskStatsborgerTidslinje
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.utils.erMinst12Måneder
+import no.nav.familie.ba.sak.kjerne.tidslinje.utils.erMinst12MånederMedNullTomSomUendelig
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD
@@ -215,7 +215,7 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
             }
 
             behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE &&
-                harOppholdstillatelseSamtidigSomErBosattINorge(person, erBosattINorgePeriode) &&
+                harMinst12MånederOppholdstillatelseSamtidigSomErBosattINorge(person, erBosattINorgePeriode) &&
                 person.type == PersonType.SØKER -> {
                 OppfyltDelvilkår("- Søker har oppholdstillatelse i Norge samtidig som bosatt ved fødsel.")
             }
@@ -225,11 +225,11 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
             }
         }
 
-    private fun harOppholdstillatelseSamtidigSomErBosattINorge(
+    private fun harMinst12MånederOppholdstillatelseSamtidigSomErBosattINorge(
         person: Person,
         erBosattINorgePeriode: Periode<Boolean?>,
     ): Boolean {
-        val oppholdstillatelseTidslinjeForPerson = lagOppholdstillatelseTidslinje(person.opphold)
+        val oppholdstillatelseTidslinjeForPerson = lagOppholdstillatelsePåMinst12MånederTidslinje(person.opphold)
 
         val harOppholdstillatelseSamtidigSomManErBosatt =
             erBosattINorgePeriode.tilTidslinje().kombinerMed(oppholdstillatelseTidslinjeForPerson) { erBosattINorgePeriode, harOppholdstillatelse ->
@@ -239,19 +239,29 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
         return harOppholdstillatelseSamtidigSomManErBosatt.tilPerioder().any { it.verdi == true }
     }
 
-    private fun lagOppholdstillatelseTidslinje(
+    private fun lagOppholdstillatelsePåMinst12MånederTidslinje(
         opphold: List<GrOpphold>,
     ): Tidslinje<Boolean> =
         opphold
-            .filter { it.type == OPPHOLDSTILLATELSE.PERMANENT || it.type == OPPHOLDSTILLATELSE.MIDLERTIDIG }
-            .mapIndexed { index, it ->
-                val erSiste = index == opphold.lastIndex
+            // Godtar kun opphold-perioder med fom-dato og som er permanent eller midlertidig
+            .filter { it.gyldigPeriode?.fom != null && (it.type == OPPHOLDSTILLATELSE.PERMANENT || it.type == OPPHOLDSTILLATELSE.MIDLERTIDIG) }
+            .map {
                 Periode(
                     verdi = true,
                     fom = it.gyldigPeriode?.fom,
-                    tom = if (erSiste) null else it.gyldigPeriode?.tom,
+                    tom =
+                        when {
+                            // Godtar null tom for permanent oppholdstillatelse
+                            it.type == OPPHOLDSTILLATELSE.PERMANENT -> it.gyldigPeriode?.tom
+
+                            // Setter dagens dato som tom dersom tom er null for midlertidig oppholdstillatelse
+                            else -> it.gyldigPeriode?.tom ?: LocalDate.now()
+                        },
                 )
             }.tilTidslinje()
+            .tilPerioderIkkeNull()
+            .filter { it.erMinst12MånederMedNullTomSomUendelig() }
+            .tilTidslinje()
 
     private fun erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat: PersonResultat): Boolean {
         val søknad = søknadService.finnSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id) ?: return false
