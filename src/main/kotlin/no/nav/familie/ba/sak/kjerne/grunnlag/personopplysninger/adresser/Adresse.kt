@@ -170,7 +170,7 @@ fun List<Adresse>.filtrereUgyldigeOppholdsadresser(): List<Adresse> {
     val filtrert =
         filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
             .velgSvalbardAdresserForIdentiskePerioder()
-            .velgAdresseMedSenestTomVedLikFom()
+            .velgAdresserMedSenestTomVedLikFom()
 
     return filtrert.forskyvTilOgMedHvisDenErLikNesteFraOgMed()
 }
@@ -183,7 +183,7 @@ private fun List<Adresse>.velgSvalbardAdresserForIdentiskePerioder(): List<Adres
             likePerioder.find { it.erPåSvalbard() } ?: likePerioder.first()
         }
 
-private fun List<Adresse>.velgAdresseMedSenestTomVedLikFom(): List<Adresse> =
+private fun List<Adresse>.velgAdresserMedSenestTomVedLikFom(): List<Adresse> =
     this
         .groupBy { it.gyldigFraOgMed }
         .values
