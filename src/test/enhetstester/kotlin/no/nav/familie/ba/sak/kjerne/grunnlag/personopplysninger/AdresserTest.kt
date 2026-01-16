@@ -911,8 +911,9 @@ class AdresserTest {
         @Test
         fun `skal kunne håndtere perioder med lik fom dato`() {
             // Arrange
-            val førsteFom = LocalDate.of(2024, 8, 14)
-            val førsteTom = LocalDate.of(2024, 8, 16)
+            val førsteFom = LocalDate.of(2024, 8, 9)
+            val andreFom = LocalDate.of(2024, 8, 14)
+            val andreTom = LocalDate.of(2024, 8, 16)
 
             val adresser =
                 Adresser(
@@ -926,7 +927,15 @@ class AdresserTest {
                             ).tilAdresse(),
                             lagGrVegadresseOppholdsadresse(
                                 kommunenummer = SvalbardKommune.SVALBARD.kommunenummer,
-                                periode = DatoIntervallEntitet(fom = førsteFom, tom = førsteTom),
+                                periode = DatoIntervallEntitet(fom = førsteFom, tom = null),
+                            ).tilAdresse(),
+                            lagGrVegadresseOppholdsadresse(
+                                kommunenummer = SvalbardKommune.SVALBARD.kommunenummer,
+                                periode = DatoIntervallEntitet(fom = andreFom, tom = null),
+                            ).tilAdresse(),
+                            lagGrVegadresseOppholdsadresse(
+                                kommunenummer = SvalbardKommune.SVALBARD.kommunenummer,
+                                periode = DatoIntervallEntitet(fom = andreFom, tom = andreTom),
                             ).tilAdresse(),
                         ),
                 )
@@ -939,7 +948,7 @@ class AdresserTest {
             assertThat(perioder).hasSize(1)
 
             assertThat(perioder[0].fom).isEqualTo(førsteFom)
-            assertThat(perioder[0].tom).isEqualTo(førsteTom)
+            assertThat(perioder[0].tom).isEqualTo(andreTom)
             assertThat(perioder[0].verdi).isTrue
         }
     }
