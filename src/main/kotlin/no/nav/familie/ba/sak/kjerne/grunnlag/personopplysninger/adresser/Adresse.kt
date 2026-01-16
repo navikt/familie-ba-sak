@@ -164,18 +164,32 @@ fun List<Adresse>.filtrereUgyldigeAdresser(): List<Adresse> {
 /**
  * Filtrerer ut adresser med ugyldige kombinasjoner av fom og tom
  * Distinkte perioder med lik fom og tom (prioriterer de som er på Svalbard)
+ * Dersom to perioder har lik fom prioriterer vi perioden som har tom satt til senest.
  **/
 fun List<Adresse>.filtrereUgyldigeOppholdsadresser(): List<Adresse> {
     val filtrert =
         filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
-            .groupBy { it.gyldigFraOgMed to it.gyldigTilOgMed }
-            .values
-            .map { likePerioder ->
-                likePerioder.find { it.erPåSvalbard() } ?: likePerioder.first()
-            }
+            .velgSvalbardAdresserForIdentiskePerioder()
+            .velgAdresseMedSenestTomVedLikFom()
 
     return filtrert.forskyvTilOgMedHvisDenErLikNesteFraOgMed()
 }
+
+private fun List<Adresse>.velgSvalbardAdresserForIdentiskePerioder(): List<Adresse> =
+    this
+        .groupBy { it.gyldigFraOgMed to it.gyldigTilOgMed }
+        .values
+        .map { likePerioder ->
+            likePerioder.find { it.erPåSvalbard() } ?: likePerioder.first()
+        }
+
+private fun List<Adresse>.velgAdresseMedSenestTomVedLikFom(): List<Adresse> =
+    this
+        .groupBy { it.gyldigFraOgMed }
+        .values
+        .map { perioderMedLikFom ->
+            perioderMedLikFom.filter { it.gyldigTilOgMed != null }.maxByOrNull { it.gyldigTilOgMed!! } ?: perioderMedLikFom.first()
+        }
 
 private fun List<Adresse>.forskyvTilOgMedHvisDenErLikNesteFraOgMed(): List<Adresse> =
     sortedBy { it.gyldigFraOgMed }
