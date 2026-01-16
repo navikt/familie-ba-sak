@@ -458,6 +458,7 @@ class PreutfyllBosattIRiketService(
         val filtrert =
             adresser
                 .filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
+                .distinct()
                 .groupBy { it.gyldigFraOgMed to it.gyldigTilOgMed }
                 .values
                 .map { likePerioder ->
