@@ -69,6 +69,7 @@ internal class AutovedtakFinnmarkstilleggTaskTest {
                 )
 
             every { fagsakService.hentAktør(fagsakId) } returns aktør
+            every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId) } returns false
             every {
                 autovedtakStegService.kjørBehandlingFinnmarkstillegg(
                     mottakersAktør = aktør,
@@ -104,6 +105,7 @@ internal class AutovedtakFinnmarkstilleggTaskTest {
                 )
 
             every { fagsakService.hentAktør(fagsakId) } returns aktør
+            every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId) } returns false
             every {
                 autovedtakStegService.kjørBehandlingFinnmarkstillegg(
                     mottakersAktør = aktør,
@@ -178,6 +180,7 @@ internal class AutovedtakFinnmarkstilleggTaskTest {
                 )
 
             every { fagsakService.hentAktør(fagsakId) } returns aktør
+            every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId) } returns false
             every {
                 autovedtakStegService.kjørBehandlingFinnmarkstillegg(
                     mottakersAktør = aktør,
@@ -231,6 +234,7 @@ internal class AutovedtakFinnmarkstilleggTaskTest {
                 )
 
             every { fagsakService.hentAktør(fagsakId) } returns aktør
+            every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId) } returns false
             every {
                 autovedtakStegService.kjørBehandlingFinnmarkstillegg(
                     mottakersAktør = aktør,
@@ -266,6 +270,7 @@ internal class AutovedtakFinnmarkstilleggTaskTest {
                 )
 
             every { fagsakService.hentAktør(fagsakId) } returns aktør
+            every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId) } returns false
             justRun { opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(fagsakId, any()) }
             every {
                 autovedtakStegService.kjørBehandlingFinnmarkstillegg(
@@ -308,6 +313,7 @@ internal class AutovedtakFinnmarkstilleggTaskTest {
                 )
 
             every { fagsakService.hentAktør(fagsakId) } returns aktør
+            every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId) } returns false
             every {
                 autovedtakStegService.kjørBehandlingFinnmarkstillegg(any(), any(), any())
             } returns "Resultat\nmed\nlinjeskift"
