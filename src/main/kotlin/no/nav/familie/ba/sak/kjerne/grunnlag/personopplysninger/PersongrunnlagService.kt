@@ -73,8 +73,9 @@ class PersongrunnlagService(
     fun mapTilPersonDtoMedStatsborgerskapLand(
         person: Person,
         erManueltLagtTilISøknad: Boolean? = null,
+        eldsteBarnsFødselsdato: LocalDate? = null,
     ): PersonDto {
-        val restPerson = person.tilPersonDto(erManueltLagtTilISøknad)
+        val restPerson = person.tilPersonDto(erManueltLagtTilISøknad, eldsteBarnsFødselsdato)
         restPerson.registerhistorikk
             ?.statsborgerskap
             ?.forEach { lagret ->

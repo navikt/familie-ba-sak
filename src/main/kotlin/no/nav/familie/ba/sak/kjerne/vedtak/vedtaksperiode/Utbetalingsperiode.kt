@@ -41,7 +41,7 @@ data class UtbetalingsperiodeDetalj(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) : this(
         person =
-            personopplysningGrunnlag.søkerOgBarn.find { person -> andel.aktør == person.aktør }?.tilPersonDto()
+            personopplysningGrunnlag.søkerOgBarn.find { person -> andel.aktør == person.aktør }?.tilPersonDto(eldsteBarnsFødselsdato = personopplysningGrunnlag.eldsteBarnSinFødselsdato)
                 ?: throw Feil("Fant ikke personopplysningsgrunnlag for andel"),
         ytelseType = andel.type,
         utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp,
@@ -96,7 +96,7 @@ fun Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagUtbetalingsperiodeD
                 ?: throw Feil("Fant ikke personopplysningsgrunnlag for andel")
 
         UtbetalingsperiodeDetalj(
-            person = personForAndel.tilPersonDto(),
+            person = personForAndel.tilPersonDto(eldsteBarnsFødselsdato = personopplysningGrunnlag.eldsteBarnSinFødselsdato)),
             ytelseType = andel.type,
             utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp,
             erPåvirketAvEndring = andel.endreteUtbetalinger.isNotEmpty(),
