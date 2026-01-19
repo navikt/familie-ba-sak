@@ -109,8 +109,12 @@ abstract class GrBostedsadresse(
                     else -> throw Feil("Vegadresse, matrikkeladresse og ukjent bosted har verdi null ved mapping fra bostedadresse")
                 }
             return mappetAdresse.also {
+                val fomFraPdl = bostedsadresse.angittFlyttedato ?: bostedsadresse.gyldigFraOgMed
+
+                val fomPåAdresse = fomFraPdl?.let { fomFraPdl -> maxOf(fomFraPdl, person.fødselsdato) }
+
                 it.person = person
-                it.periode = DatoIntervallEntitet(bostedsadresse.angittFlyttedato ?: bostedsadresse.gyldigFraOgMed, bostedsadresse.gyldigTilOgMed)
+                it.periode = DatoIntervallEntitet(fomPåAdresse, bostedsadresse.gyldigTilOgMed)
             }
         }
 

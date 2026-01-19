@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bosteds
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.vurderOmPersonerBorSammen
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -154,5 +155,35 @@ internal class BostedsadresseTest {
                 ),
             )
         Assertions.assertTrue(vurderOmPersonerBorSammen(p1Adresser.filtrerGjeldendeNå(), p2Adresser.filtrerGjeldendeNå()))
+    }
+
+    @Test
+    fun `Skal overkjøre fom i bostedsadresse dersom dette er lengre tilbake i tid enn når personen er født`() {
+        // Arrange
+        val fødselsdatoPåPerson = LocalDate.of(2020, 1, 1)
+        val fomPåAdresseFraPdl = LocalDate.of(2010, 1, 1)
+
+        val person = lagPerson(fødselsdato = fødselsdatoPåPerson)
+
+        val bostedsadresse =
+            Bostedsadresse(
+                angittFlyttedato = fomPåAdresseFraPdl,
+                gyldigFraOgMed = fomPåAdresseFraPdl,
+                gyldigTilOgMed = null,
+                matrikkeladresse =
+                    Matrikkeladresse(
+                        matrikkelId = 123L,
+                        bruksenhetsnummer = "H301",
+                        tilleggsnavn = "navn",
+                        postnummer = "0202",
+                        kommunenummer = "2231",
+                    ),
+            )
+
+        // Act
+        val grBostedsadresse = GrBostedsadresse.fraBostedsadresse(bostedsadresse, person)
+
+        // Assert
+        assertThat(grBostedsadresse.periode?.fom).isEqualTo(fødselsdatoPåPerson)
     }
 }

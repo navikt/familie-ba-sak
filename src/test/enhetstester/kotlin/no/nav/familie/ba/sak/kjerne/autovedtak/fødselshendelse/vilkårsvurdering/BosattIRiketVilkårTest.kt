@@ -29,7 +29,7 @@ class BosattIRiketVilkårTest {
 
     @Test
     fun `Skal sjekke at person bor i riket dersom vedkommende har vært utvandret langt tilbake i tid`() {
-        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val søker = tilfeldigPerson(personType = PersonType.SØKER, fødselsdato = LocalDate.of(1950, 1, 1))
 
         søker.apply {
             bostedsadresser =
@@ -224,7 +224,7 @@ class BosattIRiketVilkårTest {
 
     @Test
     fun `Skal sjekke at person bor i riket selv om hen har ekstra adresse uten fom`() {
-        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val søker = tilfeldigPerson(personType = PersonType.SØKER, fødselsdato = LocalDate.now().minusMonths(7))
 
         søker.apply {
             bostedsadresser =
