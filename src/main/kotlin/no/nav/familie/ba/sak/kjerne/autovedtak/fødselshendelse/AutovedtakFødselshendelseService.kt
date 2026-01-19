@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
@@ -238,39 +239,23 @@ class AutovedtakFødselshendelseService(
         val søkerResultat = vilkårsvurdering?.personResultater?.find { it.aktør == søker.aktør }
 
         val sisteIkkeOppfylteBosattIRiketVilkårResultat = søkerResultat?.vilkårResultater?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET && it.resultat == Resultat.IKKE_OPPFYLT }?.maxByOrNull { it.periodeFom!! }
-        val lovligOppholdResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+        val sisteIkkeOppfylteLovligOppholdVilkårResultat = søkerResultat?.vilkårResultater?.filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD && it.resultat != Resultat.OPPFYLT }?.maxByOrNull { it.periodeFom!! }
 
         if (sisteIkkeOppfylteBosattIRiketVilkårResultat != null) {
-            if (sisteIkkeOppfylteBosattIRiketVilkårResultat.evalueringÅrsaker.any {
-                    VilkårIkkeOppfyltÅrsak.valueOf(
-                        it,
-                    ) == VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM
-                }
-            ) {
-                return "Mor har flere bostedsadresser uten fra- og med dato"
-            } else if (sisteIkkeOppfylteBosattIRiketVilkårResultat.evalueringÅrsaker.any {
-                    VilkårIkkeOppfyltÅrsak.valueOf(
-                        it,
-                    ) == VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_12_MND
-                }
-            ) {
-                return "Mor bosatt i riket i mindre enn 12 måneder."
-            }
-            return "Mor er ikke bosatt i riket."
-        } else if (lovligOppholdResultat?.resultat != Resultat.OPPFYLT) {
-            return lovligOppholdResultat?.evalueringÅrsaker?.joinToString("\n") {
-                when (lovligOppholdResultat.resultat) {
+            return hentBegrunnelseFraBosattIRiketVilkårResultat(sisteIkkeOppfylteBosattIRiketVilkårResultat)
+        } else if (sisteIkkeOppfylteLovligOppholdVilkårResultat?.resultat != null) {
+            return sisteIkkeOppfylteLovligOppholdVilkårResultat.evalueringÅrsaker.joinToString("\n") {
+                when (sisteIkkeOppfylteLovligOppholdVilkårResultat.resultat) {
                     Resultat.IKKE_OPPFYLT -> VilkårIkkeOppfyltÅrsak.valueOf(it).beskrivelse
                     Resultat.IKKE_VURDERT -> VilkårKanskjeOppfyltÅrsak.valueOf(it).beskrivelse
                     else -> ""
                 }
             }
-                ?: "Mor har ikke lovlig opphold"
         }
 
         persongrunnlagService.hentBarna(behandling).forEach { barn ->
             val vilkårsresultat =
-                vilkårsvurdering.personResultater.find { it.aktør == barn.aktør }?.vilkårResultater
+                vilkårsvurdering?.personResultater?.find { it.aktør == barn.aktør }?.vilkårResultater
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.resultat == Resultat.IKKE_OPPFYLT) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato.tilKortString()}) er over 18 år."
@@ -292,6 +277,25 @@ class AutovedtakFødselshendelseService(
         logger.error("Fant ikke begrunnelse for at fødselshendelse ikke kunne automatisk behandles.")
 
         return ""
+    }
+
+    private fun hentBegrunnelseFraBosattIRiketVilkårResultat(vilkårResultat: VilkårResultat): String {
+        if (vilkårResultat.evalueringÅrsaker.any {
+                VilkårIkkeOppfyltÅrsak.valueOf(
+                    it,
+                ) == VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM
+            }
+        ) {
+            return "Mor har flere bostedsadresser uten fra- og med dato"
+        } else if (vilkårResultat.evalueringÅrsaker.any {
+                VilkårIkkeOppfyltÅrsak.valueOf(
+                    it,
+                ) == VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_12_MND
+            }
+        ) {
+            return "Mor bosatt i riket i mindre enn 12 måneder."
+        }
+        return "Mor er ikke bosatt i riket."
     }
 
     companion object {
