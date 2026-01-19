@@ -186,8 +186,10 @@ class AutovedtakFødselshendelseServiceIntegrationTest(
             val mor = lagPerson(fødselsdato = LocalDate.of(2004, 5, 2))
             val fnrMor = mor.aktør.aktivFødselsnummer()
 
-            val barn = lagPerson(fødselsdato = LocalDate.of(2025, 12, 30))
+            val barn = lagPerson(fødselsdato = LocalDate.now().minusMonths(4))
             val fnrBarn = barn.aktør.aktivFødselsnummer()
+
+            val eksisterendeBarn = lagPerson(fødselsdato = LocalDate.now().minusYears(2))
 
             FakePersonopplysningerService.leggTilPersonInfo(
                 fødselsdato = mor.fødselsdato,
@@ -198,7 +200,20 @@ class AutovedtakFødselshendelseServiceIntegrationTest(
                         bostedsadresser =
                             listOf(
                                 lagBostedsadresse(
-                                    gyldigFraOgMed = LocalDate.now().minusMonths(6),
+                                    gyldigFraOgMed = LocalDate.now().minusYears(2),
+                                    gyldigTilOgMed = LocalDate.now().minusYears(1),
+                                    vegadresse =
+                                        lagVegadresse(
+                                            matrikkelId = 2L,
+                                            husnummer = "2",
+                                            bruksenhetsnummer = "2",
+                                            adressenavn = "Test",
+                                            kommunenummer = "0002",
+                                            postnummer = "0002",
+                                        ),
+                                ),
+                                lagBostedsadresse(
+                                    gyldigFraOgMed = LocalDate.now().minusMonths(3),
                                     gyldigTilOgMed = null,
                                     vegadresse =
                                         lagVegadresse(
@@ -225,6 +240,10 @@ class AutovedtakFødselshendelseServiceIntegrationTest(
                                     aktør = barn.aktør,
                                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                                 ),
+                                ForelderBarnRelasjon(
+                                    aktør = eksisterendeBarn.aktør,
+                                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                ),
                             ),
                     ),
                 personIdent = fnrMor,
@@ -238,7 +257,7 @@ class AutovedtakFødselshendelseServiceIntegrationTest(
                         bostedsadresser =
                             listOf(
                                 lagBostedsadresse(
-                                    gyldigFraOgMed = LocalDate.now().minusMonths(6),
+                                    gyldigFraOgMed = LocalDate.now().minusMonths(4),
                                     gyldigTilOgMed = null,
                                     vegadresse =
                                         lagVegadresse(
@@ -255,7 +274,7 @@ class AutovedtakFødselshendelseServiceIntegrationTest(
                             mutableListOf(
                                 Opphold(
                                     type = OPPHOLDSTILLATELSE.PERMANENT,
-                                    oppholdFra = LocalDate.now().minusMonths(3),
+                                    oppholdFra = LocalDate.now().minusMonths(4),
                                     oppholdTil = null,
                                 ),
                             ),
@@ -269,6 +288,7 @@ class AutovedtakFødselshendelseServiceIntegrationTest(
                     ),
                 personIdent = fnrBarn,
             )
+            FakePersonopplysningerService.leggTilPersonInfo(fødselsdato = eksisterendeBarn.fødselsdato)
 
             val fødselshendelseData =
                 FødselshendelseData(
