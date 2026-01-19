@@ -922,7 +922,7 @@ class PreutfyllBosattIRiketServiceTest {
 
         assertThat(søkerBosattIRiketVilkårResultat.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
 
-        assertThat(søkerBosattIRiketVilkårResultat.evalueringÅrsaker).containsExactly(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET.name, VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_12_MND.name)
+        assertThat(søkerBosattIRiketVilkårResultat.evalueringÅrsaker).containsExactly(VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_12_MND.name)
     }
 
     @Test
