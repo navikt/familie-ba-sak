@@ -237,7 +237,7 @@ class AutovedtakFødselshendelseService(
         val søker = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id).søker()
         val søkerResultat = vilkårsvurdering?.personResultater?.find { it.aktør == søker.aktør }
 
-        val sisteIkkeOppfylteBosattIRiketVilkårResultat = søkerResultat?.vilkårResultater?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET && it.resultat == Resultat.IKKE_OPPFYLT }?.maxBy { it.periodeFom!! }
+        val sisteIkkeOppfylteBosattIRiketVilkårResultat = søkerResultat?.vilkårResultater?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET && it.resultat == Resultat.IKKE_OPPFYLT }?.maxByOrNull { it.periodeFom!! }
         val lovligOppholdResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
 
         if (sisteIkkeOppfylteBosattIRiketVilkårResultat != null) {
