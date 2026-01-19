@@ -95,8 +95,11 @@ abstract class GrOppholdsadresse(
                 oppholdsadresse.utenlandskAdresse != null -> fraUtenlandskAdresse(oppholdsadresse.utenlandskAdresse!!)
                 else -> GrUkjentAdresseOppholdsadresse()
             }.also {
+                val fomFraPdl = oppholdsadresse.gyldigFraOgMed
+                val fomPåAdresse = fomFraPdl?.let { fomFraPdl -> maxOf(fomFraPdl, person.fødselsdato) }
+
                 it.person = person
-                it.periode = DatoIntervallEntitet(oppholdsadresse.gyldigFraOgMed, oppholdsadresse.gyldigTilOgMed)
+                it.periode = DatoIntervallEntitet(fomPåAdresse, oppholdsadresse.gyldigTilOgMed)
                 it.oppholdAnnetSted = OppholdAnnetSted.parse(oppholdsadresse.oppholdAnnetSted)
             }
     }

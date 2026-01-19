@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse
 
-import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse.GrMatrikkeladresseOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse.GrOppholdsadresse
@@ -23,8 +23,8 @@ import org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE
 import java.time.LocalDate
 
 class OppholdsadresseTest {
-    private val person1 = mockk<Person>()
-    private val person2 = mockk<Person>()
+    private val person1 = lagPerson(fødselsdato = LocalDate.of(2020, 1, 1))
+    private val person2 = lagPerson(fødselsdato = LocalDate.of(2020, 1, 1))
     private val fom = LocalDate.of(2024, 1, 1)
     private val tom = LocalDate.of(2024, 12, 31)
     private val vegadresse =
@@ -92,6 +92,22 @@ class OppholdsadresseTest {
 
             val grVegadresse = grOppholdsadresse as GrVegadresseOppholdsadresse
             assertOppholdsadresse(grVegadresse)
+            assertVegadresse(grVegadresse)
+        }
+
+        @Test
+        fun `Skal overkjøre fom i oppholdsadresse dersom dette er lengre tilbake i tid enn når personen er født`() {
+            // Arrange
+            val oppholdsadresse = oppholdsadresse.copy(vegadresse = vegadresse, gyldigFraOgMed = LocalDate.of(1990, 1, 1))
+
+            // Act
+            val grOppholdsadresse = GrOppholdsadresse.fraOppholdsadresse(oppholdsadresse, person1)
+
+            // Assert
+            assertThat(grOppholdsadresse).isInstanceOf(GrVegadresseOppholdsadresse::class.java)
+
+            val grVegadresse = grOppholdsadresse as GrVegadresseOppholdsadresse
+            assertOppholdsadresse(grVegadresse, forventetFom = person1.fødselsdato)
             assertVegadresse(grVegadresse)
         }
 
