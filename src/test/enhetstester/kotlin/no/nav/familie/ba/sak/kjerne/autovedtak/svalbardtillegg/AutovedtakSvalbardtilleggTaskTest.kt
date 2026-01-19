@@ -8,25 +8,51 @@ import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.AutovedtakSkalIkkeGjennomføresFeil
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.error.RekjørSenereException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDateTime
 
 internal class AutovedtakSvalbardtilleggTaskTest {
     private val autovedtakStegService = mockk<AutovedtakStegService>()
     private val fagsakService = mockk<FagsakService>()
     private val opprettTaskService = mockk<OpprettTaskService>()
+    private val startSatsendring = mockk<StartSatsendring>()
     private val autovedtakSvalbardtilleggTask =
         AutovedtakSvalbardtilleggTask(
             autovedtakStegService = autovedtakStegService,
             fagsakService = fagsakService,
             opprettTaskService = opprettTaskService,
+            startSatsendring = startSatsendring,
         )
+
+    @Test
+    fun `skal kaste rekjørSenereException hvis satsendring trenger å bli kjørt`() {
+        // Arrange
+        val fagsakId = 12345L
+        val task =
+            Task(
+                type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE,
+                payload = fagsakId.toString(),
+            )
+
+        every { fagsakService.hentAktør(fagsakId) } returns randomAktør()
+
+        every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId) } returns true
+
+        // Act
+        val rekjørSenereException = assertThrows<RekjørSenereException> { autovedtakSvalbardtilleggTask.doTask(task) }
+
+        // Assert
+        assertThat(rekjørSenereException.triggerTid).isAfter(LocalDateTime.now().plusMinutes(58))
+    }
 
     @Nested
     inner class DoTask {
@@ -39,6 +65,7 @@ internal class AutovedtakSvalbardtilleggTaskTest {
             val task = Task(type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE, payload = fagsakId.toString())
 
             every { fagsakService.hentAktør(fagsakId) } returns aktør
+            every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId) } returns false
             every { autovedtakStegService.kjørBehandlingSvalbardtillegg(mottakersAktør = aktør, fagsakId = fagsakId, førstegangKjørt = any()) } returns AutovedtakStegService.BEHANDLING_FERDIG
 
             // Act
@@ -58,6 +85,7 @@ internal class AutovedtakSvalbardtilleggTaskTest {
             val task = Task(type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE, payload = fagsakId.toString())
 
             every { fagsakService.hentAktør(fagsakId) } returns aktør
+            every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId) } returns false
             every { autovedtakStegService.kjørBehandlingSvalbardtillegg(mottakersAktør = aktør, fagsakId = fagsakId, førstegangKjørt = any()) } returns AutovedtakStegService.BEHANDLING_FERDIG
 
             // Act
@@ -106,6 +134,7 @@ internal class AutovedtakSvalbardtilleggTaskTest {
             val task = Task(type = AutovedtakSvalbardtilleggTask.TASK_STEP_TYPE, payload = fagsakId.toString())
 
             every { fagsakService.hentAktør(fagsakId) } returns aktør
+            every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId) } returns false
             every { autovedtakStegService.kjørBehandlingSvalbardtillegg(mottakersAktør = aktør, fagsakId = fagsakId, førstegangKjørt = any()) } throws RuntimeException("Feil under behanlding")
 
             // Act and Assert
@@ -140,6 +169,7 @@ internal class AutovedtakSvalbardtilleggTaskTest {
                 )
 
             every { fagsakService.hentAktør(fagsakId) } returns aktør
+            every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId) } returns false
             every {
                 autovedtakStegService.kjørBehandlingSvalbardtillegg(
                     mottakersAktør = aktør,
@@ -175,6 +205,7 @@ internal class AutovedtakSvalbardtilleggTaskTest {
                 )
 
             every { fagsakService.hentAktør(fagsakId) } returns aktør
+            every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId) } returns false
             justRun { opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(fagsakId, any()) }
             every {
                 autovedtakStegService.kjørBehandlingSvalbardtillegg(
@@ -217,6 +248,7 @@ internal class AutovedtakSvalbardtilleggTaskTest {
                 )
 
             every { fagsakService.hentAktør(fagsakId) } returns aktør
+            every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId) } returns false
             every {
                 autovedtakStegService.kjørBehandlingSvalbardtillegg(any(), any(), any())
             } returns "Resultat\nmed\nlinjeskift"
