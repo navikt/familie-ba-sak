@@ -582,7 +582,7 @@ class PreutfyllBosattIRiketServiceTest {
                 ?.vilkårResultater
                 ?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET } ?: emptyList()
         val ikkeOppfyltPeriode = vilkårResultat.filter { it.resultat == Resultat.IKKE_OPPFYLT }
-        assertThat(ikkeOppfyltPeriode.size).isEqualTo(1)
+        assertThat(ikkeOppfyltPeriode.size).isEqualTo(2)
 
         val oppfyltPeriode = vilkårResultat.find { it.resultat == Resultat.OPPFYLT }
         assertThat(oppfyltPeriode).`as`("Forventer én OPPFYLT periode").isNotNull

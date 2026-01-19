@@ -112,7 +112,7 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
                 if (erNordiskStatsborger == true && erBosattINorge == true) {
                     OppfyltDelvilkår(begrunnelse = "- Norsk/nordisk statsborgerskap")
                 } else {
-                    IkkeOppfyltDelvilkår(ikkeOppfyltEvalueringÅrsaker = setOf(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET))
+                    IkkeOppfyltDelvilkår()
                 }
             }
 
