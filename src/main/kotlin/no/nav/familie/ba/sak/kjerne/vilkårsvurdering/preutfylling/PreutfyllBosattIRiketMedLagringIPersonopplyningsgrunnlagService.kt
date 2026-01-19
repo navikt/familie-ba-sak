@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -111,7 +112,7 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
                 if (erNordiskStatsborger == true && erBosattINorge == true) {
                     OppfyltDelvilkår(begrunnelse = "- Norsk/nordisk statsborgerskap")
                 } else {
-                    IkkeOppfyltDelvilkår
+                    IkkeOppfyltDelvilkår(ikkeOppfyltEvalueringÅrsaker = setOf(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET))
                 }
             }
 
@@ -136,7 +137,7 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
                     when {
                         erNordiskOgBosatt is OppfyltDelvilkår -> erNordiskOgBosatt
                         erØvrigeKravOppfylt is OppfyltDelvilkår -> erØvrigeKravOppfylt
-                        else -> IkkeOppfyltDelvilkår
+                        else -> IkkeOppfyltDelvilkår(((erNordiskOgBosatt?.ikkeOppfyltEvalueringÅrsaker ?: emptySet()) + (erØvrigeKravOppfylt?.ikkeOppfyltEvalueringÅrsaker ?: emptySet())))
                     }
                 }.kombinerMed(erBosattIFinnmarkEllerNordTromsTidslinje, erOppholdsadressePåSvalbardTidslinje) { erBosattIRiket, erBosattIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
                     when (erBosattIRiket) {
@@ -171,6 +172,7 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
                     begrunnelseForManuellKontroll = erBosattINorgePeriode.verdi.begrunnelseForManuellKontroll,
                     utdypendeVilkårsvurderinger = erBosattINorgePeriode.verdi.utdypendeVilkårsvurderinger,
                     erOpprinneligPreutfylt = true,
+                    evalueringÅrsaker = erBosattINorgePeriode.verdi.ikkeOppfyltEvalueringÅrsaker.map { it.name },
                 )
             }.toSet()
     }
@@ -188,7 +190,7 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
                     verdi =
                         when (erBosattINorgePeriode.verdi) {
                             true -> sjekkØvrigeKravForPeriode(behandlingÅrsak, erBosattINorgePeriode, personResultat, person)
-                            else -> IkkeOppfyltDelvilkår
+                            else -> IkkeOppfyltDelvilkår(setOf(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET))
                         },
                     fom = erBosattINorgePeriode.fom,
                     tom = erBosattINorgePeriode.tom,
@@ -221,7 +223,7 @@ class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
             }
 
             else -> {
-                IkkeOppfyltDelvilkår
+                IkkeOppfyltDelvilkår(setOf(VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_12_MND))
             }
         }
 

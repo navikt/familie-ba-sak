@@ -27,6 +27,7 @@ enum class VilkårIkkeOppfyltÅrsak(
         beskrivelse = "Er ikke bosatt i riket, flere adresser uten fom",
         vilkår = Vilkår.BOSATT_I_RIKET,
     ),
+    HAR_IKKE_BODD_I_RIKET_12_MND(beskrivelse = "Har ikke bodd i riket i 12 måneder", vilkår = Vilkår.BOSATT_I_RIKET),
 
     // Lovlig opphold
     TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD(

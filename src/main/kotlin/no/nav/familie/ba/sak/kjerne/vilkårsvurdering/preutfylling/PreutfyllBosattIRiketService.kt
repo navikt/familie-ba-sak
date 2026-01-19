@@ -157,7 +157,7 @@ class PreutfyllBosattIRiketService(
                 if (erNordiskStatsborger == true && erBosattINorge == true) {
                     OppfyltDelvilkår(begrunnelse = "- Norsk/nordisk statsborgerskap")
                 } else {
-                    IkkeOppfyltDelvilkår
+                    IkkeOppfyltDelvilkår()
                 }
             }
 
@@ -176,7 +176,7 @@ class PreutfyllBosattIRiketService(
                     when {
                         erNordiskOgBosatt is OppfyltDelvilkår -> erNordiskOgBosatt
                         erØvrigeKravOppfylt is OppfyltDelvilkår -> erØvrigeKravOppfylt
-                        else -> IkkeOppfyltDelvilkår
+                        else -> IkkeOppfyltDelvilkår()
                     }
                 }.kombinerMed(erBosattIFinnmarkEllerNordTromsTidslinje, erOppholdsadressePåSvalbardTidslinje) { erBosattIRiket, erBosattIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
                     when (erBosattIRiket) {
@@ -297,7 +297,7 @@ class PreutfyllBosattIRiketService(
                     verdi =
                         when (erBosattINorgePeriode.verdi) {
                             true -> sjekkØvrigeKravForPeriode(erBosattINorgePeriode, personResultat)
-                            else -> IkkeOppfyltDelvilkår
+                            else -> IkkeOppfyltDelvilkår()
                         },
                     fom = erBosattINorgePeriode.fom,
                     tom = erBosattINorgePeriode.tom,
@@ -322,7 +322,7 @@ class PreutfyllBosattIRiketService(
             }
 
             else -> {
-                IkkeOppfyltDelvilkår
+                IkkeOppfyltDelvilkår()
             }
         }
 

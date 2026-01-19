@@ -248,6 +248,17 @@ class AutovedtakFødselshendelseService(
         ) {
             return "Mor har flere bostedsadresser uten fra- og med dato"
         } else if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT) {
+            val vilkårIkkeOppfyltÅrsaker =
+                bosattIRiketResultat.evalueringÅrsaker.mapNotNull {
+                    try {
+                        VilkårIkkeOppfyltÅrsak.valueOf(it)
+                    } catch (_: IllegalArgumentException) {
+                        null
+                    }
+                }
+            if (vilkårIkkeOppfyltÅrsaker.contains(VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_12_MND)) {
+                return "Mor bosatt i riket i mindre enn 12 måneder."
+            }
             return "Mor er ikke bosatt i riket."
         } else if (lovligOppholdResultat?.resultat != Resultat.OPPFYLT) {
             return lovligOppholdResultat?.evalueringÅrsaker?.joinToString("\n") {
