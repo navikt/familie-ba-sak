@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
+import no.nav.familie.ba.sak.ekstern.restDomene.SøkParamDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -51,7 +51,7 @@ class FagsakDeltagerControllerTest(
             .hentEllerOpprettFagsak(personAktør.aktivFødselsnummer())
             .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
 
-        fagsakDeltagerController.oppgiFagsakdeltagere(RestSøkParam(personAktør.aktivFødselsnummer(), emptyList())).apply {
+        fagsakDeltagerController.oppgiFagsakdeltagere(SøkParamDto(personAktør.aktivFødselsnummer(), emptyList())).apply {
             assertEquals(personAktør.aktivFødselsnummer(), body!!.data!!.first().ident)
             assertEquals(FagsakDeltagerRolle.FORELDER, body!!.data!!.first().rolle)
         }
@@ -86,7 +86,7 @@ class FagsakDeltagerControllerTest(
 
         fagsakDeltagerController
             .oppgiFagsakdeltagere(
-                RestSøkParam(
+                SøkParamDto(
                     personAktør.aktivFødselsnummer(),
                     barnaFnr + randomFnr(),
                 ),

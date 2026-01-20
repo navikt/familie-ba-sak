@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 
-data class RestSøkParam(
+data class SøkParamDto(
     val personIdent: String,
     val barnasIdenter: List<String> = emptyList(),
 ) {
@@ -27,7 +27,7 @@ enum class FagsakDeltagerRolle {
     UKJENT,
 }
 
-data class RestFagsakDeltager(
+data class FagsakDeltagerDto(
     val navn: String? = null,
     val ident: String = "",
     val rolle: FagsakDeltagerRolle,
@@ -39,5 +39,5 @@ data class RestFagsakDeltager(
     val harTilgang: Boolean = true,
     val erEgenAnsatt: Boolean? = null,
 ) {
-    override fun toString(): String = "RestFagsakDeltager(rolle=$rolle, kjønn=$kjønn, fagsakId=$fagsakId)"
+    override fun toString(): String = "FagsakDeltagerDto(rolle=$rolle, kjønn=$kjønn, fagsakId=$fagsakId)"
 }
