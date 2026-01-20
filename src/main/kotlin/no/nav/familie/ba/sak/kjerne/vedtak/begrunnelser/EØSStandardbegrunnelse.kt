@@ -310,7 +310,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetNasjonalRettSekundarlandToArbeidsland"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
-
+    INNVILGET_NASJONAL_RETT_SEKUNDÆRLAND_SØKER_FÅR_PENGER_SOM_ERSTATTER_LØNN {
+        override val sanityApiNavn = "innvilgetNasjonalRettSekundarSokerFarPengerSomErstatterLonn"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_NASJONAL_RETT_SEKUNDÆRLAND_SØKER_FÅR_PENSJON_FRA_ANNET_LAND {
+        override val sanityApiNavn = "innvilgetNasjonalRettSekundarSokerFarPensjonFraAnnetLand"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
     INNVILGET_TILLEGGSTEKST_DELT_BOSTED {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
         override val sanityApiNavn = "innvilgetTilleggstekstDeltBosted"
