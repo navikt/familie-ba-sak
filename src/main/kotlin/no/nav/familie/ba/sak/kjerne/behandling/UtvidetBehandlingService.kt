@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilBehandlingStegTilstandDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilFødselshendelsefiltreringResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanseDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertEtterbetalingDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKorrigertVedtak
+import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertVedtakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestSettPåVent
@@ -177,7 +177,7 @@ class UtvidetBehandlingService(
             korrigertVedtak =
                 korrigertVedtakService
                     .finnAktivtKorrigertVedtakPåBehandling(behandlingId)
-                    ?.tilRestKorrigertVedtak(),
+                    ?.tilKorrigertVedtakDto(),
             feilutbetaltValuta = feilutbetaltValuta,
             brevmottakere = brevmottakere,
             refusjonEøs = refusjonEøs,

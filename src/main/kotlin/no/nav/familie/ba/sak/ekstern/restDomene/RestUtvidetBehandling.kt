@@ -41,7 +41,7 @@ data class RestUtvidetBehandling(
     val valutakurser: List<RestValutakurs>,
     val utenlandskePeriodebeløp: List<RestUtenlandskPeriodebeløp>,
     val korrigertEtterbetaling: KorrigertEtterbetalingDto?,
-    val korrigertVedtak: RestKorrigertVedtak?,
+    val korrigertVedtak: KorrigertVedtakDto?,
     val feilutbetaltValuta: List<FeilutbetaltValutaDto>,
     val brevmottakere: List<BrevmottakerDto>,
     val refusjonEøs: List<RestRefusjonEøs>,

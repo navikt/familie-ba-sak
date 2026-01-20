@@ -3,15 +3,15 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtak
 import java.time.LocalDate
 
-class RestKorrigertVedtak(
+class KorrigertVedtakDto(
     val id: Long,
     val vedtaksdato: LocalDate?,
     val begrunnelse: String?,
     val aktiv: Boolean,
 )
 
-fun KorrigertVedtak.tilRestKorrigertVedtak(): RestKorrigertVedtak =
-    RestKorrigertVedtak(
+fun KorrigertVedtak.tilKorrigertVedtakDto(): KorrigertVedtakDto =
+    KorrigertVedtakDto(
         id = id,
         vedtaksdato = vedtaksdato,
         begrunnelse = begrunnelse,
