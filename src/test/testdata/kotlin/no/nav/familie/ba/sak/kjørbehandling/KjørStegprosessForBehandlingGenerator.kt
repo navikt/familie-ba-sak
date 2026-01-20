@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.leggTilBegrunnelsePåVedtaksperiodeIBehandling
 import no.nav.familie.ba.sak.datagenerator.vurderVilkårsvurderingTilInnvilget
-import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -349,7 +349,7 @@ fun kjørStegprosessForFGB(
     stegService: StegService,
     vedtaksperiodeService: VedtaksperiodeService,
     behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-    institusjon: RestInstitusjon? = null,
+    institusjon: InstitusjonDto? = null,
     brevmalService: BrevmalService,
     behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
     vilkårInnvilgetFom: LocalDate? = null,
@@ -499,7 +499,7 @@ fun kjørStegprosessForFGB(
 }
 
 private fun utledFagsaktype(
-    institusjon: RestInstitusjon?,
+    institusjon: InstitusjonDto?,
 ): FagsakType =
     if (institusjon != null) {
         FagsakType.INSTITUSJON

@@ -19,7 +19,7 @@ open class BaseFagsakDto(
     open val løpendeUnderkategori: BehandlingUnderkategori?,
     open val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
     open val fagsakType: FagsakType = FagsakType.NORMAL,
-    open val institusjon: RestInstitusjon? = null,
+    open val institusjon: InstitusjonDto? = null,
 )
 
 data class FagsakDto(
@@ -76,7 +76,7 @@ data class MinimalFagsakDto(
     val behandlinger: List<RestVisningBehandling>,
     val migreringsdato: LocalDate? = null,
     override val fagsakType: FagsakType,
-    override val institusjon: RestInstitusjon?,
+    override val institusjon: InstitusjonDto?,
 ) : BaseFagsakDto(
         opprettetTidspunkt = opprettetTidspunkt,
         id = id,

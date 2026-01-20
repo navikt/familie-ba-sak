@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BaseFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
@@ -85,7 +85,7 @@ class FagsakService(
         personIdent: String,
         fraAutomatiskBehandling: Boolean = false,
         type: FagsakType = FagsakType.NORMAL,
-        institusjon: RestInstitusjon? = null,
+        institusjon: InstitusjonDto? = null,
         skjermetBarnSøker: RestSkjermetBarnSøker? = null,
     ): Fagsak {
         if (type == FagsakType.SKJERMET_BARN) {
@@ -252,7 +252,7 @@ class FagsakService(
             fagsakType = fagsak.type,
             institusjon =
                 fagsak.institusjon?.let {
-                    RestInstitusjon(
+                    InstitusjonDto(
                         orgNummer = it.orgNummer,
                         tssEksternId = it.tssEksternId,
                         navn = organisasjonService.hentOrganisasjon(it.orgNummer).navn,
@@ -276,7 +276,7 @@ class FagsakService(
         fødselsnummer: String,
         fraAutomatiskBehandling: Boolean = false,
         fagsakType: FagsakType = FagsakType.NORMAL,
-        institusjon: RestInstitusjon? = null,
+        institusjon: InstitusjonDto? = null,
         skjermetBarnSøker: RestSkjermetBarnSøker? = null,
     ): Fagsak = hentEllerOpprettFagsak(fødselsnummer, fraAutomatiskBehandling, fagsakType, institusjon, skjermetBarnSøker)
 

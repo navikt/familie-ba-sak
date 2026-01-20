@@ -44,7 +44,7 @@ data class RestUtvidetBehandling(
     val korrigertVedtak: KorrigertVedtakDto?,
     val feilutbetaltValuta: List<FeilutbetaltValutaDto>,
     val brevmottakere: List<BrevmottakerDto>,
-    val refusjonEøs: List<RestRefusjonEøs>,
+    val refusjonEøs: List<RefusjonEøsDto>,
     val vurderingsstrategiForValutakurser: VurderingsstrategiForValutakurser? = VurderingsstrategiForValutakurser.AUTOMATISK,
     val søknadMottattDato: LocalDateTime?,
     val tilbakekrevingsvedtakMotregning: RestTilbakekrevingsvedtakMotregning?,

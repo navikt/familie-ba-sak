@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -197,7 +197,7 @@ class FagsakControllerTest(
             FagsakRequest(
                 personIdent = fnr,
                 fagsakType = FagsakType.INSTITUSJON,
-                institusjon = RestInstitusjon(orgNrNav, "tss-id"),
+                institusjon = InstitusjonDto(orgNrNav, "tss-id"),
             ),
         )
         val fagsakerRessurs = fagsakService.hentMinimalFagsakerForPerson(lagAktør(fnr))

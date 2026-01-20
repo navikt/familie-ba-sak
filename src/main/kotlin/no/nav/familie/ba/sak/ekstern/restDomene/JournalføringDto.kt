@@ -47,7 +47,7 @@ data class JournalføringDto(
     val nyBehandlingstype: Journalføringsbehandlingstype,
     val nyBehandlingsårsak: BehandlingÅrsak,
     val fagsakType: FagsakType,
-    val institusjon: RestInstitusjon? = null,
+    val institusjon: InstitusjonDto? = null,
 ) {
     fun oppdaterMedDokumentOgSak(
         sak: Sak,

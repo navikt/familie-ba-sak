@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
 import no.nav.familie.ba.sak.datagenerator.lagMockRestJournalføring
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
-import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.TilknyttetBehandling
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Journalføringsbehandlingstype
@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoRepo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
-import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -107,7 +106,7 @@ class InnkommendeJournalføringServiceIntegrationTest(
 
         val request2 =
             lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
-                .copy(fagsakType = FagsakType.INSTITUSJON, institusjon = RestInstitusjon("orgnr", tssEksternId = "tss"))
+                .copy(fagsakType = FagsakType.INSTITUSJON, institusjon = InstitusjonDto("orgnr", tssEksternId = "tss"))
         val fagsakId2 = innkommendeJournalføringService.journalfør(request2, "1234", "mockEnhet", "2")
         val behandling2 = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId2.toLong())
 

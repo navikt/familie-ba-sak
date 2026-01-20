@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.validering.OrganisasjonsnummerValidator
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 
-data class RestInstitusjon(
+data class InstitusjonDto(
     val orgNummer: String?,
     val tssEksternId: String?,
     val navn: String? = null,
@@ -22,7 +22,7 @@ data class RestInstitusjon(
     }
 }
 
-data class RestRegistrerInstitusjon(
+data class RegistrerInstitusjonDto(
     val orgNummer: String,
     val tssEksternId: String,
 ) {

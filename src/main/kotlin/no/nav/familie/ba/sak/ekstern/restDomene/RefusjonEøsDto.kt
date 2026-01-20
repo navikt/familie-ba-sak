@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 
 import java.time.LocalDate
 
-data class RestRefusjonEøs(
+data class RefusjonEøsDto(
     val id: Long?,
     val fom: LocalDate,
     val tom: LocalDate,

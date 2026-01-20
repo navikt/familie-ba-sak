@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-data class RestRegisterhistorikk(
+data class RegisterhistorikkDto(
     val hentetTidspunkt: LocalDateTime,
     val sivilstand: List<RestRegisteropplysning>? = emptyList(),
     val oppholdstillatelse: List<RestRegisteropplysning>? = emptyList(),
@@ -15,8 +15,8 @@ data class RestRegisterhistorikk(
     val dødsboadresse: List<RestRegisteropplysning>? = emptyList(),
 )
 
-fun Person.tilRestRegisterhistorikk() =
-    RestRegisterhistorikk(
+fun Person.tilRegisterhistorikkDto() =
+    RegisterhistorikkDto(
         hentetTidspunkt = this.personopplysningGrunnlag.opprettetTidspunkt,
         oppholdstillatelse = opphold.map { it.tilRestRegisteropplysning() },
         statsborgerskap = statsborgerskap.map { it.tilRestRegisteropplysning() },

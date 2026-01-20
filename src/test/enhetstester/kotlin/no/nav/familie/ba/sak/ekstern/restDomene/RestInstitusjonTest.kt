@@ -13,83 +13,83 @@ class RestInstitusjonTest {
         @Test
         fun `skal ikke kaste exception om objektet er gydlig`() {
             // Arrange
-            val restInstitusjon =
-                RestInstitusjon(
+            val institusjonDto =
+                InstitusjonDto(
                     orgNummer = "889640782",
                     tssEksternId = "1",
                 )
 
             // Act & assert
-            assertDoesNotThrow { restInstitusjon.valider() }
+            assertDoesNotThrow { institusjonDto.valider() }
         }
 
         @Test
         fun `skal kaste exception orgnummer er null`() {
             // Arrange
-            val restInstitusjon =
-                RestInstitusjon(
+            val institusjonDto =
+                InstitusjonDto(
                     orgNummer = null,
                     tssEksternId = "1",
                 )
 
             // Act & assert
-            val exception = assertThrows<FunksjonellFeil> { restInstitusjon.valider() }
+            val exception = assertThrows<FunksjonellFeil> { institusjonDto.valider() }
             assertThat(exception.message).isEqualTo("Mangler organisasjonsnummer.")
         }
 
         @Test
         fun `skal kaste exception orgnummer er blank`() {
             // Arrange
-            val restInstitusjon =
-                RestInstitusjon(
+            val institusjonDto =
+                InstitusjonDto(
                     orgNummer = "",
                     tssEksternId = "1",
                 )
 
             // Act & assert
-            val exception = assertThrows<FunksjonellFeil> { restInstitusjon.valider() }
+            val exception = assertThrows<FunksjonellFeil> { institusjonDto.valider() }
             assertThat(exception.message).isEqualTo("Mangler organisasjonsnummer.")
         }
 
         @Test
         fun `skal kaste exception orgnummer er ugyldig`() {
             // Arrange
-            val restInstitusjon =
-                RestInstitusjon(
+            val institusjonDto =
+                InstitusjonDto(
                     orgNummer = "1",
                     tssEksternId = "1",
                 )
 
             // Act & assert
-            val exception = assertThrows<FunksjonellFeil> { restInstitusjon.valider() }
+            val exception = assertThrows<FunksjonellFeil> { institusjonDto.valider() }
             assertThat(exception.message).isEqualTo("Organisasjonsnummeret er ugyldig.")
         }
 
         @Test
         fun `skal kaste exception om tssEksternId er null`() {
             // Arrange
-            val restInstitusjon =
-                RestInstitusjon(
+            val institusjonDto =
+                InstitusjonDto(
                     orgNummer = "889640782",
                     tssEksternId = null,
                 )
 
             // Act & assert
-            val exception = assertThrows<FunksjonellFeil> { restInstitusjon.valider() }
+            val exception = assertThrows<FunksjonellFeil> { institusjonDto.valider() }
             assertThat(exception.message).isEqualTo("Mangler tssEksternId.")
         }
 
         @Test
         fun `skal kaste exception om tssEksternId er blank`() {
             // Arrange
-            val restInstitusjon =
-                RestInstitusjon(
+            val institusjonDto =
+                InstitusjonDto(
                     orgNummer = "889640782",
                     tssEksternId = "",
                 )
 
             // Act & assert
-            val exception = assertThrows<FunksjonellFeil> { restInstitusjon.valider() }
+            val exception = assertThrows<FunksjonellFeil> { institusjonDto.valider() }
             assertThat(exception.message).isEqualTo("Mangler tssEksternId.")
         }
     }

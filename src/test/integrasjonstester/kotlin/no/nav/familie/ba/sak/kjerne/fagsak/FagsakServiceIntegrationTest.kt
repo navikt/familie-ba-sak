@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -429,7 +429,7 @@ class FagsakServiceIntegrationTest(
     fun `Skal returnere eksisterende fagsak ved forsøk på å opprette institusjon fagsak med org nummer som allerede finnes for person`() {
         // Arrange
         val barn = lagPerson(type = PersonType.BARN)
-        val institusjon = RestInstitusjon(orgNummer = "123456789", tssEksternId = "testid")
+        val institusjon = InstitusjonDto(orgNummer = "123456789", tssEksternId = "testid")
 
         val fagsak = opprettFagsakForPersonMedStatus(personIdent = barn.aktør.aktivFødselsnummer(), fagsakStatus = FagsakStatus.AVSLUTTET, fagsakType = FagsakType.INSTITUSJON)
 
@@ -493,7 +493,7 @@ class FagsakServiceIntegrationTest(
         fagsakType: FagsakType = FagsakType.NORMAL,
         fraAutomatiskBehandling: Boolean = false,
     ): Fagsak {
-        val institusjon = RestInstitusjon(orgNummer = "123456789", tssEksternId = "testid")
+        val institusjon = InstitusjonDto(orgNummer = "123456789", tssEksternId = "testid")
         val skjermetBarnSøker = RestSkjermetBarnSøker(randomFnr())
         val fagsak =
             fagsakService.hentEllerOpprettFagsakForPersonIdent(

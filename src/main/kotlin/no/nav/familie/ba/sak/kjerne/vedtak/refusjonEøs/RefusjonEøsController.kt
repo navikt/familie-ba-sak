@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs
 
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRefusjonEøs
+import no.nav.familie.ba.sak.ekstern.restDomene.RefusjonEøsDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -35,7 +35,7 @@ class RefusjonEøsController(
     )
     fun leggTilRefusjonEøsPeriode(
         @PathVariable behandlingId: Long,
-        @RequestBody refusjonEøs: RestRefusjonEøs,
+        @RequestBody refusjonEøs: RefusjonEøsDto,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -59,7 +59,7 @@ class RefusjonEøsController(
     fun oppdaterRefusjonEøsPeriode(
         @PathVariable behandlingId: Long,
         @PathVariable id: Long,
-        @RequestBody refusjonEøs: RestRefusjonEøs,
+        @RequestBody refusjonEøs: RefusjonEøsDto,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -68,7 +68,7 @@ class RefusjonEøsController(
 
         tilgangService.validerKanRedigereBehandling(behandlingId)
 
-        refusjonEøsService.oppdaterRefusjonEøsPeriode(restRefusjonEøs = refusjonEøs, id = id)
+        refusjonEøsService.oppdaterRefusjonEøsPeriode(refusjonEøsDto = refusjonEøs, id = id)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -92,7 +92,7 @@ class RefusjonEøsController(
     @GetMapping(path = ["behandlinger/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentRefusjonEøsPerioder(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<List<RestRefusjonEøs>>> {
+    ): ResponseEntity<Ressurs<List<RefusjonEøsDto>>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hente refusjon EØS for behandling",
