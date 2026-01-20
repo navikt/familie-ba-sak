@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.BaseFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
-import no.nav.familie.ba.sak.ekstern.restDomene.SkjermetBarnSøkerDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.SkjermetBarnSøkerDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilMinimalFagsakDto
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService

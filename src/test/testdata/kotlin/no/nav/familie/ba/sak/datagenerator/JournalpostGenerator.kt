@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.datagenerator
 
-import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.JournalføringDto
 import no.nav.familie.ba.sak.ekstern.restDomene.JournalpostDokumentDto
+import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Journalføringsbehandlingstype
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype

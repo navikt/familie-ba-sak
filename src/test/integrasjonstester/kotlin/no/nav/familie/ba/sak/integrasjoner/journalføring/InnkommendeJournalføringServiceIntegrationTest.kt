@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
 import no.nav.familie.ba.sak.datagenerator.lagMockRestJournalføring
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
+import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.TilknyttetBehandling
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Journalføringsbehandlingstype

@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.VALIDER_ENDRING_
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
-import no.nav.familie.ba.sak.ekstern.restDomene.SlettVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.SlettVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService

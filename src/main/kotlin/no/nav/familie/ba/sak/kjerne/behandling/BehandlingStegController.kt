@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerInstitusjonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggelsestype
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling

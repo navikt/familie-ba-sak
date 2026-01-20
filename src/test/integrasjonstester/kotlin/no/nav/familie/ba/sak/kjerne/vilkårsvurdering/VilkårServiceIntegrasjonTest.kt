@@ -15,8 +15,8 @@ import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.datagenerator.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
-import no.nav.familie.ba.sak.ekstern.restDomene.SlettVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.SlettVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat

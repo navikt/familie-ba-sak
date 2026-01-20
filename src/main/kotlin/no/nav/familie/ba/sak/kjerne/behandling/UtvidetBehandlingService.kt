@@ -1,22 +1,22 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilManglendeFinnmarkmerkingPerioder
-import no.nav.familie.ba.sak.ekstern.restDomene.tilManglendeSvalbardmerkingPerioder
 import no.nav.familie.ba.sak.ekstern.restDomene.tilArbeidsfordelingPåBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBehandlingStegTilstandDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilFødselshendelsefiltreringResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanseDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertEtterbetalingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertVedtakDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilManglendeFinnmarkmerkingPerioder
+import no.nav.familie.ba.sak.ekstern.restDomene.tilManglendeSvalbardmerkingPerioder
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonerMedAndelerDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilSettPåVentDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestTotrinnskontroll
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVedtak
+import no.nav.familie.ba.sak.ekstern.restDomene.tilSettPåVentDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository

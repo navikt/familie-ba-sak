@@ -5,9 +5,9 @@ import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.AnnenVurderingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
-import no.nav.familie.ba.sak.ekstern.restDomene.SlettVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
+import no.nav.familie.ba.sak.ekstern.restDomene.SlettVilkårDto
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
