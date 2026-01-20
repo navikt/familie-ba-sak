@@ -19,7 +19,7 @@ import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import no.nav.familie.kontrakter.felles.journalpost.Sak
 import java.time.LocalDateTime
 
-data class RestJournalpostDokument(
+data class JournalpostDokumentDto(
     val dokumentTittel: String?,
     val dokumentInfoId: String,
     val brevkode: String?,
@@ -32,7 +32,7 @@ data class TilknyttetBehandling(
     val behandlingId: String,
 )
 
-data class RestJournalføring(
+data class JournalføringDto(
     val avsender: NavnOgIdent,
     val bruker: NavnOgIdent,
     val datoMottatt: LocalDateTime?,
@@ -41,7 +41,7 @@ data class RestJournalføring(
     val underkategori: BehandlingUnderkategori?,
     val opprettOgKnyttTilNyBehandling: Boolean,
     val tilknyttedeBehandlinger: List<TilknyttetBehandling> = emptyList(),
-    val dokumenter: List<RestJournalpostDokument>,
+    val dokumenter: List<JournalpostDokumentDto>,
     // Saksbehandler sin ident
     val navIdent: String,
     val nyBehandlingstype: Journalføringsbehandlingstype,

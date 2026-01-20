@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.datagenerator
 
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
-import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
-import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalpostDokument
+import no.nav.familie.ba.sak.ekstern.restDomene.JournalføringDto
+import no.nav.familie.ba.sak.ekstern.restDomene.JournalpostDokumentDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Journalføringsbehandlingstype
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
@@ -99,8 +99,8 @@ fun lagTilgangsstyrtJournalpost(
         journalpostTilgang = JournalpostTilgang(harTilgang = harTilgang),
     )
 
-fun lagMockRestJournalføring(bruker: NavnOgIdent): RestJournalføring =
-    RestJournalføring(
+fun lagMockRestJournalføring(bruker: NavnOgIdent): JournalføringDto =
+    JournalføringDto(
         avsender = bruker,
         bruker = bruker,
         datoMottatt = LocalDateTime.now().minusDays(10),
@@ -110,14 +110,14 @@ fun lagMockRestJournalføring(bruker: NavnOgIdent): RestJournalføring =
         opprettOgKnyttTilNyBehandling = true,
         dokumenter =
             listOf(
-                RestJournalpostDokument(
+                JournalpostDokumentDto(
                     dokumentTittel = "Søknad om barnetrygd",
                     brevkode = "mock",
                     dokumentInfoId = "1",
                     logiskeVedlegg = listOf(LogiskVedlegg("123", "Oppholdstillatelse")),
                     eksisterendeLogiskeVedlegg = emptyList(),
                 ),
-                RestJournalpostDokument(
+                JournalpostDokumentDto(
                     dokumentTittel = "Ekstra vedlegg",
                     brevkode = "mock",
                     dokumentInfoId = "2",

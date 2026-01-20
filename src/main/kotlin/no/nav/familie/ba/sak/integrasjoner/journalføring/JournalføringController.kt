@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 import jakarta.validation.Valid
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
+import no.nav.familie.ba.sak.ekstern.restDomene.JournalføringDto
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -74,7 +74,7 @@ class JournalføringController(
         @PathVariable journalpostId: String,
         @PathVariable oppgaveId: String,
         @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
-        @RequestBody @Valid request: RestJournalføring,
+        @RequestBody @Valid request: JournalføringDto,
     ): ResponseEntity<Ressurs<String>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,

@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.ekstern.restDomene.FerdigstillOppgaveKnyttJournalpostDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
+import no.nav.familie.ba.sak.ekstern.restDomene.JournalføringDto
 import no.nav.familie.ba.sak.ekstern.restDomene.TilknyttetBehandling
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.FagsakSystem
@@ -66,7 +66,7 @@ class InnkommendeJournalføringService(
                 ),
             )
 
-    private fun oppdaterLogiskeVedlegg(request: RestJournalføring) {
+    private fun oppdaterLogiskeVedlegg(request: JournalføringDto) {
         request.dokumenter.forEach { dokument ->
             val fjernedeVedlegg =
                 (dokument.eksisterendeLogiskeVedlegg ?: emptyList())
@@ -113,7 +113,7 @@ class InnkommendeJournalføringService(
 
     @Transactional
     fun journalfør(
-        request: RestJournalføring,
+        request: JournalføringDto,
         journalpostId: String,
         behandlendeEnhet: String,
         oppgaveId: String,

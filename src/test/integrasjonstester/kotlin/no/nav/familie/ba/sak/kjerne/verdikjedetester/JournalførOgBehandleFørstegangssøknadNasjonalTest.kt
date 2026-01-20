@@ -84,7 +84,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                 journalpostId = "1234",
                 oppgaveId = "5678",
                 journalførendeEnhet = "4833",
-                restJournalføring =
+                journalføringDto =
                     lagMockRestJournalføring(
                         bruker =
                             NavnOgIdent(
@@ -266,7 +266,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                 journalpostId = "1234",
                 oppgaveId = "5678",
                 journalførendeEnhet = "4833",
-                restJournalføring =
+                journalføringDto =
                     lagMockRestJournalføring(
                         bruker =
                             NavnOgIdent(

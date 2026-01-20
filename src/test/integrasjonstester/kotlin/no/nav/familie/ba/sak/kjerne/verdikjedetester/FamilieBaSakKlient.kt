@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.HentFagsakForPersonDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
+import no.nav.familie.ba.sak.ekstern.restDomene.JournalføringDto
 import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -70,13 +70,13 @@ class FamilieBaSakKlient(
         journalpostId: String,
         oppgaveId: String,
         journalførendeEnhet: String,
-        restJournalføring: RestJournalføring,
+        journalføringDto: JournalføringDto,
     ): Ressurs<String> {
         val uri =
             URI.create(encodePath("$baSakUrl/api/journalpost/$journalpostId/journalfør/$oppgaveId") + "?journalfoerendeEnhet=$journalførendeEnhet")
         return postForEntity(
             uri,
-            restJournalføring,
+            journalføringDto,
             headers,
         )
     }
