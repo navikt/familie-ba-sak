@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakerForPerson
+import no.nav.familie.ba.sak.ekstern.restDomene.HentFagsakerForPersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -102,7 +102,7 @@ class FagsakController(
     @PostMapping(path = ["/hent-fagsaker-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMinimalFagsakerForPerson(
         @RequestBody
-        request: RestHentFagsakerForPerson,
+        request: HentFagsakerForPersonDto,
     ): ResponseEntity<Ressurs<List<MinimalFagsakDto>>> {
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(request.personIdent),
