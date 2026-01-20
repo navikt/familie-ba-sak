@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.common
 
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.post
+import io.mockk.mockk
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagTestOppgave
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
@@ -38,6 +39,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
             IntegrasjonKlient(
                 URI.create(wireMockServer.baseUrl() + "/api"),
                 restOperations,
+                mockk(),
             )
     }
 

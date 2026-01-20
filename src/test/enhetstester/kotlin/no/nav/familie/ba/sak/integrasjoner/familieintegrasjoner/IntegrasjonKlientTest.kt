@@ -18,9 +18,7 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 class IntegrasjonKlientTest {
-    private val mockedRestOperations: RestOperations = mockk()
     private val restOperations: RestOperations = RestTemplateBuilder().build()
-    private val baseUri = URI("http://localhost:8080")
     private lateinit var wiremockServerItem: WireMockServer
     private lateinit var integrasjonKlient: IntegrasjonKlient
 
@@ -28,7 +26,7 @@ class IntegrasjonKlientTest {
     fun initClass() {
         wiremockServerItem = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
         wiremockServerItem.start()
-        integrasjonKlient = IntegrasjonKlient(URI.create(wiremockServerItem.baseUrl()), restOperations)
+        integrasjonKlient = IntegrasjonKlient(URI.create(wiremockServerItem.baseUrl()), restOperations, mockk())
     }
 
     @Test

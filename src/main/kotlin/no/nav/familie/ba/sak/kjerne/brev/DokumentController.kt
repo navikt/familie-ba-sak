@@ -4,15 +4,10 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
-import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdataFraBehandling
-import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdataFraFagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -41,11 +36,8 @@ class DokumentController(
     private val dokumentGenereringService: DokumentGenereringService,
     private val vedtakService: VedtakService,
     private val tilgangService: TilgangService,
-    private val persongrunnlagService: PersongrunnlagService,
-    private val arbeidsfordelingService: ArbeidsfordelingService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val dokumentDistribueringService: DokumentDistribueringService,
-    private val pdlRestKlient: PdlRestKlient,
 ) {
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
     fun genererVedtaksbrev(
@@ -103,12 +95,7 @@ class DokumentController(
 
         return dokumentGenereringService
             .genererManueltBrev(
-                manueltBrevRequest =
-                    manueltBrevRequest.byggMottakerdataFraBehandling(
-                        behandling,
-                        persongrunnlagService,
-                        arbeidsfordelingService,
-                    ),
+                manueltBrevRequest = dokumentService.byggMottakerdataFraBehandling(behandling, manueltBrevRequest),
                 erForhåndsvisning = true,
                 fagsak = behandling.fagsak,
             ).let { Ressurs.success(it) }
@@ -129,12 +116,7 @@ class DokumentController(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         dokumentService.sendManueltBrev(
-            manueltBrevRequest =
-                manueltBrevRequest.byggMottakerdataFraBehandling(
-                    behandling,
-                    persongrunnlagService,
-                    arbeidsfordelingService,
-                ),
+            manueltBrevRequest = dokumentService.byggMottakerdataFraBehandling(behandling, manueltBrevRequest),
             behandling = behandling,
             fagsakId = behandling.fagsak.id,
         )
@@ -162,8 +144,7 @@ class DokumentController(
         )
 
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
-
-        val oppdatertManueltBrevRequest = manueltBrevRequest.byggMottakerdataFraFagsak(fagsak, arbeidsfordelingService, pdlRestKlient)
+        val oppdatertManueltBrevRequest = dokumentService.byggMottakerdataFraFagsak(fagsak, manueltBrevRequest)
 
         return dokumentGenereringService
             .genererManueltBrev(
@@ -185,7 +166,7 @@ class DokumentController(
         )
 
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
-        val oppdatertManueltBrevRequest = manueltBrevRequest.byggMottakerdataFraFagsak(fagsak, arbeidsfordelingService, pdlRestKlient)
+        val oppdatertManueltBrevRequest = dokumentService.byggMottakerdataFraFagsak(fagsak, manueltBrevRequest)
 
         dokumentService.sendManueltBrev(
             manueltBrevRequest = oppdatertManueltBrevRequest,

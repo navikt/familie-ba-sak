@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SATSENDRING
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -10,9 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
-import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdataFraBehandling
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleUnderkjentVedtak
@@ -27,8 +24,6 @@ class HenleggBehandling(
     private val loggService: LoggService,
     private val dokumentService: DokumentService,
     private val oppgaveService: OppgaveService,
-    private val persongrunnlagService: PersongrunnlagService,
-    private val arbeidsfordelingService: ArbeidsfordelingService,
 ) : BehandlingSteg<RestHenleggBehandlingInfo> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -42,10 +37,7 @@ class HenleggBehandling(
             dokumentService.sendManueltBrev(
                 behandling = behandling,
                 fagsakId = fagsak.id,
-                manueltBrevRequest =
-                    ManueltBrevRequest(
-                        brevmal = brevmal,
-                    ).byggMottakerdataFraBehandling(behandling, persongrunnlagService, arbeidsfordelingService),
+                manueltBrevRequest = dokumentService.byggMottakerdataFraBehandling(behandling, ManueltBrevRequest(brevmal)),
             )
         }
 
