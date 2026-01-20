@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalin
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalingÅrsak
 import java.time.LocalDateTime
 
-data class RestKorrigertEtterbetaling(
+data class KorrigertEtterbetalingDto(
     val id: Long,
     val årsak: KorrigertEtterbetalingÅrsak,
     val begrunnelse: String?,
@@ -13,8 +13,8 @@ data class RestKorrigertEtterbetaling(
     val aktiv: Boolean,
 )
 
-fun KorrigertEtterbetaling.tilRestKorrigertEtterbetaling(): RestKorrigertEtterbetaling =
-    RestKorrigertEtterbetaling(
+fun KorrigertEtterbetaling.tilKorrigertEtterbetalingDto(): KorrigertEtterbetalingDto =
+    KorrigertEtterbetalingDto(
         id = id,
         årsak = årsak,
         begrunnelse = begrunnelse,

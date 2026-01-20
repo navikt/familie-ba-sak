@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBehandlingStegTilstandDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilFødselshendelsefiltreringResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanseDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKorrigertEtterbetaling
+import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertEtterbetalingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKorrigertVedtak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
@@ -173,7 +173,7 @@ class UtvidetBehandlingService(
             korrigertEtterbetaling =
                 korrigertEtterbetalingService
                     .finnAktivtKorrigeringPåBehandling(behandlingId)
-                    ?.tilRestKorrigertEtterbetaling(),
+                    ?.tilKorrigertEtterbetalingDto(),
             korrigertVedtak =
                 korrigertVedtakService
                     .finnAktivtKorrigertVedtakPåBehandling(behandlingId)

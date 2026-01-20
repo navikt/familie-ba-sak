@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.kjerne.korrigertetterbetaling
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestKorrigertEtterbetaling
+import no.nav.familie.ba.sak.ekstern.restDomene.KorrigertEtterbetalingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKorrigertEtterbetaling
+import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertEtterbetalingDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -55,7 +55,7 @@ class KorrigertEtterbetalingController(
     @GetMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentAlleKorrigerteEtterbetalingPåBehandling(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<List<RestKorrigertEtterbetaling>>> {
+    ): ResponseEntity<Ressurs<List<KorrigertEtterbetalingDto>>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
@@ -65,7 +65,7 @@ class KorrigertEtterbetalingController(
         val korrigerteEtterbetalinger =
             korrigertEtterbetalingService
                 .finnAlleKorrigeringerPåBehandling(behandlingId)
-                .map { it.tilRestKorrigertEtterbetaling() }
+                .map { it.tilKorrigertEtterbetalingDto() }
 
         return ResponseEntity.ok(Ressurs.success(korrigerteEtterbetalinger))
     }
