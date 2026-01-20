@@ -14,10 +14,10 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.datagenerator.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -164,16 +164,16 @@ class VilkårServiceIntegrasjonTest(
         val under18ÅrVilkårForBarn =
             vilkårsvurdering.personResultater
                 .find { it.aktør.aktivFødselsnummer() == barnFnr }
-                ?.tilRestPersonResultat()
+                ?.tilPersonResultatDto()
                 ?.vilkårResultater
                 ?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
 
-        val endretVilkårsvurdering: List<RestPersonResultat> =
+        val endretVilkårsvurdering: List<PersonResultatDto> =
             vilkårService.endreVilkår(
                 behandlingId = behandling.id,
                 vilkårId = under18ÅrVilkårForBarn!!.id,
-                restPersonResultat =
-                    RestPersonResultat(
+                personResultatDto =
+                    PersonResultatDto(
                         personIdent = barnFnr,
                         vilkårResultater =
                             listOf(
@@ -325,14 +325,14 @@ class VilkårServiceIntegrasjonTest(
 
         val enPersonIBehandlingen = vilkårsvurdering.personResultater.elementAt(0)
         val bosattVilkårForEnPersonIBehandlingen =
-            enPersonIBehandlingen.tilRestPersonResultat().vilkårResultater.find { it.vilkårType === Vilkår.BOSATT_I_RIKET }
+            enPersonIBehandlingen.tilPersonResultatDto().vilkårResultater.find { it.vilkårType === Vilkår.BOSATT_I_RIKET }
 
         assertThrows<FunksjonellFeil> {
             vilkårService.endreVilkår(
                 behandlingId = vilkårsvurdering.behandling.id,
                 vilkårId = bosattVilkårForEnPersonIBehandlingen!!.id,
-                restPersonResultat =
-                    RestPersonResultat(
+                personResultatDto =
+                    PersonResultatDto(
                         personIdent = enPersonIBehandlingen.aktør.aktivFødselsnummer(),
                         vilkårResultater =
                             listOf(
@@ -354,14 +354,14 @@ class VilkårServiceIntegrasjonTest(
 
         val enPersonIBehandlingen = vilkårsvurdering.personResultater.elementAt(0)
         val oppholdVilkårForEnPersonIBehandlingen =
-            enPersonIBehandlingen.tilRestPersonResultat().vilkårResultater.find { it.vilkårType === Vilkår.LOVLIG_OPPHOLD }
+            enPersonIBehandlingen.tilPersonResultatDto().vilkårResultater.find { it.vilkårType === Vilkår.LOVLIG_OPPHOLD }
 
         assertThrows<FunksjonellFeil> {
             vilkårService.endreVilkår(
                 behandlingId = vilkårsvurdering.behandling.id,
                 vilkårId = oppholdVilkårForEnPersonIBehandlingen!!.id,
-                restPersonResultat =
-                    RestPersonResultat(
+                personResultatDto =
+                    PersonResultatDto(
                         personIdent = enPersonIBehandlingen.aktør.aktivFødselsnummer(),
                         vilkårResultater =
                             listOf(
@@ -383,14 +383,14 @@ class VilkårServiceIntegrasjonTest(
 
         val enPersonIBehandlingen = vilkårsvurdering.personResultater.elementAt(0)
         val oppholdVilkårForEnPersonIBehandlingen =
-            enPersonIBehandlingen.tilRestPersonResultat().vilkårResultater.find { it.vilkårType === Vilkår.LOVLIG_OPPHOLD }
+            enPersonIBehandlingen.tilPersonResultatDto().vilkårResultater.find { it.vilkårType === Vilkår.LOVLIG_OPPHOLD }
 
         assertThrows<FunksjonellFeil> {
             vilkårService.endreVilkår(
                 behandlingId = vilkårsvurdering.behandling.id,
                 vilkårId = oppholdVilkårForEnPersonIBehandlingen!!.id,
-                restPersonResultat =
-                    RestPersonResultat(
+                personResultatDto =
+                    PersonResultatDto(
                         personIdent = enPersonIBehandlingen.aktør.aktivFødselsnummer(),
                         vilkårResultater =
                             listOf(
@@ -412,14 +412,14 @@ class VilkårServiceIntegrasjonTest(
 
         val enPersonIBehandlingen = vilkårsvurdering.personResultater.elementAt(0)
         val oppholdVilkårForEnPersonIBehandlingen =
-            enPersonIBehandlingen.tilRestPersonResultat().vilkårResultater.find { it.vilkårType === Vilkår.LOVLIG_OPPHOLD }
+            enPersonIBehandlingen.tilPersonResultatDto().vilkårResultater.find { it.vilkårType === Vilkår.LOVLIG_OPPHOLD }
 
         assertDoesNotThrow {
             vilkårService.endreVilkår(
                 behandlingId = vilkårsvurdering.behandling.id,
                 vilkårId = oppholdVilkårForEnPersonIBehandlingen!!.id,
-                restPersonResultat =
-                    RestPersonResultat(
+                personResultatDto =
+                    PersonResultatDto(
                         personIdent = enPersonIBehandlingen.aktør.aktivFødselsnummer(),
                         vilkårResultater =
                             listOf(
@@ -466,12 +466,12 @@ class VilkårServiceIntegrasjonTest(
         assertEquals(2, vilkårsvurdering.personResultater.size)
 
         vilkårsvurdering.personResultater.map { personResultat ->
-            personResultat.tilRestPersonResultat().vilkårResultater.map {
+            personResultat.tilPersonResultatDto().vilkårResultater.map {
                 vilkårService.endreVilkår(
                     behandlingId = behandling.id,
                     vilkårId = it.id,
-                    restPersonResultat =
-                        RestPersonResultat(
+                    personResultatDto =
+                        PersonResultatDto(
                             personIdent = personResultat.aktør.aktivFødselsnummer(),
                             vilkårResultater =
                                 listOf(
@@ -644,16 +644,16 @@ class VilkårServiceIntegrasjonTest(
         val under18ÅrVilkårForBarn =
             vilkårsvurdering.personResultater
                 .find { it.aktør.aktivFødselsnummer() == barnFnr }
-                ?.tilRestPersonResultat()
+                ?.tilPersonResultatDto()
                 ?.vilkårResultater
                 ?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
 
-        val endretVilkårsvurdering: List<RestPersonResultat> =
+        val endretVilkårsvurdering: List<PersonResultatDto> =
             vilkårService.endreVilkår(
                 behandlingId = behandling.id,
                 vilkårId = under18ÅrVilkårForBarn!!.id,
-                restPersonResultat =
-                    RestPersonResultat(
+                personResultatDto =
+                    PersonResultatDto(
                         personIdent = barnFnr,
                         vilkårResultater =
                             listOf(
@@ -864,8 +864,8 @@ class VilkårServiceIntegrasjonTest(
         vilkårService.endreVilkår(
             behandlingId = behandling.id,
             vilkårId = utvidetVilkår!!.id,
-            restPersonResultat =
-                RestPersonResultat(
+            personResultatDto =
+                PersonResultatDto(
                     personIdent = fnr,
                     vilkårResultater =
                         listOf(
@@ -1299,7 +1299,7 @@ class VilkårServiceIntegrasjonTest(
                 vilkårService.endreVilkår(
                     behandling.id,
                     vilkårId,
-                    RestPersonResultat(
+                    PersonResultatDto(
                         barnFnr,
                         listOf(restVilkårResultat),
                     ),

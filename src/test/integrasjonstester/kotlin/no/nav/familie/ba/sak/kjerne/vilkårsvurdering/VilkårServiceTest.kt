@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -168,7 +168,7 @@ class VilkårServiceTest(
                 vilkårsvurdering
                     .personResultater
                     .single()
-                    .tilRestPersonResultat()
+                    .tilPersonResultatDto()
 
             val ikkeEksisterendeVilkårId = 1L
 
@@ -178,7 +178,7 @@ class VilkårServiceTest(
                     vilkårService.endreVilkår(
                         behandlingId = behandling.id,
                         vilkårId = ikkeEksisterendeVilkårId,
-                        restPersonResultat = restPersonResultat,
+                        personResultatDto = restPersonResultat,
                     )
                 }
 
@@ -204,7 +204,7 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultater = vilkårsvurdering.personResultater.map { it.tilRestPersonResultat() }
+            val restPersonResultater = vilkårsvurdering.personResultater.map { it.tilPersonResultatDto() }
             val restPersonResultatSøker = restPersonResultater.first { it.personIdent == søkerFnr }
             val restVilkårResultat = restPersonResultatSøker.vilkårResultater.first()
 
@@ -214,7 +214,7 @@ class VilkårServiceTest(
                     .endreVilkår(
                         behandlingId = behandling.id,
                         vilkårId = restVilkårResultat.id,
-                        restPersonResultat = restPersonResultatSøker,
+                        personResultatDto = restPersonResultatSøker,
                     )
 
             // Assert
@@ -253,7 +253,7 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultat = vilkårsvurdering.personResultater.single().tilRestPersonResultat()
+            val restPersonResultat = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
             val restVilkårResultat = restPersonResultat.vilkårResultater.single()
 
             val restPersonResultatMedEndring =
@@ -274,7 +274,7 @@ class VilkårServiceTest(
                         .endreVilkår(
                             behandlingId = behandling.id,
                             vilkårId = restVilkårResultat.id,
-                            restPersonResultat = restPersonResultatMedEndring,
+                            personResultatDto = restPersonResultatMedEndring,
                         )
                 }
 
@@ -307,7 +307,7 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultat = vilkårsvurdering.personResultater.single().tilRestPersonResultat()
+            val restPersonResultat = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
             val restVilkårResultat = restPersonResultat.vilkårResultater.single()
 
             val restPersonResultatMedEndring =
@@ -325,7 +325,7 @@ class VilkårServiceTest(
                 .endreVilkår(
                     behandlingId = behandling.id,
                     vilkårId = restVilkårResultat.id,
-                    restPersonResultat = restPersonResultatMedEndring,
+                    personResultatDto = restPersonResultatMedEndring,
                 )
 
             // Assert
@@ -367,7 +367,7 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultat = vilkårsvurdering.personResultater.single().tilRestPersonResultat()
+            val restPersonResultat = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
             val restVilkårResultat = restPersonResultat.vilkårResultater.single()
 
             val restPersonResultatMedEndring =
@@ -386,7 +386,7 @@ class VilkårServiceTest(
             vilkårService.endreVilkår(
                 behandlingId = behandling.id,
                 vilkårId = restVilkårResultat.id,
-                restPersonResultat = restPersonResultatMedEndring,
+                personResultatDto = restPersonResultatMedEndring,
             )
 
             // Assert
@@ -432,7 +432,7 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultat = vilkårsvurdering.personResultater.single().tilRestPersonResultat()
+            val restPersonResultat = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
             val restVilkårResultat = restPersonResultat.vilkårResultater.single()
 
             val restPersonResultatMedEndring =
@@ -454,7 +454,7 @@ class VilkårServiceTest(
             vilkårService.endreVilkår(
                 behandlingId = behandling.id,
                 vilkårId = restVilkårResultat.id,
-                restPersonResultat = restPersonResultatMedEndring,
+                personResultatDto = restPersonResultatMedEndring,
             )
 
             // Assert

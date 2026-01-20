@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -179,8 +179,8 @@ class EndretUtbetalingAndelTest(
                 familieBaSakKlient().putVilkår(
                     behandlingId = restUtvidetBehandling.data!!.behandlingId,
                     vilkårId = it.id,
-                    restPersonResultat =
-                        RestPersonResultat(
+                    personResultatDto =
+                        PersonResultatDto(
                             personIdent = restPersonResultat.personIdent,
                             vilkårResultater =
                                 listOf(

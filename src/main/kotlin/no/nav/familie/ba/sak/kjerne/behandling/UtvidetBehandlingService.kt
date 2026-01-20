@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilFødselshendelsefiltreringRes
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanseDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertEtterbetalingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertVedtakDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestSettPåVent
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestTotrinnskontroll
@@ -146,7 +146,7 @@ class UtvidetBehandlingService(
             personer =
                 personer?.map { person -> persongrunnlagService.mapTilRestPersonMedStatsborgerskapLand(person, erManueltLagtTilISøknad = søknadsgrunnlag?.barnaMedOpplysninger?.find { it.ident == person.aktør.aktivFødselsnummer() }?.manueltRegistrert) }
                     ?: emptyList(),
-            personResultater = personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
+            personResultater = personResultater?.map { it.tilPersonResultatDto() } ?: emptyList(),
             fødselshendelsefiltreringResultater =
                 fødselshendelsefiltreringResultatRepository
                     .finnFødselshendelsefiltreringResultater(

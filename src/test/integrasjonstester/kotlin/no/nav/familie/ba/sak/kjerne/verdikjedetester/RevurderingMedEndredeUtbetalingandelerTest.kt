@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.nyRevurdering
 import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -155,12 +155,12 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         barnetsFødselsdato: LocalDate,
     ) {
         vilkårsvurdering.personResultater.map { personResultat ->
-            personResultat.tilRestPersonResultat().vilkårResultater.map {
+            personResultat.tilPersonResultatDto().vilkårResultater.map {
                 vilkårService.endreVilkår(
                     behandlingId = behandling.id,
                     vilkårId = it.id,
-                    restPersonResultat =
-                        RestPersonResultat(
+                    personResultatDto =
+                        PersonResultatDto(
                             personIdent = personResultat.aktør.aktivFødselsnummer(),
                             vilkårResultater =
                                 listOf(

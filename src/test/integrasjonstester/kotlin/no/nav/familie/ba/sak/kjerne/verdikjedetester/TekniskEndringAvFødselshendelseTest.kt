@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -93,8 +93,8 @@ class TekniskEndringAvFødselshendelseTest(
                 familieBaSakKlient().putVilkår(
                     behandlingId = restUtvidetBehandling.data!!.behandlingId,
                     vilkårId = it.id,
-                    restPersonResultat =
-                        RestPersonResultat(
+                    personResultatDto =
+                        PersonResultatDto(
                             personIdent = restPersonResultat.personIdent,
                             vilkårResultater =
                                 listOf(

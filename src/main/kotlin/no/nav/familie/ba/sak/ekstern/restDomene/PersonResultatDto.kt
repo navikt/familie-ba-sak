@@ -14,7 +14,7 @@ import no.nav.familie.kontrakter.felles.Fødselsnummer
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-data class RestPersonResultat(
+data class PersonResultatDto(
     val personIdent: String,
     val vilkårResultater: List<RestVilkårResultat>,
     val andreVurderinger: List<AnnenVurderingDto> = emptyList(),
@@ -50,8 +50,8 @@ data class RestVilkårResultat(
     fun harFremtidigTom() = this.periodeTom == null || this.periodeTom.isAfter(LocalDate.now().sisteDagIMåned())
 }
 
-fun PersonResultat.tilRestPersonResultat() =
-    RestPersonResultat(
+fun PersonResultat.tilPersonResultatDto() =
+    PersonResultatDto(
         personIdent = this.aktør.aktivFødselsnummer(),
         vilkårResultater =
             this.vilkårResultater.map { vilkårResultat ->

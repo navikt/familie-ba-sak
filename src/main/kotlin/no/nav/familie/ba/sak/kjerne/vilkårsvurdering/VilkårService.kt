@@ -5,10 +5,10 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -58,18 +58,18 @@ class VilkårService(
     fun endreVilkår(
         behandlingId: Long,
         vilkårId: Long,
-        restPersonResultat: RestPersonResultat,
-    ): List<RestPersonResultat> {
+        personResultatDto: PersonResultatDto,
+    ): List<PersonResultatDto> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
         val restVilkårResultat =
-            restPersonResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
+            personResultatDto.vilkårResultater.singleOrNull { it.id == vilkårId }
                 ?: throw Feil("Fant ikke vilkårResultat med id $vilkårId ved oppdatering av vilkår")
 
         validerResultatBegrunnelse(restVilkårResultat)
 
         val personResultat =
-            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restPersonResultat.personIdent)
+            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, personResultatDto.personIdent)
 
         if (featureToggleService.isEnabled(VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR)) {
             val eksisterendeVilkårResultat =
@@ -81,7 +81,7 @@ class VilkårService(
                 val erEndringIAnnetFeltEnnBegrunnelse = erEndringIVilkår(eksisterendeVilkårResultat, restVilkårResultat)
 
                 if (!erEndringIBegrunnelse && !erEndringIAnnetFeltEnnBegrunnelse) {
-                    return vilkårsvurdering.personResultater.map { it.tilRestPersonResultat() }
+                    return vilkårsvurdering.personResultater.map { it.tilPersonResultatDto() }
                 }
 
                 val begrunnelseErTomEllerAutomatiskUtfylt =
@@ -122,7 +122,7 @@ class VilkårService(
             migreringsdatoPåFagsak,
         )
 
-        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
+        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilPersonResultatDto() }
     }
 
     private fun erEndringIVilkår(
@@ -143,7 +143,7 @@ class VilkårService(
         behandlingId: Long,
         vilkårId: Long,
         aktør: Aktør,
-    ): List<RestPersonResultat> {
+    ): List<PersonResultatDto> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
         val personResultat =
@@ -151,14 +151,14 @@ class VilkårService(
 
         muterPersonResultatDelete(personResultat, vilkårId)
 
-        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
+        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilPersonResultatDto() }
     }
 
     @Transactional
     fun deleteVilkår(
         behandlingId: Long,
         restSlettVilkår: RestSlettVilkår,
-    ): List<RestPersonResultat> {
+    ): List<PersonResultatDto> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
         val personResultat =
             finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restSlettVilkår.personIdent)
@@ -188,14 +188,14 @@ class VilkårService(
             )
         }
 
-        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
+        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilPersonResultatDto() }
     }
 
     @Transactional
     fun postVilkår(
         behandlingId: Long,
         nyttVilkårDto: NyttVilkårDto,
-    ): List<RestPersonResultat> {
+    ): List<PersonResultatDto> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
         val behandling = vilkårsvurdering.behandling
@@ -214,7 +214,7 @@ class VilkårService(
 
         muterPersonResultatPost(personResultat, nyttVilkårDto.vilkårType)
 
-        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
+        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilPersonResultatDto() }
     }
 
     private fun validerFørLeggeTilUtvidetBarnetrygd(

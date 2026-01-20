@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.HentFagsakForPersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.JournalføringDto
 import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
@@ -137,11 +137,11 @@ class FamilieBaSakKlient(
     fun putVilkår(
         behandlingId: Long,
         vilkårId: Long,
-        restPersonResultat: RestPersonResultat,
+        personResultatDto: PersonResultatDto,
     ): Ressurs<RestUtvidetBehandling> {
         val uri = URI.create(encodePath("$baSakUrl/api/vilkaarsvurdering/$behandlingId/$vilkårId"))
 
-        return putForEntity(uri, restPersonResultat, headers)
+        return putForEntity(uri, personResultatDto, headers)
     }
 
     fun validerVilkårsvurdering(behandlingId: Long): Ressurs<RestUtvidetBehandling> {

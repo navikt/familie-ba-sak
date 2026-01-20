@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
@@ -401,8 +401,8 @@ class RestartAvSmåbarnstilleggTest(
                 familieBaSakKlient().putVilkår(
                     behandlingId = restUtvidetBehandling.behandlingId,
                     vilkårId = it.id,
-                    restPersonResultat =
-                        RestPersonResultat(
+                    personResultatDto =
+                        PersonResultatDto(
                             personIdent = restPersonResultat.personIdent,
                             vilkårResultater =
                                 listOf(

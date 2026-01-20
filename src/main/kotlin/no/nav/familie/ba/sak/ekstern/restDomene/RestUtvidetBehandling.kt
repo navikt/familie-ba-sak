@@ -27,7 +27,7 @@ data class RestUtvidetBehandling(
     val arbeidsfordelingPåBehandling: ArbeidsfordelingPåBehandlingDto,
     val søknadsgrunnlag: SøknadDTO?,
     val personer: List<PersonDto>,
-    val personResultater: List<RestPersonResultat>,
+    val personResultater: List<PersonResultatDto>,
     val fødselshendelsefiltreringResultater: List<FødselshendelsefiltreringResultatDto>,
     val utbetalingsperioder: List<Utbetalingsperiode>,
     val personerMedAndelerTilkjentYtelse: List<RestPersonMedAndeler>,
