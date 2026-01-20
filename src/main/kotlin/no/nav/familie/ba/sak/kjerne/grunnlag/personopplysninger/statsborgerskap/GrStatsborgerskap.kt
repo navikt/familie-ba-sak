@@ -17,7 +17,7 @@ import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.erInnenfor
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
+import no.nav.familie.ba.sak.ekstern.restDomene.RegisteropplysningDto
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -77,8 +77,8 @@ data class GrStatsborgerskap(
         return result
     }
 
-    fun tilRestRegisteropplysning() =
-        RestRegisteropplysning(
+    fun tilRegisteropplysningDto() =
+        RegisteropplysningDto(
             fom = this.gyldigPeriode?.fom,
             tom = this.gyldigPeriode?.tom,
             verdi = this.landkode,

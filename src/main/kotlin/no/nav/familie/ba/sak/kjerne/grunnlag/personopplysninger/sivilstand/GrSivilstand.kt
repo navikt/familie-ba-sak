@@ -15,7 +15,7 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
+import no.nav.familie.ba.sak.ekstern.restDomene.RegisteropplysningDto
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
@@ -62,8 +62,8 @@ data class GrSivilstand(
 
     override fun hashCode() = Objects.hash(fom, type, person)
 
-    fun tilRestRegisteropplysning() =
-        RestRegisteropplysning(
+    fun tilRegisteropplysningDto() =
+        RegisteropplysningDto(
             fom = this.fom,
             tom = null,
             verdi =

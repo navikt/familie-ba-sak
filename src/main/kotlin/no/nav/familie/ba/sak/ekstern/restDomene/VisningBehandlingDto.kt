@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Visningsbehandling
 import java.time.LocalDateTime
 
-class RestVisningBehandling(
+class VisningBehandlingDto(
     val behandlingId: Long,
     val opprettetTidspunkt: LocalDateTime,
     val aktivertTidspunkt: LocalDateTime,
@@ -25,7 +25,7 @@ class RestVisningBehandling(
 ) {
     companion object Factory {
         fun opprettFraVisningsbehandling(visningsbehandling: Visningsbehandling) =
-            RestVisningBehandling(
+            VisningBehandlingDto(
                 behandlingId = visningsbehandling.behandlingId,
                 opprettetTidspunkt = visningsbehandling.opprettetTidspunkt,
                 aktivertTidspunkt = visningsbehandling.aktivertTidspunkt,
@@ -41,8 +41,8 @@ class RestVisningBehandling(
     }
 }
 
-fun Behandling.tilRestVisningBehandling(vedtaksdato: LocalDateTime?) =
-    RestVisningBehandling(
+fun Behandling.tilVisningBehandlingDto(vedtaksdato: LocalDateTime?) =
+    VisningBehandlingDto(
         behandlingId = this.id,
         opprettetTidspunkt = this.opprettetTidspunkt,
         aktivertTidspunkt = this.aktivertTidspunkt,

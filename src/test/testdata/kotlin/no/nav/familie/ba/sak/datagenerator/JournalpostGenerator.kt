@@ -99,7 +99,7 @@ fun lagTilgangsstyrtJournalpost(
         journalpostTilgang = JournalpostTilgang(harTilgang = harTilgang),
     )
 
-fun lagMockRestJournalføring(bruker: NavnOgIdent): JournalføringDto =
+fun lagMockJournalføringDto(bruker: NavnOgIdent): JournalføringDto =
     JournalføringDto(
         avsender = bruker,
         bruker = bruker,

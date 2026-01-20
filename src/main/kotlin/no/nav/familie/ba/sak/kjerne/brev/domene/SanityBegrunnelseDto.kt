@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-data class RestSanityBegrunnelse(
+data class SanityBegrunnelseDto(
     val apiNavn: String?,
     val navnISystem: String,
     val vilkaar: List<String>? = emptyList(),
@@ -111,7 +111,7 @@ data class RestSanityBegrunnelse(
 inline fun <reified T : Enum<T>> String?.finnEnumverdi(apiNavn: String): T? {
     val enumverdi = enumValues<T>().find { this != null && it.name == this }
     if (enumverdi == null) {
-        val logger: Logger = LoggerFactory.getLogger(RestSanityBegrunnelse::class.java)
+        val logger: Logger = LoggerFactory.getLogger(SanityBegrunnelseDto::class.java)
         logger.error("$this på begrunnelsen $apiNavn er ikke blant verdiene til enumen ${enumValues<T>().javaClass.simpleName}")
     }
     return enumverdi

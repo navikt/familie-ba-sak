@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toPeriode
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.VilkårResultatDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -229,11 +229,11 @@ private fun lagBosattIRiketVilkårTidslinjePerAktør(vilkårsvurdering: Vilkårs
                     .tilTidslinje()
         }
 
-fun validerResultatBegrunnelse(restVilkårResultat: RestVilkårResultat) {
-    val resultat = restVilkårResultat.resultat
-    val vilkårType = restVilkårResultat.vilkårType
-    val resultatBegrunnelse = restVilkårResultat.resultatBegrunnelse
-    val regelverk = restVilkårResultat.vurderesEtter
+fun validerResultatBegrunnelse(vilkårResultatDto: VilkårResultatDto) {
+    val resultat = vilkårResultatDto.resultat
+    val vilkårType = vilkårResultatDto.vilkårType
+    val resultatBegrunnelse = vilkårResultatDto.resultatBegrunnelse
+    val regelverk = vilkårResultatDto.vurderesEtter
 
     if (resultatBegrunnelse != null) {
         if (!resultatBegrunnelse.gyldigForVilkår.contains(vilkårType)) {

@@ -2,20 +2,20 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 
 import java.time.LocalDate
 
-data class RestPutVedtaksperiodeMedFritekster(
+data class PutVedtaksperiodeMedFriteksterDto(
     val fritekster: List<String> = emptyList(),
 )
 
-data class RestPutVedtaksperiodeMedStandardbegrunnelser(
+data class PutVedtaksperiodeMedStandardbegrunnelserDto(
     val standardbegrunnelser: List<String>,
 )
 
-data class RestGenererVedtaksperioderForOverstyrtEndringstidspunkt(
+data class GenererVedtaksperioderForOverstyrtEndringstidspunktDto(
     val behandlingId: Long,
     val overstyrtEndringstidspunkt: LocalDate,
 )
 
-data class RestPutGenererFortsattInnvilgetVedtaksperioder(
+data class PutGenererFortsattInnvilgetVedtaksperioderDto(
     val skalGenererePerioderForFortsattInnvilget: Boolean,
     val behandlingId: Long,
 )

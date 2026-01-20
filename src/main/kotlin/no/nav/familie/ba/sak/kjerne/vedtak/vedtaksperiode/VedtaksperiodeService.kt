@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
+import no.nav.familie.ba.sak.ekstern.restDomene.GenererVedtaksperioderForOverstyrtEndringstidspunktDto
+import no.nav.familie.ba.sak.ekstern.restDomene.PutVedtaksperiodeMedFriteksterDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -44,11 +44,11 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentUtbetalingsperiodeDetaljer
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelserDto
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.sorter
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilRestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelserDto
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.endringstidspunkt.utledEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserForPeriode
@@ -85,7 +85,7 @@ class VedtaksperiodeService(
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
-        restPutVedtaksperiodeMedFritekster: RestPutVedtaksperiodeMedFritekster,
+        putVedtaksperiodeMedFriteksterDto: PutVedtaksperiodeMedFriteksterDto,
     ): Vedtak {
         val vedtaksperiodeMedBegrunnelser =
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
@@ -93,7 +93,7 @@ class VedtaksperiodeService(
         validerBehandlingKanRedigeres(behandling)
 
         vedtaksperiodeMedBegrunnelser.settFritekster(
-            restPutVedtaksperiodeMedFritekster.fritekster.map {
+            putVedtaksperiodeMedFriteksterDto.fritekster.map {
                 tilVedtaksbegrunnelseFritekst(
                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                     fritekst = it,
@@ -264,14 +264,14 @@ class VedtaksperiodeService(
         )
 
     @Transactional
-    fun oppdaterEndringstidspunktOgGenererVedtaksperioderPåNytt(restGenererVedtaksperioder: RestGenererVedtaksperioderForOverstyrtEndringstidspunkt) {
-        val vedtak = vedtakRepository.findByBehandlingAndAktiv(restGenererVedtaksperioder.behandlingId)
+    fun oppdaterEndringstidspunktOgGenererVedtaksperioderPåNytt(genererVedtaksperioderForOverstyrtEndringstidspunktDto: GenererVedtaksperioderForOverstyrtEndringstidspunktDto) {
+        val vedtak = vedtakRepository.findByBehandlingAndAktiv(genererVedtaksperioderForOverstyrtEndringstidspunktDto.behandlingId)
 
         validerBehandlingKanRedigeres(vedtak.behandling)
 
         lagreNedOverstyrtEndringstidspunkt(
             behandlingId = vedtak.behandling.id,
-            overstyrtEndringstidspunkt = restGenererVedtaksperioder.overstyrtEndringstidspunkt,
+            overstyrtEndringstidspunkt = genererVedtaksperioderForOverstyrtEndringstidspunktDto.overstyrtEndringstidspunkt,
         )
         oppdaterVedtakMedVedtaksperioder(vedtak)
     }
@@ -325,7 +325,7 @@ class VedtaksperiodeService(
 
     fun hentPersisterteVedtaksperioder(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> = vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)
 
-    fun hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandlingId: Long): List<RestUtvidetVedtaksperiodeMedBegrunnelser> {
+    fun hentUtvidetVedtaksperiodeMedBegrunnelserDto(behandlingId: Long): List<UtvidetVedtaksperiodeMedBegrunnelserDto> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser().values.toList()
@@ -344,7 +344,7 @@ class VedtaksperiodeService(
                 utvidetVedtaksperiodeMedBegrunnelser
                     .sorter()
                     .map {
-                        it.tilRestUtvidetVedtaksperiodeMedBegrunnelser(
+                        it.tilUtvidetVedtaksperiodeMedBegrunnelserDto(
                             sanityBegrunnelser = sanityBegrunnelser,
                             sanityEØSBegrunnelser = sanityEØSBegrunnelser,
                             alleBegrunnelserSkalStøtteFritekst = alleBegrunnelserSkalStøtteFritekst,

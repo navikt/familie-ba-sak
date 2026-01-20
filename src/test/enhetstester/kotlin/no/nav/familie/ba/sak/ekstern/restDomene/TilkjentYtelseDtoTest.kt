@@ -8,7 +8,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
-class RestTilkjentYtelseTest {
+class TilkjentYtelseDtoTest {
     @Test
     fun `Skal slå sammen etterfølgende andeler med samme kalkulert utbetalingsbeløp, ytelsetype og prosent`() {
         val aktør = randomAktør()
@@ -33,9 +33,9 @@ class RestTilkjentYtelseTest {
                 ),
             )
 
-        val restYtelsePerioder = andeler.tilYtelsePerioderDto()
+        val ytelsePerioderDto = andeler.tilYtelsePerioderDto()
         val forventetYtelsePeriodeDto = listOf(YtelsePeriodeDto(beløp = 1234, stønadFom = årMnd("2020-03"), stønadTom = årMnd("2021-12"), ytelseType = YtelseType.ORDINÆR_BARNETRYGD, skalUtbetales = true))
-        Assertions.assertThat(restYtelsePerioder).containsAll(forventetYtelsePeriodeDto).hasSize(forventetYtelsePeriodeDto.size)
+        Assertions.assertThat(ytelsePerioderDto).containsAll(forventetYtelsePeriodeDto).hasSize(forventetYtelsePeriodeDto.size)
     }
 
     @Test
@@ -78,7 +78,7 @@ class RestTilkjentYtelseTest {
                 ),
             )
 
-        val restYtelsePerioder = andeler.tilYtelsePerioderDto()
+        val ytelsePerioderDto = andeler.tilYtelsePerioderDto()
         val forventetYtelsePerioderDtos =
             listOf(
                 YtelsePeriodeDto(beløp = 1234, stønadFom = årMnd("2020-03"), stønadTom = årMnd("2020-12"), ytelseType = YtelseType.SMÅBARNSTILLEGG, skalUtbetales = true),
@@ -86,6 +86,6 @@ class RestTilkjentYtelseTest {
                 YtelsePeriodeDto(beløp = 0, stønadFom = årMnd("2022-01"), stønadTom = årMnd("2022-12"), ytelseType = YtelseType.UTVIDET_BARNETRYGD, skalUtbetales = true),
                 YtelsePeriodeDto(beløp = 0, stønadFom = årMnd("2023-01"), stønadTom = årMnd("2023-12"), ytelseType = YtelseType.UTVIDET_BARNETRYGD, skalUtbetales = false),
             )
-        Assertions.assertThat(restYtelsePerioder).containsAll(forventetYtelsePerioderDtos).hasSize(forventetYtelsePerioderDtos.size)
+        Assertions.assertThat(ytelsePerioderDto).containsAll(forventetYtelsePerioderDtos).hasSize(forventetYtelsePerioderDtos.size)
     }
 }

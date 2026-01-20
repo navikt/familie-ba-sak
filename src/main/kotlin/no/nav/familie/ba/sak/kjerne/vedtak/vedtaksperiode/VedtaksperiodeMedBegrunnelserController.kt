@@ -4,10 +4,10 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.GenererVedtaksperioderForOverstyrtEndringstidspunktDto
+import no.nav.familie.ba.sak.ekstern.restDomene.PutVedtaksperiodeMedFriteksterDto
+import no.nav.familie.ba.sak.ekstern.restDomene.PutVedtaksperiodeMedStandardbegrunnelserDto
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestUtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelserDto
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.finnBegrunnelseGrunnlagPerPerson
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -51,8 +51,8 @@ class VedtaksperiodeMedBegrunnelserController(
         @PathVariable
         vedtaksperiodeId: Long,
         @RequestBody
-        restPutVedtaksperiodeMedStandardbegrunnelser: RestPutVedtaksperiodeMedStandardbegrunnelser,
-    ): ResponseEntity<Ressurs<List<RestUtvidetVedtaksperiodeMedBegrunnelser>>> {
+        putVedtaksperiodeMedStandardbegrunnelserDto: PutVedtaksperiodeMedStandardbegrunnelserDto,
+    ): ResponseEntity<Ressurs<List<UtvidetVedtaksperiodeMedBegrunnelserDto>>> {
         val behandlingId =
             vedtaksperiodeHentOgPersisterService.finnBehandlingIdFor(vedtaksperiodeId)
                 ?: throw FunksjonellFeil("Vedtaksperiodene har blitt oppdatert. Oppdater siden og forsøk å legge til begrunnelser på nytt.")
@@ -63,7 +63,7 @@ class VedtaksperiodeMedBegrunnelserController(
         )
 
         val standardbegrunnelser =
-            restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.map {
+            putVedtaksperiodeMedStandardbegrunnelserDto.standardbegrunnelser.map {
                 IVedtakBegrunnelse.konverterTilEnumVerdi(it)
             }
 
@@ -78,7 +78,7 @@ class VedtaksperiodeMedBegrunnelserController(
 
         return ResponseEntity.ok(
             Ressurs.success(
-                vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+                vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelserDto(
                     behandlingId,
                 ),
             ),
@@ -90,8 +90,8 @@ class VedtaksperiodeMedBegrunnelserController(
         @PathVariable
         vedtaksperiodeId: Long,
         @RequestBody
-        restPutVedtaksperiodeMedFritekster: RestPutVedtaksperiodeMedFritekster,
-    ): ResponseEntity<Ressurs<List<RestUtvidetVedtaksperiodeMedBegrunnelser>>> {
+        putVedtaksperiodeMedFriteksterDto: PutVedtaksperiodeMedFriteksterDto,
+    ): ResponseEntity<Ressurs<List<UtvidetVedtaksperiodeMedBegrunnelserDto>>> {
         val behandlingId = vedtaksperiodeHentOgPersisterService.finnBehandlingIdFor(vedtaksperiodeId) ?: throw FunksjonellFeil("Vedtaksperiodene har blitt oppdatert. Oppdater siden og forsøk å legge til fritekst på nytt.")
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -101,12 +101,12 @@ class VedtaksperiodeMedBegrunnelserController(
 
         vedtaksperiodeService.oppdaterVedtaksperiodeMedFritekster(
             vedtaksperiodeId,
-            restPutVedtaksperiodeMedFritekster,
+            putVedtaksperiodeMedFriteksterDto,
         )
 
         return ResponseEntity.ok(
             Ressurs.success(
-                vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+                vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelserDto(
                     behandlingId,
                 ),
             ),
@@ -115,8 +115,8 @@ class VedtaksperiodeMedBegrunnelserController(
 
     @PutMapping("/endringstidspunkt")
     fun genererVedtaksperioderTilOgMedFørsteEndringstidspunkt(
-        @RequestBody restGenererVedtaksperioder: RestGenererVedtaksperioderForOverstyrtEndringstidspunkt,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        @RequestBody restGenererVedtaksperioder: GenererVedtaksperioderForOverstyrtEndringstidspunktDto,
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         val behandlingId = restGenererVedtaksperioder.behandlingId
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -128,7 +128,7 @@ class VedtaksperiodeMedBegrunnelserController(
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandlingId),
+                    .lagUtvidetBehandlingDto(behandlingId = behandlingId),
             ),
         )
     }
@@ -181,12 +181,12 @@ class VedtaksperiodeMedBegrunnelserController(
     }
 
     @GetMapping(path = ["/behandling/{behandlingId}/hent-vedtaksperioder"])
-    fun hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+    fun hentUtvidetVedtaksperiodeMedBegrunnelserDto(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<List<RestUtvidetVedtaksperiodeMedBegrunnelser>>> =
+    ): ResponseEntity<Ressurs<List<UtvidetVedtaksperiodeMedBegrunnelserDto>>> =
         ResponseEntity.ok(
             Ressurs.success(
-                vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandlingId),
+                vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelserDto(behandlingId),
             ),
         )
 

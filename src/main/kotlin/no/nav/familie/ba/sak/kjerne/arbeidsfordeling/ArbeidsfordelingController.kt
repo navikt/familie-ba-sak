@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -32,8 +32,8 @@ class ArbeidsfordelingController(
     fun endreBehandlendeEnhet(
         @PathVariable behandlingId: Long,
         @RequestBody
-        endreBehandlendeEnhet: RestEndreBehandlendeEnhet,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        endreBehandlendeEnhet: EndreBehandlendeEnhetDto,
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Endre behandlende enhet",
@@ -53,11 +53,11 @@ class ArbeidsfordelingController(
             endreBehandlendeEnhet = endreBehandlendeEnhet,
         )
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id)))
     }
 }
 
-data class RestEndreBehandlendeEnhet(
+data class EndreBehandlendeEnhetDto(
     val enhetId: String,
     val begrunnelse: String,
 )

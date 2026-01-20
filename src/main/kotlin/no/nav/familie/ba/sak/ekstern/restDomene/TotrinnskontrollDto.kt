@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import java.time.LocalDateTime
 
-data class RestTotrinnskontroll(
+data class TotrinnskontrollDto(
     val saksbehandler: String,
     val saksbehandlerId: String,
     val beslutter: String? = null,
@@ -11,8 +11,8 @@ data class RestTotrinnskontroll(
     val opprettetTidspunkt: LocalDateTime,
 )
 
-fun Totrinnskontroll.tilRestTotrinnskontroll() =
-    RestTotrinnskontroll(
+fun Totrinnskontroll.tilTotrinnskontrollDto() =
+    TotrinnskontrollDto(
         saksbehandler = this.saksbehandler,
         beslutter = this.beslutter,
         godkjent = this.godkjent,

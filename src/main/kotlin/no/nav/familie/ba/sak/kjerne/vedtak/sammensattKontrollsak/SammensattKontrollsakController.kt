@@ -52,7 +52,7 @@ class SammensattKontrollsakController(
         )
         val sammensattKontrollsak = sammensattKontrollsakService.finnSammensattKontrollsak(behandlingId = behandlingId)
 
-        return ResponseEntity.ok(Ressurs.success(sammensattKontrollsak?.tilRestSammensattKontrollsak()))
+        return ResponseEntity.ok(Ressurs.success(sammensattKontrollsak?.tilSammensattKontrollsakDto()))
     }
 
     @PostMapping(
@@ -74,7 +74,7 @@ class SammensattKontrollsakController(
 
         val sammensattKontrollsak = sammensattKontrollsakService.opprettSammensattKontrollsak(opprettSammensattKontrollsakDto = opprettSammensattKontrollsakDto)
 
-        return ResponseEntity.ok(Ressurs.success(sammensattKontrollsak.tilRestSammensattKontrollsak()))
+        return ResponseEntity.ok(Ressurs.success(sammensattKontrollsak.tilSammensattKontrollsakDto()))
     }
 
     @PutMapping(
@@ -96,7 +96,7 @@ class SammensattKontrollsakController(
 
         val sammensattKontrollsak = sammensattKontrollsakService.oppdaterSammensattKontrollsak(sammensattKontrollsakDto = sammensattKontrollsakDto)
 
-        return ResponseEntity.ok(Ressurs.success(sammensattKontrollsak.tilRestSammensattKontrollsak()))
+        return ResponseEntity.ok(Ressurs.success(sammensattKontrollsak.tilSammensattKontrollsakDto()))
     }
 
     @DeleteMapping(

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilArbeidsfordelingPåBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBehandlingStegTilstandDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
@@ -12,11 +12,11 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilManglendeFinnmarkmerkingPerio
 import no.nav.familie.ba.sak.ekstern.restDomene.tilManglendeSvalbardmerkingPerioder
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonerMedAndelerDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestTotrinnskontroll
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestUtenlandskPeriodebeløp
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestValutakurs
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVedtak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilSettPåVentDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilTotrinnskontrollDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilUtenlandskPeriodebeløpDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakursDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilVedtakDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
@@ -25,7 +25,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilEndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -43,7 +43,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaService
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
-import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.tilRestTilbakekrevingsvedtakMotregning
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.tilTilbakekrevingsvedtakMotregningDto
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
@@ -78,7 +78,7 @@ class UtvidetBehandlingService(
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val institusjonService: InstitusjonService,
 ) {
-    fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
+    fun lagUtvidetBehandlingDto(behandlingId: Long): UtvidetBehandlingDto {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
         val søknadsgrunnlag =
@@ -121,14 +121,14 @@ class UtvidetBehandlingService(
 
         val refusjonEøs = refusjonEøsService.hentRefusjonEøsPerioder(behandlingId)
 
-        val brevmottakere = brevmottakerService.hentRestBrevmottakere(behandlingId)
+        val brevmottakere = brevmottakerService.hentBrevmottakereDto(behandlingId)
         val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandlingId)
 
         val tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandlingId)
 
         val samhandlerInfo = behandling.fagsak.institusjon?.let { institusjonService.hentSamhandlerForBehandling(BehandlingId(behandlingId)) }
 
-        return RestUtvidetBehandling(
+        return UtvidetBehandlingDto(
             behandlingId = behandling.id,
             steg = behandling.steg,
             stegTilstand = behandling.behandlingStegTilstand.map { it.tilBehandlingStegTilstandDto() },
@@ -144,7 +144,7 @@ class UtvidetBehandlingService(
             arbeidsfordelingPåBehandling = arbeidsfordeling.tilArbeidsfordelingPåBehandlingDto(),
             søknadsgrunnlag = søknadsgrunnlag,
             personer =
-                personer?.map { person -> persongrunnlagService.mapTilRestPersonMedStatsborgerskapLand(person, erManueltLagtTilISøknad = søknadsgrunnlag?.barnaMedOpplysninger?.find { it.ident == person.aktør.aktivFødselsnummer() }?.manueltRegistrert) }
+                personer?.map { person -> persongrunnlagService.mapTilPersonDtoMedStatsborgerskapLand(person, erManueltLagtTilISøknad = søknadsgrunnlag?.barnaMedOpplysninger?.find { it.ident == person.aktør.aktivFødselsnummer() }?.manueltRegistrert) }
                     ?: emptyList(),
             personResultater = personResultater?.map { it.tilPersonResultatDto() } ?: emptyList(),
             fødselshendelsefiltreringResultater =
@@ -158,18 +158,18 @@ class UtvidetBehandlingService(
                     ?: emptyList(),
             endretUtbetalingAndeler =
                 endreteUtbetalingerMedAndeler
-                    .map { it.tilRestEndretUtbetalingAndel() },
-            tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
-            vedtak = vedtak?.tilRestVedtak(),
+                    .map { it.tilEndretUtbetalingAndelDto() },
+            tilbakekreving = tilbakekreving?.tilTilbakekrevingDto(),
+            vedtak = vedtak?.tilVedtakDto(),
             kompetanser = kompetanser.map { it.tilKompetanseDto() }.sortedByDescending { it.fom },
-            totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
+            totrinnskontroll = totrinnskontroll?.tilTotrinnskontrollDto(),
             aktivSettPåVent =
                 settPåVentService
                     .finnAktivSettPåVentPåBehandling(behandlingId = behandlingId)
                     ?.tilSettPåVentDto(),
             migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId),
-            valutakurser = valutakurser.map { it.tilRestValutakurs() },
-            utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilRestUtenlandskPeriodebeløp() },
+            valutakurser = valutakurser.map { it.tilValutakursDto() },
+            utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilUtenlandskPeriodebeløpDto() },
             korrigertEtterbetaling =
                 korrigertEtterbetalingService
                     .finnAktivtKorrigeringPåBehandling(behandlingId)
@@ -183,7 +183,7 @@ class UtvidetBehandlingService(
             refusjonEøs = refusjonEøs,
             vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandling.id)?.vurderingsstrategiForValutakurser,
             søknadMottattDato = søknadMottattDato,
-            tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregning?.tilRestTilbakekrevingsvedtakMotregning(),
+            tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregning?.tilTilbakekrevingsvedtakMotregningDto(),
             manglendeSvalbardmerking = personer?.tilManglendeSvalbardmerkingPerioder(personResultater) ?: emptyList(),
             manglendeFinnmarkmerking = samhandlerInfo?.tilManglendeFinnmarkmerkingPerioder(personResultater),
         )

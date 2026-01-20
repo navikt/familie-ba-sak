@@ -32,7 +32,7 @@ data class FagsakDto(
     override val løpendeKategori: BehandlingKategori?,
     override val løpendeUnderkategori: BehandlingUnderkategori?,
     override val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
-    val behandlinger: List<RestUtvidetBehandling>,
+    val behandlinger: List<UtvidetBehandlingDto>,
     override val fagsakType: FagsakType = FagsakType.NORMAL,
 ) : BaseFagsakDto(
         opprettetTidspunkt = opprettetTidspunkt,
@@ -48,7 +48,7 @@ data class FagsakDto(
     )
 
 fun BaseFagsakDto.tilFagsakDto(
-    restUtvidetBehandlinger: List<RestUtvidetBehandling>,
+    utvidetBehandlingerDto: List<UtvidetBehandlingDto>,
 ) = FagsakDto(
     opprettetTidspunkt = this.opprettetTidspunkt,
     id = this.id,
@@ -59,7 +59,7 @@ fun BaseFagsakDto.tilFagsakDto(
     løpendeKategori = this.løpendeKategori,
     løpendeUnderkategori = this.løpendeUnderkategori,
     gjeldendeUtbetalingsperioder = this.gjeldendeUtbetalingsperioder,
-    behandlinger = restUtvidetBehandlinger,
+    behandlinger = utvidetBehandlingerDto,
     fagsakType = this.fagsakType,
 )
 
@@ -73,7 +73,7 @@ data class MinimalFagsakDto(
     override val løpendeUnderkategori: BehandlingUnderkategori?,
     override val underBehandling: Boolean,
     override val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
-    val behandlinger: List<RestVisningBehandling>,
+    val behandlinger: List<VisningBehandlingDto>,
     val migreringsdato: LocalDate? = null,
     override val fagsakType: FagsakType,
     override val institusjon: InstitusjonDto?,
@@ -92,7 +92,7 @@ data class MinimalFagsakDto(
     )
 
 fun BaseFagsakDto.tilMinimalFagsakDto(
-    restVisningBehandlinger: List<RestVisningBehandling>,
+    visningBehandlingerDto: List<VisningBehandlingDto>,
     migreringsdato: LocalDate?,
 ) = MinimalFagsakDto(
     opprettetTidspunkt = this.opprettetTidspunkt,
@@ -104,7 +104,7 @@ fun BaseFagsakDto.tilMinimalFagsakDto(
     løpendeKategori = this.løpendeKategori,
     løpendeUnderkategori = this.løpendeUnderkategori,
     gjeldendeUtbetalingsperioder = this.gjeldendeUtbetalingsperioder,
-    behandlinger = restVisningBehandlinger,
+    behandlinger = visningBehandlingerDto,
     migreringsdato = migreringsdato,
     fagsakType = this.fagsakType,
     institusjon = this.institusjon,

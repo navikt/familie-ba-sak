@@ -68,7 +68,7 @@ data class Tilbakekreving(
             "tilbakekrevingsbehandlingId=$tilbakekrevingsbehandlingId" +
             ")"
 
-    fun tilRestTilbakekreving() =
+    fun tilTilbakekrevingDto() =
         TilbakekrevingDto(
             valg = valg,
             varsel = varsel,

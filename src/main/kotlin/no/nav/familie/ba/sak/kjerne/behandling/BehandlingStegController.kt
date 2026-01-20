@@ -5,15 +5,15 @@ import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerInstitusjonDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
 import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggelsestype
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
+import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -50,8 +50,8 @@ class BehandlingStegController(
     )
     fun registrereSøknadOgHentPersongrunnlag(
         @PathVariable behandlingId: Long,
-        @RequestBody restRegistrerSøknad: RestRegistrerSøknad,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        @RequestBody registrerSøknadDto: RegistrerSøknadDto,
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "registrere søknad",
@@ -59,14 +59,14 @@ class BehandlingStegController(
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
-        stegService.håndterSøknad(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        stegService.håndterSøknad(behandling = behandling, registrerSøknadDto = registrerSøknadDto)
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id)))
     }
 
     @PostMapping(path = ["vilkårsvurdering"])
     fun validerVilkårsvurdering(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "vurdere vilkårsvurdering",
@@ -75,7 +75,7 @@ class BehandlingStegController(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         stegService.håndterVilkårsvurdering(behandling)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id)))
     }
 
     @GetMapping(path = ["behandlingsresultat/valider"])
@@ -106,7 +106,7 @@ class BehandlingStegController(
     @PostMapping(path = ["behandlingsresultat"])
     fun utledBehandlingsresultat(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "vurdere behandlingsresultat",
@@ -115,14 +115,14 @@ class BehandlingStegController(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         stegService.håndterBehandlingsresultat(behandling)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id)))
     }
 
     @PostMapping(path = ["tilbakekreving"])
     fun lagreTilbakekrevingOgGåVidereTilNesteSteg(
         @PathVariable behandlingId: Long,
         @RequestBody tilbakekrevingDto: TilbakekrevingDto?,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "vurdere tilbakekreving",
@@ -131,14 +131,14 @@ class BehandlingStegController(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         stegService.håndterVurderTilbakekreving(behandling, tilbakekrevingDto)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id)))
     }
 
     @PostMapping(path = ["send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun sendTilBeslutter(
         @PathVariable behandlingId: Long,
         @RequestParam behandlendeEnhet: String,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "foreslå vedtak",
@@ -147,14 +147,14 @@ class BehandlingStegController(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id)))
     }
 
     @PostMapping(path = ["iverksett-vedtak"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun iverksettVedtak(
         @PathVariable behandlingId: Long,
-        @RequestBody restBeslutningPåVedtak: RestBeslutningPåVedtak,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        @RequestBody beslutningPåVedtakDto: BeslutningPåVedtakDto,
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.BESLUTTER,
             handling = "iverksette vedtak",
@@ -162,15 +162,15 @@ class BehandlingStegController(
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
-        stegService.håndterBeslutningForVedtak(behandling, restBeslutningPåVedtak)
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        stegService.håndterBeslutningForVedtak(behandling, beslutningPåVedtakDto)
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id)))
     }
 
     @PutMapping(path = ["henlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun henleggBehandlingOgSendBrev(
         @PathVariable behandlingId: Long,
-        @RequestBody henleggInfo: RestHenleggBehandlingInfo,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        @RequestBody henleggInfo: HenleggBehandlingInfoDto,
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "henlegge behandling",
@@ -192,7 +192,7 @@ class BehandlingStegController(
         validerBehandlingIkkeSendtTilEksterneTjenester(behandling = behandling)
 
         stegService.håndterHenleggBehandling(behandling, henleggInfo)
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id)))
     }
 
     private fun validerTilgangTilHenleggelseAvBehandling(
@@ -208,16 +208,16 @@ class BehandlingStegController(
     fun registerInstitusjon(
         @PathVariable behandlingId: Long,
         @RequestBody restInstitusjon: RegistrerInstitusjonDto,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val institusjon = restInstitusjon.tilInstitusjon()
 
         stegService.håndterRegistrerInstitusjon(behandling, institusjon)
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id)))
     }
 }
 
-class RestHenleggBehandlingInfo(
+class HenleggBehandlingInfoDto(
     val årsak: HenleggÅrsak,
     val begrunnelse: String,
 )

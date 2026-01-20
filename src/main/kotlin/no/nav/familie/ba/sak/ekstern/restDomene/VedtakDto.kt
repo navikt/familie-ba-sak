@@ -4,20 +4,20 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.time.LocalDateTime
 
-data class RestVedtak(
+data class VedtakDto(
     val aktiv: Boolean,
     val vedtaksdato: LocalDateTime?,
     val id: Long,
 )
 
-data class RestVedtakBegrunnelseTilknyttetVilkår(
+data class VedtakBegrunnelseTilknyttetVilkårDto(
     val id: String,
     val navn: String,
     val vilkår: Vilkår?,
 )
 
-fun Vedtak.tilRestVedtak() =
-    RestVedtak(
+fun Vedtak.tilVedtakDto() =
+    VedtakDto(
         aktiv = this.aktiv,
         vedtaksdato = this.vedtaksdato,
         id = this.id,

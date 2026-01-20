@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
-import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
+import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -28,8 +28,8 @@ class MaskineltUnderkjennVedtakTask(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         stegService.håndterBeslutningForVedtak(
             behandling = behandling,
-            restBeslutningPåVedtak =
-                RestBeslutningPåVedtak(
+            beslutningPåVedtakDto =
+                BeslutningPåVedtakDto(
                     beslutning = Beslutning.UNDERKJENT,
                     begrunnelse = "Maskinelt underkjent",
                 ),

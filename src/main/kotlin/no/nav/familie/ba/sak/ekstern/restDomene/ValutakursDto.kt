@@ -8,7 +8,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-data class RestValutakurs(
+data class ValutakursDto(
     val id: Long,
     val fom: YearMonth?,
     val tom: YearMonth?,
@@ -19,11 +19,11 @@ data class RestValutakurs(
     val kurs: BigDecimal?,
     val vurderingsform: Vurderingsform?,
     override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT,
-) : AbstractUtfyltStatus<RestValutakurs>() {
-    override fun medUtfyltStatus(): RestValutakurs = this.copy(status = utfyltStatus(finnAntallUtfylt(listOf(this.valutakursdato, this.kurs)), 2))
+) : AbstractUtfyltStatus<ValutakursDto>() {
+    override fun medUtfyltStatus(): ValutakursDto = this.copy(status = utfyltStatus(finnAntallUtfylt(listOf(this.valutakursdato, this.kurs)), 2))
 }
 
-fun RestValutakurs.tilValutakurs(barnAktører: List<Aktør>) =
+fun ValutakursDto.tilValutakurs(barnAktører: List<Aktør>) =
     Valutakurs(
         fom = this.fom,
         tom = this.tom,
@@ -34,8 +34,8 @@ fun RestValutakurs.tilValutakurs(barnAktører: List<Aktør>) =
         vurderingsform = Vurderingsform.MANUELL,
     )
 
-fun Valutakurs.tilRestValutakurs() =
-    RestValutakurs(
+fun Valutakurs.tilValutakursDto() =
+    ValutakursDto(
         id = this.id,
         fom = this.fom,
         tom = this.tom,

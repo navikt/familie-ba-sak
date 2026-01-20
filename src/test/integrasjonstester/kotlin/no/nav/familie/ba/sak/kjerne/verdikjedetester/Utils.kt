@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
+import no.nav.familie.ba.sak.ekstern.restDomene.VisningBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -35,42 +35,42 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
 import java.util.Properties
 
-fun generellAssertRestUtvidetBehandling(
-    restUtvidetBehandling: Ressurs<RestUtvidetBehandling>,
+fun generellAssertUtvidetBehandlingDto(
+    utvidetBehandlingDto: Ressurs<UtvidetBehandlingDto>,
     behandlingStatus: BehandlingStatus,
     behandlingStegType: StegType? = null,
     behandlingsresultat: Behandlingsresultat? = null,
 ) {
-    if (restUtvidetBehandling.status != Ressurs.Status.SUKSESS) {
-        throw Feil("generellAssertRestUtvidetBehandling feilet. status: ${restUtvidetBehandling.status.name},  melding: ${restUtvidetBehandling.melding}")
+    if (utvidetBehandlingDto.status != Ressurs.Status.SUKSESS) {
+        throw Feil("generellAssertutvidetBehandlingDto feilet. status: ${utvidetBehandlingDto.status.name},  melding: ${utvidetBehandlingDto.melding}")
     }
 
-    assertEquals(behandlingStatus, restUtvidetBehandling.data?.status)
+    assertEquals(behandlingStatus, utvidetBehandlingDto.data?.status)
 
     if (behandlingStegType != null) {
-        assertEquals(behandlingStegType, restUtvidetBehandling.data?.steg)
+        assertEquals(behandlingStegType, utvidetBehandlingDto.data?.steg)
     }
 
     if (behandlingsresultat != null) {
-        assertEquals(behandlingsresultat, restUtvidetBehandling.data?.resultat)
+        assertEquals(behandlingsresultat, utvidetBehandlingDto.data?.resultat)
     }
 }
 
 fun generellAssertFagsak(
-    restFagsak: Ressurs<FagsakDto>,
+    fagsakDto: Ressurs<FagsakDto>,
     fagsakStatus: FagsakStatus,
     behandlingStegType: StegType? = null,
     behandlingsresultat: Behandlingsresultat? = null,
     aktivBehandlingId: Long? = null,
 ) {
-    if (restFagsak.status != Ressurs.Status.SUKSESS) throw Feil("generellAssertFagsak feilet. status: ${restFagsak.status.name},  melding: ${restFagsak.melding}")
-    assertEquals(fagsakStatus, restFagsak.data?.status)
+    if (fagsakDto.status != Ressurs.Status.SUKSESS) throw Feil("generellAssertFagsak feilet. status: ${fagsakDto.status.name},  melding: ${fagsakDto.melding}")
+    assertEquals(fagsakStatus, fagsakDto.data?.status)
 
     val aktivBehandling =
         if (aktivBehandlingId == null) {
-            hentAktivBehandling(restFagsak = restFagsak.data!!)
+            hentAktivBehandling(fagsakDto = fagsakDto.data!!)
         } else {
-            restFagsak.data!!.behandlinger.single { it.behandlingId == aktivBehandlingId }
+            fagsakDto.data!!.behandlinger.single { it.behandlingId == aktivBehandlingId }
         }
 
     if (behandlingStegType != null) {
@@ -90,7 +90,7 @@ fun assertUtbetalingsperiode(
     assertEquals(utbetaltPerMnd, utbetalingsperiode.utbetaltPerMnd)
 }
 
-fun hentNåværendeEllerNesteMånedsUtbetaling(behandling: RestUtvidetBehandling): Int {
+fun hentNåværendeEllerNesteMånedsUtbetaling(behandling: UtvidetBehandlingDto): Int {
     val utbetalingsperioder =
         behandling.utbetalingsperioder.sortedBy { it.periodeFom }
     val nåværendeUtbetalingsperiode =
@@ -102,9 +102,9 @@ fun hentNåværendeEllerNesteMånedsUtbetaling(behandling: RestUtvidetBehandling
     return nåværendeUtbetalingsperiode?.utbetaltPerMnd ?: nesteUtbetalingsperiode?.utbetaltPerMnd ?: 0
 }
 
-fun hentAktivBehandling(restFagsak: FagsakDto): RestUtvidetBehandling = restFagsak.behandlinger.single()
+fun hentAktivBehandling(fagsakDto: FagsakDto): UtvidetBehandlingDto = fagsakDto.behandlinger.single()
 
-fun hentAktivBehandling(restMinimalFagsak: MinimalFagsakDto): RestVisningBehandling = restMinimalFagsak.behandlinger.single { it.aktiv }
+fun hentAktivBehandling(minimalFagsakDto: MinimalFagsakDto): VisningBehandlingDto = minimalFagsakDto.behandlinger.single { it.aktiv }
 
 fun behandleFødselshendelse(
     nyBehandlingHendelse: NyBehandlingHendelse,
@@ -128,21 +128,21 @@ fun behandleFødselshendelse(
         ),
     )
 
-    val restMinimalFagsakEtterVurdering = fagsakService.hentMinimalFagsakForPerson(aktør = søkerAktør)
-    if (restMinimalFagsakEtterVurdering.status != Ressurs.Status.SUKSESS) {
+    val minimalFagsakDtoEtterVurdering = fagsakService.hentMinimalFagsakForPerson(aktør = søkerAktør)
+    if (minimalFagsakDtoEtterVurdering.status != Ressurs.Status.SUKSESS) {
         return null
     }
 
     val behandlingEtterVurdering =
         behandlingHentOgPersisterService
-            .hentBehandlinger(fagsakId = restMinimalFagsakEtterVurdering.data!!.id)
+            .hentBehandlinger(fagsakId = minimalFagsakDtoEtterVurdering.data!!.id)
             .maxByOrNull { it.opprettetTidspunkt }!!
     if (behandlingEtterVurdering.erHenlagt()) {
         return behandlingEtterVurdering
     }
 
     generellAssertFagsak(
-        restFagsak = fagsakService.hentRestFagsak(restMinimalFagsakEtterVurdering.data!!.id),
+        fagsakDto = fagsakService.hentFagsakDto(minimalFagsakDtoEtterVurdering.data!!.id),
         fagsakStatus = fagsakStatusEtterVurdering,
         behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
         aktivBehandlingId = behandlingEtterVurdering.id,
@@ -236,15 +236,15 @@ fun håndterIverksettingAvBehandling(
 
     val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandlingSomSkalFerdigstilles)
 
-    val restMinimalFagsakEtterAvsluttetBehandling =
+    val minimalFagsakDtoEtterAvsluttetBehandling =
         fagsakService.hentMinimalFagsakForPerson(aktør = ferdigstiltBehandling.fagsak.aktør)
     generellAssertFagsak(
-        restFagsak = fagsakService.hentRestFagsak(restMinimalFagsakEtterAvsluttetBehandling.data!!.id),
+        fagsakDto = fagsakService.hentFagsakDto(minimalFagsakDtoEtterAvsluttetBehandling.data!!.id),
         fagsakStatus = fagsakStatusEtterIverksetting,
         behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
         aktivBehandlingId =
             hentAktivBehandling(
-                restMinimalFagsakEtterAvsluttetBehandling.data!!,
+                minimalFagsakDtoEtterAvsluttetBehandling.data!!,
             ).behandlingId,
     )
 

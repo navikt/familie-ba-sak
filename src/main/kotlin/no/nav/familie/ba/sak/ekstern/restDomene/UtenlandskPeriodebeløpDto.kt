@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.math.BigDecimal
 import java.time.YearMonth
 
-data class RestUtenlandskPeriodebeløp(
+data class UtenlandskPeriodebeløpDto(
     val id: Long,
     val fom: YearMonth?,
     val tom: YearMonth?,
@@ -18,8 +18,8 @@ data class RestUtenlandskPeriodebeløp(
     val intervall: Intervall?,
     val kalkulertMånedligBeløp: BigDecimal?,
     override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT,
-) : AbstractUtfyltStatus<RestUtenlandskPeriodebeløp>() {
-    override fun medUtfyltStatus(): RestUtenlandskPeriodebeløp =
+) : AbstractUtfyltStatus<UtenlandskPeriodebeløpDto>() {
+    override fun medUtfyltStatus(): UtenlandskPeriodebeløpDto =
         this.copy(
             status =
                 utfyltStatus(
@@ -29,7 +29,7 @@ data class RestUtenlandskPeriodebeløp(
         )
 }
 
-fun RestUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(
+fun UtenlandskPeriodebeløpDto.tilUtenlandskPeriodebeløp(
     barnAktører: List<Aktør>,
     eksisterendeUtenlandskPeriodebeløp: UtenlandskPeriodebeløp,
 ) = UtenlandskPeriodebeløp(
@@ -43,7 +43,7 @@ fun RestUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(
     kalkulertMånedligBeløp = this.tilKalkulertMånedligBeløp(),
 )
 
-fun RestUtenlandskPeriodebeløp.tilKalkulertMånedligBeløp(): BigDecimal? {
+fun UtenlandskPeriodebeløpDto.tilKalkulertMånedligBeløp(): BigDecimal? {
     if (this.beløp == null || this.intervall == null) {
         return null
     }
@@ -59,8 +59,8 @@ fun UtenlandskPeriodebeløp.tilKalkulertMånedligBeløp(): BigDecimal? {
     return this.intervall.konverterBeløpTilMånedlig(this.beløp)
 }
 
-fun UtenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp() =
-    RestUtenlandskPeriodebeløp(
+fun UtenlandskPeriodebeløp.tilUtenlandskPeriodebeløpDto() =
+    UtenlandskPeriodebeløpDto(
         id = this.id,
         fom = this.fom,
         tom = this.tom,

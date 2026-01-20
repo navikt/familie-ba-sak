@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
 import no.nav.familie.ba.sak.datagenerator.lagUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.ekstern.restDomene.UtfyltStatus
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestUtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.ekstern.restDomene.tilUtenlandskPeriodebeløpDto
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -18,9 +18,9 @@ class UtenlandskePeriodebeløpUtfyltTest {
                 intervall = Intervall.MÅNEDLIG,
             )
 
-        val restUtenlandskPeriodebeløp = utenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp()
+        val utenlandskPeriodebeløpDto = utenlandskPeriodebeløp.tilUtenlandskPeriodebeløpDto()
 
-        assertEquals(UtfyltStatus.OK, restUtenlandskPeriodebeløp.status)
+        assertEquals(UtfyltStatus.OK, utenlandskPeriodebeløpDto.status)
     }
 
     @Test
@@ -30,9 +30,9 @@ class UtenlandskePeriodebeløpUtfyltTest {
                 beløp = BigDecimal.valueOf(500),
             )
 
-        var restUtenlandskPeriodebeløp = utenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp()
+        var utenlandskPeriodebeløpDto = utenlandskPeriodebeløp.tilUtenlandskPeriodebeløpDto()
 
-        assertEquals(UtfyltStatus.UFULLSTENDIG, restUtenlandskPeriodebeløp.status)
+        assertEquals(UtfyltStatus.UFULLSTENDIG, utenlandskPeriodebeløpDto.status)
 
         utenlandskPeriodebeløp =
             lagUtenlandskPeriodebeløp(
@@ -40,17 +40,17 @@ class UtenlandskePeriodebeløpUtfyltTest {
                 valutakode = "NOK",
             )
 
-        restUtenlandskPeriodebeløp = utenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp()
+        utenlandskPeriodebeløpDto = utenlandskPeriodebeløp.tilUtenlandskPeriodebeløpDto()
 
-        assertEquals(UtfyltStatus.UFULLSTENDIG, restUtenlandskPeriodebeløp.status)
+        assertEquals(UtfyltStatus.UFULLSTENDIG, utenlandskPeriodebeløpDto.status)
     }
 
     @Test
     fun `Skal sette UtfyltStatus til IKKE_UTFYLT når ingen felter er utfylt`() {
         val utenlandskPeriodebeløp = lagUtenlandskPeriodebeløp()
 
-        val restUtenlandskPeriodebeløp = utenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp()
+        val utenlandskPeriodebeløpDto = utenlandskPeriodebeløp.tilUtenlandskPeriodebeløpDto()
 
-        assertEquals(UtfyltStatus.IKKE_UTFYLT, restUtenlandskPeriodebeløp.status)
+        assertEquals(UtfyltStatus.IKKE_UTFYLT, utenlandskPeriodebeløpDto.status)
     }
 }

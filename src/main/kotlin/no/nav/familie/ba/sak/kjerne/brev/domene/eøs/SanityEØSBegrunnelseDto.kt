@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
-data class RestSanityEØSBegrunnelse(
+data class SanityEØSBegrunnelseDto(
     val apiNavn: String?,
     val navnISystem: String?,
     val annenForeldersAktivitet: List<String>?,

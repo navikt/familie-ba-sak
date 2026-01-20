@@ -11,7 +11,7 @@ import java.time.LocalDate
 
 class UtbetalingsoppdragKtTest {
     @Nested
-    inner class TilRestUtbetalingsoppdragTest {
+    inner class TilUtbetalingsoppdragDtoTest {
         @Test
         fun `skal mappe til restUtbetalingsoppdrag uten utbetalingsperiode`() {
             // Arrange
@@ -26,7 +26,7 @@ class UtbetalingsoppdragKtTest {
                 )
 
             // Act
-            val restUtbetalingsoppdrag = utbetalingsoppdrag.tilRestUtbetalingsoppdrag()
+            val restUtbetalingsoppdrag = utbetalingsoppdrag.tilUtbetalingsoppdragDto()
 
             // Assert
             assertThat(restUtbetalingsoppdrag.kodeEndring).isEqualTo(no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.NY)
@@ -71,17 +71,17 @@ class UtbetalingsoppdragKtTest {
                 )
 
             // Act
-            val restUtbetalingsoppdrag = utbetalingsoppdrag.tilRestUtbetalingsoppdrag()
+            val utbetalingsoppdragDto = utbetalingsoppdrag.tilUtbetalingsoppdragDto()
 
             // Assert
-            assertThat(restUtbetalingsoppdrag.kodeEndring).isEqualTo(no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.NY)
-            assertThat(restUtbetalingsoppdrag.fagSystem).isEqualTo(utbetalingsoppdrag.fagSystem)
-            assertThat(restUtbetalingsoppdrag.saksnummer).isEqualTo(utbetalingsoppdrag.saksnummer)
-            assertThat(restUtbetalingsoppdrag.aktoer).isEqualTo(utbetalingsoppdrag.aktoer)
-            assertThat(restUtbetalingsoppdrag.saksbehandlerId).isEqualTo(utbetalingsoppdrag.saksbehandlerId)
-            assertThat(restUtbetalingsoppdrag.avstemmingTidspunkt).isEqualTo(utbetalingsoppdrag.avstemmingTidspunkt)
-            assertThat(restUtbetalingsoppdrag.utbetalingsperiode).hasSize(1)
-            assertThat(restUtbetalingsoppdrag.utbetalingsperiode).allSatisfy {
+            assertThat(utbetalingsoppdragDto.kodeEndring).isEqualTo(no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.NY)
+            assertThat(utbetalingsoppdragDto.fagSystem).isEqualTo(utbetalingsoppdrag.fagSystem)
+            assertThat(utbetalingsoppdragDto.saksnummer).isEqualTo(utbetalingsoppdrag.saksnummer)
+            assertThat(utbetalingsoppdragDto.aktoer).isEqualTo(utbetalingsoppdrag.aktoer)
+            assertThat(utbetalingsoppdragDto.saksbehandlerId).isEqualTo(utbetalingsoppdrag.saksbehandlerId)
+            assertThat(utbetalingsoppdragDto.avstemmingTidspunkt).isEqualTo(utbetalingsoppdrag.avstemmingTidspunkt)
+            assertThat(utbetalingsoppdragDto.utbetalingsperiode).hasSize(1)
+            assertThat(utbetalingsoppdragDto.utbetalingsperiode).allSatisfy {
                 assertThat(it.erEndringPåEksisterendePeriode).isEqualTo(utbetalingsperiode.erEndringPåEksisterendePeriode)
                 assertThat(it.opphør!!.opphørDatoFom).isEqualTo(utbetalingsperiode.opphør!!.opphørDatoFom)
                 assertThat(it.periodeId).isEqualTo(utbetalingsperiode.periodeId)
@@ -96,7 +96,7 @@ class UtbetalingsoppdragKtTest {
                 assertThat(it.behandlingId).isEqualTo(utbetalingsperiode.behandlingId)
                 assertThat(it.utbetalingsgrad).isEqualTo(utbetalingsperiode.utbetalingsgrad)
             }
-            assertThat(restUtbetalingsoppdrag.gOmregning).isEqualTo(utbetalingsoppdrag.gOmregning)
+            assertThat(utbetalingsoppdragDto.gOmregning).isEqualTo(utbetalingsoppdrag.gOmregning)
         }
 
         @Test
@@ -147,7 +147,7 @@ class UtbetalingsoppdragKtTest {
                 )
 
             // Act
-            val restUtbetalingsoppdrag = utbetalingsoppdrag.tilRestUtbetalingsoppdrag()
+            val restUtbetalingsoppdrag = utbetalingsoppdrag.tilUtbetalingsoppdragDto()
 
             // Assert
             assertThat(restUtbetalingsoppdrag.kodeEndring).isEqualTo(no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.NY)

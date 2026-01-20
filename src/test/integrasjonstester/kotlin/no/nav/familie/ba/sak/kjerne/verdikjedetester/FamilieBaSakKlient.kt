@@ -6,22 +6,22 @@ import no.nav.familie.ba.sak.ekstern.restDomene.HentFagsakForPersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.JournalføringDto
 import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.PutVedtaksperiodeMedStandardbegrunnelserDto
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
 import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
+import no.nav.familie.ba.sak.kjerne.behandling.HenleggBehandlingInfoDto
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
+import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
-import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.Logg
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestUtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelserDto
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.HttpHeaders
@@ -81,7 +81,7 @@ class FamilieBaSakKlient(
         )
     }
 
-    fun behandlingsresultatStegOgGåVidereTilNesteSteg(behandlingId: Long): Ressurs<RestUtvidetBehandling> {
+    fun behandlingsresultatStegOgGåVidereTilNesteSteg(behandlingId: Long): Ressurs<UtvidetBehandlingDto> {
         val uri = URI.create("$baSakUrl/api/behandlinger/$behandlingId/steg/behandlingsresultat")
 
         return postForEntity(uri, "", headers)
@@ -89,10 +89,10 @@ class FamilieBaSakKlient(
 
     fun henleggSøknad(
         behandlingId: Long,
-        restHenleggBehandlingInfo: RestHenleggBehandlingInfo,
-    ): Ressurs<RestUtvidetBehandling> {
+        henleggBehandlingInfoDto: HenleggBehandlingInfoDto,
+    ): Ressurs<UtvidetBehandlingDto> {
         val uri = URI.create("$baSakUrl/api/behandlinger/$behandlingId/steg/henlegg")
-        return putForEntity(uri, restHenleggBehandlingInfo, headers)
+        return putForEntity(uri, henleggBehandlingInfoDto, headers)
     }
 
     fun hentBehandlingslogg(behandlingId: Long): Ressurs<List<Logg>> {
@@ -106,7 +106,7 @@ class FamilieBaSakKlient(
         behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
         behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
         fagsakId: Long,
-    ): Ressurs<RestUtvidetBehandling> {
+    ): Ressurs<UtvidetBehandlingDto> {
         val uri = URI.create("$baSakUrl/api/behandlinger")
 
         return postForEntity(
@@ -126,25 +126,25 @@ class FamilieBaSakKlient(
 
     fun registrererSøknad(
         behandlingId: Long,
-        restRegistrerSøknad: RestRegistrerSøknad,
-    ): Ressurs<RestUtvidetBehandling> {
+        registrerSøknadDto: RegistrerSøknadDto,
+    ): Ressurs<UtvidetBehandlingDto> {
         val uri =
             URI.create(encodePath("$baSakUrl/api/behandlinger/$behandlingId/steg/registrer-søknad", "UTF-8"))
 
-        return postForEntity(uri, restRegistrerSøknad, headers)
+        return postForEntity(uri, registrerSøknadDto, headers)
     }
 
     fun putVilkår(
         behandlingId: Long,
         vilkårId: Long,
         personResultatDto: PersonResultatDto,
-    ): Ressurs<RestUtvidetBehandling> {
+    ): Ressurs<UtvidetBehandlingDto> {
         val uri = URI.create(encodePath("$baSakUrl/api/vilkaarsvurdering/$behandlingId/$vilkårId"))
 
         return putForEntity(uri, personResultatDto, headers)
     }
 
-    fun validerVilkårsvurdering(behandlingId: Long): Ressurs<RestUtvidetBehandling> {
+    fun validerVilkårsvurdering(behandlingId: Long): Ressurs<UtvidetBehandlingDto> {
         val uri = URI.create(encodePath("$baSakUrl/api/behandlinger/$behandlingId/steg/vilkårsvurdering"))
         return postForEntity(uri, "", headers)
     }
@@ -152,7 +152,7 @@ class FamilieBaSakKlient(
     fun lagreTilbakekrevingOgGåVidereTilNesteSteg(
         behandlingId: Long,
         tilbakekrevingDto: TilbakekrevingDto,
-    ): Ressurs<RestUtvidetBehandling> {
+    ): Ressurs<UtvidetBehandlingDto> {
         val uri = URI.create("$baSakUrl/api/behandlinger/$behandlingId/steg/tilbakekreving")
 
         return postForEntity(uri, tilbakekrevingDto, headers)
@@ -160,14 +160,14 @@ class FamilieBaSakKlient(
 
     fun oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId: Long,
-        restPutVedtaksperiodeMedStandardbegrunnelser: RestPutVedtaksperiodeMedStandardbegrunnelser,
-    ): Ressurs<List<RestUtvidetVedtaksperiodeMedBegrunnelser>> {
+        putVedtaksperiodeMedStandardbegrunnelserDto: PutVedtaksperiodeMedStandardbegrunnelserDto,
+    ): Ressurs<List<UtvidetVedtaksperiodeMedBegrunnelserDto>> {
         val uri = URI.create("$baSakUrl/api/vedtaksperioder/standardbegrunnelser/$vedtaksperiodeId")
 
-        return putForEntity(uri, restPutVedtaksperiodeMedStandardbegrunnelser, headers)
+        return putForEntity(uri, putVedtaksperiodeMedStandardbegrunnelserDto, headers)
     }
 
-    fun sendTilBeslutter(behandlingId: Long): Ressurs<RestUtvidetBehandling> {
+    fun sendTilBeslutter(behandlingId: Long): Ressurs<UtvidetBehandlingDto> {
         val uri =
             URI.create("$baSakUrl/api/behandlinger/$behandlingId/steg/send-til-beslutter?behandlendeEnhet=$DEFAULT_JOURNALFØRENDE_ENHET")
 
@@ -177,12 +177,12 @@ class FamilieBaSakKlient(
     fun leggTilEndretUtbetalingAndel(
         behandlingId: Long,
         endretUtbetalingAndelDto: EndretUtbetalingAndelDto,
-    ): Ressurs<RestUtvidetBehandling> {
+    ): Ressurs<UtvidetBehandlingDto> {
         val uriPost = URI.create("$baSakUrl/api/endretutbetalingandel/$behandlingId")
-        val restUtvidetBehandling = postForEntity<Ressurs<RestUtvidetBehandling>>(uriPost, "", headers)
+        val utvidetBehandlingDto = postForEntity<Ressurs<UtvidetBehandlingDto>>(uriPost, "", headers)
 
         val endretUtbetalingAndelId =
-            restUtvidetBehandling.data!!
+            utvidetBehandlingDto.data!!
                 .endretUtbetalingAndeler
                 .first { it.tom == null && it.fom == null }
                 .id
@@ -194,7 +194,7 @@ class FamilieBaSakKlient(
     fun fjernEndretUtbetalingAndel(
         behandlingId: Long,
         endretUtbetalingAndelId: Long,
-    ): Ressurs<RestUtvidetBehandling> {
+    ): Ressurs<UtvidetBehandlingDto> {
         val uri = URI.create("$baSakUrl/api/endretutbetalingandel/$behandlingId/$endretUtbetalingAndelId")
 
         return deleteForEntity(uri, "", headers)
@@ -202,12 +202,12 @@ class FamilieBaSakKlient(
 
     fun iverksettVedtak(
         behandlingId: Long,
-        restBeslutningPåVedtak: RestBeslutningPåVedtak,
+        beslutningPåVedtakDto: BeslutningPåVedtakDto,
         beslutterHeaders: HttpHeaders,
-    ): Ressurs<RestUtvidetBehandling> {
+    ): Ressurs<UtvidetBehandlingDto> {
         val uri = URI.create("$baSakUrl/api/behandlinger/$behandlingId/steg/iverksett-vedtak")
 
-        return postForEntity(uri, restBeslutningPåVedtak, beslutterHeaders)
+        return postForEntity(uri, beslutningPåVedtakDto, beslutterHeaders)
     }
 
     fun forhaandsvisHenleggelseBrev(

@@ -25,7 +25,7 @@ import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
-import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
+import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
@@ -132,7 +132,7 @@ class BeslutteVedtakTest {
             val behandling = lagBehandling()
             behandling.status = BehandlingStatus.FATTER_VEDTAK
             behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
-            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+            val beslutningPåVedtakDto = BeslutningPåVedtakDto(Beslutning.GODKJENT)
 
             every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
             every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
@@ -145,7 +145,7 @@ class BeslutteVedtakTest {
                     lagBrevmottakerDb(behandlingId = behandling.id),
                 )
 
-            val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+            val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, beslutningPåVedtakDto)
 
             verify(exactly = 1) { FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
             Assertions.assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, nesteSteg)
@@ -157,7 +157,7 @@ class BeslutteVedtakTest {
             val behandling = lagBehandling()
             behandling.status = BehandlingStatus.FATTER_VEDTAK
             behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
-            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+            val beslutningPåVedtakDto = BeslutningPåVedtakDto(Beslutning.GODKJENT)
 
             every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
             every { tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(any()) } returns mockk()
@@ -175,7 +175,7 @@ class BeslutteVedtakTest {
                 )
 
             // Act
-            beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+            beslutteVedtak.utførStegOgAngiNeste(behandling, beslutningPåVedtakDto)
 
             // Assert
             verify(exactly = 1) { JournalførTilbakekrevingsvedtakMotregningBrevTask.opprettTask(any()) }
@@ -186,7 +186,7 @@ class BeslutteVedtakTest {
             val behandling = lagBehandling()
             behandling.status = BehandlingStatus.FATTER_VEDTAK
             behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
-            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.UNDERKJENT)
+            val beslutningPåVedtakDto = BeslutningPåVedtakDto(Beslutning.UNDERKJENT)
 
             every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
             mockkObject(FerdigstillOppgaver.Companion)
@@ -208,7 +208,7 @@ class BeslutteVedtakTest {
                     lagBrevmottakerDb(behandlingId = behandling.id),
                 )
 
-            val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+            val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, beslutningPåVedtakDto)
 
             verify(exactly = 1) { FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
             verify(exactly = 1) {
@@ -229,7 +229,7 @@ class BeslutteVedtakTest {
             val vedtak = lagVedtak(behandling)
             behandling.status = BehandlingStatus.FATTER_VEDTAK
             behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
-            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+            val beslutningPåVedtakDto = BeslutningPåVedtakDto(Beslutning.GODKJENT)
 
             every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
             every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
@@ -249,7 +249,7 @@ class BeslutteVedtakTest {
                     lagBrevmottakerDb(behandlingId = behandling.id),
                 )
 
-            val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+            val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, beslutningPåVedtakDto)
 
             verify(exactly = 1) { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) }
 
@@ -268,7 +268,7 @@ class BeslutteVedtakTest {
             val behandling = lagBehandling()
             behandling.status = BehandlingStatus.FATTER_VEDTAK
             behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
-            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.UNDERKJENT)
+            val beslutningPåVedtakDto = BeslutningPåVedtakDto(Beslutning.UNDERKJENT)
 
             every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
             mockkObject(FerdigstillOppgaver.Companion)
@@ -287,7 +287,7 @@ class BeslutteVedtakTest {
                     lagBrevmottakerDb(behandlingId = behandling.id),
                 )
 
-            beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+            beslutteVedtak.utførStegOgAngiNeste(behandling, beslutningPåVedtakDto)
             verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling, true) }
         }
 
@@ -340,7 +340,7 @@ class BeslutteVedtakTest {
             val behandling = lagBehandling()
             behandling.status = BehandlingStatus.FATTER_VEDTAK
             behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
-            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+            val beslutningPåVedtakDto = BeslutningPåVedtakDto(Beslutning.GODKJENT)
 
             every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
             every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
@@ -358,7 +358,7 @@ class BeslutteVedtakTest {
             // Act & assert
             val exception =
                 assertThrows<FunksjonellFeil> {
-                    beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+                    beslutteVedtak.utførStegOgAngiNeste(behandling, beslutningPåVedtakDto)
                 }
 
             assertThat(exception.message).isEqualTo("Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket")
@@ -372,7 +372,7 @@ class BeslutteVedtakTest {
             behandling.status = BehandlingStatus.FATTER_VEDTAK
             behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
 
-            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+            val beslutningPåVedtakDto = BeslutningPåVedtakDto(Beslutning.GODKJENT)
 
             every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
             every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
@@ -389,7 +389,7 @@ class BeslutteVedtakTest {
             // Act && Assert
             val feilmelding =
                 assertThrows<FunksjonellFeil> {
-                    beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+                    beslutteVedtak.utførStegOgAngiNeste(behandling, beslutningPåVedtakDto)
                 }.melding
 
             assertThat(feilmelding).isEqualTo("Det er valgt å opprette tilbakekrevingssak men det er ikke lenger feilutbetalt beløp. Behandlingen må underkjennes, og saksbehandler må gå tilbake til behandlingsresultatet og trykke neste og fullføre behandlingen på nytt.")
@@ -402,7 +402,7 @@ class BeslutteVedtakTest {
             behandling.status = BehandlingStatus.FATTER_VEDTAK
             behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
 
-            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+            val beslutningPåVedtakDto = BeslutningPåVedtakDto(Beslutning.GODKJENT)
 
             every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
             every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
@@ -419,7 +419,7 @@ class BeslutteVedtakTest {
             // Act && Assert
             val feilmelding =
                 assertThrows<FunksjonellFeil> {
-                    beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+                    beslutteVedtak.utførStegOgAngiNeste(behandling, beslutningPåVedtakDto)
                 }.melding
 
             assertThat(feilmelding).isEqualTo("Det er en feilutbetaling som saksbehandler ikke har tatt stilling til. Saken må underkjennes og sendes tilbake til saksbehandler for ny vurdering.")
@@ -438,7 +438,7 @@ class BeslutteVedtakTest {
             every { tilbakekrevingsvedtakMotregningBrevService.opprettOgLagreTilbakekrevingsvedtakMotregningPdf(any()) } returns mockk()
 
             // Act
-            beslutteVedtak.utførStegOgAngiNeste(behandling, RestBeslutningPåVedtak(Beslutning.GODKJENT))
+            beslutteVedtak.utførStegOgAngiNeste(behandling, BeslutningPåVedtakDto(Beslutning.GODKJENT))
 
             // Assert
             verify(exactly = 1) {

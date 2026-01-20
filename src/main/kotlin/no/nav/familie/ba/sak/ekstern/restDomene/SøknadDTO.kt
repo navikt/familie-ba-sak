@@ -5,7 +5,7 @@ import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDate
 
-data class RestRegistrerSøknad(
+data class RegistrerSøknadDto(
     val søknad: SøknadDTO,
     val bekreftEndringerViaFrontend: Boolean,
 )

@@ -7,7 +7,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype
 import java.time.LocalDateTime
 import java.util.UUID
 
-class RestTilbakekrevingsbehandling(
+class TilbakekrevingsbehandlingDto(
     val behandlingId: UUID,
     val opprettetTidspunkt: LocalDateTime,
     val aktiv: Boolean,

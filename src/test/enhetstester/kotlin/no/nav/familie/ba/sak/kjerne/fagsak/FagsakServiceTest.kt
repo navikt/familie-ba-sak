@@ -128,7 +128,7 @@ class FagsakServiceTest {
             every { behandlingService.hentMigreringsdatoPåFagsak(fagsak.id) } returns null
 
             // Act
-            val restMinimalFagsak = fagsakService.lagRestMinimalFagsak(fagsak.id)
+            val restMinimalFagsak = fagsakService.lagMinimalFagsakDto(fagsak.id)
 
             // Assert
             assertThat(restMinimalFagsak.opprettetTidspunkt).isNotNull()

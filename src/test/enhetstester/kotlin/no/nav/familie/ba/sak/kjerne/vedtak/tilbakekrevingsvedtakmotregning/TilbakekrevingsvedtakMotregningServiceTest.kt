@@ -426,9 +426,9 @@ class TilbakekrevingsvedtakMotregningServiceTest {
     }
 
     @Nested
-    inner class TilRestTilbakekrevingsvedtakMotregningTest {
+    inner class TilTilbakekrevingsvedtakMotregningDtoTest {
         @Test
-        fun `tilRestTilbakekrevingsvedtakMotregning skal returnere verdiene fra TilbakekrevingsvedtakMotregning`() {
+        fun `tilTilbakekrevingsvedtakMotregningDto skal returnere verdiene fra TilbakekrevingsvedtakMotregning`() {
             // Arrange
             val tilbakekrevingsvedtakMotregning =
                 TilbakekrevingsvedtakMotregning(
@@ -442,7 +442,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
 
             // Act
             val restTilbakekrevingsvedtakMotregning =
-                tilbakekrevingsvedtakMotregning.tilRestTilbakekrevingsvedtakMotregning()
+                tilbakekrevingsvedtakMotregning.tilTilbakekrevingsvedtakMotregningDto()
 
             // Assert
             assertThat(restTilbakekrevingsvedtakMotregning.id).isEqualTo(tilbakekrevingsvedtakMotregning.id)

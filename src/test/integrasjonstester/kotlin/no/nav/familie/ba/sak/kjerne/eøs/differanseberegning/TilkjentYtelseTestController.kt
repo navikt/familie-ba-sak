@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -40,14 +40,14 @@ class TilkjentYtelseTestController(
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterEndretUtebetalingAndeler(
         @PathVariable behandlingId: Long,
-        @RequestBody restDeltBosted: Map<LocalDate, String>,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        @RequestBody deltBostedDto: Map<LocalDate, String>,
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!
 
         val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        restDeltBosted.tilEndretUtbetalingAndeler(personopplysningGrunnlag, tilkjentYtelse).forEach {
+        deltBostedDto.tilEndretUtbetalingAndeler(personopplysningGrunnlag, tilkjentYtelse).forEach {
             val lagretEndretUtbetalingAndel = endretUtbetalingAndelRepository.saveAndFlush(it.endretUtbetalingAndel)
 
             beregningService.oppdaterBehandlingMedBeregning(
@@ -57,7 +57,7 @@ class TilkjentYtelseTestController(
             )
         }
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)))
     }
 }
 

@@ -119,7 +119,7 @@ class BeregningServiceTest {
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
 
-        every { fagsakService.hentRestFagsak(any()) } answers {
+        every { fagsakService.hentFagsakDto(any()) } answers {
             Ressurs.success(
                 BaseFagsakDto(
                     opprettetTidspunkt = fagsak.opprettetTidspunkt,

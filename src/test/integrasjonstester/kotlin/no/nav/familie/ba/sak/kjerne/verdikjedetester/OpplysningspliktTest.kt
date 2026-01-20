@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
+import no.nav.familie.ba.sak.ekstern.restDomene.PutVedtaksperiodeMedStandardbegrunnelserDto
 import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
@@ -18,8 +18,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
@@ -47,11 +47,11 @@ class OpplysningspliktTest(
     @Test
     fun `Skal opprette opplysningsplikt-vilkår på søker når 'innhente opplysninger'-brev sendes ut og ta med hjemmel 17 og 18 i vedtaksbrev når opplysningsplikt-vilkåret ikke er oppfylt`() {
         val scenario =
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1990-04-20", fornavn = "Mor", etternavn = "Søker"),
+            ScenarioDto(
+                søker = ScenarioPersonDto(fødselsdato = "1990-04-20", fornavn = "Mor", etternavn = "Søker"),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = LocalDate.now().minusMonths(2).toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
@@ -135,15 +135,15 @@ class OpplysningspliktTest(
             )
 
         val vedtaksperioderMedBegrunnelser =
-            vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+            vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelserDto(
                 behandlingEtterVurderTilbakekreving.data!!.behandlingId,
             )
 
         val vedtaksperiode = vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiode.id,
-            restPutVedtaksperiodeMedStandardbegrunnelser =
-                RestPutVedtaksperiodeMedStandardbegrunnelser(
+            putVedtaksperiodeMedStandardbegrunnelserDto =
+                PutVedtaksperiodeMedStandardbegrunnelserDto(
                     standardbegrunnelser =
                         listOf(
                             Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),

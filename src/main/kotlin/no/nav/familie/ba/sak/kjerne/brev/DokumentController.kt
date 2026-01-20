@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
@@ -105,7 +105,7 @@ class DokumentController(
     fun sendBrev(
         @PathVariable behandlingId: Long,
         @RequestBody manueltBrevRequest: ManueltBrevRequest,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og sender brev: ${manueltBrevRequest.brevmal}")
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -124,7 +124,7 @@ class DokumentController(
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandlingId),
+                    .lagUtvidetBehandlingDto(behandlingId = behandlingId),
             ),
         )
     }
@@ -173,7 +173,7 @@ class DokumentController(
             fagsakId = fagsakId,
         )
 
-        return ResponseEntity.ok(Ressurs.success(fagsakService.lagRestMinimalFagsak(fagsakId = fagsakId)))
+        return ResponseEntity.ok(Ressurs.success(fagsakService.lagMinimalFagsakDto(fagsakId = fagsakId)))
     }
 
     @PostMapping(path = ["/distribusjonskanal"])

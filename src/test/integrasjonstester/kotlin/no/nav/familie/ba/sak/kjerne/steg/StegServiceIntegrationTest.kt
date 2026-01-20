@@ -16,9 +16,9 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.HenleggBehandlingInfoDto
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -28,8 +28,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -238,7 +238,7 @@ class StegServiceIntegrationTest(
         assertThrows<FunksjonellFeil> {
             stegService.håndterBeslutningForVedtak(
                 behandling,
-                RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT, begrunnelse = null),
+                BeslutningPåVedtakDto(beslutning = Beslutning.GODKJENT, begrunnelse = null),
             )
         }
     }
@@ -266,7 +266,7 @@ class StegServiceIntegrationTest(
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         stegService.håndterBeslutningForVedtak(
             behandling,
-            RestBeslutningPåVedtak(beslutning = Beslutning.UNDERKJENT, begrunnelse = "Feil"),
+            BeslutningPåVedtakDto(beslutning = Beslutning.UNDERKJENT, begrunnelse = "Feil"),
         )
 
         val behandlingEtterPersongrunnlagSteg = behandlingHentOgPersisterService.hent(behandlingId = behandling.id)
@@ -283,7 +283,7 @@ class StegServiceIntegrationTest(
         val henlagtBehandling =
             stegService.håndterHenleggBehandling(
                 vilkårsvurdertBehandling,
-                RestHenleggBehandlingInfo(
+                HenleggBehandlingInfoDto(
                     årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
                     begrunnelse = "",
                 ),
@@ -318,7 +318,7 @@ class StegServiceIntegrationTest(
         val henlagtBehandling =
             stegService.håndterHenleggBehandling(
                 behandling,
-                RestHenleggBehandlingInfo(
+                HenleggBehandlingInfoDto(
                     årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
                     begrunnelse = "Satsendring",
                 ),
@@ -358,7 +358,7 @@ class StegServiceIntegrationTest(
         assertThrows<FunksjonellFeil> {
             stegService.håndterHenleggBehandling(
                 behandlingEtterSendTilBeslutter,
-                RestHenleggBehandlingInfo(
+                HenleggBehandlingInfoDto(
                     årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
                     begrunnelse = "",
                 ),
@@ -387,7 +387,7 @@ class StegServiceIntegrationTest(
         val behandlingEtterHenleggelse =
             stegService.håndterHenleggBehandling(
                 behandling,
-                RestHenleggBehandlingInfo(årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET, begrunnelse = ""),
+                HenleggBehandlingInfoDto(årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET, begrunnelse = ""),
             )
 
         assertThat(behandlingEtterHenleggelse.steg).isEqualTo(StegType.BEHANDLING_AVSLUTTET)
@@ -943,7 +943,7 @@ class StegServiceIntegrationTest(
         val behandlingEtterBesluttVedtakSteg =
             stegService.håndterBeslutningForVedtak(
                 behandlingEtterSendTilBeslutterSteg,
-                RestBeslutningPåVedtak(
+                BeslutningPåVedtakDto(
                     Beslutning.GODKJENT,
                     "godkjent manuelt",
                 ),
@@ -1071,7 +1071,7 @@ class StegServiceIntegrationTest(
         val behandlingEtterBesluttVedtakSteg =
             stegService.håndterBeslutningForVedtak(
                 behandlingEtterSendTilBeslutterSteg,
-                RestBeslutningPåVedtak(
+                BeslutningPåVedtakDto(
                     Beslutning.GODKJENT,
                     "godkjent manuelt",
                 ),

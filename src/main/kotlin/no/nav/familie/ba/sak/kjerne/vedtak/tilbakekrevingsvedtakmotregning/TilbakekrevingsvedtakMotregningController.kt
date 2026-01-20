@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.OppdaterTilbakekrevingsvedtakMotregningDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -39,7 +39,7 @@ class TilbakekrevingsvedtakMotregningController(
     fun oppdaterTilbakekrevingsvedtakMotregning(
         @PathVariable behandlingId: Long,
         @RequestBody oppdaterTilbakekrevingsvedtakMotregningDto: OppdaterTilbakekrevingsvedtakMotregningDto,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdater tilbakekrevingsvedtak motregning",
@@ -55,7 +55,7 @@ class TilbakekrevingsvedtakMotregningController(
             heleBeløpetSkalKrevesTilbake = oppdaterTilbakekrevingsvedtakMotregningDto.heleBeløpetSkalKrevesTilbake,
         )
 
-        val restUtvidetBehandling = utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)
+        val restUtvidetBehandling = utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(restUtvidetBehandling))
     }
@@ -63,7 +63,7 @@ class TilbakekrevingsvedtakMotregningController(
     @DeleteMapping
     fun slettTilbakekrevingsvedtakMotregning(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Slett TilbakekrevingsvedtakMotregning",
@@ -72,7 +72,7 @@ class TilbakekrevingsvedtakMotregningController(
 
         tilbakekrevingsvedtakMotregningService.slettTilbakekrevingsvedtakMotregning(behandlingId)
 
-        val restUtvidetBehandling = utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)
+        val restUtvidetBehandling = utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(restUtvidetBehandling))
     }

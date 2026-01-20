@@ -30,4 +30,4 @@ data class SammensattKontrollsak(
     var fritekst: String,
 ) : BaseEntitet()
 
-fun SammensattKontrollsak.tilRestSammensattKontrollsak() = SammensattKontrollsakDto(id = id, behandlingId = behandlingId, fritekst = fritekst)
+fun SammensattKontrollsak.tilSammensattKontrollsakDto() = SammensattKontrollsakDto(id = id, behandlingId = behandlingId, fritekst = fritekst)

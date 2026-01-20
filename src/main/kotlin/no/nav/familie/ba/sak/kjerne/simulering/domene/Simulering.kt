@@ -14,11 +14,11 @@ data class Simulering(
     val tidSimuleringHentet: LocalDate?,
     val tomSisteUtbetaling: LocalDate?,
 ) {
-    fun tilRestSimulering(
+    fun tilSimuleringDto(
         avregningsperioder: List<AvregningPeriode>,
         overlappendePerioderAndreFagsaker: List<OverlappendePerioderMedAndreFagsaker>,
-    ): RestSimulering =
-        RestSimulering(
+    ): SimuleringDto =
+        SimuleringDto(
             perioder = perioder,
             fomDatoNestePeriode = fomDatoNestePeriode,
             etterbetaling = etterbetaling,
@@ -45,7 +45,7 @@ data class SimuleringsPeriode(
     val etterbetaling: BigDecimal,
 )
 
-data class RestSimulering(
+data class SimuleringDto(
     val perioder: List<SimuleringsPeriode>,
     val fomDatoNestePeriode: LocalDate?,
     val etterbetaling: BigDecimal,

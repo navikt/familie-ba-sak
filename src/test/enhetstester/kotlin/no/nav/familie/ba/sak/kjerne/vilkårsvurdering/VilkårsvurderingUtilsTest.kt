@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.VilkårResultatDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -47,7 +47,7 @@ class VilkårsvurderingUtilsTest {
         personResultat.vilkårResultater.add(løpendeOppfylt)
 
         val avslagUtenPeriode =
-            RestVilkårResultat(
+            VilkårResultatDto(
                 id = 123,
                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
                 resultat = Resultat.IKKE_OPPFYLT,
@@ -89,7 +89,7 @@ class VilkårsvurderingUtilsTest {
         personResultat.vilkårResultater.add(avslagUtenPeriode)
 
         val løpendeOppfylt =
-            RestVilkårResultat(
+            VilkårResultatDto(
                 id = 123,
                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
                 resultat = Resultat.OPPFYLT,
@@ -129,7 +129,7 @@ class VilkårsvurderingUtilsTest {
         personResultat.vilkårResultater.add(løpendeOppfylt)
 
         val avslagUtenPeriode =
-            RestVilkårResultat(
+            VilkårResultatDto(
                 id = 123,
                 vilkårType = Vilkår.BOR_MED_SØKER,
                 resultat = Resultat.IKKE_OPPFYLT,
@@ -171,7 +171,7 @@ class VilkårsvurderingUtilsTest {
         personResultat.vilkårResultater.add(avslagUtenPeriode)
 
         val løpendeOppfylt =
-            RestVilkårResultat(
+            VilkårResultatDto(
                 id = 123,
                 vilkårType = Vilkår.BOR_MED_SØKER,
                 resultat = Resultat.OPPFYLT,
@@ -204,10 +204,10 @@ class VilkårsvurderingUtilsTest {
             )
         val vedtakBegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
 
-        val restVedtakBegrunnelserTilknyttetVilkår =
-            vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(sanityBegrunnelser, vedtakBegrunnelse)
+        val vedtakBegrunnelserTilknyttetVilkårDto =
+            vedtakBegrunnelseTilVedtakBegrunnelseTilknyttetVilkårDto(sanityBegrunnelser, vedtakBegrunnelse)
 
-        Assertions.assertEquals(1, restVedtakBegrunnelserTilknyttetVilkår.size)
+        Assertions.assertEquals(1, vedtakBegrunnelserTilknyttetVilkårDto.size)
     }
 
     @Test
@@ -223,10 +223,10 @@ class VilkårsvurderingUtilsTest {
             )
         val vedtakBegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
 
-        val restVedtakBegrunnelserTilknyttetVilkår =
-            vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(sanityBegrunnelser, vedtakBegrunnelse)
+        val vedtakBegrunnelserTilknyttetVilkårDto =
+            vedtakBegrunnelseTilVedtakBegrunnelseTilknyttetVilkårDto(sanityBegrunnelser, vedtakBegrunnelse)
 
-        Assertions.assertEquals(2, restVedtakBegrunnelserTilknyttetVilkår.size)
+        Assertions.assertEquals(2, vedtakBegrunnelserTilknyttetVilkårDto.size)
     }
 
     @Test

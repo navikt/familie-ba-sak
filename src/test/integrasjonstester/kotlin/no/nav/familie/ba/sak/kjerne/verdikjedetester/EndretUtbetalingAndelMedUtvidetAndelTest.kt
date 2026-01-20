@@ -4,14 +4,14 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -30,11 +30,11 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
         val barnFødselsdato = LocalDate.of(2022, 10, 15)
 
         val scenario =
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+            ScenarioDto(
+                søker = ScenarioPersonDto(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = barnFødselsdato.toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
@@ -45,7 +45,7 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
         val søkersIdent = scenario.søker.ident
 
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
-        val restUtvidetBehandling =
+        val utvidetBehandlingDto =
             familieBaSakKlient()
                 .opprettBehandling(
                     søkersIdent = søkersIdent,
@@ -53,8 +53,8 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
                     fagsakId = fagsak.data!!.id,
                 ).data!!
 
-        val restRegistrerSøknad =
-            RestRegistrerSøknad(
+        val registrerSøknadDto =
+            RegistrerSøknadDto(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = scenario.søker.ident,
@@ -63,20 +63,20 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
                     ),
                 bekreftEndringerViaFrontend = false,
             )
-        val restBehandlingEtterRegistrertSøknad: Ressurs<RestUtvidetBehandling> =
+        val utvidetBehandlingDtoEtterRegistrertSøknad: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().registrererSøknad(
-                behandlingId = restUtvidetBehandling.behandlingId,
-                restRegistrerSøknad = restRegistrerSøknad,
+                behandlingId = utvidetBehandlingDto.behandlingId,
+                registrerSøknadDto = registrerSøknadDto,
             )
 
-        restBehandlingEtterRegistrertSøknad.data!!.personResultater.forEach { restPersonResultat ->
-            restPersonResultat.vilkårResultater.forEach {
+        utvidetBehandlingDtoEtterRegistrertSøknad.data!!.personResultater.forEach { personResultatDto ->
+            personResultatDto.vilkårResultater.forEach {
                 familieBaSakKlient().putVilkår(
-                    behandlingId = restBehandlingEtterRegistrertSøknad.data?.behandlingId!!,
+                    behandlingId = utvidetBehandlingDtoEtterRegistrertSøknad.data?.behandlingId!!,
                     vilkårId = it.id,
                     personResultatDto =
                         PersonResultatDto(
-                            personIdent = restPersonResultat.personIdent,
+                            personIdent = personResultatDto.personIdent,
                             vilkårResultater =
                                 listOf(
                                     it.copy(
@@ -94,10 +94,10 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             }
         }
 
-        val restBehandlingEtterBehandlingsresultat =
+        val utvidetBehandlingDtoEtterBehandlingsresultat =
             familieBaSakKlient()
                 .validerVilkårsvurdering(
-                    behandlingId = restBehandlingEtterRegistrertSøknad.data?.behandlingId!!,
+                    behandlingId = utvidetBehandlingDtoEtterRegistrertSøknad.data?.behandlingId!!,
                 ).data!!
 
         val endretFom = barnFødselsdato.nesteMåned()
@@ -118,7 +118,7 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             )
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
-            restBehandlingEtterBehandlingsresultat.behandlingId,
+            utvidetBehandlingDtoEtterBehandlingsresultat.behandlingId,
             endretUtbetalingAndelDtoUtvidetBarnetrygd,
         )
 
@@ -137,16 +137,16 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             )
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
-            restBehandlingEtterBehandlingsresultat.behandlingId,
+            utvidetBehandlingDtoEtterBehandlingsresultat.behandlingId,
             endretUtbetalingAndelDtoOrdinærBarnetrygd,
         )
 
         familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-            behandlingId = restBehandlingEtterBehandlingsresultat.behandlingId,
+            behandlingId = utvidetBehandlingDtoEtterBehandlingsresultat.behandlingId,
         )
 
         val andelerTilkjentYtelseMedEndretPeriode =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restBehandlingEtterBehandlingsresultat.behandlingId)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = utvidetBehandlingDtoEtterBehandlingsresultat.behandlingId)
 
         val endredeAndelerTilkjentYtelse =
             andelerTilkjentYtelseMedEndretPeriode.filter { it.kalkulertUtbetalingsbeløp == 0 }

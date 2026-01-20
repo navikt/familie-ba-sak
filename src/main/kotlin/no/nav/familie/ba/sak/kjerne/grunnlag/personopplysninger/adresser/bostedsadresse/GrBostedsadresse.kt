@@ -22,7 +22,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.erInnenfor
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
+import no.nav.familie.ba.sak.ekstern.restDomene.RegisteropplysningDto
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrMatrikkeladresseBostedsadresse.Companion.fraMatrikkeladresse
@@ -73,8 +73,8 @@ abstract class GrBostedsadresse(
         return LocalDate.now().erInnenfor(periode!!)
     }
 
-    fun tilRestRegisteropplysning() =
-        RestRegisteropplysning(
+    fun tilRegisteropplysningDto() =
+        RegisteropplysningDto(
             fom = this.periode?.fom.takeIf { it != fregManglendeFlytteDato },
             tom = this.periode?.tom,
             verdi = this.tilFrontendString(),

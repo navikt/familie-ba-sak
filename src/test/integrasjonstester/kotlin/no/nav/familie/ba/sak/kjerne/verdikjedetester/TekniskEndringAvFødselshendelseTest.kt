@@ -12,15 +12,15 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -44,11 +44,11 @@ class TekniskEndringAvFødselshendelseTest(
         System.setProperty(FeatureToggle.TEKNISK_ENDRING.navn, "true")
 
         val scenario =
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1998-01-12", fornavn = "Mor", etternavn = "Søker"),
+            ScenarioDto(
+                søker = ScenarioPersonDto(fødselsdato = "1998-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = LocalDate.now().minusDays(2).toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
@@ -71,15 +71,15 @@ class TekniskEndringAvFødselshendelseTest(
                 brevmalService = brevmalService,
             )!!
 
-        val restUtvidetBehandling =
+        val utvidetBehandlingDto =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = scenario.søker.ident,
                 behandlingType = BehandlingType.TEKNISK_ENDRING,
                 behandlingÅrsak = BehandlingÅrsak.TEKNISK_ENDRING,
                 fagsakId = behandling.fagsak.id,
             )
-        generellAssertRestUtvidetBehandling(
-            restUtvidetBehandling = restUtvidetBehandling,
+        generellAssertUtvidetBehandlingDto(
+            utvidetBehandlingDto = utvidetBehandlingDto,
             behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.VILKÅRSVURDERING,
         )
@@ -88,14 +88,14 @@ class TekniskEndringAvFødselshendelseTest(
         assertEquals(2, minimalFagsak.data?.behandlinger?.size)
 
         // Setter alle vilkår til ikke-oppfylt på løpende førstegangsbehandling
-        restUtvidetBehandling.data!!.personResultater.forEach { restPersonResultat ->
-            restPersonResultat.vilkårResultater.forEach {
+        utvidetBehandlingDto.data!!.personResultater.forEach { personResultatDto ->
+            personResultatDto.vilkårResultater.forEach {
                 familieBaSakKlient().putVilkår(
-                    behandlingId = restUtvidetBehandling.data!!.behandlingId,
+                    behandlingId = utvidetBehandlingDto.data!!.behandlingId,
                     vilkårId = it.id,
                     personResultatDto =
                         PersonResultatDto(
-                            personIdent = restPersonResultat.personIdent,
+                            personIdent = personResultatDto.personIdent,
                             vilkårResultater =
                                 listOf(
                                     it.copy(
@@ -108,46 +108,46 @@ class TekniskEndringAvFødselshendelseTest(
         }
 
         familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = restUtvidetBehandling.data!!.behandlingId,
+            behandlingId = utvidetBehandlingDto.data!!.behandlingId,
         )
 
-        val restUtvidetBehandlingEtterBehandlingsresultat =
+        val utvidetBehandlingEtterBehandlingsresultatDto =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-                behandlingId = restUtvidetBehandling.data!!.behandlingId,
+                behandlingId = utvidetBehandlingDto.data!!.behandlingId,
             )
-        generellAssertRestUtvidetBehandling(
-            restUtvidetBehandling = restUtvidetBehandlingEtterBehandlingsresultat,
+        generellAssertUtvidetBehandlingDto(
+            utvidetBehandlingDto = utvidetBehandlingEtterBehandlingsresultatDto,
             behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.VURDER_TILBAKEKREVING,
             behandlingsresultat = Behandlingsresultat.OPPHØRT,
         )
 
-        val restUtvidetBehandlingEtterVurderTilbakekreving =
+        val utvidetBehandlingDtoEtterVurderTilbakekreving =
             familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
-                restUtvidetBehandlingEtterBehandlingsresultat.data!!.behandlingId,
+                utvidetBehandlingEtterBehandlingsresultatDto.data!!.behandlingId,
                 TilbakekrevingDto(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
             )
-        generellAssertRestUtvidetBehandling(
-            restUtvidetBehandling = restUtvidetBehandlingEtterVurderTilbakekreving,
+        generellAssertUtvidetBehandlingDto(
+            utvidetBehandlingDto = utvidetBehandlingDtoEtterVurderTilbakekreving,
             behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.SEND_TIL_BESLUTTER,
             behandlingsresultat = Behandlingsresultat.OPPHØRT,
         )
 
-        val restUtvidetBehandlingEtterSendTilBeslutter =
-            familieBaSakKlient().sendTilBeslutter(behandlingId = restUtvidetBehandlingEtterVurderTilbakekreving.data?.behandlingId!!)
+        val utvidetBehandlingDtoEtterSendTilBeslutter =
+            familieBaSakKlient().sendTilBeslutter(behandlingId = utvidetBehandlingDtoEtterVurderTilbakekreving.data?.behandlingId!!)
 
-        generellAssertRestUtvidetBehandling(
-            restUtvidetBehandling = restUtvidetBehandlingEtterSendTilBeslutter,
+        generellAssertUtvidetBehandlingDto(
+            utvidetBehandlingDto = utvidetBehandlingDtoEtterSendTilBeslutter,
             behandlingStatus = BehandlingStatus.FATTER_VEDTAK,
             behandlingStegType = StegType.BESLUTTE_VEDTAK,
         )
 
-        val restUtvidetBehandlingEtterIverksetting =
+        val utvidetBehandlingDtoEtterIverksetting =
             familieBaSakKlient().iverksettVedtak(
-                behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
-                restBeslutningPåVedtak =
-                    RestBeslutningPåVedtak(
+                behandlingId = utvidetBehandlingDtoEtterSendTilBeslutter.data!!.behandlingId,
+                beslutningPåVedtakDto =
+                    BeslutningPåVedtakDto(
                         Beslutning.GODKJENT,
                     ),
                 beslutterHeaders =
@@ -165,14 +165,14 @@ class TekniskEndringAvFødselshendelseTest(
                     },
             )
 
-        generellAssertRestUtvidetBehandling(
-            restUtvidetBehandling = restUtvidetBehandlingEtterIverksetting,
+        generellAssertUtvidetBehandlingDto(
+            utvidetBehandlingDto = utvidetBehandlingDtoEtterIverksetting,
             behandlingStatus = BehandlingStatus.IVERKSETTER_VEDTAK,
             behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
         )
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingHentOgPersisterService.hent(behandlingId = restUtvidetBehandlingEtterIverksetting.data?.behandlingId!!),
+            behandlingEtterVurdering = behandlingHentOgPersisterService.hent(behandlingId = utvidetBehandlingDtoEtterIverksetting.data?.behandlingId!!),
             søkerFnr = scenario.søker.ident,
             fagsakStatusEtterIverksetting = FagsakStatus.AVSLUTTET,
             fagsakService = fagsakService,

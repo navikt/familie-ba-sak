@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
-import no.nav.familie.ba.sak.datagenerator.lagMockRestJournalføring
+import no.nav.familie.ba.sak.datagenerator.lagMockJournalføringDto
 import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
@@ -9,7 +9,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class RestJournalføringTest {
+class JournalføringDtoTest {
     @Nested
     inner class OppdaterMedDokumentOgSak {
         @Test
@@ -25,10 +25,10 @@ class RestJournalføringTest {
                 )
 
             val journalpost = lagTestJournalpost("testIdent", "1", AvsenderMottakerIdType.UTL_ORG, "EESSI")
-            val restJournalføring = lagMockRestJournalføring(NavnOgIdent("testbruker", "testIdent"))
+            val journalføringDto = lagMockJournalføringDto(NavnOgIdent("testbruker", "testIdent"))
 
             // Act
-            val oppdaterJournalpostRequest = restJournalføring.oppdaterMedDokumentOgSak(sak, journalpost)
+            val oppdaterJournalpostRequest = journalføringDto.oppdaterMedDokumentOgSak(sak, journalpost)
 
             // Assert
             assertThat(oppdaterJournalpostRequest.avsenderMottaker?.idType).isEqualTo(AvsenderMottakerIdType.UTL_ORG)
@@ -46,11 +46,11 @@ class RestJournalføringTest {
                     fagsaksystem = "BA",
                 )
 
-            val restJournalføring = lagMockRestJournalføring(NavnOgIdent("testbruker", "testIdent"))
+            val journalføringDto = lagMockJournalføringDto(NavnOgIdent("testbruker", "testIdent"))
             val journalpost = lagTestJournalpost("testIdent", "1", null, "NAV_NO")
 
             // Act
-            val oppdaterJournalpostRequest = restJournalføring.oppdaterMedDokumentOgSak(sak, journalpost)
+            val oppdaterJournalpostRequest = journalføringDto.oppdaterMedDokumentOgSak(sak, journalpost)
 
             // Assert
             assertThat(oppdaterJournalpostRequest.avsenderMottaker?.idType).isEqualTo(AvsenderMottakerIdType.FNR)
@@ -69,10 +69,10 @@ class RestJournalføringTest {
                 )
 
             val journalpost = lagTestJournalpost("", "1", AvsenderMottakerIdType.FNR, "NAV_NO")
-            val restJournalføring = lagMockRestJournalføring(NavnOgIdent("testbruker", ""))
+            val journalføringDto = lagMockJournalføringDto(NavnOgIdent("testbruker", ""))
 
             // Act
-            val oppdaterJournalpostRequest = restJournalføring.oppdaterMedDokumentOgSak(sak, journalpost)
+            val oppdaterJournalpostRequest = journalføringDto.oppdaterMedDokumentOgSak(sak, journalpost)
 
             // Assert
             assertThat(oppdaterJournalpostRequest.avsenderMottaker?.idType).isNull()

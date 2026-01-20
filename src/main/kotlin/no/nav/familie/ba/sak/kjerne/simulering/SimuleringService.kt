@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.tilRestUtbetalingsoppdrag
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.tilUtbetalingsoppdragDto
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -67,7 +67,7 @@ class SimuleringService(
                     tilkjentYtelse = tilkjentYtelse,
                     erSimulering = true,
                 ).utbetalingsoppdrag
-                .tilRestUtbetalingsoppdrag()
+                .tilUtbetalingsoppdragDto()
 
         // Simulerer ikke mot økonomi når det ikke finnes utbetalingsperioder
         if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) return null
@@ -101,7 +101,7 @@ class SimuleringService(
 
         val simulering = hentSimuleringPåBehandling(behandlingId)
         val restSimulering =
-            vedtakSimuleringMottakereTilRestSimulering(
+            vedtakSimuleringMottakereTilSimuleringDto(
                 økonomiSimuleringMottakere = simulering,
             )
 
@@ -148,12 +148,12 @@ class SimuleringService(
     }
 
     fun hentEtterbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal =
-        vedtakSimuleringMottakereTilRestSimulering(
+        vedtakSimuleringMottakereTilSimuleringDto(
             økonomiSimuleringMottakere = økonomiSimuleringMottakere,
         ).etterbetaling
 
     fun hentFeilutbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal =
-        vedtakSimuleringMottakereTilRestSimulering(
+        vedtakSimuleringMottakereTilSimuleringDto(
             økonomiSimuleringMottakere,
         ).feilutbetaling
 

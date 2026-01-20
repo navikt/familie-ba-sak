@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.common
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.VilkårResultatDto
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.tidslinje.PRAKTISK_SENESTE_DAG
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
@@ -179,7 +179,7 @@ fun lagOgValiderPeriodeFraVilkår(
         }
     }
 
-fun RestVilkårResultat.toPeriode(): Periode =
+fun VilkårResultatDto.toPeriode(): Periode =
     lagOgValiderPeriodeFraVilkår(
         this.periodeFom,
         this.periodeTom,

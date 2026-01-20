@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SATSENDRING
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.HenleggBehandlingInfoDto
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
@@ -24,10 +24,10 @@ class HenleggBehandling(
     private val loggService: LoggService,
     private val dokumentService: DokumentService,
     private val oppgaveService: OppgaveService,
-) : BehandlingSteg<RestHenleggBehandlingInfo> {
+) : BehandlingSteg<HenleggBehandlingInfoDto> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: RestHenleggBehandlingInfo,
+        data: HenleggBehandlingInfoDto,
     ): StegType {
         val fagsak = behandling.fagsak
 

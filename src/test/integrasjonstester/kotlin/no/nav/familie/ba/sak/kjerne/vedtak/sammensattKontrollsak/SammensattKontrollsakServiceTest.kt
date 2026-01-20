@@ -49,7 +49,7 @@ class SammensattKontrollsakServiceTest(
     }
 
     @Test
-    fun `opprettSammensattKontrollsak skal opprette SammensattKontrollsak basert på RestOpprettSammensattKontrollsak`() {
+    fun `opprettSammensattKontrollsak skal opprette SammensattKontrollsak basert på OpprettSammensattKontrollsakDto`() {
         val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
@@ -65,7 +65,7 @@ class SammensattKontrollsakServiceTest(
     }
 
     @Test
-    fun `oppdaterSammensattKontrollsak skal oppdatere SammensattKontrollsak basert på RestSammensattKontrollsak`() {
+    fun `oppdaterSammensattKontrollsak skal oppdatere SammensattKontrollsak basert på SammensattKontrollsakDto`() {
         val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
@@ -84,7 +84,7 @@ class SammensattKontrollsakServiceTest(
     }
 
     @Test
-    fun `slettSammensattKontrollsak skal slette SammensattKontrollsak basert på RestSammensattKontrollsak`() {
+    fun `slettSammensattKontrollsak skal slette SammensattKontrollsak basert på SammensattKontrollsakDto`() {
         val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))

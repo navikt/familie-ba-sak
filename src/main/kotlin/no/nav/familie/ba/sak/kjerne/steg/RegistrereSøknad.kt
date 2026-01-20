@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDomene
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
@@ -23,10 +23,10 @@ class RegistrereSøknad(
     private val loggService: LoggService,
     private val vedtakService: VedtakService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
-) : BehandlingSteg<RestRegistrerSøknad> {
+) : BehandlingSteg<RegistrerSøknadDto> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: RestRegistrerSøknad,
+        data: RegistrerSøknadDto,
     ): StegType {
         val aktivSøknadGrunnlagFinnes = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id) != null
         val søknadDTO: SøknadDTO = data.søknad

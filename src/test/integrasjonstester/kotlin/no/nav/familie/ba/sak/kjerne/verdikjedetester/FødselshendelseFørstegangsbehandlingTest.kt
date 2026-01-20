@@ -14,8 +14,8 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.util.ordinærSatsNesteMånedTilTester
@@ -39,11 +39,11 @@ class FødselshendelseFørstegangsbehandlingTest(
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn født november 2021 og behandles desember 2021 uten utbetalinger`() {
         val scenario =
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+            ScenarioDto(
+                søker = ScenarioPersonDto(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = LocalDate.of(2021, 11, 18).toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
@@ -66,15 +66,15 @@ class FødselshendelseFørstegangsbehandlingTest(
                 brevmalService = brevmalService,
             )
 
-        val restFagsakEtterBehandlingAvsluttet =
+        val fagsakDtoEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id)
         generellAssertFagsak(
-            restFagsak = restFagsakEtterBehandlingAvsluttet,
+            fagsakDto = fagsakDtoEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.LØPENDE,
             behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
         )
 
-        val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
+        val aktivBehandling = fagsakDtoEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
         assertEquals(Behandlingsresultat.INNVILGET, aktivBehandling.resultat)
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.behandlingId)
@@ -113,16 +113,16 @@ class FødselshendelseFørstegangsbehandlingTest(
     @Test
     fun `Skal innvilge fødselshendelse på mor med 2 barn uten utbetalinger`() {
         val scenario =
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+            ScenarioDto(
+                søker = ScenarioPersonDto(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = LocalDate.now().minusDays(2).toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
                         ),
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = LocalDate.now().minusDays(2).toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen 2",
@@ -145,15 +145,15 @@ class FødselshendelseFørstegangsbehandlingTest(
                 brevmalService = brevmalService,
             )
 
-        val restFagsakEtterBehandlingAvsluttet =
+        val fagsakDtoEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id)
         generellAssertFagsak(
-            restFagsak = restFagsakEtterBehandlingAvsluttet,
+            fagsakDto = fagsakDtoEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.LØPENDE,
             behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
         )
 
-        val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
+        val aktivBehandling = fagsakDtoEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
         assertEquals(Behandlingsresultat.INNVILGET, aktivBehandling.resultat)
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
@@ -173,11 +173,11 @@ class FødselshendelseFørstegangsbehandlingTest(
     @Test
     fun `Skal innvilge fødselshendelse på mor med 2 barn der barna er født i hver sin måned`() {
         val scenario =
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+            ScenarioDto(
+                søker = ScenarioPersonDto(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato =
                                 LocalDate
                                     .now()
@@ -187,7 +187,7 @@ class FødselshendelseFørstegangsbehandlingTest(
                             fornavn = "Barn",
                             etternavn = "Barnesen",
                         ),
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = LocalDate.now().førsteDagIInneværendeMåned().toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen 2",
@@ -210,15 +210,15 @@ class FødselshendelseFørstegangsbehandlingTest(
                 brevmalService = brevmalService,
             )
 
-        val restFagsakEtterBehandlingAvsluttet =
+        val fagsakDtoEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id)
         generellAssertFagsak(
-            restFagsak = restFagsakEtterBehandlingAvsluttet,
+            fagsakDto = fagsakDtoEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.LØPENDE,
             behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
         )
 
-        val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
+        val aktivBehandling = fagsakDtoEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
         assertEquals(Behandlingsresultat.INNVILGET, aktivBehandling.resultat)
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder

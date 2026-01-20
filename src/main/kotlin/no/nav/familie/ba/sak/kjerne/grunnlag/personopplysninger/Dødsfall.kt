@@ -12,7 +12,7 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
+import no.nav.familie.ba.sak.ekstern.restDomene.RegisteropplysningDto
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsboAdresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
@@ -44,8 +44,8 @@ data class Dødsfall(
 
     fun hentAdresseToString(): String = """$dødsfallAdresse, $dødsfallPostnummer $dødsfallPoststed"""
 
-    fun tilRestRegisteropplysning() =
-        RestRegisteropplysning(
+    fun tilRegisteropplysningDto() =
+        RegisteropplysningDto(
             fom = this.dødsfallDato,
             tom = null,
             verdi = if (dødsfallAdresse == null) "-" else hentAdresseToString(),

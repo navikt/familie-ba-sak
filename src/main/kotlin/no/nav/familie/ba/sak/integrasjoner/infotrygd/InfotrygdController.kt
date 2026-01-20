@@ -30,11 +30,11 @@ class InfotrygdController(
         @Valid
         @RequestBody
         personIdent: Personident,
-    ): ResponseEntity<Ressurs<RestInfotrygdsaker>> {
+    ): ResponseEntity<Ressurs<InfotrygdsakerDto>> {
         val aktør = personidentService.hentAktør(personIdent.ident)
         val infotrygdsaker =
             infotrygdService.hentMaskertRestInfotrygdsakerVedManglendeTilgang(aktør)
-                ?: RestInfotrygdsaker(infotrygdService.hentInfotrygdsakerForSøker(aktør).bruker)
+                ?: InfotrygdsakerDto(infotrygdService.hentInfotrygdsakerForSøker(aktør).bruker)
 
         return ResponseEntity.ok(Ressurs.success(infotrygdsaker))
     }
@@ -45,13 +45,13 @@ class Personident(
     val ident: String,
 )
 
-class RestInfotrygdsaker(
+class InfotrygdsakerDto(
     val saker: List<Sak> = emptyList(),
     val adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING? = null,
     val harTilgang: Boolean = true,
 )
 
-class RestInfotrygdstønader(
+class InfotrygdstønaderDto(
     val adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING? = null,
     val harTilgang: Boolean = true,
 )

@@ -14,8 +14,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -499,11 +499,11 @@ fun lagVilkårsvurderingMedOverstyrendeResultater(
     return vilkårsvurdering
 }
 
-fun lagVilkårsvurderingFraRestScenario(
-    scenario: RestScenario,
+fun lagVilkårsvurderingFraScenarioDto(
+    scenario: ScenarioDto,
     overstyrendeVilkårResultater: Map<AktørId, List<VilkårResultat>>,
 ): Vilkårsvurdering {
-    fun RestScenarioPerson.lagAktør() =
+    fun ScenarioPersonDto.lagAktør() =
         Aktør(
             this.aktørId,
             mutableSetOf(Personident(this.ident, mockk(relaxed = true))),

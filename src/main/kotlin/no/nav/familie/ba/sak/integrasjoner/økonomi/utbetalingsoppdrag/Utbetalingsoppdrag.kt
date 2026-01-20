@@ -4,7 +4,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 
-fun no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag.tilRestUtbetalingsoppdrag(): Utbetalingsoppdrag =
+fun no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag.tilUtbetalingsoppdragDto(): Utbetalingsoppdrag =
     Utbetalingsoppdrag(
         kodeEndring = Utbetalingsoppdrag.KodeEndring.valueOf(this.kodeEndring.name),
         fagSystem = this.fagSystem,
@@ -12,11 +12,11 @@ fun no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag.tilRest
         aktoer = this.aktoer,
         saksbehandlerId = this.saksbehandlerId,
         avstemmingTidspunkt = this.avstemmingTidspunkt,
-        utbetalingsperiode = this.utbetalingsperiode.map { it.tilRestUtbetalingsperiode() },
+        utbetalingsperiode = this.utbetalingsperiode.map { it.tilUtbetalingsperiodeDto() },
         gOmregning = this.gOmregning,
     )
 
-private fun no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode.tilRestUtbetalingsperiode(): Utbetalingsperiode =
+private fun no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode.tilUtbetalingsperiodeDto(): Utbetalingsperiode =
     Utbetalingsperiode(
         erEndringPåEksisterendePeriode = this.erEndringPåEksisterendePeriode,
         opphør = this.opphør?.let { Opphør(it.opphørDatoFom) },

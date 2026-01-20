@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.PutVedtaksperiodeMedStandardbegrunnelserDto
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
 import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevOmregningPgaAlderService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -14,15 +14,15 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.dto.AutobrevPgaAlderDTO
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -62,21 +62,21 @@ class TriggingAvAutobrevOmregningPgaAlderTest(
         årMedReduksjonsbegrunnelse: Standardbegrunnelse?,
     ): List<Behandling> {
         val scenario =
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-11-12", fornavn = "Mor", etternavn = "Søker"),
+            ScenarioDto(
+                søker = ScenarioPersonDto(fødselsdato = "1996-11-12", fornavn = "Mor", etternavn = "Søker"),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = LocalDate.now().minusYears(2).toString(),
                             fornavn = "Toåringen",
                             etternavn = "Barnesen",
                         ),
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = LocalDate.now().minusYears(6).toString(),
                             fornavn = "Seksåringen",
                             etternavn = "Barnesen",
                         ),
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = LocalDate.now().minusYears(18).toString(),
                             fornavn = "Attenåringen",
                             etternavn = "Barnesen",
@@ -87,11 +87,11 @@ class TriggingAvAutobrevOmregningPgaAlderTest(
         val fagsakId = familieBaSakKlient().opprettFagsak(søkersIdent = scenario.søker.ident).data?.id!!
         familieBaSakKlient().opprettBehandling(søkersIdent = scenario.søker.ident, fagsakId = fagsakId)
 
-        val restFagsakEtterOpprettelse = familieBaSakKlient().hentFagsak(fagsakId = fagsakId)
+        val fagsakDtoEtterOpprettelse = familieBaSakKlient().hentFagsak(fagsakId = fagsakId)
 
-        val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakEtterOpprettelse.data!!)
-        val restRegistrerSøknad =
-            RestRegistrerSøknad(
+        val aktivBehandling = hentAktivBehandling(fagsakDto = fagsakDtoEtterOpprettelse.data!!)
+        val registrerSøknadDto =
+            RegistrerSøknadDto(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = scenario.søker.ident,
@@ -99,21 +99,21 @@ class TriggingAvAutobrevOmregningPgaAlderTest(
                     ),
                 bekreftEndringerViaFrontend = false,
             )
-        val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
+        val utvidetBehandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().registrererSøknad(
                 behandlingId = aktivBehandling.behandlingId,
-                restRegistrerSøknad = restRegistrerSøknad,
+                registrerSøknadDto = registrerSøknadDto,
             )
 
         // Godkjenner alle vilkår på førstegangsbehandling.
-        restUtvidetBehandling.data!!.personResultater.forEach { restPersonResultat ->
-            restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
+        utvidetBehandlingDto.data!!.personResultater.forEach { personResultatDto ->
+            personResultatDto.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
                 familieBaSakKlient().putVilkår(
-                    behandlingId = restUtvidetBehandling.data!!.behandlingId,
+                    behandlingId = utvidetBehandlingDto.data!!.behandlingId,
                     vilkårId = it.id,
                     personResultatDto =
                         PersonResultatDto(
-                            personIdent = restPersonResultat.personIdent,
+                            personIdent = personResultatDto.personIdent,
                             vilkårResultater =
                                 listOf(
                                     it.copy(
@@ -127,30 +127,30 @@ class TriggingAvAutobrevOmregningPgaAlderTest(
         }
 
         familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = restUtvidetBehandling.data!!.behandlingId,
+            behandlingId = utvidetBehandlingDto.data!!.behandlingId,
         )
 
-        val restUtvidetBehandlingEtterBehandlingsresultat =
+        val utvidetBehandlingDtoEtterBehandlingsresultat =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-                behandlingId = restUtvidetBehandling.data!!.behandlingId,
+                behandlingId = utvidetBehandlingDto.data!!.behandlingId,
             )
 
-        val restUtvidetBehandlingEtterVurderTilbakekreving =
+        val utvidetBehandlingDtoEtterVurderTilbakekreving =
             familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
-                restUtvidetBehandlingEtterBehandlingsresultat.data!!.behandlingId,
+                utvidetBehandlingDtoEtterBehandlingsresultat.data!!.behandlingId,
                 TilbakekrevingDto(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
             )
 
         val vedtaksperioderMedBegrunnelser =
-            vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
-                restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
+            vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelserDto(
+                utvidetBehandlingDtoEtterVurderTilbakekreving.data!!.behandlingId,
             )
 
         val førsteVedtaksperiode = vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = førsteVedtaksperiode.id,
-            restPutVedtaksperiodeMedStandardbegrunnelser =
-                RestPutVedtaksperiodeMedStandardbegrunnelser(
+            putVedtaksperiodeMedStandardbegrunnelserDto =
+                PutVedtaksperiodeMedStandardbegrunnelserDto(
                     standardbegrunnelser =
                         listOf(
                             Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
@@ -168,20 +168,20 @@ class TriggingAvAutobrevOmregningPgaAlderTest(
         if (årMedReduksjonsbegrunnelse != null) {
             familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
                 vedtaksperiodeId = reduksjonVedtaksperiodeId.id,
-                restPutVedtaksperiodeMedStandardbegrunnelser =
-                    RestPutVedtaksperiodeMedStandardbegrunnelser(
+                putVedtaksperiodeMedStandardbegrunnelserDto =
+                    PutVedtaksperiodeMedStandardbegrunnelserDto(
                         standardbegrunnelser = listOf(årMedReduksjonsbegrunnelse.enumnavnTilString()),
                     ),
             )
         }
 
-        val restUtvidetBehandlingEtterSendTilBeslutter =
-            familieBaSakKlient().sendTilBeslutter(behandlingId = restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId)
+        val utvidetBehandlingDtoEtterSendTilBeslutter =
+            familieBaSakKlient().sendTilBeslutter(behandlingId = utvidetBehandlingDtoEtterVurderTilbakekreving.data!!.behandlingId)
 
         familieBaSakKlient().iverksettVedtak(
-            behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
-            restBeslutningPåVedtak =
-                RestBeslutningPåVedtak(
+            behandlingId = utvidetBehandlingDtoEtterSendTilBeslutter.data!!.behandlingId,
+            beslutningPåVedtakDto =
+                BeslutningPåVedtakDto(
                     Beslutning.GODKJENT,
                 ),
             beslutterHeaders =

@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-data class RestUtvidetBehandling(
+data class UtvidetBehandlingDto(
     val behandlingId: Long,
     val steg: StegType,
     val stegTilstand: List<BehandlingStegTilstandDto>,
@@ -34,12 +34,12 @@ data class RestUtvidetBehandling(
     val endretUtbetalingAndeler: List<EndretUtbetalingAndelDto>,
     val kompetanser: List<KompetanseDto>,
     val tilbakekreving: TilbakekrevingDto?,
-    val vedtak: RestVedtak?,
-    val totrinnskontroll: RestTotrinnskontroll?,
+    val vedtak: VedtakDto?,
+    val totrinnskontroll: TotrinnskontrollDto?,
     val aktivSettPåVent: SettPåVentDto?,
     val migreringsdato: LocalDate?,
-    val valutakurser: List<RestValutakurs>,
-    val utenlandskePeriodebeløp: List<RestUtenlandskPeriodebeløp>,
+    val valutakurser: List<ValutakursDto>,
+    val utenlandskePeriodebeløp: List<UtenlandskPeriodebeløpDto>,
     val korrigertEtterbetaling: KorrigertEtterbetalingDto?,
     val korrigertVedtak: KorrigertVedtakDto?,
     val feilutbetaltValuta: List<FeilutbetaltValutaDto>,

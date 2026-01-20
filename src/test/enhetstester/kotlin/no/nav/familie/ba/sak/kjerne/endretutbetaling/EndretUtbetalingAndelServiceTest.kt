@@ -25,7 +25,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilEndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -87,7 +87,7 @@ class EndretUtbetalingAndelServiceTest {
                 fom = YearMonth.now().minusMonths(5),
                 tom = YearMonth.now().minusMonths(1),
             )
-        val restEndretUtbetalingAndel = endretUtbetalingAndel.tilRestEndretUtbetalingAndel()
+        val restEndretUtbetalingAndel = endretUtbetalingAndel.tilEndretUtbetalingAndelDto()
 
         val andelerTilkjentYtelse =
             listOf<AndelTilkjentYtelse>(
@@ -164,7 +164,7 @@ class EndretUtbetalingAndelServiceTest {
                 tom = null,
             )
 
-        val restEndretUtbetalingAndel = endretUtbetalingAndel.tilRestEndretUtbetalingAndel()
+        val restEndretUtbetalingAndel = endretUtbetalingAndel.tilEndretUtbetalingAndelDto()
 
         val andelerTilkjentYtelse =
             listOf(
@@ -234,7 +234,7 @@ class EndretUtbetalingAndelServiceTest {
                 tom = null,
             )
 
-        val restEndretUtbetalingAndel = endretUtbetalingAndel.tilRestEndretUtbetalingAndel()
+        val restEndretUtbetalingAndel = endretUtbetalingAndel.tilEndretUtbetalingAndelDto()
 
         val andelerTilkjentYtelse =
             listOf(

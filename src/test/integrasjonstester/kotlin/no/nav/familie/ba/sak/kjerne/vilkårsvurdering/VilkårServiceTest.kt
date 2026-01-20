@@ -164,7 +164,7 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultat =
+            val personResultatDto =
                 vilkårsvurdering
                     .personResultater
                     .single()
@@ -178,7 +178,7 @@ class VilkårServiceTest(
                     vilkårService.endreVilkår(
                         behandlingId = behandling.id,
                         vilkårId = ikkeEksisterendeVilkårId,
-                        personResultatDto = restPersonResultat,
+                        personResultatDto = personResultatDto,
                     )
                 }
 
@@ -204,25 +204,25 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultater = vilkårsvurdering.personResultater.map { it.tilPersonResultatDto() }
-            val restPersonResultatSøker = restPersonResultater.first { it.personIdent == søkerFnr }
-            val restVilkårResultat = restPersonResultatSøker.vilkårResultater.first()
+            val personResultaterDto = vilkårsvurdering.personResultater.map { it.tilPersonResultatDto() }
+            val personResultatSøkerDto = personResultaterDto.first { it.personIdent == søkerFnr }
+            val vilkårResultatDto = personResultatSøkerDto.vilkårResultater.first()
 
             // Act
-            val restPersonResultaterMedEndringer =
+            val personResultatDtoerMedEndringer =
                 vilkårService
                     .endreVilkår(
                         behandlingId = behandling.id,
-                        vilkårId = restVilkårResultat.id,
-                        personResultatDto = restPersonResultatSøker,
+                        vilkårId = vilkårResultatDto.id,
+                        personResultatDto = personResultatSøkerDto,
                     )
 
             // Assert
-            assertThat(restPersonResultaterMedEndringer)
+            assertThat(personResultatDtoerMedEndringer)
                 .usingRecursiveComparison()
                 .ignoringCollectionOrder()
                 .ignoringFieldsMatchingRegexes(".*opprettetTidspunkt", ".*endretTidspunkt")
-                .isEqualTo(restPersonResultater)
+                .isEqualTo(personResultaterDto)
         }
 
         @ParameterizedTest
@@ -253,14 +253,14 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultat = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
-            val restVilkårResultat = restPersonResultat.vilkårResultater.single()
+            val personResultatDto = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
+            val vilkårResultatDto = personResultatDto.vilkårResultater.single()
 
-            val restPersonResultatMedEndring =
-                restPersonResultat.copy(
+            val personResultatDtoMedEndring =
+                personResultatDto.copy(
                     vilkårResultater =
                         listOf(
-                            restVilkårResultat.copy(
+                            vilkårResultatDto.copy(
                                 periodeFom = LocalDate.of(2024, 1, 1),
                                 begrunnelse = begrunnelseFraFrontend,
                             ),
@@ -273,8 +273,8 @@ class VilkårServiceTest(
                     vilkårService
                         .endreVilkår(
                             behandlingId = behandling.id,
-                            vilkårId = restVilkårResultat.id,
-                            personResultatDto = restPersonResultatMedEndring,
+                            vilkårId = vilkårResultatDto.id,
+                            personResultatDto = personResultatDtoMedEndring,
                         )
                 }
 
@@ -307,15 +307,15 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultat = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
-            val restVilkårResultat = restPersonResultat.vilkårResultater.single()
+            val personResultatDto = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
+            val vilkårResultatDto = personResultatDto.vilkårResultater.single()
 
-            val restPersonResultatMedEndring =
-                restPersonResultat.copy(
+            val personResultatDtoMedEndring =
+                personResultatDto.copy(
                     vilkårResultater =
                         listOf(
-                            restVilkårResultat.copy(
-                                begrunnelse = restVilkårResultat.begrunnelse + "\nEkstra informasjon",
+                            vilkårResultatDto.copy(
+                                begrunnelse = vilkårResultatDto.begrunnelse + "\nEkstra informasjon",
                             ),
                         ),
                 )
@@ -324,8 +324,8 @@ class VilkårServiceTest(
             vilkårService
                 .endreVilkår(
                     behandlingId = behandling.id,
-                    vilkårId = restVilkårResultat.id,
-                    personResultatDto = restPersonResultatMedEndring,
+                    vilkårId = vilkårResultatDto.id,
+                    personResultatDto = personResultatDtoMedEndring,
                 )
 
             // Assert
@@ -339,7 +339,7 @@ class VilkårServiceTest(
 
             assertThat(oppdatertVilkårResultat.erAutomatiskVurdert).isFalse()
             assertThat(oppdatertVilkårResultat.erOpprinneligPreutfylt).isTrue()
-            assertThat(oppdatertVilkårResultat.begrunnelse).isEqualTo(restVilkårResultat.begrunnelse + "\nEkstra informasjon")
+            assertThat(oppdatertVilkårResultat.begrunnelse).isEqualTo(vilkårResultatDto.begrunnelse + "\nEkstra informasjon")
         }
 
         @Test
@@ -367,14 +367,14 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultat = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
-            val restVilkårResultat = restPersonResultat.vilkårResultater.single()
+            val personResultatDto = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
+            val vilkårResultatDto = personResultatDto.vilkårResultater.single()
 
-            val restPersonResultatMedEndring =
-                restPersonResultat.copy(
+            val personResultatMedEndringDto =
+                personResultatDto.copy(
                     vilkårResultater =
                         listOf(
-                            restVilkårResultat
+                            vilkårResultatDto
                                 .copy(
                                     periodeFom = LocalDate.of(2024, 1, 1),
                                     begrunnelse = "Ny begrunnelse",
@@ -385,8 +385,8 @@ class VilkårServiceTest(
             // Act
             vilkårService.endreVilkår(
                 behandlingId = behandling.id,
-                vilkårId = restVilkårResultat.id,
-                personResultatDto = restPersonResultatMedEndring,
+                vilkårId = vilkårResultatDto.id,
+                personResultatDto = personResultatMedEndringDto,
             )
 
             // Assert
@@ -432,14 +432,14 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultat = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
-            val restVilkårResultat = restPersonResultat.vilkårResultater.single()
+            val personResultatDto = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
+            val vilkårResultatDto = personResultatDto.vilkårResultater.single()
 
-            val restPersonResultatMedEndring =
-                restPersonResultat.copy(
+            val personResultatDtoMedEndring =
+                personResultatDto.copy(
                     vilkårResultater =
                         listOf(
-                            restVilkårResultat
+                            vilkårResultatDto
                                 .copy(
                                     periodeFom = LocalDate.of(2024, 1, 1),
                                     begrunnelse = "Ny begrunnelse",
@@ -453,8 +453,8 @@ class VilkårServiceTest(
             // Act
             vilkårService.endreVilkår(
                 behandlingId = behandling.id,
-                vilkårId = restVilkårResultat.id,
-                personResultatDto = restPersonResultatMedEndring,
+                vilkårId = vilkårResultatDto.id,
+                personResultatDto = personResultatDtoMedEndring,
             )
 
             // Assert

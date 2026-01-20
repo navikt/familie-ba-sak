@@ -51,9 +51,9 @@ class RefusjonEøsService(
     fun hentRefusjonEøsPerioder(behandlingId: Long) =
         refusjonEøsRepository
             .finnRefusjonEøsForBehandling(behandlingId = behandlingId)
-            .map { tilRest(it) }
+            .map { tilDto(it) }
 
-    private fun tilRest(it: RefusjonEøs) =
+    private fun tilDto(it: RefusjonEøs) =
         RefusjonEøsDto(
             id = it.id,
             fom = it.fom,

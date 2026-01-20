@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs
 
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RefusjonEøsDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -36,7 +36,7 @@ class RefusjonEøsController(
     fun leggTilRefusjonEøsPeriode(
         @PathVariable behandlingId: Long,
         @RequestBody refusjonEøs: RefusjonEøsDto,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "legg til periode med refusjon EØS",
@@ -48,7 +48,7 @@ class RefusjonEøsController(
             behandlingId = behandlingId,
         )
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)))
     }
 
     @PutMapping(
@@ -60,7 +60,7 @@ class RefusjonEøsController(
         @PathVariable behandlingId: Long,
         @PathVariable id: Long,
         @RequestBody refusjonEøs: RefusjonEøsDto,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "oppdater periode med refusjon EØS",
@@ -70,14 +70,14 @@ class RefusjonEøsController(
 
         refusjonEøsService.oppdaterRefusjonEøsPeriode(refusjonEøsDto = refusjonEøs, id = id)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)))
     }
 
     @DeleteMapping(path = ["behandlinger/{behandlingId}/perioder/{id}"])
     fun fjernRefusjonEøsPeriode(
         @PathVariable behandlingId: Long,
         @PathVariable id: Long,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "fjerner periode med refusjon EØS",
@@ -86,7 +86,7 @@ class RefusjonEøsController(
 
         refusjonEøsService.fjernRefusjonEøsPeriode(id = id)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)))
     }
 
     @GetMapping(path = ["behandlinger/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])

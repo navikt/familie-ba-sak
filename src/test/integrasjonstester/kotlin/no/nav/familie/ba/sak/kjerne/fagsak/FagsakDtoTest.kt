@@ -17,7 +17,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class RestFagsakTest(
+class FagsakDtoTest(
     @Autowired
     private val stegService: StegService,
     @Autowired
@@ -34,7 +34,7 @@ class RestFagsakTest(
     private val brevmalService: BrevmalService,
 ) : AbstractSpringIntegrationTest() {
     @Test
-    fun `Skal sjekke at gjeldende utbetalingsperioder kommer med i restfagsak`() {
+    fun `Skal sjekke at gjeldende utbetalingsperioder kommer med i fagsak dto`() {
         val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
         val barnFnr = leggTilPersonInfo(randomBarnFødselsdato(10))
 
@@ -63,8 +63,8 @@ class RestFagsakTest(
             vedtaksperiodeService = vedtaksperiodeService,
         )
 
-        val restfagsak = fagsakService.hentRestFagsak(fagsakId = førstegangsbehandling.fagsak.id)
+        val fagsakDto = fagsakService.hentFagsakDto(fagsakId = førstegangsbehandling.fagsak.id)
 
-        assertThat(restfagsak.data?.gjeldendeUtbetalingsperioder).isNotEmpty
+        assertThat(fagsakDto.data?.gjeldendeUtbetalingsperioder).isNotEmpty
     }
 }

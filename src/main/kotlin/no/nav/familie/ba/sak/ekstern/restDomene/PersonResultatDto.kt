@@ -16,7 +16,7 @@ import java.time.LocalDateTime
 
 data class PersonResultatDto(
     val personIdent: String,
-    val vilkårResultater: List<RestVilkårResultat>,
+    val vilkårResultater: List<VilkårResultatDto>,
     val andreVurderinger: List<AnnenVurderingDto> = emptyList(),
 ) {
     // Bruker init til å validere personidenten
@@ -25,7 +25,7 @@ data class PersonResultatDto(
     }
 }
 
-data class RestVilkårResultat(
+data class VilkårResultatDto(
     val id: Long,
     val vilkårType: Vilkår,
     val resultat: Resultat,
@@ -55,7 +55,7 @@ fun PersonResultat.tilPersonResultatDto() =
         personIdent = this.aktør.aktivFødselsnummer(),
         vilkårResultater =
             this.vilkårResultater.map { vilkårResultat ->
-                RestVilkårResultat(
+                VilkårResultatDto(
                     resultat = vilkårResultat.resultat,
                     resultatBegrunnelse = vilkårResultat.resultatBegrunnelse,
                     erAutomatiskVurdert = vilkårResultat.erAutomatiskVurdert,

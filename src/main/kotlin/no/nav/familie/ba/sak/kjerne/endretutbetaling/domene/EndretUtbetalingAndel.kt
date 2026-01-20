@@ -140,7 +140,7 @@ fun EndretUtbetalingAndel.førerTilOpphør() = this.prosent == BigDecimal.ZERO &
 
 fun EndretUtbetalingAndel?.skalUtbetales() = this != null && this.prosent != BigDecimal.ZERO
 
-fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel() =
+fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilEndretUtbetalingAndelDto() =
     EndretUtbetalingAndelDto(
         id = this.id,
         personIdenter = this.personIdenter,
@@ -154,7 +154,7 @@ fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel()
         erTilknyttetAndeler = this.andelerTilkjentYtelse.isNotEmpty(),
     )
 
-fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
+fun EndretUtbetalingAndel.fraEndretUtbetalingAndelDto(
     endretUtbetalingAndelDto: EndretUtbetalingAndelDto,
     personer: Set<Person>,
 ): EndretUtbetalingAndel {

@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.VALIDER_ENDRING_
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.SlettVilkårDto
+import no.nav.familie.ba.sak.ekstern.restDomene.VilkårResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -62,11 +62,11 @@ class VilkårService(
     ): List<PersonResultatDto> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
-        val restVilkårResultat =
+        val vilkårResultatDto =
             personResultatDto.vilkårResultater.singleOrNull { it.id == vilkårId }
                 ?: throw Feil("Fant ikke vilkårResultat med id $vilkårId ved oppdatering av vilkår")
 
-        validerResultatBegrunnelse(restVilkårResultat)
+        validerResultatBegrunnelse(vilkårResultatDto)
 
         val personResultat =
             finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, personResultatDto.personIdent)
@@ -77,15 +77,15 @@ class VilkårService(
                     ?: throw Feil("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
 
             if (eksisterendeVilkårResultat.erOpprinneligPreutfylt) {
-                val erEndringIBegrunnelse = eksisterendeVilkårResultat.begrunnelse != restVilkårResultat.begrunnelse
-                val erEndringIAnnetFeltEnnBegrunnelse = erEndringIVilkår(eksisterendeVilkårResultat, restVilkårResultat)
+                val erEndringIBegrunnelse = eksisterendeVilkårResultat.begrunnelse != vilkårResultatDto.begrunnelse
+                val erEndringIAnnetFeltEnnBegrunnelse = erEndringIVilkår(eksisterendeVilkårResultat, vilkårResultatDto)
 
                 if (!erEndringIBegrunnelse && !erEndringIAnnetFeltEnnBegrunnelse) {
                     return vilkårsvurdering.personResultater.map { it.tilPersonResultatDto() }
                 }
 
                 val begrunnelseErTomEllerAutomatiskUtfylt =
-                    restVilkårResultat.begrunnelse.run { isBlank() || startsWith(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT) }
+                    vilkårResultatDto.begrunnelse.run { isBlank() || startsWith(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT) }
 
                 if (erEndringIAnnetFeltEnnBegrunnelse && begrunnelseErTomEllerAutomatiskUtfylt) {
                     throw FunksjonellFeil(
@@ -98,20 +98,20 @@ class VilkårService(
                     opprettLoggForEndringIPreutfyltVilkår(
                         behandling = vilkårsvurdering.behandling,
                         forrigeVilkår = eksisterendeVilkårResultat,
-                        nyttVilkår = restVilkårResultat,
+                        nyttVilkår = vilkårResultatDto,
                     ),
                 )
             }
         }
 
-        muterPersonVilkårResultaterPut(personResultat, restVilkårResultat)
+        muterPersonVilkårResultaterPut(personResultat, vilkårResultatDto)
 
         val vilkårResultat =
             personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
                 ?: throw Feil("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
 
         vilkårResultat.also {
-            it.standardbegrunnelser = restVilkårResultat.avslagBegrunnelser ?: emptyList()
+            it.standardbegrunnelser = vilkårResultatDto.avslagBegrunnelser ?: emptyList()
         }
 
         val migreringsdatoPåFagsak =
@@ -127,16 +127,16 @@ class VilkårService(
 
     private fun erEndringIVilkår(
         vilkårResultat: VilkårResultat,
-        restVilkårResultat: RestVilkårResultat,
+        vilkårResultatDto: VilkårResultatDto,
     ): Boolean =
-        vilkårResultat.periodeFom != restVilkårResultat.periodeFom ||
-            vilkårResultat.periodeTom != restVilkårResultat.periodeTom ||
-            vilkårResultat.resultat != restVilkårResultat.resultat ||
-            vilkårResultat.resultatBegrunnelse != restVilkårResultat.resultatBegrunnelse ||
-            vilkårResultat.erEksplisittAvslagPåSøknad != restVilkårResultat.erEksplisittAvslagPåSøknad ||
-            vilkårResultat.vurderesEtter != restVilkårResultat.vurderesEtter ||
-            vilkårResultat.utdypendeVilkårsvurderinger.toSet() != restVilkårResultat.utdypendeVilkårsvurderinger.toSet() ||
-            vilkårResultat.standardbegrunnelser.toSet() != restVilkårResultat.avslagBegrunnelser.orEmpty().toSet()
+        vilkårResultat.periodeFom != vilkårResultatDto.periodeFom ||
+            vilkårResultat.periodeTom != vilkårResultatDto.periodeTom ||
+            vilkårResultat.resultat != vilkårResultatDto.resultat ||
+            vilkårResultat.resultatBegrunnelse != vilkårResultatDto.resultatBegrunnelse ||
+            vilkårResultat.erEksplisittAvslagPåSøknad != vilkårResultatDto.erEksplisittAvslagPåSøknad ||
+            vilkårResultat.vurderesEtter != vilkårResultatDto.vurderesEtter ||
+            vilkårResultat.utdypendeVilkårsvurderinger.toSet() != vilkårResultatDto.utdypendeVilkårsvurderinger.toSet() ||
+            vilkårResultat.standardbegrunnelser.toSet() != vilkårResultatDto.avslagBegrunnelser.orEmpty().toSet()
 
     @Transactional
     fun deleteVilkårsperiode(

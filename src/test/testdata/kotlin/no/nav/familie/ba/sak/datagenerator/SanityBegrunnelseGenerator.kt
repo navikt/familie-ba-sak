@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.datagenerator
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeTrigger
-import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelseDto
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
@@ -42,8 +42,8 @@ fun lagRestSanityBegrunnelse(
     begrunnelseTypeForPerson: String? = null,
     ikkeIBruk: Boolean? = false,
     stotterFritekst: Boolean? = false,
-): RestSanityBegrunnelse =
-    RestSanityBegrunnelse(
+): SanityBegrunnelseDto =
+    SanityBegrunnelseDto(
         apiNavn = apiNavn,
         navnISystem = navnISystem,
         vilkaar = vilkaar,

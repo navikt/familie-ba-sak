@@ -12,8 +12,8 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.util.ordinærSatsNesteMånedTilTester
@@ -36,16 +36,16 @@ class FødselshendelseRevurderingTest(
     fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
         val revurderingsbarnSinFødselsdato = now().minusMonths(3)
         val scenario =
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
+            ScenarioDto(
+                søker = ScenarioPersonDto(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = now().minusMonths(12).toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
                         ),
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = revurderingsbarnSinFødselsdato.toString(),
                             fornavn = "Barn2",
                             etternavn = "Barnesen2",
@@ -87,25 +87,25 @@ class FødselshendelseRevurderingTest(
                 brevmalService = brevmalService,
             )
 
-        val restFagsakEtterBehandlingAvsluttet =
+        val fagsakDtoEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id)
 
         generellAssertFagsak(
-            restFagsak = restFagsakEtterBehandlingAvsluttet,
+            fagsakDto = fagsakDtoEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.LØPENDE,
             behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
             aktivBehandlingId = behandling.id,
         )
 
         val aktivBehandling =
-            restFagsakEtterBehandlingAvsluttet
+            fagsakDtoEtterBehandlingAvsluttet
                 .getDataOrThrow()
                 .behandlinger
                 .single {
                     it.behandlingId ==
                         behandlingHentOgPersisterService
                             .finnAktivForFagsak(
-                                restFagsakEtterBehandlingAvsluttet.data!!.id,
+                                fagsakDtoEtterBehandlingAvsluttet.data!!.id,
                             )?.id
                 }
 

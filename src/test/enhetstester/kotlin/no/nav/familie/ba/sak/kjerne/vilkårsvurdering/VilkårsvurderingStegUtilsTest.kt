@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.VilkårResultatDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -108,8 +108,8 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `periode erstattes dersom en periode med overlappende tidsintervall legges til`() {
-        val restVilkårResultat =
-            RestVilkårResultat(
+        val vilkårResultatDto =
+            VilkårResultatDto(
                 2,
                 vilkår,
                 resultat,
@@ -122,7 +122,7 @@ class VilkårsvurderingStegUtilsTest {
             )
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
-            restVilkårResultat,
+            vilkårResultatDto,
         )
 
         assertEquals(2, personResultat.vilkårResultater.size)
@@ -145,8 +145,8 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `periode splittes dersom en periode med inneklemt tidsintervall legges til`() {
-        val restVilkårResultat =
-            RestVilkårResultat(
+        val vilkårResultatDto =
+            VilkårResultatDto(
                 2,
                 vilkår,
                 resultat,
@@ -160,7 +160,7 @@ class VilkårsvurderingStegUtilsTest {
 
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
-            restVilkårResultat,
+            vilkårResultatDto,
         )
 
         assertEquals(4, personResultat.vilkårResultater.size)
@@ -196,8 +196,8 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `fom-dato flyttes korrekt`() {
-        val restVilkårResultat =
-            RestVilkårResultat(
+        val vilkårResultatDto =
+            VilkårResultatDto(
                 2,
                 vilkår,
                 resultat,
@@ -211,7 +211,7 @@ class VilkårsvurderingStegUtilsTest {
 
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
-            restVilkårResultat,
+            vilkårResultatDto,
         )
 
         assertEquals(3, personResultat.vilkårResultater.size)
@@ -240,8 +240,8 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `tom-dato flyttes korrekt`() {
-        val restVilkårResultat =
-            RestVilkårResultat(
+        val vilkårResultatDto =
+            VilkårResultatDto(
                 2,
                 vilkår,
                 resultat,
@@ -255,7 +255,7 @@ class VilkårsvurderingStegUtilsTest {
 
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
-            restVilkårResultat,
+            vilkårResultatDto,
         )
 
         assertEquals(3, personResultat.vilkårResultater.size)
@@ -284,8 +284,8 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `skal sette erAutomatiskVurdert til false og begrunnelseForManuellKontroll til null`() {
-        val restVilkårResultat =
-            RestVilkårResultat(
+        val vilkårResultatDto =
+            VilkårResultatDto(
                 id = 1,
                 behandlingId = behandling.id,
                 vilkårType = BOSATT_I_RIKET,
@@ -304,7 +304,7 @@ class VilkårsvurderingStegUtilsTest {
 
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
-            restVilkårResultat,
+            vilkårResultatDto,
         )
 
         with(personResultat.vilkårResultater.first { it.id == 1L }) {
@@ -444,8 +444,8 @@ class VilkårsvurderingStegUtilsTest {
                 begrunnelse = "",
                 sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
             )
-        val restVilkårResultat =
-            RestVilkårResultat(
+        val vilkårResultatDto =
+            VilkårResultatDto(
                 id = 1,
                 vilkårType = vilkår,
                 resultat = resultat,
@@ -457,7 +457,7 @@ class VilkårsvurderingStegUtilsTest {
                 behandlingId = behandling.id,
             )
 
-        VilkårsvurderingUtils.tilpassVilkårForEndretVilkår(personResultat, vilkårResultat, restVilkårResultat)
+        VilkårsvurderingUtils.tilpassVilkårForEndretVilkår(personResultat, vilkårResultat, vilkårResultatDto)
 
         assertEquals(LocalDate.of(2020, 1, 1), vilkårResultat.periodeFom)
         assertEquals(LocalDate.of(2020, 5, 31), vilkårResultat.periodeTom)

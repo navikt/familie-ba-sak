@@ -46,7 +46,7 @@ data class TilbakekrevingsvedtakMotregning(
     var vedtakPdf: ByteArray? = null,
 ) : BaseEntitet()
 
-fun TilbakekrevingsvedtakMotregning.tilRestTilbakekrevingsvedtakMotregning() =
+fun TilbakekrevingsvedtakMotregning.tilTilbakekrevingsvedtakMotregningDto() =
     TilbakekrevingsvedtakMotregningDto(
         id = this.id,
         behandlingId = this.behandling.id,

@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.common.RessursUtils.ok
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
+import no.nav.familie.ba.sak.ekstern.restDomene.VisningBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -51,17 +51,17 @@ class BehandlingController(
     @GetMapping(path = ["fagsak/{fagsakId}"])
     fun hentBehandlinger(
         @PathVariable fagsakId: Long,
-    ): ResponseEntity<Ressurs<List<RestVisningBehandling>>> {
+    ): ResponseEntity<Ressurs<List<VisningBehandlingDto>>> {
         tilgangService.validerTilgangTilFagsak(event = AuditLoggerEvent.ACCESS, fagsakId = fagsakId)
         tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.VEILEDER, handling = "hent behandlinger")
-        val behandlinger = behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsakId).map { RestVisningBehandling.opprettFraVisningsbehandling(it) }
+        val behandlinger = behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsakId).map { VisningBehandlingDto.opprettFraVisningsbehandling(it) }
         return ResponseEntity.ok(Ressurs.success(behandlinger))
     }
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettBehandling(
         @RequestBody nyBehandling: NyBehandling,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(nyBehandling.søkersIdent),
             event = AuditLoggerEvent.CREATE,
@@ -78,7 +78,7 @@ class BehandlingController(
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandling.id),
+                    .lagUtvidetBehandlingDto(behandlingId = behandling.id),
             ),
         )
     }
@@ -105,8 +105,8 @@ class BehandlingController(
     @PutMapping(path = ["/{behandlingId}/behandlingstema"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun endreBehandlingstema(
         @PathVariable behandlingId: Long,
-        @RequestBody endreBehandlingstema: RestEndreBehandlingstema,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        @RequestBody endreBehandlingstema: EndreBehandlingstemaDto,
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -124,7 +124,7 @@ class BehandlingController(
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandling.id),
+                    .lagUtvidetBehandlingDto(behandlingId = behandling.id),
             ),
         )
     }
@@ -203,7 +203,7 @@ data class NyBehandlingHendelse(
     val barnasIdenter: List<String>,
 )
 
-data class RestEndreBehandlingstema(
+data class EndreBehandlingstemaDto(
     val behandlingUnderkategori: BehandlingUnderkategori,
     val behandlingKategori: BehandlingKategori,
 )

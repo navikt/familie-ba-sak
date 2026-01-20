@@ -70,7 +70,7 @@ class PersongrunnlagService(
     private val kodeverkService: KodeverkService,
     private val featureToggleService: FeatureToggleService,
 ) {
-    fun mapTilRestPersonMedStatsborgerskapLand(
+    fun mapTilPersonDtoMedStatsborgerskapLand(
         person: Person,
         erManueltLagtTilISøknad: Boolean? = null,
     ): PersonDto {

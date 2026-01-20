@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class RestTidslinjerTest {
+internal class TidslinjerDtoTest {
     @Test
     fun `når barnet har løpende vilkår, skal likevel rest-tidslinjene for regelverk og oppfylt vilkår være avsluttet ved 18 år`() {
         val barnsFødselsdato = 13.jan(2020)
@@ -46,7 +46,7 @@ internal class RestTidslinjerTest {
                         .tilPersonEnkelSøkerOgBarn(),
             )
 
-        val restTidslinjer = vilkårsvurderingTidslinjer.tilRestTidslinjer()
+        val restTidslinjer = vilkårsvurderingTidslinjer.tilTidslinjerDto()
         val barnetsTidslinjer = restTidslinjer.barnasTidslinjer[barn1.aktør.aktivFødselsnummer()]!!
 
         // Stopper ved søkers siste til-og-med-dato fordi Regelverk er <null> etter det, som filtreres bort
@@ -105,7 +105,7 @@ internal class RestTidslinjerTest {
                         .tilPersonEnkelSøkerOgBarn(),
             )
 
-        val restTidslinjer = vilkårsvurderingTidslinjer.tilRestTidslinjer()
+        val restTidslinjer = vilkårsvurderingTidslinjer.tilTidslinjerDto()
         val søkersTidslinjer = restTidslinjer.søkersTidslinjer
 
         // Stopper ved siste dag i måneden før yngste barn fyller 18 år

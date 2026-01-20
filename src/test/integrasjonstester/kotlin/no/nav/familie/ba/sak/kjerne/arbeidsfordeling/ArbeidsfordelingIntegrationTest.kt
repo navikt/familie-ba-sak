@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilRelasjonIPersonInfo
@@ -95,7 +95,7 @@ class ArbeidsfordelingIntegrationTest(
         // Act
         stegService.håndterSøknad(
             behandling,
-            RestRegistrerSøknad(
+            RegistrerSøknadDto(
                 søknad =
                     lagSøknadDTO(
                         søkerFnr,
@@ -138,7 +138,7 @@ class ArbeidsfordelingIntegrationTest(
         // Act
         stegService.håndterSøknad(
             behandling,
-            RestRegistrerSøknad(
+            RegistrerSøknadDto(
                 søknad =
                     lagSøknadDTO(
                         søkerFnr,
@@ -185,7 +185,7 @@ class ArbeidsfordelingIntegrationTest(
 
         stegService.håndterSøknad(
             behandling,
-            RestRegistrerSøknad(
+            RegistrerSøknadDto(
                 søknad =
                     lagSøknadDTO(
                         søkerFnr,
@@ -205,7 +205,7 @@ class ArbeidsfordelingIntegrationTest(
         // Act
         stegService.håndterSøknad(
             behandling,
-            RestRegistrerSøknad(
+            RegistrerSøknadDto(
                 søknad =
                     lagSøknadDTO(
                         søkerFnr,
@@ -249,7 +249,7 @@ class ArbeidsfordelingIntegrationTest(
 
         arbeidsfordelingService.manueltOppdaterBehandlendeEnhet(
             behandling,
-            RestEndreBehandlendeEnhet(
+            EndreBehandlendeEnhetDto(
                 enhetId = MANUELT_OVERSTYRT_ENHET.enhetsnummer,
                 begrunnelse = "",
             ),
@@ -258,7 +258,7 @@ class ArbeidsfordelingIntegrationTest(
         // Act
         stegService.håndterSøknad(
             behandling,
-            RestRegistrerSøknad(
+            RegistrerSøknadDto(
                 søknad =
                     lagSøknadDTO(
                         søkerFnr,
@@ -303,7 +303,7 @@ class ArbeidsfordelingIntegrationTest(
         // Act
         stegService.håndterSøknad(
             behandling,
-            RestRegistrerSøknad(
+            RegistrerSøknadDto(
                 søknad =
                     lagSøknadDTO(
                         søkerFnr,

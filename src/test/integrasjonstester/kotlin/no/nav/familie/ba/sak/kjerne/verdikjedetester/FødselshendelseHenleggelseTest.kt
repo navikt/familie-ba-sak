@@ -26,8 +26,8 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -78,16 +78,16 @@ class FødselshendelseHenleggelseTest(
     @Test
     fun `Skal henlegge fødselshendelse på grunn av at søker er under 18 (filtreringsregel)`() {
         val scenario =
-            RestScenario(
+            ScenarioDto(
                 søker =
-                    RestScenarioPerson(
+                    ScenarioPersonDto(
                         fødselsdato = now().minusYears(16).toString(),
                         fornavn = "Mor",
                         etternavn = "Søker",
                     ),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = now().minusMonths(2).toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
@@ -133,11 +133,11 @@ class FødselshendelseHenleggelseTest(
     @Test
     fun `Skal henlegge fødselshendelse på grunn av at barn ikke er bosatt i riket og bor ikke med mor (vilkårsvurdering)`() {
         val scenario =
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
+            ScenarioDto(
+                søker = ScenarioPersonDto(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = now().toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
@@ -204,9 +204,9 @@ class FødselshendelseHenleggelseTest(
     @Test
     fun `Skal henlegge fødselshendelse på grunn av at mor mottar utvidet barnetrygd (filtreringsregel)`() {
         val scenario =
-            RestScenario(
+            ScenarioDto(
                 søker =
-                    RestScenarioPerson(
+                    ScenarioPersonDto(
                         fødselsdato =
                             now()
                                 .minusYears(26)
@@ -218,12 +218,12 @@ class FødselshendelseHenleggelseTest(
                     ),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = now().minusMonths(2).toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
                         ),
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = now().minusYears(2).toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
@@ -250,7 +250,7 @@ class FødselshendelseHenleggelseTest(
         assertEquals(
             ordinærSatsNesteMånedTilTester().beløp + sisteUtvidetSatsTilTester(),
             hentNåværendeEllerNesteMånedsUtbetaling(
-                behandling = utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id),
+                behandling = utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id),
             ),
         )
 
@@ -291,9 +291,9 @@ class FødselshendelseHenleggelseTest(
     @Test
     fun `Skal henlegge fødselshendelse på grunn av at mor mottar EØS-barnetrygd (filtreringsregel)`() {
         val scenario =
-            RestScenario(
+            ScenarioDto(
                 søker =
-                    RestScenarioPerson(
+                    ScenarioPersonDto(
                         fødselsdato =
                             now()
                                 .minusYears(26)
@@ -305,12 +305,12 @@ class FødselshendelseHenleggelseTest(
                     ),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = now().minusMonths(2).toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
                         ),
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = now().minusYears(2).toString(),
                             fornavn = "Barn2",
                             etternavn = "Barnesen",
@@ -374,9 +374,9 @@ class FødselshendelseHenleggelseTest(
         val fødselsdato = "1993-01-12"
         val barnFødselsdato = now()
         val scenario =
-            RestScenario(
+            ScenarioDto(
                 søker =
-                    RestScenarioPerson(fødselsdato = fødselsdato, fornavn = "Mor", etternavn = "Søker").copy(
+                    ScenarioPersonDto(fødselsdato = fødselsdato, fornavn = "Mor", etternavn = "Søker").copy(
                         statsborgerskap =
                             listOf(
                                 Statsborgerskap(
@@ -389,7 +389,7 @@ class FødselshendelseHenleggelseTest(
                     ),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = barnFødselsdato.toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",

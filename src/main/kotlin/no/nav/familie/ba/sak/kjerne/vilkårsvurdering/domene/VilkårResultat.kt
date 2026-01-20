@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.VilkårResultatDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelseListConverter
@@ -106,17 +106,17 @@ data class VilkårResultat(
         resultat = Resultat.IKKE_VURDERT
     }
 
-    fun oppdater(restVilkårResultat: RestVilkårResultat) {
-        periodeFom = restVilkårResultat.periodeFom
-        periodeTom = restVilkårResultat.periodeTom
-        begrunnelse = restVilkårResultat.begrunnelse
-        resultat = restVilkårResultat.resultat
-        resultatBegrunnelse = restVilkårResultat.resultatBegrunnelse
+    fun oppdater(vilkårResultatDto: VilkårResultatDto) {
+        periodeFom = vilkårResultatDto.periodeFom
+        periodeTom = vilkårResultatDto.periodeTom
+        begrunnelse = vilkårResultatDto.begrunnelse
+        resultat = vilkårResultatDto.resultat
+        resultatBegrunnelse = vilkårResultatDto.resultatBegrunnelse
         erAutomatiskVurdert = false
-        erEksplisittAvslagPåSøknad = restVilkårResultat.erEksplisittAvslagPåSøknad
+        erEksplisittAvslagPåSøknad = vilkårResultatDto.erEksplisittAvslagPåSøknad
         oppdaterPekerTilBehandling()
-        vurderesEtter = restVilkårResultat.vurderesEtter
-        utdypendeVilkårsvurderinger = restVilkårResultat.utdypendeVilkårsvurderinger
+        vurderesEtter = vilkårResultatDto.vurderesEtter
+        utdypendeVilkårsvurderinger = vilkårResultatDto.utdypendeVilkårsvurderinger
         begrunnelseForManuellKontroll = null
     }
 

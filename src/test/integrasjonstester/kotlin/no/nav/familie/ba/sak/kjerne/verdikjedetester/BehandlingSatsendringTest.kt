@@ -19,8 +19,8 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.SatsendringTaskDto
@@ -146,9 +146,9 @@ class BehandlingSatsendringTest(
         )
 
     private fun lagScenario() =
-        RestScenario(
+        ScenarioDto(
             søker =
-                RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker")
+                ScenarioPersonDto(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker")
                     .copy(
                         bostedsadresser =
                             mutableListOf(
@@ -162,7 +162,7 @@ class BehandlingSatsendringTest(
                     ),
             barna =
                 listOf(
-                    RestScenarioPerson(
+                    ScenarioPersonDto(
                         fødselsdato = LocalDate.of(2023, 1, 1).toString(),
                         fornavn = "Barn",
                         etternavn = "Barnesen",
@@ -180,7 +180,7 @@ class BehandlingSatsendringTest(
                 ),
         )
 
-    private fun opprettBehandling(scenario: RestScenario) =
+    private fun opprettBehandling(scenario: ScenarioDto) =
         behandleFødselshendelse(
             nyBehandlingHendelse =
                 NyBehandlingHendelse(

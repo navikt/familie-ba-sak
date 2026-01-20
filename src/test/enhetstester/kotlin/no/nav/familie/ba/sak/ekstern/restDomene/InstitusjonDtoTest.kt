@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
-class RestInstitusjonTest {
+class InstitusjonDtoTest {
     @Nested
     inner class Valider {
         @Test

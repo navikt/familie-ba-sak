@@ -59,13 +59,13 @@ class FagsakController(
     }
 
     @GetMapping(path = ["/{fagsakId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentRestFagsak(
+    fun hentFagsakDto(
         @PathVariable fagsakId: Long,
     ): ResponseEntity<Ressurs<FagsakDto>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter fagsak med id $fagsakId")
         tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId, event = AuditLoggerEvent.ACCESS)
 
-        val fagsak = fagsakService.hentRestFagsak(fagsakId)
+        val fagsak = fagsakService.hentFagsakDto(fagsakId)
         return ResponseEntity.ok().body(fagsak)
     }
 
@@ -76,7 +76,7 @@ class FagsakController(
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter minimal fagsak med id $fagsakId")
         tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId, event = AuditLoggerEvent.ACCESS)
 
-        val fagsak = fagsakService.hentRestMinimalFagsak(fagsakId)
+        val fagsak = fagsakService.hentMinimalFagsakDto(fagsakId)
         return ResponseEntity.ok().body(fagsak)
     }
 
@@ -121,8 +121,8 @@ class FagsakController(
 
     @PostMapping(path = ["/sok/fagsaker-hvor-person-er-deltaker"])
     fun søkFagsakerHvorPersonErSøkerEllerMottarOrdinærBarnetrygd(
-        @RequestBody request: RestSøkFagsakRequest,
-    ): ResponseEntity<Ressurs<List<RestFagsakIdOgTilknyttetAktørId>>> {
+        @RequestBody request: SøkFagsakRequestDto,
+    ): ResponseEntity<Ressurs<List<FagsakIdOgTilknyttetAktørIdDto>>> {
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(request.personIdent),
             event = AuditLoggerEvent.ACCESS,
@@ -135,7 +135,7 @@ class FagsakController(
 
         val fagsakIdOgTilknyttetAktørId =
             fagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær.map {
-                RestFagsakIdOgTilknyttetAktørId(aktørId = it.aktør.aktørId, fagsakId = it.id)
+                FagsakIdOgTilknyttetAktørIdDto(aktørId = it.aktør.aktørId, fagsakId = it.id)
             }
 
         return ResponseEntity.ok().body(Ressurs.success(fagsakIdOgTilknyttetAktørId))
@@ -143,8 +143,8 @@ class FagsakController(
 
     @PostMapping(path = ["/sok/fagsaker-hvor-person-mottar-lopende-ytelse"])
     fun søkFagsakerHvorPersonMottarLøpendeYtelse(
-        @RequestBody request: RestSøkFagsakRequest,
-    ): ResponseEntity<Ressurs<List<RestFagsakIdOgTilknyttetAktørId>>> {
+        @RequestBody request: SøkFagsakRequestDto,
+    ): ResponseEntity<Ressurs<List<FagsakIdOgTilknyttetAktørIdDto>>> {
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(request.personIdent),
             event = AuditLoggerEvent.ACCESS,
@@ -160,13 +160,13 @@ class FagsakController(
 
         val fagsakIdOgTilknyttetAktørId =
             fagsakerHvorAktørMottarLøpendeUtvidetEllerOrdinær.map {
-                RestFagsakIdOgTilknyttetAktørId(aktørId = it.aktør.aktørId, fagsakId = it.id)
+                FagsakIdOgTilknyttetAktørIdDto(aktørId = it.aktør.aktørId, fagsakId = it.id)
             }
 
         return ResponseEntity.ok().body(Ressurs.success(fagsakIdOgTilknyttetAktørId))
     }
 
-    data class RestSøkFagsakRequest(
+    data class SøkFagsakRequestDto(
         val personIdent: String,
     ) {
         // Bruker init til å validere personidenten
@@ -175,7 +175,7 @@ class FagsakController(
         }
     }
 
-    data class RestFagsakIdOgTilknyttetAktørId(
+    data class FagsakIdOgTilknyttetAktørIdDto(
         val aktørId: String,
         val fagsakId: Long,
     )
@@ -205,7 +205,7 @@ class FagsakController(
     }
 }
 
-data class RestBeslutningPåVedtak(
+data class BeslutningPåVedtakDto(
     val beslutning: Beslutning,
     val begrunnelse: String? = null,
     val kontrollerteSider: List<String> = emptyList(),

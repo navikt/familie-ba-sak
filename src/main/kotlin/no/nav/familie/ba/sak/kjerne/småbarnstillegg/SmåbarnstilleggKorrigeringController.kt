@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -35,7 +35,7 @@ class SmåbarnstilleggController(
     fun leggTilSmåBarnstilleggPåBehandling(
         @PathVariable behandlingId: Long,
         @RequestBody småbarnstilleggKorrigeringRequest: SmåbarnstilleggKorrigeringRequest,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -46,14 +46,14 @@ class SmåbarnstilleggController(
 
         småbarnstilleggKorrigeringService.leggTilSmåbarnstilleggPåBehandling(småbarnstilleggKorrigeringRequest.årMåned, behandling)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId)))
     }
 
     @DeleteMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun fjernSmåbarnstilleggFraMåned(
         @PathVariable behandlingId: Long,
         @RequestBody småBarnstilleggKorrigeringRequest: SmåbarnstilleggKorrigeringRequest,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.DELETE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -64,7 +64,7 @@ class SmåbarnstilleggController(
 
         småbarnstilleggKorrigeringService.fjernSmåbarnstilleggPåBehandling(småBarnstilleggKorrigeringRequest.årMåned, behandling)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId)))
     }
 }
 

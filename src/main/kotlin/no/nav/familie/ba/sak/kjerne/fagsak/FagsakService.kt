@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.BaseFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.SkjermetBarnSøkerDto
+import no.nav.familie.ba.sak.ekstern.restDomene.VisningBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilMinimalFagsakDto
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
@@ -77,7 +77,7 @@ class FagsakService(
                 institusjon = fagsakRequest.institusjon,
                 skjermetBarnSøker = fagsakRequest.skjermetBarnSøker,
             )
-        return hentRestMinimalFagsak(fagsakId = fagsak.id)
+        return hentMinimalFagsakDto(fagsakId = fagsak.id)
     }
 
     @Transactional
@@ -181,7 +181,7 @@ class FagsakService(
     ): Ressurs<MinimalFagsakDto> {
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør, fagsakType)
         return if (fagsak != null) {
-            Ressurs.success(data = lagRestMinimalFagsak(fagsakId = fagsak.id))
+            Ressurs.success(data = lagMinimalFagsakDto(fagsakId = fagsak.id))
         } else {
             Ressurs.failure(
                 errorMessage = "Fant ikke fagsak på person",
@@ -194,32 +194,32 @@ class FagsakService(
         fagsakTyper: List<FagsakType> = FagsakType.entries.toList(),
     ): Ressurs<List<MinimalFagsakDto>> {
         val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør).filter { fagsakTyper.contains(it.type) }
-        return Ressurs.success(data = lagRestMinimalFagsaker(fagsaker))
+        return Ressurs.success(data = lagMinimalFagsakerDto(fagsaker))
     }
 
-    fun hentRestFagsak(fagsakId: Long): Ressurs<FagsakDto> = Ressurs.success(data = lagRestFagsak(fagsakId))
+    fun hentFagsakDto(fagsakId: Long): Ressurs<FagsakDto> = Ressurs.success(data = lagFagsakDto(fagsakId))
 
-    fun hentRestMinimalFagsak(fagsakId: Long): Ressurs<MinimalFagsakDto> = Ressurs.success(data = lagRestMinimalFagsak(fagsakId))
+    fun hentMinimalFagsakDto(fagsakId: Long): Ressurs<MinimalFagsakDto> = Ressurs.success(data = lagMinimalFagsakDto(fagsakId))
 
-    fun lagRestMinimalFagsaker(fagsaker: List<Fagsak>): List<MinimalFagsakDto> = fagsaker.map { lagRestMinimalFagsak(it.id) }
+    fun lagMinimalFagsakerDto(fagsaker: List<Fagsak>): List<MinimalFagsakDto> = fagsaker.map { lagMinimalFagsakDto(it.id) }
 
-    fun lagRestMinimalFagsak(fagsakId: Long): MinimalFagsakDto {
+    fun lagMinimalFagsakDto(fagsakId: Long): MinimalFagsakDto {
         val restBaseFagsak = lagRestBaseFagsak(fagsakId)
         val visningsbehandlinger = behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsakId)
         val migreringsdato = behandlingService.hentMigreringsdatoPåFagsak(fagsakId)
         return restBaseFagsak.tilMinimalFagsakDto(
-            restVisningBehandlinger = visningsbehandlinger.map { RestVisningBehandling.opprettFraVisningsbehandling(it) },
+            visningBehandlingerDto = visningsbehandlinger.map { VisningBehandlingDto.opprettFraVisningsbehandling(it) },
             migreringsdato = migreringsdato,
         )
     }
 
-    private fun lagRestFagsak(fagsakId: Long): FagsakDto {
+    private fun lagFagsakDto(fagsakId: Long): FagsakDto {
         val restBaseFagsak = lagRestBaseFagsak(fagsakId)
 
         val utvidedeBehandlinger =
             behandlingHentOgPersisterService
                 .hentBehandlinger(fagsakId = fagsakId)
-                .map { utvidetBehandlingService.lagRestUtvidetBehandling(it.id) }
+                .map { utvidetBehandlingService.lagUtvidetBehandlingDto(it.id) }
 
         return restBaseFagsak.tilFagsakDto(utvidedeBehandlinger)
     }

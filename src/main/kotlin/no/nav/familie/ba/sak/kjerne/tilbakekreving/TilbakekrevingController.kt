@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.RestTilbakekrevingsbehandling
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingsbehandlingDto
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -28,7 +28,7 @@ class TilbakekrevingController(
     @GetMapping(path = ["/fagsak/{fagsakId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentTilbakekrevingsbehandlinger(
         @PathVariable fagsakId: Long,
-    ): Ressurs<List<RestTilbakekrevingsbehandling>> {
+    ): Ressurs<List<TilbakekrevingsbehandlingDto>> {
         tilgangService.validerTilgangTilHandlingOgFagsak(
             fagsakId = fagsakId,
             event = AuditLoggerEvent.ACCESS,
@@ -36,7 +36,7 @@ class TilbakekrevingController(
             handling = "hente tilbakekrevingsbehandlinger",
         )
 
-        val tilbakekrevingsbehandlinger = tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
+        val tilbakekrevingsbehandlinger = tilbakekrevingsbehandlingService.hentTilbakekrevingsbehandlingerDto((fagsakId))
         return Ressurs.success(tilbakekrevingsbehandlinger)
     }
 

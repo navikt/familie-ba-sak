@@ -1,16 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.RestTilbakekrevingsbehandling
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingsbehandlingDto
 import org.springframework.stereotype.Service
 
 @Service
 class TilbakekrevingsbehandlingService(
     private val tilbakekrevingKlient: TilbakekrevingKlient,
 ) {
-    fun hentRestTilbakekrevingsbehandlinger(fagsakId: Long): List<RestTilbakekrevingsbehandling> {
+    fun hentTilbakekrevingsbehandlingerDto(fagsakId: Long): List<TilbakekrevingsbehandlingDto> {
         val behandlinger = tilbakekrevingKlient.hentTilbakekrevingsbehandlinger(fagsakId)
         return behandlinger.map {
-            RestTilbakekrevingsbehandling(
+            TilbakekrevingsbehandlingDto(
                 behandlingId = it.behandlingId,
                 opprettetTidspunkt = it.opprettetTidspunkt,
                 aktiv = it.aktiv,

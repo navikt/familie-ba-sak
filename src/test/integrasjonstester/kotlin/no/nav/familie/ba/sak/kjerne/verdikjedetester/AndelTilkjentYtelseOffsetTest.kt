@@ -6,8 +6,8 @@ import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -21,8 +21,8 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.Datakilde
@@ -60,7 +60,7 @@ class AndelTilkjentYtelseOffsetTest(
 
     @Test
     fun `Skal ha riktig offset for andeler når man legger til ny andel`() {
-        val personScenario1: RestScenario = lagScenario(barnFødselsdato)
+        val personScenario1: ScenarioDto = lagScenario(barnFødselsdato)
         val fagsak1: MinimalFagsakDto = lagFagsak(personScenario = personScenario1)
         val behandling1 =
             fullførBehandling(
@@ -91,12 +91,12 @@ class AndelTilkjentYtelseOffsetTest(
         Assertions.assertEquals(offsetBehandling1 + forventetOffsetNyAndel, offsetBehandling2)
     }
 
-    fun lagScenario(barnFødselsdato: LocalDate): RestScenario =
-        RestScenario(
-            søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+    fun lagScenario(barnFødselsdato: LocalDate): ScenarioDto =
+        ScenarioDto(
+            søker = ScenarioPersonDto(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
             barna =
                 listOf(
-                    RestScenarioPerson(
+                    ScenarioPersonDto(
                         fødselsdato = barnFødselsdato.toString(),
                         fornavn = "Barn",
                         etternavn = "Barnesen",
@@ -104,11 +104,11 @@ class AndelTilkjentYtelseOffsetTest(
                 ),
         ).also { stubScenario(it) }
 
-    fun lagFagsak(personScenario: RestScenario): MinimalFagsakDto = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
+    fun lagFagsak(personScenario: ScenarioDto): MinimalFagsakDto = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
 
     fun fullførBehandling(
         fagsak: MinimalFagsakDto,
-        personScenario: RestScenario,
+        personScenario: ScenarioDto,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
         efSakRestKlient.leggTilEksternPeriode(
@@ -118,16 +118,16 @@ class AndelTilkjentYtelseOffsetTest(
                     perioder = emptyList(),
                 ),
         )
-        val restBehandling: Ressurs<RestUtvidetBehandling> =
+        val behandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,
                 behandlingType = behandlingType,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 fagsakId = fagsak.id,
             )
-        val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
-        val restRegistrerSøknad =
-            RestRegistrerSøknad(
+        val behandling = behandlingHentOgPersisterService.hent(behandlingDto.data!!.behandlingId)
+        val registrerSøknadDto =
+            RegistrerSøknadDto(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = fagsak.søkerFødselsnummer,
@@ -136,14 +136,14 @@ class AndelTilkjentYtelseOffsetTest(
                     ),
                 bekreftEndringerViaFrontend = false,
             )
-        val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
+        val utvidetBehandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().registrererSøknad(
                 behandlingId = behandling.id,
-                restRegistrerSøknad = restRegistrerSøknad,
+                registrerSøknadDto = registrerSøknadDto,
             )
 
         return fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
-            restUtvidetBehandling = restUtvidetBehandling.data!!,
+            utvidetBehandlingDto = utvidetBehandlingDto.data!!,
             personScenario = personScenario,
             fagsak = fagsak,
             familieBaSakKlient = familieBaSakKlient(),
@@ -159,7 +159,7 @@ class AndelTilkjentYtelseOffsetTest(
 
     fun fullførRevurderingMedOvergangstonad(
         fagsak: MinimalFagsakDto,
-        personScenario: RestScenario,
+        personScenario: ScenarioDto,
         barnFødselsdato: LocalDate,
     ): Behandling {
         val behandlingType = BehandlingType.REVURDERING
@@ -180,7 +180,7 @@ class AndelTilkjentYtelseOffsetTest(
                         ),
                 ),
         )
-        val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
+        val utvidetBehandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,
                 behandlingType = behandlingType,
@@ -190,7 +190,7 @@ class AndelTilkjentYtelseOffsetTest(
             )
 
         return fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
-            restUtvidetBehandling = restUtvidetBehandling.data!!,
+            utvidetBehandlingDto = utvidetBehandlingDto.data!!,
             personScenario = personScenario,
             fagsak = fagsak,
             familieBaSakKlient = familieBaSakKlient(),

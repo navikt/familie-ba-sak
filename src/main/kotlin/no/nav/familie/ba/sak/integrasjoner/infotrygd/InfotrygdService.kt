@@ -17,11 +17,11 @@ class InfotrygdService(
 ) {
     fun hentInfotrygdsakerForSøker(aktør: Aktør): InfotrygdSøkResponse<Sak> = infotrygdBarnetrygdKlient.hentSaker(listOf(aktør.aktivFødselsnummer()), emptyList())
 
-    fun hentMaskertRestInfotrygdsakerVedManglendeTilgang(aktør: Aktør): RestInfotrygdsaker? =
+    fun hentMaskertRestInfotrygdsakerVedManglendeTilgang(aktør: Aktør): InfotrygdsakerDto? =
         familieIntegrasjonerTilgangskontrollService
             .hentMaskertPersonInfoVedManglendeTilgang(aktør)
             ?.let {
-                RestInfotrygdsaker(
+                InfotrygdsakerDto(
                     adressebeskyttelsegradering = it.adressebeskyttelseGradering,
                     harTilgang = false,
                 )

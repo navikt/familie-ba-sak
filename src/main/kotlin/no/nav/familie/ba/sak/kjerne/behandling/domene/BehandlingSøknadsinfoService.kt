@@ -37,7 +37,7 @@ class BehandlingSøknadsinfoService(
     fun hentSøknadsstatistikk(
         fom: LocalDate,
         tom: LocalDate,
-    ): RestSøknadsstatistikkForPeriode {
+    ): SøknadsstatistikkForPeriodeDto {
         val antallSøknaderPerGruppe =
             behandlingSøknadsinfoRepository.hentAntallSøknaderIPeriode(fom.atStartOfDay(), tom.atTime(LocalTime.MAX))
 
@@ -51,18 +51,18 @@ class BehandlingSøknadsinfoService(
         val antallUtvidetDigitale =
             antallSøknaderPerGruppe.singleOrNull { it.erDigital && it.brevkode == UTVIDET.søknadskode }?.antall ?: 0
 
-        return RestSøknadsstatistikkForPeriode(
+        return SøknadsstatistikkForPeriodeDto(
             fom = fom,
             tom = tom,
             ordinærBarnetrygd =
-                RestAntallSøknader(
+                AntallSøknaderDto(
                     totalt = antallOrdinære,
                     papirsøknader = antallOrdinære - antallOrdinæreDigitale,
                     digitaleSøknader = antallOrdinæreDigitale,
                     digitaliseringsgrad = antallOrdinæreDigitale / antallOrdinære.toFloat(),
                 ),
             utvidetBarnetrygd =
-                RestAntallSøknader(
+                AntallSøknaderDto(
                     totalt = antallUtvidet,
                     papirsøknader = antallUtvidet - antallUtvidetDigitale,
                     digitaleSøknader = antallUtvidetDigitale,
@@ -73,15 +73,15 @@ class BehandlingSøknadsinfoService(
 }
 
 @Suppress("unused")
-class RestSøknadsstatistikkForPeriode(
+class SøknadsstatistikkForPeriodeDto(
     val fom: LocalDate,
     val tom: LocalDate,
-    val ordinærBarnetrygd: RestAntallSøknader,
-    val utvidetBarnetrygd: RestAntallSøknader,
+    val ordinærBarnetrygd: AntallSøknaderDto,
+    val utvidetBarnetrygd: AntallSøknaderDto,
 )
 
 @Suppress("unused")
-class RestAntallSøknader(
+class AntallSøknaderDto(
     val totalt: Int,
     val papirsøknader: Int,
     val digitaleSøknader: Int,

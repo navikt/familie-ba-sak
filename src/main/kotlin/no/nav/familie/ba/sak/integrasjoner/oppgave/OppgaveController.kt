@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonInfoDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalføringService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DataForManuellJournalføring
-import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
+import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.FinnOppgaveRequestDto
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -51,11 +51,11 @@ class OppgaveController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun hentOppgaver(
-        @RequestBody restFinnOppgaveRequest: RestFinnOppgaveRequest,
+        @RequestBody finnOppgaveRequestDto: FinnOppgaveRequestDto,
     ): ResponseEntity<Ressurs<FinnOppgaveResponseDto>> =
         try {
             val oppgaver: FinnOppgaveResponseDto =
-                oppgaveService.hentOppgaver(restFinnOppgaveRequest.tilFinnOppgaveRequest())
+                oppgaveService.hentOppgaver(finnOppgaveRequestDto.tilFinnOppgaveRequest())
             ResponseEntity.ok().body(Ressurs.success(oppgaver, "Finn oppgaver OK"))
         } catch (e: Throwable) {
             illegalState("Henting av oppgaver feilet", e)

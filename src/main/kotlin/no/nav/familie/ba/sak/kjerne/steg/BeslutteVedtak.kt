@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerValidering
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
-import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
+import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
@@ -63,7 +63,7 @@ class BeslutteVedtak(
     private val brevmottakerService: BrevmottakerService,
     private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
     private val tilbakekrevingsvedtakMotregningBrevService: TilbakekrevingsvedtakMotregningBrevService,
-) : BehandlingSteg<RestBeslutningPåVedtak> {
+) : BehandlingSteg<BeslutningPåVedtakDto> {
     override fun preValiderSteg(
         behandling: Behandling,
         stegService: StegService?,
@@ -94,7 +94,7 @@ class BeslutteVedtak(
 
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: RestBeslutningPåVedtak,
+        data: BeslutningPåVedtakDto,
     ): StegType {
         validerBrevmottakere(BehandlingId(behandling.id), data.beslutning.erGodkjent())
 
@@ -247,7 +247,7 @@ class BeslutteVedtak(
 
     private fun opprettTaskFerdigstillGodkjenneVedtak(
         behandling: Behandling,
-        beslutning: RestBeslutningPåVedtak,
+        beslutning: BeslutningPåVedtakDto,
         behandlingErAutomatiskBesluttet: Boolean,
     ) {
         loggService.opprettBeslutningOmVedtakLogg(

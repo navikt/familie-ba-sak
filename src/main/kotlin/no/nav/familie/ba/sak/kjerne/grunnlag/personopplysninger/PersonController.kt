@@ -4,7 +4,7 @@ import jakarta.validation.Valid
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.ManuellDødsfallDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonInfoDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonInfoDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonInfoMedNavnOgAdresseDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
@@ -95,14 +95,14 @@ class PersonController(
     @GetMapping(path = ["/oppdater-registeropplysninger/{behandlingId}"])
     fun hentOgOppdaterRegisteropplysninger(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
 
         val personopplysningGrunnlag = persongrunnlagService.oppdaterRegisteropplysninger(behandlingId)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = personopplysningGrunnlag.behandlingId),
+                    .lagUtvidetBehandlingDto(behandlingId = personopplysningGrunnlag.behandlingId),
             ),
         )
     }
@@ -111,7 +111,7 @@ class PersonController(
     fun registrerManuellDødsfallPåPerson(
         @PathVariable behandlingId: Long,
         @RequestBody manuellDødsfallDto: ManuellDødsfallDto,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
 
         persongrunnlagService.registrerManuellDødsfallPåPerson(
@@ -124,7 +124,7 @@ class PersonController(
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandlingId),
+                    .lagUtvidetBehandlingDto(behandlingId = behandlingId),
             ),
         )
     }

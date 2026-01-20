@@ -54,7 +54,7 @@ fun PersonopplysningGrunnlag.tilPersonerMedAndelerDto(andelerKnyttetTilPersoner:
         }
 
 fun List<AndelTilkjentYtelse>.tilYtelsePerioderDto(): List<YtelsePeriodeDto> {
-    val restYtelsePeriodeTidslinjePerAktørOgTypeSlåttSammen =
+    val ytelsePeriodeDtoTidslinjePerAktørOgTypeSlåttSammen =
         this
             .groupBy { Pair(it.aktør, it.type) }
             .mapValues { (_, andelerTilkjentYtelse) ->
@@ -63,7 +63,7 @@ fun List<AndelTilkjentYtelse>.tilYtelsePerioderDto(): List<YtelsePeriodeDto> {
                     .slåSammenLikePerioder()
             }
 
-    return restYtelsePeriodeTidslinjePerAktørOgTypeSlåttSammen
+    return ytelsePeriodeDtoTidslinjePerAktørOgTypeSlåttSammen
         .flatMap { (_, andelerTidslinje) -> andelerTidslinje.tilPerioderIkkeNull() }
         .map { periode ->
             periode.verdi.let { innhold ->

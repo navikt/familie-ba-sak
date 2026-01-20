@@ -16,7 +16,7 @@ import no.nav.familie.tidslinje.mapVerdi
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.time.LocalDate
 
-fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
+fun VilkårsvurderingTidslinjer.tilTidslinjerDto(): TidslinjerDto {
     val barnasTidslinjer = this.barnasTidslinjer()
     val søkersTidslinje = this.søkersTidslinje()
 
@@ -25,75 +25,75 @@ fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
             .map { it.erUnder18ÅrVilkårTidslinje }
             .kombinerUtenNull { barnaEr0Til18ÅrListe -> barnaEr0Til18ÅrListe.any { it } }
 
-    return RestTidslinjer(
+    return TidslinjerDto(
         barnasTidslinjer =
             barnasTidslinjer.entries.associate {
                 val erUnder18årTidslinje = it.value.erUnder18ÅrVilkårTidslinje
                 it.key.aktivFødselsnummer() to
-                    RestTidslinjerForBarn(
+                    TidslinjerForBarnDto(
                         vilkårTidslinjer =
                             it.value.vilkårsresultatTidslinjer.map {
                                 it
                                     .beskjærEtter(erUnder18årTidslinje)
-                                    .tilRestTidslinje()
+                                    .tilTidslinjeDto()
                             },
                         oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje =
                             it.value
                                 .regelverkResultatTidslinje
                                 .mapVerdi { it?.resultat }
                                 .beskjærEtter(erUnder18årTidslinje)
-                                .tilRestTidslinje(),
+                                .tilTidslinjeDto(),
                         regelverkTidslinje =
                             it.value.regelverkResultatTidslinje
                                 .mapVerdi { it?.regelverk }
                                 .beskjærEtter(erUnder18årTidslinje)
-                                .tilRestTidslinje(),
+                                .tilTidslinjeDto(),
                     )
             },
         søkersTidslinjer =
-            RestTidslinjerForSøker(
+            TidslinjerForSøkerDto(
                 vilkårTidslinjer =
                     søkersTidslinje.vilkårsresultatTidslinjer.map {
                         it
                             .beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje)
-                            .tilRestTidslinje()
+                            .tilTidslinjeDto()
                     },
                 oppfyllerEgneVilkårTidslinje =
                     søkersTidslinje
                         .regelverkResultatTidslinje
                         .mapVerdi { it?.resultat }
                         .beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje)
-                        .tilRestTidslinje(),
+                        .tilTidslinjeDto(),
             ),
     )
 }
 
-fun <V> Tidslinje<V>.tilRestTidslinje(): List<RestTidslinjePeriode<V>> =
+fun <V> Tidslinje<V>.tilTidslinjeDto(): List<TidslinjePeriodeDto<V>> =
     this.tilPerioder().filtrerIkkeNull().map { periode ->
-        RestTidslinjePeriode(
+        TidslinjePeriodeDto(
             fraOgMed = periode.fom?.førsteDagIInneværendeMåned() ?: PRAKTISK_TIDLIGSTE_DAG,
             tilOgMed = periode.tom?.sisteDagIMåned(),
             innhold = periode.verdi,
         )
     }
 
-data class RestTidslinjer(
-    val barnasTidslinjer: Map<String, RestTidslinjerForBarn>,
-    val søkersTidslinjer: RestTidslinjerForSøker,
+data class TidslinjerDto(
+    val barnasTidslinjer: Map<String, TidslinjerForBarnDto>,
+    val søkersTidslinjer: TidslinjerForSøkerDto,
 )
 
-data class RestTidslinjerForBarn(
-    val vilkårTidslinjer: List<List<RestTidslinjePeriode<VilkårRegelverkResultat>>>,
-    val oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje: List<RestTidslinjePeriode<Resultat>>,
-    val regelverkTidslinje: List<RestTidslinjePeriode<Regelverk>>,
+data class TidslinjerForBarnDto(
+    val vilkårTidslinjer: List<List<TidslinjePeriodeDto<VilkårRegelverkResultat>>>,
+    val oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje: List<TidslinjePeriodeDto<Resultat>>,
+    val regelverkTidslinje: List<TidslinjePeriodeDto<Regelverk>>,
 )
 
-data class RestTidslinjerForSøker(
-    val vilkårTidslinjer: List<List<RestTidslinjePeriode<VilkårRegelverkResultat>>>,
-    val oppfyllerEgneVilkårTidslinje: List<RestTidslinjePeriode<Resultat>>,
+data class TidslinjerForSøkerDto(
+    val vilkårTidslinjer: List<List<TidslinjePeriodeDto<VilkårRegelverkResultat>>>,
+    val oppfyllerEgneVilkårTidslinje: List<TidslinjePeriodeDto<Resultat>>,
 )
 
-data class RestTidslinjePeriode<T>(
+data class TidslinjePeriodeDto<T>(
     val fraOgMed: LocalDate,
     val tilOgMed: LocalDate?,
     val innhold: T,

@@ -15,8 +15,8 @@ import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.datagenerator.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.SlettVilkårDto
+import no.nav.familie.ba.sak.ekstern.restDomene.VilkårResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -593,7 +593,7 @@ class VilkårServiceIntegrasjonTest(
 
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
-            RestVilkårResultat(
+            VilkårResultatDto(
                 borMedSøkerVilkår.id,
                 Vilkår.BOR_MED_SØKER,
                 Resultat.OPPFYLT,
@@ -869,7 +869,7 @@ class VilkårServiceIntegrasjonTest(
                     personIdent = fnr,
                     vilkårResultater =
                         listOf(
-                            RestVilkårResultat(
+                            VilkårResultatDto(
                                 id = utvidetVilkår.id,
                                 vilkårType = utvidetVilkår.vilkårType,
                                 resultat = Resultat.OPPFYLT,
@@ -1282,8 +1282,8 @@ class VilkårServiceIntegrasjonTest(
         }
 
         val vilkårId = barnPersonResultat.vilkårResultater.single { it.vilkårType == Vilkår.BOR_MED_SØKER }.id
-        val restVilkårResultat =
-            RestVilkårResultat(
+        val vilkårResultatDto =
+            VilkårResultatDto(
                 id = vilkårId,
                 vilkårType = Vilkår.BOR_MED_SØKER,
                 resultat = Resultat.OPPFYLT,
@@ -1301,7 +1301,7 @@ class VilkårServiceIntegrasjonTest(
                     vilkårId,
                     PersonResultatDto(
                         barnFnr,
-                        listOf(restVilkårResultat),
+                        listOf(vilkårResultatDto),
                     ),
                 )
             }

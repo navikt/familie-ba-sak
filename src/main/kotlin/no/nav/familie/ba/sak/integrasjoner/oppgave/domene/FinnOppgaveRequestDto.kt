@@ -8,7 +8,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-data class RestFinnOppgaveRequest(
+data class FinnOppgaveRequestDto(
     val behandlingstema: String? = null,
     val behandlingstype: String? = null,
     val oppgavetype: String? = null,

@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
@@ -173,8 +173,8 @@ class SøknadGrunnlagTest(
 
         stegService.håndterSøknad(
             behandling = behandling,
-            restRegistrerSøknad =
-                RestRegistrerSøknad(
+            registrerSøknadDto =
+                RegistrerSøknadDto(
                     søknad = søknadDTO,
                     bekreftEndringerViaFrontend = false,
                 ),
@@ -245,8 +245,8 @@ class SøknadGrunnlagTest(
         val behandlingEtterNyRegistrering =
             stegService.håndterSøknad(
                 behandling = behandlingEtterVilkårsvurderingSteg,
-                restRegistrerSøknad =
-                    RestRegistrerSøknad(
+                registrerSøknadDto =
+                    RegistrerSøknadDto(
                         søknad =
                             SøknadDTO(
                                 underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
@@ -281,7 +281,7 @@ class SøknadGrunnlagTest(
     }
 
     @Test
-    fun `Skal fjerne barn og mapping til restbehandling skal kjøre ok`() {
+    fun `Skal fjerne barn og mapping til utvidet behandling dto skal kjøre ok`() {
         val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
         val barn1Fnr = leggTilPersonInfo(randomBarnFødselsdato())
         val barn2Fnr = leggTilPersonInfo(randomBarnFødselsdato())
@@ -302,8 +302,8 @@ class SøknadGrunnlagTest(
         val behandlingEtterNyRegistrering =
             stegService.håndterSøknad(
                 behandling = behandlingEtterVilkårsvurderingSteg,
-                restRegistrerSøknad =
-                    RestRegistrerSøknad(
+                registrerSøknadDto =
+                    RegistrerSøknadDto(
                         søknad =
                             SøknadDTO(
                                 underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
@@ -328,7 +328,7 @@ class SøknadGrunnlagTest(
                     ),
             )
 
-        assertDoesNotThrow { utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
+        assertDoesNotThrow { utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingEtterNyRegistrering.id) }
     }
 
     @Test

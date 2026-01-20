@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.leggTilBegrunnelsePåVedtaksperiodeIBehandling
 import no.nav.familie.ba.sak.datagenerator.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
 import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -16,9 +16,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
-import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -143,8 +143,8 @@ private fun håndterSøknadSteg(
     behandlingUnderkategori: BehandlingUnderkategori,
 ) = stegService.håndterSøknad(
     behandling = behandling,
-    restRegistrerSøknad =
-        RestRegistrerSøknad(
+    registrerSøknadDto =
+        RegistrerSøknadDto(
             søknad =
                 lagSøknadDTO(
                     søkerIdent = søkerFnr,
@@ -250,7 +250,7 @@ private fun håndterBeslutteVedtakSteg(
     val behandlingEtterBeslutteVedtak =
         stegService.håndterBeslutningForVedtak(
             behandlingEtterSendTilBeslutter,
-            RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT),
+            BeslutningPåVedtakDto(beslutning = Beslutning.GODKJENT),
         )
     return behandlingEtterBeslutteVedtak
 }
@@ -378,8 +378,8 @@ fun kjørStegprosessForFGB(
     val behandlingEtterPersongrunnlagSteg =
         stegService.håndterSøknad(
             behandling = behandling,
-            restRegistrerSøknad =
-                RestRegistrerSøknad(
+            registrerSøknadDto =
+                RegistrerSøknadDto(
                     søknad =
                         lagSøknadDTO(
                             søkerIdent = søkerFnr,
@@ -432,7 +432,7 @@ fun kjørStegprosessForFGB(
     val behandlingEtterBeslutteVedtak =
         stegService.håndterBeslutningForVedtak(
             behandlingEtterSendTilBeslutter,
-            RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT),
+            BeslutningPåVedtakDto(beslutning = Beslutning.GODKJENT),
         )
     if (tilSteg == StegType.BESLUTTE_VEDTAK) return behandlingEtterBeslutteVedtak
 
@@ -569,7 +569,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     val behandlingEtterBeslutteVedtak =
         stegService.håndterBeslutningForVedtak(
             behandlingEtterSendTilBeslutter,
-            RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT),
+            BeslutningPåVedtakDto(beslutning = Beslutning.GODKJENT),
         )
     if (tilSteg == StegType.BESLUTTE_VEDTAK) return behandlingEtterBeslutteVedtak
 

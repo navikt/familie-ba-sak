@@ -373,7 +373,7 @@ class ForvalterController(
             throw Feil("Du har ikke tilgang til å kjøre valutajustering")
         }
 
-        val fagsak = fagsakService.hentRestMinimalFagsak(fagsakId)
+        val fagsak = fagsakService.hentMinimalFagsakDto(fagsakId)
         return ResponseEntity.ok(fagsak)
     }
 

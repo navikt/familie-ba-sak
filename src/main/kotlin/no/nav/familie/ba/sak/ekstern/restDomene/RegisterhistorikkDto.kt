@@ -6,37 +6,37 @@ import java.time.LocalDateTime
 
 data class RegisterhistorikkDto(
     val hentetTidspunkt: LocalDateTime,
-    val sivilstand: List<RestRegisteropplysning>? = emptyList(),
-    val oppholdstillatelse: List<RestRegisteropplysning>? = emptyList(),
-    val statsborgerskap: List<RestRegisteropplysning>? = emptyList(),
-    val bostedsadresse: List<RestRegisteropplysning>? = emptyList(),
-    val deltBosted: List<RestRegisteropplysning>? = emptyList(),
-    val oppholdsadresse: List<RestRegisteropplysning>? = emptyList(),
-    val dødsboadresse: List<RestRegisteropplysning>? = emptyList(),
+    val sivilstand: List<RegisteropplysningDto>? = emptyList(),
+    val oppholdstillatelse: List<RegisteropplysningDto>? = emptyList(),
+    val statsborgerskap: List<RegisteropplysningDto>? = emptyList(),
+    val bostedsadresse: List<RegisteropplysningDto>? = emptyList(),
+    val deltBosted: List<RegisteropplysningDto>? = emptyList(),
+    val oppholdsadresse: List<RegisteropplysningDto>? = emptyList(),
+    val dødsboadresse: List<RegisteropplysningDto>? = emptyList(),
 )
 
 fun Person.tilRegisterhistorikkDto() =
     RegisterhistorikkDto(
         hentetTidspunkt = this.personopplysningGrunnlag.opprettetTidspunkt,
-        oppholdstillatelse = opphold.map { it.tilRestRegisteropplysning() },
-        statsborgerskap = statsborgerskap.map { it.tilRestRegisteropplysning() },
-        bostedsadresse = this.bostedsadresser.map { it.tilRestRegisteropplysning() }.fyllInnTomDatoer(),
-        oppholdsadresse = this.oppholdsadresser.map { it.tilRestRegisteropplysning() }.fyllInnTomDatoer(),
-        deltBosted = this.deltBosted.map { it.tilRestRegisteropplysning() }.fyllInnTomDatoer(),
-        sivilstand = this.sivilstander.map { it.tilRestRegisteropplysning() },
-        dødsboadresse = if (this.dødsfall == null) emptyList() else listOf(this.dødsfall!!.tilRestRegisteropplysning()),
+        oppholdstillatelse = opphold.map { it.tilRegisteropplysningDto() },
+        statsborgerskap = statsborgerskap.map { it.tilRegisteropplysningDto() },
+        bostedsadresse = this.bostedsadresser.map { it.tilRegisteropplysningDto() }.fyllInnTomDatoer(),
+        oppholdsadresse = this.oppholdsadresser.map { it.tilRegisteropplysningDto() }.fyllInnTomDatoer(),
+        deltBosted = this.deltBosted.map { it.tilRegisteropplysningDto() }.fyllInnTomDatoer(),
+        sivilstand = this.sivilstander.map { it.tilRegisteropplysningDto() },
+        dødsboadresse = if (this.dødsfall == null) emptyList() else listOf(this.dødsfall!!.tilRegisteropplysningDto()),
     )
 
-data class RestRegisteropplysning(
+data class RegisteropplysningDto(
     val fom: LocalDate?,
     val tom: LocalDate?,
     var verdi: String,
 )
 
-fun List<RestRegisteropplysning>.fyllInnTomDatoer(): List<RestRegisteropplysning> =
+fun List<RegisteropplysningDto>.fyllInnTomDatoer(): List<RegisteropplysningDto> =
     this
         .sortedBy { it.fom }
-        .foldRight(mutableListOf<RestRegisteropplysning>()) { foregående, acc ->
+        .foldRight(mutableListOf<RegisteropplysningDto>()) { foregående, acc ->
             if (acc.isEmpty() || foregående.tom != null || foregående.fom == null) {
                 acc.add(foregående)
             } else {

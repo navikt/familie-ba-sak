@@ -8,7 +8,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import java.time.LocalDate
 
-data class RestScenarioPerson(
+data class ScenarioPersonDto(
     private var _ident: String? = null,
     // yyyy-mm-dd
     val fødselsdato: String,

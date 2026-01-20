@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
-import no.nav.familie.ba.sak.kjerne.simulering.vedtakSimuleringMottakereTilRestSimulering
+import no.nav.familie.ba.sak.kjerne.simulering.vedtakSimuleringMottakereTilSimuleringDto
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.Tilbakekreving
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
 import no.nav.familie.kontrakter.felles.tilbakekreving.Institusjon
@@ -60,7 +60,7 @@ fun hentTilbakekrevingsperioderISimulering(
     simulering: List<ØkonomiSimuleringMottaker>,
 ): List<Periode> =
     slåsammenNærliggendeFeilutbtalingPerioder(
-        vedtakSimuleringMottakereTilRestSimulering(
+        vedtakSimuleringMottakereTilSimuleringDto(
             økonomiSimuleringMottakere = simulering,
         ).perioder,
     )
@@ -72,7 +72,7 @@ fun opprettVarsel(
     if (tilbakekreving?.valg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL) {
         val varseltekst = tilbakekreving.varsel ?: throw Feil("Varseltekst er ikke satt")
         val restSimulering =
-            vedtakSimuleringMottakereTilRestSimulering(
+            vedtakSimuleringMottakereTilSimuleringDto(
                 økonomiSimuleringMottakere = simulering,
             )
 
