@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestAnnenVurdering
+import no.nav.familie.ba.sak.ekstern.restDomene.AnnenVurderingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
@@ -66,7 +66,7 @@ class VilkårController(
     fun endreAnnenVurdering(
         @PathVariable behandlingId: Long,
         @PathVariable annenVurderingId: Long,
-        @RequestBody restAnnenVurdering: RestAnnenVurdering,
+        @RequestBody annenVurderingDto: AnnenVurderingDto,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -78,7 +78,7 @@ class VilkårController(
         annenVurderingService.endreAnnenVurdering(
             behandlingId = behandlingId,
             annenVurderingId = annenVurderingId,
-            restAnnenVurdering = restAnnenVurdering,
+            annenVurderingDto = annenVurderingDto,
         )
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))

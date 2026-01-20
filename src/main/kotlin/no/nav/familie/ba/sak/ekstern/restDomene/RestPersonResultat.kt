@@ -17,7 +17,7 @@ import java.time.LocalDateTime
 data class RestPersonResultat(
     val personIdent: String,
     val vilkårResultater: List<RestVilkårResultat>,
-    val andreVurderinger: List<RestAnnenVurdering> = emptyList(),
+    val andreVurderinger: List<AnnenVurderingDto> = emptyList(),
 ) {
     // Bruker init til å validere personidenten
     init {
@@ -77,6 +77,6 @@ fun PersonResultat.tilRestPersonResultat() =
             },
         andreVurderinger =
             this.andreVurderinger.map { annenVurdering ->
-                annenVurdering.tilRestAnnenVurdering()
+                annenVurdering.tilAnnenVurderingDto()
             },
     )
