@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilManglendeFinnmarkmerkingPerioder
 import no.nav.familie.ba.sak.ekstern.restDomene.tilManglendeSvalbardmerkingPerioder
 import no.nav.familie.ba.sak.ekstern.restDomene.tilArbeidsfordelingPåBehandlingDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
+import no.nav.familie.ba.sak.ekstern.restDomene.tilBehandlingStegTilstandDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKompetanse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKorrigertEtterbetaling
@@ -131,7 +131,7 @@ class UtvidetBehandlingService(
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
             steg = behandling.steg,
-            stegTilstand = behandling.behandlingStegTilstand.map { it.tilRestBehandlingStegTilstand() },
+            stegTilstand = behandling.behandlingStegTilstand.map { it.tilBehandlingStegTilstandDto() },
             status = behandling.status,
             resultat = behandling.resultat,
             skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,

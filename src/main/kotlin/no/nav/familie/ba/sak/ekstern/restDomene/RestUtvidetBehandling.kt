@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 data class RestUtvidetBehandling(
     val behandlingId: Long,
     val steg: StegType,
-    val stegTilstand: List<RestBehandlingStegTilstand>,
+    val stegTilstand: List<BehandlingStegTilstandDto>,
     val status: BehandlingStatus,
     val resultat: Behandlingsresultat,
     val skalBehandlesAutomatisk: Boolean,

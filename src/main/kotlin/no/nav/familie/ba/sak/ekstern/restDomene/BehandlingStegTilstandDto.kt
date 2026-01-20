@@ -4,13 +4,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTil
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 
-class RestBehandlingStegTilstand(
+class BehandlingStegTilstandDto(
     val behandlingSteg: StegType,
     val behandlingStegStatus: BehandlingStegStatus,
 )
 
-fun BehandlingStegTilstand.tilRestBehandlingStegTilstand() =
-    RestBehandlingStegTilstand(
+fun BehandlingStegTilstand.tilBehandlingStegTilstandDto() =
+    BehandlingStegTilstandDto(
         behandlingSteg = this.behandlingSteg,
         behandlingStegStatus = this.behandlingStegStatus,
     )
