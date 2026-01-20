@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.tilbakekreving
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -20,16 +20,16 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 fun validerVerdierPåRestTilbakekreving(
-    restTilbakekreving: RestTilbakekreving?,
+    tilbakekrevingDto: TilbakekrevingDto?,
     feilutbetaling: BigDecimal,
 ) {
-    if (feilutbetaling != BigDecimal.ZERO && restTilbakekreving == null) {
+    if (feilutbetaling != BigDecimal.ZERO && tilbakekrevingDto == null) {
         throw FunksjonellFeil(
             "Simuleringen har en feilutbetaling, men restTilbakekreving var null",
             frontendFeilmelding = "Du må velge en tilbakekrevingsstrategi siden det er en feilutbetaling.",
         )
     }
-    if (feilutbetaling == BigDecimal.ZERO && restTilbakekreving != null) {
+    if (feilutbetaling == BigDecimal.ZERO && tilbakekrevingDto != null) {
         throw FunksjonellFeil(
             "Simuleringen har ikke en feilutbetaling, men restTilbakekreving var ikke null",
             frontendFeilmelding = "Du kan ikke opprette en tilbakekreving når det ikke er en feilutbetaling.",

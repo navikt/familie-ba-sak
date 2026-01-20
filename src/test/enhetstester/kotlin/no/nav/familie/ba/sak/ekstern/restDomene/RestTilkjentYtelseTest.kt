@@ -33,9 +33,9 @@ class RestTilkjentYtelseTest {
                 ),
             )
 
-        val restYtelsePerioder = andeler.tilRestYtelsePerioder()
-        val forventetRestYtelsePeriode = listOf(RestYtelsePeriode(beløp = 1234, stønadFom = årMnd("2020-03"), stønadTom = årMnd("2021-12"), ytelseType = YtelseType.ORDINÆR_BARNETRYGD, skalUtbetales = true))
-        Assertions.assertThat(restYtelsePerioder).containsAll(forventetRestYtelsePeriode).hasSize(forventetRestYtelsePeriode.size)
+        val restYtelsePerioder = andeler.tilYtelsePerioderDto()
+        val forventetYtelsePeriodeDto = listOf(YtelsePeriodeDto(beløp = 1234, stønadFom = årMnd("2020-03"), stønadTom = årMnd("2021-12"), ytelseType = YtelseType.ORDINÆR_BARNETRYGD, skalUtbetales = true))
+        Assertions.assertThat(restYtelsePerioder).containsAll(forventetYtelsePeriodeDto).hasSize(forventetYtelsePeriodeDto.size)
     }
 
     @Test
@@ -78,14 +78,14 @@ class RestTilkjentYtelseTest {
                 ),
             )
 
-        val restYtelsePerioder = andeler.tilRestYtelsePerioder()
-        val forventetRestYtelsePerioder =
+        val restYtelsePerioder = andeler.tilYtelsePerioderDto()
+        val forventetYtelsePerioderDtos =
             listOf(
-                RestYtelsePeriode(beløp = 1234, stønadFom = årMnd("2020-03"), stønadTom = årMnd("2020-12"), ytelseType = YtelseType.SMÅBARNSTILLEGG, skalUtbetales = true),
-                RestYtelsePeriode(beløp = 1234, stønadFom = årMnd("2021-01"), stønadTom = årMnd("2021-12"), ytelseType = YtelseType.UTVIDET_BARNETRYGD, skalUtbetales = true),
-                RestYtelsePeriode(beløp = 0, stønadFom = årMnd("2022-01"), stønadTom = årMnd("2022-12"), ytelseType = YtelseType.UTVIDET_BARNETRYGD, skalUtbetales = true),
-                RestYtelsePeriode(beløp = 0, stønadFom = årMnd("2023-01"), stønadTom = årMnd("2023-12"), ytelseType = YtelseType.UTVIDET_BARNETRYGD, skalUtbetales = false),
+                YtelsePeriodeDto(beløp = 1234, stønadFom = årMnd("2020-03"), stønadTom = årMnd("2020-12"), ytelseType = YtelseType.SMÅBARNSTILLEGG, skalUtbetales = true),
+                YtelsePeriodeDto(beløp = 1234, stønadFom = årMnd("2021-01"), stønadTom = årMnd("2021-12"), ytelseType = YtelseType.UTVIDET_BARNETRYGD, skalUtbetales = true),
+                YtelsePeriodeDto(beløp = 0, stønadFom = årMnd("2022-01"), stønadTom = årMnd("2022-12"), ytelseType = YtelseType.UTVIDET_BARNETRYGD, skalUtbetales = true),
+                YtelsePeriodeDto(beløp = 0, stønadFom = årMnd("2023-01"), stønadTom = årMnd("2023-12"), ytelseType = YtelseType.UTVIDET_BARNETRYGD, skalUtbetales = false),
             )
-        Assertions.assertThat(restYtelsePerioder).containsAll(forventetRestYtelsePerioder).hasSize(forventetRestYtelsePerioder.size)
+        Assertions.assertThat(restYtelsePerioder).containsAll(forventetYtelsePerioderDtos).hasSize(forventetYtelsePerioderDtos.size)
     }
 }

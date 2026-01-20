@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
+import no.nav.familie.ba.sak.ekstern.restDomene.SlettVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -610,8 +610,8 @@ class VilkårServiceTest(
                 },
             )
 
-            val restSlettVilkår =
-                RestSlettVilkår(
+            val slettVilkårDto =
+                SlettVilkårDto(
                     personIdent = søkerFnr,
                     vilkårType = LOVLIG_OPPHOLD,
                 )
@@ -621,7 +621,7 @@ class VilkårServiceTest(
                 assertThrows<FunksjonellFeil> {
                     vilkårService.deleteVilkår(
                         behandlingId = behandling.id,
-                        restSlettVilkår = restSlettVilkår,
+                        slettVilkårDto = slettVilkårDto,
                     )
                 }
 
@@ -662,8 +662,8 @@ class VilkårServiceTest(
                 },
             )
 
-            val restSlettVilkår =
-                RestSlettVilkår(
+            val slettVilkårDto =
+                SlettVilkårDto(
                     personIdent = søkerFnr,
                     vilkårType = UTVIDET_BARNETRYGD,
                 )
@@ -671,7 +671,7 @@ class VilkårServiceTest(
             // Act
             vilkårService.deleteVilkår(
                 behandlingId = behandling.id,
-                restSlettVilkår = restSlettVilkår,
+                slettVilkårDto = slettVilkårDto,
             )
 
             // Assert

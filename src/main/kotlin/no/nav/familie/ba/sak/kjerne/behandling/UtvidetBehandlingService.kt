@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanseDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertEtterbetalingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertVedtakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
+import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonerMedAndelerDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilSettPåVentDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestTotrinnskontroll
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestUtenlandskPeriodebeløp
@@ -154,7 +154,7 @@ class UtvidetBehandlingService(
                     ).map { it.tilFødselshendelsefiltreringResultatDto() },
             utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling, personopplysningGrunnlag),
             personerMedAndelerTilkjentYtelse =
-                personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
+                personopplysningGrunnlag?.tilPersonerMedAndelerDto(andelerTilkjentYtelse)
                     ?: emptyList(),
             endretUtbetalingAndeler =
                 endreteUtbetalingerMedAndeler

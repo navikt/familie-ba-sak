@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
+import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonerMedAndelerDto
 import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
@@ -371,7 +371,7 @@ class BehandlingIntegrationTest(
         val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         val restVedtakBarnMap =
             personopplysningGrunnlag
-                .tilRestPersonerMedAndeler(andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelse.toList())
+                .tilPersonerMedAndelerDto(andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelse.toList())
                 .associateBy(
                     { it.personIdent },
                     { restPersonMedAndeler -> restPersonMedAndeler.ytelsePerioder.sortedBy { it.stønadFom } },
@@ -496,7 +496,7 @@ class BehandlingIntegrationTest(
         val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         val restVedtakBarnMap =
             personopplysningGrunnlag
-                .tilRestPersonerMedAndeler(andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelse.toList())
+                .tilPersonerMedAndelerDto(andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelse.toList())
                 .associateBy(
                     { it.personIdent },
                     { restPersonMedAndeler -> restPersonMedAndeler.ytelsePerioder.sortedBy { it.stønadFom } },

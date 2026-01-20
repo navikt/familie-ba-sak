@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -347,12 +347,12 @@ class StegService(
     @Transactional
     fun håndterVurderTilbakekreving(
         behandling: Behandling,
-        restTilbakekreving: RestTilbakekreving? = null,
+        tilbakekrevingDto: TilbakekrevingDto? = null,
     ): Behandling {
         val behandlingSteg: VurderTilbakekrevingSteg = hentBehandlingSteg(StegType.VURDER_TILBAKEKREVING) as VurderTilbakekrevingSteg
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, restTilbakekreving)
+            behandlingSteg.utførStegOgAngiNeste(behandling, tilbakekrevingDto)
         }
     }
 

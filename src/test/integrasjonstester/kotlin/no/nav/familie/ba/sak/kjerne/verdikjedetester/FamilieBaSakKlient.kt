@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -151,11 +151,11 @@ class FamilieBaSakKlient(
 
     fun lagreTilbakekrevingOgGåVidereTilNesteSteg(
         behandlingId: Long,
-        restTilbakekreving: RestTilbakekreving,
+        tilbakekrevingDto: TilbakekrevingDto,
     ): Ressurs<RestUtvidetBehandling> {
         val uri = URI.create("$baSakUrl/api/behandlinger/$behandlingId/steg/tilbakekreving")
 
-        return postForEntity(uri, restTilbakekreving, headers)
+        return postForEntity(uri, tilbakekrevingDto, headers)
     }
 
     fun oppdaterVedtaksperiodeMedStandardbegrunnelser(

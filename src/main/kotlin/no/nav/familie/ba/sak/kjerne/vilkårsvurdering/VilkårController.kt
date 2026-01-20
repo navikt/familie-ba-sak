@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.AnnenVurderingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
+import no.nav.familie.ba.sak.ekstern.restDomene.SlettVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -115,7 +115,7 @@ class VilkårController(
     @DeleteMapping(path = ["/{behandlingId}/vilkaar"])
     fun slettVilkår(
         @PathVariable behandlingId: Long,
-        @RequestBody restSlettVilkår: RestSlettVilkår,
+        @RequestBody slettVilkårDto: SlettVilkårDto,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.DELETE)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -124,7 +124,7 @@ class VilkårController(
         )
         tilgangService.validerKanRedigereBehandling(behandlingId)
 
-        vilkårService.deleteVilkår(behandlingId, restSlettVilkår)
+        vilkårService.deleteVilkår(behandlingId, slettVilkårDto)
 
         tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))

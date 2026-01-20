@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.datagenerator.leggTilBegrunnelsePåVedtaksperiodeIB
 import no.nav.familie.ba.sak.datagenerator.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -262,7 +262,7 @@ private fun hånderSilmuleringssteg(
     stegService.håndterVurderTilbakekreving(
         behandlingEtterBehandlingsresultat,
         if (behandlingEtterBehandlingsresultat.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
-            RestTilbakekreving(
+            TilbakekrevingDto(
                 valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                 begrunnelse = "Begrunnelse",
             )
@@ -411,7 +411,7 @@ fun kjørStegprosessForFGB(
     val behandlingEtterVurderTilbakekrevingSteg =
         stegService.håndterVurderTilbakekreving(
             behandlingEtterBehandlingsresultat,
-            RestTilbakekreving(
+            TilbakekrevingDto(
                 valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                 begrunnelse = "Begrunnelse",
             ),
@@ -547,7 +547,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
         stegService.håndterVurderTilbakekreving(
             behandlingEtterBehandlingsresultat,
             if (behandlingEtterBehandlingsresultat.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
-                RestTilbakekreving(
+                TilbakekrevingDto(
                     valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                     begrunnelse = "Begrunnelse",
                 )

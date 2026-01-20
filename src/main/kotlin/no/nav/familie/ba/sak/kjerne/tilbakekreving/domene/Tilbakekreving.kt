@@ -14,7 +14,7 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -69,7 +69,7 @@ data class Tilbakekreving(
             ")"
 
     fun tilRestTilbakekreving() =
-        RestTilbakekreving(
+        TilbakekrevingDto(
             valg = valg,
             varsel = varsel,
             begrunnelse = begrunnelse,

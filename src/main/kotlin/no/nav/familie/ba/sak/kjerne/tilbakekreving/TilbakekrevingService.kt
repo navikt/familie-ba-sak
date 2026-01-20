@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -47,26 +47,26 @@ class TilbakekrevingService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     fun validerRestTilbakekreving(
-        restTilbakekreving: RestTilbakekreving?,
+        tilbakekrevingDto: TilbakekrevingDto?,
         behandlingId: Long,
     ) {
         val feilutbetaling = simuleringService.hentFeilutbetaling(behandlingId)
-        validerVerdierPåRestTilbakekreving(restTilbakekreving, feilutbetaling)
+        validerVerdierPåRestTilbakekreving(tilbakekrevingDto, feilutbetaling)
     }
 
     @Transactional
     fun lagreTilbakekreving(
-        restTilbakekreving: RestTilbakekreving,
+        tilbakekrevingDto: TilbakekrevingDto,
         behandlingId: Long,
     ): Tilbakekreving? {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
         val tilbakekreving =
             Tilbakekreving(
-                begrunnelse = restTilbakekreving.begrunnelse,
+                begrunnelse = tilbakekrevingDto.begrunnelse,
                 behandling = behandling,
-                valg = restTilbakekreving.valg,
-                varsel = restTilbakekreving.varsel,
+                valg = tilbakekrevingDto.valg,
+                varsel = tilbakekrevingDto.varsel,
                 tilbakekrevingsbehandlingId =
                     tilbakekrevingRepository
                         .findByBehandlingId(behandling.id)

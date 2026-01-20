@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.datagenerator.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
+import no.nav.familie.ba.sak.ekstern.restDomene.SlettVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
@@ -951,7 +951,7 @@ class VilkårServiceIntegrasjonTest(
             assertThrows<RuntimeException> {
                 vilkårService.deleteVilkår(
                     behandling.id,
-                    RestSlettVilkår(
+                    SlettVilkårDto(
                         personIdent = fnr,
                         vilkårType = Vilkår.BOR_MED_SØKER,
                     ),
@@ -993,7 +993,7 @@ class VilkårServiceIntegrasjonTest(
             assertThrows<RuntimeException> {
                 vilkårService.deleteVilkår(
                     behandling.id,
-                    RestSlettVilkår(
+                    SlettVilkårDto(
                         personIdent = fnr,
                         vilkårType = Vilkår.UTVIDET_BARNETRYGD,
                     ),
@@ -1066,7 +1066,7 @@ class VilkårServiceIntegrasjonTest(
             assertThrows<RuntimeException> {
                 vilkårService.deleteVilkår(
                     behandling.id,
-                    RestSlettVilkår(
+                    SlettVilkårDto(
                         personIdent = fnr,
                         vilkårType = Vilkår.UTVIDET_BARNETRYGD,
                     ),
@@ -1119,7 +1119,7 @@ class VilkårServiceIntegrasjonTest(
 
         vilkårService.deleteVilkår(
             behandling.id,
-            RestSlettVilkår(
+            SlettVilkårDto(
                 personIdent = fnr,
                 vilkårType = Vilkår.UTVIDET_BARNETRYGD,
             ),
@@ -1200,7 +1200,7 @@ class VilkårServiceIntegrasjonTest(
 
         vilkårService.deleteVilkår(
             behandling.id,
-            RestSlettVilkår(
+            SlettVilkårDto(
                 personIdent = fnr,
                 vilkårType = Vilkår.UTVIDET_BARNETRYGD,
             ),

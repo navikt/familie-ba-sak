@@ -15,15 +15,15 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-data class RestPersonMedAndeler(
+data class PersonMedAndelerDto(
     val personIdent: String?,
     val beløp: Int,
     val stønadFom: YearMonth,
     val stønadTom: YearMonth,
-    val ytelsePerioder: List<RestYtelsePeriode>,
+    val ytelsePerioder: List<YtelsePeriodeDto>,
 )
 
-data class RestYtelsePeriode(
+data class YtelsePeriodeDto(
     val beløp: Int,
     val stønadFom: YearMonth,
     val stønadTom: YearMonth,
@@ -31,16 +31,16 @@ data class RestYtelsePeriode(
     val skalUtbetales: Boolean,
 )
 
-fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner: List<AndelTilkjentYtelse>): List<RestPersonMedAndeler> =
+fun PersonopplysningGrunnlag.tilPersonerMedAndelerDto(andelerKnyttetTilPersoner: List<AndelTilkjentYtelse>): List<PersonMedAndelerDto> =
     andelerKnyttetTilPersoner
         .groupBy { it.aktør }
         .map { andelerForPerson ->
             val personId = andelerForPerson.key
             val andeler = andelerForPerson.value
 
-            val ytelsePerioder = andeler.tilRestYtelsePerioder()
+            val ytelsePerioder = andeler.tilYtelsePerioderDto()
 
-            RestPersonMedAndeler(
+            PersonMedAndelerDto(
                 personIdent =
                     this.søkerOgBarn
                         .find { person -> person.aktør == personId }
@@ -53,13 +53,13 @@ fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner
             )
         }
 
-fun List<AndelTilkjentYtelse>.tilRestYtelsePerioder(): List<RestYtelsePeriode> {
+fun List<AndelTilkjentYtelse>.tilYtelsePerioderDto(): List<YtelsePeriodeDto> {
     val restYtelsePeriodeTidslinjePerAktørOgTypeSlåttSammen =
         this
             .groupBy { Pair(it.aktør, it.type) }
             .mapValues { (_, andelerTilkjentYtelse) ->
                 andelerTilkjentYtelse
-                    .tilRestYtelsePeriodeUtenDatoerTidslinje()
+                    .tilYtelsePeriodeUtenDatoerTidslinjeDto()
                     .slåSammenLikePerioder()
             }
 
@@ -67,7 +67,7 @@ fun List<AndelTilkjentYtelse>.tilRestYtelsePerioder(): List<RestYtelsePeriode> {
         .flatMap { (_, andelerTidslinje) -> andelerTidslinje.tilPerioderIkkeNull() }
         .map { periode ->
             periode.verdi.let { innhold ->
-                RestYtelsePeriode(
+                YtelsePeriodeDto(
                     beløp = innhold.kalkulertUtbetalingsbeløp,
                     stønadFom = periode.fom?.toYearMonth() ?: throw Feil("Fra og med-dato kan ikke være null"),
                     stønadTom = periode.tom?.toYearMonth() ?: throw Feil("Til og med-dato kan ikke være null"),
@@ -78,20 +78,20 @@ fun List<AndelTilkjentYtelse>.tilRestYtelsePerioder(): List<RestYtelsePeriode> {
         }
 }
 
-data class RestYtelsePeriodeUtenDatoer(
+data class YtelsePeriodeUtenDatoerDto(
     val kalkulertUtbetalingsbeløp: Int,
     val ytelseType: YtelseType,
     val skalUtbetales: Boolean,
 )
 
-private fun List<AndelTilkjentYtelse>.tilRestYtelsePeriodeUtenDatoerTidslinje() =
+private fun List<AndelTilkjentYtelse>.tilYtelsePeriodeUtenDatoerTidslinjeDto() =
     this
         .map {
             Periode(
                 fom = it.stønadFom.førsteDagIInneværendeMåned(),
                 tom = it.stønadTom.sisteDagIInneværendeMåned(),
                 verdi =
-                    RestYtelsePeriodeUtenDatoer(
+                    YtelsePeriodeUtenDatoerDto(
                         kalkulertUtbetalingsbeløp = it.kalkulertUtbetalingsbeløp,
                         ytelseType = it.type,
                         skalUtbetales = it.prosent > BigDecimal.ZERO,

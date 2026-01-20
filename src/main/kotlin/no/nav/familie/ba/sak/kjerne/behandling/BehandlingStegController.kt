@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerInstitusjonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggelsestype
@@ -121,7 +121,7 @@ class BehandlingStegController(
     @PostMapping(path = ["tilbakekreving"])
     fun lagreTilbakekrevingOgGåVidereTilNesteSteg(
         @PathVariable behandlingId: Long,
-        @RequestBody restTilbakekreving: RestTilbakekreving?,
+        @RequestBody tilbakekrevingDto: TilbakekrevingDto?,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -129,7 +129,7 @@ class BehandlingStegController(
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        stegService.håndterVurderTilbakekreving(behandling, restTilbakekreving)
+        stegService.håndterVurderTilbakekreving(behandling, tilbakekrevingDto)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }

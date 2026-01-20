@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakeØkonomiKlient
 import no.nav.familie.ba.sak.fake.FakeØkonomiKlient.Companion.leggTilSimuleringResultat
@@ -478,7 +478,7 @@ class StegServiceIntegrationTest(
         val behandlingEtterTilbakekrevingSteg =
             stegService.håndterVurderTilbakekreving(
                 behandlingEtterBehandlingsresultatSteg,
-                RestTilbakekreving(
+                TilbakekrevingDto(
                     valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                     begrunnelse = "ignorer tilbakekreving",
                 ),
@@ -594,7 +594,7 @@ class StegServiceIntegrationTest(
         val behandlingEtterTilbakekrevingSteg =
             stegService.håndterVurderTilbakekreving(
                 behandlingEtterBehandlingsresultatSteg,
-                RestTilbakekreving(
+                TilbakekrevingDto(
                     valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                     begrunnelse = "ignorer tilbakekreving",
                 ),
@@ -710,7 +710,7 @@ class StegServiceIntegrationTest(
         val behandlingEtterTilbakekrevingSteg =
             stegService.håndterVurderTilbakekreving(
                 behandlingEtterBehandlingsresultatSteg,
-                RestTilbakekreving(
+                TilbakekrevingDto(
                     valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                     begrunnelse = "ignorer tilbakekreving",
                 ),
@@ -813,7 +813,7 @@ class StegServiceIntegrationTest(
         val behandlingEtterTilbakekrevingSteg =
             stegService.håndterVurderTilbakekreving(
                 behandlingEtterBehandlingsresultatSteg,
-                RestTilbakekreving(
+                TilbakekrevingDto(
                     valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                     begrunnelse = "ignorer tilbakekreving",
                 ),
@@ -925,7 +925,7 @@ class StegServiceIntegrationTest(
         val behandlingEtterTilbakekrevingSteg =
             stegService.håndterVurderTilbakekreving(
                 behandlingEtterBehandlingsresultatSteg,
-                RestTilbakekreving(
+                TilbakekrevingDto(
                     valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                     begrunnelse = "ignorer tilbakekreving",
                 ),
@@ -1052,7 +1052,7 @@ class StegServiceIntegrationTest(
         val behandlingEtterTilbakekrevingSteg =
             stegService.håndterVurderTilbakekreving(
                 behandlingEtterBehandlingsresultatSteg,
-                RestTilbakekreving(
+                TilbakekrevingDto(
                     valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                     begrunnelse = "ignorer tilbakekreving",
                 ),
@@ -1188,7 +1188,7 @@ class StegServiceIntegrationTest(
         val behandlingEtterTilbakekrevingSteg =
             stegService.håndterVurderTilbakekreving(
                 behandlingEtterBehandlingsresultatSteg,
-                RestTilbakekreving(
+                TilbakekrevingDto(
                     valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                     begrunnelse = "ignorer tilbakekreving",
                 ),

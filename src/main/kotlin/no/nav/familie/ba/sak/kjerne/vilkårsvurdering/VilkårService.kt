@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.VALIDER_ENDRING_
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
+import no.nav.familie.ba.sak.ekstern.restDomene.SlettVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -157,31 +157,31 @@ class VilkårService(
     @Transactional
     fun deleteVilkår(
         behandlingId: Long,
-        restSlettVilkår: RestSlettVilkår,
+        slettVilkårDto: SlettVilkårDto,
     ): List<PersonResultatDto> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
         val personResultat =
-            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restSlettVilkår.personIdent)
+            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, slettVilkårDto.personIdent)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         if (!behandling.kanLeggeTilOgFjerneUtvidetVilkår() ||
-            Vilkår.UTVIDET_BARNETRYGD != restSlettVilkår.vilkårType ||
-            finnesUtvidetBarnetrydIForrigeBehandling(behandling, restSlettVilkår.personIdent)
+            Vilkår.UTVIDET_BARNETRYGD != slettVilkårDto.vilkårType ||
+            finnesUtvidetBarnetrydIForrigeBehandling(behandling, slettVilkårDto.personIdent)
         ) {
             throw FunksjonellFeil(
                 melding =
-                    "Vilkår ${restSlettVilkår.vilkårType.beskrivelse} kan ikke slettes " +
+                    "Vilkår ${slettVilkårDto.vilkårType.beskrivelse} kan ikke slettes " +
                         "for behandling $behandlingId",
                 frontendFeilmelding =
-                    "Vilkår ${restSlettVilkår.vilkårType.beskrivelse} kan ikke slettes " +
+                    "Vilkår ${slettVilkårDto.vilkårType.beskrivelse} kan ikke slettes " +
                         "for behandling $behandlingId",
             )
         }
 
         personResultat.vilkårResultater
-            .filter { it.vilkårType == restSlettVilkår.vilkårType }
+            .filter { it.vilkårType == slettVilkårDto.vilkårType }
             .forEach { personResultat.removeVilkårResultat(it.id) }
 
-        if (restSlettVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
+        if (slettVilkårDto.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
             behandlingstemaService.oppdaterBehandlingstemaForVilkår(
                 behandling = behandling,
                 overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,

@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -32,8 +32,8 @@ class VurderTilbakekrevingStegTest {
             årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             førsteSteg = StegType.VURDER_TILBAKEKREVING,
         )
-    private val restTilbakekreving: RestTilbakekreving =
-        RestTilbakekreving(
+    private val tilbakekrevingDto: TilbakekrevingDto =
+        TilbakekrevingDto(
             valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
             varsel = "testverdi",
             begrunnelse = "testverdi",
@@ -54,12 +54,12 @@ class VurderTilbakekrevingStegTest {
             assertDoesNotThrow {
                 vurderTilbakekrevingSteg.utførStegOgAngiNeste(
                     behandling,
-                    restTilbakekreving,
+                    tilbakekrevingDto,
                 )
             }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
-        verify(exactly = 1) { tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id) }
-        verify(exactly = 1) { tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id) }
+        verify(exactly = 1) { tilbakekrevingService.validerRestTilbakekreving(tilbakekrevingDto, behandling.id) }
+        verify(exactly = 1) { tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto, behandling.id) }
     }
 
     @Test
@@ -69,11 +69,11 @@ class VurderTilbakekrevingStegTest {
             assertDoesNotThrow {
                 vurderTilbakekrevingSteg.utførStegOgAngiNeste(
                     behandling,
-                    restTilbakekreving,
+                    tilbakekrevingDto,
                 )
             }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
-        verify(exactly = 0) { tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id) }
-        verify(exactly = 0) { tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id) }
+        verify(exactly = 0) { tilbakekrevingService.validerRestTilbakekreving(tilbakekrevingDto, behandling.id) }
+        verify(exactly = 0) { tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto, behandling.id) }
     }
 }

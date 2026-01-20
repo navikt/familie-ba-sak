@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
@@ -65,14 +65,14 @@ class TilbakekrevingServiceTest(
                 brevmalService = brevmalService,
             )
 
-        val restTilbakekreving =
-            RestTilbakekreving(
+        val tilbakekrevingDto =
+            TilbakekrevingDto(
                 valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
                 varsel = "Varsel",
                 begrunnelse = "Begrunnelse",
             )
-        tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id)
-        tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id)
+        tilbakekrevingService.validerRestTilbakekreving(tilbakekrevingDto, behandling.id)
+        tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto, behandling.id)
 
         // Act
         stegService.håndterIverksettMotFamilieTilbake(behandling, Properties())
@@ -103,14 +103,14 @@ class TilbakekrevingServiceTest(
                 brevmalService = brevmalService,
             )
 
-        val restTilbakekreving =
-            RestTilbakekreving(
+        val tilbakekrevingDto =
+            TilbakekrevingDto(
                 valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
                 varsel = "Varsel",
                 begrunnelse = "Begrunnelse",
             )
-        tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id)
-        tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id)
+        tilbakekrevingService.validerRestTilbakekreving(tilbakekrevingDto, behandling.id)
+        tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto, behandling.id)
 
         // Act
         stegService.håndterIverksettMotFamilieTilbake(behandling, Properties())

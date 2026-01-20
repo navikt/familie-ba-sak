@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterTilbakekrevingsvedtakMotregning
+import no.nav.familie.ba.sak.ekstern.restDomene.OppdaterTilbakekrevingsvedtakMotregningDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -38,7 +38,7 @@ class TilbakekrevingsvedtakMotregningController(
     )
     fun oppdaterTilbakekrevingsvedtakMotregning(
         @PathVariable behandlingId: Long,
-        @RequestBody restOppdaterTilbakekrevingsvedtakMotregning: RestOppdaterTilbakekrevingsvedtakMotregning,
+        @RequestBody oppdaterTilbakekrevingsvedtakMotregningDto: OppdaterTilbakekrevingsvedtakMotregningDto,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -48,11 +48,11 @@ class TilbakekrevingsvedtakMotregningController(
 
         tilbakekrevingsvedtakMotregningService.oppdaterTilbakekrevingsvedtakMotregning(
             behandlingId = behandlingId,
-            samtykke = restOppdaterTilbakekrevingsvedtakMotregning.samtykke,
-            årsakTilFeilutbetaling = restOppdaterTilbakekrevingsvedtakMotregning.årsakTilFeilutbetaling,
-            vurderingAvSkyld = restOppdaterTilbakekrevingsvedtakMotregning.vurderingAvSkyld,
-            varselDato = restOppdaterTilbakekrevingsvedtakMotregning.varselDato,
-            heleBeløpetSkalKrevesTilbake = restOppdaterTilbakekrevingsvedtakMotregning.heleBeløpetSkalKrevesTilbake,
+            samtykke = oppdaterTilbakekrevingsvedtakMotregningDto.samtykke,
+            årsakTilFeilutbetaling = oppdaterTilbakekrevingsvedtakMotregningDto.årsakTilFeilutbetaling,
+            vurderingAvSkyld = oppdaterTilbakekrevingsvedtakMotregningDto.vurderingAvSkyld,
+            varselDato = oppdaterTilbakekrevingsvedtakMotregningDto.varselDato,
+            heleBeløpetSkalKrevesTilbake = oppdaterTilbakekrevingsvedtakMotregningDto.heleBeløpetSkalKrevesTilbake,
         )
 
         val restUtvidetBehandling = utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)
