@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
+import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
@@ -194,14 +194,14 @@ class VilkårService(
     @Transactional
     fun postVilkår(
         behandlingId: Long,
-        restNyttVilkår: RestNyttVilkår,
+        nyttVilkårDto: NyttVilkårDto,
     ): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
         val behandling = vilkårsvurdering.behandling
 
-        if (restNyttVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
-            validerFørLeggeTilUtvidetBarnetrygd(behandling, restNyttVilkår, vilkårsvurdering)
+        if (nyttVilkårDto.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
+            validerFørLeggeTilUtvidetBarnetrygd(behandling, nyttVilkårDto, vilkårsvurdering)
 
             behandlingstemaService.oppdaterBehandlingstemaForVilkår(
                 behandling = behandling,
@@ -210,32 +210,32 @@ class VilkårService(
         }
 
         val personResultat =
-            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restNyttVilkår.personIdent)
+            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, nyttVilkårDto.personIdent)
 
-        muterPersonResultatPost(personResultat, restNyttVilkår.vilkårType)
+        muterPersonResultatPost(personResultat, nyttVilkårDto.vilkårType)
 
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }
 
     private fun validerFørLeggeTilUtvidetBarnetrygd(
         behandling: Behandling,
-        restNyttVilkår: RestNyttVilkår,
+        nyttVilkårDto: NyttVilkårDto,
         vilkårsvurdering: Vilkårsvurdering,
     ) {
         if (!behandling.kanLeggeTilOgFjerneUtvidetVilkår() && !harUtvidetVilkår(vilkårsvurdering)) {
             throw FunksjonellFeil(
                 melding =
-                    "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til for behandling ${behandling.id} " +
+                    "${nyttVilkårDto.vilkårType.beskrivelse} kan ikke legges til for behandling ${behandling.id} " +
                         "med behandlingsårsak ${behandling.opprettetÅrsak.visningsnavn}",
                 frontendFeilmelding =
-                    "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til " +
+                    "${nyttVilkårDto.vilkårType.beskrivelse} kan ikke legges til " +
                         "for behandling ${behandling.id} med behandlingsårsak ${behandling.opprettetÅrsak.visningsnavn}",
             )
         }
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
         if (personopplysningGrunnlag.søkerOgBarn
-                .single { it.aktør == personidentService.hentAktør(restNyttVilkår.personIdent) }
+                .single { it.aktør == personidentService.hentAktør(nyttVilkårDto.personIdent) }
                 .type != PersonType.SØKER
         ) {
             throw FunksjonellFeil(

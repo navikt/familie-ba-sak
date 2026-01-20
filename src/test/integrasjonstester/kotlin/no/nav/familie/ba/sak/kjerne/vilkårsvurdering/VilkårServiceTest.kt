@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
-import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
+import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
@@ -692,8 +692,8 @@ class VilkårServiceTest(
 
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(lagVilkårsvurdering(behandling = behandling))
 
-            val restNyttVilkår =
-                RestNyttVilkår(
+            val nyttVilkårDto =
+                NyttVilkårDto(
                     personIdent = barnFnr,
                     vilkårType = UTVIDET_BARNETRYGD,
                 )
@@ -703,7 +703,7 @@ class VilkårServiceTest(
                 assertThrows<FunksjonellFeil> {
                     vilkårService.postVilkår(
                         behandlingId = behandling.id,
-                        restNyttVilkår = restNyttVilkår,
+                        nyttVilkårDto = nyttVilkårDto,
                     )
                 }
 
@@ -720,8 +720,8 @@ class VilkårServiceTest(
 
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(lagVilkårsvurdering(behandling = behandling))
 
-            val restNyttVilkår =
-                RestNyttVilkår(
+            val nyttVilkårDto =
+                NyttVilkårDto(
                     personIdent = barnFnr,
                     vilkårType = UTVIDET_BARNETRYGD,
                 )
@@ -731,7 +731,7 @@ class VilkårServiceTest(
                 assertThrows<FunksjonellFeil> {
                     vilkårService.postVilkår(
                         behandlingId = behandling.id,
-                        restNyttVilkår = restNyttVilkår,
+                        nyttVilkårDto = nyttVilkårDto,
                     )
                 }
 
@@ -763,8 +763,8 @@ class VilkårServiceTest(
                 },
             )
 
-            val restNyttVilkår =
-                RestNyttVilkår(
+            val nyttVilkårDto =
+                NyttVilkårDto(
                     personIdent = søkerFnr,
                     vilkårType = UTVIDET_BARNETRYGD,
                 )
@@ -772,7 +772,7 @@ class VilkårServiceTest(
             // Act
             vilkårService.postVilkår(
                 behandlingId = behandling.id,
-                restNyttVilkår = restNyttVilkår,
+                nyttVilkårDto = nyttVilkårDto,
             )
 
             // Assert
@@ -795,8 +795,8 @@ class VilkårServiceTest(
                 },
             )
 
-            val restNyttVilkår =
-                RestNyttVilkår(
+            val nyttVilkårDto =
+                NyttVilkårDto(
                     personIdent = søkerFnr,
                     vilkårType = LOVLIG_OPPHOLD,
                 )
@@ -804,7 +804,7 @@ class VilkårServiceTest(
             // Act
             vilkårService.postVilkår(
                 behandlingId = behandling.id,
-                restNyttVilkår = restNyttVilkår,
+                nyttVilkårDto = nyttVilkårDto,
             )
 
             // Assert

@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.datagenerator.vurderVilkårsvurderingTilInnvilget
-import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
+import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
@@ -759,7 +759,7 @@ class VilkårServiceIntegrasjonTest(
         }
         vilkårService.postVilkår(
             nåVærendeBehandling.id,
-            RestNyttVilkår(
+            NyttVilkårDto(
                 personIdent = fnr,
                 vilkårType = Vilkår.UTVIDET_BARNETRYGD,
             ),
@@ -808,7 +808,7 @@ class VilkårServiceIntegrasjonTest(
             assertThrows<RuntimeException> {
                 vilkårService.postVilkår(
                     behandling.id,
-                    RestNyttVilkår(
+                    NyttVilkårDto(
                         personIdent = fnr,
                         vilkårType = Vilkår.UTVIDET_BARNETRYGD,
                     ),
@@ -887,7 +887,7 @@ class VilkårServiceIntegrasjonTest(
         assertDoesNotThrow {
             vilkårService.postVilkår(
                 behandling.id,
-                RestNyttVilkår(
+                NyttVilkårDto(
                     personIdent = fnr,
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
                 ),
@@ -923,7 +923,7 @@ class VilkårServiceIntegrasjonTest(
             assertThrows<RuntimeException> {
                 vilkårService.postVilkår(
                     nåVærendeBehandling.id,
-                    RestNyttVilkår(
+                    NyttVilkårDto(
                         personIdent = barnFnr,
                         vilkårType = Vilkår.UTVIDET_BARNETRYGD,
                     ),
@@ -1096,7 +1096,7 @@ class VilkårServiceIntegrasjonTest(
 
         vilkårService.postVilkår(
             behandling.id,
-            RestNyttVilkår(personIdent = fnr, vilkårType = Vilkår.UTVIDET_BARNETRYGD),
+            NyttVilkårDto(personIdent = fnr, vilkårType = Vilkår.UTVIDET_BARNETRYGD),
         )
 
         val vilkårsvurderingFørSlett = vilkårService.hentVilkårsvurdering(behandling.id)!!
@@ -1177,7 +1177,7 @@ class VilkårServiceIntegrasjonTest(
 
         vilkårService.postVilkår(
             behandling.id,
-            RestNyttVilkår(personIdent = fnr, vilkårType = Vilkår.UTVIDET_BARNETRYGD),
+            NyttVilkårDto(personIdent = fnr, vilkårType = Vilkår.UTVIDET_BARNETRYGD),
         )
 
         val vilkårsvurderingFørSlett = vilkårService.hentVilkårsvurdering(behandling.id)!!
@@ -1354,7 +1354,7 @@ class VilkårServiceIntegrasjonTest(
             }
         }
 
-        vilkårService.postVilkår(behandling.id, RestNyttVilkår(barnFnr, Vilkår.BOR_MED_SØKER))
+        vilkårService.postVilkår(behandling.id, NyttVilkårDto(barnFnr, Vilkår.BOR_MED_SØKER))
 
         vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
         assertTrue {

@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.AnnenVurderingDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
+import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
@@ -133,7 +133,7 @@ class VilkårController(
     @PostMapping(path = ["/{behandlingId}"])
     fun nyttVilkår(
         @PathVariable behandlingId: Long,
-        @RequestBody restNyttVilkår: RestNyttVilkår,
+        @RequestBody nyttVilkårDto: NyttVilkårDto,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -142,7 +142,7 @@ class VilkårController(
         )
         tilgangService.validerKanRedigereBehandling(behandlingId)
 
-        vilkårService.postVilkår(behandlingId, restNyttVilkår)
+        vilkårService.postVilkår(behandlingId, nyttVilkårDto)
 
         tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
         return ResponseEntity.ok(
