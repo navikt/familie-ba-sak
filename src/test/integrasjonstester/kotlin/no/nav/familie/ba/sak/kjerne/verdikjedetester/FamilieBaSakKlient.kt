@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
+import no.nav.familie.ba.sak.ekstern.restDomene.HentFagsakForPersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
@@ -61,7 +61,7 @@ class FamilieBaSakKlient(
 
         return postForEntity(
             uri,
-            RestHentFagsakForPerson(personIdent),
+            HentFagsakForPersonDto(personIdent),
             headers,
         )
     }
