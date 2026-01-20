@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
+import no.nav.familie.ba.sak.ekstern.restDomene.FerdigstillOppgaveKnyttJournalpostDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.TilknyttetBehandling
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
@@ -196,7 +196,7 @@ class InnkommendeJournalføringService(
     }
 
     fun knyttJournalpostTilFagsakOgFerdigstillOppgave(
-        request: RestFerdigstillOppgaveKnyttJournalpost,
+        request: FerdigstillOppgaveKnyttJournalpostDto,
         oppgaveId: Long,
     ): String {
         val fagsak =

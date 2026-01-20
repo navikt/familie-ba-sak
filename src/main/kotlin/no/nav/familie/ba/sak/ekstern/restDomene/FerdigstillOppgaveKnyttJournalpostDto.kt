@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import java.time.LocalDateTime
 
-data class RestFerdigstillOppgaveKnyttJournalpost(
+data class FerdigstillOppgaveKnyttJournalpostDto(
     val journalpostId: String,
     val tilknyttedeBehandlinger: List<TilknyttetBehandling> = emptyList(),
     val opprettOgKnyttTilNyBehandling: Boolean = false,

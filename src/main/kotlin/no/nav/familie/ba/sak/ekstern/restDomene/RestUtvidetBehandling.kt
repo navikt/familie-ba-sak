@@ -42,7 +42,7 @@ data class RestUtvidetBehandling(
     val utenlandskePeriodebeløp: List<RestUtenlandskPeriodebeløp>,
     val korrigertEtterbetaling: RestKorrigertEtterbetaling?,
     val korrigertVedtak: RestKorrigertVedtak?,
-    val feilutbetaltValuta: List<RestFeilutbetaltValuta>,
+    val feilutbetaltValuta: List<FeilutbetaltValutaDto>,
     val brevmottakere: List<BrevmottakerDto>,
     val refusjonEøs: List<RestRefusjonEøs>,
     val vurderingsstrategiForValutakurser: VurderingsstrategiForValutakurser? = VurderingsstrategiForValutakurser.AUTOMATISK,

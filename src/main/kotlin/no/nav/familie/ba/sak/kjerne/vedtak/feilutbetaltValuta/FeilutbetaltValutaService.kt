@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFeilutbetaltValuta
+import no.nav.familie.ba.sak.ekstern.restDomene.FeilutbetaltValutaDto
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -15,7 +15,7 @@ class FeilutbetaltValutaService(
 
     @Transactional
     fun leggTilFeilutbetaltValutaPeriode(
-        feilutbetaltValuta: RestFeilutbetaltValuta,
+        feilutbetaltValuta: FeilutbetaltValutaDto,
         behandlingId: Long,
     ): Long {
         val lagret =
@@ -48,7 +48,7 @@ class FeilutbetaltValutaService(
     fun hentFeilutbetaltValutaPerioder(behandlingId: Long) = feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(behandlingId = behandlingId).map { tilRest(it) }
 
     private fun tilRest(it: FeilutbetaltValuta) =
-        RestFeilutbetaltValuta(
+        FeilutbetaltValutaDto(
             id = it.id,
             fom = it.fom,
             tom = it.tom,
@@ -57,14 +57,14 @@ class FeilutbetaltValutaService(
 
     @Transactional
     fun oppdatertFeilutbetaltValutaPeriode(
-        restFeilutbetaltValuta: RestFeilutbetaltValuta,
+        feilutbetaltValutaDto: FeilutbetaltValutaDto,
         id: Long,
     ) {
-        val feilutbetaltValuta = feilutbetaltValutaRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${restFeilutbetaltValuta.id}") }
+        val feilutbetaltValuta = feilutbetaltValutaRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${feilutbetaltValutaDto.id}") }
 
-        feilutbetaltValuta.fom = restFeilutbetaltValuta.fom
-        feilutbetaltValuta.tom = restFeilutbetaltValuta.tom
-        feilutbetaltValuta.feilutbetaltBeløp = restFeilutbetaltValuta.feilutbetaltBeløp
+        feilutbetaltValuta.fom = feilutbetaltValutaDto.fom
+        feilutbetaltValuta.tom = feilutbetaltValutaDto.tom
+        feilutbetaltValuta.feilutbetaltBeløp = feilutbetaltValutaDto.feilutbetaltBeløp
         feilutbetaltValuta.erPerMåned = false
     }
 }

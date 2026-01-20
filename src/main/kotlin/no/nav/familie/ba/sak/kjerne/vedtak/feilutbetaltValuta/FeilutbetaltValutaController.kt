@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFeilutbetaltValuta
+import no.nav.familie.ba.sak.ekstern.restDomene.FeilutbetaltValutaDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -36,7 +36,7 @@ class FeilutbetaltValutaController(
     )
     fun leggTilFeilutbetaltValutaPeriode(
         @PathVariable behandlingId: Long,
-        @RequestBody feilutbetaltValuta: RestFeilutbetaltValuta,
+        @RequestBody feilutbetaltValuta: FeilutbetaltValutaDto,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -60,7 +60,7 @@ class FeilutbetaltValutaController(
     fun oppdaterFeilutbetaltValutaPeriode(
         @PathVariable behandlingId: Long,
         @PathVariable id: Long,
-        @RequestBody feilutbetaltValuta: RestFeilutbetaltValuta,
+        @RequestBody feilutbetaltValuta: FeilutbetaltValutaDto,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -68,7 +68,7 @@ class FeilutbetaltValutaController(
             handling = "oppdater periode med feilutbetalt valuta",
         )
 
-        feilutbetaltValutaService.oppdatertFeilutbetaltValutaPeriode(restFeilutbetaltValuta = feilutbetaltValuta, id = id)
+        feilutbetaltValutaService.oppdatertFeilutbetaltValutaPeriode(feilutbetaltValutaDto = feilutbetaltValuta, id = id)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -91,7 +91,7 @@ class FeilutbetaltValutaController(
     @GetMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentFeilutbetaltValutaPerioder(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<List<RestFeilutbetaltValuta>?>> {
+    ): ResponseEntity<Ressurs<List<FeilutbetaltValutaDto>?>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
