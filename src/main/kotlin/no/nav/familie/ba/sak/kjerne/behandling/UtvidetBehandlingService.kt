@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilManglendeFinnmarkmerkingPerio
 import no.nav.familie.ba.sak.ekstern.restDomene.tilManglendeSvalbardmerkingPerioder
 import no.nav.familie.ba.sak.ekstern.restDomene.tilArbeidsfordelingPåBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBehandlingStegTilstandDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFødselshendelsefiltreringResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.tilFødselshendelsefiltreringResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKompetanse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKorrigertEtterbetaling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKorrigertVedtak
@@ -151,7 +151,7 @@ class UtvidetBehandlingService(
                 fødselshendelsefiltreringResultatRepository
                     .finnFødselshendelsefiltreringResultater(
                         behandlingId = behandling.id,
-                    ).map { it.tilRestFødselshendelsefiltreringResultat() },
+                    ).map { it.tilFødselshendelsefiltreringResultatDto() },
             utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling, personopplysningGrunnlag),
             personerMedAndelerTilkjentYtelse =
                 personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
