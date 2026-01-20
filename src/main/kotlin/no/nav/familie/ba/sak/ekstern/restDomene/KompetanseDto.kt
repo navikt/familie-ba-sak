@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.time.YearMonth
 
-data class RestKompetanse(
+data class KompetanseDto(
     val id: Long,
     val fom: YearMonth?,
     val tom: YearMonth?,
@@ -19,8 +19,8 @@ data class RestKompetanse(
     val resultat: KompetanseResultat? = null,
     override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT,
     val erAnnenForelderOmfattetAvNorskLovgivning: Boolean? = false,
-) : AbstractUtfyltStatus<RestKompetanse>() {
-    override fun medUtfyltStatus(): RestKompetanse {
+) : AbstractUtfyltStatus<KompetanseDto>() {
+    override fun medUtfyltStatus(): KompetanseDto {
         var antallUtfylteFelter =
             finnAntallUtfylt(
                 listOf(
@@ -53,8 +53,8 @@ data class RestKompetanse(
     }
 }
 
-fun Kompetanse.tilRestKompetanse() =
-    RestKompetanse(
+fun Kompetanse.tilKompetanseDto() =
+    KompetanseDto(
         id = this.id,
         fom = this.fom,
         tom = this.tom,
@@ -68,7 +68,7 @@ fun Kompetanse.tilRestKompetanse() =
         erAnnenForelderOmfattetAvNorskLovgivning = this.erAnnenForelderOmfattetAvNorskLovgivning,
     ).medUtfyltStatus()
 
-fun RestKompetanse.tilKompetanse(barnAktører: List<Aktør>) =
+fun KompetanseDto.tilKompetanse(barnAktører: List<Aktør>) =
     Kompetanse(
         fom = this.fom,
         tom = this.tom,

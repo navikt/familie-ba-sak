@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestKompetanse
+import no.nav.familie.ba.sak.ekstern.restDomene.KompetanseDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanse
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -37,7 +37,7 @@ class KompetanseController(
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterKompetanse(
         @PathVariable behandlingId: Long,
-        @RequestBody restKompetanse: RestKompetanse,
+        @RequestBody kompetanseDto: KompetanseDto,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -46,8 +46,8 @@ class KompetanseController(
         )
         tilgangService.validerKanRedigereBehandling(behandlingId)
 
-        val barnAktører = restKompetanse.barnIdenter.map { personidentService.hentAktør(it) }
-        val kompetanse = restKompetanse.tilKompetanse(barnAktører = barnAktører)
+        val barnAktører = kompetanseDto.barnIdenter.map { personidentService.hentAktør(it) }
+        val kompetanse = kompetanseDto.tilKompetanse(barnAktører = barnAktører)
 
         validerOppdatering(kompetanse)
 

@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilManglendeSvalbardmerkingPerio
 import no.nav.familie.ba.sak.ekstern.restDomene.tilArbeidsfordelingPåBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBehandlingStegTilstandDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilFødselshendelsefiltreringResultatDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKompetanse
+import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanseDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKorrigertEtterbetaling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKorrigertVedtak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
@@ -161,7 +161,7 @@ class UtvidetBehandlingService(
                     .map { it.tilRestEndretUtbetalingAndel() },
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
             vedtak = vedtak?.tilRestVedtak(),
-            kompetanser = kompetanser.map { it.tilRestKompetanse() }.sortedByDescending { it.fom },
+            kompetanser = kompetanser.map { it.tilKompetanseDto() }.sortedByDescending { it.fom },
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
             aktivSettPåVent =
                 settPåVentService

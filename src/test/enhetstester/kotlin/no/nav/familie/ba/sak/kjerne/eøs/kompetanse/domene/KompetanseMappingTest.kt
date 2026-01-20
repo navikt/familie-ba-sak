@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
 
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanse
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKompetanse
+import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanseDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -27,7 +27,7 @@ internal class KompetanseMappingTest {
                 resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
             )
 
-        val restKompetanse = kompetanse.tilRestKompetanse()
+        val restKompetanse = kompetanse.tilKompetanseDto()
 
         assertEquals(kompetanse, restKompetanse.tilKompetanse(barnAktører.toList()))
     }

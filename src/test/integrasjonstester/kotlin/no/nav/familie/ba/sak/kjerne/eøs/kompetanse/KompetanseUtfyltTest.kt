@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.ekstern.restDomene.UtfyltStatus
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKompetanse
+import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanseDto
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.BarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
@@ -22,7 +22,7 @@ class KompetanseUtfyltTest {
                 søkersAktivitetsland = "NO",
             )
 
-        val restKompetanse = kompetanse.tilRestKompetanse()
+        val restKompetanse = kompetanse.tilKompetanseDto()
 
         assertEquals(UtfyltStatus.OK, restKompetanse.status)
     }
@@ -38,7 +38,7 @@ class KompetanseUtfyltTest {
                 søkersAktivitetsland = "NO",
             )
 
-        var restKompetanse = kompetanse.tilRestKompetanse()
+        var restKompetanse = kompetanse.tilKompetanseDto()
 
         assertEquals(UtfyltStatus.OK, restKompetanse.status)
 
@@ -51,7 +51,7 @@ class KompetanseUtfyltTest {
                 søkersAktivitetsland = "NO",
             )
 
-        restKompetanse = kompetanse.tilRestKompetanse()
+        restKompetanse = kompetanse.tilKompetanseDto()
 
         assertEquals(UtfyltStatus.OK, restKompetanse.status)
     }
@@ -66,7 +66,7 @@ class KompetanseUtfyltTest {
                 søkersAktivitet = KompetanseAktivitet.ARBEIDER,
             )
 
-        var restKompetanse = kompetanse.tilRestKompetanse()
+        var restKompetanse = kompetanse.tilKompetanseDto()
 
         assertEquals(UtfyltStatus.UFULLSTENDIG, restKompetanse.status)
 
@@ -78,7 +78,7 @@ class KompetanseUtfyltTest {
                 søkersAktivitet = KompetanseAktivitet.ARBEIDER,
             )
 
-        restKompetanse = kompetanse.tilRestKompetanse()
+        restKompetanse = kompetanse.tilKompetanseDto()
 
         assertEquals(UtfyltStatus.UFULLSTENDIG, restKompetanse.status)
 
@@ -90,7 +90,7 @@ class KompetanseUtfyltTest {
                 søkersAktivitet = KompetanseAktivitet.ARBEIDER,
             )
 
-        restKompetanse = kompetanse.tilRestKompetanse()
+        restKompetanse = kompetanse.tilKompetanseDto()
 
         assertEquals(UtfyltStatus.UFULLSTENDIG, restKompetanse.status)
 
@@ -102,7 +102,7 @@ class KompetanseUtfyltTest {
                 søkersAktivitet = KompetanseAktivitet.ARBEIDER,
             )
 
-        restKompetanse = kompetanse.tilRestKompetanse()
+        restKompetanse = kompetanse.tilKompetanseDto()
 
         assertEquals(UtfyltStatus.UFULLSTENDIG, restKompetanse.status)
     }
@@ -114,7 +114,7 @@ class KompetanseUtfyltTest {
                 annenForeldersAktivitet = KompetanseAktivitet.IKKE_AKTUELT,
             )
 
-        var restKompetanse = kompetanse.tilRestKompetanse()
+        var restKompetanse = kompetanse.tilKompetanseDto()
 
         assertEquals(UtfyltStatus.UFULLSTENDIG, restKompetanse.status)
 
@@ -124,7 +124,7 @@ class KompetanseUtfyltTest {
                 barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             )
 
-        restKompetanse = kompetanse.tilRestKompetanse()
+        restKompetanse = kompetanse.tilKompetanseDto()
 
         assertEquals(UtfyltStatus.UFULLSTENDIG, restKompetanse.status)
 
@@ -135,7 +135,7 @@ class KompetanseUtfyltTest {
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
             )
 
-        restKompetanse = kompetanse.tilRestKompetanse()
+        restKompetanse = kompetanse.tilKompetanseDto()
 
         assertEquals(UtfyltStatus.UFULLSTENDIG, restKompetanse.status)
 
@@ -147,7 +147,7 @@ class KompetanseUtfyltTest {
                 søkersAktivitet = KompetanseAktivitet.ARBEIDER,
             )
 
-        restKompetanse = kompetanse.tilRestKompetanse()
+        restKompetanse = kompetanse.tilKompetanseDto()
 
         assertEquals(UtfyltStatus.UFULLSTENDIG, restKompetanse.status)
     }
@@ -156,7 +156,7 @@ class KompetanseUtfyltTest {
     fun `Skal sette UtfyltStatus til IKKE_UTFYLT dersom ingen av feltene er utfylt`() {
         val kompetanse = lagKompetanse()
 
-        val restKompetanse = kompetanse.tilRestKompetanse()
+        val restKompetanse = kompetanse.tilKompetanseDto()
 
         assertEquals(UtfyltStatus.IKKE_UTFYLT, restKompetanse.status)
     }
@@ -172,7 +172,7 @@ class KompetanseUtfyltTest {
                 søkersAktivitet = KompetanseAktivitet.ARBEIDER,
             )
 
-        val restKompetanse = kompetanse.tilRestKompetanse()
+        val restKompetanse = kompetanse.tilKompetanseDto()
 
         assertEquals(UtfyltStatus.UFULLSTENDIG, restKompetanse.status)
     }
