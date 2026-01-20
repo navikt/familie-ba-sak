@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 import jakarta.validation.Valid
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.ManuellDødsfallDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonInfoDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfoMedNavnOgAdresse
+import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonInfoDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonInfoMedNavnOgAdresseDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -41,7 +41,7 @@ class PersonController(
     @PostMapping
     fun hentPerson(
         @Valid @RequestBody personIdentDto: PersonIdent,
-    ): ResponseEntity<Ressurs<RestPersonInfo>> {
+    ): ResponseEntity<Ressurs<PersonInfoDto>> {
         val personIdent = personIdentDto.ident
 
         // Valider personIdent
@@ -52,14 +52,14 @@ class PersonController(
             familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
                 ?: personopplysningerService
                     .hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
-                    .tilRestPersonInfo(personIdent)
+                    .tilPersonInfoDto(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
     }
 
     @PostMapping(path = ["/enkel"])
     fun hentPersonEnkel(
         @Valid @RequestBody personIdentDto: PersonIdent,
-    ): ResponseEntity<Ressurs<RestPersonInfo>> {
+    ): ResponseEntity<Ressurs<PersonInfoDto>> {
         val personIdent = personIdentDto.ident
 
         // Valider personIdent
@@ -70,14 +70,14 @@ class PersonController(
             familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
                 ?: personopplysningerService
                     .hentPersoninfoEnkel(aktør)
-                    .tilRestPersonInfo(personIdent)
+                    .tilPersonInfoDto(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
     }
 
     @PostMapping(path = ["/adresse"])
     fun hentPersonAdresse(
         @Valid @RequestBody personIdentDto: PersonIdent,
-    ): ResponseEntity<Ressurs<RestPersonInfo>> {
+    ): ResponseEntity<Ressurs<PersonInfoDto>> {
         val personIdent = personIdentDto.ident
 
         // For validering
@@ -88,7 +88,7 @@ class PersonController(
             familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
                 ?: personopplysningerService
                     .hentPersoninfoNavnOgAdresse(aktør)
-                    .tilRestPersonInfoMedNavnOgAdresse(personIdent)
+                    .tilPersonInfoMedNavnOgAdresseDto(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
     }
 

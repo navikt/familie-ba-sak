@@ -10,23 +10,23 @@ import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADE
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import java.time.LocalDate
 
-data class RestPersonInfo(
+data class PersonInfoDto(
     val personIdent: String,
     var fødselsdato: LocalDate? = null,
     val navn: String? = null,
     val kjønn: Kjønn? = null,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
     var harTilgang: Boolean = true,
-    val forelderBarnRelasjon: List<RestForelderBarnRelasjon> = emptyList(),
-    val forelderBarnRelasjonMaskert: List<RestForelderBarnRelasjonMaskert> = emptyList(),
+    val forelderBarnRelasjon: List<ForelderBarnRelasjonDto> = emptyList(),
+    val forelderBarnRelasjonMaskert: List<ForelderBarnRelasjonMaskertDto> = emptyList(),
     val kommunenummer: String = "ukjent",
     val dødsfallDato: String? = null,
-    val bostedsadresse: RestBostedsadresse? = null,
+    val bostedsadresse: BostedsadresseDto? = null,
     val erEgenAnsatt: Boolean? = null,
     val harFalskIdentitet: Boolean = false,
 )
 
-data class RestForelderBarnRelasjon(
+data class ForelderBarnRelasjonDto(
     val personIdent: String,
     val relasjonRolle: FORELDERBARNRELASJONROLLE,
     val navn: String,
@@ -35,24 +35,24 @@ data class RestForelderBarnRelasjon(
     val erEgenAnsatt: Boolean? = null,
 )
 
-data class RestForelderBarnRelasjonMaskert(
+data class ForelderBarnRelasjonMaskertDto(
     val relasjonRolle: FORELDERBARNRELASJONROLLE,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING,
 )
 
-data class RestBostedsadresse(
+data class BostedsadresseDto(
     val adresse: String?,
     val postnummer: String,
 )
 
-private fun ForelderBarnRelasjonMaskert.tilRestForelderBarnRelasjonMaskert() =
-    RestForelderBarnRelasjonMaskert(
+private fun ForelderBarnRelasjonMaskert.tilForelderBarnRelasjonMaskertDto() =
+    ForelderBarnRelasjonMaskertDto(
         relasjonRolle = this.relasjonsrolle,
         adressebeskyttelseGradering = this.adressebeskyttelseGradering,
     )
 
-private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() =
-    RestForelderBarnRelasjon(
+private fun ForelderBarnRelasjon.tilForelderBarnRelasjonDto() =
+    ForelderBarnRelasjonDto(
         personIdent = this.aktør.aktivFødselsnummer(),
         relasjonRolle = this.relasjonsrolle,
         navn = this.navn ?: "",
@@ -61,18 +61,18 @@ private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() =
         erEgenAnsatt = this.erEgenAnsatt,
     )
 
-fun PdlPersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo =
+fun PdlPersonInfo.tilPersonInfoDto(personIdent: String): PersonInfoDto =
     when (this) {
         is PdlPersonInfo.Person -> {
-            this.personInfo.tilRestPersonInfo(personIdent)
+            this.personInfo.tilPersonInfoDto(personIdent)
         }
 
         is PdlPersonInfo.FalskPerson -> {
-            this.falskIdentitetPersonInfo.tilRestPersonInfo(personIdent)
+            this.falskIdentitetPersonInfo.tilPersonInfoDto(personIdent)
         }
     }
 
-fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
+fun PersonInfo.tilPersonInfoDto(personIdent: String): PersonInfoDto {
     val bostedsadresse =
         this.bostedsadresser.filter { it.angittFlyttedato != null }.maxByOrNull { it.angittFlyttedato!! }
     val kommunenummer: String =
@@ -86,21 +86,21 @@ fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
 
     val dødsfallDato = if (this.dødsfall != null && this.dødsfall.erDød) this.dødsfall.dødsdato else null
 
-    return RestPersonInfo(
+    return PersonInfoDto(
         personIdent = personIdent,
         fødselsdato = this.fødselsdato,
         navn = this.navn,
         kjønn = this.kjønn,
         adressebeskyttelseGradering = this.adressebeskyttelseGradering,
-        forelderBarnRelasjon = this.forelderBarnRelasjon.map { it.tilRestForelderBarnRelasjon() },
-        forelderBarnRelasjonMaskert = this.forelderBarnRelasjonMaskert.map { it.tilRestForelderBarnRelasjonMaskert() },
+        forelderBarnRelasjon = this.forelderBarnRelasjon.map { it.tilForelderBarnRelasjonDto() },
+        forelderBarnRelasjonMaskert = this.forelderBarnRelasjonMaskert.map { it.tilForelderBarnRelasjonMaskertDto() },
         kommunenummer = kommunenummer,
         dødsfallDato = dødsfallDato,
         erEgenAnsatt = this.erEgenAnsatt,
     )
 }
 
-fun FalskIdentitetPersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
+fun FalskIdentitetPersonInfo.tilPersonInfoDto(personIdent: String): PersonInfoDto {
     val nyesteAdresse = adresser?.bostedsadresser?.filter { it.gyldigFraOgMed != null }?.maxByOrNull { it.gyldigFraOgMed!! }
     val kommunenummer =
         when {
@@ -109,7 +109,7 @@ fun FalskIdentitetPersonInfo.tilRestPersonInfo(personIdent: String): RestPersonI
             else -> "ukjent"
         } ?: "ukjent"
 
-    return RestPersonInfo(
+    return PersonInfoDto(
         personIdent = personIdent,
         navn = this.navn,
         fødselsdato = this.fødselsdato,
@@ -119,10 +119,10 @@ fun FalskIdentitetPersonInfo.tilRestPersonInfo(personIdent: String): RestPersonI
     )
 }
 
-fun PersonInfo.tilRestPersonInfoMedNavnOgAdresse(personIdent: String): RestPersonInfo {
+fun PersonInfo.tilPersonInfoMedNavnOgAdresseDto(personIdent: String): PersonInfoDto {
     val bostedsadresse = this.bostedsadresser.singleOrNull() // det skal kun være en bostedsadresse i PersonInfo uten historikk
     val postnummer = bostedsadresse?.vegadresse?.postnummer ?: bostedsadresse?.matrikkeladresse?.postnummer
-    return RestPersonInfo(
+    return PersonInfoDto(
         personIdent = personIdent,
         fødselsdato = this.fødselsdato,
         navn = this.navn,
@@ -133,7 +133,7 @@ fun PersonInfo.tilRestPersonInfoMedNavnOgAdresse(personIdent: String): RestPerso
                 }
 
                 else -> {
-                    RestBostedsadresse(
+                    BostedsadresseDto(
                         adresse =
                             bostedsadresse
                                 ?.vegadresse

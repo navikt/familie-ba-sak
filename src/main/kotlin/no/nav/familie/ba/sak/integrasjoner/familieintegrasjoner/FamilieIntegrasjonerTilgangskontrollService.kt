@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 
 import no.nav.familie.ba.sak.config.hentCacheForSaksbehandler
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonInfoDto
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.tilAdressebeskyttelse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -16,11 +16,11 @@ class FamilieIntegrasjonerTilgangskontrollService(
     private val cacheManager: CacheManager,
     private val systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
 ) {
-    fun hentMaskertPersonInfoVedManglendeTilgang(aktør: Aktør): RestPersonInfo? {
+    fun hentMaskertPersonInfoVedManglendeTilgang(aktør: Aktør): PersonInfoDto? {
         val harTilgang = sjekkTilgangTilPerson(personIdent = aktør.aktivFødselsnummer()).harTilgang
         return if (!harTilgang) {
             val adressebeskyttelse = systemOnlyPdlRestKlient.hentAdressebeskyttelse(aktør).tilAdressebeskyttelse()
-            RestPersonInfo(
+            PersonInfoDto(
                 personIdent = aktør.aktivFødselsnummer(),
                 adressebeskyttelseGradering = adressebeskyttelse,
                 harTilgang = false,

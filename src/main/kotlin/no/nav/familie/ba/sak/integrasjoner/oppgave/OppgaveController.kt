@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.FerdigstillOppgaveKnyttJournalpostDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
+import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonInfoDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalføringService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DataForManuellJournalføring
@@ -118,7 +118,7 @@ class OppgaveController(
                     aktør?.let {
                         personopplysningerService
                             .hentPersoninfoMedRelasjonerOgRegisterinformasjon(it)
-                            .tilRestPersonInfo(it.aktivFødselsnummer())
+                            .tilPersonInfoDto(it.aktivFødselsnummer())
                     },
                 minimalFagsak = minimalFagsak,
             )

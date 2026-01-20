@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonInfoDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FalskIdentitetPersonInfo
@@ -64,7 +64,7 @@ class PersonControllerTest {
             assertThat(respons.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
             assertThat(respons.body!!.data).isNotNull
 
-            val data: RestPersonInfo = respons.body!!.data!!
+            val data: PersonInfoDto = respons.body!!.data!!
             assertThat(data.navn).isEqualTo(person.navn)
             assertThat(data.fødselsdato).isEqualTo(person.fødselsdato)
             assertThat(data.kjønn).isEqualTo(person.kjønn)
@@ -95,7 +95,7 @@ class PersonControllerTest {
             assertThat(respons.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
             assertThat(respons.body!!.data).isNotNull
 
-            val data: RestPersonInfo = respons.body!!.data!!
+            val data: PersonInfoDto = respons.body!!.data!!
             assertThat(data.navn).isEqualTo(person.navn)
             assertThat(data.fødselsdato).isEqualTo(person.fødselsdato)
             assertThat(data.kjønn).isEqualTo(person.kjønn)
@@ -106,15 +106,15 @@ class PersonControllerTest {
             // Arrange
             val person = lagPerson()
 
-            val restPersonInfo =
-                RestPersonInfo(
+            val personInfoDto =
+                PersonInfoDto(
                     personIdent = person.aktør.aktivFødselsnummer(),
                     adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
                     harTilgang = false,
                 )
 
             every { personidentService.hentAktør(person.aktør.aktivFødselsnummer()) } returns person.aktør
-            every { familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør) } returns restPersonInfo
+            every { familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør) } returns personInfoDto
 
             // Act
             val respons = personController.hentPerson(PersonIdent(person.aktør.aktivFødselsnummer()))
@@ -125,8 +125,8 @@ class PersonControllerTest {
             assertThat(respons.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
             assertThat(respons.body!!.data).isNotNull
 
-            val data: RestPersonInfo = respons.body!!.data!!
-            assertThat(data).isEqualTo(restPersonInfo)
+            val data: PersonInfoDto = respons.body!!.data!!
+            assertThat(data).isEqualTo(personInfoDto)
         }
     }
 }

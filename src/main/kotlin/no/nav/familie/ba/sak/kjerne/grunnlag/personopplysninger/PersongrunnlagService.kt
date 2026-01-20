@@ -7,9 +7,9 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
+import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
@@ -73,8 +73,8 @@ class PersongrunnlagService(
     fun mapTilRestPersonMedStatsborgerskapLand(
         person: Person,
         erManueltLagtTilISøknad: Boolean? = null,
-    ): RestPerson {
-        val restPerson = person.tilRestPerson(erManueltLagtTilISøknad)
+    ): PersonDto {
+        val restPerson = person.tilPersonDto(erManueltLagtTilISøknad)
         restPerson.registerhistorikk
             ?.statsborgerskap
             ?.forEach { lagret ->

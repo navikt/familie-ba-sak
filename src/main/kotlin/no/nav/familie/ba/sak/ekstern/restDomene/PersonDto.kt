@@ -10,7 +10,7 @@ import java.time.LocalDate
  * NB: Bør ikke brukes internt, men kun ut mot eksterne tjenester siden klassen
  * inneholder aktiv personIdent og ikke aktørId.
  */
-data class RestPerson(
+data class PersonDto(
     val type: PersonType,
     val fødselsdato: LocalDate?,
     val personIdent: String,
@@ -22,8 +22,8 @@ data class RestPerson(
     val erManueltLagtTilISøknad: Boolean? = null,
 )
 
-fun Person.tilRestPerson(erManueltLagtTilISøknad: Boolean? = null): RestPerson =
-    RestPerson(
+fun Person.tilPersonDto(erManueltLagtTilISøknad: Boolean? = null): PersonDto =
+    PersonDto(
         type = this.type,
         fødselsdato = this.fødselsdato,
         personIdent = this.aktør.aktivFødselsnummer(),
