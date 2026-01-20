@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.BaseFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
+import no.nav.familie.ba.sak.ekstern.restDomene.SkjermetBarnSøkerDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilMinimalFagsakDto
@@ -86,7 +86,7 @@ class FagsakService(
         fraAutomatiskBehandling: Boolean = false,
         type: FagsakType = FagsakType.NORMAL,
         institusjon: InstitusjonDto? = null,
-        skjermetBarnSøker: RestSkjermetBarnSøker? = null,
+        skjermetBarnSøker: SkjermetBarnSøkerDto? = null,
     ): Fagsak {
         if (type == FagsakType.SKJERMET_BARN) {
             when {
@@ -277,7 +277,7 @@ class FagsakService(
         fraAutomatiskBehandling: Boolean = false,
         fagsakType: FagsakType = FagsakType.NORMAL,
         institusjon: InstitusjonDto? = null,
-        skjermetBarnSøker: RestSkjermetBarnSøker? = null,
+        skjermetBarnSøker: SkjermetBarnSøkerDto? = null,
     ): Fagsak = hentEllerOpprettFagsak(fødselsnummer, fraAutomatiskBehandling, fagsakType, institusjon, skjermetBarnSøker)
 
     fun hentNormalFagsak(aktør: Aktør): Fagsak? =

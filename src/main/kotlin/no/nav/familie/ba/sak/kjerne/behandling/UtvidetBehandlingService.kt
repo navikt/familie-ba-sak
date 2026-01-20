@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertEtterbetalingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertVedtakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestSettPåVent
+import no.nav.familie.ba.sak.ekstern.restDomene.tilSettPåVentDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestTotrinnskontroll
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestValutakurs
@@ -166,7 +166,7 @@ class UtvidetBehandlingService(
             aktivSettPåVent =
                 settPåVentService
                     .finnAktivSettPåVentPåBehandling(behandlingId = behandlingId)
-                    ?.tilRestSettPåVent(),
+                    ?.tilSettPåVentDto(),
             migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId),
             valutakurser = valutakurser.map { it.tilRestValutakurs() },
             utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilRestUtenlandskPeriodebeløp() },

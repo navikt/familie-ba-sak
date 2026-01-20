@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
+import no.nav.familie.ba.sak.ekstern.restDomene.SkjermetBarnSøkerDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -494,7 +494,7 @@ class FagsakServiceIntegrationTest(
         fraAutomatiskBehandling: Boolean = false,
     ): Fagsak {
         val institusjon = InstitusjonDto(orgNummer = "123456789", tssEksternId = "testid")
-        val skjermetBarnSøker = RestSkjermetBarnSøker(randomFnr())
+        val skjermetBarnSøker = SkjermetBarnSøkerDto(randomFnr())
         val fagsak =
             fagsakService.hentEllerOpprettFagsakForPersonIdent(
                 fødselsnummer = personIdent,

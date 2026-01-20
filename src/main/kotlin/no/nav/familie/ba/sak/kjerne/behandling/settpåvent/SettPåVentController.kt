@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSettPåVent
+import no.nav.familie.ba.sak.ekstern.restDomene.SettPåVentDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -27,14 +27,14 @@ class SettPåVentController(
     @PostMapping(path = ["{behandlingId}"])
     fun settBehandlingPåVent(
         @PathVariable behandlingId: Long,
-        @RequestBody restSettPåVent: RestSettPåVent,
+        @RequestBody settPåVentDto: SettPåVentDto,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sett behandling på vent",
         )
-        settPåVentService.settBehandlingPåVent(behandlingId, restSettPåVent.frist, restSettPåVent.årsak)
+        settPåVentService.settBehandlingPåVent(behandlingId, settPåVentDto.frist, settPåVentDto.årsak)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -42,14 +42,14 @@ class SettPåVentController(
     @PutMapping(path = ["{behandlingId}"])
     fun oppdaterSettBehandlingPåVent(
         @PathVariable behandlingId: Long,
-        @RequestBody restSettPåVent: RestSettPåVent,
+        @RequestBody settPåVentDto: SettPåVentDto,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdater ventefrist og/eller venteårsak på behandling",
         )
-        settPåVentService.oppdaterSettBehandlingPåVent(behandlingId, restSettPåVent.frist, restSettPåVent.årsak)
+        settPåVentService.oppdaterSettBehandlingPåVent(behandlingId, settPåVentDto.frist, settPåVentDto.årsak)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

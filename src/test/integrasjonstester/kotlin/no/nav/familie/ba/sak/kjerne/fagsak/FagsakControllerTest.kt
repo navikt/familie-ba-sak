@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
+import no.nav.familie.ba.sak.ekstern.restDomene.SkjermetBarnSøkerDto
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -79,7 +79,7 @@ class FagsakControllerTest(
     fun `Skal opprette fagsak av type SKJERMET_BARN`() {
         val fnr = randomFnr()
         val søkersIdent = randomFnr()
-        val skjermetBarnSøker = RestSkjermetBarnSøker(søkersIdent = søkersIdent)
+        val skjermetBarnSøker = SkjermetBarnSøkerDto(søkersIdent = søkersIdent)
 
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr, fagsakType = FagsakType.SKJERMET_BARN, skjermetBarnSøker = skjermetBarnSøker))
 

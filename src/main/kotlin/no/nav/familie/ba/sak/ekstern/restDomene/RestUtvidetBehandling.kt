@@ -36,7 +36,7 @@ data class RestUtvidetBehandling(
     val tilbakekreving: RestTilbakekreving?,
     val vedtak: RestVedtak?,
     val totrinnskontroll: RestTotrinnskontroll?,
-    val aktivSettPåVent: RestSettPåVent?,
+    val aktivSettPåVent: SettPåVentDto?,
     val migreringsdato: LocalDate?,
     val valutakurser: List<RestValutakurs>,
     val utenlandskePeriodebeløp: List<RestUtenlandskPeriodebeløp>,

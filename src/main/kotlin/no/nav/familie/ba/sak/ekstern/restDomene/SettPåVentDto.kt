@@ -4,13 +4,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVent
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import java.time.LocalDate
 
-data class RestSettPåVent(
+data class SettPåVentDto(
     val frist: LocalDate,
     val årsak: SettPåVentÅrsak,
 )
 
-fun SettPåVent.tilRestSettPåVent(): RestSettPåVent =
-    RestSettPåVent(
+fun SettPåVent.tilSettPåVentDto(): SettPåVentDto =
+    SettPåVentDto(
         frist = this.frist,
         årsak = this.årsak,
     )
