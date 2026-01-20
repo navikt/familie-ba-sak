@@ -4,11 +4,11 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
+import no.nav.familie.ba.sak.ekstern.restDomene.SlettVilkårDto
+import no.nav.familie.ba.sak.ekstern.restDomene.VilkårResultatDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -58,18 +58,18 @@ class VilkårService(
     fun endreVilkår(
         behandlingId: Long,
         vilkårId: Long,
-        restPersonResultat: RestPersonResultat,
-    ): List<RestPersonResultat> {
+        personResultatDto: PersonResultatDto,
+    ): List<PersonResultatDto> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
-        val restVilkårResultat =
-            restPersonResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
+        val vilkårResultatDto =
+            personResultatDto.vilkårResultater.singleOrNull { it.id == vilkårId }
                 ?: throw Feil("Fant ikke vilkårResultat med id $vilkårId ved oppdatering av vilkår")
 
-        validerResultatBegrunnelse(restVilkårResultat)
+        validerResultatBegrunnelse(vilkårResultatDto)
 
         val personResultat =
-            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restPersonResultat.personIdent)
+            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, personResultatDto.personIdent)
 
         if (featureToggleService.isEnabled(VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR)) {
             val eksisterendeVilkårResultat =
@@ -77,15 +77,15 @@ class VilkårService(
                     ?: throw Feil("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
 
             if (eksisterendeVilkårResultat.erOpprinneligPreutfylt) {
-                val erEndringIBegrunnelse = eksisterendeVilkårResultat.begrunnelse != restVilkårResultat.begrunnelse
-                val erEndringIAnnetFeltEnnBegrunnelse = erEndringIVilkår(eksisterendeVilkårResultat, restVilkårResultat)
+                val erEndringIBegrunnelse = eksisterendeVilkårResultat.begrunnelse != vilkårResultatDto.begrunnelse
+                val erEndringIAnnetFeltEnnBegrunnelse = erEndringIVilkår(eksisterendeVilkårResultat, vilkårResultatDto)
 
                 if (!erEndringIBegrunnelse && !erEndringIAnnetFeltEnnBegrunnelse) {
-                    return vilkårsvurdering.personResultater.map { it.tilRestPersonResultat() }
+                    return vilkårsvurdering.personResultater.map { it.tilPersonResultatDto() }
                 }
 
                 val begrunnelseErTomEllerAutomatiskUtfylt =
-                    restVilkårResultat.begrunnelse.run { isBlank() || startsWith(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT) }
+                    vilkårResultatDto.begrunnelse.run { isBlank() || startsWith(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT) }
 
                 if (erEndringIAnnetFeltEnnBegrunnelse && begrunnelseErTomEllerAutomatiskUtfylt) {
                     throw FunksjonellFeil(
@@ -98,20 +98,20 @@ class VilkårService(
                     opprettLoggForEndringIPreutfyltVilkår(
                         behandling = vilkårsvurdering.behandling,
                         forrigeVilkår = eksisterendeVilkårResultat,
-                        nyttVilkår = restVilkårResultat,
+                        nyttVilkår = vilkårResultatDto,
                     ),
                 )
             }
         }
 
-        muterPersonVilkårResultaterPut(personResultat, restVilkårResultat)
+        muterPersonVilkårResultaterPut(personResultat, vilkårResultatDto)
 
         val vilkårResultat =
             personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
                 ?: throw Feil("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
 
         vilkårResultat.also {
-            it.standardbegrunnelser = restVilkårResultat.avslagBegrunnelser ?: emptyList()
+            it.standardbegrunnelser = vilkårResultatDto.avslagBegrunnelser ?: emptyList()
         }
 
         val migreringsdatoPåFagsak =
@@ -122,28 +122,28 @@ class VilkårService(
             migreringsdatoPåFagsak,
         )
 
-        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
+        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilPersonResultatDto() }
     }
 
     private fun erEndringIVilkår(
         vilkårResultat: VilkårResultat,
-        restVilkårResultat: RestVilkårResultat,
+        vilkårResultatDto: VilkårResultatDto,
     ): Boolean =
-        vilkårResultat.periodeFom != restVilkårResultat.periodeFom ||
-            vilkårResultat.periodeTom != restVilkårResultat.periodeTom ||
-            vilkårResultat.resultat != restVilkårResultat.resultat ||
-            vilkårResultat.resultatBegrunnelse != restVilkårResultat.resultatBegrunnelse ||
-            vilkårResultat.erEksplisittAvslagPåSøknad != restVilkårResultat.erEksplisittAvslagPåSøknad ||
-            vilkårResultat.vurderesEtter != restVilkårResultat.vurderesEtter ||
-            vilkårResultat.utdypendeVilkårsvurderinger.toSet() != restVilkårResultat.utdypendeVilkårsvurderinger.toSet() ||
-            vilkårResultat.standardbegrunnelser.toSet() != restVilkårResultat.avslagBegrunnelser.orEmpty().toSet()
+        vilkårResultat.periodeFom != vilkårResultatDto.periodeFom ||
+            vilkårResultat.periodeTom != vilkårResultatDto.periodeTom ||
+            vilkårResultat.resultat != vilkårResultatDto.resultat ||
+            vilkårResultat.resultatBegrunnelse != vilkårResultatDto.resultatBegrunnelse ||
+            vilkårResultat.erEksplisittAvslagPåSøknad != vilkårResultatDto.erEksplisittAvslagPåSøknad ||
+            vilkårResultat.vurderesEtter != vilkårResultatDto.vurderesEtter ||
+            vilkårResultat.utdypendeVilkårsvurderinger.toSet() != vilkårResultatDto.utdypendeVilkårsvurderinger.toSet() ||
+            vilkårResultat.standardbegrunnelser.toSet() != vilkårResultatDto.avslagBegrunnelser.orEmpty().toSet()
 
     @Transactional
     fun deleteVilkårsperiode(
         behandlingId: Long,
         vilkårId: Long,
         aktør: Aktør,
-    ): List<RestPersonResultat> {
+    ): List<PersonResultatDto> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
         val personResultat =
@@ -151,57 +151,57 @@ class VilkårService(
 
         muterPersonResultatDelete(personResultat, vilkårId)
 
-        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
+        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilPersonResultatDto() }
     }
 
     @Transactional
     fun deleteVilkår(
         behandlingId: Long,
-        restSlettVilkår: RestSlettVilkår,
-    ): List<RestPersonResultat> {
+        slettVilkårDto: SlettVilkårDto,
+    ): List<PersonResultatDto> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
         val personResultat =
-            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restSlettVilkår.personIdent)
+            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, slettVilkårDto.personIdent)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         if (!behandling.kanLeggeTilOgFjerneUtvidetVilkår() ||
-            Vilkår.UTVIDET_BARNETRYGD != restSlettVilkår.vilkårType ||
-            finnesUtvidetBarnetrydIForrigeBehandling(behandling, restSlettVilkår.personIdent)
+            Vilkår.UTVIDET_BARNETRYGD != slettVilkårDto.vilkårType ||
+            finnesUtvidetBarnetrydIForrigeBehandling(behandling, slettVilkårDto.personIdent)
         ) {
             throw FunksjonellFeil(
                 melding =
-                    "Vilkår ${restSlettVilkår.vilkårType.beskrivelse} kan ikke slettes " +
+                    "Vilkår ${slettVilkårDto.vilkårType.beskrivelse} kan ikke slettes " +
                         "for behandling $behandlingId",
                 frontendFeilmelding =
-                    "Vilkår ${restSlettVilkår.vilkårType.beskrivelse} kan ikke slettes " +
+                    "Vilkår ${slettVilkårDto.vilkårType.beskrivelse} kan ikke slettes " +
                         "for behandling $behandlingId",
             )
         }
 
         personResultat.vilkårResultater
-            .filter { it.vilkårType == restSlettVilkår.vilkårType }
+            .filter { it.vilkårType == slettVilkårDto.vilkårType }
             .forEach { personResultat.removeVilkårResultat(it.id) }
 
-        if (restSlettVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
+        if (slettVilkårDto.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
             behandlingstemaService.oppdaterBehandlingstemaForVilkår(
                 behandling = behandling,
                 overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
             )
         }
 
-        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
+        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilPersonResultatDto() }
     }
 
     @Transactional
     fun postVilkår(
         behandlingId: Long,
-        restNyttVilkår: RestNyttVilkår,
-    ): List<RestPersonResultat> {
+        nyttVilkårDto: NyttVilkårDto,
+    ): List<PersonResultatDto> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
         val behandling = vilkårsvurdering.behandling
 
-        if (restNyttVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
-            validerFørLeggeTilUtvidetBarnetrygd(behandling, restNyttVilkår, vilkårsvurdering)
+        if (nyttVilkårDto.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
+            validerFørLeggeTilUtvidetBarnetrygd(behandling, nyttVilkårDto, vilkårsvurdering)
 
             behandlingstemaService.oppdaterBehandlingstemaForVilkår(
                 behandling = behandling,
@@ -210,32 +210,32 @@ class VilkårService(
         }
 
         val personResultat =
-            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restNyttVilkår.personIdent)
+            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, nyttVilkårDto.personIdent)
 
-        muterPersonResultatPost(personResultat, restNyttVilkår.vilkårType)
+        muterPersonResultatPost(personResultat, nyttVilkårDto.vilkårType)
 
-        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
+        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilPersonResultatDto() }
     }
 
     private fun validerFørLeggeTilUtvidetBarnetrygd(
         behandling: Behandling,
-        restNyttVilkår: RestNyttVilkår,
+        nyttVilkårDto: NyttVilkårDto,
         vilkårsvurdering: Vilkårsvurdering,
     ) {
         if (!behandling.kanLeggeTilOgFjerneUtvidetVilkår() && !harUtvidetVilkår(vilkårsvurdering)) {
             throw FunksjonellFeil(
                 melding =
-                    "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til for behandling ${behandling.id} " +
+                    "${nyttVilkårDto.vilkårType.beskrivelse} kan ikke legges til for behandling ${behandling.id} " +
                         "med behandlingsårsak ${behandling.opprettetÅrsak.visningsnavn}",
                 frontendFeilmelding =
-                    "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til " +
+                    "${nyttVilkårDto.vilkårType.beskrivelse} kan ikke legges til " +
                         "for behandling ${behandling.id} med behandlingsårsak ${behandling.opprettetÅrsak.visningsnavn}",
             )
         }
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
         if (personopplysningGrunnlag.søkerOgBarn
-                .single { it.aktør == personidentService.hentAktør(restNyttVilkår.personIdent) }
+                .single { it.aktør == personidentService.hentAktør(nyttVilkårDto.personIdent) }
                 .type != PersonType.SØKER
         ) {
             throw FunksjonellFeil(

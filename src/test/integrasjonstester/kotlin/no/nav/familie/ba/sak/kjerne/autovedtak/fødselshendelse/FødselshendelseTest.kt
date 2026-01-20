@@ -128,7 +128,7 @@ class FødselshendelseTest(
             assertThat(it.stønadFom).isEqualTo(barnFødselsdato.nesteMåned())
         }
 
-        val vedtaksperioder = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandling.id)
+        val vedtaksperioder = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelserDto(behandling.id)
         assertThat(vedtaksperioder.single().begrunnelser).anySatisfy {
             assertThat { it.standardbegrunnelse == Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE.toString() }
             assertThat { it.standardbegrunnelse == INNVILGET_FINNMARKSTILLEGG_UTEN_DATO.toString() }
@@ -214,7 +214,7 @@ class FødselshendelseTest(
             assertThat(it.aktør).isEqualTo(yngsteBarnAktør)
         }
 
-        val vedtaksperioder = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandling.id)
+        val vedtaksperioder = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelserDto(behandling.id)
         assertThat(vedtaksperioder.single().begrunnelser).anySatisfy {
             assertThat { it.standardbegrunnelse == INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN.toString() }
             assertThat { it.standardbegrunnelse == INNVILGET_FINNMARKSTILLEGG_UTEN_DATO.toString() }
@@ -279,7 +279,7 @@ class FødselshendelseTest(
             assertThat(it.stønadFom).isEqualTo(barnFødselsdato.nesteMåned())
         }
 
-        val vedtaksperioder = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandling.id)
+        val vedtaksperioder = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelserDto(behandling.id)
         assertThat(vedtaksperioder.single().begrunnelser).anySatisfy {
             assertThat { it.standardbegrunnelse == Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE.toString() }
             assertThat { it.standardbegrunnelse == INNVILGET_SVALBARDTILLEGG_UTEN_DATO.toString() }
@@ -371,7 +371,7 @@ class FødselshendelseTest(
             assertThat(it.aktør).isEqualTo(yngsteBarnAktør)
         }
 
-        val vedtaksperioder = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandling.id)
+        val vedtaksperioder = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelserDto(behandling.id)
         assertThat(vedtaksperioder.single().begrunnelser).anySatisfy {
             assertThat { it.standardbegrunnelse == INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN.toString() }
             assertThat { it.standardbegrunnelse == INNVILGET_SVALBARDTILLEGG_UTEN_DATO.toString() }

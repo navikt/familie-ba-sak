@@ -10,8 +10,8 @@ import no.nav.familie.ba.sak.common.kanSplitte
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toPeriode
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.VedtakBegrunnelseTilknyttetVilkårDto
+import no.nav.familie.ba.sak.ekstern.restDomene.VilkårResultatDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
@@ -70,26 +70,26 @@ object VilkårsvurderingUtils {
     /**
      * Funksjon som tar inn endret vilkår og muterer personens vilkårresultater til å få plass til den endrede perioden.
      * @param[personResultat] Person med vilkår som eventuelt justeres
-     * @param[restVilkårResultat] Det endrede vilkårresultatet
+     * @param[vilkårResultatDto] Det endrede vilkårresultatet
      * @return VilkårResultater før og etter mutering
      */
     fun muterPersonVilkårResultaterPut(
         personResultat: PersonResultat,
-        restVilkårResultat: RestVilkårResultat,
+        vilkårResultatDto: VilkårResultatDto,
     ): Pair<List<VilkårResultat>, List<VilkårResultat>> {
         validerAvslagUtenPeriodeMedLøpende(
             personSomEndres = personResultat,
-            vilkårSomEndres = restVilkårResultat,
+            vilkårSomEndres = vilkårResultatDto,
         )
         val kopiAvVilkårResultater = personResultat.vilkårResultater.toList()
 
         kopiAvVilkårResultater
-            .filter { !(it.erEksplisittAvslagUtenPeriode() && it.id != restVilkårResultat.id) }
+            .filter { !(it.erEksplisittAvslagUtenPeriode() && it.id != vilkårResultatDto.id) }
             .forEach {
                 tilpassVilkårForEndretVilkår(
                     personResultat = personResultat,
                     vilkårResultat = it,
-                    restVilkårResultat = restVilkårResultat,
+                    vilkårResultatDto = vilkårResultatDto,
                 )
             }
 
@@ -98,7 +98,7 @@ object VilkårsvurderingUtils {
 
     fun validerAvslagUtenPeriodeMedLøpende(
         personSomEndres: PersonResultat,
-        vilkårSomEndres: RestVilkårResultat,
+        vilkårSomEndres: VilkårResultatDto,
     ) {
         val resultaterPåVilkår =
             personSomEndres.vilkårResultater.filter { it.vilkårType == vilkårSomEndres.vilkårType && it.id != vilkårSomEndres.id }
@@ -138,18 +138,18 @@ object VilkårsvurderingUtils {
     /**
      * @param [personResultat] person vilkårresultatet tilhører
      * @param [vilkårResultat] vilkårresultat som skal oppdaters på person
-     * @param [restVilkårResultat] oppdatert resultat fra frontend
+     * @param [vilkårResultatDto] oppdatert resultat fra frontend
      */
     fun tilpassVilkårForEndretVilkår(
         personResultat: PersonResultat,
         vilkårResultat: VilkårResultat,
-        restVilkårResultat: RestVilkårResultat,
+        vilkårResultatDto: VilkårResultatDto,
     ) {
-        val periodePåNyttVilkår: Periode = restVilkårResultat.toPeriode()
+        val periodePåNyttVilkår: Periode = vilkårResultatDto.toPeriode()
 
-        if (vilkårResultat.id == restVilkårResultat.id) {
-            vilkårResultat.oppdater(restVilkårResultat)
-        } else if (vilkårResultat.vilkårType == restVilkårResultat.vilkårType && !restVilkårResultat.erAvslagUtenPeriode()) {
+        if (vilkårResultat.id == vilkårResultatDto.id) {
+            vilkårResultat.oppdater(vilkårResultatDto)
+        } else if (vilkårResultat.vilkårType == vilkårResultatDto.vilkårType && !vilkårResultatDto.erAvslagUtenPeriode()) {
             val periode: Periode = vilkårResultat.toPeriode()
 
             var nyFom = periodePåNyttVilkår.tom
@@ -358,7 +358,7 @@ fun standardbegrunnelserTilNedtrekksmenytekster(
     .mapValues { begrunnelseGruppe ->
         begrunnelseGruppe.value
             .flatMap { vedtakBegrunnelse ->
-                vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
+                vedtakBegrunnelseTilVedtakBegrunnelseTilknyttetVilkårDto(
                     sanityBegrunnelser,
                     vedtakBegrunnelse,
                 )
@@ -371,24 +371,24 @@ fun eøsStandardbegrunnelserTilNedtrekksmenytekster(
     .groupBy { it.vedtakBegrunnelseType }
     .mapValues { begrunnelseGruppe ->
         begrunnelseGruppe.value.flatMap { vedtakBegrunnelse ->
-            eøsBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
+            eøsBegrunnelseTilVedtakBegrunnelseTilknyttetVilkårDto(
                 sanityEØSBegrunnelser,
                 vedtakBegrunnelse,
             )
         }
     }
 
-fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
+fun vedtakBegrunnelseTilVedtakBegrunnelseTilknyttetVilkårDto(
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     vedtakBegrunnelse: Standardbegrunnelse,
-): List<RestVedtakBegrunnelseTilknyttetVilkår> {
+): List<VedtakBegrunnelseTilknyttetVilkårDto> {
     val sanityBegrunnelse = sanityBegrunnelser[vedtakBegrunnelse] ?: return emptyList()
 
     val visningsnavn = sanityBegrunnelse.navnISystem
 
     return if (sanityBegrunnelse.vilkår.isEmpty()) {
         listOf(
-            RestVedtakBegrunnelseTilknyttetVilkår(
+            VedtakBegrunnelseTilknyttetVilkårDto(
                 id = vedtakBegrunnelse.enumnavnTilString(),
                 navn = visningsnavn,
                 vilkår = null,
@@ -396,7 +396,7 @@ fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
         )
     } else {
         sanityBegrunnelse.vilkår.map {
-            RestVedtakBegrunnelseTilknyttetVilkår(
+            VedtakBegrunnelseTilknyttetVilkårDto(
                 id = vedtakBegrunnelse.enumnavnTilString(),
                 navn = visningsnavn,
                 vilkår = it,
@@ -405,15 +405,15 @@ fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
     }
 }
 
-fun eøsBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
+fun eøsBegrunnelseTilVedtakBegrunnelseTilknyttetVilkårDto(
     sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
     vedtakBegrunnelse: EØSStandardbegrunnelse,
-): List<RestVedtakBegrunnelseTilknyttetVilkår> {
+): List<VedtakBegrunnelseTilknyttetVilkårDto> {
     val eøsSanityBegrunnelse = sanityEØSBegrunnelser[vedtakBegrunnelse] ?: return emptyList()
 
     return if (eøsSanityBegrunnelse.vilkår.isEmpty()) {
         listOf(
-            RestVedtakBegrunnelseTilknyttetVilkår(
+            VedtakBegrunnelseTilknyttetVilkårDto(
                 id = vedtakBegrunnelse.enumnavnTilString(),
                 navn = eøsSanityBegrunnelse.navnISystem,
                 vilkår = null,
@@ -421,7 +421,7 @@ fun eøsBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
         )
     } else {
         eøsSanityBegrunnelse.vilkår.map {
-            RestVedtakBegrunnelseTilknyttetVilkår(
+            VedtakBegrunnelseTilknyttetVilkårDto(
                 id = vedtakBegrunnelse.enumnavnTilString(),
                 navn = eøsSanityBegrunnelse.navnISystem,
                 vilkår = it,

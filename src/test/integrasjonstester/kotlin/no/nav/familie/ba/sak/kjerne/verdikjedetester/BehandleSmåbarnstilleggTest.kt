@@ -6,19 +6,19 @@ import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
+import no.nav.familie.ba.sak.ekstern.restDomene.PutVedtaksperiodeMedStandardbegrunnelserDto
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
 import no.nav.familie.ba.sak.fake.tilPayload
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.HenleggBehandlingInfoDto
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -27,16 +27,16 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -85,11 +85,11 @@ class BehandleSmåbarnstilleggTest(
     private val periodeMedFullOvergangsstønadFom = barnFødselsdato.plusYears(1)
 
     val scenario =
-        RestScenario(
-            søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+        ScenarioDto(
+            søker = ScenarioPersonDto(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
             barna =
                 listOf(
-                    RestScenarioPerson(
+                    ScenarioPersonDto(
                         fødselsdato = barnFødselsdato.toString(),
                         fornavn = "Barn",
                         etternavn = "Barnesen",
@@ -134,16 +134,16 @@ class BehandleSmåbarnstilleggTest(
         settOppefSakMockForDeFørste2Testene(søkersIdent)
 
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
-        val restBehandling =
+        val behandlingDto =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = søkersIdent,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 fagsakId = fagsak.data!!.id,
             )
 
-        val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
-        val restRegistrerSøknad =
-            RestRegistrerSøknad(
+        val behandling = behandlingHentOgPersisterService.hent(behandlingDto.data!!.behandlingId)
+        val registrerSøknadDto =
+            RegistrerSøknadDto(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = søkersIdent,
@@ -152,25 +152,25 @@ class BehandleSmåbarnstilleggTest(
                     ),
                 bekreftEndringerViaFrontend = false,
             )
-        val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
+        val utvidetBehandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().registrererSøknad(
                 behandlingId = behandling.id,
-                restRegistrerSøknad = restRegistrerSøknad,
+                registrerSøknadDto = registrerSøknadDto,
             )
-        generellAssertRestUtvidetBehandling(
-            restUtvidetBehandling = restUtvidetBehandling,
+        generellAssertUtvidetBehandlingDto(
+            utvidetBehandlingDto = utvidetBehandlingDto,
             behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.VILKÅRSVURDERING,
         )
 
-        restUtvidetBehandling.data!!.personResultater.forEach { restPersonResultat ->
-            restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
+        utvidetBehandlingDto.data!!.personResultater.forEach { personResultatDto ->
+            personResultatDto.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
                 familieBaSakKlient().putVilkår(
-                    behandlingId = restUtvidetBehandling.data!!.behandlingId,
+                    behandlingId = utvidetBehandlingDto.data!!.behandlingId,
                     vilkårId = it.id,
-                    restPersonResultat =
-                        RestPersonResultat(
-                            personIdent = restPersonResultat.personIdent,
+                    personResultatDto =
+                        PersonResultatDto(
+                            personIdent = personResultatDto.personIdent,
                             vilkårResultater =
                                 listOf(
                                     it.copy(
@@ -184,24 +184,24 @@ class BehandleSmåbarnstilleggTest(
         }
 
         familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = restUtvidetBehandling.data!!.behandlingId,
+            behandlingId = utvidetBehandlingDto.data!!.behandlingId,
         )
 
-        val restUtvidetBehandlingEtterBehandlingsResultat =
+        val utvidetBehandlingDtoEtterBehandlingsResultat =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-                behandlingId = restUtvidetBehandling.data!!.behandlingId,
+                behandlingId = utvidetBehandlingDto.data!!.behandlingId,
             )
 
         assertEquals(
             ordinærSatsNesteMånedTilTester().beløp + sisteUtvidetSatsTilTester() + sisteSmåbarnstilleggSatsTilTester(),
             hentNåværendeEllerNesteMånedsUtbetaling(
-                behandling = restUtvidetBehandlingEtterBehandlingsResultat.data!!,
+                behandling = utvidetBehandlingDtoEtterBehandlingsResultat.data!!,
             ),
         )
 
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                behandlingId = restUtvidetBehandlingEtterBehandlingsResultat.data!!.behandlingId,
+                behandlingId = utvidetBehandlingDtoEtterBehandlingsResultat.data!!.behandlingId,
             )
         val utvidedeAndeler = andelerTilkjentYtelse.filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
         val småbarnstilleggAndel = andelerTilkjentYtelse.single { it.type == YtelseType.SMÅBARNSTILLEGG }
@@ -219,33 +219,33 @@ class BehandleSmåbarnstilleggTest(
             småbarnstilleggAndel.stønadTom,
         )
 
-        generellAssertRestUtvidetBehandling(
-            restUtvidetBehandling = restUtvidetBehandlingEtterBehandlingsResultat,
+        generellAssertUtvidetBehandlingDto(
+            utvidetBehandlingDto = utvidetBehandlingDtoEtterBehandlingsResultat,
             behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.VURDER_TILBAKEKREVING,
         )
 
-        val restUtvidetBehandlingEtterVurderTilbakekreving =
+        val utvidetBehandlingDtoEtterVurderTilbakekreving =
             familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
-                restUtvidetBehandlingEtterBehandlingsResultat.data!!.behandlingId,
-                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
+                utvidetBehandlingDtoEtterBehandlingsResultat.data!!.behandlingId,
+                TilbakekrevingDto(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
             )
-        generellAssertRestUtvidetBehandling(
-            restUtvidetBehandling = restUtvidetBehandlingEtterVurderTilbakekreving,
+        generellAssertUtvidetBehandlingDto(
+            utvidetBehandlingDto = utvidetBehandlingDtoEtterVurderTilbakekreving,
             behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.SEND_TIL_BESLUTTER,
         )
 
         val vedtaksperioderMedBegrunnelser =
-            vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
-                restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
+            vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelserDto(
+                utvidetBehandlingDtoEtterVurderTilbakekreving.data!!.behandlingId,
             )
 
         val vedtaksperiode = vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiode.id,
-            restPutVedtaksperiodeMedStandardbegrunnelser =
-                RestPutVedtaksperiodeMedStandardbegrunnelser(
+            putVedtaksperiodeMedStandardbegrunnelserDto =
+                PutVedtaksperiodeMedStandardbegrunnelserDto(
                     standardbegrunnelser =
                         listOf(
                             Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
@@ -253,20 +253,20 @@ class BehandleSmåbarnstilleggTest(
                 ),
         )
 
-        val restUtvidetBehandlingEtterSendTilBeslutter =
-            familieBaSakKlient().sendTilBeslutter(behandlingId = restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId)
+        val utvidetBehandlingDtoEtterSendTilBeslutter =
+            familieBaSakKlient().sendTilBeslutter(behandlingId = utvidetBehandlingDtoEtterVurderTilbakekreving.data!!.behandlingId)
 
-        generellAssertRestUtvidetBehandling(
-            restUtvidetBehandling = restUtvidetBehandlingEtterSendTilBeslutter,
+        generellAssertUtvidetBehandlingDto(
+            utvidetBehandlingDto = utvidetBehandlingDtoEtterSendTilBeslutter,
             behandlingStatus = BehandlingStatus.FATTER_VEDTAK,
             behandlingStegType = StegType.BESLUTTE_VEDTAK,
         )
 
-        val restUtvidetBehandlingEtterIverksetting =
+        val utvidetBehandlingDtoEtterIverksetting =
             familieBaSakKlient().iverksettVedtak(
-                behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
-                restBeslutningPåVedtak =
-                    RestBeslutningPåVedtak(
+                behandlingId = utvidetBehandlingDtoEtterSendTilBeslutter.data!!.behandlingId,
+                beslutningPåVedtakDto =
+                    BeslutningPåVedtakDto(
                         Beslutning.GODKJENT,
                     ),
                 beslutterHeaders =
@@ -283,8 +283,8 @@ class BehandleSmåbarnstilleggTest(
                         )
                     },
             )
-        generellAssertRestUtvidetBehandling(
-            restUtvidetBehandling = restUtvidetBehandlingEtterIverksetting,
+        generellAssertUtvidetBehandlingDto(
+            utvidetBehandlingDto = utvidetBehandlingDtoEtterIverksetting,
             behandlingStatus = BehandlingStatus.IVERKSETTER_VEDTAK,
             behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
         )
@@ -371,7 +371,7 @@ class BehandleSmåbarnstilleggTest(
             stegService.håndterHenleggBehandling(
                 behandling = aktivBehandling,
                 henleggBehandlingInfo =
-                    RestHenleggBehandlingInfo(
+                    HenleggBehandlingInfoDto(
                         årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
                         begrunnelse = "",
                     ),

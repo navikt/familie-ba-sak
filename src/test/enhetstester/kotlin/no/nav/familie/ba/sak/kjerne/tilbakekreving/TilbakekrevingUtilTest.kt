@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions
@@ -22,8 +22,8 @@ class TilbakekrevingUtilTest {
     fun `test validerVerdierPåRestTilbakekreving kaster feil ved tilbakekreving uten feilutbetaling`() {
         assertThrows<Exception> {
             validerVerdierPåRestTilbakekreving(
-                restTilbakekreving =
-                    RestTilbakekreving(
+                tilbakekrevingDto =
+                    TilbakekrevingDto(
                         valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                         begrunnelse = "",
                     ),
@@ -36,7 +36,7 @@ class TilbakekrevingUtilTest {
     fun `test validerVerdierPåRestTilbakekreving kaster feil ved ingen tilbakekreving når det er en feilutbetaling`() {
         assertThrows<Exception> {
             validerVerdierPåRestTilbakekreving(
-                restTilbakekreving = null,
+                tilbakekrevingDto = null,
                 feilutbetaling = BigDecimal.ONE,
             )
         }

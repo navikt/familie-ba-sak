@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
+import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerDto
+import no.nav.familie.ba.sak.ekstern.restDomene.SøkParamDto
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -28,8 +28,8 @@ class FagsakDeltagerController(
 ) {
     @PostMapping
     fun søkFagsak(
-        @RequestBody søkParam: RestSøkParam,
-    ): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
+        @RequestBody søkParam: SøkParamDto,
+    ): ResponseEntity<Ressurs<List<FagsakDeltagerDto>>> {
         søkParam.valider()
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} søker fagsak")
 
@@ -39,13 +39,13 @@ class FagsakDeltagerController(
 
     @PostMapping(path = ["/fagsakdeltagere"])
     fun oppgiFagsakdeltagere(
-        @RequestBody restSøkParam: RestSøkParam,
-    ): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
-        restSøkParam.valider()
+        @RequestBody søkParamDto: SøkParamDto,
+    ): ResponseEntity<Ressurs<List<FagsakDeltagerDto>>> {
+        søkParamDto.valider()
         return Result
             .runCatching {
-                val aktør = personidentService.hentAktør(restSøkParam.personIdent)
-                val barnsAktørId = personidentService.hentAktørIder(restSøkParam.barnasIdenter)
+                val aktør = personidentService.hentAktør(søkParamDto.personIdent)
+                val barnsAktørId = personidentService.hentAktørIder(søkParamDto.barnasIdenter)
 
                 fagsakDeltagerService.oppgiFagsakDeltagere(aktør, barnsAktørId)
             }.fold(

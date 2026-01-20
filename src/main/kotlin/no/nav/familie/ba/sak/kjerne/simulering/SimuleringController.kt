@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.simulering
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
-import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
+import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringDto
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -27,7 +27,7 @@ class SimuleringController(
     @GetMapping(path = ["/{behandlingId}/simulering"])
     fun hentSimulering(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<RestSimulering>> {
+    ): ResponseEntity<Ressurs<SimuleringDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
         val avregningsperioder = avregningService.hentPerioderMedAvregning(behandlingId)
@@ -40,12 +40,12 @@ class SimuleringController(
         }
 
         val simulering =
-            vedtakSimuleringMottakereTilRestSimulering(
+            vedtakSimuleringMottakereTilSimuleringDto(
                 økonomiSimuleringMottakere = vedtakSimuleringMottaker,
             )
 
         val restSimulering =
-            simulering.tilRestSimulering(avregningsperioder, overlappendePerioderMedAndreFagsaker)
+            simulering.tilSimuleringDto(avregningsperioder, overlappendePerioderMedAndreFagsaker)
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }
 

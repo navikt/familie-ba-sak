@@ -8,9 +8,9 @@ import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
-import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
+import no.nav.familie.ba.sak.ekstern.restDomene.SlettVilkårDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -164,11 +164,11 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultat =
+            val personResultatDto =
                 vilkårsvurdering
                     .personResultater
                     .single()
-                    .tilRestPersonResultat()
+                    .tilPersonResultatDto()
 
             val ikkeEksisterendeVilkårId = 1L
 
@@ -178,7 +178,7 @@ class VilkårServiceTest(
                     vilkårService.endreVilkår(
                         behandlingId = behandling.id,
                         vilkårId = ikkeEksisterendeVilkårId,
-                        restPersonResultat = restPersonResultat,
+                        personResultatDto = personResultatDto,
                     )
                 }
 
@@ -204,25 +204,25 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultater = vilkårsvurdering.personResultater.map { it.tilRestPersonResultat() }
-            val restPersonResultatSøker = restPersonResultater.first { it.personIdent == søkerFnr }
-            val restVilkårResultat = restPersonResultatSøker.vilkårResultater.first()
+            val personResultaterDto = vilkårsvurdering.personResultater.map { it.tilPersonResultatDto() }
+            val personResultatSøkerDto = personResultaterDto.first { it.personIdent == søkerFnr }
+            val vilkårResultatDto = personResultatSøkerDto.vilkårResultater.first()
 
             // Act
-            val restPersonResultaterMedEndringer =
+            val personResultatDtoerMedEndringer =
                 vilkårService
                     .endreVilkår(
                         behandlingId = behandling.id,
-                        vilkårId = restVilkårResultat.id,
-                        restPersonResultat = restPersonResultatSøker,
+                        vilkårId = vilkårResultatDto.id,
+                        personResultatDto = personResultatSøkerDto,
                     )
 
             // Assert
-            assertThat(restPersonResultaterMedEndringer)
+            assertThat(personResultatDtoerMedEndringer)
                 .usingRecursiveComparison()
                 .ignoringCollectionOrder()
                 .ignoringFieldsMatchingRegexes(".*opprettetTidspunkt", ".*endretTidspunkt")
-                .isEqualTo(restPersonResultater)
+                .isEqualTo(personResultaterDto)
         }
 
         @ParameterizedTest
@@ -253,14 +253,14 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultat = vilkårsvurdering.personResultater.single().tilRestPersonResultat()
-            val restVilkårResultat = restPersonResultat.vilkårResultater.single()
+            val personResultatDto = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
+            val vilkårResultatDto = personResultatDto.vilkårResultater.single()
 
-            val restPersonResultatMedEndring =
-                restPersonResultat.copy(
+            val personResultatDtoMedEndring =
+                personResultatDto.copy(
                     vilkårResultater =
                         listOf(
-                            restVilkårResultat.copy(
+                            vilkårResultatDto.copy(
                                 periodeFom = LocalDate.of(2024, 1, 1),
                                 begrunnelse = begrunnelseFraFrontend,
                             ),
@@ -273,8 +273,8 @@ class VilkårServiceTest(
                     vilkårService
                         .endreVilkår(
                             behandlingId = behandling.id,
-                            vilkårId = restVilkårResultat.id,
-                            restPersonResultat = restPersonResultatMedEndring,
+                            vilkårId = vilkårResultatDto.id,
+                            personResultatDto = personResultatDtoMedEndring,
                         )
                 }
 
@@ -307,15 +307,15 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultat = vilkårsvurdering.personResultater.single().tilRestPersonResultat()
-            val restVilkårResultat = restPersonResultat.vilkårResultater.single()
+            val personResultatDto = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
+            val vilkårResultatDto = personResultatDto.vilkårResultater.single()
 
-            val restPersonResultatMedEndring =
-                restPersonResultat.copy(
+            val personResultatDtoMedEndring =
+                personResultatDto.copy(
                     vilkårResultater =
                         listOf(
-                            restVilkårResultat.copy(
-                                begrunnelse = restVilkårResultat.begrunnelse + "\nEkstra informasjon",
+                            vilkårResultatDto.copy(
+                                begrunnelse = vilkårResultatDto.begrunnelse + "\nEkstra informasjon",
                             ),
                         ),
                 )
@@ -324,8 +324,8 @@ class VilkårServiceTest(
             vilkårService
                 .endreVilkår(
                     behandlingId = behandling.id,
-                    vilkårId = restVilkårResultat.id,
-                    restPersonResultat = restPersonResultatMedEndring,
+                    vilkårId = vilkårResultatDto.id,
+                    personResultatDto = personResultatDtoMedEndring,
                 )
 
             // Assert
@@ -339,7 +339,7 @@ class VilkårServiceTest(
 
             assertThat(oppdatertVilkårResultat.erAutomatiskVurdert).isFalse()
             assertThat(oppdatertVilkårResultat.erOpprinneligPreutfylt).isTrue()
-            assertThat(oppdatertVilkårResultat.begrunnelse).isEqualTo(restVilkårResultat.begrunnelse + "\nEkstra informasjon")
+            assertThat(oppdatertVilkårResultat.begrunnelse).isEqualTo(vilkårResultatDto.begrunnelse + "\nEkstra informasjon")
         }
 
         @Test
@@ -367,14 +367,14 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultat = vilkårsvurdering.personResultater.single().tilRestPersonResultat()
-            val restVilkårResultat = restPersonResultat.vilkårResultater.single()
+            val personResultatDto = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
+            val vilkårResultatDto = personResultatDto.vilkårResultater.single()
 
-            val restPersonResultatMedEndring =
-                restPersonResultat.copy(
+            val personResultatMedEndringDto =
+                personResultatDto.copy(
                     vilkårResultater =
                         listOf(
-                            restVilkårResultat
+                            vilkårResultatDto
                                 .copy(
                                     periodeFom = LocalDate.of(2024, 1, 1),
                                     begrunnelse = "Ny begrunnelse",
@@ -385,8 +385,8 @@ class VilkårServiceTest(
             // Act
             vilkårService.endreVilkår(
                 behandlingId = behandling.id,
-                vilkårId = restVilkårResultat.id,
-                restPersonResultat = restPersonResultatMedEndring,
+                vilkårId = vilkårResultatDto.id,
+                personResultatDto = personResultatMedEndringDto,
             )
 
             // Assert
@@ -432,14 +432,14 @@ class VilkårServiceTest(
                     },
                 )
 
-            val restPersonResultat = vilkårsvurdering.personResultater.single().tilRestPersonResultat()
-            val restVilkårResultat = restPersonResultat.vilkårResultater.single()
+            val personResultatDto = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
+            val vilkårResultatDto = personResultatDto.vilkårResultater.single()
 
-            val restPersonResultatMedEndring =
-                restPersonResultat.copy(
+            val personResultatDtoMedEndring =
+                personResultatDto.copy(
                     vilkårResultater =
                         listOf(
-                            restVilkårResultat
+                            vilkårResultatDto
                                 .copy(
                                     periodeFom = LocalDate.of(2024, 1, 1),
                                     begrunnelse = "Ny begrunnelse",
@@ -453,8 +453,8 @@ class VilkårServiceTest(
             // Act
             vilkårService.endreVilkår(
                 behandlingId = behandling.id,
-                vilkårId = restVilkårResultat.id,
-                restPersonResultat = restPersonResultatMedEndring,
+                vilkårId = vilkårResultatDto.id,
+                personResultatDto = personResultatDtoMedEndring,
             )
 
             // Assert
@@ -610,8 +610,8 @@ class VilkårServiceTest(
                 },
             )
 
-            val restSlettVilkår =
-                RestSlettVilkår(
+            val slettVilkårDto =
+                SlettVilkårDto(
                     personIdent = søkerFnr,
                     vilkårType = LOVLIG_OPPHOLD,
                 )
@@ -621,7 +621,7 @@ class VilkårServiceTest(
                 assertThrows<FunksjonellFeil> {
                     vilkårService.deleteVilkår(
                         behandlingId = behandling.id,
-                        restSlettVilkår = restSlettVilkår,
+                        slettVilkårDto = slettVilkårDto,
                     )
                 }
 
@@ -662,8 +662,8 @@ class VilkårServiceTest(
                 },
             )
 
-            val restSlettVilkår =
-                RestSlettVilkår(
+            val slettVilkårDto =
+                SlettVilkårDto(
                     personIdent = søkerFnr,
                     vilkårType = UTVIDET_BARNETRYGD,
                 )
@@ -671,7 +671,7 @@ class VilkårServiceTest(
             // Act
             vilkårService.deleteVilkår(
                 behandlingId = behandling.id,
-                restSlettVilkår = restSlettVilkår,
+                slettVilkårDto = slettVilkårDto,
             )
 
             // Assert
@@ -692,8 +692,8 @@ class VilkårServiceTest(
 
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(lagVilkårsvurdering(behandling = behandling))
 
-            val restNyttVilkår =
-                RestNyttVilkår(
+            val nyttVilkårDto =
+                NyttVilkårDto(
                     personIdent = barnFnr,
                     vilkårType = UTVIDET_BARNETRYGD,
                 )
@@ -703,7 +703,7 @@ class VilkårServiceTest(
                 assertThrows<FunksjonellFeil> {
                     vilkårService.postVilkår(
                         behandlingId = behandling.id,
-                        restNyttVilkår = restNyttVilkår,
+                        nyttVilkårDto = nyttVilkårDto,
                     )
                 }
 
@@ -720,8 +720,8 @@ class VilkårServiceTest(
 
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(lagVilkårsvurdering(behandling = behandling))
 
-            val restNyttVilkår =
-                RestNyttVilkår(
+            val nyttVilkårDto =
+                NyttVilkårDto(
                     personIdent = barnFnr,
                     vilkårType = UTVIDET_BARNETRYGD,
                 )
@@ -731,7 +731,7 @@ class VilkårServiceTest(
                 assertThrows<FunksjonellFeil> {
                     vilkårService.postVilkår(
                         behandlingId = behandling.id,
-                        restNyttVilkår = restNyttVilkår,
+                        nyttVilkårDto = nyttVilkårDto,
                     )
                 }
 
@@ -763,8 +763,8 @@ class VilkårServiceTest(
                 },
             )
 
-            val restNyttVilkår =
-                RestNyttVilkår(
+            val nyttVilkårDto =
+                NyttVilkårDto(
                     personIdent = søkerFnr,
                     vilkårType = UTVIDET_BARNETRYGD,
                 )
@@ -772,7 +772,7 @@ class VilkårServiceTest(
             // Act
             vilkårService.postVilkår(
                 behandlingId = behandling.id,
-                restNyttVilkår = restNyttVilkår,
+                nyttVilkårDto = nyttVilkårDto,
             )
 
             // Assert
@@ -795,8 +795,8 @@ class VilkårServiceTest(
                 },
             )
 
-            val restNyttVilkår =
-                RestNyttVilkår(
+            val nyttVilkårDto =
+                NyttVilkårDto(
                     personIdent = søkerFnr,
                     vilkårType = LOVLIG_OPPHOLD,
                 )
@@ -804,7 +804,7 @@ class VilkårServiceTest(
             // Act
             vilkårService.postVilkår(
                 behandlingId = behandling.id,
-                restNyttVilkår = restNyttVilkår,
+                nyttVilkårDto = nyttVilkårDto,
             )
 
             // Assert

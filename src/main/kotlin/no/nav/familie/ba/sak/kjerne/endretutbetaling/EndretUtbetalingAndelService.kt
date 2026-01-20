@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerOgSettTomDatoHvisNull
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraEndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak.ETTERBETALING_3MND
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak.ETTERBETALING_3ÅR
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -44,11 +44,11 @@ class EndretUtbetalingAndelService(
     fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         behandling: Behandling,
         endretUtbetalingAndelId: Long,
-        restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
+        endretUtbetalingAndelDto: EndretUtbetalingAndelDto,
     ) {
         val endretUtbetalingAndel = endretUtbetalingAndelRepository.getReferenceById(endretUtbetalingAndelId)
         val personerPåEndretUtbetalingAndel =
-            restEndretUtbetalingAndel.personIdenter.takeUnless { it.isNullOrEmpty() }
+            endretUtbetalingAndelDto.personIdenter.takeUnless { it.isNullOrEmpty() }
                 ?: throw FunksjonellFeil("Endret utbetalingsperiode må gjelde minst én person")
 
         val personerIEndretUtbetalingAndel =
@@ -62,7 +62,7 @@ class EndretUtbetalingAndelService(
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
-        endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, personerIEndretUtbetalingAndel.toSet())
+        endretUtbetalingAndel.fraEndretUtbetalingAndelDto(endretUtbetalingAndelDto, personerIEndretUtbetalingAndel.toSet())
 
         val andreEndredeAndelerPåBehandling =
             endretUtbetalingAndelHentOgPersisterService

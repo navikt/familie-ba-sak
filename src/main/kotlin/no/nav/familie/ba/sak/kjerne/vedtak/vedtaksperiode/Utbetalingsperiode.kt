@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonDto
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinje
@@ -29,7 +29,7 @@ data class Utbetalingsperiode(
 )
 
 data class UtbetalingsperiodeDetalj(
-    val person: RestPerson,
+    val person: PersonDto,
     val ytelseType: YtelseType,
     val utbetaltPerMnd: Int,
     val erPåvirketAvEndring: Boolean,
@@ -41,7 +41,7 @@ data class UtbetalingsperiodeDetalj(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) : this(
         person =
-            personopplysningGrunnlag.søkerOgBarn.find { person -> andel.aktør == person.aktør }?.tilRestPerson()
+            personopplysningGrunnlag.søkerOgBarn.find { person -> andel.aktør == person.aktør }?.tilPersonDto()
                 ?: throw Feil("Fant ikke personopplysningsgrunnlag for andel"),
         ytelseType = andel.type,
         utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp,
@@ -96,7 +96,7 @@ fun Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagUtbetalingsperiodeD
                 ?: throw Feil("Fant ikke personopplysningsgrunnlag for andel")
 
         UtbetalingsperiodeDetalj(
-            person = personForAndel.tilRestPerson(),
+            person = personForAndel.tilPersonDto(),
             ytelseType = andel.type,
             utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp,
             erPåvirketAvEndring = andel.endreteUtbetalinger.isNotEmpty(),

@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRefusjonEøs
+import no.nav.familie.ba.sak.ekstern.restDomene.RefusjonEøsDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
@@ -27,7 +27,7 @@ class RefusjonEøsServiceIT(
         val behandling =
             lagBehandlingUtenId(fagsak = fagsak).let { behandlingHentOgPersisterService.lagreEllerOppdater(it, false) }
         val refusjonEøs =
-            RestRefusjonEøs(
+            RefusjonEøsDto(
                 id = 0,
                 fom = LocalDate.of(2020, Month.JANUARY, 1),
                 tom = LocalDate.of(2021, Month.MAY, 31),
@@ -45,8 +45,8 @@ class RefusjonEøsServiceIT(
             .also { Assertions.assertThat(it[0].tom).isEqualTo("2021-05-31") }
 
         refusjonEøsService.oppdaterRefusjonEøsPeriode(
-            restRefusjonEøs =
-                RestRefusjonEøs(
+            refusjonEøsDto =
+                RefusjonEøsDto(
                     id = id,
                     fom = LocalDate.of(2020, Month.JANUARY, 1),
                     tom = LocalDate.of(2020, Month.MAY, 31),
@@ -66,7 +66,7 @@ class RefusjonEøsServiceIT(
             .also { Assertions.assertThat(it[0].refusjonAvklart).isEqualTo(false) }
 
         val refusjonEøs2 =
-            RestRefusjonEøs(
+            RefusjonEøsDto(
                 id = 0,
                 fom = LocalDate.of(2019, Month.DECEMBER, 1),
                 tom = LocalDate.of(2019, Month.DECEMBER, 31),

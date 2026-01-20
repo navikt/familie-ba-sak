@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
@@ -35,15 +35,15 @@ class KompetanseTestController(
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun endreKompetanser(
         @PathVariable behandlingId: Long,
-        @RequestBody restKompetanser: Map<LocalDate, String>,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        @RequestBody kompetanserDto: Map<LocalDate, String>,
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         val behandlingIdObjekt = BehandlingId(behandlingId)
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingIdObjekt.id)!!
-        restKompetanser.tilKompetanser(behandlingIdObjekt, personopplysningGrunnlag).forEach {
+        kompetanserDto.tilKompetanser(behandlingIdObjekt, personopplysningGrunnlag).forEach {
             kompetanseService.oppdaterKompetanse(behandlingIdObjekt, it)
         }
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingIdObjekt.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingIdObjekt.id)))
     }
 }
 

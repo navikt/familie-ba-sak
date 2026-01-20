@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
-import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingFraRestScenario
+import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingFraScenarioDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -17,8 +17,8 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -44,16 +44,16 @@ class RevurderingDødsfallTest(
     @Test
     fun `Dødsfall bruker skal kjøre gjennom`() {
         val scenario =
-            RestScenario(
+            ScenarioDto(
                 søker =
-                    RestScenarioPerson(
+                    ScenarioPersonDto(
                         fødselsdato = "1982-01-12",
                         fornavn = "Mor",
                         etternavn = "Søker",
                     ),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = LocalDate.now().minusMonths(2).toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
@@ -104,7 +104,7 @@ class RevurderingDødsfallTest(
                 vedtakService = vedtakService,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingÅrsak = BehandlingÅrsak.DØDSFALL_BRUKER,
-                overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(scenario, overstyrendeVilkårResultater),
+                overstyrendeVilkårsvurdering = lagVilkårsvurderingFraScenarioDto(scenario, overstyrendeVilkårResultater),
                 behandlingstype = BehandlingType.REVURDERING,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
@@ -113,11 +113,11 @@ class RevurderingDødsfallTest(
                 brevmalService = brevmalService,
             )
 
-        val restFagsakEtterBehandlingAvsluttet =
+        val fagsakDtoEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = behandlingDødsfall.fagsak.id)
 
         generellAssertFagsak(
-            restFagsak = restFagsakEtterBehandlingAvsluttet,
+            fagsakDto = fagsakDtoEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.AVSLUTTET,
             behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
             aktivBehandlingId = behandlingDødsfall.id,
@@ -127,16 +127,16 @@ class RevurderingDødsfallTest(
     @Test
     fun `Dødsfall bruker skal stoppes dersom ikke bosatt i riket er stoppet før dagens dato`() {
         val scenario =
-            RestScenario(
+            ScenarioDto(
                 søker =
-                    RestScenarioPerson(
+                    ScenarioPersonDto(
                         fødselsdato = "1982-01-12",
                         fornavn = "Mor",
                         etternavn = "Søker",
                     ),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = LocalDate.now().minusMonths(2).toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
@@ -174,7 +174,7 @@ class RevurderingDødsfallTest(
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingÅrsak = BehandlingÅrsak.DØDSFALL_BRUKER,
                 overstyrendeVilkårsvurdering =
-                    lagVilkårsvurderingFraRestScenario(
+                    lagVilkårsvurderingFraScenarioDto(
                         scenario,
                         overstyrendeVilkårResultater,
                     ),

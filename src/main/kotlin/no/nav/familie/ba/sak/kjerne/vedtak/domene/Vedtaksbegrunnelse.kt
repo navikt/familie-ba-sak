@@ -16,7 +16,7 @@ import jakarta.persistence.Table
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.støtterFritekst
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.VedtaksbegrunnelseDto
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -48,10 +48,10 @@ class Vedtaksbegrunnelse(
     override fun toString(): String = "Vedtaksbegrunnelse(id=$id, standardbegrunnelse=$standardbegrunnelse)"
 }
 
-fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse(
+fun Vedtaksbegrunnelse.tilVedtaksbegrunnelseDto(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     alleBegrunnelserSkalStøtteFritekst: Boolean,
-) = RestVedtaksbegrunnelse(
+) = VedtaksbegrunnelseDto(
     standardbegrunnelse = this.standardbegrunnelse.enumnavnTilString(),
     vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
     vedtakBegrunnelseSpesifikasjon = this.standardbegrunnelse.enumnavnTilString(),

@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.ekstern.restDomene.RestOpprettSammensattKontrollsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSammensattKontrollsak
+import no.nav.familie.ba.sak.ekstern.restDomene.OpprettSammensattKontrollsakDto
+import no.nav.familie.ba.sak.ekstern.restDomene.SammensattKontrollsakDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -49,12 +49,12 @@ class SammensattKontrollsakServiceTest(
     }
 
     @Test
-    fun `opprettSammensattKontrollsak skal opprette SammensattKontrollsak basert på RestOpprettSammensattKontrollsak`() {
+    fun `opprettSammensattKontrollsak skal opprette SammensattKontrollsak basert på OpprettSammensattKontrollsakDto`() {
         val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
-        val sammensattKontrollsak = sammensattKontrollsakService.opprettSammensattKontrollsak(RestOpprettSammensattKontrollsak(behandlingId = behandling.id, fritekst = "Fritekst"))
+        val sammensattKontrollsak = sammensattKontrollsakService.opprettSammensattKontrollsak(OpprettSammensattKontrollsakDto(behandlingId = behandling.id, fritekst = "Fritekst"))
 
         assertThat(sammensattKontrollsak.behandlingId).isEqualTo(behandling.id)
         assertThat(sammensattKontrollsak.fritekst).isEqualTo("Fritekst")
@@ -65,13 +65,13 @@ class SammensattKontrollsakServiceTest(
     }
 
     @Test
-    fun `oppdaterSammensattKontrollsak skal oppdatere SammensattKontrollsak basert på RestSammensattKontrollsak`() {
+    fun `oppdaterSammensattKontrollsak skal oppdatere SammensattKontrollsak basert på SammensattKontrollsakDto`() {
         val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
-        val eksisterendeSammensattKontrollsak = sammensattKontrollsakService.opprettSammensattKontrollsak(RestOpprettSammensattKontrollsak(behandlingId = behandling.id, fritekst = "Fritekst"))
-        val oppdatertSammensattKontrollsak = sammensattKontrollsakService.oppdaterSammensattKontrollsak(RestSammensattKontrollsak(id = eksisterendeSammensattKontrollsak.id, behandlingId = behandling.id, fritekst = "Oppdatert fritekst"))
+        val eksisterendeSammensattKontrollsak = sammensattKontrollsakService.opprettSammensattKontrollsak(OpprettSammensattKontrollsakDto(behandlingId = behandling.id, fritekst = "Fritekst"))
+        val oppdatertSammensattKontrollsak = sammensattKontrollsakService.oppdaterSammensattKontrollsak(SammensattKontrollsakDto(id = eksisterendeSammensattKontrollsak.id, behandlingId = behandling.id, fritekst = "Oppdatert fritekst"))
 
         assertThat(oppdatertSammensattKontrollsak.id).isEqualTo(eksisterendeSammensattKontrollsak.id)
         assertThat(oppdatertSammensattKontrollsak.behandlingId).isEqualTo(behandling.id)
@@ -84,12 +84,12 @@ class SammensattKontrollsakServiceTest(
     }
 
     @Test
-    fun `slettSammensattKontrollsak skal slette SammensattKontrollsak basert på RestSammensattKontrollsak`() {
+    fun `slettSammensattKontrollsak skal slette SammensattKontrollsak basert på SammensattKontrollsakDto`() {
         val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
-        val eksisterendeSammensattKontrollsak = sammensattKontrollsakService.opprettSammensattKontrollsak(RestOpprettSammensattKontrollsak(behandlingId = behandling.id, fritekst = "Fritekst"))
+        val eksisterendeSammensattKontrollsak = sammensattKontrollsakService.opprettSammensattKontrollsak(OpprettSammensattKontrollsakDto(behandlingId = behandling.id, fritekst = "Fritekst"))
         sammensattKontrollsakService.slettSammensattKontrollsak(eksisterendeSammensattKontrollsak.id)
 
         assertThat(sammensattKontrollsakService.finnSammensattKontrollsak(behandlingId = behandling.id)).isNull()

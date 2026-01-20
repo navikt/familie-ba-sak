@@ -48,7 +48,7 @@ class BehandlingStegControllerTest {
             behandlingStegController.henleggBehandlingOgSendBrev(
                 behandlingId = behandling.id,
                 henleggInfo =
-                    RestHenleggBehandlingInfo(
+                    HenleggBehandlingInfoDto(
                         begrunnelse = "dette er en begrunnelse",
                         årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
                     ),

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
@@ -21,7 +21,7 @@ class AutomatiskRegistrerSøknadService(
     private val personopplysningerService: PersonopplysningerService,
     private val personidentService: PersonidentService,
 ) {
-    fun lagRestRegistrerSøknad(behandling: Behandling): RestRegistrerSøknad {
+    fun lagRestRegistrerSøknad(behandling: Behandling): RegistrerSøknadDto {
         val søknad =
             søknadService.finnSøknad(behandling.id)
                 ?: throw Feil("Fant ikke søknad for behandling med id ${behandling.id}")
@@ -67,7 +67,7 @@ class AutomatiskRegistrerSøknadService(
 
         val barnaMedOpplysninger = (barnMedRelasjon + barnUtenRelasjonFraSøknad).distinctBy { it.ident }
 
-        return RestRegistrerSøknad(
+        return RegistrerSøknadDto(
             søknad =
                 SøknadDTO(
                     underkategori = underkategori,

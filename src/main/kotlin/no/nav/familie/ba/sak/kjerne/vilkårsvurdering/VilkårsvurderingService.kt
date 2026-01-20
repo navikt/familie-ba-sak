@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
+import no.nav.familie.ba.sak.ekstern.restDomene.VedtakBegrunnelseTilknyttetVilkårDto
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -56,7 +56,7 @@ class VilkårsvurderingService(
         return vilkårsvurderingRepository.save(vilkårsvurdering)
     }
 
-    fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> =
+    fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<VedtakBegrunnelseTilknyttetVilkårDto>> =
         standardbegrunnelserTilNedtrekksmenytekster(sanityService.hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = true)) +
             eøsStandardbegrunnelserTilNedtrekksmenytekster(sanityService.hentSanityEØSBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = true))
 

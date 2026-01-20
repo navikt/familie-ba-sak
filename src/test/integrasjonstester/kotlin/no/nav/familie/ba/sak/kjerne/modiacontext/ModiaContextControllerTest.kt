@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.modiacontext
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.ekstern.restDomene.RestNyAktivBrukerIModiaContext
+import no.nav.familie.ba.sak.ekstern.restDomene.NyAktivBrukerIModiaContextDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -33,7 +33,7 @@ class ModiaContextControllerTest(
     fun `skal oppdatere context`() {
         val response =
             modiaContextController.settNyAktivBruker(
-                RestNyAktivBrukerIModiaContext(personIdent = "13025514402"),
+                NyAktivBrukerIModiaContextDto(personIdent = "13025514402"),
             )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
@@ -47,7 +47,7 @@ class ModiaContextControllerTest(
         val exception =
             assertThrows<IllegalStateException> {
                 modiaContextController.settNyAktivBruker(
-                    RestNyAktivBrukerIModiaContext(personIdent = "12345678910"),
+                    NyAktivBrukerIModiaContextDto(personIdent = "12345678910"),
                 )
             }
 

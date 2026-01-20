@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -22,10 +22,10 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRe
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.HenleggBehandlingInfoDto
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -35,10 +35,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
-import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
@@ -236,8 +236,8 @@ class StegService(
     @Transactional
     fun håndterSøknad(
         behandling: Behandling,
-        restRegistrerSøknad: RestRegistrerSøknad,
-    ): Behandling = fullførSøknadsHåndtering(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
+        registrerSøknadDto: RegistrerSøknadDto,
+    ): Behandling = fullførSøknadsHåndtering(behandling = behandling, registrerSøknadDto = registrerSøknadDto)
 
     @Transactional
     fun håndterAutomatiskRegistrerSøknad(behandling: Behandling): Behandling =
@@ -245,7 +245,7 @@ class StegService(
             val restRegistrerSøknad = automatiskRegistrerSøknadService.lagRestRegistrerSøknad(behandling)
             fullførSøknadsHåndtering(
                 behandling = behandling,
-                restRegistrerSøknad = restRegistrerSøknad,
+                registrerSøknadDto = restRegistrerSøknad,
             )
         } catch (e: Exception) {
             val feilmelding = "Klarte ikke å automatisk registrere søknad for behandling ${behandling.id}. Feil: ${e.message}"
@@ -259,10 +259,10 @@ class StegService(
 
     private fun fullførSøknadsHåndtering(
         behandling: Behandling,
-        restRegistrerSøknad: RestRegistrerSøknad,
+        registrerSøknadDto: RegistrerSøknadDto,
     ): Behandling {
         val behandlingSteg: RegistrereSøknad = hentBehandlingSteg(StegType.REGISTRERE_SØKNAD) as RegistrereSøknad
-        val søknadDTO = restRegistrerSøknad.søknad
+        val søknadDTO = registrerSøknadDto.søknad
 
         val aktivSøknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
         val innsendtSøknad = søknadDTO.writeValueAsString()
@@ -272,7 +272,7 @@ class StegService(
         }
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, restRegistrerSøknad)
+            behandlingSteg.utførStegOgAngiNeste(behandling, registrerSøknadDto)
         }
     }
 
@@ -347,12 +347,12 @@ class StegService(
     @Transactional
     fun håndterVurderTilbakekreving(
         behandling: Behandling,
-        restTilbakekreving: RestTilbakekreving? = null,
+        tilbakekrevingDto: TilbakekrevingDto? = null,
     ): Behandling {
         val behandlingSteg: VurderTilbakekrevingSteg = hentBehandlingSteg(StegType.VURDER_TILBAKEKREVING) as VurderTilbakekrevingSteg
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, restTilbakekreving)
+            behandlingSteg.utførStegOgAngiNeste(behandling, tilbakekrevingDto)
         }
     }
 
@@ -371,7 +371,7 @@ class StegService(
         if (automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)) {
             return håndterBeslutningForVedtak(
                 behandlingEtterBeslutterSteg,
-                RestBeslutningPåVedtak(Beslutning.GODKJENT),
+                BeslutningPåVedtakDto(Beslutning.GODKJENT),
             )
         }
         return behandlingEtterBeslutterSteg
@@ -380,19 +380,19 @@ class StegService(
     @Transactional
     fun håndterBeslutningForVedtak(
         behandling: Behandling,
-        restBeslutningPåVedtak: RestBeslutningPåVedtak,
+        beslutningPåVedtakDto: BeslutningPåVedtakDto,
     ): Behandling {
         val behandlingSteg: BeslutteVedtak = hentBehandlingSteg(StegType.BESLUTTE_VEDTAK) as BeslutteVedtak
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+            behandlingSteg.utførStegOgAngiNeste(behandling, beslutningPåVedtakDto)
         }
     }
 
     @Transactional
     fun håndterHenleggBehandling(
         behandling: Behandling,
-        henleggBehandlingInfo: RestHenleggBehandlingInfo,
+        henleggBehandlingInfo: HenleggBehandlingInfoDto,
     ): Behandling {
         val behandlingSteg: HenleggBehandling = hentBehandlingSteg(StegType.HENLEGG_BEHANDLING) as HenleggBehandling
 

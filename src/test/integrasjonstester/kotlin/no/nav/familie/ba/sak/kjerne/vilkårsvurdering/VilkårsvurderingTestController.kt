@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -61,7 +61,7 @@ class VilkårsvurderingTestController(
     @PostMapping()
     fun opprettBehandlingMedVilkårsvurdering(
         @RequestBody personresultater: Map<LocalDate, Map<Vilkår, String>>,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         val personer =
             personresultater
                 .tilPersoner()
@@ -108,14 +108,14 @@ class VilkårsvurderingTestController(
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id)))
     }
 
     @PostMapping("/{behandlingId}")
     fun oppdaterVilkårsvurderingIBehandling(
         @PathVariable behandlingId: Long,
         @RequestBody personresultater: Map<LocalDate, Map<Vilkår, String>>,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
         val behandling = behandlingRepository.finnBehandling(behandlingId)
 
@@ -130,7 +130,7 @@ class VilkårsvurderingTestController(
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)))
     }
 }
 

@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.statistikk.internstatistikk
 import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.domene.RestSøknadsstatistikkForPeriode
+import no.nav.familie.ba.sak.kjerne.behandling.domene.SøknadsstatistikkForPeriodeDto
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -44,7 +44,7 @@ class InternStatistikkController(
     fun hentSøknadsstatistikkForPeriode(
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) fom: LocalDate?,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) tom: LocalDate?,
-    ): ResponseEntity<Ressurs<RestSøknadsstatistikkForPeriode>> {
+    ): ResponseEntity<Ressurs<SøknadsstatistikkForPeriodeDto>> {
         val fomDato = fom ?: LocalDate.now().minusMonths(4).withDayOfMonth(1)
         val tomDato = tom ?: fomDato.plusMonths(4).minusDays(1)
 

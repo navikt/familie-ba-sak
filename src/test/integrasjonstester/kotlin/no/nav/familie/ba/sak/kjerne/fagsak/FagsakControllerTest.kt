@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
+import no.nav.familie.ba.sak.ekstern.restDomene.SkjermetBarnSøkerDto
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -79,7 +79,7 @@ class FagsakControllerTest(
     fun `Skal opprette fagsak av type SKJERMET_BARN`() {
         val fnr = randomFnr()
         val søkersIdent = randomFnr()
-        val skjermetBarnSøker = RestSkjermetBarnSøker(søkersIdent = søkersIdent)
+        val skjermetBarnSøker = SkjermetBarnSøkerDto(søkersIdent = søkersIdent)
 
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr, fagsakType = FagsakType.SKJERMET_BARN, skjermetBarnSøker = skjermetBarnSøker))
 
@@ -107,18 +107,18 @@ class FagsakControllerTest(
     fun `Skal returnere eksisterende fagsak på person som allerede finnes`() {
         val fnr = randomFnr()
 
-        val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
-        assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
+        val nyMinimalFagsakDto = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
+        assertEquals(Ressurs.Status.SUKSESS, nyMinimalFagsakDto.body?.status)
         assertEquals(fnr, fagsakService.hentNormalFagsak(lagAktør(fnr))?.aktør?.aktivFødselsnummer())
 
-        val eksisterendeRestFagsak =
+        val eksisterendeMinimalFagsakDto =
             fagsakController.hentEllerOpprettFagsak(
                 FagsakRequest(
                     personIdent = fnr,
                 ),
             )
-        assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
-        assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
+        assertEquals(Ressurs.Status.SUKSESS, eksisterendeMinimalFagsakDto.body?.status)
+        assertEquals(eksisterendeMinimalFagsakDto.body!!.data!!.id, nyMinimalFagsakDto.body!!.data!!.id)
     }
 
     @Test
@@ -132,8 +132,8 @@ class FagsakControllerTest(
         val aktør = aktørIdRepository.save(Aktør(aktørId))
         personidentRepository.save(Personident(fødselsnummer = fnr, aktør = aktør, aktiv = true))
 
-        val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
-        assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
+        val nyFagsakDto = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
+        assertEquals(Ressurs.Status.SUKSESS, nyFagsakDto.body?.status)
         assertEquals(fnr, fagsakService.hentNormalFagsak(aktør)?.aktør?.aktivFødselsnummer())
 
         personidentRepository.save(
@@ -141,15 +141,15 @@ class FagsakControllerTest(
         )
         personidentRepository.save(Personident(fødselsnummer = nyttFnr, aktør = aktør, aktiv = true))
 
-        val eksisterendeRestFagsak =
+        val eksisterendeFagsakDto =
             fagsakController.hentEllerOpprettFagsak(
                 FagsakRequest(
                     personIdent = nyttFnr,
                 ),
             )
-        assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
-        assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
-        assertEquals(nyttFnr, eksisterendeRestFagsak.body!!.data?.søkerFødselsnummer)
+        assertEquals(Ressurs.Status.SUKSESS, eksisterendeFagsakDto.body?.status)
+        assertEquals(eksisterendeFagsakDto.body!!.data!!.id, nyFagsakDto.body!!.data!!.id)
+        assertEquals(nyttFnr, eksisterendeFagsakDto.body!!.data?.søkerFødselsnummer)
     }
 
     @Test
@@ -157,15 +157,15 @@ class FagsakControllerTest(
     fun `Skal returnere eksisterende fagsak på person som allerede finnes basert på aktørid`() {
         val aktørId = randomAktør()
         val fagsakRequest = FagsakRequest(personIdent = aktørId.aktivFødselsnummer())
-        val nyRestFagsak =
+        val fagsakDto =
             fagsakController.hentEllerOpprettFagsak(
                 fagsakRequest,
             )
-        assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
+        assertEquals(Ressurs.Status.SUKSESS, fagsakDto.body?.status)
 
-        val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(fagsakRequest)
-        assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
-        assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
+        val eksisterendeFagsakDto = fagsakController.hentEllerOpprettFagsak(fagsakRequest)
+        assertEquals(Ressurs.Status.SUKSESS, eksisterendeFagsakDto.body?.status)
+        assertEquals(eksisterendeFagsakDto.body!!.data!!.id, fagsakDto.body!!.data!!.id)
     }
 
     @Test
@@ -197,7 +197,7 @@ class FagsakControllerTest(
             FagsakRequest(
                 personIdent = fnr,
                 fagsakType = FagsakType.INSTITUSJON,
-                institusjon = RestInstitusjon(orgNrNav, "tss-id"),
+                institusjon = InstitusjonDto(orgNrNav, "tss-id"),
             ),
         )
         val fagsakerRessurs = fagsakService.hentMinimalFagsakerForPerson(lagAktør(fnr))

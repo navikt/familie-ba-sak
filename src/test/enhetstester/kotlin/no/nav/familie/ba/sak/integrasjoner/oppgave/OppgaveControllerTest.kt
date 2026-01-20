@@ -7,7 +7,7 @@ import io.mockk.runs
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalføringService
-import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
+import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.FinnOppgaveRequestDto
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -101,7 +101,7 @@ class OppgaveControllerTest {
         every {
             oppgaveService.hentOppgaver(any())
         } returns FinnOppgaveResponseDto(1, listOf(Oppgave(tema = Tema.BAR)))
-        val response = oppgaveController.hentOppgaver(RestFinnOppgaveRequest())
+        val response = oppgaveController.hentOppgaver(FinnOppgaveRequestDto())
         val oppgaverOgAntall = response.body?.data as FinnOppgaveResponseDto
         Assertions.assertEquals(1, oppgaverOgAntall.antallTreffTotalt)
         Assertions.assertEquals(Tema.BAR, oppgaverOgAntall.oppgaver.first().tema)

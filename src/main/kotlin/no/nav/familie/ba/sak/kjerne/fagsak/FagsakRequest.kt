@@ -1,15 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
+import no.nav.familie.ba.sak.ekstern.restDomene.SkjermetBarnSøkerDto
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 
 data class FagsakRequest(
     val personIdent: String,
     val fagsakType: FagsakType = FagsakType.NORMAL,
-    val institusjon: RestInstitusjon? = null,
-    val skjermetBarnSøker: RestSkjermetBarnSøker? = null,
+    val institusjon: InstitusjonDto? = null,
+    val skjermetBarnSøker: SkjermetBarnSøkerDto? = null,
 ) {
     // Bruker init til å validere personidenten
     init {

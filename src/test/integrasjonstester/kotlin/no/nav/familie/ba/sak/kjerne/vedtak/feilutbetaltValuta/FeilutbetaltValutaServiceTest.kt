@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFeilutbetaltValuta
+import no.nav.familie.ba.sak.ekstern.restDomene.FeilutbetaltValutaDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
@@ -26,7 +26,7 @@ class FeilutbetaltValutaServiceTest(
             lagFagsakUtenId(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
         val behandling = lagBehandlingUtenId(fagsak = fagsak).let { behandlingHentOgPersisterService.lagreEllerOppdater(it, false) }
         val feilutbetaltValuta =
-            RestFeilutbetaltValuta(
+            FeilutbetaltValutaDto(
                 id = 0,
                 fom = LocalDate.of(2020, Month.JANUARY, 1),
                 tom = LocalDate.of(2021, Month.MAY, 31),
@@ -42,8 +42,8 @@ class FeilutbetaltValutaServiceTest(
             .also { Assertions.assertThat(it[0].tom).isNotNull() }
 
         feilutbetaltValutaService.oppdatertFeilutbetaltValutaPeriode(
-            restFeilutbetaltValuta =
-                RestFeilutbetaltValuta(
+            feilutbetaltValutaDto =
+                FeilutbetaltValutaDto(
                     id = id,
                     fom = LocalDate.of(2020, Month.JANUARY, 1),
                     tom = LocalDate.of(2020, Month.MAY, 31),
@@ -58,7 +58,7 @@ class FeilutbetaltValutaServiceTest(
             .also { Assertions.assertThat(it.get(0).tom).isEqualTo("2020-05-31") }
 
         val feilutbetaltValuta2 =
-            RestFeilutbetaltValuta(
+            FeilutbetaltValutaDto(
                 id = 0,
                 fom = LocalDate.of(2019, Month.DECEMBER, 1),
                 tom = LocalDate.of(2019, Month.DECEMBER, 31),

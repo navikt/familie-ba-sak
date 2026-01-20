@@ -31,7 +31,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.Behandlin
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.KlassifiseringKorrigerer
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.tilRestUtbetalingsoppdrag
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.tilUtbetalingsoppdragDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -248,13 +248,13 @@ class OppdragSteg {
         validerForventetUtbetalingsoppdrag(
             dataTable,
             beregnetUtbetalingsoppdrag
-                .mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
+                .mapValues { it.value.utbetalingsoppdrag.tilUtbetalingsoppdragDto() }
                 .toMutableMap(),
         )
         assertSjekkBehandlingIder(
             dataTable,
             beregnetUtbetalingsoppdrag
-                .mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
+                .mapValues { it.value.utbetalingsoppdrag.tilUtbetalingsoppdragDto() }
                 .toMutableMap(),
         )
     }
@@ -298,13 +298,13 @@ class OppdragSteg {
         validerForventetUtbetalingsoppdrag(
             dataTable,
             beregnetUtbetalingsoppdragSimulering
-                .mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
+                .mapValues { it.value.utbetalingsoppdrag.tilUtbetalingsoppdragDto() }
                 .toMutableMap(),
         )
         assertSjekkBehandlingIder(
             dataTable,
             beregnetUtbetalingsoppdragSimulering
-                .mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
+                .mapValues { it.value.utbetalingsoppdrag.tilUtbetalingsoppdragDto() }
                 .toMutableMap(),
         )
     }

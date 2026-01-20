@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.lagVisningsbehandling
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
+import no.nav.familie.ba.sak.ekstern.restDomene.SkjermetBarnSøkerDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
@@ -128,7 +128,7 @@ class FagsakServiceTest {
             every { behandlingService.hentMigreringsdatoPåFagsak(fagsak.id) } returns null
 
             // Act
-            val restMinimalFagsak = fagsakService.lagRestMinimalFagsak(fagsak.id)
+            val restMinimalFagsak = fagsakService.lagMinimalFagsakDto(fagsak.id)
 
             // Assert
             assertThat(restMinimalFagsak.opprettetTidspunkt).isNotNull()
@@ -183,14 +183,14 @@ class FagsakServiceTest {
 
             val barnIdent = randomBarnFnr(alder = 5)
             val søkerIdent = randomFnr()
-            val restSkjermetBarnSøker = RestSkjermetBarnSøker(søkerIdent)
+            val skjermetBarnSøkerDto = SkjermetBarnSøkerDto(søkerIdent)
 
             // Act && Assert
             val frontendFeilmelding =
                 assertThrows<FunksjonellFeil> {
                     fagsakService.hentEllerOpprettFagsak(
                         personIdent = barnIdent,
-                        skjermetBarnSøker = restSkjermetBarnSøker,
+                        skjermetBarnSøker = skjermetBarnSøkerDto,
                         fraAutomatiskBehandling = true,
                         type = FagsakType.SKJERMET_BARN,
                     )
@@ -206,14 +206,14 @@ class FagsakServiceTest {
 
             val barnIdent = randomBarnFnr(alder = 5)
             val søkerIdent = randomFnr()
-            val restSkjermetBarnSøker = RestSkjermetBarnSøker(søkerIdent)
+            val skjermetBarnSøkerDto = SkjermetBarnSøkerDto(søkerIdent)
 
             // Act && Assert
             val frontendFeilmelding =
                 assertThrows<FunksjonellFeil> {
                     fagsakService.hentEllerOpprettFagsak(
                         personIdent = barnIdent,
-                        skjermetBarnSøker = restSkjermetBarnSøker,
+                        skjermetBarnSøker = skjermetBarnSøkerDto,
                         fraAutomatiskBehandling = true,
                         type = FagsakType.SKJERMET_BARN,
                     )
@@ -253,7 +253,7 @@ class FagsakServiceTest {
             val søkerIdent = ident
             val barnAktør = randomAktør(barnIdent)
 
-            val restSkjermetBarnSøker = RestSkjermetBarnSøker(søkerIdent)
+            val skjermetBarnSøkerDto = SkjermetBarnSøkerDto(søkerIdent)
 
             every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
             every { personidentService.hentOgLagreAktør(barnIdent, true) } returns barnAktør
@@ -263,7 +263,7 @@ class FagsakServiceTest {
                 assertThrows<FunksjonellFeil> {
                     fagsakService.hentEllerOpprettFagsak(
                         personIdent = barnIdent,
-                        skjermetBarnSøker = restSkjermetBarnSøker,
+                        skjermetBarnSøker = skjermetBarnSøkerDto,
                         fraAutomatiskBehandling = false,
                         type = FagsakType.SKJERMET_BARN,
                     )
@@ -281,7 +281,7 @@ class FagsakServiceTest {
             val søkerAktør = randomAktør(søkerIdent)
             val fagsak = lagFagsak(1, type = FagsakType.SKJERMET_BARN)
 
-            val restSkjermetBarnSøker = RestSkjermetBarnSøker(søkerIdent)
+            val skjermetBarnSøkerDto = SkjermetBarnSøkerDto(søkerIdent)
 
             every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
             every { personidentService.hentOgLagreAktør(barnIdent, true) } returns barnAktør
@@ -292,7 +292,7 @@ class FagsakServiceTest {
             val returnertFagsak =
                 fagsakService.hentEllerOpprettFagsak(
                     personIdent = barnIdent,
-                    skjermetBarnSøker = restSkjermetBarnSøker,
+                    skjermetBarnSøker = skjermetBarnSøkerDto,
                     fraAutomatiskBehandling = false,
                     type = FagsakType.SKJERMET_BARN,
                 )

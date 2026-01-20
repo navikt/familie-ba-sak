@@ -6,8 +6,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterTilbakekrevingsvedtakMotregning
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.OppdaterTilbakekrevingsvedtakMotregningDto
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -46,8 +46,8 @@ class TilbakekrevingsvedtakMotregningControllerTest {
             vedtakPdf = ByteArray(0),
         )
 
-    private val restOppdaterTilbakekrevingsvedtakMotregning =
-        RestOppdaterTilbakekrevingsvedtakMotregning(
+    private val oppdaterTilbakekrevingsvedtakMotregningDto =
+        OppdaterTilbakekrevingsvedtakMotregningDto(
             årsakTilFeilutbetaling = null,
             vurderingAvSkyld = null,
             varselDato = null,
@@ -55,7 +55,7 @@ class TilbakekrevingsvedtakMotregningControllerTest {
             heleBeløpetSkalKrevesTilbake = null,
         )
 
-    val restUtvidetBehandlingMock = mockk<RestUtvidetBehandling>()
+    val utvidetBehandlingDtoMock = mockk<UtvidetBehandlingDto>()
 
     @BeforeEach
     fun setUp() {
@@ -70,7 +70,7 @@ class TilbakekrevingsvedtakMotregningControllerTest {
                 behandling.id,
             )
         } returns tilbakekrevingsvedtakMotregning
-        every { utvidetBehandlingService.lagRestUtvidetBehandling(behandling.id) } returns restUtvidetBehandlingMock
+        every { utvidetBehandlingService.lagUtvidetBehandlingDto(behandling.id) } returns utvidetBehandlingDtoMock
     }
 
     @Nested
@@ -83,7 +83,7 @@ class TilbakekrevingsvedtakMotregningControllerTest {
             tilbakekrevingsvedtakMotregningController.opprettOgHentTilbakekrevingsvedtakMotregningPdf(behandlingId = behandling.id)
             tilbakekrevingsvedtakMotregningController.oppdaterTilbakekrevingsvedtakMotregning(
                 behandlingId = behandling.id,
-                restOppdaterTilbakekrevingsvedtakMotregning = restOppdaterTilbakekrevingsvedtakMotregning,
+                oppdaterTilbakekrevingsvedtakMotregningDto = oppdaterTilbakekrevingsvedtakMotregningDto,
             )
 
             // Assert
@@ -116,13 +116,13 @@ class TilbakekrevingsvedtakMotregningControllerTest {
             val response =
                 tilbakekrevingsvedtakMotregningController.oppdaterTilbakekrevingsvedtakMotregning(
                     behandlingId = behandling.id,
-                    restOppdaterTilbakekrevingsvedtakMotregning = restOppdaterTilbakekrevingsvedtakMotregning,
+                    oppdaterTilbakekrevingsvedtakMotregningDto = oppdaterTilbakekrevingsvedtakMotregningDto,
                 )
 
             // Assert
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
-            assertThat(response.body!!.data).isEqualTo(restUtvidetBehandlingMock)
+            assertThat(response.body!!.data).isEqualTo(utvidetBehandlingDtoMock)
         }
 
         @Test
@@ -134,7 +134,7 @@ class TilbakekrevingsvedtakMotregningControllerTest {
             // Assert
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
-            assertThat(response.body!!.data).isEqualTo(restUtvidetBehandlingMock)
+            assertThat(response.body!!.data).isEqualTo(utvidetBehandlingDtoMock)
         }
 
         @Test

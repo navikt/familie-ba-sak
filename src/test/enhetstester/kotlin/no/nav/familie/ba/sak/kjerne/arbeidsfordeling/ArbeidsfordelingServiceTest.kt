@@ -478,7 +478,7 @@ class ArbeidsfordelingServiceTest {
             val behandling = lagBehandling()
 
             val endreBehandlendeEnhet =
-                RestEndreBehandlendeEnhet(
+                EndreBehandlendeEnhetDto(
                     enhetId = STEINKJER.enhetsnummer,
                     begrunnelse = "Begrunnelse for endring",
                 )

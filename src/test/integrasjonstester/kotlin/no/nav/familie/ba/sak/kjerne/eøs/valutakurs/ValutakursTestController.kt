@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
@@ -34,15 +34,15 @@ class ValutakursTestController(
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun endreValutakurser(
         @PathVariable behandlingId: Long,
-        @RequestBody restValutakurser: Map<LocalDate, String>,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        @RequestBody listeAvValutakursDto: Map<LocalDate, String>,
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         val behandlingIdObjekt = BehandlingId(behandlingId)
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingIdObjekt.id)!!
-        restValutakurser.tilValutakurser(behandlingIdObjekt, personopplysningGrunnlag).forEach {
+        listeAvValutakursDto.tilValutakurser(behandlingIdObjekt, personopplysningGrunnlag).forEach {
             valutakursService.oppdaterValutakurs(behandlingIdObjekt, it)
         }
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingIdObjekt.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingIdObjekt.id)))
     }
 }
 

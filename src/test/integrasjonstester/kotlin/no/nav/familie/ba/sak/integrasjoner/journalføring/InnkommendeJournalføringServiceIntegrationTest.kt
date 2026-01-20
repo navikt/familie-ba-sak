@@ -2,10 +2,10 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
-import no.nav.familie.ba.sak.datagenerator.lagMockRestJournalføring
+import no.nav.familie.ba.sak.datagenerator.lagMockJournalføringDto
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
-import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.TilknyttetBehandling
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Journalføringsbehandlingstype
@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoRepo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
-import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -36,7 +35,7 @@ class InnkommendeJournalføringServiceIntegrationTest(
     @Test
     fun `journalfør skal opprette en førstegangsbehandling fra journalføring og lagre ned søknadsinfo`() {
         val søkerFnr = randomFnr()
-        val request = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", søkerFnr))
+        val request = lagMockJournalføringDto(bruker = NavnOgIdent("Mock", søkerFnr))
         val fagsakId = innkommendeJournalføringService.journalfør(request, "123", "mockEnhet", "1")
 
         val behandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId.toLong())
@@ -55,7 +54,7 @@ class InnkommendeJournalføringServiceIntegrationTest(
     @Test
     fun `journalfør skal lagre ned søknadsinfo tilknyttet en tidligere behandling`() {
         val søkerFnr = randomFnr()
-        val førsteSøknad = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", søkerFnr))
+        val førsteSøknad = lagMockJournalføringDto(bruker = NavnOgIdent("Mock", søkerFnr))
         val fagsakId = innkommendeJournalføringService.journalfør(førsteSøknad, "123", "mockEnhet", "1")
 
         val behandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId.toLong())
@@ -85,7 +84,7 @@ class InnkommendeJournalføringServiceIntegrationTest(
     @Test
     fun `journalfør skal opprette behandling på fagsak som har BARN som eier hvis enslig mindreårig eller institusjon`() {
         val request =
-            lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
+            lagMockJournalføringDto(bruker = NavnOgIdent("Mock", randomFnr()))
                 .copy(fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG)
 
         val journalpostId = "123"
@@ -106,8 +105,8 @@ class InnkommendeJournalføringServiceIntegrationTest(
         assertEquals(FagsakType.BARN_ENSLIG_MINDREÅRIG, behandling!!.fagsak.type)
 
         val request2 =
-            lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
-                .copy(fagsakType = FagsakType.INSTITUSJON, institusjon = RestInstitusjon("orgnr", tssEksternId = "tss"))
+            lagMockJournalføringDto(bruker = NavnOgIdent("Mock", randomFnr()))
+                .copy(fagsakType = FagsakType.INSTITUSJON, institusjon = InstitusjonDto("orgnr", tssEksternId = "tss"))
         val fagsakId2 = innkommendeJournalføringService.journalfør(request2, "1234", "mockEnhet", "2")
         val behandling2 = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId2.toLong())
 
@@ -118,7 +117,7 @@ class InnkommendeJournalføringServiceIntegrationTest(
     @Test
     fun `journalfør skal ikke opprette en førstegangsbehandling fra journalføring med manglende mottatt dato`() {
         val søkerFnr = randomFnr()
-        val request = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", søkerFnr)).copy(datoMottatt = null)
+        val request = lagMockJournalføringDto(bruker = NavnOgIdent("Mock", søkerFnr)).copy(datoMottatt = null)
 
         val exception =
             assertThrows<RuntimeException> {

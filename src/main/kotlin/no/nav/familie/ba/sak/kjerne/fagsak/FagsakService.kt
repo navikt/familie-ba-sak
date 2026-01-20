@@ -5,14 +5,14 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestBaseFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.BaseFagsakDto
+import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDto
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
+import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
+import no.nav.familie.ba.sak.ekstern.restDomene.SkjermetBarnSøkerDto
+import no.nav.familie.ba.sak.ekstern.restDomene.VisningBehandlingDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilFagsakDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilMinimalFagsakDto
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -69,7 +69,7 @@ class FagsakService(
     }
 
     @Transactional
-    fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestMinimalFagsak> {
+    fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<MinimalFagsakDto> {
         val fagsak =
             hentEllerOpprettFagsak(
                 personIdent = fagsakRequest.personIdent,
@@ -77,7 +77,7 @@ class FagsakService(
                 institusjon = fagsakRequest.institusjon,
                 skjermetBarnSøker = fagsakRequest.skjermetBarnSøker,
             )
-        return hentRestMinimalFagsak(fagsakId = fagsak.id)
+        return hentMinimalFagsakDto(fagsakId = fagsak.id)
     }
 
     @Transactional
@@ -85,8 +85,8 @@ class FagsakService(
         personIdent: String,
         fraAutomatiskBehandling: Boolean = false,
         type: FagsakType = FagsakType.NORMAL,
-        institusjon: RestInstitusjon? = null,
-        skjermetBarnSøker: RestSkjermetBarnSøker? = null,
+        institusjon: InstitusjonDto? = null,
+        skjermetBarnSøker: SkjermetBarnSøkerDto? = null,
     ): Fagsak {
         if (type == FagsakType.SKJERMET_BARN) {
             when {
@@ -178,10 +178,10 @@ class FagsakService(
     fun hentMinimalFagsakForPerson(
         aktør: Aktør,
         fagsakType: FagsakType = FagsakType.NORMAL,
-    ): Ressurs<RestMinimalFagsak> {
+    ): Ressurs<MinimalFagsakDto> {
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør, fagsakType)
         return if (fagsak != null) {
-            Ressurs.success(data = lagRestMinimalFagsak(fagsakId = fagsak.id))
+            Ressurs.success(data = lagMinimalFagsakDto(fagsakId = fagsak.id))
         } else {
             Ressurs.failure(
                 errorMessage = "Fant ikke fagsak på person",
@@ -192,39 +192,39 @@ class FagsakService(
     fun hentMinimalFagsakerForPerson(
         aktør: Aktør,
         fagsakTyper: List<FagsakType> = FagsakType.entries.toList(),
-    ): Ressurs<List<RestMinimalFagsak>> {
+    ): Ressurs<List<MinimalFagsakDto>> {
         val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør).filter { fagsakTyper.contains(it.type) }
-        return Ressurs.success(data = lagRestMinimalFagsaker(fagsaker))
+        return Ressurs.success(data = lagMinimalFagsakerDto(fagsaker))
     }
 
-    fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> = Ressurs.success(data = lagRestFagsak(fagsakId))
+    fun hentFagsakDto(fagsakId: Long): Ressurs<FagsakDto> = Ressurs.success(data = lagFagsakDto(fagsakId))
 
-    fun hentRestMinimalFagsak(fagsakId: Long): Ressurs<RestMinimalFagsak> = Ressurs.success(data = lagRestMinimalFagsak(fagsakId))
+    fun hentMinimalFagsakDto(fagsakId: Long): Ressurs<MinimalFagsakDto> = Ressurs.success(data = lagMinimalFagsakDto(fagsakId))
 
-    fun lagRestMinimalFagsaker(fagsaker: List<Fagsak>): List<RestMinimalFagsak> = fagsaker.map { lagRestMinimalFagsak(it.id) }
+    fun lagMinimalFagsakerDto(fagsaker: List<Fagsak>): List<MinimalFagsakDto> = fagsaker.map { lagMinimalFagsakDto(it.id) }
 
-    fun lagRestMinimalFagsak(fagsakId: Long): RestMinimalFagsak {
+    fun lagMinimalFagsakDto(fagsakId: Long): MinimalFagsakDto {
         val restBaseFagsak = lagRestBaseFagsak(fagsakId)
         val visningsbehandlinger = behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsakId)
         val migreringsdato = behandlingService.hentMigreringsdatoPåFagsak(fagsakId)
-        return restBaseFagsak.tilRestMinimalFagsak(
-            restVisningBehandlinger = visningsbehandlinger.map { RestVisningBehandling.opprettFraVisningsbehandling(it) },
+        return restBaseFagsak.tilMinimalFagsakDto(
+            visningBehandlingerDto = visningsbehandlinger.map { VisningBehandlingDto.opprettFraVisningsbehandling(it) },
             migreringsdato = migreringsdato,
         )
     }
 
-    private fun lagRestFagsak(fagsakId: Long): RestFagsak {
+    private fun lagFagsakDto(fagsakId: Long): FagsakDto {
         val restBaseFagsak = lagRestBaseFagsak(fagsakId)
 
         val utvidedeBehandlinger =
             behandlingHentOgPersisterService
                 .hentBehandlinger(fagsakId = fagsakId)
-                .map { utvidetBehandlingService.lagRestUtvidetBehandling(it.id) }
+                .map { utvidetBehandlingService.lagUtvidetBehandlingDto(it.id) }
 
-        return restBaseFagsak.tilRestFagsak(utvidedeBehandlinger)
+        return restBaseFagsak.tilFagsakDto(utvidedeBehandlinger)
     }
 
-    private fun lagRestBaseFagsak(fagsakId: Long): RestBaseFagsak {
+    private fun lagRestBaseFagsak(fagsakId: Long): BaseFagsakDto {
         val fagsak = hentPåFagsakId(fagsakId = fagsakId)
 
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsakId)
@@ -234,7 +234,7 @@ class FagsakService(
         val gjeldendeUtbetalingsperioder =
             if (sistVedtatteBehandling != null) vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistVedtatteBehandling) else emptyList()
 
-        return RestBaseFagsak(
+        return BaseFagsakDto(
             opprettetTidspunkt = fagsak.opprettetTidspunkt,
             id = fagsak.id,
             fagsakeier = fagsak.aktør.aktivFødselsnummer(),
@@ -252,7 +252,7 @@ class FagsakService(
             fagsakType = fagsak.type,
             institusjon =
                 fagsak.institusjon?.let {
-                    RestInstitusjon(
+                    InstitusjonDto(
                         orgNummer = it.orgNummer,
                         tssEksternId = it.tssEksternId,
                         navn = organisasjonService.hentOrganisasjon(it.orgNummer).navn,
@@ -276,8 +276,8 @@ class FagsakService(
         fødselsnummer: String,
         fraAutomatiskBehandling: Boolean = false,
         fagsakType: FagsakType = FagsakType.NORMAL,
-        institusjon: RestInstitusjon? = null,
-        skjermetBarnSøker: RestSkjermetBarnSøker? = null,
+        institusjon: InstitusjonDto? = null,
+        skjermetBarnSøker: SkjermetBarnSøkerDto? = null,
     ): Fagsak = hentEllerOpprettFagsak(fødselsnummer, fraAutomatiskBehandling, fagsakType, institusjon, skjermetBarnSøker)
 
     fun hentNormalFagsak(aktør: Aktør): Fagsak? =

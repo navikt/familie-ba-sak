@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.sanity
 
-import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelseDto
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.RestSanityEØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.SanityEØSBegrunnelseDto
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.testfiler.Testfil.SANITY_BEGRUNNELSER
@@ -14,12 +14,12 @@ import no.nav.familie.kontrakter.felles.objectMapper
 // se https://familie-brev.sanity.studio/ba-brev/vision med query fra SanityQueries.kt.
 object SanityData {
     fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
-        val restSanityBegrunnelser =
+        val sanityBegrunnelserDto =
             objectMapper
-                .readValue(SANITY_BEGRUNNELSER, Array<RestSanityBegrunnelse>::class.java)
+                .readValue(SANITY_BEGRUNNELSER, Array<SanityBegrunnelseDto>::class.java)
                 .toList()
 
-        return restSanityBegrunnelser.mapNotNull { it.tilSanityBegrunnelse() }
+        return sanityBegrunnelserDto.mapNotNull { it.tilSanityBegrunnelse() }
     }
 
     fun hentSanityBegrunnelserMap(): Map<Standardbegrunnelse, SanityBegrunnelse> {
@@ -38,14 +38,14 @@ object SanityData {
     }
 
     fun hentSanityEØSBegrunnelser(): List<SanityEØSBegrunnelse> {
-        val restSanityEØSBegrunnelser =
+        val sanityEØSBegrunnelserDto =
             objectMapper
                 .readValue(
                     SANITY_EØS_BEGRUNNELSER,
-                    Array<RestSanityEØSBegrunnelse>::class.java,
+                    Array<SanityEØSBegrunnelseDto>::class.java,
                 ).toList()
 
-        return restSanityEØSBegrunnelser.mapNotNull { it.tilSanityEØSBegrunnelse() }
+        return sanityEØSBegrunnelserDto.mapNotNull { it.tilSanityEØSBegrunnelse() }
     }
 
     fun hentSanityEØSBegrunnelserMap(): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {

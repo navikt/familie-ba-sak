@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.institusjon
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -28,7 +28,7 @@ class InstitusjonServiceIntegrasjonTest(
         val fagsak =
             fagsakService.hentEllerOpprettFagsakForPersonIdent(
                 fødselsnummer = tilfeldigPerson().aktør.aktivFødselsnummer(),
-                institusjon = RestInstitusjon(orgNr, tssEksternId),
+                institusjon = InstitusjonDto(orgNr, tssEksternId),
                 fagsakType = FagsakType.INSTITUSJON,
             )
         val behandling = lagBehandlingUtenId(fagsak).also { behandlingRepository.saveAndFlush(it) }
@@ -63,7 +63,7 @@ class InstitusjonServiceIntegrasjonTest(
         val fagsak =
             fagsakService.hentEllerOpprettFagsakForPersonIdent(
                 fødselsnummer = tilfeldigPerson().aktør.aktivFødselsnummer(),
-                institusjon = RestInstitusjon(orgNr, tssEksternId),
+                institusjon = InstitusjonDto(orgNr, tssEksternId),
                 fagsakType = FagsakType.INSTITUSJON,
             )
         val behandling = lagBehandlingUtenId(fagsak).also { behandlingRepository.saveAndFlush(it) }

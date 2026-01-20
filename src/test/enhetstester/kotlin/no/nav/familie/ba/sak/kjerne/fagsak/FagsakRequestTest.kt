@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
+import no.nav.familie.ba.sak.ekstern.restDomene.SkjermetBarnSøkerDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -52,7 +52,7 @@ class FagsakRequestTest {
                     "21100426738",
                     fagsakType = FagsakType.INSTITUSJON,
                     institusjon =
-                        RestInstitusjon(
+                        InstitusjonDto(
                             orgNummer = "889640782",
                             tssEksternId = "321",
                             navn = "orgnavn",
@@ -72,7 +72,7 @@ class FagsakRequestTest {
                     "21100426738",
                     fagsakType = FagsakType.SKJERMET_BARN,
                     institusjon = null,
-                    skjermetBarnSøker = RestSkjermetBarnSøker(søkersIdent = "25050508792"),
+                    skjermetBarnSøker = SkjermetBarnSøkerDto(søkersIdent = "25050508792"),
                 )
 
             // Act & assert
@@ -103,7 +103,7 @@ class FagsakRequestTest {
                     "21100426738",
                     fagsakType = FagsakType.INSTITUSJON,
                     institusjon =
-                        RestInstitusjon(
+                        InstitusjonDto(
                             orgNummer = "1",
                             tssEksternId = "321",
                             navn = "orgnavn",
@@ -129,7 +129,7 @@ class FagsakRequestTest {
                     "21100426738",
                     fagsakType = fagsakType,
                     institusjon =
-                        RestInstitusjon(
+                        InstitusjonDto(
                             orgNummer = "889640782",
                             tssEksternId = "321",
                             navn = "orgnavn",
@@ -167,7 +167,7 @@ class FagsakRequestTest {
         fun `skal kaste exception om man har skjermet barn søker med en annen fagsaktype enn skjermet`(fagsakType: FagsakType) {
             // Arrange
             val institusjon =
-                RestInstitusjon(
+                InstitusjonDto(
                     orgNummer = "889640782",
                     tssEksternId = "321",
                     navn = "orgnavn",
@@ -178,7 +178,7 @@ class FagsakRequestTest {
                     "21100426738",
                     fagsakType = fagsakType,
                     institusjon = if (fagsakType == FagsakType.INSTITUSJON) institusjon else null,
-                    skjermetBarnSøker = RestSkjermetBarnSøker(søkersIdent = "25050508792"),
+                    skjermetBarnSøker = SkjermetBarnSøkerDto(søkersIdent = "25050508792"),
                 )
 
             // Act & assert
@@ -194,7 +194,7 @@ class FagsakRequestTest {
                     "21100426738",
                     fagsakType = FagsakType.SKJERMET_BARN,
                     institusjon = null,
-                    skjermetBarnSøker = RestSkjermetBarnSøker(søkersIdent = "123"),
+                    skjermetBarnSøker = SkjermetBarnSøkerDto(søkersIdent = "123"),
                 )
 
             // Act & assert

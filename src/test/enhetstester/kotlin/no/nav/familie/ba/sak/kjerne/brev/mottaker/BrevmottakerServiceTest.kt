@@ -7,7 +7,7 @@ import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
+import no.nav.familie.ba.sak.ekstern.restDomene.BrevmottakerDto
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -202,7 +202,7 @@ internal class BrevmottakerServiceTest {
 
     @Test
     fun `leggTilBrevmottaker skal lagre logg på at brevmottaker legges til`() {
-        val restBrevmottaker = mockk<RestBrevmottaker>(relaxed = true)
+        val brevmottakerDto = mockk<BrevmottakerDto>(relaxed = true)
 
         every {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
@@ -214,7 +214,7 @@ internal class BrevmottakerServiceTest {
         every { loggService.opprettBrevmottakerLogg(any(), false) } just runs
         every { brevmottakerRepository.save(any()) } returns mockk()
 
-        brevmottakerService.leggTilBrevmottaker(restBrevmottaker, 200)
+        brevmottakerService.leggTilBrevmottaker(brevmottakerDto, 200)
 
         verify { loggService.opprettBrevmottakerLogg(any(), false) }
         verify { brevmottakerRepository.save(any()) }

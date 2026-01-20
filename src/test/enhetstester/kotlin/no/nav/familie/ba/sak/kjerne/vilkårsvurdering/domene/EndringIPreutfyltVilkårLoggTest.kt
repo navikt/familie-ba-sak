@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene
 
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.VilkårResultatDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -28,7 +28,7 @@ class EndringIPreutfyltVilkårLoggTest {
             )
 
         val nyttVilkår =
-            RestVilkårResultat(
+            VilkårResultatDto(
                 id = forrigeVilkår.id,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
@@ -91,7 +91,7 @@ class EndringIPreutfyltVilkårLoggTest {
             )
 
         val nyttVilkår =
-            RestVilkårResultat(
+            VilkårResultatDto(
                 id = forrigeVilkår.id,
                 vilkårType = Vilkår.GIFT_PARTNERSKAP,
                 resultat = Resultat.IKKE_VURDERT,

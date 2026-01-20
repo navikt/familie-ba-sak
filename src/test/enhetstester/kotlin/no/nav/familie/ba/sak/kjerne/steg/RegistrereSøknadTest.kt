@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDomene
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -56,8 +56,8 @@ class RegistrereSøknadTest {
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                 )
 
-            val restRegistrerSøknad =
-                RestRegistrerSøknad(
+            val registrerSøknadDto =
+                RegistrerSøknadDto(
                     søknad = søknadDTO,
                     bekreftEndringerViaFrontend = false,
                 )
@@ -69,7 +69,7 @@ class RegistrereSøknadTest {
             every { søknadGrunnlagService.lagreOgDeaktiverGammel(any()) } returnsArgument 0
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling = behandling) } returns null
             every { persongrunnlagService.registrerBarnFraSøknad(søknadDTO, behandling, null) } just runs
-            every { tilbakestillBehandlingService.initierOgSettBehandlingTilVilkårsvurdering(behandling, restRegistrerSøknad.bekreftEndringerViaFrontend) } just runs
+            every { tilbakestillBehandlingService.initierOgSettBehandlingTilVilkårsvurdering(behandling, registrerSøknadDto.bekreftEndringerViaFrontend) } just runs
             every { vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id) } returns vedtak
             every { vedtakService.oppdater(vedtak) } returnsArgument 0
 
@@ -77,7 +77,7 @@ class RegistrereSøknadTest {
             val stegType =
                 registrereSøknad.utførStegOgAngiNeste(
                     behandling = behandling,
-                    data = restRegistrerSøknad,
+                    data = registrerSøknadDto,
                 )
 
             // Assert
@@ -85,7 +85,7 @@ class RegistrereSøknadTest {
             verify(exactly = 1) { loggService.opprettRegistrertSøknadLogg(behandling, false) }
             verify(exactly = 1) { søknadGrunnlagService.lagreOgDeaktiverGammel(any()) }
             verify(exactly = 1) { persongrunnlagService.registrerBarnFraSøknad(søknadDTO, behandling, null) }
-            verify(exactly = 1) { tilbakestillBehandlingService.initierOgSettBehandlingTilVilkårsvurdering(behandling, restRegistrerSøknad.bekreftEndringerViaFrontend) }
+            verify(exactly = 1) { tilbakestillBehandlingService.initierOgSettBehandlingTilVilkårsvurdering(behandling, registrerSøknadDto.bekreftEndringerViaFrontend) }
             verify(exactly = 1) { vedtakService.oppdater(vedtak) }
             assertThat(stegType).isEqualTo(StegType.VILKÅRSVURDERING)
             assertThat(behandling.underkategori).isEqualTo(søknadDTO.underkategori.tilDomene())
@@ -103,8 +103,8 @@ class RegistrereSøknadTest {
                     underkategori = BehandlingUnderkategori.UTVIDET,
                 )
 
-            val restRegistrerSøknad =
-                RestRegistrerSøknad(
+            val registrerSøknadDto =
+                RegistrerSøknadDto(
                     søknad = søknadDTO,
                     bekreftEndringerViaFrontend = false,
                 )
@@ -120,7 +120,7 @@ class RegistrereSøknadTest {
             every { søknadGrunnlagService.lagreOgDeaktiverGammel(any()) } returnsArgument 0
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling = behandling) } returns null
             every { persongrunnlagService.registrerBarnFraSøknad(søknadDTO, behandling, null) } just runs
-            every { tilbakestillBehandlingService.initierOgSettBehandlingTilVilkårsvurdering(behandling, restRegistrerSøknad.bekreftEndringerViaFrontend) } just runs
+            every { tilbakestillBehandlingService.initierOgSettBehandlingTilVilkårsvurdering(behandling, registrerSøknadDto.bekreftEndringerViaFrontend) } just runs
             every { vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id) } returns vedtak
             every { vedtakService.oppdater(vedtak) } returnsArgument 0
 
@@ -128,7 +128,7 @@ class RegistrereSøknadTest {
             val stegType =
                 registrereSøknad.utførStegOgAngiNeste(
                     behandling = behandling,
-                    data = restRegistrerSøknad,
+                    data = registrerSøknadDto,
                 )
 
             // Assert
@@ -136,7 +136,7 @@ class RegistrereSøknadTest {
             verify(exactly = 1) { loggService.opprettRegistrertSøknadLogg(behandling, false) }
             verify(exactly = 1) { søknadGrunnlagService.lagreOgDeaktiverGammel(any()) }
             verify(exactly = 1) { persongrunnlagService.registrerBarnFraSøknad(søknadDTO, behandling, null) }
-            verify(exactly = 1) { tilbakestillBehandlingService.initierOgSettBehandlingTilVilkårsvurdering(behandling, restRegistrerSøknad.bekreftEndringerViaFrontend) }
+            verify(exactly = 1) { tilbakestillBehandlingService.initierOgSettBehandlingTilVilkårsvurdering(behandling, registrerSøknadDto.bekreftEndringerViaFrontend) }
             verify(exactly = 1) { vedtakService.oppdater(vedtak) }
             assertThat(stegType).isEqualTo(StegType.VILKÅRSVURDERING)
             assertThat(behandling.underkategori).isEqualTo(søknadDTO.underkategori.tilDomene())

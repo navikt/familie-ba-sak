@@ -48,7 +48,7 @@ class ArbeidsfordelingService(
     @Transactional
     fun manueltOppdaterBehandlendeEnhet(
         behandling: Behandling,
-        endreBehandlendeEnhet: RestEndreBehandlendeEnhet,
+        endreBehandlendeEnhet: EndreBehandlendeEnhetDto,
     ) {
         validerEndringAvBehandlendeEnhet(endreBehandlendeEnhet)
 
@@ -80,7 +80,7 @@ class ArbeidsfordelingService(
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id)
     }
 
-    private fun validerEndringAvBehandlendeEnhet(endreBehandlendeEnhet: RestEndreBehandlendeEnhet) {
+    private fun validerEndringAvBehandlendeEnhet(endreBehandlendeEnhet: EndreBehandlendeEnhetDto) {
         if (endreBehandlendeEnhet.enhetId == STEINKJER.enhetsnummer) {
             throw FunksjonellFeil(
                 melding = "Fra og med 5. januar 2026 er det ikke lenger å mulig å endre behandlende enhet til Steinkjer.",

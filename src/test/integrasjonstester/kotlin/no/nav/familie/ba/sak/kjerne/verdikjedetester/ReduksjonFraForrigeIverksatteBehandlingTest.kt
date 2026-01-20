@@ -6,9 +6,9 @@ import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -23,8 +23,8 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.Datakilde
@@ -61,8 +61,8 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
 
     @Test
     fun `Skal lage reduksjon fra sist iverksatte behandling-periode når småbarnstillegg blir borte`() {
-        val personScenario: RestScenario = lagScenario(barnFødselsdato)
-        val fagsak: RestMinimalFagsak = lagFagsak(personScenario)
+        val personScenario: ScenarioDto = lagScenario(barnFødselsdato)
+        val fagsak: MinimalFagsakDto = lagFagsak(personScenario)
 
         val osFom = LocalDate.now().førsteDagIInneværendeMåned()
         val osTom = LocalDate.now().plusMonths(2).sisteDagIMåned()
@@ -113,12 +113,12 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         Assertions.assertEquals(osTom, periodeMedReduksjon.tom)
     }
 
-    fun lagScenario(barnFødselsdato: LocalDate): RestScenario =
-        RestScenario(
-            søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+    fun lagScenario(barnFødselsdato: LocalDate): ScenarioDto =
+        ScenarioDto(
+            søker = ScenarioPersonDto(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
             barna =
                 listOf(
-                    RestScenarioPerson(
+                    ScenarioPersonDto(
                         fødselsdato = barnFødselsdato.toString(),
                         fornavn = "Barn",
                         etternavn = "Barnesen",
@@ -126,11 +126,11 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                 ),
         ).also { stubScenario(it) }
 
-    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
+    fun lagFagsak(personScenario: ScenarioDto): MinimalFagsakDto = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
 
     fun fullførBehandlingMedOvergangsstønad(
-        fagsak: RestMinimalFagsak,
-        personScenario: RestScenario,
+        fagsak: MinimalFagsakDto,
+        personScenario: ScenarioDto,
         overgangsstønadPerioder: List<EksternPeriode>,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
@@ -141,16 +141,16 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                     perioder = overgangsstønadPerioder,
                 ),
         )
-        val restBehandling: Ressurs<RestUtvidetBehandling> =
+        val behandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,
                 behandlingType = behandlingType,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 fagsakId = fagsak.id,
             )
-        val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
-        val restRegistrerSøknad =
-            RestRegistrerSøknad(
+        val behandling = behandlingHentOgPersisterService.hent(behandlingDto.data!!.behandlingId)
+        val registrerSøknadDto =
+            RegistrerSøknadDto(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = fagsak.søkerFødselsnummer,
@@ -159,14 +159,14 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                     ),
                 bekreftEndringerViaFrontend = false,
             )
-        val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
+        val utvidetBehandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().registrererSøknad(
                 behandlingId = behandling.id,
-                restRegistrerSøknad = restRegistrerSøknad,
+                registrerSøknadDto = registrerSøknadDto,
             )
 
         return fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
-            restUtvidetBehandling = restUtvidetBehandling.data!!,
+            utvidetBehandlingDto = utvidetBehandlingDto.data!!,
             personScenario = personScenario,
             fagsak = fagsak,
             familieBaSakKlient = familieBaSakKlient(),
@@ -181,8 +181,8 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     }
 
     fun fullførRevurderingUtenOvergangstonad(
-        fagsak: RestMinimalFagsak,
-        personScenario: RestScenario,
+        fagsak: MinimalFagsakDto,
+        personScenario: ScenarioDto,
     ): Behandling {
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
@@ -195,7 +195,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                 ),
         )
 
-        val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
+        val utvidetBehandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,
                 behandlingType = behandlingType,
@@ -205,7 +205,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
             )
 
         return fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
-            restUtvidetBehandling = restUtvidetBehandling.data!!,
+            utvidetBehandlingDto = utvidetBehandlingDto.data!!,
             personScenario = personScenario,
             fagsak = fagsak,
             familieBaSakKlient = familieBaSakKlient(),

@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.støtterFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.VedtaksbegrunnelseDto
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -46,10 +46,10 @@ class EØSBegrunnelse(
             begrunnelse = this.begrunnelse,
         )
 
-    fun tilRestVedtaksbegrunnelse(
+    fun tilVedtaksbegrunnelseDto(
         sanityBegrunnelser: List<ISanityBegrunnelse>,
         alleBegrunnelserSkalStøtteFritekst: Boolean,
-    ) = RestVedtaksbegrunnelse(
+    ) = VedtaksbegrunnelseDto(
         standardbegrunnelse = this.begrunnelse.enumnavnTilString(),
         vedtakBegrunnelseType = this.begrunnelse.vedtakBegrunnelseType,
         vedtakBegrunnelseSpesifikasjon = this.begrunnelse.enumnavnTilString(),

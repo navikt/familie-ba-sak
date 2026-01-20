@@ -47,7 +47,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import java.time.LocalDate
 
-fun stubScenario(scenario: RestScenario) {
+fun stubScenario(scenario: ScenarioDto) {
     val alleIdenter = scenario.barna.map { it } + scenario.søker
     alleIdenter.forEach {
         stubHentIdenter(it.ident)
@@ -63,7 +63,7 @@ fun stubScenario(scenario: RestScenario) {
     stubHentArbeidsforhold(scenario.søker.ident)
 }
 
-private fun stubHentSøknad(restScenarioPerson: RestScenarioPerson) {
+private fun stubHentSøknad(scenarioPersonDto: ScenarioPersonDto) {
     stubFor(
         post(urlEqualTo("/rest/api/"))
             .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString("")))
@@ -78,7 +78,7 @@ private fun stubHentSøknad(restScenarioPerson: RestScenarioPerson) {
     )
 }
 
-private fun stubHentStatsborgerskap(restScenarioPerson: RestScenarioPerson) {
+private fun stubHentStatsborgerskap(scenarioPersonDto: ScenarioPersonDto) {
     val response =
         PdlBaseResponse(
             data =
@@ -86,7 +86,7 @@ private fun stubHentStatsborgerskap(restScenarioPerson: RestScenarioPerson) {
                     person =
                         PdlStatsborgerskapPerson(
                             statsborgerskap =
-                                restScenarioPerson.statsborgerskap,
+                                scenarioPersonDto.statsborgerskap,
                         ),
                 ),
             errors = null,
@@ -94,7 +94,7 @@ private fun stubHentStatsborgerskap(restScenarioPerson: RestScenarioPerson) {
         )
     val pdlRequestBody =
         PdlPersonRequest(
-            variables = PdlPersonRequestVariables(restScenarioPerson.ident, historikk = true),
+            variables = PdlPersonRequestVariables(scenarioPersonDto.ident, historikk = true),
             query = hentGraphqlQuery("statsborgerskap"),
         )
 
@@ -112,14 +112,14 @@ private fun stubHentStatsborgerskap(restScenarioPerson: RestScenarioPerson) {
     )
 }
 
-private fun stubHentOppholdstillatelse(restScenarioPerson: RestScenarioPerson) {
+private fun stubHentOppholdstillatelse(scenarioPersonDto: ScenarioPersonDto) {
     val response =
         PdlBaseResponse(
             data =
                 PdlOppholdResponse(
                     person =
                         PdlOppholdPerson(
-                            opphold = restScenarioPerson.oppholdstillatelse,
+                            opphold = scenarioPersonDto.oppholdstillatelse,
                         ),
                 ),
             errors = null,
@@ -128,7 +128,7 @@ private fun stubHentOppholdstillatelse(restScenarioPerson: RestScenarioPerson) {
 
     val pdlRequestBody =
         PdlPersonRequest(
-            variables = PdlPersonRequestVariables(restScenarioPerson.ident, historikk = true),
+            variables = PdlPersonRequestVariables(scenarioPersonDto.ident, historikk = true),
             query = hentGraphqlQuery("oppholdstillatelse"),
         )
 
@@ -165,8 +165,8 @@ private fun stubHentArbeidsforhold(ident: String) {
     )
 }
 
-private fun stubHentBostedsadresserOgDeltBostedForPerson(restScenario: RestScenario) {
-    genererAlleKombinasjoner(restScenario.barna + restScenario.søker).forEach { personer ->
+private fun stubHentBostedsadresserOgDeltBostedForPerson(scenarioDto: ScenarioDto) {
+    genererAlleKombinasjoner(scenarioDto.barna + scenarioDto.søker).forEach { personer ->
         val pdlRequestBody =
             PdlPersonBolkRequest(
                 variables = PdlPersonBolkRequestVariables(personer.map { it.ident }),
@@ -207,8 +207,8 @@ private fun stubHentBostedsadresserOgDeltBostedForPerson(restScenario: RestScena
     }
 }
 
-private fun stubHenthentBostedsadresseDeltBostedOgOppholdsadresseForPerson(restScenario: RestScenario) {
-    genererAlleKombinasjoner(restScenario.barna + restScenario.søker).forEach { personer ->
+private fun stubHenthentBostedsadresseDeltBostedOgOppholdsadresseForPerson(scenarioDto: ScenarioDto) {
+    genererAlleKombinasjoner(scenarioDto.barna + scenarioDto.søker).forEach { personer ->
         val pdlRequestBody =
             PdlPersonBolkRequest(
                 variables = PdlPersonBolkRequestVariables(personer.map { it.ident }),
@@ -295,14 +295,14 @@ private fun stubHentIdenter(personIdent: String) {
     )
 }
 
-private fun stubHentPerson(scenario: RestScenario) {
+private fun stubHentPerson(scenario: ScenarioDto) {
     stubHentPersonEnkel(scenario.søker)
     scenario.barna.forEach { stubHentPersonEnkel(it) }
     stubHentPersonMedRelasjonSøker(scenario)
     scenario.barna.forEach { barn -> stubHentPersonMedRelasjonBarn(barn, scenario.søker) }
 }
 
-private fun stubHentPersonMedRelasjonSøker(scenario: RestScenario) {
+private fun stubHentPersonMedRelasjonSøker(scenario: ScenarioDto) {
     val response =
         PdlBaseResponse(
             data =
@@ -344,8 +344,8 @@ private fun stubHentPersonMedRelasjonSøker(scenario: RestScenario) {
 }
 
 private fun stubHentPersonMedRelasjonBarn(
-    barn: RestScenarioPerson,
-    søker: RestScenarioPerson,
+    barn: ScenarioPersonDto,
+    søker: ScenarioPersonDto,
 ) {
     val response =
         PdlBaseResponse(
@@ -387,7 +387,7 @@ private fun stubHentPersonMedRelasjonBarn(
     )
 }
 
-private fun enkelPdlHentPersonResponse(scenarioPerson: RestScenarioPerson): PdlPersonData =
+private fun enkelPdlHentPersonResponse(scenarioPerson: ScenarioPersonDto): PdlPersonData =
     PdlPersonData(
         folkeregisteridentifikator =
             listOf(
@@ -421,7 +421,7 @@ private fun enkelPdlHentPersonResponse(scenarioPerson: RestScenarioPerson): PdlP
         kontaktinformasjonForDoedsbo = emptyList(),
     )
 
-private fun stubHentPersonEnkel(scenarioPerson: RestScenarioPerson) {
+private fun stubHentPersonEnkel(scenarioPerson: ScenarioPersonDto) {
     val response =
         PdlBaseResponse(
             data =
@@ -453,7 +453,7 @@ private fun stubHentPersonEnkel(scenarioPerson: RestScenarioPerson) {
     )
 }
 
-private fun stubHentPersonStatsborgerskap(scenarioPerson: RestScenarioPerson) {
+private fun stubHentPersonStatsborgerskap(scenarioPerson: ScenarioPersonDto) {
     val response =
         PdlBaseResponse(
             data =
@@ -487,7 +487,7 @@ private fun stubHentPersonStatsborgerskap(scenarioPerson: RestScenarioPerson) {
     )
 }
 
-private fun stubHentPersonVergemaalEllerFretidfullmakt(scenarioPerson: RestScenarioPerson) {
+private fun stubHentPersonVergemaalEllerFretidfullmakt(scenarioPerson: ScenarioPersonDto) {
     val response =
         PdlBaseResponse(
             data =

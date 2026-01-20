@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerDto
 import no.nav.familie.ba.sak.fake.FakePdlIdentRestKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonIkkeFunnet
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
@@ -320,6 +320,6 @@ class FagsakDeltagerServiceIntegrationTest(
         val aktør = lagAktør()
 
         leggTilPersonIkkeFunnet(aktør.aktivFødselsnummer())
-        assertEquals(emptyList<RestFagsakDeltager>(), fagsakDeltagerService.hentFagsakDeltagere(aktør.aktivFødselsnummer()))
+        assertEquals(emptyList<FagsakDeltagerDto>(), fagsakDeltagerService.hentFagsakDeltagere(aktør.aktivFødselsnummer()))
     }
 }

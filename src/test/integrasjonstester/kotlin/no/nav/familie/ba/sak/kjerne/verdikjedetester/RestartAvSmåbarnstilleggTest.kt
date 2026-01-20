@@ -8,12 +8,12 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
+import no.nav.familie.ba.sak.ekstern.restDomene.PutVedtaksperiodeMedStandardbegrunnelserDto
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
@@ -29,14 +29,14 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.SatsendringTaskDto
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -76,8 +76,8 @@ class RestartAvSmåbarnstilleggTest(
         val restartSmåbarnstilleggMåned = LocalDate.now().plusMonths(4)
 
         // Fagsak 1 - har åpen behandling og skal ikke tas med
-        val personScenario1: RestScenario = lagScenario(barnFødselsdato)
-        val fagsak1: RestMinimalFagsak = lagFagsak(personScenario = personScenario1)
+        val personScenario1: ScenarioDto = lagScenario(barnFødselsdato)
+        val fagsak1: MinimalFagsakDto = lagFagsak(personScenario = personScenario1)
         fullførBehandling(
             fagsak = fagsak1,
             personScenario = personScenario1,
@@ -110,8 +110,8 @@ class RestartAvSmåbarnstilleggTest(
         )
 
         // Fagsak 2 - har restart av småbarnstillegg som ikke er begrunnet og skal være med i listen
-        val personScenario2: RestScenario = lagScenario(barnFødselsdato)
-        val fagsak2: RestMinimalFagsak = lagFagsak(personScenario = personScenario2)
+        val personScenario2: ScenarioDto = lagScenario(barnFødselsdato)
+        val fagsak2: MinimalFagsakDto = lagFagsak(personScenario = personScenario2)
         fullførBehandling(
             fagsak = fagsak2,
             personScenario = personScenario2,
@@ -138,8 +138,8 @@ class RestartAvSmåbarnstilleggTest(
         )
 
         // Fagsak 3 - har restart av småbarnstillegg som allerede er begrunnet, skal ikke være med i listen
-        val personScenario3: RestScenario = lagScenario(barnFødselsdato)
-        val fagsak3: RestMinimalFagsak = lagFagsak(personScenario = personScenario3)
+        val personScenario3: ScenarioDto = lagScenario(barnFødselsdato)
+        val fagsak3: MinimalFagsakDto = lagFagsak(personScenario = personScenario3)
         fullførBehandling(
             fagsak = fagsak3,
             personScenario = personScenario3,
@@ -187,8 +187,8 @@ class RestartAvSmåbarnstilleggTest(
         every { SatsTidspunkt.senesteSatsTidspunkt } returns senesteSatsTidspunkt // Mocker slik at behandling får gammel sats
 
         // Fagsak - har restart dato på samme dato som satsendringen
-        val personScenario: RestScenario = lagScenario(barnFødselsdato)
-        val fagsakMedSatsendringOgSmåbarnstilleggSomSkalRestartes: RestMinimalFagsak =
+        val personScenario: ScenarioDto = lagScenario(barnFødselsdato)
+        val fagsakMedSatsendringOgSmåbarnstilleggSomSkalRestartes: MinimalFagsakDto =
             lagFagsak(personScenario = personScenario)
         fullførBehandling(
             fagsak = fagsakMedSatsendringOgSmåbarnstilleggSomSkalRestartes,
@@ -239,8 +239,8 @@ class RestartAvSmåbarnstilleggTest(
             ) // Mocker slik at behandling får gammel sats
 
         // Fagsak  - har løpende fagsak med småbarnstillegg og skal ikke restartes
-        val personScenario2: RestScenario = lagScenario(barnFødselsdato)
-        val fagsakMedSatsendringOgSmåbarnstilleggSomIkkeSkalRestartes: RestMinimalFagsak =
+        val personScenario2: ScenarioDto = lagScenario(barnFødselsdato)
+        val fagsakMedSatsendringOgSmåbarnstilleggSomIkkeSkalRestartes: MinimalFagsakDto =
             lagFagsak(personScenario = personScenario2)
         fullførBehandling(
             fagsak = fagsakMedSatsendringOgSmåbarnstilleggSomIkkeSkalRestartes,
@@ -270,12 +270,12 @@ class RestartAvSmåbarnstilleggTest(
         Assertions.assertFalse(fagsaker.contains(fagsakMedSatsendringOgSmåbarnstilleggSomIkkeSkalRestartes.id))
     }
 
-    fun lagScenario(barnFødselsdato: LocalDate): RestScenario =
-        RestScenario(
-            søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+    fun lagScenario(barnFødselsdato: LocalDate): ScenarioDto =
+        ScenarioDto(
+            søker = ScenarioPersonDto(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
             barna =
                 listOf(
-                    RestScenarioPerson(
+                    ScenarioPersonDto(
                         fødselsdato = barnFødselsdato.toString(),
                         fornavn = "Barn",
                         etternavn = "Barnesen",
@@ -283,11 +283,11 @@ class RestartAvSmåbarnstilleggTest(
                 ),
         ).also { stubScenario(it) }
 
-    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
+    fun lagFagsak(personScenario: ScenarioDto): MinimalFagsakDto = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
 
     fun fullførBehandling(
-        fagsak: RestMinimalFagsak,
-        personScenario: RestScenario,
+        fagsak: MinimalFagsakDto,
+        personScenario: ScenarioDto,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
         efSakRestKlient.leggTilEksternPeriode(
@@ -297,16 +297,16 @@ class RestartAvSmåbarnstilleggTest(
             ),
         )
 
-        val restBehandling: Ressurs<RestUtvidetBehandling> =
+        val behandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,
                 behandlingType = behandlingType,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 fagsakId = fagsak.id,
             )
-        val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
-        val restRegistrerSøknad =
-            RestRegistrerSøknad(
+        val behandling = behandlingHentOgPersisterService.hent(behandlingDto.data!!.behandlingId)
+        val registrerSøknadDto =
+            RegistrerSøknadDto(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = fagsak.søkerFødselsnummer,
@@ -315,22 +315,22 @@ class RestartAvSmåbarnstilleggTest(
                     ),
                 bekreftEndringerViaFrontend = false,
             )
-        val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
+        val utvidetBehandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().registrererSøknad(
                 behandlingId = behandling.id,
-                restRegistrerSøknad = restRegistrerSøknad,
+                registrerSøknadDto = registrerSøknadDto,
             )
 
         return fullførRestenAvBehandlingen(
-            restUtvidetBehandling = restUtvidetBehandling.data!!,
+            utvidetBehandlingDto = utvidetBehandlingDto.data!!,
             personScenario = personScenario,
             fagsak = fagsak,
         )
     }
 
     fun fullførRevurderingMedOvergangstonad(
-        fagsak: RestMinimalFagsak,
-        personScenario: RestScenario,
+        fagsak: MinimalFagsakDto,
+        personScenario: ScenarioDto,
         barnFødselsdato: LocalDate,
         mockPerioderMedOvergangsstønad: List<EksternPeriode> =
             listOf(
@@ -354,7 +354,7 @@ class RestartAvSmåbarnstilleggTest(
                 ),
         )
 
-        val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
+        val utvidetBehandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,
                 behandlingType = behandlingType,
@@ -364,7 +364,7 @@ class RestartAvSmåbarnstilleggTest(
             )
 
         return fullførRestenAvBehandlingen(
-            restUtvidetBehandling = restUtvidetBehandling.data!!,
+            utvidetBehandlingDto = utvidetBehandlingDto.data!!,
             personScenario = personScenario,
             fagsak = fagsak,
             skalBegrunneSmåbarnstillegg = skalBegrunneSmåbarnstillegg,
@@ -393,17 +393,17 @@ class RestartAvSmåbarnstilleggTest(
     }
 
     fun settAlleVilkårTilOppfylt(
-        restUtvidetBehandling: RestUtvidetBehandling,
+        utvidetBehandlingDto: UtvidetBehandlingDto,
         barnFødselsdato: LocalDate,
     ) {
-        restUtvidetBehandling.personResultater.forEach { restPersonResultat ->
-            restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
+        utvidetBehandlingDto.personResultater.forEach { personResultatDto ->
+            personResultatDto.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
                 familieBaSakKlient().putVilkår(
-                    behandlingId = restUtvidetBehandling.behandlingId,
+                    behandlingId = utvidetBehandlingDto.behandlingId,
                     vilkårId = it.id,
-                    restPersonResultat =
-                        RestPersonResultat(
-                            personIdent = restPersonResultat.personIdent,
+                    personResultatDto =
+                        PersonResultatDto(
+                            personIdent = personResultatDto.personIdent,
                             vilkårResultater =
                                 listOf(
                                     it.copy(
@@ -418,8 +418,8 @@ class RestartAvSmåbarnstilleggTest(
     }
 
     private fun startEnRevurderingNyeOpplysningerMenIkkeFullfør(
-        fagsak: RestMinimalFagsak,
-        personScenario: RestScenario,
+        fagsak: MinimalFagsakDto,
+        personScenario: ScenarioDto,
         barnFødselsdato: LocalDate,
     ): Behandling {
         val behandlingType = BehandlingType.REVURDERING
@@ -439,7 +439,7 @@ class RestartAvSmåbarnstilleggTest(
                     ),
             ),
         )
-        val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
+        val utvidetBehandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,
                 behandlingType = behandlingType,
@@ -447,46 +447,46 @@ class RestartAvSmåbarnstilleggTest(
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 fagsakId = fagsak.id,
             )
-        return behandlingHentOgPersisterService.hent(restUtvidetBehandling.data!!.behandlingId)
+        return behandlingHentOgPersisterService.hent(utvidetBehandlingDto.data!!.behandlingId)
     }
 
     fun fullførRestenAvBehandlingen(
-        restUtvidetBehandling: RestUtvidetBehandling,
-        personScenario: RestScenario,
-        fagsak: RestMinimalFagsak,
+        utvidetBehandlingDto: UtvidetBehandlingDto,
+        personScenario: ScenarioDto,
+        fagsak: MinimalFagsakDto,
         skalBegrunneSmåbarnstillegg: Boolean = false,
     ): Behandling {
         settAlleVilkårTilOppfylt(
-            restUtvidetBehandling = restUtvidetBehandling,
+            utvidetBehandlingDto = utvidetBehandlingDto,
             barnFødselsdato = barnFødselsdato,
         )
 
         familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = restUtvidetBehandling.behandlingId,
+            behandlingId = utvidetBehandlingDto.behandlingId,
         )
 
-        val restUtvidetBehandlingEtterBehandlingsResultat =
+        val utvidetBehandlingDtoEtterBehandlingsResultat =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-                behandlingId = restUtvidetBehandling.behandlingId,
+                behandlingId = utvidetBehandlingDto.behandlingId,
             )
 
-        val restUtvidetBehandlingEtterVurderTilbakekreving =
+        val utvidetBehandlingDtoEtterVurderTilbakekreving =
             familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
-                restUtvidetBehandlingEtterBehandlingsResultat.data!!.behandlingId,
-                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
+                utvidetBehandlingDtoEtterBehandlingsResultat.data!!.behandlingId,
+                TilbakekrevingDto(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
             )
 
         val vedtaksperioderMedBegrunnelser =
-            vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
-                restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
+            vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelserDto(
+                utvidetBehandlingDtoEtterVurderTilbakekreving.data!!.behandlingId,
             )
 
         val utvidetVedtaksperiodeMedBegrunnelser = vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
 
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = utvidetVedtaksperiodeMedBegrunnelser.id,
-            restPutVedtaksperiodeMedStandardbegrunnelser =
-                RestPutVedtaksperiodeMedStandardbegrunnelser(
+            putVedtaksperiodeMedStandardbegrunnelserDto =
+                PutVedtaksperiodeMedStandardbegrunnelserDto(
                     standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.filter(String::isNotEmpty).take(5),
                 ),
         )
@@ -501,8 +501,8 @@ class RestartAvSmåbarnstilleggTest(
             småbarnstilleggVedtaksperioder.forEach { periode ->
                 familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
                     vedtaksperiodeId = periode.id,
-                    restPutVedtaksperiodeMedStandardbegrunnelser =
-                        RestPutVedtaksperiodeMedStandardbegrunnelser(
+                    putVedtaksperiodeMedStandardbegrunnelserDto =
+                        PutVedtaksperiodeMedStandardbegrunnelserDto(
                             standardbegrunnelser =
                                 listOf(
                                     Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG.enumnavnTilString(),
@@ -512,13 +512,13 @@ class RestartAvSmåbarnstilleggTest(
             }
         }
 
-        val restUtvidetBehandlingEtterSendTilBeslutter =
-            familieBaSakKlient().sendTilBeslutter(behandlingId = restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId)
+        val utvidetBehandlingDtoEtterSendTilBeslutter =
+            familieBaSakKlient().sendTilBeslutter(behandlingId = utvidetBehandlingDtoEtterVurderTilbakekreving.data!!.behandlingId)
 
         familieBaSakKlient().iverksettVedtak(
-            behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
-            restBeslutningPåVedtak =
-                RestBeslutningPåVedtak(
+            behandlingId = utvidetBehandlingDtoEtterSendTilBeslutter.data!!.behandlingId,
+            beslutningPåVedtakDto =
+                BeslutningPåVedtakDto(
                     Beslutning.GODKJENT,
                 ),
             beslutterHeaders =

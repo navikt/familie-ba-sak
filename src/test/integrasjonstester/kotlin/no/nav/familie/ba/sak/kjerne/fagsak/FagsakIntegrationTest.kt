@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,7 +23,7 @@ class FagsakIntegrationTest(
                 personFnr,
                 false,
                 FagsakType.INSTITUSJON,
-                RestInstitusjon("orgnr", null),
+                InstitusjonDto("orgnr", null),
             )
         val fagsakEnsligMindreÅrig =
             fagsakService.hentEllerOpprettFagsak(
@@ -52,7 +52,7 @@ class FagsakIntegrationTest(
                 personFnr,
                 false,
                 FagsakType.INSTITUSJON,
-                RestInstitusjon("orgnr", null),
+                InstitusjonDto("orgnr", null),
             )
         val fagsakEnsligMindreÅrig =
             fagsakService.hentEllerOpprettFagsak(

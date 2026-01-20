@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
-import no.nav.familie.ba.sak.datagenerator.lagMockRestJournalføring
+import no.nav.familie.ba.sak.datagenerator.lagMockJournalføringDto
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -16,7 +16,7 @@ class JournalføringUtilsTest {
         val søkerFnr = randomFnr()
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
-            lagMockRestJournalføring(
+            lagMockJournalføringDto(
                 bruker = NavnOgIdent("Mock", søkerFnr),
             ).copy(
                 journalpostTittel = "Søknad om ordinær barnetrygd",
@@ -30,7 +30,7 @@ class JournalføringUtilsTest {
         val søkerFnr = randomFnr()
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
-            lagMockRestJournalføring(
+            lagMockJournalføringDto(
                 bruker = NavnOgIdent("Mock", søkerFnr),
             ).copy(
                 journalpostTittel = utvidetJournalpostTittel,
@@ -44,7 +44,7 @@ class JournalføringUtilsTest {
     fun `Skal utlede ordinær når søknad om ordinær journalføres, men underkategori ikke er satt`() {
         val søkerFnr = randomFnr()
         val underkategori: BehandlingUnderkategori =
-            lagMockRestJournalføring(bruker = NavnOgIdent(navn = "Mock", søkerFnr))
+            lagMockJournalføringDto(bruker = NavnOgIdent(navn = "Mock", søkerFnr))
                 .copy(
                     journalpostTittel = ordinærJournalpostTittel,
                     kategori = null,
@@ -58,7 +58,7 @@ class JournalføringUtilsTest {
     fun `Skal utlede ordinær når søknad om ordinær journalføres, og underkategori er satt til ordinær`() {
         val søkerFnr = randomFnr()
         val underkategori: BehandlingUnderkategori =
-            lagMockRestJournalføring(bruker = NavnOgIdent(navn = "Mock", søkerFnr))
+            lagMockJournalføringDto(bruker = NavnOgIdent(navn = "Mock", søkerFnr))
                 .copy(
                     journalpostTittel = ordinærJournalpostTittel,
                     kategori = null,
@@ -72,7 +72,7 @@ class JournalføringUtilsTest {
     fun `Skal utlede utvidet når søknad om utvidet journalføres, men underkategori ikke er satt`() {
         val søkerFnr = randomFnr()
         val underkategori: BehandlingUnderkategori =
-            lagMockRestJournalføring(bruker = NavnOgIdent(navn = "Mock", søkerFnr))
+            lagMockJournalføringDto(bruker = NavnOgIdent(navn = "Mock", søkerFnr))
                 .copy(
                     journalpostTittel = utvidetJournalpostTittel,
                     kategori = null,
@@ -86,7 +86,7 @@ class JournalføringUtilsTest {
     fun `Skal utlede utvidet når søknad om utvidet journalføres, og underkategori er satt til utvidet`() {
         val søkerFnr = randomFnr()
         val underkategori: BehandlingUnderkategori =
-            lagMockRestJournalføring(bruker = NavnOgIdent(navn = "Mock", søkerFnr))
+            lagMockJournalføringDto(bruker = NavnOgIdent(navn = "Mock", søkerFnr))
                 .copy(
                     journalpostTittel = utvidetJournalpostTittel,
                     kategori = null,

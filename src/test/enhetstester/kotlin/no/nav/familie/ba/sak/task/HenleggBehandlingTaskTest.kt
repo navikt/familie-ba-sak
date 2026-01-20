@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.HenleggBehandlingInfoDto
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -73,7 +73,7 @@ internal class HenleggBehandlingTaskTest {
         val task = opprettTekniskHenleggelseGrunnetSatsendringTask()
         henleggBehandlingTask.doTask(task)
 
-        val henleggBehandlingInfo = slot<RestHenleggBehandlingInfo>()
+        val henleggBehandlingInfo = slot<HenleggBehandlingInfoDto>()
         verify(exactly = 1) {
             stegService.håndterHenleggBehandling(behandling, capture(henleggBehandlingInfo))
         }

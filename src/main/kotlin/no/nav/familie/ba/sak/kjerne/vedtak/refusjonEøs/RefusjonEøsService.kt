@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRefusjonEøs
+import no.nav.familie.ba.sak.ekstern.restDomene.RefusjonEøsDto
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -20,7 +20,7 @@ class RefusjonEøsService(
 
     @Transactional
     fun leggTilRefusjonEøsPeriode(
-        refusjonEøs: RestRefusjonEøs,
+        refusjonEøs: RefusjonEøsDto,
         behandlingId: Long,
     ): Long {
         val lagretPeriode =
@@ -51,10 +51,10 @@ class RefusjonEøsService(
     fun hentRefusjonEøsPerioder(behandlingId: Long) =
         refusjonEøsRepository
             .finnRefusjonEøsForBehandling(behandlingId = behandlingId)
-            .map { tilRest(it) }
+            .map { tilDto(it) }
 
-    private fun tilRest(it: RefusjonEøs) =
-        RestRefusjonEøs(
+    private fun tilDto(it: RefusjonEøs) =
+        RefusjonEøsDto(
             id = it.id,
             fom = it.fom,
             tom = it.tom,
@@ -65,16 +65,16 @@ class RefusjonEøsService(
 
     @Transactional
     fun oppdaterRefusjonEøsPeriode(
-        restRefusjonEøs: RestRefusjonEøs,
+        refusjonEøsDto: RefusjonEøsDto,
         id: Long,
     ) {
         val refusjonEøs = hentRefusjonEøs(id)
 
-        refusjonEøs.fom = restRefusjonEøs.fom
-        refusjonEøs.tom = restRefusjonEøs.tom
-        refusjonEøs.refusjonsbeløp = restRefusjonEøs.refusjonsbeløp
-        refusjonEøs.land = restRefusjonEøs.land
-        refusjonEøs.refusjonAvklart = restRefusjonEøs.refusjonAvklart
+        refusjonEøs.fom = refusjonEøsDto.fom
+        refusjonEøs.tom = refusjonEøsDto.tom
+        refusjonEøs.refusjonsbeløp = refusjonEøsDto.refusjonsbeløp
+        refusjonEøs.land = refusjonEøsDto.land
+        refusjonEøs.refusjonAvklart = refusjonEøsDto.refusjonAvklart
     }
 
     fun harRefusjonEøsPåBehandling(behandlingId: Long): Boolean = refusjonEøsRepository.finnRefusjonEøsForBehandling(behandlingId).isNotEmpty()

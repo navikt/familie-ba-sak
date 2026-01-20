@@ -12,7 +12,7 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekrevingsvedtakMotregning
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingsvedtakMotregningDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
@@ -46,8 +46,8 @@ data class TilbakekrevingsvedtakMotregning(
     var vedtakPdf: ByteArray? = null,
 ) : BaseEntitet()
 
-fun TilbakekrevingsvedtakMotregning.tilRestTilbakekrevingsvedtakMotregning() =
-    RestTilbakekrevingsvedtakMotregning(
+fun TilbakekrevingsvedtakMotregning.tilTilbakekrevingsvedtakMotregningDto() =
+    TilbakekrevingsvedtakMotregningDto(
         id = this.id,
         behandlingId = this.behandling.id,
         årsakTilFeilutbetaling = this.årsakTilFeilutbetaling,

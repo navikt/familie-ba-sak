@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import no.nav.familie.ba.sak.datagenerator.lagValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.UtfyltStatus
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestValutakurs
+import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakursDto
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -17,9 +17,9 @@ class ValutakursUtfyltTest {
                 kurs = BigDecimal.valueOf(10),
             )
 
-        val restValutakurs = valutakurs.tilRestValutakurs()
+        val valutakursDto = valutakurs.tilValutakursDto()
 
-        Assertions.assertEquals(UtfyltStatus.OK, restValutakurs.status)
+        Assertions.assertEquals(UtfyltStatus.OK, valutakursDto.status)
     }
 
     @Test
@@ -29,26 +29,26 @@ class ValutakursUtfyltTest {
                 valutakursdato = LocalDate.now(),
             )
 
-        var restValutakurs = valutakurs.tilRestValutakurs()
+        var valutaKursDto = valutakurs.tilValutakursDto()
 
-        Assertions.assertEquals(UtfyltStatus.UFULLSTENDIG, restValutakurs.status)
+        Assertions.assertEquals(UtfyltStatus.UFULLSTENDIG, valutaKursDto.status)
 
         valutakurs =
             lagValutakurs(
                 kurs = BigDecimal.valueOf(10),
             )
 
-        restValutakurs = valutakurs.tilRestValutakurs()
+        valutaKursDto = valutakurs.tilValutakursDto()
 
-        Assertions.assertEquals(UtfyltStatus.UFULLSTENDIG, restValutakurs.status)
+        Assertions.assertEquals(UtfyltStatus.UFULLSTENDIG, valutaKursDto.status)
     }
 
     @Test
     fun `Skal sette UtfyltStatus til IKKE_UTFYLT når ingen felter er utfylt`() {
         val valutakurs = lagValutakurs()
 
-        val restValutakurs = valutakurs.tilRestValutakurs()
+        val valutaKursDto = valutakurs.tilValutakursDto()
 
-        Assertions.assertEquals(UtfyltStatus.IKKE_UTFYLT, restValutakurs.status)
+        Assertions.assertEquals(UtfyltStatus.IKKE_UTFYLT, valutaKursDto.status)
     }
 }

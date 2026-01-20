@@ -19,7 +19,7 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
+import no.nav.familie.ba.sak.ekstern.restDomene.RegisteropplysningDto
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse.GrMatrikkeladresseOppholdsadresse.Companion.fraMatrikkeladresse
@@ -72,8 +72,8 @@ abstract class GrOppholdsadresse(
             it.oppholdAnnetSted = oppholdAnnetSted
         }
 
-    fun tilRestRegisteropplysning() =
-        RestRegisteropplysning(
+    fun tilRegisteropplysningDto() =
+        RegisteropplysningDto(
             fom = this.periode?.fom.takeIf { it != fregManglendeFlytteDato },
             tom = this.periode?.tom,
             verdi = this.tilFrontendString(),

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.feilHvis
-import no.nav.familie.ba.sak.ekstern.restDomene.RestAnnenVurdering
+import no.nav.familie.ba.sak.ekstern.restDomene.AnnenVurderingDto
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
@@ -32,7 +32,7 @@ class AnnenVurderingService(
     fun endreAnnenVurdering(
         behandlingId: Long,
         annenVurderingId: Long,
-        restAnnenVurdering: RestAnnenVurdering,
+        annenVurderingDto: AnnenVurderingDto,
     ) {
         val vurdering = hent(annenVurderingId = annenVurderingId)
         val behandling = vurdering.personResultat.vilkårsvurdering.behandling
@@ -43,9 +43,9 @@ class AnnenVurderingService(
         }
         annenVurderingRepository.save(
             vurdering.also {
-                it.resultat = restAnnenVurdering.resultat
-                it.begrunnelse = restAnnenVurdering.begrunnelse
-                it.type = restAnnenVurdering.type
+                it.resultat = annenVurderingDto.resultat
+                it.begrunnelse = annenVurderingDto.begrunnelse
+                it.type = annenVurderingDto.type
             },
         )
     }

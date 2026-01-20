@@ -4,9 +4,9 @@ import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.nyRevurdering
-import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -27,8 +27,8 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -69,16 +69,16 @@ class RevurderingMedEndredeUtbetalingandelerTest(
     @Test
     fun `Endrede utbetalingsandeler fra forrige behandling kopieres riktig og oppdaterer andel med riktig beløp`() {
         val scenario =
-            RestScenario(
+            ScenarioDto(
                 søker =
-                    RestScenarioPerson(
+                    ScenarioPersonDto(
                         fødselsdato = "${LocalDate.now().minusYears(28)}",
                         fornavn = "Mor",
                         etternavn = "Søker",
                     ),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = LocalDate.now().minusYears(4).toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
@@ -155,12 +155,12 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         barnetsFødselsdato: LocalDate,
     ) {
         vilkårsvurdering.personResultater.map { personResultat ->
-            personResultat.tilRestPersonResultat().vilkårResultater.map {
+            personResultat.tilPersonResultatDto().vilkårResultater.map {
                 vilkårService.endreVilkår(
                     behandlingId = behandling.id,
                     vilkårId = it.id,
-                    restPersonResultat =
-                        RestPersonResultat(
+                    personResultatDto =
+                        PersonResultatDto(
                             personIdent = personResultat.aktør.aktivFødselsnummer(),
                             vilkårResultater =
                                 listOf(
@@ -246,8 +246,8 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         val endretUtbetalingAndel =
             endretUtbetalingAndelService.opprettTomEndretUtbetalingAndel(førstegangsbehandling)
 
-        val restEndretUtbetalingAndel =
-            RestEndretUtbetalingAndel(
+        val endretUtbetalingAndelDto =
+            EndretUtbetalingAndelDto(
                 id = endretUtbetalingAndel.id,
                 fom = endretAndelFom,
                 tom = endretAndelTom,
@@ -263,7 +263,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
             førstegangsbehandling,
             endretUtbetalingAndel.id,
-            restEndretUtbetalingAndel,
+            endretUtbetalingAndelDto,
         )
 
         førstegangsbehandling.behandlingStegTilstand.add(

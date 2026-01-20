@@ -1,29 +1,29 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
+import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
+import no.nav.familie.ba.sak.ekstern.restDomene.PutVedtaksperiodeMedStandardbegrunnelserDto
+import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.springframework.http.HttpHeaders
 import java.time.LocalDate
 
 fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
-    restUtvidetBehandling: RestUtvidetBehandling,
-    personScenario: RestScenario,
-    fagsak: RestMinimalFagsak,
+    utvidetBehandlingDto: UtvidetBehandlingDto,
+    personScenario: ScenarioDto,
+    fagsak: MinimalFagsakDto,
     familieBaSakKlient: FamilieBaSakKlient,
     lagToken: (Map<String, Any>) -> String,
     behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -34,29 +34,29 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
     vedtaksperiodeService: VedtaksperiodeService,
 ): Behandling {
     settAlleVilkårTilOppfylt(
-        restUtvidetBehandling = restUtvidetBehandling,
+        utvidetBehandlingDto = utvidetBehandlingDto,
         barnFødselsdato = personScenario.barna.maxOf { LocalDate.parse(it.fødselsdato) },
         familieBaSakKlient = familieBaSakKlient,
     )
 
     familieBaSakKlient.validerVilkårsvurdering(
-        behandlingId = restUtvidetBehandling.behandlingId,
+        behandlingId = utvidetBehandlingDto.behandlingId,
     )
 
-    val restUtvidetBehandlingEtterBehandlingsResultat =
+    val utvidetBehandlingDtoEtterBehandlingsResultat =
         familieBaSakKlient.behandlingsresultatStegOgGåVidereTilNesteSteg(
-            behandlingId = restUtvidetBehandling.behandlingId,
+            behandlingId = utvidetBehandlingDto.behandlingId,
         )
 
-    val restUtvidetBehandlingEtterVurderTilbakekreving =
+    val utvidetBehandlingDtoEtterVurderTilbakekreving =
         familieBaSakKlient.lagreTilbakekrevingOgGåVidereTilNesteSteg(
-            restUtvidetBehandlingEtterBehandlingsResultat.data!!.behandlingId,
-            RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
+            utvidetBehandlingDtoEtterBehandlingsResultat.data!!.behandlingId,
+            TilbakekrevingDto(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
         )
 
     val vedtaksperioderMedBegrunnelser =
-        vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
-            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
+        vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelserDto(
+            utvidetBehandlingDtoEtterVurderTilbakekreving.data!!.behandlingId,
         )
 
     val utvidetVedtaksperiodeMedBegrunnelser =
@@ -64,18 +64,18 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
 
     familieBaSakKlient.oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId = utvidetVedtaksperiodeMedBegrunnelser.id,
-        restPutVedtaksperiodeMedStandardbegrunnelser =
-            RestPutVedtaksperiodeMedStandardbegrunnelser(
+        putVedtaksperiodeMedStandardbegrunnelserDto =
+            PutVedtaksperiodeMedStandardbegrunnelserDto(
                 standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.filter(String::isNotEmpty).take(5),
             ),
     )
-    val restUtvidetBehandlingEtterSendTilBeslutter =
-        familieBaSakKlient.sendTilBeslutter(behandlingId = restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId)
+    val utvidetBehandlingDtoEtterSendTilBeslutter =
+        familieBaSakKlient.sendTilBeslutter(behandlingId = utvidetBehandlingDtoEtterVurderTilbakekreving.data!!.behandlingId)
 
     familieBaSakKlient.iverksettVedtak(
-        behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
-        restBeslutningPåVedtak =
-            RestBeslutningPåVedtak(
+        behandlingId = utvidetBehandlingDtoEtterSendTilBeslutter.data!!.behandlingId,
+        beslutningPåVedtakDto =
+            BeslutningPåVedtakDto(
                 Beslutning.GODKJENT,
             ),
         beslutterHeaders =
@@ -103,18 +103,18 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
 }
 
 fun settAlleVilkårTilOppfylt(
-    restUtvidetBehandling: RestUtvidetBehandling,
+    utvidetBehandlingDto: UtvidetBehandlingDto,
     barnFødselsdato: LocalDate,
     familieBaSakKlient: FamilieBaSakKlient,
 ) {
-    restUtvidetBehandling.personResultater.forEach { restPersonResultat ->
-        restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
+    utvidetBehandlingDto.personResultater.forEach { personResultatDto ->
+        personResultatDto.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
             familieBaSakKlient.putVilkår(
-                behandlingId = restUtvidetBehandling.behandlingId,
+                behandlingId = utvidetBehandlingDto.behandlingId,
                 vilkårId = it.id,
-                restPersonResultat =
-                    RestPersonResultat(
-                        personIdent = restPersonResultat.personIdent,
+                personResultatDto =
+                    PersonResultatDto(
+                        personIdent = personResultatDto.personIdent,
                         vilkårResultater =
                             listOf(
                                 it.copy(

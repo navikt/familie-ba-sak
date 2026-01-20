@@ -5,7 +5,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import jakarta.validation.ConstraintViolationException
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.ekstern.restDomene.UtenlandskPeriodebeløpDto
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -43,7 +43,7 @@ class UtenlandskPeriodebeløpControllerTest {
             assertThrows<ConstraintViolationException> {
                 utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(
                     1,
-                    RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = (-1.0).toBigDecimal(), null, null, null),
+                    UtenlandskPeriodebeløpDto(1, null, null, emptyList(), beløp = (-1.0).toBigDecimal(), null, null, null),
                 )
             }
 
@@ -69,7 +69,7 @@ class UtenlandskPeriodebeløpControllerTest {
         val response =
             utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(
                 1,
-                RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = 1.0.toBigDecimal(), null, null, null),
+                UtenlandskPeriodebeløpDto(1, null, null, emptyList(), beløp = 1.0.toBigDecimal(), null, null, null),
             )
 
         assertEquals(HttpStatus.OK, response.statusCode)

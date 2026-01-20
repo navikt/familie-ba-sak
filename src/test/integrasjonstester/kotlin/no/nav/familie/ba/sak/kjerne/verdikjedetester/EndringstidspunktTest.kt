@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
-import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingFraRestScenario
+import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingFraScenarioDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -15,8 +15,8 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -40,16 +40,16 @@ class EndringstidspunktTest(
     fun `Skal filtrere bort alle vedtaksperioder før endringstidspunktet`() {
         val barnFødselsdato = LocalDate.now().minusYears(2)
         val scenario =
-            RestScenario(
+            ScenarioDto(
                 søker =
-                    RestScenarioPerson(
+                    ScenarioPersonDto(
                         fødselsdato = "1982-01-12",
                         fornavn = "Mor",
                         etternavn = "Søker",
                     ),
                 barna =
                     listOf(
-                        RestScenarioPerson(
+                        ScenarioPersonDto(
                             fødselsdato = barnFødselsdato.toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
@@ -70,7 +70,7 @@ class EndringstidspunktTest(
             underkategori = BehandlingUnderkategori.ORDINÆR,
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             overstyrendeVilkårsvurdering =
-                lagVilkårsvurderingFraRestScenario(
+                lagVilkårsvurderingFraScenarioDto(
                     scenario,
                     overstyrendeVilkårResultaterFGB,
                 ),
@@ -125,7 +125,7 @@ class EndringstidspunktTest(
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
                 overstyrendeVilkårsvurdering =
-                    lagVilkårsvurderingFraRestScenario(
+                    lagVilkårsvurderingFraScenarioDto(
                         scenario,
                         overstyrendeVilkårResultaterRevurdering,
                     ),

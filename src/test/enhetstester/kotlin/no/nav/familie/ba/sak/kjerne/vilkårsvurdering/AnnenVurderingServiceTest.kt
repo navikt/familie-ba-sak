@@ -6,7 +6,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.RestAnnenVurdering
+import no.nav.familie.ba.sak.ekstern.restDomene.AnnenVurderingDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
@@ -63,7 +63,7 @@ class AnnenVurderingServiceTest {
         annenVurderingService.endreAnnenVurdering(
             personResultat.vilkårsvurdering.behandling.id,
             123L,
-            RestAnnenVurdering(
+            AnnenVurderingDto(
                 123L,
                 Resultat.IKKE_OPPFYLT,
                 type = AnnenVurderingType.OPPLYSNINGSPLIKT,

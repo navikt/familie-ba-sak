@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.korrigertvedtak
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -33,7 +33,7 @@ class KorrigertVedtakController(
     fun opprettKorrigertVedtakPåBehandling(
         @PathVariable behandlingId: Long,
         @RequestBody korrigerVedtakRequest: KorrigerVedtakRequest,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.CREATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -47,13 +47,13 @@ class KorrigertVedtakController(
 
         korrigertVedtakService.lagreKorrigertVedtak(korrigertVedtak)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId)))
     }
 
     @PatchMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun settKorrigertVedtakTilInaktivPåBehandling(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -65,6 +65,6 @@ class KorrigertVedtakController(
 
         korrigertVedtakService.settKorrigertVedtakPåBehandlingTilInaktiv(behandling)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)))
     }
 }

@@ -30,7 +30,7 @@ import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.ekstern.restDomene.RestNyAktivBrukerIModiaContext
+import no.nav.familie.ba.sak.ekstern.restDomene.NyAktivBrukerIModiaContextDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient.Companion.VEDTAK_VEDLEGG_FILNAVN
@@ -576,7 +576,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
                     .willReturn(okJson(modiaContextResponse { success(it) })),
             )
 
-        val modiaContext = integrasjonKlient.settNyAktivBrukerIModiaContext(RestNyAktivBrukerIModiaContext(personIdent = "13025514402"))
+        val modiaContext = integrasjonKlient.settNyAktivBrukerIModiaContext(NyAktivBrukerIModiaContextDto(personIdent = "13025514402"))
 
         assertThat(modiaContext.aktivBruker).isEqualTo("13025514402")
     }
@@ -617,7 +617,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
 
         val exception =
             assertThrows<RessursException> {
-                integrasjonKlient.settNyAktivBrukerIModiaContext(RestNyAktivBrukerIModiaContext(personIdent = "13025514402"))
+                integrasjonKlient.settNyAktivBrukerIModiaContext(NyAktivBrukerIModiaContextDto(personIdent = "13025514402"))
             }
 
         assertThat(exception.message).contains("modia-context-holder")
@@ -690,7 +690,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
     private fun modiaContextRequest() =
         equalToJson(
             objectMapper.writeValueAsString(
-                RestNyAktivBrukerIModiaContext(personIdent = "13025514402"),
+                NyAktivBrukerIModiaContextDto(personIdent = "13025514402"),
             ),
         )
 

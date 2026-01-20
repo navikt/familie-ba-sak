@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
+import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonerMedAndelerDto
 import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
@@ -369,12 +369,12 @@ class BehandlingIntegrationTest(
         vilkårsvurderingRepository.save(vilkårsvurdering)
 
         val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-        val restVedtakBarnMap =
+        val barnOgYtelsePeriodeDtoMap =
             personopplysningGrunnlag
-                .tilRestPersonerMedAndeler(andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelse.toList())
+                .tilPersonerMedAndelerDto(andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelse.toList())
                 .associateBy(
                     { it.personIdent },
-                    { restPersonMedAndeler -> restPersonMedAndeler.ytelsePerioder.sortedBy { it.stønadFom } },
+                    { personMedAndelerDto -> personMedAndelerDto.ytelsePerioder.sortedBy { it.stønadFom } },
                 )
 
         val satsEndringDatoSeptember2020 =
@@ -382,10 +382,10 @@ class BehandlingIntegrationTest(
         val satsEndringDatoSeptember2021 =
             SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1654)!!.toYearMonth()
         val satsEndringDatoJanuar2022 = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1676)!!.toYearMonth()
-        assertEquals(2, restVedtakBarnMap.size)
+        assertEquals(2, barnOgYtelsePeriodeDtoMap.size)
 
         // Barn 1
-        val barn1Perioder = restVedtakBarnMap[barn1Fnr]!!.sortedBy { it.stønadFom }
+        val barn1Perioder = barnOgYtelsePeriodeDtoMap[barn1Fnr]!!.sortedBy { it.stønadFom }
         assertEquals(1054, barn1Perioder[0].beløp)
         assertEquals(januar2020, barn1Perioder[0].stønadFom)
         assertEquals(satsEndringDatoSeptember2020.minusMonths(1), barn1Perioder[0].stønadTom)
@@ -405,7 +405,7 @@ class BehandlingIntegrationTest(
         assertEquals(1054, barn1Perioder[4].beløp)
 
         // Barn 2
-        val barn2Perioder = restVedtakBarnMap[barn2Fnr]!!.sortedBy { it.stønadFom }
+        val barn2Perioder = barnOgYtelsePeriodeDtoMap[barn2Fnr]!!.sortedBy { it.stønadFom }
         assertEquals(1354, barn2Perioder[0].beløp)
         assertEquals(oktober2020, barn2Perioder[0].stønadFom)
         assertTrue(oktober2020 < barn2Perioder[0].stønadTom)
@@ -494,18 +494,18 @@ class BehandlingIntegrationTest(
         val satsEndringDatoJanuar2022 = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1676)!!.toYearMonth()
 
         val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-        val restVedtakBarnMap =
+        val barnOgYtelsePeriodeDtoMap =
             personopplysningGrunnlag
-                .tilRestPersonerMedAndeler(andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelse.toList())
+                .tilPersonerMedAndelerDto(andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelse.toList())
                 .associateBy(
                     { it.personIdent },
-                    { restPersonMedAndeler -> restPersonMedAndeler.ytelsePerioder.sortedBy { it.stønadFom } },
+                    { personMedAndelerDto -> personMedAndelerDto.ytelsePerioder.sortedBy { it.stønadFom } },
                 )
 
-        assertEquals(2, restVedtakBarnMap.size)
+        assertEquals(2, barnOgYtelsePeriodeDtoMap.size)
 
         // Barn 1
-        val barn1Perioder = restVedtakBarnMap[barn1Fnr]!!.sortedBy { it.stønadFom }
+        val barn1Perioder = barnOgYtelsePeriodeDtoMap[barn1Fnr]!!.sortedBy { it.stønadFom }
         assertEquals(4, barn1Perioder.size)
         assertEquals(1354, barn1Perioder[0].beløp)
         assertEquals(januar2021, barn1Perioder[0].stønadFom)
@@ -518,7 +518,7 @@ class BehandlingIntegrationTest(
         assertTrue(stønadTom >= barn1Perioder[3].stønadTom)
 
         // Barn 3
-        val barn3perioder = restVedtakBarnMap[barn3Fnr]!!.sortedBy { it.stønadFom }
+        val barn3perioder = barnOgYtelsePeriodeDtoMap[barn3Fnr]!!.sortedBy { it.stønadFom }
         assertEquals(4, barn3perioder.size)
         assertEquals(1354, barn3perioder[0].beløp)
         assertEquals(januar2021, barn3perioder[0].stønadFom)

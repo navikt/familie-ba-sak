@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.HenleggBehandlingInfoDto
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -60,7 +60,7 @@ class HenleggBehandlingTask(
         stegService
             .håndterHenleggBehandling(
                 behandling = behandling,
-                henleggBehandlingInfo = henleggBehandlingTaskDTO.run { RestHenleggBehandlingInfo(årsak, begrunnelse) },
+                henleggBehandlingInfo = henleggBehandlingTaskDTO.run { HenleggBehandlingInfoDto(årsak, begrunnelse) },
             ).apply {
                 task.metadata["behandlendeEnhetId"] = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(id).behandlendeEnhetId
                 task.metadata["Resultat"] = "Henleggelse kjørt OK"

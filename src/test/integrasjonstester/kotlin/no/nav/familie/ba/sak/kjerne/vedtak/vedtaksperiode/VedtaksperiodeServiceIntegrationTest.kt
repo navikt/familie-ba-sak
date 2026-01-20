@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
@@ -105,8 +105,8 @@ class VedtaksperiodeServiceIntegrationTest(
         val behandlingEtterNySøknadsregistrering =
             stegService.håndterSøknad(
                 behandling = behandling,
-                restRegistrerSøknad =
-                    RestRegistrerSøknad(
+                registrerSøknadDto =
+                    RegistrerSøknadDto(
                         søknad =
                             SøknadDTO(
                                 underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
@@ -163,8 +163,8 @@ class VedtaksperiodeServiceIntegrationTest(
         val behandlingEtterNySøknadsregistrering =
             stegService.håndterSøknad(
                 behandling = behandling,
-                restRegistrerSøknad =
-                    RestRegistrerSøknad(
+                registrerSøknadDto =
+                    RegistrerSøknadDto(
                         søknad =
                             SøknadDTO(
                                 underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
