@@ -9,7 +9,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSammensattKontrollsak
+import no.nav.familie.ba.sak.ekstern.restDomene.SammensattKontrollsakDto
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -30,4 +30,4 @@ data class SammensattKontrollsak(
     var fritekst: String,
 ) : BaseEntitet()
 
-fun SammensattKontrollsak.tilRestSammensattKontrollsak() = RestSammensattKontrollsak(id = id, behandlingId = behandlingId, fritekst = fritekst)
+fun SammensattKontrollsak.tilRestSammensattKontrollsak() = SammensattKontrollsakDto(id = id, behandlingId = behandlingId, fritekst = fritekst)

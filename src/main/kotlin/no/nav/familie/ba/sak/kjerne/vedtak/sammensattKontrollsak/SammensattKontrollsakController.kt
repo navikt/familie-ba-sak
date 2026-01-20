@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestOpprettSammensattKontrollsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSammensattKontrollsak
+import no.nav.familie.ba.sak.ekstern.restDomene.OpprettSammensattKontrollsakDto
+import no.nav.familie.ba.sak.ekstern.restDomene.SammensattKontrollsakDto
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -41,7 +41,7 @@ class SammensattKontrollsakController(
     )
     fun hentSammensattKontrollsak(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<RestSammensattKontrollsak?>> {
+    ): ResponseEntity<Ressurs<SammensattKontrollsakDto?>> {
         if (!featureToggleService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
             throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
@@ -60,8 +60,8 @@ class SammensattKontrollsakController(
         consumes = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun opprettSammensattKontrollsak(
-        @RequestBody restOpprettSammensattKontrollsak: RestOpprettSammensattKontrollsak,
-    ): ResponseEntity<Ressurs<RestSammensattKontrollsak>> {
+        @RequestBody opprettSammensattKontrollsakDto: OpprettSammensattKontrollsakDto,
+    ): ResponseEntity<Ressurs<SammensattKontrollsakDto>> {
         if (!featureToggleService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
             throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
@@ -70,9 +70,9 @@ class SammensattKontrollsakController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Opprett SammensattKontrollsak",
         )
-        tilgangService.validerKanRedigereBehandling(restOpprettSammensattKontrollsak.behandlingId)
+        tilgangService.validerKanRedigereBehandling(opprettSammensattKontrollsakDto.behandlingId)
 
-        val sammensattKontrollsak = sammensattKontrollsakService.opprettSammensattKontrollsak(restOpprettSammensattKontrollsak = restOpprettSammensattKontrollsak)
+        val sammensattKontrollsak = sammensattKontrollsakService.opprettSammensattKontrollsak(opprettSammensattKontrollsakDto = opprettSammensattKontrollsakDto)
 
         return ResponseEntity.ok(Ressurs.success(sammensattKontrollsak.tilRestSammensattKontrollsak()))
     }
@@ -82,8 +82,8 @@ class SammensattKontrollsakController(
         consumes = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun oppdaterSammensattKontrollsak(
-        @RequestBody restSammensattKontrollsak: RestSammensattKontrollsak,
-    ): ResponseEntity<Ressurs<RestSammensattKontrollsak>> {
+        @RequestBody sammensattKontrollsakDto: SammensattKontrollsakDto,
+    ): ResponseEntity<Ressurs<SammensattKontrollsakDto>> {
         if (!featureToggleService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
             throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
@@ -92,9 +92,9 @@ class SammensattKontrollsakController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdater SammensattKontrollsak",
         )
-        tilgangService.validerKanRedigereBehandling(restSammensattKontrollsak.behandlingId)
+        tilgangService.validerKanRedigereBehandling(sammensattKontrollsakDto.behandlingId)
 
-        val sammensattKontrollsak = sammensattKontrollsakService.oppdaterSammensattKontrollsak(restSammensattKontrollsak = restSammensattKontrollsak)
+        val sammensattKontrollsak = sammensattKontrollsakService.oppdaterSammensattKontrollsak(sammensattKontrollsakDto = sammensattKontrollsakDto)
 
         return ResponseEntity.ok(Ressurs.success(sammensattKontrollsak.tilRestSammensattKontrollsak()))
     }
@@ -103,7 +103,7 @@ class SammensattKontrollsakController(
         consumes = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun slettSammensattKontrollsak(
-        @RequestBody restSammensattKontrollsak: RestSammensattKontrollsak,
+        @RequestBody sammensattKontrollsakDto: SammensattKontrollsakDto,
     ): ResponseEntity<Ressurs<Long>> {
         if (!featureToggleService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
             throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
@@ -113,10 +113,10 @@ class SammensattKontrollsakController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Slett SammensattKontrollsak",
         )
-        tilgangService.validerKanRedigereBehandling(restSammensattKontrollsak.behandlingId)
+        tilgangService.validerKanRedigereBehandling(sammensattKontrollsakDto.behandlingId)
 
-        sammensattKontrollsakService.slettSammensattKontrollsak(restSammensattKontrollsak.id)
+        sammensattKontrollsakService.slettSammensattKontrollsak(sammensattKontrollsakDto.id)
 
-        return ResponseEntity.ok(Ressurs.success(restSammensattKontrollsak.id))
+        return ResponseEntity.ok(Ressurs.success(sammensattKontrollsakDto.id))
     }
 }

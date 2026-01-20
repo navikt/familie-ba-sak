@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestOpprettSammensattKontrollsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSammensattKontrollsak
+import no.nav.familie.ba.sak.ekstern.restDomene.OpprettSammensattKontrollsakDto
+import no.nav.familie.ba.sak.ekstern.restDomene.SammensattKontrollsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilSammensattKontrollsak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.data.repository.findByIdOrNull
@@ -17,9 +17,9 @@ class SammensattKontrollsakService(
 
     @Transactional
     fun opprettSammensattKontrollsak(
-        restOpprettSammensattKontrollsak: RestOpprettSammensattKontrollsak,
+        opprettSammensattKontrollsakDto: OpprettSammensattKontrollsakDto,
     ): SammensattKontrollsak {
-        val opprettetSammensattKontrollsak = sammensattKontrollsakRepository.save(restOpprettSammensattKontrollsak.tilSammensattKontrollsak())
+        val opprettetSammensattKontrollsak = sammensattKontrollsakRepository.save(opprettSammensattKontrollsakDto.tilSammensattKontrollsak())
 
         loggService.loggSammensattKontrollsakLagtTil(opprettetSammensattKontrollsak)
 
@@ -28,13 +28,13 @@ class SammensattKontrollsakService(
 
     @Transactional
     fun oppdaterSammensattKontrollsak(
-        restSammensattKontrollsak: RestSammensattKontrollsak,
+        sammensattKontrollsakDto: SammensattKontrollsakDto,
     ): SammensattKontrollsak {
-        val sammensattKontrollsak = sammensattKontrollsakRepository.hentSammensattKontrollsak(restSammensattKontrollsak.id)
+        val sammensattKontrollsak = sammensattKontrollsakRepository.hentSammensattKontrollsak(sammensattKontrollsakDto.id)
 
         return sammensattKontrollsakRepository.save(
             sammensattKontrollsak.also {
-                it.fritekst = restSammensattKontrollsak.fritekst
+                it.fritekst = sammensattKontrollsakDto.fritekst
                 loggService.loggSammensattKontrollsakEndret(it)
             },
         )
