@@ -26,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.NavIdent
-import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -292,14 +291,13 @@ class ArbeidsfordelingService(
 
         val identMedStrengeste = finnPersonMedStrengesteAdressebeskyttelse(personIdentMedAdresseBeskyttelseListe)
 
-        return integrasjonKlient.hentBehandlendeEnhet(identMedStrengeste ?: søker.ident, behandling.kategori.tilOppgavebehandlingType()).singleOrNull()
+        return integrasjonKlient.hentBehandlendeEnhet(identMedStrengeste ?: søker.ident).singleOrNull()
             ?: throw Feil(message = "Fant flere eller ingen enheter på behandling.")
     }
 
     fun hentArbeidsfordelingsenhetPåIdenter(
         søkerIdent: String,
         barnIdenter: List<String>,
-        behandlingstype: Behandlingstype?,
     ): Arbeidsfordelingsenhet {
         val identMedStrengeste =
             finnPersonMedStrengesteAdressebeskyttelse(
@@ -307,7 +305,7 @@ class ArbeidsfordelingService(
                     identMedAdressebeskyttelse(søkerIdent, personType = PersonType.SØKER),
             )
 
-        return integrasjonKlient.hentBehandlendeEnhet(identMedStrengeste ?: søkerIdent, behandlingstype).singleOrNull()
+        return integrasjonKlient.hentBehandlendeEnhet(identMedStrengeste ?: søkerIdent).singleOrNull()
             ?: throw Feil(message = "Fant flere eller ingen enheter på behandling.")
     }
 

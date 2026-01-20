@@ -34,8 +34,11 @@ class DokumentControllerTest(
             dokumentGenereringService = mockDokumentGenereringService,
             vedtakService = vedtakService,
             tilgangService = tilgangService,
+            persongrunnlagService = mockk(relaxed = true),
+            arbeidsfordelingService = mockk(relaxed = true),
             utvidetBehandlingService = mockk(relaxed = true),
             dokumentDistribueringService = mockk(relaxed = true),
+            pdlRestKlient = mockk(relaxed = true),
         )
 
     @Test

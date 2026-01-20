@@ -10,27 +10,14 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.HENT_ARBEIDSFORDELING_MED_BEHANDLINGSTYPE
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagBrevmottakerDb
-import no.nav.familie.ba.sak.datagenerator.lagFagsak
-import no.nav.familie.ba.sak.datagenerator.lagInstitusjon
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.DRAMMEN
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.OSLO
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.STORD
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -43,8 +30,6 @@ import no.nav.familie.ba.sak.kjerne.brev.mottaker.FullmektigEllerVerge
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -66,7 +51,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import java.time.LocalDate
 
 internal class DokumentServiceTest {
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>(relaxed = true)
@@ -85,11 +69,6 @@ internal class DokumentServiceTest {
             ),
         )
     private val saksbehandlerContext = mockk<SaksbehandlerContext>(relaxed = true)
-    private val arbeidsfordelingService = mockk<ArbeidsfordelingService>(relaxed = true)
-    private val pdlRestKlient = mockk<PdlRestKlient>(relaxed = true)
-    private val persongrunnlagService = mockk<PersongrunnlagService>(relaxed = true)
-    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
-    private val integrasjonKlient = mockk<IntegrasjonKlient>(relaxed = true)
 
     private val dokumentService: DokumentService =
         spyk(
@@ -105,11 +84,6 @@ internal class DokumentServiceTest {
                 brevmottakerService = brevmottakerService,
                 validerBrevmottakerService = mockk(relaxed = true),
                 saksbehandlerContext = saksbehandlerContext,
-                arbeidsfordelingService = arbeidsfordelingService,
-                pdlRestKlient = pdlRestKlient,
-                persongrunnlagService = persongrunnlagService,
-                featureToggleService = featureToggleService,
-                integrasjonKlient = integrasjonKlient,
             ),
         )
 
@@ -417,166 +391,6 @@ internal class DokumentServiceTest {
 
             // Assert
             assertThat(vedtaksbrevPdf.data).isEqualTo(byteArray)
-        }
-    }
-
-    @Nested
-    inner class ByggMottakerdataFraFagsak {
-        private val søker = randomAktør()
-        private val fagsak = lagFagsak(aktør = søker, type = FagsakType.NORMAL)
-        private val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.INNHENTE_OPPLYSNINGER, mottakerMålform = Målform.NB)
-
-        @BeforeEach
-        fun setup() {
-            every { featureToggleService.isEnabled(HENT_ARBEIDSFORDELING_MED_BEHANDLINGSTYPE) } returns true
-        }
-
-        @Test
-        fun `byggMottakerdataFraFagsak skal bygge korrekt informasjon om mottaker for person`() {
-            // Arrange
-            val fagsak = lagFagsak(aktør = søker, type = FagsakType.NORMAL)
-
-            every { arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(any(), any(), any()) } returns
-                Arbeidsfordelingsenhet(
-                    enhetId = OSLO.enhetsnummer,
-                    enhetNavn = OSLO.enhetsnavn,
-                )
-
-            // Act
-            val oppdatertManueltBrevRequest = dokumentService.byggMottakerdataFraFagsak(fagsak, manueltBrevRequest)
-
-            // Assert
-            assertThat(oppdatertManueltBrevRequest.enhet?.enhetId).isEqualTo(OSLO.enhetsnummer)
-            assertThat(oppdatertManueltBrevRequest.enhet?.enhetNavn).isEqualTo(OSLO.enhetsnavn)
-            assertThat(oppdatertManueltBrevRequest.mottakerMålform).isEqualTo(Målform.NB)
-        }
-
-        @Test
-        fun `byggMottakerdataFraFagsak skal bygge korrekt informasjon om mottaker for institusjon`() {
-            // Arrange
-            val institusjon = lagInstitusjon()
-            val fagsak = lagFagsak(aktør = søker, institusjon = institusjon, type = FagsakType.INSTITUSJON)
-
-            every { pdlRestKlient.hentPerson(fagsak.aktør, PersonInfoQuery.ENKEL) } returns PersonInfo(fødselsdato = LocalDate.now(), navn = "Navn navnesen")
-            every { arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(any(), any(), any()) } returns
-                Arbeidsfordelingsenhet(
-                    enhetId = OSLO.enhetsnummer,
-                    enhetNavn = OSLO.enhetsnavn,
-                )
-
-            // Act
-            val oppdatertManueltBrevRequest = dokumentService.byggMottakerdataFraFagsak(fagsak, manueltBrevRequest)
-
-            // Assert
-            assertThat(oppdatertManueltBrevRequest.enhet?.enhetId).isEqualTo(OSLO.enhetsnummer)
-            assertThat(oppdatertManueltBrevRequest.enhet?.enhetNavn).isEqualTo(OSLO.enhetsnavn)
-            assertThat(oppdatertManueltBrevRequest.mottakerMålform).isEqualTo(Målform.NB)
-            assertThat(oppdatertManueltBrevRequest.vedrørende?.fødselsnummer).isEqualTo(søker.aktivFødselsnummer())
-            assertThat(oppdatertManueltBrevRequest.vedrørende?.navn).isEqualTo("Navn navnesen")
-        }
-
-        @Test
-        fun `skal hente arbeidsfordeling uten behandlingstype når feature toggle er av`() {
-            // Arrange
-            val arbeidsfordelingsenhet =
-                Arbeidsfordelingsenhet(
-                    enhetId = OSLO.enhetsnummer,
-                    enhetNavn = OSLO.enhetsnavn,
-                )
-
-            every { featureToggleService.isEnabled(HENT_ARBEIDSFORDELING_MED_BEHANDLINGSTYPE) } returns false
-            every { arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(any(), any(), any()) } returns arbeidsfordelingsenhet
-
-            // Act
-            val oppdatertManueltBrevRequest = dokumentService.byggMottakerdataFraFagsak(fagsak, manueltBrevRequest)
-
-            // Assert
-            assertThat(oppdatertManueltBrevRequest.enhet?.enhetId).isEqualTo(OSLO.enhetsnummer)
-            assertThat(oppdatertManueltBrevRequest.enhet?.enhetNavn).isEqualTo(OSLO.enhetsnavn)
-            verify(exactly = 1) {
-                arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(
-                    søkerIdent = søker.aktivFødselsnummer(),
-                    barnIdenter = any(),
-                    behandlingstype = null,
-                )
-            }
-        }
-
-        @Test
-        fun `skal legge til saksbehandlers enhet når feature toggle er på og NavIdent har tilgang til kun én enhet`() {
-            // Arrange
-            every { integrasjonKlient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(any()) } returns listOf(OSLO)
-
-            // Act
-            val oppdatertManueltBrevRequest = dokumentService.byggMottakerdataFraFagsak(fagsak, manueltBrevRequest)
-
-            // Assert
-            assertThat(oppdatertManueltBrevRequest.enhet?.enhetId).isEqualTo(OSLO.enhetsnummer)
-            assertThat(oppdatertManueltBrevRequest.enhet?.enhetNavn).isEqualTo(OSLO.enhetsnavn)
-            verify(exactly = 0) { arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(any(), any(), any()) }
-            verify(exactly = 0) { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) }
-        }
-
-        @Test
-        fun `skal hente arbeidsfordeling med behandlingstype når feature toggle er på og NavIdent har tilgang til flere enheter`() {
-            // Arrange
-            val behandling = lagBehandling()
-            val arbeidsfordelingsenhet =
-                Arbeidsfordelingsenhet(
-                    enhetId = OSLO.enhetsnummer,
-                    enhetNavn = OSLO.enhetsnavn,
-                )
-
-            every { integrasjonKlient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(any()) } returns listOf(OSLO, DRAMMEN)
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns behandling
-            every { arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(any(), any(), any()) } returns arbeidsfordelingsenhet
-
-            // Act
-            val oppdatertManueltBrevRequest = dokumentService.byggMottakerdataFraFagsak(fagsak, manueltBrevRequest)
-
-            // Assert
-            assertThat(oppdatertManueltBrevRequest.enhet?.enhetId).isEqualTo(OSLO.enhetsnummer)
-            assertThat(oppdatertManueltBrevRequest.enhet?.enhetNavn).isEqualTo(OSLO.enhetsnavn)
-            verify(exactly = 1) { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) }
-            verify(exactly = 1) {
-                arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(
-                    søkerIdent = søker.aktivFødselsnummer(),
-                    barnIdenter = emptyList(),
-                    behandlingstype = behandling.kategori.tilOppgavebehandlingType(),
-                )
-            }
-        }
-
-        @Test
-        fun `skal håndtere ingen siste vedtatte behandling når feature toggle er på og NavIdent har tilgang til flere enheter`() {
-            // Arrange
-            val barn1Ident = "12345678910"
-            val barn2Ident = "10987654321"
-            val manueltBrevDtoMedBarn = manueltBrevRequest.copy(barnIBrev = listOf(barn1Ident, barn2Ident))
-            val arbeidsfordelingsenhet =
-                Arbeidsfordelingsenhet(
-                    enhetId = OSLO.enhetsnummer,
-                    enhetNavn = OSLO.enhetsnavn,
-                )
-
-            every { integrasjonKlient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(any()) } returns listOf(DRAMMEN, STORD)
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
-            every { arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(any(), any(), any()) } returns arbeidsfordelingsenhet
-
-            // Act
-            val oppdatertManueltBrevRequest = dokumentService.byggMottakerdataFraFagsak(fagsak, manueltBrevDtoMedBarn)
-
-            // Assert
-            assertThat(oppdatertManueltBrevRequest.enhet?.enhetId).isEqualTo(OSLO.enhetsnummer)
-            assertThat(oppdatertManueltBrevRequest.enhet?.enhetNavn).isEqualTo(OSLO.enhetsnavn)
-            verify(exactly = 1) { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) }
-            verify(exactly = 1) {
-                arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(
-                    søkerIdent = søker.aktivFødselsnummer(),
-                    barnIdenter = listOf(barn1Ident, barn2Ident),
-                    behandlingstype = null,
-                )
-            }
         }
     }
 

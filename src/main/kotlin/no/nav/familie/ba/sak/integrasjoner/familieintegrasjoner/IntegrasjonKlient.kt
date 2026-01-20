@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
 import no.nav.familie.ba.sak.common.kallEksternTjenesteUtenRespons
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyAktivBrukerIModiaContext
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
@@ -39,7 +37,6 @@ import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerReques
 import no.nav.familie.kontrakter.felles.journalpost.TilgangsstyrtJournalpost
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
-import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -59,6 +56,7 @@ import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.time.LocalDate
+import java.util.Optional
 
 const val DEFAULT_JOURNALFØRENDE_ENHET = "9999"
 
@@ -66,7 +64,6 @@ const val DEFAULT_JOURNALFØRENDE_ENHET = "9999"
 class IntegrasjonKlient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
-    private val featureToggleService: FeatureToggleService,
 ) : AbstractRestClient(restOperations, "integrasjon") {
     @Cacheable("alle-eøs-land", cacheManager = "dailyCache")
     fun hentAlleEØSLand(): KodeverkDto {
@@ -122,21 +119,12 @@ class IntegrasjonKlient(
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
     @Cacheable("behandlendeEnhet", cacheManager = "shortCache")
-    fun hentBehandlendeEnhet(
-        ident: String,
-        behandlingstype: Behandlingstype? = null,
-    ): List<Arbeidsfordelingsenhet> {
+    fun hentBehandlendeEnhet(ident: String): List<Arbeidsfordelingsenhet> {
         val uri =
             UriComponentsBuilder
                 .fromUri(integrasjonUri)
                 .pathSegment("arbeidsfordeling", "enhet", "BAR")
-                .let {
-                    if (featureToggleService.isEnabled(FeatureToggle.HENT_ARBEIDSFORDELING_MED_BEHANDLINGSTYPE)) {
-                        it.queryParam("behandlingstype", behandlingstype)
-                    } else {
-                        it
-                    }
-                }.build()
+                .build()
                 .toUri()
 
         return kallEksternTjenesteRessurs(

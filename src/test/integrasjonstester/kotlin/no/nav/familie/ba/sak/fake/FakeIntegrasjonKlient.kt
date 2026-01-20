@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.fake
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
 import no.nav.familie.ba.sak.datagenerator.lagKodeverkLand
 import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
@@ -40,7 +39,6 @@ import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkSpråk
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -60,7 +58,7 @@ import java.util.UUID
 
 class FakeIntegrasjonKlient(
     restOperations: RestOperations,
-) : IntegrasjonKlient(URI("integrasjoner-url"), restOperations, mockk()) {
+) : IntegrasjonKlient(URI("integrasjoner-url"), restOperations) {
     private val egenansatt = mutableSetOf<String>()
     private val behandlendeEnhetForIdent = mutableMapOf<String, List<Arbeidsfordelingsenhet>>()
     private val versjonerteBarnetrygdSøknader = mutableMapOf<String, VersjonertBarnetrygdSøknad>()
@@ -85,10 +83,7 @@ class FakeIntegrasjonKlient(
                 },
         )
 
-    override fun hentBehandlendeEnhet(
-        ident: String,
-        behandlingstype: Behandlingstype?,
-    ): List<Arbeidsfordelingsenhet> =
+    override fun hentBehandlendeEnhet(ident: String): List<Arbeidsfordelingsenhet> =
         behandlendeEnhetForIdent[ident] ?: listOf(
             Arbeidsfordelingsenhet.opprettFra(BarnetrygdEnhet.OSLO),
         )

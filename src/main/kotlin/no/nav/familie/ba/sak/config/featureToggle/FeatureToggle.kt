@@ -77,6 +77,4 @@ enum class FeatureToggle(
     HENT_ARBEIDSFORDELING_FOR_AUTOMATISK_BEHANDLING_ETTER_PORTEFØLJEJUSTERING("familie-ba-sak.hent-arbeidsfordeling-for-automatisk-behandling-etter-portefoljejustering"),
 
     SKAL_HÅNDTERE_FALSK_IDENTITET("familie-ba-sak.skal-handtere-falsk-identitet"),
-
-    HENT_ARBEIDSFORDELING_MED_BEHANDLINGSTYPE("familie-ba-sak.hent-arbeidsfordeling-med-behandlingstype"),
 }

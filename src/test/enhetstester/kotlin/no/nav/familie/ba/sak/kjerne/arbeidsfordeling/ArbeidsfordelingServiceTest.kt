@@ -94,7 +94,7 @@ class ArbeidsfordelingServiceTest {
                     .finnSøkerOgBarnAktørerTilAktiv(behandling.id)
             } returns listOf(søker, barn)
 
-            every { integrasjonKlient.hentBehandlendeEnhet(søker.aktør.aktivFødselsnummer(), any()) } returns
+            every { integrasjonKlient.hentBehandlendeEnhet(søker.aktør.aktivFødselsnummer()) } returns
                 listOf(
                     arbeidsfordelingsenhet,
                 )
@@ -247,7 +247,7 @@ class ArbeidsfordelingServiceTest {
                 )
 
             // Ny enhet
-            every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer(), any()) } returns
+            every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer()) } returns
                 listOf(
                     Arbeidsfordelingsenhet(
                         enhetId = OSLO.enhetsnummer,
@@ -286,7 +286,7 @@ class ArbeidsfordelingServiceTest {
                 )
 
             // Ny enhet
-            every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer(), any()) } returns
+            every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer()) } returns
                 listOf(
                     Arbeidsfordelingsenhet(
                         enhetId = OSLO.enhetsnummer,
@@ -325,7 +325,7 @@ class ArbeidsfordelingServiceTest {
                 )
 
             // Ny enhet
-            every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer(), any()) } returns
+            every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer()) } returns
                 listOf(
                     Arbeidsfordelingsenhet(
                         enhetId = MIDLERTIDIG_ENHET.enhetsnummer,
@@ -362,7 +362,7 @@ class ArbeidsfordelingServiceTest {
                 )
 
             // Ny enhet
-            every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer(), any()) } returns
+            every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer()) } returns
                 listOf(
                     Arbeidsfordelingsenhet(
                         enhetId = STEINKJER.enhetsnummer,
