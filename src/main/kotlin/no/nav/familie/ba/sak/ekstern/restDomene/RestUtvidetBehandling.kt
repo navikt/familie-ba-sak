@@ -24,7 +24,7 @@ data class RestUtvidetBehandling(
     val årsak: BehandlingÅrsak,
     val opprettetTidspunkt: LocalDateTime,
     val endretAv: String,
-    val arbeidsfordelingPåBehandling: RestArbeidsfordelingPåBehandling,
+    val arbeidsfordelingPåBehandling: ArbeidsfordelingPåBehandlingDto,
     val søknadsgrunnlag: SøknadDTO?,
     val personer: List<RestPerson>,
     val personResultater: List<RestPersonResultat>,

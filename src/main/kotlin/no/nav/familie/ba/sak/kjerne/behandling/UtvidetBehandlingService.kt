@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilManglendeFinnmarkmerkingPerioder
 import no.nav.familie.ba.sak.ekstern.restDomene.tilManglendeSvalbardmerkingPerioder
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.tilArbeidsfordelingPåBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKompetanse
@@ -141,7 +141,7 @@ class UtvidetBehandlingService(
             årsak = behandling.opprettetÅrsak,
             opprettetTidspunkt = behandling.opprettetTidspunkt,
             endretAv = behandling.endretAv,
-            arbeidsfordelingPåBehandling = arbeidsfordeling.tilRestArbeidsfordelingPåBehandling(),
+            arbeidsfordelingPåBehandling = arbeidsfordeling.tilArbeidsfordelingPåBehandlingDto(),
             søknadsgrunnlag = søknadsgrunnlag,
             personer =
                 personer?.map { person -> persongrunnlagService.mapTilRestPersonMedStatsborgerskapLand(person, erManueltLagtTilISøknad = søknadsgrunnlag?.barnaMedOpplysninger?.find { it.ident == person.aktør.aktivFødselsnummer() }?.manueltRegistrert) }
