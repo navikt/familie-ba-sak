@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import jakarta.validation.Valid
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
-import no.nav.familie.ba.sak.ekstern.restDomene.RestManuellDødsfall
+import no.nav.familie.ba.sak.ekstern.restDomene.ManuellDødsfallDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
@@ -110,15 +110,15 @@ class PersonController(
     @PostMapping(path = ["/registrer-manuell-dodsfall/{behandlingId}"])
     fun registrerManuellDødsfallPåPerson(
         @PathVariable behandlingId: Long,
-        @RequestBody restManuellDødsfall: RestManuellDødsfall,
+        @RequestBody manuellDødsfallDto: ManuellDødsfallDto,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
 
         persongrunnlagService.registrerManuellDødsfallPåPerson(
             behandlingId = BehandlingId(behandlingId),
-            personIdent = PersonIdent(restManuellDødsfall.personIdent),
-            dødsfallDato = restManuellDødsfall.dødsfallDato,
-            begrunnelse = restManuellDødsfall.begrunnelse,
+            personIdent = PersonIdent(manuellDødsfallDto.personIdent),
+            dødsfallDato = manuellDødsfallDto.dødsfallDato,
+            begrunnelse = manuellDødsfallDto.begrunnelse,
         )
 
         return ResponseEntity.ok(
