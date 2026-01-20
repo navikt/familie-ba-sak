@@ -137,6 +137,7 @@ class IntegrasjonKlient(
                         it
                     }
                 }.build()
+                .encode()
                 .toUri()
 
         return kallEksternTjenesteRessurs(

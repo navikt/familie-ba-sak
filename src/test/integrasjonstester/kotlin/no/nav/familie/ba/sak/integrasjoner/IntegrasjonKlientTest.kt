@@ -372,7 +372,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
     fun `hentBehandlendeEnhet returnerer OK med behandlingstype`() {
         every { featureToggleService.isEnabled(HENT_ARBEIDSFORDELING_MED_BEHANDLINGSTYPE) } returns true
         wireMockServer.stubFor(
-            post("/api/arbeidsfordeling/enhet/BAR?behandlingstype=NASJONAL")
+            post("/api/arbeidsfordeling/enhet/BAR?behandlingstype=E%C3%98S")
                 .withHeader("Accept", containing("json"))
                 .willReturn(
                     okJson(
@@ -387,7 +387,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
                 ),
         )
 
-        val enhet = integrasjonKlient.hentBehandlendeEnhet("1", Behandlingstype.NASJONAL)
+        val enhet = integrasjonKlient.hentBehandlendeEnhet("1", Behandlingstype.EØS)
         assertThat(enhet).isNotEmpty
         assertThat(enhet.first().enhetId).isEqualTo("2")
     }
