@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -77,7 +77,7 @@ class RestartAvSmåbarnstilleggTest(
 
         // Fagsak 1 - har åpen behandling og skal ikke tas med
         val personScenario1: RestScenario = lagScenario(barnFødselsdato)
-        val fagsak1: RestMinimalFagsak = lagFagsak(personScenario = personScenario1)
+        val fagsak1: MinimalFagsakDto = lagFagsak(personScenario = personScenario1)
         fullførBehandling(
             fagsak = fagsak1,
             personScenario = personScenario1,
@@ -111,7 +111,7 @@ class RestartAvSmåbarnstilleggTest(
 
         // Fagsak 2 - har restart av småbarnstillegg som ikke er begrunnet og skal være med i listen
         val personScenario2: RestScenario = lagScenario(barnFødselsdato)
-        val fagsak2: RestMinimalFagsak = lagFagsak(personScenario = personScenario2)
+        val fagsak2: MinimalFagsakDto = lagFagsak(personScenario = personScenario2)
         fullførBehandling(
             fagsak = fagsak2,
             personScenario = personScenario2,
@@ -139,7 +139,7 @@ class RestartAvSmåbarnstilleggTest(
 
         // Fagsak 3 - har restart av småbarnstillegg som allerede er begrunnet, skal ikke være med i listen
         val personScenario3: RestScenario = lagScenario(barnFødselsdato)
-        val fagsak3: RestMinimalFagsak = lagFagsak(personScenario = personScenario3)
+        val fagsak3: MinimalFagsakDto = lagFagsak(personScenario = personScenario3)
         fullførBehandling(
             fagsak = fagsak3,
             personScenario = personScenario3,
@@ -188,7 +188,7 @@ class RestartAvSmåbarnstilleggTest(
 
         // Fagsak - har restart dato på samme dato som satsendringen
         val personScenario: RestScenario = lagScenario(barnFødselsdato)
-        val fagsakMedSatsendringOgSmåbarnstilleggSomSkalRestartes: RestMinimalFagsak =
+        val fagsakMedSatsendringOgSmåbarnstilleggSomSkalRestartes: MinimalFagsakDto =
             lagFagsak(personScenario = personScenario)
         fullførBehandling(
             fagsak = fagsakMedSatsendringOgSmåbarnstilleggSomSkalRestartes,
@@ -240,7 +240,7 @@ class RestartAvSmåbarnstilleggTest(
 
         // Fagsak  - har løpende fagsak med småbarnstillegg og skal ikke restartes
         val personScenario2: RestScenario = lagScenario(barnFødselsdato)
-        val fagsakMedSatsendringOgSmåbarnstilleggSomIkkeSkalRestartes: RestMinimalFagsak =
+        val fagsakMedSatsendringOgSmåbarnstilleggSomIkkeSkalRestartes: MinimalFagsakDto =
             lagFagsak(personScenario = personScenario2)
         fullførBehandling(
             fagsak = fagsakMedSatsendringOgSmåbarnstilleggSomIkkeSkalRestartes,
@@ -283,10 +283,10 @@ class RestartAvSmåbarnstilleggTest(
                 ),
         ).also { stubScenario(it) }
 
-    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
+    fun lagFagsak(personScenario: RestScenario): MinimalFagsakDto = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
 
     fun fullførBehandling(
-        fagsak: RestMinimalFagsak,
+        fagsak: MinimalFagsakDto,
         personScenario: RestScenario,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
@@ -329,7 +329,7 @@ class RestartAvSmåbarnstilleggTest(
     }
 
     fun fullførRevurderingMedOvergangstonad(
-        fagsak: RestMinimalFagsak,
+        fagsak: MinimalFagsakDto,
         personScenario: RestScenario,
         barnFødselsdato: LocalDate,
         mockPerioderMedOvergangsstønad: List<EksternPeriode> =
@@ -418,7 +418,7 @@ class RestartAvSmåbarnstilleggTest(
     }
 
     private fun startEnRevurderingNyeOpplysningerMenIkkeFullfør(
-        fagsak: RestMinimalFagsak,
+        fagsak: MinimalFagsakDto,
         personScenario: RestScenario,
         barnFødselsdato: LocalDate,
     ): Behandling {
@@ -453,7 +453,7 @@ class RestartAvSmåbarnstilleggTest(
     fun fullførRestenAvBehandlingen(
         restUtvidetBehandling: RestUtvidetBehandling,
         personScenario: RestScenario,
-        fagsak: RestMinimalFagsak,
+        fagsak: MinimalFagsakDto,
         skalBegrunneSmåbarnstillegg: Boolean = false,
     ): Behandling {
         settAlleVilkårTilOppfylt(

@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDto
+import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -57,7 +57,7 @@ fun generellAssertRestUtvidetBehandling(
 }
 
 fun generellAssertFagsak(
-    restFagsak: Ressurs<RestFagsak>,
+    restFagsak: Ressurs<FagsakDto>,
     fagsakStatus: FagsakStatus,
     behandlingStegType: StegType? = null,
     behandlingsresultat: Behandlingsresultat? = null,
@@ -102,9 +102,9 @@ fun hentNåværendeEllerNesteMånedsUtbetaling(behandling: RestUtvidetBehandling
     return nåværendeUtbetalingsperiode?.utbetaltPerMnd ?: nesteUtbetalingsperiode?.utbetaltPerMnd ?: 0
 }
 
-fun hentAktivBehandling(restFagsak: RestFagsak): RestUtvidetBehandling = restFagsak.behandlinger.single()
+fun hentAktivBehandling(restFagsak: FagsakDto): RestUtvidetBehandling = restFagsak.behandlinger.single()
 
-fun hentAktivBehandling(restMinimalFagsak: RestMinimalFagsak): RestVisningBehandling = restMinimalFagsak.behandlinger.single { it.aktiv }
+fun hentAktivBehandling(restMinimalFagsak: MinimalFagsakDto): RestVisningBehandling = restMinimalFagsak.behandlinger.single { it.aktiv }
 
 fun behandleFødselshendelse(
     nyBehandlingHendelse: NyBehandlingHendelse,

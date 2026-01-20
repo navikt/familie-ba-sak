@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
@@ -49,7 +49,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
     @Test
     fun `Plukk riktige behandlinger - skal være nyeste, løpende med opphør i småbarnstillegg for valgt måned`() {
         val personScenario1: RestScenario = lagScenario(barnFødselsdato)
-        val fagsak1: RestMinimalFagsak = lagFagsak(personScenario = personScenario1)
+        val fagsak1: MinimalFagsakDto = lagFagsak(personScenario = personScenario1)
         fullførBehandling(
             fagsak = fagsak1,
             personScenario = personScenario1,
@@ -67,7 +67,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
         )
 
         val personScenario2: RestScenario = lagScenario(barnFødselsdato)
-        val fagsak2: RestMinimalFagsak = lagFagsak(personScenario = personScenario2)
+        val fagsak2: MinimalFagsakDto = lagFagsak(personScenario = personScenario2)
         fullførBehandling(
             fagsak = fagsak2,
             personScenario = personScenario2,
@@ -112,10 +112,10 @@ class AutobrevSmåbarnstilleggOpphørTest(
                 ),
         ).also { stubScenario(it) }
 
-    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
+    fun lagFagsak(personScenario: RestScenario): MinimalFagsakDto = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
 
     fun fullførBehandling(
-        fagsak: RestMinimalFagsak,
+        fagsak: MinimalFagsakDto,
         personScenario: RestScenario,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
@@ -167,7 +167,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
     }
 
     fun fullførRevurderingMedOvergangstonad(
-        fagsak: RestMinimalFagsak,
+        fagsak: MinimalFagsakDto,
         personScenario: RestScenario,
         barnFødselsdato: LocalDate,
     ): Behandling {
@@ -215,7 +215,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
     }
 
     private fun startEnRevurderingNyeOpplysningerMenIkkeFullfør(
-        fagsak: RestMinimalFagsak,
+        fagsak: MinimalFagsakDto,
         personScenario: RestScenario,
         barnFødselsdato: LocalDate,
     ): Behandling {

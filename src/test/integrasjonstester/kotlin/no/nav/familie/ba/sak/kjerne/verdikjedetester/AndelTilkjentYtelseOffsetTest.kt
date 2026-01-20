@@ -5,7 +5,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
@@ -61,7 +61,7 @@ class AndelTilkjentYtelseOffsetTest(
     @Test
     fun `Skal ha riktig offset for andeler når man legger til ny andel`() {
         val personScenario1: RestScenario = lagScenario(barnFødselsdato)
-        val fagsak1: RestMinimalFagsak = lagFagsak(personScenario = personScenario1)
+        val fagsak1: MinimalFagsakDto = lagFagsak(personScenario = personScenario1)
         val behandling1 =
             fullførBehandling(
                 fagsak = fagsak1,
@@ -104,10 +104,10 @@ class AndelTilkjentYtelseOffsetTest(
                 ),
         ).also { stubScenario(it) }
 
-    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
+    fun lagFagsak(personScenario: RestScenario): MinimalFagsakDto = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
 
     fun fullførBehandling(
-        fagsak: RestMinimalFagsak,
+        fagsak: MinimalFagsakDto,
         personScenario: RestScenario,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
@@ -158,7 +158,7 @@ class AndelTilkjentYtelseOffsetTest(
     }
 
     fun fullførRevurderingMedOvergangstonad(
-        fagsak: RestMinimalFagsak,
+        fagsak: MinimalFagsakDto,
         personScenario: RestScenario,
         barnFødselsdato: LocalDate,
     ): Behandling {

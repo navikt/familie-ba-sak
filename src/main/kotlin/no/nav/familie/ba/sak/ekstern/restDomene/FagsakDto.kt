@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-open class RestBaseFagsak(
+open class BaseFagsakDto(
     open val opprettetTidspunkt: LocalDateTime,
     open val id: Long,
     open val fagsakeier: String,
@@ -22,7 +22,7 @@ open class RestBaseFagsak(
     open val institusjon: RestInstitusjon? = null,
 )
 
-data class RestFagsak(
+data class FagsakDto(
     override val opprettetTidspunkt: LocalDateTime,
     override val id: Long,
     override val fagsakeier: String,
@@ -34,7 +34,7 @@ data class RestFagsak(
     override val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
     val behandlinger: List<RestUtvidetBehandling>,
     override val fagsakType: FagsakType = FagsakType.NORMAL,
-) : RestBaseFagsak(
+) : BaseFagsakDto(
         opprettetTidspunkt = opprettetTidspunkt,
         id = id,
         fagsakeier = fagsakeier,
@@ -47,9 +47,9 @@ data class RestFagsak(
         fagsakType = fagsakType,
     )
 
-fun RestBaseFagsak.tilRestFagsak(
+fun BaseFagsakDto.tilFagsakDto(
     restUtvidetBehandlinger: List<RestUtvidetBehandling>,
-) = RestFagsak(
+) = FagsakDto(
     opprettetTidspunkt = this.opprettetTidspunkt,
     id = this.id,
     fagsakeier = this.fagsakeier,
@@ -63,7 +63,7 @@ fun RestBaseFagsak.tilRestFagsak(
     fagsakType = this.fagsakType,
 )
 
-data class RestMinimalFagsak(
+data class MinimalFagsakDto(
     override val opprettetTidspunkt: LocalDateTime,
     override val id: Long,
     override val fagsakeier: String,
@@ -77,7 +77,7 @@ data class RestMinimalFagsak(
     val migreringsdato: LocalDate? = null,
     override val fagsakType: FagsakType,
     override val institusjon: RestInstitusjon?,
-) : RestBaseFagsak(
+) : BaseFagsakDto(
         opprettetTidspunkt = opprettetTidspunkt,
         id = id,
         fagsakeier = fagsakeier,
@@ -91,10 +91,10 @@ data class RestMinimalFagsak(
         institusjon = institusjon,
     )
 
-fun RestBaseFagsak.tilRestMinimalFagsak(
+fun BaseFagsakDto.tilMinimalFagsakDto(
     restVisningBehandlinger: List<RestVisningBehandling>,
     migreringsdato: LocalDate?,
-) = RestMinimalFagsak(
+) = MinimalFagsakDto(
     opprettetTidspunkt = this.opprettetTidspunkt,
     id = this.id,
     fagsakeier = this.fagsakeier,

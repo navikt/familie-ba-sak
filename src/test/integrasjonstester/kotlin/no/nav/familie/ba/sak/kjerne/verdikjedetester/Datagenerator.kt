@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
@@ -23,7 +23,7 @@ import java.time.LocalDate
 fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
     restUtvidetBehandling: RestUtvidetBehandling,
     personScenario: RestScenario,
-    fagsak: RestMinimalFagsak,
+    fagsak: MinimalFagsakDto,
     familieBaSakKlient: FamilieBaSakKlient,
     lagToken: (Map<String, Any>) -> String,
     behandlingHentOgPersisterService: BehandlingHentOgPersisterService,

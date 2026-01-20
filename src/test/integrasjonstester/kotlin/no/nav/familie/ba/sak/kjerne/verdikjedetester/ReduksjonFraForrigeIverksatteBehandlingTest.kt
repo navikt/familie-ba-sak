@@ -6,7 +6,7 @@ import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
@@ -62,7 +62,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     @Test
     fun `Skal lage reduksjon fra sist iverksatte behandling-periode når småbarnstillegg blir borte`() {
         val personScenario: RestScenario = lagScenario(barnFødselsdato)
-        val fagsak: RestMinimalFagsak = lagFagsak(personScenario)
+        val fagsak: MinimalFagsakDto = lagFagsak(personScenario)
 
         val osFom = LocalDate.now().førsteDagIInneværendeMåned()
         val osTom = LocalDate.now().plusMonths(2).sisteDagIMåned()
@@ -126,10 +126,10 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                 ),
         ).also { stubScenario(it) }
 
-    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
+    fun lagFagsak(personScenario: RestScenario): MinimalFagsakDto = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
 
     fun fullførBehandlingMedOvergangsstønad(
-        fagsak: RestMinimalFagsak,
+        fagsak: MinimalFagsakDto,
         personScenario: RestScenario,
         overgangsstønadPerioder: List<EksternPeriode>,
     ): Behandling {
@@ -181,7 +181,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     }
 
     fun fullførRevurderingUtenOvergangstonad(
-        fagsak: RestMinimalFagsak,
+        fagsak: MinimalFagsakDto,
         personScenario: RestScenario,
     ): Behandling {
         val behandlingType = BehandlingType.REVURDERING

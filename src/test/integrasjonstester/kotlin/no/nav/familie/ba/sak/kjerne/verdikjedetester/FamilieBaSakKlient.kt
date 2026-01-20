@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -35,7 +35,7 @@ class FamilieBaSakKlient(
     restOperations: RestOperations,
     private val headers: HttpHeaders,
 ) : AbstractRestClient(restOperations, "familie-ba-sak") {
-    fun opprettFagsak(søkersIdent: String): Ressurs<RestMinimalFagsak> {
+    fun opprettFagsak(søkersIdent: String): Ressurs<MinimalFagsakDto> {
         val uri = URI.create("$baSakUrl/api/fagsaker")
 
         return postForEntity(
@@ -47,7 +47,7 @@ class FamilieBaSakKlient(
         )
     }
 
-    fun hentFagsak(fagsakId: Long): Ressurs<RestFagsak> {
+    fun hentFagsak(fagsakId: Long): Ressurs<FagsakDto> {
         val uri = URI.create("$baSakUrl/api/fagsaker/$fagsakId")
 
         return getForEntity(
@@ -56,7 +56,7 @@ class FamilieBaSakKlient(
         )
     }
 
-    fun hentMinimalFagsakPåPerson(personIdent: String): Ressurs<RestMinimalFagsak> {
+    fun hentMinimalFagsakPåPerson(personIdent: String): Ressurs<MinimalFagsakDto> {
         val uri = URI.create("$baSakUrl/api/fagsaker/hent-fagsak-paa-person")
 
         return postForEntity(

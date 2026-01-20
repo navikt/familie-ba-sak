@@ -22,8 +22,8 @@ import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
-import no.nav.familie.ba.sak.ekstern.restDomene.RestBaseFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.BaseFagsakDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilFagsakDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -121,7 +121,7 @@ class BeregningServiceTest {
 
         every { fagsakService.hentRestFagsak(any()) } answers {
             Ressurs.success(
-                RestBaseFagsak(
+                BaseFagsakDto(
                     opprettetTidspunkt = fagsak.opprettetTidspunkt,
                     id = fagsak.id,
                     fagsakeier = fagsak.aktør.aktivFødselsnummer(),
@@ -132,7 +132,7 @@ class BeregningServiceTest {
                     løpendeUnderkategori = null,
                     gjeldendeUtbetalingsperioder = emptyList(),
                     fagsakType = fagsak.type,
-                ).tilRestFagsak(emptyList()),
+                ).tilFagsakDto(emptyList()),
             )
         }
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } answers { emptyList() }

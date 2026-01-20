@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
@@ -364,7 +364,7 @@ class ForvalterController(
     @Operation(summary = "Start valutajustering på fagsak for gjeldende måned")
     fun justerValuta(
         @PathVariable fagsakId: Long,
-    ): ResponseEntity<Ressurs<RestMinimalFagsak>> {
+    ): ResponseEntity<Ressurs<MinimalFagsakDto>> {
         val erPersonMedTilgangTilÅStarteValutajustering = featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ENKELT_SAK)
 
         if (erPersonMedTilgangTilÅStarteValutajustering) {
