@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 
-data class RestNyAktivBrukerIModiaContext(
+data class NyAktivBrukerIModiaContextDto(
     val personIdent: String,
 ) {
     init {

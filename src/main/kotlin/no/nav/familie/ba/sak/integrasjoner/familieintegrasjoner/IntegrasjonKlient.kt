@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
 import no.nav.familie.ba.sak.common.kallEksternTjenesteUtenRespons
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestNyAktivBrukerIModiaContext
+import no.nav.familie.ba.sak.ekstern.restDomene.NyAktivBrukerIModiaContextDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsforholdRequest
@@ -632,7 +632,7 @@ class IntegrasjonKlient(
         }
     }
 
-    fun settNyAktivBrukerIModiaContext(nyAktivBruker: RestNyAktivBrukerIModiaContext): ModiaContext {
+    fun settNyAktivBrukerIModiaContext(nyAktivBruker: NyAktivBrukerIModiaContextDto): ModiaContext {
         val uri = URI.create("$integrasjonUri/modia-context-holder/sett-aktiv-bruker")
         return kallEksternTjenesteRessurs(
             tjeneste = "modia.context.holder.sett",

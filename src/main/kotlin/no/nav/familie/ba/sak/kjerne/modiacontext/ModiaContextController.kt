@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.modiacontext
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
-import no.nav.familie.ba.sak.ekstern.restDomene.RestNyAktivBrukerIModiaContext
+import no.nav.familie.ba.sak.ekstern.restDomene.NyAktivBrukerIModiaContextDto
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -35,7 +35,7 @@ class ModiaContextController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun settNyAktivBruker(
-        @RequestBody nyAktivBruker: RestNyAktivBrukerIModiaContext,
+        @RequestBody nyAktivBruker: NyAktivBrukerIModiaContextDto,
     ): ResponseEntity<Ressurs<ModiaContext>> {
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(nyAktivBruker.personIdent),

@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.datagenerator.lagKodeverkLand
 import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
 import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.ekstern.restDomene.RestNyAktivBrukerIModiaContext
+import no.nav.familie.ba.sak.ekstern.restDomene.NyAktivBrukerIModiaContextDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
@@ -240,7 +240,7 @@ class FakeIntegrasjonKlient(
 
     override fun hentDistribusjonskanal(request: DokdistkanalRequest): Distribusjonskanal = Distribusjonskanal.UKJENT
 
-    override fun settNyAktivBrukerIModiaContext(nyAktivBruker: RestNyAktivBrukerIModiaContext): ModiaContext =
+    override fun settNyAktivBrukerIModiaContext(nyAktivBruker: NyAktivBrukerIModiaContextDto): ModiaContext =
         ModiaContext(
             aktivBruker = nyAktivBruker.personIdent,
             aktivEnhet = "0000",
