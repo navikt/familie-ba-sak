@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
+import no.nav.familie.ba.sak.ekstern.restDomene.BrevmottakerDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -31,7 +31,7 @@ class BrevmottakerController(
     @PostMapping(path = ["{behandlingId}"], produces = [APPLICATION_JSON_VALUE], consumes = [APPLICATION_JSON_VALUE])
     fun leggTilBrevmottaker(
         @PathVariable behandlingId: Long,
-        @RequestBody brevmottaker: RestBrevmottaker,
+        @RequestBody brevmottaker: BrevmottakerDto,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -63,7 +63,7 @@ class BrevmottakerController(
     @GetMapping(path = ["{behandlingId}"], produces = [APPLICATION_JSON_VALUE])
     fun hentBrevmottakere(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<List<RestBrevmottaker>>> {
+    ): ResponseEntity<Ressurs<List<BrevmottakerDto>>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,

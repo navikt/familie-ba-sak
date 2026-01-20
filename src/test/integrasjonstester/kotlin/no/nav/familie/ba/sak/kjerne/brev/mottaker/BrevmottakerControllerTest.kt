@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
+import no.nav.familie.ba.sak.ekstern.restDomene.BrevmottakerDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
@@ -35,7 +35,7 @@ internal class BrevmottakerControllerTest(
         val behandling = lagBehandlingUtenId(fagsak = fagsak).let { behandlingRepository.save(it) }
 
         val brevmottaker =
-            RestBrevmottaker(
+            BrevmottakerDto(
                 null,
                 MottakerType.FULLMEKTIG,
                 "navn",

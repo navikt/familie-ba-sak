@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
+import no.nav.familie.ba.sak.ekstern.restDomene.BrevmottakerDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBrevMottaker
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
@@ -19,10 +19,10 @@ class BrevmottakerService(
 ) {
     @Transactional
     fun leggTilBrevmottaker(
-        restBrevMottaker: RestBrevmottaker,
+        brevMottakerDto: BrevmottakerDto,
         behandlingId: Long,
     ) {
-        val brevmottaker = restBrevMottaker.tilBrevMottaker(behandlingId)
+        val brevmottaker = brevMottakerDto.tilBrevMottaker(behandlingId)
 
         validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
             behandlingId = behandlingId,
@@ -55,7 +55,7 @@ class BrevmottakerService(
 
     fun hentRestBrevmottakere(behandlingId: Long) =
         brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId).map {
-            RestBrevmottaker(
+            BrevmottakerDto(
                 id = it.id,
                 type = it.type,
                 navn = it.navn,
