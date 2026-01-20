@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -36,7 +36,7 @@ class EndretUtbetalingAndelController(
     fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         @PathVariable behandlingId: Long,
         @PathVariable endretUtbetalingAndelId: Long,
-        @RequestBody restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
+        @RequestBody endretUtbetalingAndelDto: EndretUtbetalingAndelDto,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -50,7 +50,7 @@ class EndretUtbetalingAndelController(
         endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
             behandling = behandling,
             endretUtbetalingAndelId = endretUtbetalingAndelId,
-            restEndretUtbetalingAndel = restEndretUtbetalingAndel,
+            endretUtbetalingAndelDto = endretUtbetalingAndelDto,
         )
 
         tilbakestillBehandlingTilBehandlingsresultatService

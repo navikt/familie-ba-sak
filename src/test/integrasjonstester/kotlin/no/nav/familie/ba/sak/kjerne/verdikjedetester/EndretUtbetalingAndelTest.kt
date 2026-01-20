@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
@@ -34,8 +34,8 @@ class EndretUtbetalingAndelTest(
         val endretFom = YearMonth.of(2021, 9)
         val endretTom = YearMonth.of(2021, 11)
 
-        val restEndretUtbetalingAndel =
-            RestEndretUtbetalingAndel(
+        val endretUtbetalingAndelDto =
+            EndretUtbetalingAndelDto(
                 id = null,
                 personIdenter = listOf(scenario.barna.first().ident),
                 prosent = BigDecimal(0),
@@ -50,7 +50,7 @@ class EndretUtbetalingAndelTest(
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
             restUtvidetBehandling.data!!.behandlingId,
-            restEndretUtbetalingAndel,
+            endretUtbetalingAndelDto,
         )
 
         val andelerTilkjentYtelseMedEndretPeriode =
@@ -88,8 +88,8 @@ class EndretUtbetalingAndelTest(
         val endretFom = YearMonth.of(2021, 9)
         val endretTom = YearMonth.of(2021, 11)
 
-        val restEndretUtbetalingAndel =
-            RestEndretUtbetalingAndel(
+        val endretUtbetalingAndelDto =
+            EndretUtbetalingAndelDto(
                 id = null,
                 personIdenter = listOf(scenario.barna.first().ident),
                 prosent = BigDecimal(0),
@@ -105,7 +105,7 @@ class EndretUtbetalingAndelTest(
         val restUtvidetBehandlingEtterEndretPeriode =
             familieBaSakKlient().leggTilEndretUtbetalingAndel(
                 restUtvidetBehandling.data!!.behandlingId,
-                restEndretUtbetalingAndel,
+                endretUtbetalingAndelDto,
             )
 
         val endretUtbetalingAndelId =

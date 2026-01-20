@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
@@ -103,8 +103,8 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
         val endretFom = barnFødselsdato.nesteMåned()
         val endretTom = endretFom.plusMonths(2)
 
-        val restEndretUtbetalingAndelUtvidetBarnetrygd =
-            RestEndretUtbetalingAndel(
+        val endretUtbetalingAndelDtoUtvidetBarnetrygd =
+            EndretUtbetalingAndelDto(
                 id = null,
                 personIdenter = listOf(scenario.søker.ident),
                 prosent = BigDecimal(0),
@@ -119,11 +119,11 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
             restBehandlingEtterBehandlingsresultat.behandlingId,
-            restEndretUtbetalingAndelUtvidetBarnetrygd,
+            endretUtbetalingAndelDtoUtvidetBarnetrygd,
         )
 
-        val restEndretUtbetalingAndelOrdinærBarnetrygd =
-            RestEndretUtbetalingAndel(
+        val endretUtbetalingAndelDtoOrdinærBarnetrygd =
+            EndretUtbetalingAndelDto(
                 id = null,
                 personIdenter = listOf(scenario.barna.first().ident),
                 prosent = BigDecimal(0),
@@ -138,7 +138,7 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
             restBehandlingEtterBehandlingsresultat.behandlingId,
-            restEndretUtbetalingAndelOrdinærBarnetrygd,
+            endretUtbetalingAndelDtoOrdinærBarnetrygd,
         )
 
         familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(

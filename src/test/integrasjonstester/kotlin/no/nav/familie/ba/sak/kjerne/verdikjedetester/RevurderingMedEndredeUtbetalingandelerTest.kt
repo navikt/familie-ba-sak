@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.nyRevurdering
-import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
@@ -246,8 +246,8 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         val endretUtbetalingAndel =
             endretUtbetalingAndelService.opprettTomEndretUtbetalingAndel(førstegangsbehandling)
 
-        val restEndretUtbetalingAndel =
-            RestEndretUtbetalingAndel(
+        val endretUtbetalingAndelDto =
+            EndretUtbetalingAndelDto(
                 id = endretUtbetalingAndel.id,
                 fom = endretAndelFom,
                 tom = endretAndelTom,
@@ -263,7 +263,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
             førstegangsbehandling,
             endretUtbetalingAndel.id,
-            restEndretUtbetalingAndel,
+            endretUtbetalingAndelDto,
         )
 
         førstegangsbehandling.behandlingStegTilstand.add(

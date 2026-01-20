@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
@@ -176,7 +176,7 @@ class FamilieBaSakKlient(
 
     fun leggTilEndretUtbetalingAndel(
         behandlingId: Long,
-        restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
+        endretUtbetalingAndelDto: EndretUtbetalingAndelDto,
     ): Ressurs<RestUtvidetBehandling> {
         val uriPost = URI.create("$baSakUrl/api/endretutbetalingandel/$behandlingId")
         val restUtvidetBehandling = postForEntity<Ressurs<RestUtvidetBehandling>>(uriPost, "", headers)
@@ -188,7 +188,7 @@ class FamilieBaSakKlient(
                 .id
         val uriPut = URI.create("$baSakUrl/api/endretutbetalingandel/$behandlingId/$endretUtbetalingAndelId")
 
-        return putForEntity(uriPut, restEndretUtbetalingAndel, headers)
+        return putForEntity(uriPut, endretUtbetalingAndelDto, headers)
     }
 
     fun fjernEndretUtbetalingAndel(

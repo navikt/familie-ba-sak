@@ -22,7 +22,7 @@ import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -141,7 +141,7 @@ fun EndretUtbetalingAndel.førerTilOpphør() = this.prosent == BigDecimal.ZERO &
 fun EndretUtbetalingAndel?.skalUtbetales() = this != null && this.prosent != BigDecimal.ZERO
 
 fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel() =
-    RestEndretUtbetalingAndel(
+    EndretUtbetalingAndelDto(
         id = this.id,
         personIdenter = this.personIdenter,
         prosent = this.prosent,
@@ -155,16 +155,16 @@ fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel()
     )
 
 fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
-    restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
+    endretUtbetalingAndelDto: EndretUtbetalingAndelDto,
     personer: Set<Person>,
 ): EndretUtbetalingAndel {
-    this.fom = restEndretUtbetalingAndel.fom
-    this.tom = restEndretUtbetalingAndel.tom
-    this.prosent = restEndretUtbetalingAndel.prosent ?: BigDecimal(0)
-    this.årsak = restEndretUtbetalingAndel.årsak
-    this.avtaletidspunktDeltBosted = restEndretUtbetalingAndel.avtaletidspunktDeltBosted
-    this.søknadstidspunkt = restEndretUtbetalingAndel.søknadstidspunkt
-    this.begrunnelse = restEndretUtbetalingAndel.begrunnelse
+    this.fom = endretUtbetalingAndelDto.fom
+    this.tom = endretUtbetalingAndelDto.tom
+    this.prosent = endretUtbetalingAndelDto.prosent ?: BigDecimal(0)
+    this.årsak = endretUtbetalingAndelDto.årsak
+    this.avtaletidspunktDeltBosted = endretUtbetalingAndelDto.avtaletidspunktDeltBosted
+    this.søknadstidspunkt = endretUtbetalingAndelDto.søknadstidspunkt
+    this.begrunnelse = endretUtbetalingAndelDto.begrunnelse
     this.personer = personer.toMutableSet()
     return this
 }

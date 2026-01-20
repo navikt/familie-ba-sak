@@ -31,7 +31,7 @@ data class RestUtvidetBehandling(
     val fødselshendelsefiltreringResultater: List<RestFødselshendelsefiltreringResultat>,
     val utbetalingsperioder: List<Utbetalingsperiode>,
     val personerMedAndelerTilkjentYtelse: List<RestPersonMedAndeler>,
-    val endretUtbetalingAndeler: List<RestEndretUtbetalingAndel>,
+    val endretUtbetalingAndeler: List<EndretUtbetalingAndelDto>,
     val kompetanser: List<RestKompetanse>,
     val tilbakekreving: RestTilbakekreving?,
     val vedtak: RestVedtak?,

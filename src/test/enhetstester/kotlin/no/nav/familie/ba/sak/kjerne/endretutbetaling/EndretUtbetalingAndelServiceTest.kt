@@ -138,7 +138,7 @@ class EndretUtbetalingAndelServiceTest {
                 endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
                     behandling = behandling,
                     endretUtbetalingAndelId = endretUtbetalingAndel.id,
-                    restEndretUtbetalingAndel = restEndretUtbetalingAndel,
+                    endretUtbetalingAndelDto = restEndretUtbetalingAndel,
                 )
             }
         Assertions.assertEquals(
@@ -197,7 +197,7 @@ class EndretUtbetalingAndelServiceTest {
         endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
             behandling = behandling,
             endretUtbetalingAndelId = endretUtbetalingAndel.id,
-            restEndretUtbetalingAndel = restEndretUtbetalingAndel,
+            endretUtbetalingAndelDto = restEndretUtbetalingAndel,
         )
 
         // Assert
@@ -263,7 +263,7 @@ class EndretUtbetalingAndelServiceTest {
                 endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
                     behandling = behandling,
                     endretUtbetalingAndelId = endretUtbetalingAndel.id,
-                    restEndretUtbetalingAndel = restEndretUtbetalingAndel,
+                    endretUtbetalingAndelDto = restEndretUtbetalingAndel,
                 )
             }.frontendFeilmelding
 
