@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.task.PorteføljejusteringTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -37,7 +37,7 @@ class PorteføljejusteringTask(
         val oppgaveGruppereringer = finnOppgaveResponseDto.oppgaver.tilOppgaveGrupperinger()
         val grupperteOppgaver =
             grupperOppgaverEtterSaksreferanseBehandlesAvApplikasjonOgOppgavetype(oppgaveGruppereringer)
-        secureLogger.info(objectMapper.writeValueAsString(grupperteOppgaver))
+        secureLogger.info(jsonMapper.writeValueAsString(grupperteOppgaver))
         // TODO: Legg inn logikk for å opprette tasker som oppdaterer enhet på oppgavene. Kommer i en senere PR når håndtering av porteføljejustering er ferdig avklart.
     }
 

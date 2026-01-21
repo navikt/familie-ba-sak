@@ -1,10 +1,8 @@
 package no.nav.familie.ba.sak.config
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import no.nav.familie.kontrakter.felles.Applikasjon
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -24,6 +22,7 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.support.LoggingProducerListener
+import tools.jackson.databind.ObjectMapper
 
 @Configuration
 class KafkaAivenConfig(
@@ -66,7 +65,7 @@ class KafkaAivenConfig(
     fun kafkaListenerEndpointRegistry(): KafkaListenerEndpointRegistry? = KafkaListenerEndpointRegistry()
 
     @Bean("kafkaObjectMapper")
-    fun kafkaObjectMapper(): ObjectMapper = objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL)
+    fun kafkaObjectMapper(): ObjectMapper = jsonMapper // TODO fix spring boot 4 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
     private fun producerConfigs(): Map<String, Any> {
         val kafkaBrokers = System.getenv("KAFKA_BROKERS") ?: LOCAL_KAFKA_BROKER

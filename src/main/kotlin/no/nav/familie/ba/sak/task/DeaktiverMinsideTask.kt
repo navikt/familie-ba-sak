@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.task.dto.MinsideDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -27,7 +27,7 @@ class DeaktiverMinsideTask(
     @WithSpan
     override fun doTask(task: Task) {
         val deaktiverMinsideDTO =
-            objectMapper.readValue(task.payload, MinsideDTO::class.java)
+            jsonMapper.readValue(task.payload, MinsideDTO::class.java)
 
         val aktør =
             aktørIdRepository.findByAktørIdOrNull(deaktiverMinsideDTO.aktørId)
@@ -49,7 +49,7 @@ class DeaktiverMinsideTask(
         fun opprettTask(aktør: Aktør): Task =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(MinsideDTO(aktør.aktørId)),
+                payload = jsonMapper.writeValueAsString(MinsideDTO(aktør.aktørId)),
                 properties =
                     Properties().apply {
                         this["aktørId"] = aktør.aktørId

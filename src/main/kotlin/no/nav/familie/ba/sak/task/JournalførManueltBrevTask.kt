@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.task.dto.JournalførManueltBrevDTO
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -37,7 +37,7 @@ class JournalførManueltBrevTask(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val journalførManueltBrevDTO = objectMapper.readValue(task.payload, JournalførManueltBrevDTO::class.java)
+        val journalførManueltBrevDTO = jsonMapper.readValue(task.payload, JournalførManueltBrevDTO::class.java)
         logger.info("Journalfører manuelt brev for fagsak=${journalførManueltBrevDTO.fagsakId} og behandling=${journalførManueltBrevDTO.behandlingId}")
 
         val fagsak = fagsakService.hentPåFagsakId(journalførManueltBrevDTO.fagsakId)
@@ -116,7 +116,7 @@ class JournalførManueltBrevTask(
         ): Task =
             Task(
                 TASK_STEP_TYPE,
-                objectMapper.writeValueAsString(
+                jsonMapper.writeValueAsString(
                     JournalførManueltBrevDTO(
                         fagsakId = fagsakId,
                         behandlingId = behandlingId,

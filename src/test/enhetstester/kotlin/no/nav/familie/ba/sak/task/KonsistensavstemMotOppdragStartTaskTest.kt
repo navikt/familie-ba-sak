@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -118,7 +118,7 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         val batchId = 123L
         val transaksjonsId = UUID.randomUUID()
         val payload =
-            objectMapper.writeValueAsString(
+            jsonMapper.writeValueAsString(
                 KonsistensavstemmingStartTaskDTO(
                     batchId = batchId,
                     avstemmingdato = avstemmingdato,

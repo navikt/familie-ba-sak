@@ -1,13 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import com.fasterxml.jackson.databind.node.ArrayNode
 import jakarta.persistence.AttributeConverter
 import jakarta.persistence.Converter
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.deser.std.StdDeserializer
+import tools.jackson.databind.node.ArrayNode
 
 sealed interface IVedtakBegrunnelse {
     val sanityApiNavn: String
@@ -48,10 +48,10 @@ fun IVedtakBegrunnelse.støtterFritekst(sanityBegrunnelser: List<ISanityBegrunne
 
 class IVedtakBegrunnelseDeserializer : StdDeserializer<List<IVedtakBegrunnelse>>(List::class.java) {
     override fun deserialize(
-        jsonParser: JsonParser?,
-        p1: DeserializationContext?,
+        jsonParser: JsonParser,
+        p1: DeserializationContext,
     ): List<IVedtakBegrunnelse> {
-        val node: ArrayNode = jsonParser!!.codec.readTree(jsonParser)
+        val node: ArrayNode = jsonParser.readValueAsTree()
         return node
             .map { it.asText() }
             .map { IVedtakBegrunnelse.konverterTilEnumVerdi(it) }

@@ -1,14 +1,14 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagring
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Component
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.ObjectMapper
 
 @Component
 class SaksstatistikkEventListener(
@@ -44,8 +44,8 @@ class SaksstatistikkEventListener(
     }
 }
 
-val sakstatistikkObjectMapper: ObjectMapper =
-    objectMapper
-        .copy()
-        .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
-        .configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false)
+val sakstatistikkObjectMapper: ObjectMapper = jsonMapper // TODO fix spring boot 4
+//    jsonMapper
+//        .copy()
+//        .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+//        .configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false)

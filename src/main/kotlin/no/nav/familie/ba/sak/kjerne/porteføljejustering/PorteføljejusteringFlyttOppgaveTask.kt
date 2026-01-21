@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.porteføljejustering
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
@@ -15,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.klage.KlageKlient
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.overstyrTaskMedNyCallId
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
@@ -28,6 +27,7 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import tools.jackson.module.kotlin.readValue
 import java.util.Properties
 import java.util.UUID
 
@@ -49,7 +49,7 @@ class PorteføljejusteringFlyttOppgaveTask(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val porteføljejusteringFlyttOppgaveDto: PorteføljejusteringFlyttOppgaveDto = objectMapper.readValue(task.payload)
+        val porteføljejusteringFlyttOppgaveDto: PorteføljejusteringFlyttOppgaveDto = jsonMapper.readValue(task.payload)
         val oppgave = integrasjonKlient.finnOppgaveMedId(porteføljejusteringFlyttOppgaveDto.oppgaveId)
         oppgave.saksreferanse?.let { task.metadata["saksreferanse"] = it }
         if (oppgave.tildeltEnhetsnr != STEINKJER.enhetsnummer && oppgave.tildeltEnhetsnr != VADSØ.enhetsnummer && oppgave.tildeltEnhetsnr != OSLO.enhetsnummer) {
@@ -191,7 +191,7 @@ class PorteføljejusteringFlyttOppgaveTask(
                 Task(
                     type = TASK_STEP_TYPE,
                     payload =
-                        objectMapper.writeValueAsString(
+                        jsonMapper.writeValueAsString(
                             PorteføljejusteringFlyttOppgaveDto(
                                 oppgaveId = oppgaveId,
                                 originalEnhet = enhetId,

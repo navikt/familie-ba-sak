@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.brev.DokumentDistribueringService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.mottakerErDødUtenDødsboadresse
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -49,7 +49,7 @@ class DistribuerDokumentPåJournalpostIdTask(
 
     @WithSpan
     override fun doTask(task: Task) {
-        val taskData = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
+        val taskData = jsonMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
 
         val brevmal = taskData.brevmal
         val erTaskEldreEnn6Mnd = task.opprettetTid.isBefore(LocalDateTime.now().minusMonths(6))
@@ -91,7 +91,7 @@ class DistribuerDokumentPåJournalpostIdTask(
 
             return Task(
                 type = this.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(distribuerDokumentDTO),
+                payload = jsonMapper.writeValueAsString(distribuerDokumentDTO),
                 triggerTid = LocalDateTime.now().plusMinutes(5),
                 metadataWrapper = PropertiesWrapper(metadata),
             )

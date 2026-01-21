@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.NavSystemtype
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
@@ -21,7 +21,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Primary
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.retry.annotation.EnableRetry
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestTemplate
@@ -59,8 +59,8 @@ class ApplicationConfig {
      */
     @Bean
     @Primary
-    fun restTemplateBuilder(objectMapper: ObjectMapper): RestTemplateBuilder {
-        val jackson2HttpMessageConverter = MappingJackson2HttpMessageConverter(objectMapper)
+    fun restTemplateBuilder(): RestTemplateBuilder {
+        val jackson2HttpMessageConverter = JacksonJsonHttpMessageConverter(jsonMapper)
         return RestTemplateBuilder()
             .connectTimeout(Duration.of(2, ChronoUnit.SECONDS))
             .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
@@ -68,7 +68,7 @@ class ApplicationConfig {
     }
 
     /**
-     * Overskriver OAuth2HttpClient som settes opp i token-support som ikke kan få med objectMapper fra felles
+     * Overskriver OAuth2HttpClient som settes opp i token-support som ikke kan få med jsonMapper fra felles
      * pga. .setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE)
      * og [OAuth2AccessTokenResponse] som burde settes med setters, då feltnavn heter noe annet enn feltet i json
      */

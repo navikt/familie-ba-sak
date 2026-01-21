@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.kontrakter.felles.Fødselsnummer
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import java.time.LocalDate
 
 data class RegistrerSøknadDto(
@@ -18,7 +18,7 @@ data class SøknadDTO(
     val erAutomatiskRegistrert: Boolean = false,
 )
 
-fun SøknadDTO.writeValueAsString(): String = objectMapper.writeValueAsString(this)
+fun SøknadDTO.writeValueAsString(): String = jsonMapper.writeValueAsString(this)
 
 data class SøkerMedOpplysninger(
     val ident: String,

@@ -32,7 +32,7 @@ import no.nav.familie.eksterne.kontrakter.BehandlingTypeV2
 import no.nav.familie.eksterne.kontrakter.BehandlingÅrsakV2
 import no.nav.familie.eksterne.kontrakter.FagsakType
 import no.nav.familie.eksterne.kontrakter.Kompetanse
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -211,7 +211,7 @@ internal class StønadsstatistikkServiceTest {
 
         // Act
         val vedtak = stønadsstatistikkService.hentVedtakV2(1L)
-        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(vedtak))
+        println(jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(vedtak))
 
         // Assert
         assertEquals(2, vedtak.utbetalingsperioderV2[0].utbetalingsDetaljer.size)

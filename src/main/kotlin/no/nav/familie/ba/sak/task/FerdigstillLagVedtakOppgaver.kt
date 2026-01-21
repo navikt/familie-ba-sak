@@ -2,7 +2,7 @@
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -24,7 +24,7 @@ class FerdigstillLagVedtakOppgaver(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val ferdigstillLagVedtakOppgaverDTO = objectMapper.readValue(task.payload, FerdigstillLagVedtakOppgaverDTO::class.java)
+        val ferdigstillLagVedtakOppgaverDTO = jsonMapper.readValue(task.payload, FerdigstillLagVedtakOppgaverDTO::class.java)
         oppgaveService.ferdigstillLagVedtakOppgaver(behandlingId = ferdigstillLagVedtakOppgaverDTO.behandlingId)
     }
 
@@ -36,7 +36,7 @@ class FerdigstillLagVedtakOppgaver(
         ): Task =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(FerdigstillLagVedtakOppgaverDTO(behandlingId = behandlingId)),
+                payload = jsonMapper.writeValueAsString(FerdigstillLagVedtakOppgaverDTO(behandlingId = behandlingId)),
                 properties =
                     Properties().apply {
                         this["behandlingId"] = behandlingId.toString()

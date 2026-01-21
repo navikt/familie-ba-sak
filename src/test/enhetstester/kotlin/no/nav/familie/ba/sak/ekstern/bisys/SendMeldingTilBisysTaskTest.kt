@@ -20,7 +20,7 @@ import no.nav.familie.ba.sak.statistikk.producer.DefaultKafkaProducer.Companion.
 import no.nav.familie.ba.sak.task.SendMeldingTilBisysTask
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetrygdBisysMelding
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetrygdEndretType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -115,7 +115,7 @@ class SendMeldingTilBisysTaskTest {
         sendMeldingTilBisysTask.doTask(SendMeldingTilBisysTask.opprettTask(behandling[1].id))
 
         verify(exactly = 1) { kafkaProducer.kafkaAivenTemplate.send(any(), any(), any()) }
-        val jsonMelding = objectMapper.readValue(meldingSlot.captured, BarnetrygdBisysMelding::class.java)
+        val jsonMelding = jsonMapper.readValue(meldingSlot.captured, BarnetrygdBisysMelding::class.java)
         assertThat(jsonMelding.søker).isEqualTo(behandling[1].fagsak.aktør.aktivFødselsnummer())
         assertThat(jsonMelding.barn).hasSize(1)
         assertThat(jsonMelding.barn[0].ident).isEqualTo(barn1.aktør.aktivFødselsnummer())
@@ -175,7 +175,7 @@ class SendMeldingTilBisysTaskTest {
         sendMeldingTilBisysTask.doTask(SendMeldingTilBisysTask.opprettTask(behandling[1].id))
 
         verify(exactly = 1) { kafkaProducer.kafkaAivenTemplate.send(any(), any(), any()) }
-        val jsonMelding = objectMapper.readValue(meldingSlot.captured, BarnetrygdBisysMelding::class.java)
+        val jsonMelding = jsonMapper.readValue(meldingSlot.captured, BarnetrygdBisysMelding::class.java)
         assertThat(jsonMelding.søker).isEqualTo(behandling[1].fagsak.aktør.aktivFødselsnummer())
         assertThat(jsonMelding.barn).hasSize(1)
         assertThat(jsonMelding.barn[0].ident).isEqualTo(barn1.aktør.aktivFødselsnummer())

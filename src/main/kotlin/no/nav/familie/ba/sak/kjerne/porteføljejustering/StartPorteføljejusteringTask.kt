@@ -1,12 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.porteføljejustering
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.internal.BehandlesAvApplikasjon
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -16,7 +15,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import kotlin.collections.contains
+import tools.jackson.module.kotlin.readValue
 
 @Service
 @TaskStepBeskrivelse(
@@ -31,7 +30,7 @@ class StartPorteføljejusteringTask(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val startPorteføljejusteringTaskDto: StartPorteføljejusteringTaskDto = objectMapper.readValue(task.payload)
+        val startPorteføljejusteringTaskDto: StartPorteføljejusteringTaskDto = jsonMapper.readValue(task.payload)
         val oppgaverISteinkjer =
             integrasjonKlient
                 .hentOppgaver(
@@ -44,7 +43,7 @@ class StartPorteføljejusteringTask(
 
         logger.info("Fant ${oppgaverISteinkjer.size} barnetrygd oppgaver i Steinkjer")
 
-        val oppgaverMedFlytteTask = taskService.finnAlleTaskerMedType(PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE).map { objectMapper.readValue<PorteføljejusteringFlyttOppgaveDto>(it.payload).oppgaveId }.toSet()
+        val oppgaverMedFlytteTask = taskService.finnAlleTaskerMedType(PorteføljejusteringFlyttOppgaveTask.TASK_STEP_TYPE).map { jsonMapper.readValue<PorteføljejusteringFlyttOppgaveDto>(it.payload).oppgaveId }.toSet()
 
         val oppgaverSomSkalFlyttes =
             oppgaverISteinkjer
@@ -92,7 +91,7 @@ class StartPorteføljejusteringTask(
         ): Task =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(StartPorteføljejusteringTaskDto(antallTasks = antallTasks, behandlesAvApplikasjon = behandlesAvApplikasjon?.applikasjonNavn, dryRun = dryRun)),
+                payload = jsonMapper.writeValueAsString(StartPorteføljejusteringTaskDto(antallTasks = antallTasks, behandlesAvApplikasjon = behandlesAvApplikasjon?.applikasjonNavn, dryRun = dryRun)),
             )
     }
 }

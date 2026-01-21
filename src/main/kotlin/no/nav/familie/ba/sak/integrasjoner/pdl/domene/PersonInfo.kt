@@ -1,11 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -17,6 +12,11 @@ import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.annotation.JsonDeserialize
+import tools.jackson.databind.deser.std.StdDeserializer
 import java.time.LocalDate
 import java.time.Period
 
@@ -136,10 +136,10 @@ data class VergeData(
 
 class KjonnDeserializer : StdDeserializer<Kjønn>(Kjønn::class.java) {
     override fun deserialize(
-        jp: JsonParser?,
-        p1: DeserializationContext?,
+        jp: JsonParser,
+        p1: DeserializationContext,
     ): Kjønn {
-        val node: JsonNode = jp!!.codec.readTree(jp)
+        val node: JsonNode = jp.readValueAsTree()
         return when (val kjønn = node.asText()) {
             "M" -> Kjønn.MANN
             "K" -> Kjønn.KVINNE

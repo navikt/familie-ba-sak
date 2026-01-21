@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.statistikk.producer
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
@@ -9,7 +8,7 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMell
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetrygdBisysMelding
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,6 +20,7 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import tools.jackson.databind.ObjectMapper
 
 interface KafkaProducer {
     fun sendMessageForTopicVedtakV2(vedtakV2: VedtakDVHV2): Long
@@ -110,7 +110,7 @@ class DefaultKafkaProducer(
         key: String,
         behandlingId: String,
     ) {
-        val meldingIString: String = objectMapper.writeValueAsString(melding)
+        val meldingIString: String = jsonMapper.writeValueAsString(melding)
 
         kafkaAivenTemplate
             .send(tilbakekrevingResponseTopic, key, meldingIString)
@@ -133,7 +133,7 @@ class DefaultKafkaProducer(
         hentAlleIdenterTilPsysResponseDTO: HentAlleIdenterTilPsysResponseDTO,
     ) {
         kafkaAivenTemplate
-            .send(BARNETRYGD_PENSJON_TOPIC, objectMapper.writeValueAsString(hentAlleIdenterTilPsysResponseDTO))
+            .send(BARNETRYGD_PENSJON_TOPIC, jsonMapper.writeValueAsString(hentAlleIdenterTilPsysResponseDTO))
             .exceptionally {
                 val feilmelding =
                     "Melding på topic $BARNETRYGD_PENSJON_TOPIC kan ikke sendes for " +
@@ -148,7 +148,7 @@ class DefaultKafkaProducer(
         barnetrygdBisysMelding: BarnetrygdBisysMelding,
     ) {
         val opphørBarnetrygdBisysMelding =
-            objectMapper.writeValueAsString(barnetrygdBisysMelding)
+            jsonMapper.writeValueAsString(barnetrygdBisysMelding)
 
         kafkaAivenTemplate
             .send(OPPHOER_BARNETRYGD_BISYS_TOPIC, behandlingId, opphørBarnetrygdBisysMelding)

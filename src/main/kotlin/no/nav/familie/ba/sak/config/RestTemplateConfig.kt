@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.config
 
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.restklient.interceptor.BearerTokenClientCredentialsClientInterceptor
 import no.nav.familie.restklient.interceptor.BearerTokenClientInterceptor
 import no.nav.familie.restklient.interceptor.ConsumerIdClientInterceptor
@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Profile
 import org.springframework.http.converter.ByteArrayHttpMessageConverter
 import org.springframework.http.converter.StringHttpMessageConverter
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
 import java.nio.charset.StandardCharsets
@@ -39,7 +39,7 @@ class RestTemplateConfig {
                 MdcValuesPropagatingClientInterceptor(),
             ).additionalMessageConverters(
                 ByteArrayHttpMessageConverter(),
-                MappingJackson2HttpMessageConverter(objectMapper),
+                JacksonJsonHttpMessageConverter(jsonMapper),
             ).build()
 
     @Bean("jwtBearer")
@@ -54,7 +54,7 @@ class RestTemplateConfig {
                 MdcValuesPropagatingClientInterceptor(),
             ).additionalMessageConverters(
                 ByteArrayHttpMessageConverter(),
-                MappingJackson2HttpMessageConverter(objectMapper),
+                JacksonJsonHttpMessageConverter(jsonMapper),
             ).build()
 
     @Bean("jwtBearerMedLangTimeout")
@@ -71,7 +71,7 @@ class RestTemplateConfig {
                 MdcValuesPropagatingClientInterceptor(),
             ).additionalMessageConverters(
                 ByteArrayHttpMessageConverter(),
-                MappingJackson2HttpMessageConverter(objectMapper),
+                JacksonJsonHttpMessageConverter(jsonMapper),
             ).build()
 
     @Bean
@@ -86,7 +86,7 @@ class RestTemplateConfig {
             .interceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
             .additionalMessageConverters(
                 ByteArrayHttpMessageConverter(),
-                MappingJackson2HttpMessageConverter(objectMapper),
+                JacksonJsonHttpMessageConverter(jsonMapper),
             ).build()
 
     @Bean
@@ -109,6 +109,6 @@ val restTemplate =
         listOf(
             StringHttpMessageConverter(StandardCharsets.UTF_8),
             ByteArrayHttpMessageConverter(),
-            MappingJackson2HttpMessageConverter(objectMapper),
+            JacksonJsonHttpMessageConverter(jsonMapper),
         ),
     )

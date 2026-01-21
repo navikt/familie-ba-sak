@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingAvsluttTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppdrag.PerioderForBehandling
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -119,7 +119,7 @@ class AvstemmingService(
         val konsistensavstemmingAvsluttTask =
             Task(
                 type = KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(konsistensavstemmingAvsluttTaskDTO),
+                payload = jsonMapper.writeValueAsString(konsistensavstemmingAvsluttTaskDTO),
                 properties =
                     Properties().apply {
                         this["transaksjonsId"] = konsistensavstemmingAvsluttTaskDTO.transaksjonsId.toString()
@@ -150,7 +150,7 @@ class AvstemmingService(
             Task(
                 type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE,
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO,
                     ),
                 properties =

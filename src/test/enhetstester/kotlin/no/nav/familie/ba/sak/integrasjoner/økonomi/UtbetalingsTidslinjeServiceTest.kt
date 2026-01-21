@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
@@ -40,7 +40,7 @@ class UtbetalingsTidslinjeServiceTest {
         @Test
         fun `skal generere utbetalingsperioder for behandlinger etter dato`() {
             // Arrange
-            val tilkjentYtelse = lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling()))
+            val tilkjentYtelse = lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = jsonMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling()))
 
             every { behandlingRepository.finnFagsakIderForBehandlinger(any<List<Long>>()) } returns listOf(fagsak.id)
             every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns listOf(tilkjentYtelse)
@@ -60,7 +60,7 @@ class UtbetalingsTidslinjeServiceTest {
         @Test
         fun `skal generere utbetalingstidslinjer for førstegangsbehandling med 2 kjeder ordinær barnetrygd`() {
             // Arrange
-            val tilkjentYtelse = lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling()))
+            val tilkjentYtelse = lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = jsonMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling()))
 
             every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns listOf(tilkjentYtelse)
 
@@ -121,8 +121,8 @@ class UtbetalingsTidslinjeServiceTest {
 
             every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns
                 listOf(
-                    lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling())),
-                    lagTilkjentYtelse(behandling = revurdering, utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdragRevurdering)),
+                    lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = jsonMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling())),
+                    lagTilkjentYtelse(behandling = revurdering, utbetalingsoppdrag = jsonMapper.writeValueAsString(utbetalingsoppdragRevurdering)),
                 )
 
             // Act
@@ -186,8 +186,8 @@ class UtbetalingsTidslinjeServiceTest {
 
             every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns
                 listOf(
-                    lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling())),
-                    lagTilkjentYtelse(behandling = revurderingOpphør, utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdragRevurderingOpphør)),
+                    lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = jsonMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling())),
+                    lagTilkjentYtelse(behandling = revurderingOpphør, utbetalingsoppdrag = jsonMapper.writeValueAsString(utbetalingsoppdragRevurderingOpphør)),
                 )
 
             // Act
@@ -249,8 +249,8 @@ class UtbetalingsTidslinjeServiceTest {
 
             every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns
                 listOf(
-                    lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling())),
-                    lagTilkjentYtelse(behandling = revurderingOpphør, utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdragRevurderingOpphør)),
+                    lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = jsonMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling())),
+                    lagTilkjentYtelse(behandling = revurderingOpphør, utbetalingsoppdrag = jsonMapper.writeValueAsString(utbetalingsoppdragRevurderingOpphør)),
                 )
 
             // Act
@@ -321,8 +321,8 @@ class UtbetalingsTidslinjeServiceTest {
 
             every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns
                 listOf(
-                    lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling())),
-                    lagTilkjentYtelse(behandling = revurderingOpphør, utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdragRevurderingOpphør)),
+                    lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = jsonMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling())),
+                    lagTilkjentYtelse(behandling = revurderingOpphør, utbetalingsoppdrag = jsonMapper.writeValueAsString(utbetalingsoppdragRevurderingOpphør)),
                 )
 
             // Act
@@ -385,8 +385,8 @@ class UtbetalingsTidslinjeServiceTest {
 
             every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns
                 listOf(
-                    lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling())),
-                    lagTilkjentYtelse(behandling = revurdering, utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdragRevurderingOpphørVedOverskriving)),
+                    lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = jsonMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling())),
+                    lagTilkjentYtelse(behandling = revurdering, utbetalingsoppdrag = jsonMapper.writeValueAsString(utbetalingsoppdragRevurderingOpphørVedOverskriving)),
                 )
 
             // Act
@@ -445,8 +445,8 @@ class UtbetalingsTidslinjeServiceTest {
 
             every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns
                 listOf(
-                    lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling())),
-                    lagTilkjentYtelse(behandling = revurderingOpphørFeilPeriodeId, utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdragRevurderingOpphørFeilPeriodeId)),
+                    lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = jsonMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling())),
+                    lagTilkjentYtelse(behandling = revurderingOpphørFeilPeriodeId, utbetalingsoppdrag = jsonMapper.writeValueAsString(utbetalingsoppdragRevurderingOpphørFeilPeriodeId)),
                 )
 
             // Act

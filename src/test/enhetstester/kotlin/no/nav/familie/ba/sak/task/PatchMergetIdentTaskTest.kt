@@ -20,7 +20,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.PersonIdent
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
@@ -82,7 +82,7 @@ class PatchMergetIdentTaskTest {
         val aktørMergeLoggSlot = slot<AktørMergeLogg>()
         every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
 
-        task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
+        task.doTask(Task(payload = jsonMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
 
         val aktørMergeLogg = aktørMergeLoggSlot.captured
         assertThat(aktørMergeLogg.nyAktørId).isEqualTo(nyAktør.aktørId)
@@ -105,7 +105,7 @@ class PatchMergetIdentTaskTest {
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns emptySet()
 
-        assertThrows<Feil> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
+        assertThrows<Feil> { task.doTask(Task(payload = jsonMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
             assertThat(it.message).isEqualTo("Fant ikke ident som skal patches på fagsak=${fagsak.id} aktører=[]")
         }
     }
@@ -122,7 +122,7 @@ class PatchMergetIdentTaskTest {
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
         every { pdlIdentRestKlient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns emptyList()
 
-        assertThrows<Feil> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
+        assertThrows<Feil> { task.doTask(Task(payload = jsonMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
             assertThat(it.message).isEqualTo("Ident som skal patches finnes ikke som historisk ident av ny ident")
         }
     }
@@ -146,7 +146,7 @@ class PatchMergetIdentTaskTest {
 
         every { personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident) } returns Personident(nyAktør.aktivFødselsnummer(), nyAktør)
 
-        assertThrows<Feil> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
+        assertThrows<Feil> { task.doTask(Task(payload = jsonMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
             assertThat(it.message).isEqualTo("Fant allerede en personident for nytt fødselsnummer")
         }
     }
@@ -173,7 +173,7 @@ class PatchMergetIdentTaskTest {
         val aktørMergeLoggSlot = slot<AktørMergeLogg>()
         every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
 
-        task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
+        task.doTask(Task(payload = jsonMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
 
         val aktørMergeLogg = aktørMergeLoggSlot.captured
         assertThat(aktørMergeLogg.nyAktørId).isEqualTo(nyAktør.aktørId)
@@ -208,7 +208,7 @@ class PatchMergetIdentTaskTest {
         val aktørMergeLoggSlot = slot<AktørMergeLogg>()
         every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
 
-        task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
+        task.doTask(Task(payload = jsonMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
 
         val aktørMergeLogg = aktørMergeLoggSlot.captured
         assertThat(aktørMergeLogg.nyAktørId).isEqualTo(nyAktør.aktørId)

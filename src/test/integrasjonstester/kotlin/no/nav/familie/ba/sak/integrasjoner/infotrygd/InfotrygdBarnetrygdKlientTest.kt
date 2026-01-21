@@ -13,7 +13,7 @@ import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -63,7 +63,7 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             post(løpendeBarnetrygdURL).willReturn(
                 okJson(
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         InfotrygdLøpendeBarnetrygdResponse(false),
                     ),
                 ),
@@ -72,7 +72,7 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             post(sakerURL).willReturn(
                 okJson(
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         InfotrygdSøkResponse(listOf(Sak(status = "IP")), emptyList()),
                     ),
                 ),
@@ -81,7 +81,7 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             post(stønaderURL).willReturn(
                 okJson(
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         InfotrygdSøkResponse(listOf(Stønad()), emptyList()),
                     ),
                 ),
@@ -97,7 +97,7 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.verify(
             anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(
                 equalToJson(
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         infotrygdSøkRequest,
                     ),
                 ),
@@ -106,7 +106,7 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.verify(
             anyRequestedFor(urlEqualTo(sakerURL)).withRequestBody(
                 equalToJson(
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         infotrygdSøkRequest,
                     ),
                 ),
@@ -115,7 +115,7 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.verify(
             anyRequestedFor(urlEqualTo(stønaderURL)).withRequestBody(
                 equalToJson(
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         infotrygdSøkRequest,
                     ),
                 ),
@@ -131,7 +131,7 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             post(løpendeBarnetrygdURL).willReturn(
                 okJson(
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         InfotrygdLøpendeBarnetrygdResponse(false),
                     ),
                 ),
@@ -145,7 +145,7 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.verify(
             anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(
                 equalToJson(
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         infotrygdSøkRequest,
                     ),
                 ),
@@ -167,7 +167,7 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
     fun `harNyligSendtBrevFor skal returnerer true for personIdent`() {
         wireMockServer.stubFor(
             post(brevURL).willReturn(
-                okJson(objectMapper.writeValueAsString(InfotrygdBarnetrygdKlient.SendtBrevResponse(true, emptyList()))),
+                okJson(jsonMapper.writeValueAsString(InfotrygdBarnetrygdKlient.SendtBrevResponse(true, emptyList()))),
             ),
         )
 

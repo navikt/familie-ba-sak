@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.task.IverksettMotOppdragTask.Companion.TASK_STEP_TY
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -27,7 +27,7 @@ class IverksettMotOppdragTask(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
+        val iverksettingTask = jsonMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         stegService.håndterIverksettMotØkonomi(
             behandling = behandlingHentOgPersisterService.hent(iverksettingTask.behandlingsId),
             iverksettingTaskDTO = iverksettingTask,
@@ -35,7 +35,7 @@ class IverksettMotOppdragTask(
     }
 
     override fun onCompletion(task: Task) {
-        val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
+        val iverksettingTask = jsonMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         val personIdent =
             behandlingHentOgPersisterService
                 .hent(iverksettingTask.behandlingsId)
@@ -88,7 +88,7 @@ class IverksettMotOppdragTask(
             Task(
                 type = TASK_STEP_TYPE,
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         IverksettingTaskDTO(
                             personIdent = aktør.aktivFødselsnummer(),
                             behandlingsId = behandlingsId,

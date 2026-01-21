@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.HenleggBehandlingInfoDto
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -31,7 +31,7 @@ class HenleggBehandlingTask(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val henleggBehandlingTaskDTO = objectMapper.readValue(task.payload, HenleggBehandlingTaskDTO::class.java)
+        val henleggBehandlingTaskDTO = jsonMapper.readValue(task.payload, HenleggBehandlingTaskDTO::class.java)
         val behandling =
             behandlingHentOgPersisterService.hent(henleggBehandlingTaskDTO.behandlingId).apply {
                 task.metadata["fagsakId"] = fagsak.id.toString()
