@@ -342,7 +342,7 @@ class ForvalterController(
             handling = "Rekjør satsendring med feiltype",
         )
 
-        val satskjøringerSomSkalRekjøres = satskjøringRepository.finnPåFeilTypeOgFerdigTidIkkeNull(feiltype, satstid)
+        val satskjøringerSomSkalRekjøres = satskjøringRepository.finnPåFeilTypeOgFerdigTidNull(feiltype, satstid)
         satskjøringRepository.deleteAll(satskjøringerSomSkalRekjøres)
         return ResponseEntity.ok("Ok")
     }

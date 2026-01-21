@@ -17,7 +17,7 @@ interface SatskjøringRepository : JpaRepository<Satskjøring, Long> {
     ): Satskjøring?
 
     @Query(value = "SELECT sk from Satskjøring sk where sk.ferdigTidspunkt IS NULL and sk.feiltype = :feiltype and sk.satsTidspunkt = :satsTidspunkt")
-    fun finnPåFeilTypeOgFerdigTidIkkeNull(
+    fun finnPåFeilTypeOgFerdigTidNull(
         feiltype: String,
         satsTidspunkt: YearMonth,
     ): List<Satskjøring>
