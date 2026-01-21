@@ -64,4 +64,6 @@ enum class FeatureToggle(
     SKAL_HÅNDTERE_FALSK_IDENTITET("familie-ba-sak.skal-handtere-falsk-identitet"),
 
     HENT_ARBEIDSFORDELING_MED_BEHANDLINGSTYPE("familie-ba-sak.hent-arbeidsfordeling-med-behandlingstype"),
+
+    SKAL_HENTE_UTBETALINGSLAND_FRA_UTENLANDSKPERIODEBELØP("familie-ba-sak.skal-hente-utbetalingsland-fra-utenlandskperiodebelop"),
 }

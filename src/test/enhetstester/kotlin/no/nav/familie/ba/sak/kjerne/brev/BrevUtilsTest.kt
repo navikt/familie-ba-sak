@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.datagenerator.lagValutakurs
 import no.nav.familie.ba.sak.datagenerator.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -621,7 +622,7 @@ internal class BrevUtilsTest {
     }
 
     @Test
-    fun `hentLandOgStartdatoForUtbetalingstabell - skal finne alle kompetanser som gjelder etter endringstidspunktet`() {
+    fun `hentLandOgStartdatoForUtbetalingstabellGammel - skal finne alle kompetanser som gjelder etter endringstidspunktet`() {
         val endringstidspunkt = YearMonth.now()
 
         val kompetanser =
@@ -663,13 +664,13 @@ internal class BrevUtilsTest {
                 "DK" to "Danmark",
             )
 
-        val utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt = endringstidspunkt, landkoder = landkoder, kompetanser = kompetanser)
+        val utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabellGammel(endringstidspunkt = endringstidspunkt, landkoder = landkoder, kompetanser = kompetanser)
         assertThat(utbetalingstabellAutomatiskValutajustering).isNotNull
         assertThat(utbetalingstabellAutomatiskValutajustering.utbetalingerEosLand?.first()).isEqualTo("Sverige og Danmark")
     }
 
     @Test
-    fun `hentLandOgStartdatoForUtbetalingstabell - skal finne korrekt utbetalingsland når hovedregelen gir Norge`() {
+    fun `hentLandOgStartdatoForUtbetalingstabellGammel - skal finne korrekt utbetalingsland når hovedregelen gir Norge`() {
         val endringstidspunkt = YearMonth.now()
 
         val kompetanser =
@@ -696,9 +697,63 @@ internal class BrevUtilsTest {
                 "SE" to "Sverige",
             )
 
-        val utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt = endringstidspunkt, landkoder = landkoder, kompetanser = kompetanser)
+        val utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabellGammel(endringstidspunkt = endringstidspunkt, landkoder = landkoder, kompetanser = kompetanser)
         assertThat(utbetalingstabellAutomatiskValutajustering).isNotNull
         assertThat(utbetalingstabellAutomatiskValutajustering.utbetalingerEosLand?.first()).isEqualTo("Sverige")
+    }
+
+    @Test
+    fun `hentLandOgStartdatoForUtbetalingstabell - skal finne alle utenlandsperiode beløp som gjelder etter endringstidspunktet`() {
+        val endringstidspunkt = YearMonth.now()
+
+        val utenlandskPeriodebeløp =
+            listOf(
+                lagUtenlandskPeriodebeløp(
+                    fom = YearMonth.now().minusMonths(5),
+                    tom = YearMonth.now().minusMonths(3),
+                    utbetalingsland = "NL",
+                    valutakode = "EUR",
+                    beløp = BigDecimal.valueOf(1000),
+                    intervall = Intervall.MÅNEDLIG,
+                    barnAktører =
+                        setOf(
+                            randomAktør(),
+                        ),
+                ),
+                lagUtenlandskPeriodebeløp(
+                    fom = YearMonth.now().minusMonths(2),
+                    tom = YearMonth.now().plusMonths(2),
+                    utbetalingsland = "SE",
+                    valutakode = "SEK",
+                    beløp = BigDecimal.valueOf(1000),
+                    intervall = Intervall.MÅNEDLIG,
+                    barnAktører =
+                        setOf(
+                            randomAktør(),
+                        ),
+                ),
+                lagUtenlandskPeriodebeløp(
+                    fom = YearMonth.now().plusMonths(3),
+                    utbetalingsland = "DK",
+                    valutakode = "DKK",
+                    beløp = BigDecimal.valueOf(1000),
+                    intervall = Intervall.MÅNEDLIG,
+                    barnAktører =
+                        setOf(
+                            randomAktør(),
+                        ),
+                ),
+            )
+
+        val landkoder =
+            mapOf(
+                "SE" to "Sverige",
+                "DK" to "Danmark",
+            )
+
+        val utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt = endringstidspunkt, landkoder = landkoder, utenlandskPeriodebeløp = utenlandskPeriodebeløp)
+        assertThat(utbetalingstabellAutomatiskValutajustering).isNotNull
+        assertThat(utbetalingstabellAutomatiskValutajustering.utbetalingerEosLand?.first()).isEqualTo("Sverige og Danmark")
     }
 }
 

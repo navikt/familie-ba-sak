@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
@@ -110,6 +111,7 @@ class BrevService(
     private val avregningService: AvregningService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val clockProvider: ClockProvider,
+    private val featureToggle: FeatureToggleService,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -300,12 +302,21 @@ class BrevService(
         utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>?,
     ): UtbetalingstabellAutomatiskValutajustering? {
         val behandlingId = vedtak.behandling.id
+        val skalHenteUtbetalingslandFraUtenlandskPeriodebeløp = featureToggle.isEnabled(FeatureToggle.SKAL_HENTE_UTBETALINGSLAND_FRA_UTENLANDSKPERIODEBELØP)
 
         return utbetalingerPerMndEøs?.let {
             val endringstidspunkt = finnStarttidspunktForUtbetalingstabell(behandling = vedtak.behandling)
             val landkoder = kodeverkService.hentLandkoderISO2()
-            val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = behandlingId)
-            return hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt.toYearMonth(), landkoder, kompetanser)
+
+            return if (skalHenteUtbetalingslandFraUtenlandskPeriodebeløp) {
+                val utenlandskPeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandlingId)
+
+                hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt.toYearMonth(), landkoder, utenlandskPeriodebeløp)
+            } else {
+                val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = behandlingId)
+
+                hentLandOgStartdatoForUtbetalingstabellGammel(endringstidspunkt.toYearMonth(), landkoder, kompetanser)
+            }
         }
     }
 

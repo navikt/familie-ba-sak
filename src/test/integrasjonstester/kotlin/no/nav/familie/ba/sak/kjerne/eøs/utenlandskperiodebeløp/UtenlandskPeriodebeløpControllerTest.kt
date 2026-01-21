@@ -43,7 +43,7 @@ class UtenlandskPeriodebeløpControllerTest {
             assertThrows<ConstraintViolationException> {
                 utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(
                     1,
-                    UtenlandskPeriodebeløpDto(1, null, null, emptyList(), beløp = (-1.0).toBigDecimal(), null, null, null),
+                    UtenlandskPeriodebeløpDto(1, null, null, emptyList(), beløp = (-1.0).toBigDecimal(), null, null, null, null),
                 )
             }
 
@@ -69,7 +69,7 @@ class UtenlandskPeriodebeløpControllerTest {
         val response =
             utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(
                 1,
-                UtenlandskPeriodebeløpDto(1, null, null, emptyList(), beløp = 1.0.toBigDecimal(), null, null, null),
+                UtenlandskPeriodebeløpDto(1, null, null, emptyList(), beløp = 1.0.toBigDecimal(), null, null, null, null),
             )
 
         assertEquals(HttpStatus.OK, response.statusCode)
