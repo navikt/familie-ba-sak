@@ -49,7 +49,7 @@ class KafkaAivenConfig(
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.setConcurrency(1)
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
-        factory.consumerFactory = consumerFactory()
+        factory.setConsumerFactory(consumerFactory())
         factory.setCommonErrorHandler(kafkaErrorHandler)
         return factory
     }
@@ -58,7 +58,7 @@ class KafkaAivenConfig(
     fun kafkaAivenHendelseListenerAvroLatestContainerFactory(kafkaErrorHandler: KafkaAivenErrorHandler): ConcurrentKafkaListenerContainerFactory<String, String> =
         ConcurrentKafkaListenerContainerFactory<String, String>().apply {
             containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
-            consumerFactory = DefaultKafkaConsumerFactory(consumerConfigsLatestAvro())
+            setConsumerFactory(DefaultKafkaConsumerFactory(consumerConfigsLatestAvro()))
             setCommonErrorHandler(kafkaErrorHandler)
         }
 
