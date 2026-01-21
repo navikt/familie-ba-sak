@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -11,6 +12,7 @@ import org.slf4j.MDC
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Slice
 import org.springframework.stereotype.Service
+import java.time.YearMonth
 import java.util.stream.Collectors
 
 @Service
@@ -19,6 +21,7 @@ class SatsendringService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val fagsakRepository: FagsakRepository,
     private val personOpplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    private val satskjøringRepository: SatskjøringRepository,
 ) {
     private val logger = LoggerFactory.getLogger(SatsendringService::class.java)
 
@@ -73,5 +76,28 @@ class SatsendringService(
         fagsakerUtenSisteSats.chunked(1000) {
             logger.warn("$it")
         }
+    }
+
+    fun finnUferdigeSatskjøringer(
+        feiltyper: List<SatsendringSvar>,
+        satsTidspunkt: YearMonth = StartSatsendring.hentAktivSatsendringstidspunkt(),
+    ): List<Long> =
+        feiltyper.flatMap { feiltype ->
+            satskjøringRepository.finnPåFeilTypeOgFerdigTidNull(feiltype.name, satsTidspunkt).map { it.fagsakId }
+        }
+
+    fun slettSatskjøringer(fagsakIder: Set<Long>): List<Long> {
+        logger.info("Sletter satskjøringer for fagsakIder: $fagsakIder")
+        val satskjøringer = satskjøringRepository.findByFagsakIdIn(fagsakIder)
+
+        val ferdigeSatskjøringer = satskjøringer.filter { it.ferdigTidspunkt != null }
+        if (ferdigeSatskjøringer.isNotEmpty()) {
+            throw Feil(
+                "Satskjøring for fagsaker ${ferdigeSatskjøringer.map { it.fagsakId }} er ikke ferdige. Kan ikke slette.",
+            )
+        }
+
+        satskjøringRepository.deleteAll(satskjøringer)
+        return satskjøringer.map { it.fagsakId }
     }
 }
