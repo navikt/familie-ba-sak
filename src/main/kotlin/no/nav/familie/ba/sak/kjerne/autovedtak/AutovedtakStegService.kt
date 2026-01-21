@@ -4,8 +4,6 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.KAN_KJØRE_AUTOVEDTAK_SVALBARDTILLEGG
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggService
@@ -147,32 +145,24 @@ class AutovedtakStegService(
         mottakersAktør: Aktør,
         fagsakId: Long,
         førstegangKjørt: LocalDateTime = LocalDateTime.now(),
-    ): String {
-        if (!featureToggleService.isEnabled(KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG)) {
-            return "Autovedtak for Finnmarkstillegg er deaktivert"
-        }
-        return kjørBehandling(
+    ): String =
+        kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = FinnmarkstilleggData(fagsakId),
             førstegangKjørt = førstegangKjørt,
         )
-    }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun kjørBehandlingSvalbardtillegg(
         mottakersAktør: Aktør,
         fagsakId: Long,
         førstegangKjørt: LocalDateTime = LocalDateTime.now(),
-    ): String {
-        if (!featureToggleService.isEnabled(KAN_KJØRE_AUTOVEDTAK_SVALBARDTILLEGG)) {
-            return "Autovedtak for Svalbardtillegg er deaktivert"
-        }
-        return kjørBehandling(
+    ): String =
+        kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = SvalbardtilleggData(fagsakId),
             førstegangKjørt = førstegangKjørt,
         )
-    }
 
     private fun kjørBehandling(
         automatiskBehandlingData: AutomatiskBehandlingData,
