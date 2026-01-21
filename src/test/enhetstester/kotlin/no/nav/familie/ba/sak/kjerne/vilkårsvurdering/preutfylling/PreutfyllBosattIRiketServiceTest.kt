@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -581,7 +582,7 @@ class PreutfyllBosattIRiketServiceTest {
                 ?.vilkårResultater
                 ?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET } ?: emptyList()
         val ikkeOppfyltPeriode = vilkårResultat.filter { it.resultat == Resultat.IKKE_OPPFYLT }
-        assertThat(ikkeOppfyltPeriode.size).isEqualTo(1)
+        assertThat(ikkeOppfyltPeriode.size).isEqualTo(2)
 
         val oppfyltPeriode = vilkårResultat.find { it.resultat == Resultat.OPPFYLT }
         assertThat(oppfyltPeriode).`as`("Forventer én OPPFYLT periode").isNotNull
@@ -777,7 +778,7 @@ class PreutfyllBosattIRiketServiceTest {
     }
 
     @Test
-    fun `skal gi begrunnelse oppholdstillatelse dersom det eksisterer 12 måneder permanent opphold samtidig som man har adresse i norge for oppfylt periode`() {
+    fun `skal gi begrunnelse oppholdstillatelse dersom det eksisterer 12 måneder permanent opphold samtidig som man har adresse i norge for oppfylt periode og behandlingsårsak er fødselshendelse`() {
         // Arrange
         val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
         val barnAktør = lagAktør()
@@ -852,7 +853,7 @@ class PreutfyllBosattIRiketServiceTest {
     }
 
     @Test
-    fun `skal ikke gi oppfylt delvilkår dersom det eksisterer opphold samtidig som man har adresse i norge for oppfylt periode`() {
+    fun `skal ikke gi oppfylt delvilkår dersom det eksisterer opphold samtidig som man har adresse i norge for oppfylt periode når behandlingsårsak ikke er fødselshendelse`() {
         // Arrange
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val barnAktør = lagAktør()
@@ -887,7 +888,7 @@ class PreutfyllBosattIRiketServiceTest {
                         it.opphold =
                             mutableListOf(
                                 GrOpphold(
-                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    type = OPPHOLDSTILLATELSE.PERMANENT,
                                     gyldigPeriode =
                                         DatoIntervallEntitet(
                                             fom = LocalDate.now().minusMonths(6),
@@ -912,15 +913,16 @@ class PreutfyllBosattIRiketServiceTest {
         preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
 
         // Assert
-        val vilkårResultat =
+        val søkerBosattIRiketVilkårResultat =
             vilkårsvurdering.personResultater
                 .find { it.aktør == søkerAktør }
                 ?.vilkårResultater
-                ?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET } ?: emptyList()
+                ?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }!!
+                .single()
 
-        assertThat(vilkårResultat).allSatisfy {
-            assertThat(it.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
-        }
+        assertThat(søkerBosattIRiketVilkårResultat.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
+
+        assertThat(søkerBosattIRiketVilkårResultat.evalueringÅrsaker).containsExactly(VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_12_MND.name)
     }
 
     @Test
