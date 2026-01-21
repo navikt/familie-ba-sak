@@ -75,7 +75,7 @@ class PreutfyllLovligOppholdMedLagringIPersongrunnlagService(
                         erNordisk == true -> OppfyltDelvilkår("- Norsk/nordisk statsborgerskap.")
                         erEØSBorgerOgArbeidsforhold == true -> OppfyltDelvilkår("- EØS-borger og har arbeidsforhold i Norge.", begrunnelseForManuellKontroll = INFORMASJON_OM_ARBEIDSFORHOLD)
                         harOppholdstillatelse == true -> OppfyltDelvilkår("- Har gyldig oppholdstillatelse i Norge.", begrunnelseForManuellKontroll = INFORMASJON_OM_OPPHOLDSTILLATELSE)
-                        else -> IkkeOppfyltDelvilkår
+                        else -> IkkeOppfyltDelvilkår()
                     }
                 }.beskjærFraOgMed(fomDatoForBeskjæring)
 

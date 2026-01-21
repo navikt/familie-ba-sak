@@ -8,7 +8,57 @@ on:
         default: false
         type: boolean
 
+# Må ha eget test-oppsett siden ba-sak ikke støtter å kjøre alle testene i en bolk.
 jobs:
+  enhetstest:
+    name: Enhetstest
+    if: ${{ !inputs.skip-tests }}
+    permissions:
+      contents: read
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@main # ratchet:exclude
+    with:
+      profile: 'enhetstest'
+      with-coverage: ${{ github.actor != 'dependabot[bot]' && github.event_name != 'merge_group' && true || false }}
+      coverage-artifact-name: 'enhetstest'
+      coverage-artifact-path: 'target/coverage/enhetstest.xml'
+      java-version: '25'
+    secrets: inherit
+
+  integrasjonstest:
+    name: Integrasjonstest
+    if: ${{ !inputs.skip-tests }}
+    permissions:
+      contents: read
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@main # ratchet:exclude
+    with:
+      profile: 'integrasjonstest'
+      with-coverage: ${{ github.actor != 'dependabot[bot]' && github.event_name != 'merge_group' && true || false }}
+      coverage-artifact-name: 'integrasjonstest'
+      coverage-artifact-path: 'target/coverage/integrasjonstest.xml'
+      java-version: '25'
+    secrets: inherit
+
+  verdikjedetest-feature-toggle-av:
+    name: Verdikjedetester feature toggle av
+    if: ${{ !inputs.skip-tests }}
+    permissions:
+      contents: read
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@main # ratchet:exclude
+    with:
+      profile: 'verdikjedetest-feature-toggle-av'
+      java-version: '25'
+    secrets: inherit
+
+  verdikjedetest-feature-toggle-paa:
+    name: Verdikjedetester feature toggle på
+    if: ${{ !inputs.skip-tests }}
+    permissions:
+      contents: read
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@main # ratchet:exclude
+    with:
+      profile: 'verdikjedetest-feature-toggle-paa'
+      java-version: '25'
+    secrets: inherit
   build:
     name: Build
     permissions:
@@ -19,14 +69,23 @@ jobs:
       build-image: true
       push-image: true
       byosbom: target/classes/META-INF/sbom/application.cdx.json
-      skip-tests: ${{ inputs.skip-tests }}
+      skip-tests: true
       java-version: '25'
     secrets: inherit
   deploy-with-new-image:
     name: Deploy with new image
     permissions:
       id-token: write
-    needs: [build]
+    needs: [build, enhetstest, integrasjonstest, verdikjedetest-feature-toggle-av, verdikjedetest-feature-toggle-paa]
+    if: |
+      always() &&
+      needs.build.result == 'success' &&
+      (inputs.skip-tests || (
+        needs.enhetstest.result == 'success' &&
+        needs.integrasjonstest.result == 'success' &&
+        needs.verdikjedetest-feature-toggle-av.result == 'success' &&
+        needs.verdikjedetest-feature-toggle-paa.result == 'success'
+      ))
     uses: navikt/familie-baks-gha-workflows/.github/workflows/deploy.yaml@main # ratchet:exclude
     with:
       image: ${{ needs.build.outputs.image }}

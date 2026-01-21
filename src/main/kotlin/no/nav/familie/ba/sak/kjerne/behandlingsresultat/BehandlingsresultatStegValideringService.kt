@@ -10,8 +10,6 @@ import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -55,7 +53,6 @@ class BehandlingsresultatStegValideringService(
     private val valutakursRepository: ValutakursRepository,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val clockProvider: ClockProvider,
-    private val featureToggleService: FeatureToggleService,
 ) {
     fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {
         if (behandling.status == BehandlingStatus.AVSLUTTET) return
@@ -154,11 +151,7 @@ class BehandlingsresultatStegValideringService(
                     "Endring av $ytelseTypeFormatert fører også til endring av $motsattTilleggFormatert.\n" +
                     "Endring av $ytelseTypeFormatert og $motsattTilleggFormatert må håndteres manuelt."
 
-            if (featureToggleService.isEnabled(OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
-                throw AutovedtakMåBehandlesManueltFeil(begrunnelse)
-            } else {
-                throw Feil(begrunnelse)
-            }
+            throw AutovedtakMåBehandlesManueltFeil(begrunnelse)
         }
 
         val andelerMedYtelseTypeErInnvilgetInneværendeMånedOgToMånederFramITid =
@@ -175,11 +168,7 @@ class BehandlingsresultatStegValideringService(
                     "Automatisk behandling fører til innvilgelse av $ytelseTypeFormatert mer enn én måned fram i tid.\n" +
                     "Endring av $ytelseTypeFormatert må håndteres manuelt."
 
-            if (featureToggleService.isEnabled(OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
-                throw AutovedtakMåBehandlesManueltFeil(begrunnelse)
-            } else {
-                throw Feil(begrunnelse)
-            }
+            throw AutovedtakMåBehandlesManueltFeil(begrunnelse)
         }
 
         rekjørNesteMånedHvisYtelseTypeErInnvilgetToMånederFramITid(

@@ -3,6 +3,10 @@ name: Deploy kafka topics
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -12,61 +16,51 @@ jobs:
       - name: Deploy bisys-opphoer-av-barnetrygd-topic til dev
         uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-gcp
           RESOURCE: .nais/kafka/bisys-opphoer-av-barnetrygd-dev.yaml
       - name: Deploy bisys-opphoer-av-barnetrygd-topic til prod
         uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-gcp
           RESOURCE: .nais/kafka/bisys-opphoer-av-barnetrygd-prod.yaml
       - name: Deploy dvh-vedtak-topic til dev
         uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-gcp
           RESOURCE: .nais/kafka/dvh-vedtak-topic-dev.yaml
       - name: Deploy aapen-familie-ba-sak-identer-med-barnetrygd til dev
         uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-gcp
           RESOURCE: .nais/kafka/aapen-familie-ba-sak-identer-med-barnetrygd-dev.yaml
       - name: Deploy dvh-vedtak-topic til prod
         uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-gcp
           RESOURCE: .nais/kafka/dvh-vedtak-topic-prod.yaml
       - name: Deploy dvh-saksstatistikk-sak-v1-topic til dev
         uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-gcp
           RESOURCE: .nais/kafka/dvh-saksstatistikk-sak-v1-topic-dev.yaml
       - name: Deploy dvh-saksstatistikk-sak-v1-topic til prod
         uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-gcp
           RESOURCE: .nais/kafka/dvh-saksstatistikk-sak-v1-topic-prod.yaml
       - name: Deploy dvh-sakstatistikk-behandling-v1-topic til dev
         uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-gcp
           RESOURCE: .nais/kafka/dvh-sakstatistikk-behandling-v1-topic-dev.yaml
       - name: Deploy dvh-sakstatistikk-behandling-v1-topic til prod
         uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-gcp
           RESOURCE: .nais/kafka/dvh-sakstatistikk-behandling-v1-topic-prod.yaml
       - name: Deploy aapen-familie-ba-sak-identer-med-barnetrygd til prod
         uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-gcp
           RESOURCE: .nais/kafka/aapen-familie-ba-sak-identer-med-barnetrygd-prod.yaml
 

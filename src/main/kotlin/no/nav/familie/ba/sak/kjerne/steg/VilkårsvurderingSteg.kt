@@ -44,7 +44,6 @@ class VilkårsvurderingSteg(
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
     private val månedligValutajusteringService: MånedligValutajusteringService,
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
-    private val featureToggleService: FeatureToggleService,
     private val opprettTaskService: OpprettTaskService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
@@ -158,7 +157,7 @@ class VilkårsvurderingSteg(
 
         if (behandling.erFinnmarkstillegg()) {
             val skalBehandlesManuelt = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerIFinnmark(vilkårsvurdering, andelerIForrigeBehandling)
-            if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
+            if (skalBehandlesManuelt) {
                 opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(
                     fagsakId = behandling.fagsak.id,
                     beskrivelse = "Finnmarkstillegg kan ikke behandles automatisk som følge av adresseendring. Det finnes perioder der søker er bosatt i Finnmark/Nord-Troms samtidig som et barn med delt barnetrygd ikke er bosatt i Finnmark/Nord-Troms.\nEndring av Finnmarkstillegg må håndteres manuelt.",
@@ -168,7 +167,7 @@ class VilkårsvurderingSteg(
 
         if (behandling.erSvalbardtillegg()) {
             val skalBehandlesManuelt = finnesPerioderDerBarnMedDeltBostedIkkeBorMedSøkerPåSvalbard(vilkårsvurdering, andelerIForrigeBehandling)
-            if (skalBehandlesManuelt && featureToggleService.isEnabled(FeatureToggle.OPPRETT_MANUELL_OPPGAVE_AUTOVEDTAK_FINNMARK_SVALBARD)) {
+            if (skalBehandlesManuelt) {
                 opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(
                     fagsakId = behandling.fagsak.id,
                     beskrivelse = "Svalbardtillegg kan ikke behandles automatisk som følge av adresseendring. Det finnes perioder der søker er bosatt på Svalbard samtidig som et barn med delt barnetrygd ikke er bosatt på Svalbard.\nEndring av Svalbardtillegg må håndteres manuelt.",
