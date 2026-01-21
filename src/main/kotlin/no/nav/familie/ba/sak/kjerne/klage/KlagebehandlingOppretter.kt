@@ -4,10 +4,13 @@ import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.TilpassArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.klage.dto.OpprettKlageDto
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.NavIdent
@@ -27,6 +30,7 @@ class KlagebehandlingOppretter(
     private val integrasjonKlient: IntegrasjonKlient,
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
     private val clockProvider: ClockProvider,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(KlagebehandlingOppretter::class.java)
 
@@ -42,6 +46,10 @@ class KlagebehandlingOppretter(
         fagsak: Fagsak,
         klageMottattDato: LocalDate,
     ): UUID {
+        if (fagsak.type === FagsakType.INSTITUSJON && !featureToggleService.isEnabled(FeatureToggle.SKAL_KUNNE_BEHANDLE_BA_INSTITUSJONSFAGSAKER_I_KLAGE)) {
+            throw FunksjonellFeil("Oppretting av klagebehandlinger for institusjonsfagsaker er ikke implementert.")
+        }
+
         if (klageMottattDato.isAfter(LocalDate.now(clockProvider.get()))) {
             throw FunksjonellFeil("Kan ikke opprette klage med krav mottatt frem i tid.")
         }
