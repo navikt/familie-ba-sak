@@ -17,11 +17,6 @@ Egenskap: Finnmarkstillegg autovedtak
       | 1            | 1       | SØKER      | 01.01.2000  |
       | 1            | 2       | BARN       | 01.01.2025  |
 
-    Og med følgende feature toggles
-      | BehandlingId | FeatureToggleId                                                     | Er togglet på |
-      | 2            | familie-ba-sak.skal-bruke-adressehendelseloype-for-finnmarkstillegg | Ja            |
-
-
   Scenario: Skal oppdatere vilkårresultater og generere andeler når autovedtak finnmarkstillegg kjøres
     Og dagens dato er 01.09.2025
 
