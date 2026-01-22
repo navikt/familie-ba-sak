@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.HENT_ARBEIDSFORDELING_FOR_AUTOMATISK_BEHANDLING_ETTER_PORTEFØLJEJUSTERING
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
@@ -10,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlien
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.MIDLERTIDIG_ENHET
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.STEINKJER
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåB
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.tilArbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
@@ -270,73 +271,110 @@ class ArbeidsfordelingService(
             ?: throw Feil("Finner ikke tilknyttet arbeidsfordeling på behandling med id $behandlingId")
 
     fun hentArbeidsfordelingsenhet(behandling: Behandling): Arbeidsfordelingsenhet {
-        val søker =
-            identMedAdressebeskyttelse(
-                aktør = behandling.fagsak.aktør,
-                personType = PersonType.SØKER,
-            )
+        val søkerIdent = behandling.fagsak.aktør.aktivFødselsnummer()
 
-        val personIdentMedAdresseBeskyttelseListe =
+        val arbeidsfordelingPersoner: Map<String, ArbeidsfordelingPerson> =
             personopplysningGrunnlagRepository
                 .finnSøkerOgBarnAktørerTilAktiv(behandling.id)
                 .barn()
-                .mapNotNull {
-                    try {
-                        identMedAdressebeskyttelse(it.aktør, personType = PersonType.BARN)
-                    } catch (e: PdlPersonKanIkkeBehandlesIFagsystem) {
-                        logger.warn("Ignorerer barn fra hentArbeidsfordelingsenhet for behandling ${behandling.id} : ${e.årsak}")
-                        secureLogger.warn("Ignorerer barn ${it.aktør.aktivFødselsnummer()} hentArbeidsfordelingsenhet for behandling ${behandling.id}: ${e.årsak}")
-                        null
-                    }
-                }.plus(søker)
+                .associate {
+                    it.aktør.aktivFødselsnummer() to arbeidsfordelingPerson(it.aktør, PersonType.BARN)
+                }.plus(
+                    søkerIdent to arbeidsfordelingPerson(behandling.fagsak.aktør, PersonType.SØKER),
+                )
 
-        val identMedStrengeste = finnPersonMedStrengesteAdressebeskyttelse(personIdentMedAdresseBeskyttelseListe)
+        return hentArbeidsfordelingForPersoner(
+            fagsak = behandling.fagsak,
+            arbeidsfordelingPersoner = arbeidsfordelingPersoner,
+            behandlingType = behandling.kategori.tilOppgavebehandlingType(),
+        )
+    }
 
-        return integrasjonKlient.hentBehandlendeEnhet(identMedStrengeste ?: søker.ident, behandling.kategori.tilOppgavebehandlingType()).singleOrNull()
-            ?: throw Feil(message = "Fant flere eller ingen enheter på behandling.")
+    private fun arbeidsfordelingPerson(
+        aktør: Aktør,
+        personType: PersonType,
+    ): ArbeidsfordelingPerson {
+        val pdlPersonInfo = personopplysningerService.hentPdlPersonInfoEnkel(aktør)
+        return ArbeidsfordelingPerson(
+            pdlPersonInfo,
+            IdentMedAdressebeskyttelse(
+                ident = aktør.aktivFødselsnummer(),
+                adressebeskyttelsegradering =
+                    pdlPersonInfo
+                        .personInfoBase()
+                        .adressebeskyttelseGradering,
+                personType = personType,
+            ),
+        )
     }
 
     fun hentArbeidsfordelingsenhetPåIdenter(
-        søkerIdent: String,
+        fagsak: Fagsak,
         barnIdenter: List<String>,
         behandlingstype: Behandlingstype?,
     ): Arbeidsfordelingsenhet {
-        val identMedStrengeste =
-            finnPersonMedStrengesteAdressebeskyttelse(
-                barnIdenter.map { identMedAdressebeskyttelse(it, personType = PersonType.BARN) } +
-                    identMedAdressebeskyttelse(søkerIdent, personType = PersonType.SØKER),
+        val søkerIdent = fagsak.aktør.aktivFødselsnummer()
+
+        val arbeidsfordelingPersoner: Map<String, ArbeidsfordelingPerson> =
+            mapOf(
+                søkerIdent to
+                    arbeidsfordelingPerson(
+                        aktør = personidentService.hentAktør(søkerIdent),
+                        personType = PersonType.SØKER,
+                    ),
+            ).plus(
+                barnIdenter.associateWith {
+                    arbeidsfordelingPerson(
+                        aktør = personidentService.hentAktør(it),
+                        personType = PersonType.BARN,
+                    )
+                },
             )
 
-        return integrasjonKlient.hentBehandlendeEnhet(identMedStrengeste ?: søkerIdent, behandlingstype).singleOrNull()
-            ?: throw Feil(message = "Fant flere eller ingen enheter på behandling.")
+        return hentArbeidsfordelingForPersoner(
+            fagsak = fagsak,
+            arbeidsfordelingPersoner = arbeidsfordelingPersoner,
+            behandlingType = behandlingstype,
+        )
     }
 
-    private fun identMedAdressebeskyttelse(
-        ident: String,
-        personType: PersonType,
-    ) = IdentMedAdressebeskyttelse(
-        ident = ident,
-        adressebeskyttelsegradering =
-            personopplysningerService
-                .hentPersoninfoEnkel(
-                    personidentService.hentAktør(ident),
-                ).adressebeskyttelseGradering,
-        personType = personType,
-    )
+    fun hentArbeidsfordelingForPersoner(
+        fagsak: Fagsak,
+        arbeidsfordelingPersoner: Map<String, ArbeidsfordelingPerson>,
+        behandlingType: Behandlingstype?,
+    ): Arbeidsfordelingsenhet {
+        val søkerIdent = fagsak.aktør.aktivFødselsnummer()
 
-    private fun identMedAdressebeskyttelse(
-        aktør: Aktør,
-        personType: PersonType,
-    ) = IdentMedAdressebeskyttelse(
-        ident = aktør.aktivFødselsnummer(),
-        adressebeskyttelsegradering = personopplysningerService.hentPersoninfoEnkel(aktør).adressebeskyttelseGradering,
-        personType = personType,
-    )
+        val identMedStrengesteAdressebeskyttelse =
+            finnPersonMedStrengesteAdressebeskyttelse(
+                arbeidsfordelingPersoner.values.map { it.identMedAdressebeskyttelse },
+            ) ?: søkerIdent
+
+        val (pdlPersonInfoMedStrengesteAdressebeskyttelse, _) = arbeidsfordelingPersoner[identMedStrengesteAdressebeskyttelse] ?: throw Feil("Ident med strengeste adressebeskyttelse matcher ingen av personene i behandlingen")
+
+        return when (pdlPersonInfoMedStrengesteAdressebeskyttelse) {
+            is PdlPersonInfo.Person -> {
+                integrasjonKlient.hentBehandlendeEnhet(identMedStrengesteAdressebeskyttelse, behandlingType).singleOrNull()
+                    ?: throw Feil(message = "Fant flere eller ingen enheter på behandling.")
+            }
+
+            is PdlPersonInfo.FalskPerson -> {
+                // Dersom ident med strengeste adressebeskyttelse er falsk, henter vi siste gyldige arbeidsfordeling for fagsak og bruker den
+                val sisteGyldigeArbeidsfordelingForFagsak = arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(fagsak.id) ?: throw Feil(message = "Kan ikke arbeidsfordele behandling for falsk identitet i fagsak uten tidligere behandling")
+                Arbeidsfordelingsenhet(enhetId = sisteGyldigeArbeidsfordelingForFagsak.behandlendeEnhetId, enhetNavn = sisteGyldigeArbeidsfordelingForFagsak.behandlendeEnhetNavn)
+            }
+        }
+    }
 
     data class IdentMedAdressebeskyttelse(
         val ident: String,
         val adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING?,
         val personType: PersonType,
+    )
+
+    data class ArbeidsfordelingPerson(
+        val pdlPersonInfo: PdlPersonInfo,
+        val identMedAdressebeskyttelse: IdentMedAdressebeskyttelse,
     )
 
     companion object {
