@@ -80,6 +80,7 @@ class KlagebehandlingOppretter(
         return klageKlient.opprettKlage(
             OpprettKlagebehandlingRequest(
                 ident = fødselsnummer,
+                orgNummer = utledOrgNummer(fagsak),
                 stønadstype = Stønadstype.BARNETRYGD,
                 eksternFagsakId = fagsak.id.toString(),
                 fagsystem = Fagsystem.BA,
@@ -89,4 +90,16 @@ class KlagebehandlingOppretter(
             ),
         )
     }
+
+    private fun utledOrgNummer(fagsak: Fagsak): String? =
+        if (fagsak.type === FagsakType.INSTITUSJON) {
+            val institusjon = fagsak.institusjon
+            if (institusjon == null) {
+                logger.error("Fant ikke institusjon for fagsak ${fagsak.id} med type ${fagsak.type}.")
+                throw Feil("Fant ikke forventet institusjon på fagsak ${fagsak.id}.")
+            }
+            institusjon.orgNummer
+        } else {
+            null
+        }
 }
