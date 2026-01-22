@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.falskidentitet
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAktør
@@ -15,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIde
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 class FalskIdentitetServiceTest {
@@ -102,6 +104,37 @@ class FalskIdentitetServiceTest {
 
             // Assert
             assertThat(falskIdentitet).isNull()
+        }
+    }
+
+    @Nested
+    inner class HentPersonForFalskIdentitet {
+        @Test
+        fun `skal returnere aktiv Person fra forrige behandling når den finnes`() {
+            // Arrange
+            val person = lagPerson()
+
+            every { personRepository.findByAktør(person.aktør) } returns listOf(person)
+
+            // Act
+            val personForFalskIdentitet = falskIdentitetService.hentPersonForFalskIdentitet(person.aktør)
+
+            // Assert
+            assertThat(personForFalskIdentitet).isEqualTo(person)
+        }
+
+        @Test
+        fun `skal kaste feil dersom forrige behandling ikke finnes`() {
+            // Arrange
+            val person = lagPerson()
+
+            every { personRepository.findByAktør(person.aktør) } returns emptyList()
+
+            // Act
+            val funksjonellFeil = assertThrows<FunksjonellFeil> { falskIdentitetService.hentPersonForFalskIdentitet(person.aktør) }
+
+            // Assert
+            assertThat(funksjonellFeil.melding).isEqualTo("Kan ikke behandle falsk identitet uten personopplysninger fra tidligere behandlinger i ba-sak for aktør ${person.aktør.aktivFødselsnummer()}")
         }
     }
 }
