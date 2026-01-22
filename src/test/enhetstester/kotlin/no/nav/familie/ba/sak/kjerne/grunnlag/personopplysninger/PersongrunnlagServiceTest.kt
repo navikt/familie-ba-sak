@@ -20,12 +20,14 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -49,6 +51,7 @@ class PersongrunnlagServiceTest {
     private val kodeverkService = mockk<KodeverkService>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val falskIdentitetService = mockk<FalskIdentitetService>()
 
     private val persongrunnlagService =
         spyk(
@@ -66,6 +69,7 @@ class PersongrunnlagServiceTest {
                 vilkårsvurderingService = vilkårsvurderingService,
                 kodeverkService = kodeverkService,
                 featureToggleService = featureToggleService,
+                falskIdentitetService = falskIdentitetService,
             ),
         )
 
@@ -155,8 +159,8 @@ class PersongrunnlagServiceTest {
                 every { personopplysningerService.hentPersoninfoEnkel(barnet.aktør) } returns PersonInfo(barnet.fødselsdato)
 
                 every {
-                    personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnet.aktør)
-                } returns PersonInfo(barnet.fødselsdato, barnet.navn, barnet.kjønn)
+                    personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(barnet.aktør)
+                } returns PdlPersonInfo.Person(PersonInfo(barnet.fødselsdato, barnet.navn, barnet.kjønn))
 
                 every { personopplysningGrunnlagRepository.save(nyttGrunnlag) } returns nyttGrunnlag
 
@@ -293,14 +297,14 @@ class PersongrunnlagServiceTest {
             every { personopplysningerService.hentPersoninfoEnkel(yngsteBarnInneværendeBehandling.aktør) } returns PersonInfo(yngsteBarnInneværendeBehandling.fødselsdato)
             every { personopplysningerService.hentPersoninfoEnkel(mellomBarnForrigeBehandling.aktør) } returns PersonInfo(mellomBarnForrigeBehandling.fødselsdato)
 
-            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns
-                PersonInfo(søker.fødselsdato)
-            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eldsteBarnInneværendeBehandling.aktør) } returns
-                PersonInfo(eldsteBarnInneværendeBehandling.fødselsdato)
-            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(yngsteBarnInneværendeBehandling.aktør) } returns
-                PersonInfo(yngsteBarnInneværendeBehandling.fødselsdato)
-            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(mellomBarnForrigeBehandling.aktør) } returns
-                PersonInfo(mellomBarnForrigeBehandling.fødselsdato)
+            every { personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns
+                PdlPersonInfo.Person(PersonInfo(søker.fødselsdato))
+            every { personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(eldsteBarnInneværendeBehandling.aktør) } returns
+                PdlPersonInfo.Person(PersonInfo(eldsteBarnInneværendeBehandling.fødselsdato))
+            every { personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(yngsteBarnInneværendeBehandling.aktør) } returns
+                PdlPersonInfo.Person(PersonInfo(yngsteBarnInneværendeBehandling.fødselsdato))
+            every { personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(mellomBarnForrigeBehandling.aktør) } returns
+                PdlPersonInfo.Person(PersonInfo(mellomBarnForrigeBehandling.fødselsdato))
 
             every { personopplysningGrunnlagRepository.save(nyttGrunnlag) } returns nyttGrunnlag
             every { featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
@@ -348,14 +352,14 @@ class PersongrunnlagServiceTest {
             every { personopplysningerService.hentPersoninfoEnkel(yngsteBarnForrigeBehandling.aktør) } returns PersonInfo(yngsteBarnForrigeBehandling.fødselsdato)
             every { personopplysningerService.hentPersoninfoEnkel(mellomBarnInneværendeBehandling.aktør) } returns PersonInfo(mellomBarnInneværendeBehandling.fødselsdato)
 
-            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns
-                PersonInfo(søker.fødselsdato)
-            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eldsteBarnForrigeBehandling.aktør) } returns
-                PersonInfo(eldsteBarnForrigeBehandling.fødselsdato)
-            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(yngsteBarnForrigeBehandling.aktør) } returns
-                PersonInfo(yngsteBarnForrigeBehandling.fødselsdato)
-            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(mellomBarnInneværendeBehandling.aktør) } returns
-                PersonInfo(mellomBarnInneværendeBehandling.fødselsdato)
+            every { personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns
+                PdlPersonInfo.Person(PersonInfo(søker.fødselsdato))
+            every { personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(eldsteBarnForrigeBehandling.aktør) } returns
+                PdlPersonInfo.Person(PersonInfo(eldsteBarnForrigeBehandling.fødselsdato))
+            every { personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(yngsteBarnForrigeBehandling.aktør) } returns
+                PdlPersonInfo.Person(PersonInfo(yngsteBarnForrigeBehandling.fødselsdato))
+            every { personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(mellomBarnInneværendeBehandling.aktør) } returns
+                PdlPersonInfo.Person(PersonInfo(mellomBarnInneværendeBehandling.fødselsdato))
 
             every { personopplysningGrunnlagRepository.save(nyttGrunnlag) } returns nyttGrunnlag
 
@@ -420,15 +424,17 @@ class PersongrunnlagServiceTest {
                     vegadresse = lagVegadresse(),
                 )
 
-            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns
-                PersonInfo(
-                    fødselsdato = søker.fødselsdato,
-                    bostedsadresser = listOf(adresseFørEldsteBarn, adresseOverlapperEldsteBarn, adresseEtterEldsteBarn),
+            every { personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns
+                PdlPersonInfo.Person(
+                    PersonInfo(
+                        fødselsdato = søker.fødselsdato,
+                        bostedsadresser = listOf(adresseFørEldsteBarn, adresseOverlapperEldsteBarn, adresseEtterEldsteBarn),
+                    ),
                 )
-            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eldsteBarn.aktør) } returns
-                PersonInfo(eldsteBarn.fødselsdato)
-            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(yngreBarn.aktør) } returns
-                PersonInfo(yngreBarn.fødselsdato)
+            every { personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(eldsteBarn.aktør) } returns
+                PdlPersonInfo.Person(PersonInfo(eldsteBarn.fødselsdato))
+            every { personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(yngreBarn.aktør) } returns
+                PdlPersonInfo.Person(PersonInfo(yngreBarn.fødselsdato))
 
             every { personopplysningGrunnlagRepository.save(nyttGrunnlag) } returns nyttGrunnlag
             every { kodeverkService.hentPoststed(any()) } returns "Oslo"
