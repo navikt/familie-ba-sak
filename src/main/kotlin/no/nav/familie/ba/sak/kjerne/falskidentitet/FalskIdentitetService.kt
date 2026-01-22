@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.falskidentitet
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FalskIdentitetPersonInfo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -41,6 +43,11 @@ class FalskIdentitetService(
         } else {
             return null
         }
+    }
+
+    fun hentPersonForFalskIdentitet(aktør: Aktør): Person {
+        val personer = personRepository.findByAktør(aktør)
+        return personer.firstOrNull { it.personopplysningGrunnlag.aktiv } ?: personer.firstOrNull() ?: throw FunksjonellFeil("Kan ikke behandle falsk identitet uten personopplysninger fra tidligere behandlinger i ba-sak for aktør ${aktør.aktivFødselsnummer()}")
     }
 
     companion object {

@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -24,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.SKJERMET_BARN
+import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortBostedsadresserFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortDeltBostedForSøker
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortIkkeRelevanteSivilstander
@@ -69,6 +71,7 @@ class PersongrunnlagService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val kodeverkService: KodeverkService,
     private val featureToggleService: FeatureToggleService,
+    private val falskIdentitetService: FalskIdentitetService,
 ) {
     fun mapTilPersonDtoMedStatsborgerskapLand(
         person: Person,
@@ -328,11 +331,11 @@ class PersongrunnlagService(
         hentArbeidsforhold: Boolean = false,
         eldsteBarnsFødselsdato: LocalDate,
     ): Person {
-        val personinfo =
+        val pdlPersonInfo =
             if (skalHenteEnkelPersonInfo) {
-                personopplysningerService.hentPersoninfoEnkel(aktør)
+                personopplysningerService.hentPdlPersonInfoEnkel(aktør)
             } else {
-                personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+                personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
             }
 
         val filtrerAdresser = featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
@@ -340,92 +343,101 @@ class PersongrunnlagService(
         val filtrerOpphold = featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO)
         val filtrerSivilstand = featureToggleService.isEnabled(FeatureToggle.FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
 
-        return Person(
-            type = personType,
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            fødselsdato = personinfo.fødselsdato,
-            aktør = aktør,
-            navn = personinfo.navn ?: "",
-            kjønn = personinfo.kjønn,
-            målform = målform,
-        ).also { person ->
-            person.opphold =
-                personinfo.opphold
-                    ?.filtrerBortOppholdFørEldsteBarn(eldsteBarnsFødselsdato, filtrerOpphold)
-                    ?.map { GrOpphold.fraOpphold(it, person) }
-                    ?.toMutableList() ?: mutableListOf()
-            person.bostedsadresser =
-                personinfo.bostedsadresser
-                    .filtrerUtKunNorskeBostedsadresser()
-                    .filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
-                    .map {
-                        GrBostedsadresse.fraBostedsadresse(
-                            bostedsadresse = it,
-                            person = person,
-                            poststed = it.poststed(),
-                        )
-                    }.toMutableList()
-            person.oppholdsadresser =
-                personinfo.oppholdsadresser
-                    .filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
-                    .map {
-                        GrOppholdsadresse.fraOppholdsadresse(
-                            oppholdsadresse = it,
-                            person = person,
-                            poststed = it.poststed(),
-                        )
-                    }.toMutableList()
-            person.deltBosted =
-                personinfo.deltBosted
-                    .filtrerBortDeltBostedForSøker(person.type, filtrerAdresser)
-                    .map {
-                        GrDeltBosted.fraDeltBosted(
-                            deltBosted = it,
-                            person = person,
-                            poststed = it.poststed(),
-                        )
-                    }.toMutableList()
-            person.sivilstander =
-                personinfo.sivilstander
-                    .filtrerBortIkkeRelevanteSivilstander(filtrerSivilstand, behandlingKategori, behandlingUnderkategori, personType)
-                    .map { GrSivilstand.fraSivilstand(it, person) }
-                    .toMutableList()
-            person.statsborgerskap =
-                personinfo.statsborgerskap
-                    ?.filtrerBortStatsborgerskapFørEldsteBarn(eldsteBarnsFødselsdato, filtrerStatsborgerskap)
-                    ?.flatMap {
-                        statsborgerskapService.hentStatsborgerskapMedMedlemskap(
-                            statsborgerskap = it,
-                            person = person,
-                        )
-                    }?.sortedBy { it.gyldigPeriode?.fom }
-                    ?.toMutableList() ?: mutableListOf()
-            person.dødsfall =
-                lagDødsfallFraPdl(
-                    person = person,
-                    dødsfallDatoFraPdl = personinfo.dødsfall?.dødsdato,
-                    dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo?.adresse,
-                )
+        return when (pdlPersonInfo) {
+            is PdlPersonInfo.FalskPerson -> {
+                // Kopierer personopplysninger for falsk identitet fra aktiv Person fra tidligere behandling for aktør
+                falskIdentitetService.hentPersonForFalskIdentitet(aktør).tilKopiForNyttPersonopplysningGrunnlag(personopplysningGrunnlag)
+            }
 
-            if (featureToggleService.isEnabled(FeatureToggle.ARBEIDSFORHOLD_STRENGERE_NEDHENTING)) {
-                val personErSøker = person.type == PersonType.SØKER
-                val harStatsborgerskapIEØS = person.statsborgerskap.any { it.medlemskap == Medlemskap.EØS }
-                if (personErSøker && harStatsborgerskapIEØS) {
-                    val arbeidsforholdForPerson =
-                        arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
-                            statsborgerskap = person.statsborgerskap,
+            is PdlPersonInfo.Person -> {
+                Person(
+                    type = personType,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fødselsdato = pdlPersonInfo.personInfo.fødselsdato,
+                    aktør = aktør,
+                    navn = pdlPersonInfo.personInfo.navn ?: "",
+                    kjønn = pdlPersonInfo.personInfo.kjønn,
+                    målform = målform,
+                ).also { person ->
+                    person.opphold =
+                        pdlPersonInfo.personInfo.opphold
+                            ?.filtrerBortOppholdFørEldsteBarn(eldsteBarnsFødselsdato, filtrerOpphold)
+                            ?.map { GrOpphold.fraOpphold(it, person) }
+                            ?.toMutableList() ?: mutableListOf()
+                    person.bostedsadresser =
+                        pdlPersonInfo.personInfo.bostedsadresser
+                            .filtrerUtKunNorskeBostedsadresser()
+                            .filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
+                            .map {
+                                GrBostedsadresse.fraBostedsadresse(
+                                    bostedsadresse = it,
+                                    person = person,
+                                    poststed = it.poststed(),
+                                )
+                            }.toMutableList()
+                    person.oppholdsadresser =
+                        pdlPersonInfo.personInfo.oppholdsadresser
+                            .filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
+                            .map {
+                                GrOppholdsadresse.fraOppholdsadresse(
+                                    oppholdsadresse = it,
+                                    person = person,
+                                    poststed = it.poststed(),
+                                )
+                            }.toMutableList()
+                    person.deltBosted =
+                        pdlPersonInfo.personInfo.deltBosted
+                            .filtrerBortDeltBostedForSøker(person.type, filtrerAdresser)
+                            .map {
+                                GrDeltBosted.fraDeltBosted(
+                                    deltBosted = it,
+                                    person = person,
+                                    poststed = it.poststed(),
+                                )
+                            }.toMutableList()
+                    person.sivilstander =
+                        pdlPersonInfo.personInfo.sivilstander
+                            .filtrerBortIkkeRelevanteSivilstander(filtrerSivilstand, behandlingKategori, behandlingUnderkategori, personType)
+                            .map { GrSivilstand.fraSivilstand(it, person) }
+                            .toMutableList()
+                    person.statsborgerskap =
+                        pdlPersonInfo.personInfo.statsborgerskap
+                            ?.filtrerBortStatsborgerskapFørEldsteBarn(eldsteBarnsFødselsdato, filtrerStatsborgerskap)
+                            ?.flatMap {
+                                statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+                                    statsborgerskap = it,
+                                    person = person,
+                                )
+                            }?.sortedBy { it.gyldigPeriode?.fom }
+                            ?.toMutableList() ?: mutableListOf()
+                    person.dødsfall =
+                        lagDødsfallFraPdl(
                             person = person,
-                            cutOffFomDato = eldsteBarnsFødselsdato,
+                            dødsfallDatoFraPdl = pdlPersonInfo.personInfo.dødsfall?.dødsdato,
+                            dødsfallAdresseFraPdl = pdlPersonInfo.personInfo.kontaktinformasjonForDoedsbo?.adresse,
                         )
-                    person.arbeidsforhold = arbeidsforholdForPerson.toMutableList()
-                }
-            } else {
-                if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
-                    person.arbeidsforhold =
-                        arbeidsforholdService
-                            .hentArbeidsforhold(
-                                person = person,
-                            ).toMutableList()
+
+                    if (featureToggleService.isEnabled(FeatureToggle.ARBEIDSFORHOLD_STRENGERE_NEDHENTING)) {
+                        val personErSøker = person.type == PersonType.SØKER
+                        val harStatsborgerskapIEØS = person.statsborgerskap.any { it.medlemskap == Medlemskap.EØS }
+                        if (personErSøker && harStatsborgerskapIEØS) {
+                            val arbeidsforholdForPerson =
+                                arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
+                                    statsborgerskap = person.statsborgerskap,
+                                    person = person,
+                                    cutOffFomDato = eldsteBarnsFødselsdato,
+                                )
+                            person.arbeidsforhold = arbeidsforholdForPerson.toMutableList()
+                        }
+                    } else {
+                        if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
+                            person.arbeidsforhold =
+                                arbeidsforholdService
+                                    .hentArbeidsforhold(
+                                        person = person,
+                                    ).toMutableList()
+                        }
+                    }
                 }
             }
         }
