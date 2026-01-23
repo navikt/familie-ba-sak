@@ -44,8 +44,6 @@ enum class FeatureToggle(
     // Toggle for å kunne skru av tungtkjørende statistikk for grafana når man f.eks. kjører autovedtak som satsendring/finnmarkstillegg
     TUNGTKJØRENDE_GRAFANA_STATISTIKK("familie-ba-sak.generer-grafana-statistikk"),
 
-    JOURNALFOER_MANUELT_BREV_I_TASK("familie-ba-sak.journalfoer-manuelt-brev-i-task"),
-
     FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO("familie-ba-sak.filtrer-adresse-for-soker-paa-eldste-barns-fodselsdato"),
 
     FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO("familie-ba-sak.filtrer-statsborgerskap-paa-eldste-barns-fodselsdato"),
