@@ -214,7 +214,7 @@ class VilkårsvurderingForNyBehandlingService(
                         ?.map { it.aktør } ?: emptyList(),
             )
 
-        if (!behandling.skalBehandlesAutomatisk) {
+        if (!behandling.skalBehandlesAutomatisk && !behandling.erTekniskEndring()) {
             preutfyllVilkårService.preutfyllVilkår(vilkårsvurdering = initiellVilkårsvurdering)
         } else if (behandling.opprettetÅrsak == FØDSELSHENDELSE && featureToggleService.isEnabled(SKAL_PREUTFYLLE_BOSATT_I_RIKET_I_FØDSELSHENDELSER)) {
             val identerVilkårSkalPreutfyllesFor =
