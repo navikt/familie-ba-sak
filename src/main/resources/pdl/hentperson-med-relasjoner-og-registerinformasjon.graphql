@@ -1,5 +1,5 @@
 query($ident: ID!) {person: hentPerson(ident: $ident) {
-    folkeregisteridentifikator {
+    folkeregisteridentifikator(historikk: true) {
         identifikasjonsnummer
         status
         type
