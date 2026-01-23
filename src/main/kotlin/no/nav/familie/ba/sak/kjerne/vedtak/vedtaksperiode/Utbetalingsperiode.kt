@@ -96,7 +96,7 @@ fun Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagUtbetalingsperiodeD
                 ?: throw Feil("Fant ikke personopplysningsgrunnlag for andel")
 
         UtbetalingsperiodeDetalj(
-            person = personForAndel.tilPersonDto(eldsteBarnsFødselsdato = personopplysningGrunnlag.eldsteBarnSinFødselsdato)),
+            person = personForAndel.tilPersonDto(eldsteBarnsFødselsdato = personopplysningGrunnlag.eldsteBarnSinFødselsdato),
             ytelseType = andel.type,
             utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp,
             erPåvirketAvEndring = andel.endreteUtbetalinger.isNotEmpty(),
