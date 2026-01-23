@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.HENT_ARBEIDSFORDELING_FOR_AUTOMATISK_BEHANDLING_ETTER_PORTEFØLJEJUSTERING
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -86,40 +85,6 @@ class ArbeidsfordelingService(
                 melding = "Fra og med 5. januar 2026 er det ikke lenger å mulig å endre behandlende enhet til Steinkjer.",
             )
         }
-    }
-
-    @Transactional
-    fun oppdaterBehandlendeEnhetPåBehandlingIForbindelseMedPorteføljejustering(
-        behandling: Behandling,
-        nyEnhetId: String,
-    ) {
-        val aktivArbeidsfordelingPåBehandling = arbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(behandling.id)
-
-        if (nyEnhetId == aktivArbeidsfordelingPåBehandling.behandlendeEnhetId) return
-
-        val forrigeArbeidsfordelingsenhet =
-            Arbeidsfordelingsenhet(
-                enhetId = aktivArbeidsfordelingPåBehandling.behandlendeEnhetId,
-                enhetNavn = aktivArbeidsfordelingPåBehandling.behandlendeEnhetNavn,
-            )
-
-        val oppdatertArbeidsfordelingPåBehandling =
-            arbeidsfordelingPåBehandlingRepository.save(
-                aktivArbeidsfordelingPåBehandling.copy(
-                    behandlendeEnhetId = nyEnhetId,
-                    behandlendeEnhetNavn = BarnetrygdEnhet.fraEnhetsnummer(nyEnhetId).enhetsnavn,
-                ),
-            )
-
-        loggService.opprettBehandlendeEnhetEndret(
-            behandling = behandling,
-            fraEnhet = forrigeArbeidsfordelingsenhet,
-            tilEnhet = oppdatertArbeidsfordelingPåBehandling,
-            manuellOppdatering = false,
-            begrunnelse = "Porteføljejustering",
-        )
-
-        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id)
     }
 
     fun fastsettBehandlendeEnhet(
@@ -205,35 +170,23 @@ class ArbeidsfordelingService(
         val sisteGyldigeArbeidsfordeling = arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(behandling.fagsak.id)
 
         val skalHenteArbeidsfordelingsenhet =
-            featureToggleService.isEnabled(HENT_ARBEIDSFORDELING_FOR_AUTOMATISK_BEHANDLING_ETTER_PORTEFØLJEJUSTERING) && (
-                sisteGyldigeArbeidsfordeling == null ||
-                    sisteGyldigeArbeidsfordeling.behandlendeEnhetId == MIDLERTIDIG_ENHET.enhetsnummer ||
-                    sisteGyldigeArbeidsfordeling.behandlendeEnhetId == STEINKJER.enhetsnummer
-            )
+            sisteGyldigeArbeidsfordeling == null ||
+                sisteGyldigeArbeidsfordeling.behandlendeEnhetId == MIDLERTIDIG_ENHET.enhetsnummer ||
+                sisteGyldigeArbeidsfordeling.behandlendeEnhetId == STEINKJER.enhetsnummer
 
         val arbeidsfordelingPåBehandling =
             if (skalHenteArbeidsfordelingsenhet) {
                 val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
-                if (arbeidsfordelingsenhet.enhetId == STEINKJER.enhetsnummer) {
-                    throw Feil("Kan ikke sette behandlende enhet til '${STEINKJER.enhetsnavn}' etter porteføljejustering.")
-                }
-
                 ArbeidsfordelingPåBehandling(
                     behandlingId = behandling.id,
                     behandlendeEnhetId = arbeidsfordelingsenhet.enhetId,
                     behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn,
                 )
             } else {
-                sisteGyldigeArbeidsfordeling?.copy(
+                sisteGyldigeArbeidsfordeling.copy(
                     id = 0,
                     behandlingId = behandling.id,
                 )
-                    // Dette kan slettes når toggle fjernes
-                    ?: ArbeidsfordelingPåBehandling(
-                        behandlingId = behandling.id,
-                        behandlendeEnhetId = MIDLERTIDIG_ENHET.enhetsnummer,
-                        behandlendeEnhetNavn = MIDLERTIDIG_ENHET.enhetsnavn,
-                    )
             }
 
         return arbeidsfordelingPåBehandlingRepository.save(arbeidsfordelingPåBehandling)
