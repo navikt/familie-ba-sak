@@ -40,8 +40,6 @@ enum class FeatureToggle(
     // NAV-25256
     SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN("familie-ba-sak.skjermet-barn"),
 
-    SKAL_PREUTFYLLE_BOSATT_I_RIKET_I_FØDSELSHENDELSER("familie-ba-sak.skal-preutfylle-bosatt-i-riket-i-foedselshendelse"),
-
     VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR("familie-ba-sak.valider-endring-av-preutfylte-vilkaar"),
 
     // Toggle for å kunne skru av tungtkjørende statistikk for grafana når man f.eks. kjører autovedtak som satsendring/finnmarkstillegg
