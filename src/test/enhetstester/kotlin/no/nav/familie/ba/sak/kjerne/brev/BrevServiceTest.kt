@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -48,6 +49,7 @@ class BrevServiceTest {
     val mockAvregningService = mockk<AvregningService>()
 
     val clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(LocalDate.of(2025, 12, 1))
+    val mockedFeatureToggleServie = mockFeatureToggleService()
     val brevService =
         BrevService(
             totrinnskontrollService = mockTotrinnskontrollService,
@@ -71,6 +73,7 @@ class BrevServiceTest {
             avregningService = mockAvregningService,
             behandlingHentOgPersisterService = mockk(),
             clockProvider = clockProvider,
+            featureToggle = mockedFeatureToggleServie,
         )
 
     @BeforeEach

@@ -17,6 +17,7 @@ data class UtenlandskPeriodebeløpDto(
     val valutakode: String?,
     val intervall: Intervall?,
     val kalkulertMånedligBeløp: BigDecimal?,
+    val utbetalingsland: String?,
     override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT,
 ) : AbstractUtfyltStatus<UtenlandskPeriodebeløpDto>() {
     override fun medUtfyltStatus(): UtenlandskPeriodebeløpDto =
@@ -39,7 +40,7 @@ fun UtenlandskPeriodebeløpDto.tilUtenlandskPeriodebeløp(
     beløp = this.beløp,
     valutakode = this.valutakode,
     intervall = this.intervall,
-    utbetalingsland = eksisterendeUtenlandskPeriodebeløp.utbetalingsland,
+    utbetalingsland = utbetalingsland ?: eksisterendeUtenlandskPeriodebeløp.utbetalingsland,
     kalkulertMånedligBeløp = this.tilKalkulertMånedligBeløp(),
 )
 
@@ -69,4 +70,5 @@ fun UtenlandskPeriodebeløp.tilUtenlandskPeriodebeløpDto() =
         valutakode = this.valutakode,
         intervall = this.intervall,
         kalkulertMånedligBeløp = this.kalkulertMånedligBeløp,
+        utbetalingsland = this.utbetalingsland,
     ).medUtfyltStatus()
