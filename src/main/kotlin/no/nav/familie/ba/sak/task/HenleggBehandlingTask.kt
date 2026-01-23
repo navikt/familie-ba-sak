@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -72,6 +73,7 @@ class HenleggBehandlingTask(
     }
 }
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class HenleggBehandlingTaskDTO(
     val behandlingId: Long,
     val årsak: HenleggÅrsak,

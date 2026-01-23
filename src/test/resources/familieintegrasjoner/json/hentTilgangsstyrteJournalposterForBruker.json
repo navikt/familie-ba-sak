@@ -15,10 +15,12 @@
             "dokumentstatus": null,
             "dokumentvarianter": [
               {
-                "variantformat": "ARKIV"
+                "variantformat": "ARKIV",
+                "saksbehandlerHarTilgang": true
               },
               {
-                "variantformat": "ORIGINAL"
+                "variantformat": "ORIGINAL",
+                "saksbehandlerHarTilgang": true
               }
             ],
             "logiskeVedlegg": []

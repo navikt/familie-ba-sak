@@ -4,10 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagring
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
-import no.nav.familie.kontrakter.felles.jsonMapper
+import no.nav.familie.kontrakter.felles.jsonMapperBuilder
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Component
-import tools.jackson.databind.DeserializationFeature
 import tools.jackson.databind.ObjectMapper
 
 @Component
@@ -44,8 +43,10 @@ class SaksstatistikkEventListener(
     }
 }
 
-val sakstatistikkObjectMapper: ObjectMapper = jsonMapper // TODO fix spring boot 4
-//    jsonMapper
-//        .copy()
-//        .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
-//        .configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false)
+val sakstatistikkObjectMapper: ObjectMapper =
+    jsonMapperBuilder
+        .changeDefaultPropertyInclusion {
+            JsonInclude.Value.construct(JsonInclude.Include.NON_EMPTY, JsonInclude.Include.NON_EMPTY)
+        }
+//        .defaultTimeZone(TimeZone.getTimeZone("Europe/Oslo")) // TODO test
+        .build()
