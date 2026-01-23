@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class RestPersonTest {
+class PersonDtoTest {
     @Test
     fun `historiskeIdenter skal kun inkludere identer med gjelderTil lik eller etter eldste barn sin fødselsdato`() {
         // Arrange
@@ -41,7 +41,7 @@ class RestPersonTest {
         aktør.personidenter.add(Personident(fødselsnummer = "33333333333", aktør = aktør, aktiv = true, gjelderTil = null))
 
         // Act
-        val restPerson = personopplysningGrunnlag.søker.tilRestPerson(eldsteBarnsFødselsdato = eldsteBarnFødselsdato)
+        val restPerson = personopplysningGrunnlag.søker.tilPersonDto(eldsteBarnsFødselsdato = eldsteBarnFødselsdato)
 
         // Assert
         assertEquals(listOf("22222222222", "33333333333"), restPerson.historiskeIdenter)
