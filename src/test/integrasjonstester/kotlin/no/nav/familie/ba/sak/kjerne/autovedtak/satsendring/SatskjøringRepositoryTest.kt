@@ -101,4 +101,50 @@ class SatskjøringRepositoryTest(
 
         assertThat(satskjøringer).hasSize(0)
     }
+
+    @Test
+    fun `finnPåFeilTypeOgFerdigTidNull finner ikke satskjøringer med ferdigTid != Null`() {
+        val aktør = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
+        val fagsakId = lagFagsakUtenId(aktør = aktør).also { fagsakRepository.saveAndFlush(it) }.id
+
+        satskjøringRepository.saveAndFlush(
+            Satskjøring(
+                fagsakId = fagsakId,
+                satsTidspunkt = YearMonth.now(),
+                feiltype = "feiltype",
+                ferdigTidspunkt = LocalDateTime.now(),
+            ),
+        )
+
+        val satskjøringer =
+            satskjøringRepository.finnPåFeilTypeOgFerdigTidNull(
+                feiltype = "feiltype",
+                satsTidspunkt = YearMonth.now(),
+            )
+
+        assertThat(satskjøringer).isEmpty()
+    }
+
+    @Test
+    fun `finnPåFeilTypeOgFerdigTidNull finner kun satskjøringer med ferdigTidNull`() {
+        val aktør = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
+        val fagsakId = lagFagsakUtenId(aktør = aktør).also { fagsakRepository.saveAndFlush(it) }.id
+
+        satskjøringRepository.saveAndFlush(
+            Satskjøring(
+                fagsakId = fagsakId,
+                satsTidspunkt = YearMonth.now(),
+                feiltype = "feiltype",
+                ferdigTidspunkt = null,
+            ),
+        )
+
+        val satskjøringer =
+            satskjøringRepository.finnPåFeilTypeOgFerdigTidNull(
+                feiltype = "feiltype",
+                satsTidspunkt = YearMonth.now(),
+            )
+
+        assertThat(satskjøringer).isEmpty()
+    }
 }

@@ -93,7 +93,7 @@ class SatsendringService(
         val ferdigeSatskjøringer = satskjøringer.filter { it.ferdigTidspunkt != null }
         if (ferdigeSatskjøringer.isNotEmpty()) {
             throw Feil(
-                "Satskjøring for fagsaker ${ferdigeSatskjøringer.map { it.fagsakId }} er ikke ferdige. Kan ikke slette.",
+                "Det finnes en eller flere satskjøringer for fagsaker ${ferdigeSatskjøringer.map { it.fagsakId }} som er ferdige. Kan ikke slette.",
             )
         }
 
