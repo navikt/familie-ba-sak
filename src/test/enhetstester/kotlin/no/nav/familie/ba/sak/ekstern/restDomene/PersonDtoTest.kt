@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -44,6 +45,10 @@ class PersonDtoTest {
         val restPerson = personopplysningGrunnlag.søker.tilPersonDto(eldsteBarnsFødselsdato = eldsteBarnFødselsdato)
 
         // Assert
-        assertEquals(listOf("22222222222", "33333333333"), restPerson.historiskeIdenter)
+        val historiskeIdenter = restPerson.registerhistorikk?.historiskeIdenter
+        assertEquals(2, historiskeIdenter?.size)
+
+        val fødselsnummer = historiskeIdenter?.map { it.verdi }
+        assertTrue(fødselsnummer?.containsAll(listOf("22222222222", "33333333333")) == true)
     }
 }

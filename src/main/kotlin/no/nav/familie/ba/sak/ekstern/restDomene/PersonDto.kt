@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
-import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -21,7 +20,6 @@ data class PersonDto(
     val målform: Målform,
     val dødsfallDato: LocalDate? = null,
     val erManueltLagtTilISøknad: Boolean? = null,
-    val historiskeIdenter: List<String>? = null,
 )
 
 fun Person.tilPersonDto(
@@ -34,14 +32,8 @@ fun Person.tilPersonDto(
         personIdent = this.aktør.aktivFødselsnummer(),
         navn = this.navn,
         kjønn = this.kjønn,
-        registerhistorikk = this.tilRegisterhistorikkDto(),
+        registerhistorikk = this.tilRegisterhistorikkDto(eldsteBarnsFødselsdato),
         målform = this.målform,
         dødsfallDato = this.dødsfall?.dødsfallDato,
         erManueltLagtTilISøknad = erManueltLagtTilISøknad,
-        historiskeIdenter =
-            this.aktør.personidenter
-                .filter { ident ->
-                    eldsteBarnsFødselsdato == null ||
-                        ident.gjelderTil?.toLocalDate()?.isSameOrAfter(eldsteBarnsFødselsdato) != false
-                }.map { it.fødselsnummer },
     )
