@@ -10,9 +10,5 @@ class JacksonJsonConfig {
     @Bean
     fun objectMapper(): ObjectMapper =
         jsonMapperBuilder
-//            .changeDefaultPropertyInclusion {
-//                JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL)
-//            }
-//        .defaultTimeZone(TimeZone.getTimeZone("Europe/Oslo")) // TODO test
             .build()
 }

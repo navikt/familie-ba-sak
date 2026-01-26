@@ -179,9 +179,9 @@ class HentStatusTest {
             periodeId = 1L,
             behandlingId = nyBehandling.id,
             datoForVedtak = LocalDate.of(2020, Month.APRIL, 1),
-            klassifisering = "",
+            klassifisering = "BATR",
             sats = BigDecimal.ONE,
             satsType = Utbetalingsperiode.SatsType.MND,
-            utbetalesTil = "",
+            utbetalesTil = "utbetalesTil",
         )
 }

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -19,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.felles.utbetalingsgenerator.domain.Opphør
 import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -34,6 +36,11 @@ class EndretMigreringsdatoUtlederTest {
             behandlingMigreringsinfoRepository,
             tilkjentYtelseRepository,
         )
+
+    @BeforeEach
+    fun setUp() {
+        clearAllMocks()
+    }
 
     @Test
     fun `skal returnere null hvis forrige tilkjente ytelse er null`() {

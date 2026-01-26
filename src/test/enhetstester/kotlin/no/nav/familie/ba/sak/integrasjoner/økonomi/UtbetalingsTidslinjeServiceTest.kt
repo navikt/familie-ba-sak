@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
@@ -17,6 +18,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -541,6 +543,6 @@ fun lagUtbetalingsperiode(
     klassifisering = klassifisering,
     sats = beløp,
     satsType = Utbetalingsperiode.SatsType.MND,
-    utbetalesTil = "",
+    utbetalesTil = "utbetalesTil",
     opphør = opphør,
 )

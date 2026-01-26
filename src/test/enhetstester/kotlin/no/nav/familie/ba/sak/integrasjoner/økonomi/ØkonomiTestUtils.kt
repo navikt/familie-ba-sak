@@ -20,9 +20,9 @@ fun lagUtbetalingsoppdrag(
 ) = Utbetalingsoppdrag(
     kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
     fagSystem = "BA",
-    saksnummer = "",
+    saksnummer = "saksnummer",
     aktoer = UUID.randomUUID().toString(),
-    saksbehandlerId = "",
+    saksbehandlerId = "saksbehandler",
     avstemmingTidspunkt = avstemmingTidspunkt,
     utbetalingsperiode = utbetalingsperiode,
 )
