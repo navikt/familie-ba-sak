@@ -302,21 +302,14 @@ class BrevService(
         utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>?,
     ): UtbetalingstabellAutomatiskValutajustering? {
         val behandlingId = vedtak.behandling.id
-        val skalHenteUtbetalingslandFraUtenlandskPeriodebeløp = featureToggle.isEnabled(FeatureToggle.SKAL_HENTE_UTBETALINGSLAND_FRA_UTENLANDSKPERIODEBELØP)
 
         return utbetalingerPerMndEøs?.let {
             val endringstidspunkt = finnStarttidspunktForUtbetalingstabell(behandling = vedtak.behandling)
             val landkoder = kodeverkService.hentLandkoderISO2()
 
-            return if (skalHenteUtbetalingslandFraUtenlandskPeriodebeløp) {
-                val utenlandskPeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandlingId)
+            val utenlandskPeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandlingId)
 
-                hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt.toYearMonth(), landkoder, utenlandskPeriodebeløp)
-            } else {
-                val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = behandlingId)
-
-                hentLandOgStartdatoForUtbetalingstabellGammel(endringstidspunkt.toYearMonth(), landkoder, kompetanser)
-            }
+            hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt.toYearMonth(), landkoder, utenlandskPeriodebeløp)
         }
     }
 
