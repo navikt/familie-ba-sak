@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
-import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.datagenerator.lagValutakurs
@@ -22,8 +21,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.assertj.core.api.Assertions.assertThat
@@ -619,87 +616,6 @@ internal class BrevUtilsTest {
             )
 
         assertThat(skalHenteUtbetalingerEøs(endringstidspunkt = endringstidspunkt, valutakurser = valutakurser)).isFalse
-    }
-
-    @Test
-    fun `hentLandOgStartdatoForUtbetalingstabellGammel - skal finne alle kompetanser som gjelder etter endringstidspunktet`() {
-        val endringstidspunkt = YearMonth.now()
-
-        val kompetanser =
-            listOf(
-                lagKompetanse(
-                    fom = YearMonth.now().minusMonths(2),
-                    tom = YearMonth.now().plusMonths(2),
-                    søkersAktivitet = KompetanseAktivitet.ARBEIDER,
-                    søkersAktivitetsland = "NO",
-                    annenForeldersAktivitet = KompetanseAktivitet.ARBEIDER,
-                    annenForeldersAktivitetsland = "SE",
-                    barnetsBostedsland = "SE",
-                    kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
-                    erAnnenForelderOmfattetAvNorskLovgivning = false,
-                    barnAktører =
-                        setOf(
-                            randomAktør(),
-                        ),
-                ),
-                lagKompetanse(
-                    fom = YearMonth.now().plusMonths(3),
-                    søkersAktivitet = KompetanseAktivitet.ARBEIDER,
-                    søkersAktivitetsland = "NO",
-                    annenForeldersAktivitet = KompetanseAktivitet.ARBEIDER,
-                    annenForeldersAktivitetsland = "DK",
-                    barnetsBostedsland = "DK",
-                    kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
-                    erAnnenForelderOmfattetAvNorskLovgivning = false,
-                    barnAktører =
-                        setOf(
-                            randomAktør(),
-                        ),
-                ),
-            )
-
-        val landkoder =
-            mapOf(
-                "SE" to "Sverige",
-                "DK" to "Danmark",
-            )
-
-        val utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabellGammel(endringstidspunkt = endringstidspunkt, landkoder = landkoder, kompetanser = kompetanser)
-        assertThat(utbetalingstabellAutomatiskValutajustering).isNotNull
-        assertThat(utbetalingstabellAutomatiskValutajustering.utbetalingerEosLand?.first()).isEqualTo("Sverige og Danmark")
-    }
-
-    @Test
-    fun `hentLandOgStartdatoForUtbetalingstabellGammel - skal finne korrekt utbetalingsland når hovedregelen gir Norge`() {
-        val endringstidspunkt = YearMonth.now()
-
-        val kompetanser =
-            listOf(
-                lagKompetanse(
-                    fom = YearMonth.now(),
-                    tom = YearMonth.now().plusMonths(2),
-                    søkersAktivitet = KompetanseAktivitet.MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
-                    søkersAktivitetsland = "SE",
-                    annenForeldersAktivitet = KompetanseAktivitet.IKKE_AKTUELT,
-                    annenForeldersAktivitetsland = null,
-                    barnetsBostedsland = "NO",
-                    kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
-                    erAnnenForelderOmfattetAvNorskLovgivning = false,
-                    barnAktører =
-                        setOf(
-                            randomAktør(),
-                        ),
-                ),
-            )
-
-        val landkoder =
-            mapOf(
-                "SE" to "Sverige",
-            )
-
-        val utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabellGammel(endringstidspunkt = endringstidspunkt, landkoder = landkoder, kompetanser = kompetanser)
-        assertThat(utbetalingstabellAutomatiskValutajustering).isNotNull
-        assertThat(utbetalingstabellAutomatiskValutajustering.utbetalingerEosLand?.first()).isEqualTo("Sverige")
     }
 
     @Test

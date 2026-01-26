@@ -61,8 +61,6 @@ enum class FeatureToggle(
 
     HENT_ARBEIDSFORDELING_MED_BEHANDLINGSTYPE("familie-ba-sak.hent-arbeidsfordeling-med-behandlingstype"),
 
-    SKAL_HENTE_UTBETALINGSLAND_FRA_UTENLANDSKPERIODEBELØP("familie-ba-sak.skal-hente-utbetalingsland-fra-utenlandskperiodebelop"),
-
     // NAV-27369
     SKAL_KUNNE_BEHANDLE_BA_INSTITUSJONSFAGSAKER_I_KLAGE("familie-klage.skal-kunne-behandle-ba-institusjon-fagsaker"),
 }

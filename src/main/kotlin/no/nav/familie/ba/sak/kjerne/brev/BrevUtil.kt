@@ -134,31 +134,6 @@ fun skalHenteUtbetalingerEøs(
     return valutakurserEtterEndringtidspunktet.any { it.value.erIkkeTom() }
 }
 
-@Deprecated("Skal gå over til hentLandOgStartdatoForUtbetalingstabell på sikt")
-fun hentLandOgStartdatoForUtbetalingstabellGammel(
-    endringstidspunkt: YearMonth,
-    landkoder: Map<String, String>,
-    kompetanser: Collection<Kompetanse>,
-): UtbetalingstabellAutomatiskValutajustering {
-    val utfylteSekundærlandsKompetanserEtterEndringstidspunkt =
-        kompetanser
-            .filter { it.erNorgeSekundærland() }
-            .tilUtfylteKompetanserEtterEndringstidpunktPerAktør(endringstidspunkt)
-
-    if (utfylteSekundærlandsKompetanserEtterEndringstidspunkt.isEmpty()) {
-        throw Feil("Finner ingen kompetanser etter endringstidspunkt")
-    }
-
-    val eøsLandMedUtbetalinger =
-        utfylteSekundærlandsKompetanserEtterEndringstidspunkt.values
-            .flatten()
-            .map {
-                it.utbetalingsland()
-            }.toSet()
-            .map { it.tilLandNavn(landkoder).navn }
-    return UtbetalingstabellAutomatiskValutajustering(utbetalingerEosLand = eøsLandMedUtbetalinger.slåSammen(), utbetalingerEosMndAar = endringstidspunkt.tilMånedÅr())
-}
-
 fun hentLandOgStartdatoForUtbetalingstabell(
     endringstidspunkt: YearMonth,
     landkoder: Map<String, String>,
