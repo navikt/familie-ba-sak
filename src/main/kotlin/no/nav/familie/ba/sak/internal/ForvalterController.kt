@@ -326,27 +326,6 @@ class ForvalterController(
         return ResponseEntity.ok("Ok")
     }
 
-    @PostMapping("/satsendringer/{satstid}/feiltype/{feiltype}/rekjør")
-    @Operation(
-        summary = "Rekjør satsendringer med feiltype lik feiltypen som er sendt inn",
-        description =
-            "Dette endepunktet sletter alle rader fra Satskjøring der ferdigtid ikke er satt og med feiltypen som er sendt inn. " +
-                "Det gjør at satsendringen kjøres på nytt på fagsaken.",
-    )
-    fun rekjørSatsendringMedFeiltype(
-        @PathVariable satstid: YearMonth,
-        @PathVariable feiltype: String,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Rekjør satsendring med feiltype",
-        )
-
-        val satskjøringerSomSkalRekjøres = satskjøringRepository.finnPåFeilTypeOgFerdigTidNull(feiltype, satstid)
-        satskjøringRepository.deleteAll(satskjøringerSomSkalRekjøres)
-        return ResponseEntity.ok("Ok")
-    }
-
     @GetMapping(path = ["/kjor-intern-konsistensavstemming/{maksAntallTasker}"])
     fun kjørInternKonsistensavstemming(
         @PathVariable maksAntallTasker: Int = Int.MAX_VALUE,

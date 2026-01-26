@@ -86,9 +86,12 @@ class SatsendringService(
             satskjøringRepository.finnPåFeilTypeOgFerdigTidNull(feiltype.name, satsTidspunkt).map { it.fagsakId }
         }
 
-    fun slettSatskjøringer(fagsakIder: Set<Long>): List<Long> {
+    fun slettSatskjøringer(
+        fagsakIder: Set<Long>,
+        satsTidspunkt: YearMonth = StartSatsendring.hentAktivSatsendringstidspunkt(),
+    ): List<Long> {
         logger.info("Sletter satskjøringer for fagsakIder: $fagsakIder")
-        val satskjøringer = satskjøringRepository.findByFagsakIdIn(fagsakIder)
+        val satskjøringer = satskjøringRepository.findBySatsTidspunktAndFagsakIdIn(satsTidspunkt, fagsakIder)
 
         val ferdigeSatskjøringer = satskjøringer.filter { it.ferdigTidspunkt != null }
         if (ferdigeSatskjøringer.isNotEmpty()) {

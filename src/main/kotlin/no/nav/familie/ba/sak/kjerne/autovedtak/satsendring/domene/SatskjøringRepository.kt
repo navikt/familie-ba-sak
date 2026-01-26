@@ -24,5 +24,8 @@ interface SatskjøringRepository : JpaRepository<Satskjøring, Long> {
 
     fun findBySatsTidspunktAndFerdigTidspunktIsNullAndFeiltypeIsNotNull(satsTidspunkt: YearMonth): List<Satskjøring>
 
-    fun findByFagsakIdIn(fagsakIds: Set<Long>): List<Satskjøring>
+    fun findBySatsTidspunktAndFagsakIdIn(
+        satsTidspunkt: YearMonth,
+        fagsakIds: Set<Long>,
+    ): MutableList<Satskjøring>
 }

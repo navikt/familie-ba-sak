@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
+import io.swagger.v3.oas.annotations.Operation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -34,6 +36,7 @@ class SatsendringController(
     private val tilgangService: TilgangService,
     private val opprettTaskService: OpprettTaskService,
     private val satsendringService: SatsendringService,
+    private val satskjøringRepository: SatskjøringRepository,
 ) {
     @GetMapping(path = ["/kjorsatsendring/{fagsakId}"])
     fun utførSatsendringITaskPåFagsak(
@@ -117,6 +120,8 @@ class SatsendringController(
     fun finnFeiledeSatskjøringer(
         @RequestBody finnUferdigeSatskjøringerRequest: FinnUferdigeSatskjøringerRequest,
     ): ResponseEntity<Ressurs<List<Long>>> {
+        tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.FORVALTER, "Se satskjøringer som er forsøkt kjørt men som ikke er ferdige")
+
         val feiledeSatskjøringer =
             satsendringService.finnUferdigeSatskjøringer(
                 feiltyper = finnUferdigeSatskjøringerRequest.feiltype,
@@ -128,14 +133,42 @@ class SatsendringController(
 
     @DeleteMapping(path = ["/satskjoringer"])
     fun slettSatskjøringer(
-        @RequestBody fagsakIder: Set<Long>,
+        @RequestBody slettSatskjøringerRequest: SlettSatskjøringerRequest,
     ): ResponseEntity<Ressurs<String>> {
-        satsendringService.slettSatskjøringer(fagsakIder)
-        return ResponseEntity.ok(Ressurs.success("Slettet satskjøringer for fagsakIder: $fagsakIder"))
+        tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.FORVALTER, "Slett satskjøringer som ikke er ferdigkjørt.")
+
+        satsendringService.slettSatskjøringer(slettSatskjøringerRequest.fagsakIder, slettSatskjøringerRequest.satsTid)
+        return ResponseEntity.ok(Ressurs.success("Slettet satskjøringer for fagsakIder: ${slettSatskjøringerRequest.fagsakIder}"))
+    }
+
+    @PostMapping("/satsendringer/{satstid}/feiltype/{feiltype}/rekjør")
+    @Operation(
+        summary = "Rekjør satsendringer med feiltype lik feiltypen som er sendt inn",
+        description =
+            "Dette endepunktet sletter alle rader fra Satskjøring der ferdigtid ikke er satt og med feiltypen som er sendt inn. " +
+                "Det gjør at satsendringen kjøres på nytt på fagsaken.",
+    )
+    fun rekjørSatsendringMedFeiltype(
+        @PathVariable satstid: YearMonth,
+        @PathVariable feiltype: String,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Rekjør satsendring med feiltype",
+        )
+
+        val satskjøringerSomSkalRekjøres = satskjøringRepository.finnPåFeilTypeOgFerdigTidNull(feiltype, satstid)
+        satskjøringRepository.deleteAll(satskjøringerSomSkalRekjøres)
+        return ResponseEntity.ok("Ok")
     }
 }
 
 data class FinnUferdigeSatskjøringerRequest(
     val feiltype: List<SatsendringSvar> = SatsendringSvar.entries,
+    val satsTid: YearMonth = StartSatsendring.hentAktivSatsendringstidspunkt(),
+)
+
+data class SlettSatskjøringerRequest(
+    val fagsakIder: Set<Long>,
     val satsTid: YearMonth = StartSatsendring.hentAktivSatsendringstidspunkt(),
 )

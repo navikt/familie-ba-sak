@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRe
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
@@ -19,6 +20,13 @@ class SatskjøringRepositoryTest(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val aktørIdRepository: AktørIdRepository,
 ) : AbstractSpringIntegrationTest() {
+    @BeforeEach
+    fun setUp() {
+        satskjøringRepository.deleteAll()
+        fagsakRepository.deleteAll()
+        aktørIdRepository.deleteAll()
+    }
+
     @Test
     fun `findBySatsTidspunktAndFerdigTidspunktIsNullAndFeiltypeIsNotNull henter satskjøring med riktig tidspunkt og som har feiltype`() {
         val aktør = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
@@ -104,6 +112,7 @@ class SatskjøringRepositoryTest(
 
     @Test
     fun `finnPåFeilTypeOgFerdigTidNull finner ikke satskjøringer med ferdigTid != Null`() {
+        // Arrange
         val aktør = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
         val fagsakId = lagFagsakUtenId(aktør = aktør).also { fagsakRepository.saveAndFlush(it) }.id
 
@@ -116,35 +125,53 @@ class SatskjøringRepositoryTest(
             ),
         )
 
+        // Act
         val satskjøringer =
             satskjøringRepository.finnPåFeilTypeOgFerdigTidNull(
                 feiltype = "feiltype",
                 satsTidspunkt = YearMonth.now(),
             )
 
+        // Assert
         assertThat(satskjøringer).isEmpty()
     }
 
     @Test
     fun `finnPåFeilTypeOgFerdigTidNull finner kun satskjøringer med ferdigTidNull`() {
+        // Arrange
         val aktør = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
         val fagsakId = lagFagsakUtenId(aktør = aktør).also { fagsakRepository.saveAndFlush(it) }.id
 
-        satskjøringRepository.saveAndFlush(
-            Satskjøring(
-                fagsakId = fagsakId,
-                satsTidspunkt = YearMonth.now(),
-                feiltype = "feiltype",
-                ferdigTidspunkt = null,
+        val aktør2 = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
+        val fagsakId2 = lagFagsakUtenId(aktør = aktør2).also { fagsakRepository.saveAndFlush(it) }.id
+
+        satskjøringRepository.saveAllAndFlush(
+            listOf(
+                Satskjøring(
+                    fagsakId = fagsakId,
+                    satsTidspunkt = YearMonth.now(),
+                    feiltype = "feiltype",
+                    ferdigTidspunkt = null,
+                ),
+                Satskjøring(
+                    fagsakId = fagsakId2,
+                    satsTidspunkt = YearMonth.now(),
+                    feiltype = "feiltype",
+                    ferdigTidspunkt = LocalDateTime.now(),
+                ),
             ),
         )
 
+        // Act
         val satskjøringer =
             satskjøringRepository.finnPåFeilTypeOgFerdigTidNull(
                 feiltype = "feiltype",
                 satsTidspunkt = YearMonth.now(),
             )
 
-        assertThat(satskjøringer).isEmpty()
+        // Assert
+        assertThat(satskjøringer).hasSize(1)
+        assertThat(satskjøringer.single().ferdigTidspunkt).isNull()
+        assertThat(satskjøringer.single().fagsakId).isEqualTo(fagsakId)
     }
 }

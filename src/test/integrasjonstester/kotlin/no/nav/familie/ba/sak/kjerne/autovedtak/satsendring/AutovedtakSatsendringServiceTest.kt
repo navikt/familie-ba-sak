@@ -155,6 +155,38 @@ class AutovedtakSatsendringServiceTest(
         }
 
         @Test
+        fun `Sletter ikke satskjøringer med andre satstidspunkt enn det som er oppgitt`() {
+            // Arrange
+            val fagsaker =
+                setOf(
+                    opprettLøpendeFagsak(),
+                )
+
+            val satskjøringer =
+                listOf(
+                    Satskjøring(
+                        fagsakId = fagsaker.first().id,
+                        satsTidspunkt = YearMonth.of(2024, 1),
+                    ),
+                    Satskjøring(
+                        fagsakId = fagsaker.first().id,
+                        satsTidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt(),
+                    ),
+                )
+
+            satskjøringRepository.saveAll(satskjøringer)
+            // Act
+            val slettedeSatskjøringer = satsendringService.slettSatskjøringer(fagsaker.map { it.id }.toSet())
+
+            // Assert
+            assertThat(slettedeSatskjøringer).isEqualTo(fagsaker.map { it.id })
+
+            val satskjøringerIDb = satskjøringRepository.findAll()
+            assertThat(satskjøringerIDb.size).isEqualTo(1)
+            assertThat(satskjøringerIDb.first().satsTidspunkt).isEqualTo(YearMonth.of(2024, 1))
+        }
+
+        @Test
         fun `finnUferdigeSatskjøringer finner kun uferdige satskjøringer av spesifikk type`() {
             // Arrange
             val fagsaker =
