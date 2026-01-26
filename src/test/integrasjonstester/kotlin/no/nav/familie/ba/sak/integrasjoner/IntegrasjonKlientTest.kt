@@ -133,7 +133,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
             anyRequestedFor(anyUrl())
                 .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("opprettOppgave"))
                 .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("srvfamilie-ba-sak"))
-                .withRequestBody(equalToJson(jsonMapper.writeValueAsString(request))),
+                .withRequestBody(equalToJson(jsonMapper.writeValueAsString(request), true, true)),
         )
     }
 
@@ -228,6 +228,8 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
                                 behandlingId = vedtak.behandling.id,
                             ),
                         ),
+                        true,
+                        true,
                     ),
                 ),
         )

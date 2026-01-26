@@ -52,7 +52,6 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
@@ -646,6 +645,9 @@ class ForvalterController(
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandlingId)
         return ResponseEntity.ok("Sendt behandlingsstatistikk for behandling $behandlingId til Datavarehus")
     }
+
+    @GetMapping("/ping")
+    fun ping(): ResponseEntity<String> = ResponseEntity.ok("pong")
 }
 
 enum class BehandlesAvApplikasjon(

@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.jsonMapper
 import java.time.LocalDate
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 data class RegistrerSøknadDto(
     val søknad: SøknadDTO,
     val bekreftEndringerViaFrontend: Boolean,
@@ -14,7 +16,7 @@ data class SøknadDTO(
     val underkategori: BehandlingUnderkategoriDTO,
     val søkerMedOpplysninger: SøkerMedOpplysninger,
     val barnaMedOpplysninger: List<BarnMedOpplysninger>,
-    val endringAvOpplysningerBegrunnelse: String,
+    val endringAvOpplysningerBegrunnelse: String = "",
     val erAutomatiskRegistrert: Boolean = false,
 )
 

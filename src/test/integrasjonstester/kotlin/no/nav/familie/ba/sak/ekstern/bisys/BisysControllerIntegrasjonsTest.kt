@@ -25,6 +25,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
+import org.springframework.web.client.getForEntity
 import org.springframework.web.client.postForEntity
 import org.wiremock.spring.ConfigureWireMock
 import org.wiremock.spring.EnableWireMock
@@ -282,17 +283,12 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         header.setBearerAuth(
             hentTokenForBisys(),
         )
-        val ikkeBisysTjeneste =
-            HttpEntity<String>(
-                "tullball",
-                header,
-            )
 
         val error =
             assertThrows<HttpClientErrorException> {
-                restTemplate.postForEntity<Any>(
-                    hentUrl("/api/tullballtjeneste"),
-                    ikkeBisysTjeneste,
+                restTemplate.getForEntity<String>(
+                    hentUrl("/api/samhandler/orgnr/987654321"),
+                    header,
                 )
             }
 
