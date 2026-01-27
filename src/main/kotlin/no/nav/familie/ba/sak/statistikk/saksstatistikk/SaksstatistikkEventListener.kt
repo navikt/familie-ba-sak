@@ -51,7 +51,7 @@ val sakstatistikkObjectMapper: ObjectMapper =
     JsonMapper
         .builder()
         .addModule(KotlinModule.Builder().build())
-        .enable(DateTimeFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+        .configure(DateTimeFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false)
         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
         .changeDefaultPropertyInclusion {
