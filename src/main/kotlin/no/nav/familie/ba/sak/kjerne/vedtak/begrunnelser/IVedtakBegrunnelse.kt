@@ -53,7 +53,7 @@ class IVedtakBegrunnelseDeserializer : StdDeserializer<List<IVedtakBegrunnelse>>
     ): List<IVedtakBegrunnelse> {
         val node: ArrayNode = jsonParser.readValueAsTree()
         return node
-            .map { it.asText() }
+            .map { it.asString() }
             .map { IVedtakBegrunnelse.konverterTilEnumVerdi(it) }
     }
 }

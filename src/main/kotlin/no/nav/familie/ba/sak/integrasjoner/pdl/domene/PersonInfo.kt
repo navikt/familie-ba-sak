@@ -140,7 +140,7 @@ class KjonnDeserializer : StdDeserializer<Kjønn>(Kjønn::class.java) {
         p1: DeserializationContext,
     ): Kjønn {
         val node: JsonNode = jp.readValueAsTree()
-        return when (val kjønn = node.asText()) {
+        return when (val kjønn = node.asString()) {
             "M" -> Kjønn.MANN
             "K" -> Kjønn.KVINNE
             else -> Kjønn.valueOf(kjønn)
