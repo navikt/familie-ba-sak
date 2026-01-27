@@ -6,12 +6,14 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAktør
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFalskIdentitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -108,33 +110,47 @@ class FalskIdentitetServiceTest {
     }
 
     @Nested
-    inner class HentPersonForFalskIdentitet {
+    inner class HarFalskIdentitet {
         @Test
-        fun `skal returnere aktiv Person fra forrige behandling når den finnes`() {
+        fun `skal returnere true dersom aktør er falsk identitet`() {
             // Arrange
-            val person = lagPerson()
+            val aktør = lagAktør()
 
-            every { personRepository.findByAktør(person.aktør) } returns listOf(person)
+            every { pdlRestKlient.hentFalskIdentitet(aktør.aktivFødselsnummer()) } returns PdlFalskIdentitet(erFalsk = true)
 
             // Act
-            val personForFalskIdentitet = falskIdentitetService.hentPersonForFalskIdentitet(person.aktør)
+            val harFalskIdentitet = falskIdentitetService.harFalskIdentitet(aktør)
 
             // Assert
-            assertThat(personForFalskIdentitet).isEqualTo(person)
+            assertThat(harFalskIdentitet).isTrue
         }
 
         @Test
-        fun `skal kaste feil dersom forrige behandling ikke finnes`() {
+        fun `skal returnere false dersom aktør ikke er falsk identitet`() {
             // Arrange
-            val person = lagPerson()
+            val aktør = lagAktør()
 
-            every { personRepository.findByAktør(person.aktør) } returns emptyList()
+            every { pdlRestKlient.hentFalskIdentitet(aktør.aktivFødselsnummer()) } returns PdlFalskIdentitet(erFalsk = false)
 
             // Act
-            val funksjonellFeil = assertThrows<FunksjonellFeil> { falskIdentitetService.hentPersonForFalskIdentitet(person.aktør) }
+            val harFalskIdentitet = falskIdentitetService.harFalskIdentitet(aktør)
 
             // Assert
-            assertThat(funksjonellFeil.melding).isEqualTo("Kan ikke behandle falsk identitet uten personopplysninger fra tidligere behandlinger i ba-sak for aktør ${person.aktør.aktivFødselsnummer()}")
+            assertThat(harFalskIdentitet).isFalse
+        }
+
+        @Test
+        fun `skal returnere false dersom pdl ikke returnerer noen falsk identitet for aktør`() {
+            // Arrange
+            val aktør = lagAktør()
+
+            every { pdlRestKlient.hentFalskIdentitet(aktør.aktivFødselsnummer()) } returns null
+
+            // Act
+            val harFalskIdentitet = falskIdentitetService.harFalskIdentitet(aktør)
+
+            // Assert
+            assertThat(harFalskIdentitet).isFalse
         }
     }
 }

@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -235,6 +236,24 @@ class StegServiceTest {
             // Act & assert
             val exception = assertThrows<FunksjonellFeil> { stegService.håndterNyBehandling(nyBehandling) }
             assertThat(exception.melding).isEqualTo("Det er ikke mulig å opprette behandling med årsak Iverksette KA-vedtak")
+        }
+
+        @Test
+        fun `skal kaste feil dersom behandlingsårsak er FALSK_IDENTITET og toggle ikke er skrudd på`() {
+            // Arrange
+            val nyBehandling =
+                NyBehandling(
+                    søkersIdent = randomFnr(),
+                    behandlingType = BehandlingType.REVURDERING,
+                    behandlingÅrsak = BehandlingÅrsak.FALSK_IDENTITET,
+                    fagsakId = 1L,
+                )
+
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns false
+
+            // Act & assert
+            val exception = assertThrows<FunksjonellFeil> { stegService.håndterNyBehandling(nyBehandling) }
+            assertThat(exception.melding).isEqualTo("Det er ikke mulig å opprette behandling med årsak 'Falsk identitet'. ${FalskIdentitetService.Companion.KAN_IKKE_HÅNDTERE_FALSK_IDENTITET}")
         }
     }
 

@@ -75,13 +75,14 @@ data class PersonopplysningGrunnlag(
     fun tilKopiForNyBehandling(
         behandling: Behandling,
         søkerOgBarnMedTilkjentYtelseFraForrigeBehandling: List<Aktør>,
+        aktørerMedFalskIdentitet: List<Aktør> = emptyList(),
     ): PersonopplysningGrunnlag =
         copy(id = 0, behandlingId = behandling.id, personer = mutableSetOf()).also { it ->
             it.personer
                 .addAll(
                     personer
                         .filter { person -> søkerOgBarnMedTilkjentYtelseFraForrigeBehandling.any { søkerEllerBarn -> søkerEllerBarn.aktørId == person.aktør.aktørId } }
-                        .map { person -> person.tilKopiForNyttPersonopplysningGrunnlag(it) },
+                        .map { person -> person.tilKopiForNyttPersonopplysningGrunnlag(it, aktørerMedFalskIdentitet.any { it.aktørId == person.aktør.aktørId }) },
                 )
         }
 
