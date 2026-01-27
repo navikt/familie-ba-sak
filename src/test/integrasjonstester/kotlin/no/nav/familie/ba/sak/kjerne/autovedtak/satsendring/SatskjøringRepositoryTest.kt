@@ -24,20 +24,28 @@ class SatskjøringRepositoryTest(
         val aktør = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
         val fagsakId = lagFagsakUtenId(aktør = aktør).also { fagsakRepository.saveAndFlush(it) }.id
 
-        satskjøringRepository.saveAndFlush(
-            Satskjøring(
-                fagsakId = fagsakId,
-                satsTidspunkt = YearMonth.now(),
-                feiltype = "feiltype",
-            ),
-        )
+        val satsTidspunkt = YearMonth.now()
+        val satskjøring =
+            satskjøringRepository.saveAndFlush(
+                Satskjøring(
+                    fagsakId = fagsakId,
+                    satsTidspunkt = satsTidspunkt,
+                    feiltype = "feiltype",
+                ),
+            )
 
         val satskjøringer =
             satskjøringRepository.findBySatsTidspunktAndFerdigTidspunktIsNullAndFeiltypeIsNotNull(
-                YearMonth.now(),
+                satsTidspunkt,
             )
 
-        assertThat(satskjøringer).hasSize(1).extracting("fagsakId").containsExactly(fagsakId)
+        assertThat(satskjøringer).contains(satskjøring)
+        assertThat(satskjøringer).allMatch { satskjøring ->
+            @Suppress("IDENTITY_SENSITIVE_OPERATIONS_WITH_VALUE_TYPE")
+            satskjøring.satsTidspunkt == satsTidspunkt &&
+                satskjøring.feiltype != null &&
+                satskjøring.ferdigTidspunkt == null
+        }
     }
 
     @Test
@@ -65,21 +73,23 @@ class SatskjøringRepositoryTest(
         val aktør = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
         val fagsakId = lagFagsakUtenId(aktør = aktør).also { fagsakRepository.saveAndFlush(it) }.id
 
-        satskjøringRepository.saveAndFlush(
-            Satskjøring(
-                fagsakId = fagsakId,
-                satsTidspunkt = YearMonth.now(),
-                ferdigTidspunkt = LocalDateTime.now(),
-                feiltype = "feiltype",
-            ),
-        )
+        val satskjøring =
+            satskjøringRepository.saveAndFlush(
+                Satskjøring(
+                    fagsakId = fagsakId,
+                    satsTidspunkt = YearMonth.now(),
+                    ferdigTidspunkt = LocalDateTime.now(),
+                    feiltype = "feiltype",
+                ),
+            )
 
         val satskjøringer =
             satskjøringRepository.findBySatsTidspunktAndFerdigTidspunktIsNullAndFeiltypeIsNotNull(
                 YearMonth.now(),
             )
 
-        assertThat(satskjøringer).hasSize(0)
+        assertThat(satskjøringer).allMatch { it.ferdigTidspunkt == null }
+        assertThat(satskjøringer).doesNotContain(satskjøring)
     }
 
     @Test
@@ -87,18 +97,85 @@ class SatskjøringRepositoryTest(
         val aktør = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
         val fagsakId = lagFagsakUtenId(aktør = aktør).also { fagsakRepository.saveAndFlush(it) }.id
 
-        satskjøringRepository.saveAndFlush(
-            Satskjøring(
-                fagsakId = fagsakId,
-                satsTidspunkt = YearMonth.now(),
-            ),
-        )
+        val satskjøring =
+            satskjøringRepository.saveAndFlush(
+                Satskjøring(
+                    fagsakId = fagsakId,
+                    satsTidspunkt = YearMonth.now(),
+                ),
+            )
 
         val satskjøringer =
             satskjøringRepository.findBySatsTidspunktAndFerdigTidspunktIsNullAndFeiltypeIsNotNull(
                 YearMonth.now(),
             )
 
-        assertThat(satskjøringer).hasSize(0)
+        assertThat(satskjøringer).doesNotContain(satskjøring)
+        assertThat(satskjøringer).allMatch { it.feiltype != null }
+    }
+
+    @Test
+    fun `finnPåFeilTypeOgFerdigTidNull finner ikke satskjøringer med ferdigTid != Null`() {
+        // Arrange
+        val aktør = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
+        val fagsakId = lagFagsakUtenId(aktør = aktør).also { fagsakRepository.saveAndFlush(it) }.id
+
+        satskjøringRepository.saveAndFlush(
+            Satskjøring(
+                fagsakId = fagsakId,
+                satsTidspunkt = YearMonth.now(),
+                feiltype = "feiltype",
+                ferdigTidspunkt = LocalDateTime.now(),
+            ),
+        )
+
+        // Act
+        val satskjøringer =
+            satskjøringRepository.finnPåFeilTypeOgFerdigTidNull(
+                feiltype = "feiltype",
+                satsTidspunkt = YearMonth.now(),
+            )
+
+        // Assert
+        assertThat(satskjøringer.map { it.fagsakId }).doesNotContain(fagsakId)
+    }
+
+    @Test
+    fun `finnPåFeilTypeOgFerdigTidNull finner kun satskjøringer med ferdigTidNull`() {
+        // Arrange
+        val aktør = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
+        val fagsakId = lagFagsakUtenId(aktør = aktør).also { fagsakRepository.saveAndFlush(it) }.id
+
+        val aktør2 = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
+        val fagsakId2 = lagFagsakUtenId(aktør = aktør2).also { fagsakRepository.saveAndFlush(it) }.id
+
+        satskjøringRepository.saveAllAndFlush(
+            listOf(
+                Satskjøring(
+                    fagsakId = fagsakId,
+                    satsTidspunkt = YearMonth.now(),
+                    feiltype = "feiltype",
+                    ferdigTidspunkt = null,
+                ),
+                Satskjøring(
+                    fagsakId = fagsakId2,
+                    satsTidspunkt = YearMonth.now(),
+                    feiltype = "feiltype",
+                    ferdigTidspunkt = LocalDateTime.now(),
+                ),
+            ),
+        )
+
+        // Act
+        val satskjøringer =
+            satskjøringRepository.finnPåFeilTypeOgFerdigTidNull(
+                feiltype = "feiltype",
+                satsTidspunkt = YearMonth.now(),
+            )
+
+        // Assert
+        assertThat(satskjøringer).hasSize(1)
+        assertThat(satskjøringer.single().ferdigTidspunkt).isNull()
+        assertThat(satskjøringer.single().fagsakId).isEqualTo(fagsakId)
     }
 }
