@@ -6,13 +6,13 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.ekstern.pensjon.HentAlleIdenterTilPsysResponseDTO
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagring
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
+import no.nav.familie.ba.sak.statistikk.saksstatistikk.sakstatistikkObjectMapper
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetrygdBisysMelding
 import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Primary
@@ -20,7 +20,6 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import tools.jackson.databind.ObjectMapper
 
 interface KafkaProducer {
     fun sendMessageForTopicVedtakV2(vedtakV2: VedtakDVHV2): Long
@@ -60,10 +59,6 @@ class DefaultKafkaProducer(
     private val saksstatistikkBehandlingDvhCounter = Metrics.counter(COUNTER_NAME, "type", "behandling")
 
     @Autowired
-    @Qualifier("kafkaObjectMapper")
-    lateinit var kafkaObjectMapper: ObjectMapper
-
-    @Autowired
     lateinit var kafkaAivenTemplate: KafkaTemplate<String, String>
 
     @Value("\${TILBAKEKREVING_RESPONSE_TOPIC}")
@@ -71,7 +66,7 @@ class DefaultKafkaProducer(
 
     override fun sendMessageForTopicVedtakV2(vedtakV2: VedtakDVHV2): Long {
         val vedtakForDVHV2Melding =
-            kafkaObjectMapper.writeValueAsString(vedtakV2)
+            sakstatistikkObjectMapper.writeValueAsString(vedtakV2)
         val response = kafkaAivenTemplate.send(VEDTAKV2_TOPIC, vedtakV2.funksjonellId, vedtakForDVHV2Melding).get()
         logger.info("$VEDTAKV2_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
         vedtakV2Counter.increment()
@@ -80,7 +75,7 @@ class DefaultKafkaProducer(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     override fun sendMessageForTopicBehandling(melding: SaksstatistikkMellomlagring): Long {
-        val behandlingsMelding = kafkaObjectMapper.writeValueAsString(melding.jsonToBehandlingDVH())
+        val behandlingsMelding = sakstatistikkObjectMapper.writeValueAsString(melding.jsonToBehandlingDVH())
 
         val response =
             kafkaAivenTemplate.send(SAKSSTATISTIKK_BEHANDLING_TOPIC, melding.funksjonellId, behandlingsMelding).get()
@@ -93,7 +88,7 @@ class DefaultKafkaProducer(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     override fun sendMessageForTopicSak(melding: SaksstatistikkMellomlagring): Long {
-        val saksMelding = kafkaObjectMapper.writeValueAsString(melding.jsonToSakDVH())
+        val saksMelding = sakstatistikkObjectMapper.writeValueAsString(melding.jsonToSakDVH())
 
         val response =
             kafkaAivenTemplate.send(SAKSSTATISTIKK_SAK_TOPIC, melding.funksjonellId, saksMelding).get()

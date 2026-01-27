@@ -55,5 +55,5 @@ val sakstatistikkObjectMapper: ObjectMapper =
         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
         .changeDefaultPropertyInclusion {
-            JsonInclude.Value.construct(JsonInclude.Include.NON_EMPTY, JsonInclude.Include.NON_EMPTY)
+            JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL)
         }.build()

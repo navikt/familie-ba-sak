@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.config
 
-import com.fasterxml.jackson.annotation.JsonInclude
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import no.nav.familie.kontrakter.felles.Applikasjon
 import org.apache.kafka.clients.CommonClientConfigs
@@ -22,11 +21,6 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.support.LoggingProducerListener
-import tools.jackson.databind.DeserializationFeature
-import tools.jackson.databind.ObjectMapper
-import tools.jackson.databind.SerializationFeature
-import tools.jackson.databind.json.JsonMapper
-import tools.jackson.module.kotlin.KotlinModule
 
 @Configuration
 class KafkaAivenConfig(
@@ -67,17 +61,6 @@ class KafkaAivenConfig(
 
     @Bean(name = [KafkaListenerConfigUtils.KAFKA_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME])
     fun kafkaListenerEndpointRegistry(): KafkaListenerEndpointRegistry? = KafkaListenerEndpointRegistry()
-
-    @Bean("kafkaObjectMapper")
-    fun kafkaObjectMapper(): ObjectMapper =
-        JsonMapper
-            .builder()
-            .addModule(KotlinModule.Builder().build())
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-            .changeDefaultPropertyInclusion {
-                JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL)
-            }.build()
 
     private fun producerConfigs(): Map<String, Any> {
         val kafkaBrokers = System.getenv("KAFKA_BROKERS") ?: LOCAL_KAFKA_BROKER
