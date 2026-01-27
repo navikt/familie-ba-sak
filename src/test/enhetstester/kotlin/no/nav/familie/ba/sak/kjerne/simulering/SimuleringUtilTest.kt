@@ -250,8 +250,6 @@ class SimuleringUtilTest {
 
         val ytelseMedManuellePosteringer =
             jsonMapper
-//    TODO fix Spring boot 4            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-//                .configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true)
                 .readValue<DetaljertSimuleringResultat>(fil)
 
         val vedtakSimuleringMottakere =
