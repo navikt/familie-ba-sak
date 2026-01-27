@@ -182,8 +182,9 @@ class AutovedtakSatsendringServiceTest(
             assertThat(slettedeSatskjøringer).isEqualTo(fagsaker.map { it.id })
 
             val satskjøringerIDb = satskjøringRepository.findAll()
-            assertThat(satskjøringerIDb.size).isEqualTo(1)
-            assertThat(satskjøringerIDb.first().satsTidspunkt).isEqualTo(YearMonth.of(2024, 1))
+
+            @Suppress("AssertBetweenInconvertibleTypes")
+            assertThat(satskjøringerIDb).contains(satskjøringer.first())
         }
 
         @Test
