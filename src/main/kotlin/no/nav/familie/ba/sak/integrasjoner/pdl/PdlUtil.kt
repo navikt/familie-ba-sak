@@ -34,7 +34,7 @@ inline fun <reified DATA : Any, reified T : Any> feilsjekkOgReturnerData(
             errorMelding +
                 "PDL rapporterte ingen feil men returnerte tomt datafelt",
         )
-        throw PdlRequestException("Manglende ${T::class} ved feilfri respons fra PDL. Se secure logg for detaljer.")
+        throw PdlRequestException("Manglende data ved mapping til ${T::class} ved feilfri respons fra PDL. Se secure logg for detaljer.")
     }
     return data
 }

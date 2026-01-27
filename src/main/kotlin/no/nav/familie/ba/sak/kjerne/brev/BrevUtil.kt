@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilUtfylteKompetanser
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utbetalingsland
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilUtbetaltFraAnnetLand
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilUtfylteUtenlandskPeriodebeløpEtterEndringstidpunktPerAktør
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -136,22 +137,21 @@ fun skalHenteUtbetalingerEøs(
 fun hentLandOgStartdatoForUtbetalingstabell(
     endringstidspunkt: YearMonth,
     landkoder: Map<String, String>,
-    kompetanser: Collection<Kompetanse>,
+    utenlandskPeriodebeløp: Collection<UtenlandskPeriodebeløp>,
 ): UtbetalingstabellAutomatiskValutajustering {
-    val utfylteSekundærlandsKompetanserEtterEndringstidspunkt =
-        kompetanser
-            .filter { it.erNorgeSekundærland() }
-            .tilUtfylteKompetanserEtterEndringstidpunktPerAktør(endringstidspunkt)
+    val utfylteUtenlandskperiodebeløpEtterEndringstidspunkt =
+        utenlandskPeriodebeløp
+            .tilUtfylteUtenlandskPeriodebeløpEtterEndringstidpunktPerAktør(endringstidspunkt)
 
-    if (utfylteSekundærlandsKompetanserEtterEndringstidspunkt.isEmpty()) {
-        throw Feil("Finner ingen kompetanser etter endringstidspunkt")
+    if (utfylteUtenlandskperiodebeløpEtterEndringstidspunkt.isEmpty()) {
+        throw Feil("Finner ingen utenlandsk periodebeløp etter endringstidspunkt")
     }
 
     val eøsLandMedUtbetalinger =
-        utfylteSekundærlandsKompetanserEtterEndringstidspunkt.values
+        utfylteUtenlandskperiodebeløpEtterEndringstidspunkt.values
             .flatten()
             .map {
-                it.utbetalingsland()
+                it.utbetalingsland
             }.toSet()
             .map { it.tilLandNavn(landkoder).navn }
     return UtbetalingstabellAutomatiskValutajustering(utbetalingerEosLand = eøsLandMedUtbetalinger.slåSammen(), utbetalingerEosMndAar = endringstidspunkt.tilMånedÅr())

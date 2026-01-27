@@ -6,18 +6,23 @@ import io.mockk.slot
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.lagInstitusjon
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.TilpassArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.klage.dto.OpprettKlageDto
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.Klagebehandlingsårsak
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import no.nav.familie.kontrakter.felles.klage.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -32,6 +37,7 @@ class KlagebehandlingOppretterTest {
     private val integrasjonKlient = mockk<IntegrasjonKlient>()
     private val tilpassArbeidsfordelingService = mockk<TilpassArbeidsfordelingService>()
     private val clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(dagensDato)
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val klagebehandlingOppretter =
         KlagebehandlingOppretter(
@@ -40,10 +46,32 @@ class KlagebehandlingOppretterTest {
             integrasjonKlient,
             tilpassArbeidsfordelingService,
             clockProvider,
+            featureToggleService,
         )
+
+    @BeforeEach
+    fun setup() {
+        every { featureToggleService.isEnabled(FeatureToggle.SKAL_KUNNE_BEHANDLE_BA_INSTITUSJONSFAGSAKER_I_KLAGE) } returns true
+    }
 
     @Nested
     inner class OpprettKlage {
+        @Test
+        fun `skal kaste exception hvis man prøver å opprette en klagebehandling for en institusjonsfagsak om toggelen er skrudd av`() {
+            // Arrange
+            val fagsak = lagFagsak(type = FagsakType.INSTITUSJON)
+            val klageMottattDato = dagensDato.plusDays(1)
+
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_KUNNE_BEHANDLE_BA_INSTITUSJONSFAGSAKER_I_KLAGE) } returns false
+
+            // Act & assert
+            val exception =
+                assertThrows<FunksjonellFeil> {
+                    klagebehandlingOppretter.opprettKlage(fagsak, klageMottattDato)
+                }
+            assertThat(exception.message).isEqualTo("Oppretting av klagebehandlinger for institusjonsfagsaker er ikke implementert.")
+        }
+
         @Test
         fun `skal kaste exception hvis klagebehandlingen blir mottatt etter dagens dato`() {
             // Arrange
@@ -115,6 +143,7 @@ class KlagebehandlingOppretterTest {
             // Assert
             assertThat(id).isEqualTo(klagebehandlingId)
             assertThat(opprettKlageRequest.captured.ident).isEqualTo(fagsak.aktør.aktivFødselsnummer())
+            assertThat(opprettKlageRequest.captured.orgNummer).isNull()
             assertThat(opprettKlageRequest.captured.stønadstype).isEqualTo(Stønadstype.BARNETRYGD)
             assertThat(opprettKlageRequest.captured.eksternFagsakId).isEqualTo(fagsak.id.toString())
             assertThat(opprettKlageRequest.captured.fagsystem).isEqualTo(Fagsystem.BA)
@@ -142,6 +171,7 @@ class KlagebehandlingOppretterTest {
             // Assert
             assertThat(id).isEqualTo(klagebehandlingId)
             assertThat(opprettKlageRequest.captured.ident).isEqualTo(fagsak.aktør.aktivFødselsnummer())
+            assertThat(opprettKlageRequest.captured.orgNummer).isNull()
             assertThat(opprettKlageRequest.captured.stønadstype).isEqualTo(Stønadstype.BARNETRYGD)
             assertThat(opprettKlageRequest.captured.eksternFagsakId).isEqualTo(fagsak.id.toString())
             assertThat(opprettKlageRequest.captured.fagsystem).isEqualTo(Fagsystem.BA)
@@ -170,11 +200,60 @@ class KlagebehandlingOppretterTest {
             // Assert
             assertThat(id).isEqualTo(klagebehandlingId)
             assertThat(opprettKlageRequest.captured.ident).isEqualTo(fagsak.aktør.aktivFødselsnummer())
+            assertThat(opprettKlageRequest.captured.orgNummer).isNull()
             assertThat(opprettKlageRequest.captured.stønadstype).isEqualTo(Stønadstype.BARNETRYGD)
             assertThat(opprettKlageRequest.captured.eksternFagsakId).isEqualTo(fagsak.id.toString())
             assertThat(opprettKlageRequest.captured.fagsystem).isEqualTo(Fagsystem.BA)
             assertThat(opprettKlageRequest.captured.behandlendeEnhet).isEqualTo(tilpassetArbeidsfordelingsenhet.enhetId)
             assertThat(opprettKlageRequest.captured.behandlingsårsak).isEqualTo(Klagebehandlingsårsak.ORDINÆR)
+        }
+
+        @Test
+        fun `skal lage OpprettKlageRequest for institusjonsfagsak om toggle er skrudd på`() {
+            // Arrange
+            val institusjon = lagInstitusjon(orgNummer = "123456789")
+            val fagsak = lagFagsak(type = FagsakType.INSTITUSJON, institusjon = institusjon)
+            val klageMottattDato = dagensDato
+            val arbeidsfordelingsenhet = Arbeidsfordelingsenhet.opprettFra(BarnetrygdEnhet.OSLO)
+            val klagebehandlingId = UUID.randomUUID()
+
+            val opprettKlageRequest = slot<OpprettKlagebehandlingRequest>()
+
+            every { integrasjonKlient.hentBehandlendeEnhet(fagsak.aktør.aktivFødselsnummer()) } returns listOf(arbeidsfordelingsenhet)
+            every { klageKlient.opprettKlage(capture(opprettKlageRequest)) } returns klagebehandlingId
+            every { tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(arbeidsfordelingsenhet, any()) } returns arbeidsfordelingsenhet
+
+            // Act
+            val id = klagebehandlingOppretter.opprettKlage(fagsak, klageMottattDato)
+
+            // Assert
+            assertThat(id).isEqualTo(klagebehandlingId)
+            assertThat(opprettKlageRequest.captured.ident).isEqualTo(fagsak.aktør.aktivFødselsnummer())
+            assertThat(opprettKlageRequest.captured.orgNummer).isEqualTo(institusjon.orgNummer)
+            assertThat(opprettKlageRequest.captured.stønadstype).isEqualTo(Stønadstype.BARNETRYGD)
+            assertThat(opprettKlageRequest.captured.eksternFagsakId).isEqualTo(fagsak.id.toString())
+            assertThat(opprettKlageRequest.captured.fagsystem).isEqualTo(Fagsystem.BA)
+            assertThat(opprettKlageRequest.captured.behandlendeEnhet).isEqualTo(arbeidsfordelingsenhet.enhetId)
+            assertThat(opprettKlageRequest.captured.behandlingsårsak).isEqualTo(Klagebehandlingsårsak.ORDINÆR)
+        }
+
+        @Test
+        fun `skal kaste feil om man prøver å opprette en klagebehandling for fagsak av type institusjon men som mangler insitutsjon`() {
+            // Arrange
+            val fagsak = lagFagsak(type = FagsakType.INSTITUSJON, institusjon = null)
+            val klageMottattDato = dagensDato
+            val arbeidsfordelingsenhet = Arbeidsfordelingsenhet.opprettFra(BarnetrygdEnhet.OSLO)
+            val klagebehandlingId = UUID.randomUUID()
+
+            val opprettKlageRequest = slot<OpprettKlagebehandlingRequest>()
+
+            every { integrasjonKlient.hentBehandlendeEnhet(fagsak.aktør.aktivFødselsnummer()) } returns listOf(arbeidsfordelingsenhet)
+            every { klageKlient.opprettKlage(capture(opprettKlageRequest)) } returns klagebehandlingId
+            every { tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(arbeidsfordelingsenhet, any()) } returns arbeidsfordelingsenhet
+
+            // Act & assert
+            val exception = assertThrows<Feil> { klagebehandlingOppretter.opprettKlage(fagsak, klageMottattDato) }
+            assertThat(exception.message).isEqualTo("Fant ikke forventet institusjon på fagsak ${fagsak.id}.")
         }
     }
 }
