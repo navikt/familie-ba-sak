@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.småbarnstillegg
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import io.swagger.v3.oas.annotations.media.Schema
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
@@ -68,6 +69,7 @@ class SmåbarnstilleggController(
     }
 }
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 data class SmåbarnstilleggKorrigeringRequest(
     @Schema(
         implementation = String::class,
