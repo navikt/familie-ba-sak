@@ -447,7 +447,7 @@ internal class SaksstatistikkServiceTest {
         every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns lagBehandling(fagsak)
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
-        println(jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
+        println(sakstatistikkObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
 
         assertThat(sakDvh?.aktorId).isEqualTo(randomAktørId.aktørId.toLong())
         assertThat(sakDvh?.aktorer).hasSize(2).extracting("rolle").containsOnly("SØKER", "BARN")
