@@ -144,7 +144,13 @@ class UtvidetBehandlingService(
             arbeidsfordelingPåBehandling = arbeidsfordeling.tilArbeidsfordelingPåBehandlingDto(),
             søknadsgrunnlag = søknadsgrunnlag,
             personer =
-                personer?.map { person -> persongrunnlagService.mapTilPersonDtoMedStatsborgerskapLand(person, erManueltLagtTilISøknad = søknadsgrunnlag?.barnaMedOpplysninger?.find { it.ident == person.aktør.aktivFødselsnummer() }?.manueltRegistrert) }
+                personer?.map { person ->
+                    persongrunnlagService.mapTilPersonDtoMedStatsborgerskapLand(
+                        person = person,
+                        erManueltLagtTilISøknad = søknadsgrunnlag?.barnaMedOpplysninger?.find { it.ident == person.aktør.aktivFødselsnummer() }?.manueltRegistrert,
+                        eldsteBarnsFødselsdato = personopplysningGrunnlag.eldsteBarnSinFødselsdato,
+                    )
+                }
                     ?: emptyList(),
             personResultater = personResultater?.map { it.tilPersonResultatDto() } ?: emptyList(),
             fødselshendelsefiltreringResultater =

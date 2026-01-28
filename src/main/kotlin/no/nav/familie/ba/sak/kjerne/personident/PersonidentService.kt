@@ -165,6 +165,9 @@ class PersonidentService(
         return aktør
     }
 
+    @Transactional
+    fun lagreAktør(aktør: Aktør): Aktør = aktørIdRepository.saveAndFlush(aktør)
+
     companion object {
         val logger = LoggerFactory.getLogger(PersonidentService::class.java)
     }

@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FolkeregisteridentifikatorStatus
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.GeografiskTilknytning
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
@@ -9,6 +10,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlDødsfallResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFalskIdentitet
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFalskIdentitetResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlGeografiskTilknytningResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlOppholdResponse
@@ -25,6 +27,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerKjønnPåKilde
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerNavnPåKilde
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.util.UriUtil
@@ -42,6 +45,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 class PdlRestKlient(
@@ -89,6 +93,8 @@ class PdlRestKlient(
             val forelderBarnRelasjon: Set<ForelderBarnRelasjon> =
                 when (personInfoQuery) {
                     PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON -> {
+                        lagreHistoriskeIdenter(fødselsnummer, pdlPerson.person.folkeregisteridentifikator)
+
                         pdlPerson.person.forelderBarnRelasjon
                             .mapNotNull { relasjon ->
                                 relasjon.relatertPersonsIdent
@@ -145,6 +151,44 @@ class PdlRestKlient(
             return null
         }
         return DødsfallData(erDød = true, dødsdato = dødsdato)
+    }
+
+    private fun lagreHistoriskeIdenter(
+        aktivtFødselsnummer: String,
+        identer: List<PdlFolkeregisteridentifikator>,
+    ) {
+        try {
+            val aktør = personidentService.hentAktør(aktivtFødselsnummer)
+            val eksisterendeFødselsnummer = aktør.personidenter.map { it.fødselsnummer }.toSet()
+            val nyeIdenter =
+                identer
+                    .filter { it.identifikasjonsnummer != null && it.identifikasjonsnummer !in eksisterendeFødselsnummer }
+
+            if (nyeIdenter.isNotEmpty()) {
+                secureLogger.info("Lagrer ${nyeIdenter.map { it.identifikasjonsnummer }} som nye folkeregisteridentifikatorer på aktør ${aktør.aktørId}: ")
+
+                nyeIdenter.forEach { pdlIdent ->
+                    val erAktiv = pdlIdent.status == FolkeregisteridentifikatorStatus.I_BRUK
+                    if (erAktiv) {
+                        aktør.personidenter.filter { it.aktiv }.forEach {
+                            it.aktiv = false
+                            it.gjelderTil = LocalDateTime.now()
+                        }
+                    }
+                    aktør.personidenter.add(
+                        Personident(
+                            fødselsnummer = pdlIdent.identifikasjonsnummer!!,
+                            aktør = aktør,
+                            aktiv = erAktiv,
+                            gjelderTil = if (erAktiv) null else LocalDateTime.now(),
+                        ),
+                    )
+                }
+                personidentService.lagreAktør(aktør)
+            }
+        } catch (e: Exception) {
+            secureLogger.warn("Kunne ikke lagre historiske folketregisteridentifikatorer for $aktivtFødselsnummer", e)
+        }
     }
 
     @Cacheable("vergedata", cacheManager = "shortCache")
