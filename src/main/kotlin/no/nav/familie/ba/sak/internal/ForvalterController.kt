@@ -585,7 +585,4 @@ class ForvalterController(
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandlingId)
         return ResponseEntity.ok("Sendt behandlingsstatistikk for behandling $behandlingId til Datavarehus")
     }
-
-    @GetMapping("/ping")
-    fun ping(): ResponseEntity<String> = ResponseEntity.ok("pong")
 }
