@@ -5,10 +5,8 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.util.replaceFirst
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.EØSLand.Companion.hentEøsTidslinje
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.tidslinje.Periode
@@ -23,15 +21,13 @@ class StatsborgerskapService(
     private val kodeverkService: KodeverkService,
     private val featureToggleService: FeatureToggleService,
 ) {
-    fun brukHardkodeForStatsborgerskap() = featureToggleService.isEnabled(FeatureToggle.HARDKODET_EEAFREG_STATSBORGERSKAP)
-
     fun hentLand(landkode: String): String = kodeverkService.hentLand(landkode)
 
     fun hentStatsborgerskapMedMedlemskap(
         statsborgerskap: Statsborgerskap,
         person: Person,
     ): List<GrStatsborgerskap> {
-        if (brukHardkodeForStatsborgerskap()) {
+        if (featureToggleService.isEnabled(FeatureToggle.HARDKODET_EEAFREG_STATSBORGERSKAP)) {
             return lagMedlemskapPerioderForStatsborgerskap(statsborgerskap, person.fødselsdato).map {
                 GrStatsborgerskap(
                     gyldigPeriode =
@@ -109,10 +105,11 @@ class StatsborgerskapService(
 
     fun lagMedlemskapPerioderForStatsborgerskap(
         statsborgerskap: Statsborgerskap,
-        startDato: LocalDate?,
+        cutOffFomDato: LocalDate?,
     ): List<Periode<Medlemskap>> {
         val datoFra = statsborgerskap.hentFom()
-        val eøsTidslinje = hentEøsTidslinje(statsborgerskap.land)
+
+        val eøsTidslinje = kodeverkService.hentEøsMedlemskapsTidslinje(statsborgerskap.land)
 
         val statsborgerskapTidslinje =
             Periode(
@@ -125,18 +122,28 @@ class StatsborgerskapService(
             .kombinerMed(eøsTidslinje) { statsborgerskap, erEøsland ->
                 statsborgerskap?.let { finnMedlemskap(it, erEøsland ?: false) }
             }.tilPerioderIkkeNull()
-            .filter { it.tom == null || it.tom!! >= startDato }
-            .run {
-                if (statsborgerskap.hentFom() == null) {
-                    this.replaceFirst { it.copy(fom = null) }
-                } else {
-                    this
-                }
+            .filter { it.tom == null || it.tom!! >= cutOffFomDato }
+            .apply {
+                beskjærFomDato(cutOffFomDato)
             }
     }
 
+    private fun List<Periode<Medlemskap>>.beskjærFomDato(
+        cutOffFomDato: LocalDate?,
+    ) {
+        map { periode ->
+            periode.fom.let {
+                if (it == null || it < cutOffFomDato) {
+                    periode.copy(fom = cutOffFomDato)
+                } else {
+                    periode
+                }
+            }
+        }
+    }
+
     fun hentSterkesteMedlemskap(statsborgerskap: Statsborgerskap): Medlemskap? {
-        if (brukHardkodeForStatsborgerskap()) {
+        if (featureToggleService.isEnabled(FeatureToggle.HARDKODET_EEAFREG_STATSBORGERSKAP)) {
             val datoFra = statsborgerskap.hentFom() ?: LocalDate.now()
 
             val medlemskapsPerioder = lagMedlemskapPerioderForStatsborgerskap(statsborgerskap, datoFra)
@@ -179,7 +186,8 @@ class StatsborgerskapService(
         }
     }
 
-    private fun hentMedlemskapsperioderUnderStatsborgerskapsperioden( // Kan fjernes når vi går over til hardkodet EØS
+    private fun hentMedlemskapsperioderUnderStatsborgerskapsperioden(
+        // Kan fjernes når vi går over til hardkodet EØS
         medlemskapsperioderForValgtLand: List<BetydningDto>,
         statsborgerFra: LocalDate?,
         statsborgerTil: LocalDate?,
@@ -218,7 +226,8 @@ class StatsborgerskapService(
             else -> Medlemskap.UKJENT
         }
 
-    private fun finnMedlemskap( // Kan fjernes når vi går over til hardkodet EØS
+    private fun finnMedlemskap(
+        // Kan fjernes når vi går over til hardkodet EØS
         statsborgerskap: Statsborgerskap,
         eøsMedlemskapsperioderForValgtLand: List<BetydningDto>,
         gyldigFraOgMed: LocalDate?,
@@ -231,7 +240,8 @@ class StatsborgerskapService(
             else -> Medlemskap.UKJENT
         }
 
-    private fun erEØSMedlemPåGittDato( // Kan fjernes når vi går over til hardkodet EØS
+    private fun erEØSMedlemPåGittDato(
+        // Kan fjernes når vi går over til hardkodet EØS
         eøsMedlemskapsperioderForValgtLand: List<BetydningDto>,
         gjeldendeDato: LocalDate?,
     ): Boolean =
@@ -245,7 +255,8 @@ class StatsborgerskapService(
 
     private fun erInnenforDatoerSomBetegnerUendelighetIKodeverk(dato: LocalDate) = dato.isAfter(TIDLIGSTE_DATO_I_KODEVERK) && dato.isBefore(SENESTE_DATO_I_KODEVERK) // Kan fjernes når vi går over til hardkodet EØS
 
-    private fun erInnenforDatoerForStatsborgerskapet( // Kan fjernes når vi går over til hardkodet EØS
+    private fun erInnenforDatoerForStatsborgerskapet(
+        // Kan fjernes når vi går over til hardkodet EØS
         dato: LocalDate,
         statsborgerFra: LocalDate?,
         statsborgerTil: LocalDate?,
