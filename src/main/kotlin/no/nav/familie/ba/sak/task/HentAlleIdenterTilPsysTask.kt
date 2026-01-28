@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.ba.sak.task.dto.HentAlleIdenterTilPsysRequestDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -38,7 +38,7 @@ class HentAlleIdenterTilPsysTask(
 
     @WithSpan
     override fun doTask(task: Task) {
-        objectMapper.readValue(task.payload, HentAlleIdenterTilPsysRequestDTO::class.java).run {
+        jsonMapper.readValue(task.payload, HentAlleIdenterTilPsysRequestDTO::class.java).run {
             logger.info("Starter med å hente alle identer fra DB for request $requestId")
 
             val identer = hentAlleIdenterMedBarnetrygd(år, requestId)
@@ -82,7 +82,7 @@ class HentAlleIdenterTilPsysTask(
         ): Task =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(HentAlleIdenterTilPsysRequestDTO(år = år, requestId = uuid)),
+                payload = jsonMapper.writeValueAsString(HentAlleIdenterTilPsysRequestDTO(år = år, requestId = uuid)),
                 properties =
                     Properties().apply {
                         this["år"] = år.toString()

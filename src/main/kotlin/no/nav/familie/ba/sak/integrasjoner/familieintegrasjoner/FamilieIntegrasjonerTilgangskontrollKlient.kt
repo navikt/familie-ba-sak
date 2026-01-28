@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
+import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders

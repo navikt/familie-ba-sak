@@ -1,14 +1,17 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagring
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Component
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.SerializationFeature
+import tools.jackson.databind.cfg.DateTimeFeature
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.KotlinModule
 
 @Component
 class SaksstatistikkEventListener(
@@ -45,7 +48,12 @@ class SaksstatistikkEventListener(
 }
 
 val sakstatistikkObjectMapper: ObjectMapper =
-    objectMapper
-        .copy()
-        .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
-        .configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false)
+    JsonMapper
+        .builder()
+        .addModule(KotlinModule.Builder().build())
+        .configure(DateTimeFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false)
+        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+        .changeDefaultPropertyInclusion {
+            JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL)
+        }.build()

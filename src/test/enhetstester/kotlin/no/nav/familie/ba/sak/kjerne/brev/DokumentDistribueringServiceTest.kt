@@ -8,9 +8,9 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlien
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
-import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.internal.TaskService
+import no.nav.familie.restklient.client.RessursException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.http.HttpStatus

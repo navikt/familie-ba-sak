@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.integrasjoner.ef
 
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
-import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.http.util.UriUtil
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
+import no.nav.familie.restklient.client.AbstractRestClient
+import no.nav.familie.restklient.util.UriUtil
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component

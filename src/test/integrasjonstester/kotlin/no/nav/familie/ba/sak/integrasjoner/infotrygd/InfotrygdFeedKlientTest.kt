@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedTaskDto
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.NavHttpHeaders
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -50,7 +50,7 @@ class InfotrygdFeedKlientTest : AbstractSpringIntegrationTest() {
     fun `skal legge til fødselsnummer i infotrygd feed`() {
         wireMockServer.stubFor(
             post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(
-                okJson(objectMapper.writeValueAsString(success("Create"))),
+                okJson(jsonMapper.writeValueAsString(success("Create"))),
             ),
         )
         val request = InfotrygdFødselhendelsesFeedTaskDto(listOf("fnr"))
@@ -64,7 +64,7 @@ class InfotrygdFeedKlientTest : AbstractSpringIntegrationTest() {
                 .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("srvfamilie-ba-sak"))
                 .withRequestBody(
                     equalToJson(
-                        objectMapper.writeValueAsString(InfotrygdFødselhendelsesFeedDto(fnrBarn = request.fnrBarn.first())),
+                        jsonMapper.writeValueAsString(InfotrygdFødselhendelsesFeedDto(fnrBarn = request.fnrBarn.first())),
                     ),
                 ),
         )

@@ -22,8 +22,8 @@ import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelserDto
-import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.http.HttpHeaders
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriUtils.encodePath

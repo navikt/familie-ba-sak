@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.task.dto.AutobrevPgaAlderDTO
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
@@ -61,7 +61,7 @@ class OpprettTaskService(
             Task(
                 type = OpprettOppgaveTask.TASK_STEP_TYPE,
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         OpprettOppgaveTaskDTO(
                             behandlingId,
                             Oppgavetype.VurderLivshendelse,
@@ -107,7 +107,7 @@ class OpprettTaskService(
                 Task(
                     type = SendAutobrevPgaAlderTask.TASK_STEP_TYPE,
                     payload =
-                        objectMapper.writeValueAsString(
+                        jsonMapper.writeValueAsString(
                             AutobrevPgaAlderDTO(
                                 fagsakId = fagsakId,
                                 alder = alder,
@@ -131,7 +131,7 @@ class OpprettTaskService(
                 Task(
                     type = SendAutobrevOpphørSmåbarnstilleggTask.TASK_STEP_TYPE,
                     payload =
-                        objectMapper.writeValueAsString(
+                        jsonMapper.writeValueAsString(
                             AutobrevOpphørSmåbarnstilleggDTO(
                                 fagsakId = fagsakId,
                             ),
@@ -161,7 +161,7 @@ class OpprettTaskService(
             taskRepository.save(
                 Task(
                     type = SatsendringTask.TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(SatsendringTaskDto(fagsakId, satstidspunkt)),
+                    payload = jsonMapper.writeValueAsString(SatsendringTaskDto(fagsakId, satstidspunkt)),
                     properties =
                         Properties().apply {
                             this["fagsakId"] = fagsakId.toString()
@@ -230,7 +230,7 @@ class OpprettTaskService(
             Task(
                 type = HenleggBehandlingTask.TASK_STEP_TYPE,
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         HenleggBehandlingTaskDTO(
                             behandlingId = behandlingId,
                             årsak = årsak,
@@ -252,7 +252,7 @@ class OpprettTaskService(
     ) = taskRepository.save(
         Task(
             type = PatchMergetIdentTask.TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(dto),
+            payload = jsonMapper.writeValueAsString(dto),
             properties =
                 Properties().apply {
                     this["fagsakId"] = dto.fagsakId.toString()
@@ -269,7 +269,7 @@ class OpprettTaskService(
         taskRepository.save(
             Task(
                 type = PatchFomPåVilkårTilFødselsdatoTask.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(dto),
+                payload = jsonMapper.writeValueAsString(dto),
                 properties =
                     Properties().apply {
                         this["behandlingId"] = dto.behandlingId.toString()
@@ -285,7 +285,7 @@ class OpprettTaskService(
         taskRepository.save(
             Task(
                 type = GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(dto),
+                payload = jsonMapper.writeValueAsString(dto),
                 properties =
                     Properties().apply {
                         this["fomDato"] = dto.fomDato.toString()

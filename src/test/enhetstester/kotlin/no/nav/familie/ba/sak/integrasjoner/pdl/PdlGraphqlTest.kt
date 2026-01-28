@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
@@ -11,7 +10,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlNavn
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerKjønnPåKilde
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerNavnPåKilde
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
@@ -19,10 +18,11 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.readValue
 import java.io.File
 
 class PdlGraphqlTest {
-    private val mapper = objectMapper
+    private val mapper = jsonMapper
 
     @Test
     fun testDeserialization() {

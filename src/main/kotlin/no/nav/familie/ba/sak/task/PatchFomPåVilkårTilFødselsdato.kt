@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.internal.ForvalterService
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -20,7 +20,7 @@ class PatchFomPåVilkårTilFødselsdatoTask(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val dto = objectMapper.readValue(task.payload, PatchFomPåVilkårTilFødselsdato::class.java)
+        val dto = jsonMapper.readValue(task.payload, PatchFomPåVilkårTilFødselsdato::class.java)
 
         forvalterService.settFomPåVilkårTilPersonsFødselsdato(dto.behandlingId)
     }

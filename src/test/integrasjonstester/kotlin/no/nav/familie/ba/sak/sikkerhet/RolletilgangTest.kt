@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.sikkerhet
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -9,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -21,6 +20,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.postForEntity
+import tools.jackson.module.kotlin.readValue
 
 @ActiveProfiles(
     "postgres",
@@ -59,7 +59,7 @@ class RolletilgangTest(
         )
         val requestEntity =
             HttpEntity<String>(
-                objectMapper.writeValueAsString(
+                jsonMapper.writeValueAsString(
                     FagsakRequest(
                         personIdent = fnr,
                     ),
@@ -75,7 +75,7 @@ class RolletilgangTest(
                 )
             }
 
-        val ressurs: Ressurs<Fagsak> = objectMapper.readValue(error.responseBodyAsString)
+        val ressurs: Ressurs<Fagsak> = jsonMapper.readValue(error.responseBodyAsString)
 
         assertEquals(HttpStatus.FORBIDDEN, error.statusCode)
         assertEquals(Ressurs.Status.IKKE_TILGANG, ressurs.status)
@@ -102,7 +102,7 @@ class RolletilgangTest(
         )
         val requestEntity =
             HttpEntity<String>(
-                objectMapper.writeValueAsString(
+                jsonMapper.writeValueAsString(
                     FagsakRequest(
                         personIdent = fnr,
                     ),
@@ -136,7 +136,7 @@ class RolletilgangTest(
         )
         val requestEntity =
             HttpEntity<String>(
-                objectMapper.writeValueAsString(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.data!!.id)),
+                jsonMapper.writeValueAsString(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.data!!.id)),
                 header,
             )
 
@@ -148,7 +148,7 @@ class RolletilgangTest(
                 )
             }
 
-        val ressurs: Ressurs<Behandling> = objectMapper.readValue(error.responseBodyAsString)
+        val ressurs: Ressurs<Behandling> = jsonMapper.readValue(error.responseBodyAsString)
 
         assertEquals(HttpStatus.FORBIDDEN, error.statusCode)
         assertEquals(Ressurs.Status.IKKE_TILGANG, ressurs.status)
@@ -173,7 +173,7 @@ class RolletilgangTest(
         )
         val requestEntity =
             HttpEntity<String>(
-                objectMapper.writeValueAsString(
+                jsonMapper.writeValueAsString(
                     listOf(1L, 2L),
                 ),
                 header,
@@ -187,7 +187,7 @@ class RolletilgangTest(
                 )
             }
 
-        val ressurs: Ressurs<Fagsak> = objectMapper.readValue(error.responseBodyAsString)
+        val ressurs: Ressurs<Fagsak> = jsonMapper.readValue(error.responseBodyAsString)
 
         assertEquals(HttpStatus.FORBIDDEN, error.statusCode)
         assertEquals(Ressurs.Status.IKKE_TILGANG, ressurs.status)
@@ -213,7 +213,7 @@ class RolletilgangTest(
         )
         val requestEntity =
             HttpEntity<String>(
-                objectMapper.writeValueAsString(
+                jsonMapper.writeValueAsString(
                     emptyList<Long>(),
                 ),
                 header,

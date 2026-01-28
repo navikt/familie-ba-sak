@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.tilbakekreving
 
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -38,7 +38,7 @@ class HentFagsystemsbehandlingRequestConsumer(
         val data: String = consumerRecord.value()
         val key: String = consumerRecord.key()
         val request: HentFagsystemsbehandlingRequest =
-            objectMapper.readValue(data, HentFagsystemsbehandlingRequest::class.java)
+            jsonMapper.readValue(data, HentFagsystemsbehandlingRequest::class.java)
 
         if (request.ytelsestype != Ytelsestype.BARNETRYGD) {
             return

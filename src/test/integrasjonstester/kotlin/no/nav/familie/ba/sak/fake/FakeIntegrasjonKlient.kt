@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.fake
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
 import no.nav.familie.ba.sak.datagenerator.lagKodeverkLand
@@ -34,12 +33,12 @@ import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.TilgangsstyrtJournalpost
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkSpråk
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -53,6 +52,7 @@ import no.nav.familie.kontrakter.felles.organisasjon.OrganisasjonAdresse
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.springframework.core.io.ClassPathResource
 import org.springframework.web.client.RestOperations
+import tools.jackson.module.kotlin.readValue
 import java.io.BufferedReader
 import java.net.URI
 import java.time.LocalDate
@@ -298,7 +298,7 @@ class FakeIntegrasjonKlient(
         val landkoder =
             ClassPathResource("landkoder/landkoder.json").inputStream.bufferedReader().use(BufferedReader::readText)
 
-        return objectMapper.readValue<List<LandkodeISO2>>(landkoder).associate { it.code to it.name }
+        return jsonMapper.readValue<List<LandkodeISO2>>(landkoder).associate { it.code to it.name }
     }
 
     data class LandkodeISO2(

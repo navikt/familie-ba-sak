@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.førerTilOpphør
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -53,7 +53,7 @@ class OppdaterTilkjentYtelseService(
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     ) {
         val opphør = Opphør.opprettFor(utbetalingsoppdrag, tilkjentYtelse.behandling)
-        tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
+        tilkjentYtelse.utbetalingsoppdrag = jsonMapper.writeValueAsString(utbetalingsoppdrag)
         tilkjentYtelse.stønadTom = utledStønadTom(tilkjentYtelse.andelerTilkjentYtelse, endretUtbetalingAndeler)
         tilkjentYtelse.stønadFom = if (opphør.erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOf { it.stønadFom }
         tilkjentYtelse.endretDato = LocalDate.now(clockProvider.get())

@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -11,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.ResultatBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.Fødselsnummer
+import tools.jackson.databind.annotation.JsonDeserialize
 import java.time.LocalDate
 import java.time.LocalDateTime
 

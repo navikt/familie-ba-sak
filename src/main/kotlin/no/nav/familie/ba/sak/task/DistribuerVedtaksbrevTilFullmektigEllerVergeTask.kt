@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.brev.DokumentDistribueringService
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -21,7 +21,7 @@ class DistribuerVedtaksbrevTilFullmektigEllerVergeTask(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val distribuerDokumentDTO = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
+        val distribuerDokumentDTO = jsonMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
         dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
             distribuerDokumentDTO = distribuerDokumentDTO,
             loggBehandlerRolle = BehandlerRolle.SYSTEM,
@@ -35,7 +35,7 @@ class DistribuerVedtaksbrevTilFullmektigEllerVergeTask(
         ): Task =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(distribuerDokumentDTO),
+                payload = jsonMapper.writeValueAsString(distribuerDokumentDTO),
                 properties = properties,
             ).copy(
                 triggerTid = utledNesteTriggerTidIHverdagerForTask(),

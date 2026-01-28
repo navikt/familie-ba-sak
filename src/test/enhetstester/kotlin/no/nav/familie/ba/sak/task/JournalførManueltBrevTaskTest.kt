@@ -22,7 +22,7 @@ import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
@@ -138,7 +138,7 @@ class JournalførManueltBrevTaskTest {
 
             val capturedTask = taskSlot.captured
             assertThat(capturedTask.type).isEqualTo(DistribuerDokumentTask.TASK_STEP_TYPE)
-            val distribuerDokumentDTO = objectMapper.readValue(capturedTask.payload, DistribuerDokumentDTO::class.java)
+            val distribuerDokumentDTO = jsonMapper.readValue(capturedTask.payload, DistribuerDokumentDTO::class.java)
             assertThat(distribuerDokumentDTO.journalpostId).isEqualTo("journalpostId")
             assertThat(distribuerDokumentDTO.brevmal).isEqualTo(brevmal)
             assertThat(distribuerDokumentDTO.fagsakId).isEqualTo(fagsak.id)
@@ -226,7 +226,7 @@ class JournalførManueltBrevTaskTest {
 
             val capturedTask = taskSlot.captured
             assertThat(capturedTask.type).isEqualTo(DistribuerDokumentTask.TASK_STEP_TYPE)
-            val distribuerDokumentDTO = objectMapper.readValue(capturedTask.payload, DistribuerDokumentDTO::class.java)
+            val distribuerDokumentDTO = jsonMapper.readValue(capturedTask.payload, DistribuerDokumentDTO::class.java)
             assertThat(distribuerDokumentDTO.journalpostId).isEqualTo("journalpostId")
             assertThat(distribuerDokumentDTO.brevmal).isEqualTo(brevmal)
             assertThat(distribuerDokumentDTO.fagsakId).isEqualTo(fagsak.id)
@@ -344,7 +344,7 @@ class JournalførManueltBrevTaskTest {
 
             val capturedTask = taskSlot.captured
             assertThat(capturedTask.type).isEqualTo(DistribuerDokumentTask.TASK_STEP_TYPE)
-            val distribuerDokumentDTO = objectMapper.readValue(capturedTask.payload, DistribuerDokumentDTO::class.java)
+            val distribuerDokumentDTO = jsonMapper.readValue(capturedTask.payload, DistribuerDokumentDTO::class.java)
             assertThat(distribuerDokumentDTO.manuellAdresseInfo).isNotNull
             assertThat(distribuerDokumentDTO.manuellAdresseInfo).isEqualTo(mottakerInfo.manuellAdresseInfo)
         }
@@ -420,7 +420,7 @@ class JournalførManueltBrevTaskTest {
             // Assert
             assertThat(task.type).isEqualTo(JournalførManueltBrevTask.TASK_STEP_TYPE)
             assertThat(task.payload).isNotNull()
-            val journalførManueltBrevDTO = objectMapper.readValue(task.payload, JournalførManueltBrevDTO::class.java)
+            val journalførManueltBrevDTO = jsonMapper.readValue(task.payload, JournalførManueltBrevDTO::class.java)
             assertThat(journalførManueltBrevDTO.fagsakId).isEqualTo(fagsakId)
             assertThat(journalførManueltBrevDTO.behandlingId).isEqualTo(behandlingId)
             assertThat(journalførManueltBrevDTO.manuellBrevRequest).isEqualTo(manueltBrevDto)

@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagRepository
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 
 fun mockSøknadGrunnlagRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): SøknadGrunnlagRepository {
     val søknadGrunnlagRepository = mockk<SøknadGrunnlagRepository>()
@@ -19,7 +19,7 @@ fun mockSøknadGrunnlagRepository(dataFraCucumber: VedtaksperioderOgBegrunnelser
             SøknadGrunnlag(
                 behandlingId = behandlingId,
                 søknad =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         lagSøknadDTO(
                             randomFnr(),
                             emptyList(),

@@ -26,12 +26,12 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerNavnPåKilde
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.http.util.UriUtil
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.UtenlandskAdresse
+import no.nav.familie.restklient.client.AbstractRestClient
+import no.nav.familie.restklient.util.UriUtil
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value

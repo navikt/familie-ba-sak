@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.fake
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
+import tools.jackson.module.kotlin.readValue
 
 class FakeTaskRepositoryWrapper(
     taskService: TaskService,
@@ -24,4 +24,4 @@ class FakeTaskRepositoryWrapper(
     fun hentLagredeTaskerAvType(type: String): List<Task> = this.lagredeTasker.filter { it.type == type }
 }
 
-inline fun <reified T> List<Task>.tilPayload(): List<T> = this.map { objectMapper.readValue(it.payload) }
+inline fun <reified T> List<Task>.tilPayload(): List<T> = this.map { jsonMapper.readValue(it.payload) }

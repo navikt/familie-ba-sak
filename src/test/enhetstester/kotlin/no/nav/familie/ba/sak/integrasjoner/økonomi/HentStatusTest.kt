@@ -22,7 +22,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.prosessering.domene.Task
@@ -143,7 +143,7 @@ class HentStatusTest {
         val nyTilkjentYtelse =
             lagInitiellTilkjentYtelse(
                 behandling = behandling,
-                utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdrag(utbetalingsperiode = utbetalingsperiode)),
+                utbetalingsoppdrag = jsonMapper.writeValueAsString(lagUtbetalingsoppdrag(utbetalingsperiode = utbetalingsperiode)),
             )
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns nyTilkjentYtelse
     }
@@ -179,9 +179,9 @@ class HentStatusTest {
             periodeId = 1L,
             behandlingId = nyBehandling.id,
             datoForVedtak = LocalDate.of(2020, Month.APRIL, 1),
-            klassifisering = "",
+            klassifisering = "BATR",
             sats = BigDecimal.ONE,
             satsType = Utbetalingsperiode.SatsType.MND,
-            utbetalesTil = "",
+            utbetalesTil = "utbetalesTil",
         )
 }

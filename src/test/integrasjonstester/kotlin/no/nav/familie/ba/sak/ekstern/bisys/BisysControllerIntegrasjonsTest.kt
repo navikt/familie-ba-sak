@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.ekstern.bisys
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
@@ -12,7 +11,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.verify
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.AfterEach
@@ -26,10 +25,12 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
+import org.springframework.web.client.getForEntity
 import org.springframework.web.client.postForEntity
 import org.wiremock.spring.ConfigureWireMock
 import org.wiremock.spring.EnableWireMock
 import org.wiremock.spring.InjectWireMock
+import tools.jackson.module.kotlin.readValue
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.time.LocalDate
@@ -89,7 +90,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
             }
 
         assertThat(error.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-        val errorObject = objectMapper.readValue<EksternTjenesteFeil>(error.responseBodyAsByteArray)
+        val errorObject = jsonMapper.readValue<EksternTjenesteFeil>(error.responseBodyAsByteArray)
         assertThat(errorObject.melding).contains("Henting av utvidet barnetrygd feilet. Gav feil: 500 Server Error on POST request for")
         assertThat(errorObject.melding).contains("foobar")
         assertThat(errorObject.path).isEqualTo("/api/bisys/hent-utvidet-barnetrygd")
@@ -282,17 +283,12 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         header.setBearerAuth(
             hentTokenForBisys(),
         )
-        val ikkeBisysTjeneste =
-            HttpEntity<String>(
-                "tullball",
-                header,
-            )
 
         val error =
             assertThrows<HttpClientErrorException> {
-                restTemplate.postForEntity<Any>(
-                    hentUrl("/api/tullballtjeneste"),
-                    ikkeBisysTjeneste,
+                restTemplate.getForEntity<String>(
+                    hentUrl("/api/samhandler/orgnr/987654321"),
+                    header,
                 )
             }
 
@@ -306,7 +302,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
             hentTokenForBisys(),
         )
         return HttpEntity(
-            objectMapper.writeValueAsString(
+            jsonMapper.writeValueAsString(
                 request,
             ),
             header,

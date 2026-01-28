@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -41,7 +41,7 @@ class StatusFraOppdragTask(
      */
     @WithSpan
     override fun doTask(task: Task) {
-        val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
+        val statusFraOppdragDTO = jsonMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
 
         stegService.håndterStatusFraØkonomi(
             behandling = behandlingHentOgPersisterService.hent(behandlingId = statusFraOppdragDTO.behandlingsId),
@@ -50,7 +50,7 @@ class StatusFraOppdragTask(
     }
 
     override fun onCompletion(task: Task) {
-        val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
+        val statusFraOppdragDTO = jsonMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
 
         val nyTaskV2 = PubliserVedtakV2Task.opprettTask(statusFraOppdragDTO.personIdent, statusFraOppdragDTO.behandlingsId)
         taskRepository.save(nyTaskV2)
@@ -65,7 +65,7 @@ class StatusFraOppdragTask(
         ): Task =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(statusFraOppdragDTO),
+                payload = jsonMapper.writeValueAsString(statusFraOppdragDTO),
                 properties = properties,
             )
     }

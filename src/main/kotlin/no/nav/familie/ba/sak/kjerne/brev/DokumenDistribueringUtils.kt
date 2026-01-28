@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
-import no.nav.familie.http.client.RessursException
+import no.nav.familie.restklient.client.RessursException
 import org.springframework.http.HttpStatus
 
 // 410 GONE er unikt for bruker død og ingen dødsboadresse mot Dokdist

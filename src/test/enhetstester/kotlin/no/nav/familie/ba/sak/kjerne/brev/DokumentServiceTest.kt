@@ -55,7 +55,7 @@ import no.nav.familie.ba.sak.task.dto.JournalførManueltBrevDTO
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
@@ -154,7 +154,7 @@ internal class DokumentServiceTest {
 
             assertThat(capturedTask.metadata["mottakerType"]).isEqualTo(Institusjon::class.simpleName)
 
-            val journalførManueltBrevDTO = objectMapper.readValue(capturedTask.payload, JournalførManueltBrevDTO::class.java)
+            val journalførManueltBrevDTO = jsonMapper.readValue(capturedTask.payload, JournalførManueltBrevDTO::class.java)
             assertThat(journalførManueltBrevDTO.mottaker.avsenderMottaker).isNotNull
             assertThat(journalførManueltBrevDTO.mottaker.avsenderMottaker!!.idType).isEqualTo(AvsenderMottakerIdType.ORGNR)
             assertThat(journalførManueltBrevDTO.mottaker.avsenderMottaker.id).isEqualTo(orgNummer)

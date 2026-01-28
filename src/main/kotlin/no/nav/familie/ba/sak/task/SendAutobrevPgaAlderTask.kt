@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevOmregningPgaAlderService
 import no.nav.familie.ba.sak.task.dto.AutobrevPgaAlderDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -26,7 +26,7 @@ class SendAutobrevPgaAlderTask(
 
     @WithSpan
     override fun doTask(task: Task) {
-        val autobrevDTO = objectMapper.readValue(task.payload, AutobrevPgaAlderDTO::class.java)
+        val autobrevDTO = jsonMapper.readValue(task.payload, AutobrevPgaAlderDTO::class.java)
 
         if (!YearMonth.now().equals(autobrevDTO.årMåned)) {
             logger.info("Task for autobrev må kjøres innenfor måneden det skal sjekkes mot.")

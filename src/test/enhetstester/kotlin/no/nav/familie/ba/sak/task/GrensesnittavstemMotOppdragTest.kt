@@ -7,7 +7,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -47,7 +47,7 @@ class GrensesnittavstemMotOppdragTest {
         grensesnittavstemMotOppdrag.onCompletion(
             Task(
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         GrensesnittavstemmingTaskDTO(
                             fomDato = triggerDato.minusDays(1).atStartOfDay(),
                             tomDato = triggerDato.atStartOfDay(),
@@ -60,7 +60,7 @@ class GrensesnittavstemMotOppdragTest {
         )
 
         val lagretTask = slot.captured
-        val testDto = objectMapper.readValue(lagretTask.payload, GrensesnittavstemmingTaskDTO::class.java)
+        val testDto = jsonMapper.readValue(lagretTask.payload, GrensesnittavstemmingTaskDTO::class.java)
 
         assertEquals(triggerDato.atStartOfDay(), testDto.fomDato)
         assertEquals(nesteTriggerDato.atStartOfDay(), testDto.tomDato)
@@ -114,7 +114,7 @@ class GrensesnittavstemMotOppdragTest {
             Task(
                 type = GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         GrensesnittavstemmingTaskDTO(
                             iDag.minusDays(1),
                             iDag,
@@ -132,7 +132,7 @@ class GrensesnittavstemMotOppdragTest {
         verify(exactly = 1) { taskRepositoryMock.save(capture(slot)) }
         assertEquals(GrensesnittavstemMotOppdrag.TASK_STEP_TYPE, slot.captured.type)
         assertEquals(iDag.plusDays(1).toLocalDate().atTime(8, 0), slot.captured.triggerTid)
-        val taskDTO = objectMapper.readValue(slot.captured.payload, GrensesnittavstemmingTaskDTO::class.java)
+        val taskDTO = jsonMapper.readValue(slot.captured.payload, GrensesnittavstemmingTaskDTO::class.java)
         assertEquals(taskDTO.fomDato, iDag)
         assertEquals(taskDTO.tomDato, iDag.plusDays(1))
     }
