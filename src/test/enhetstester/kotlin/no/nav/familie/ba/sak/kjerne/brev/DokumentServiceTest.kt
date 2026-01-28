@@ -495,7 +495,7 @@ internal class DokumentServiceTest {
             assertThat(oppdatertManueltBrevRequest.enhet?.enhetNavn).isEqualTo(OSLO.enhetsnavn)
             verify(exactly = 1) {
                 arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(
-                    søkerIdent = søker.aktivFødselsnummer(),
+                    fagsak = fagsak,
                     barnIdenter = any(),
                     behandlingstype = null,
                 )
@@ -540,7 +540,7 @@ internal class DokumentServiceTest {
             verify(exactly = 1) { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) }
             verify(exactly = 1) {
                 arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(
-                    søkerIdent = søker.aktivFødselsnummer(),
+                    fagsak = fagsak,
                     barnIdenter = emptyList(),
                     behandlingstype = behandling.kategori.tilOppgavebehandlingType(),
                 )
@@ -572,7 +572,7 @@ internal class DokumentServiceTest {
             verify(exactly = 1) { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) }
             verify(exactly = 1) {
                 arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(
-                    søkerIdent = søker.aktivFødselsnummer(),
+                    fagsak = fagsak,
                     barnIdenter = listOf(barn1Ident, barn2Ident),
                     behandlingstype = null,
                 )

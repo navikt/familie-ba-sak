@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.fake.FakePdlRestKlient
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFalskIdentitet
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -188,6 +190,83 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
         validerAtPersonerIGrunnlagErLike(grunnlagFraFørsteBehandling, grunnlagFraSatsendringBehandling, false)
     }
 
+    @Test
+    fun `opprettKopiEllerNyttPersonopplysningGrunnlag - skal opprette nytt PersonopplysningGrunnlag som kopi av personopplysningsgrunnlag fra forrige behandling ved årsak 'Falsk identitet'`() {
+        val morId = randomFnr()
+        val barnId = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
+        val førsteBehandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
+
+        personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
+            førsteBehandling,
+            null,
+            morId,
+            listOf(barnId),
+        )
+
+        val grunnlagFraFørsteBehandling =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = førsteBehandling.id)
+
+        // Legger til andel tilkjent ytelse på barn
+        tilkjentYtelseRepository.saveAndFlush(
+            lagInitiellTilkjentYtelse(førsteBehandling, "").also {
+                it.andelerTilkjentYtelse.addAll(
+                    listOf(
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.of(2023, 5),
+                            tom = YearMonth.of(2025, 5),
+                            person = grunnlagFraFørsteBehandling!!.personer.first { person -> person.aktør.aktivFødselsnummer() == barnId },
+                            behandling = førsteBehandling,
+                            tilkjentYtelse = it,
+                        ),
+                    ),
+                )
+            },
+        )
+
+        avsluttOgLagreBehandling(førsteBehandling)
+
+        assertThat(grunnlagFraFørsteBehandling!!.personer.size).isEqualTo(2)
+        assertThat(grunnlagFraFørsteBehandling.personer.any { it.aktør.aktivFødselsnummer() == morId })
+        assertThat(grunnlagFraFørsteBehandling.personer.any { it.aktør.aktivFødselsnummer() == barnId })
+
+        FakePdlRestKlient.leggTilFalskIdentitetIPDL(morId, PdlFalskIdentitet(erFalsk = true))
+
+        val falskIdentitetBehandlingUtenID =
+            lagBehandlingUtenId(
+                fagsak,
+                behandlingType = BehandlingType.REVURDERING,
+                årsak = BehandlingÅrsak.FALSK_IDENTITET,
+            )
+
+        val falskIdentitetBehandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                falskIdentitetBehandlingUtenID,
+            )
+
+        personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
+            falskIdentitetBehandling,
+            førsteBehandling,
+            morId,
+            listOf(barnId),
+        )
+
+        val grunnlagFraSatsendringBehandling =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = falskIdentitetBehandling.id)
+
+        assertThat(grunnlagFraSatsendringBehandling!!.personer.size).isEqualTo(2)
+        assertThat(grunnlagFraSatsendringBehandling.personer.any { it.aktør.aktivFødselsnummer() == morId })
+        assertThat(grunnlagFraSatsendringBehandling.personer.any { it.aktør.aktivFødselsnummer() == barnId })
+        assertThat(grunnlagFraSatsendringBehandling.id)
+            .isNotEqualTo(grunnlagFraFørsteBehandling.id)
+        assertThat(grunnlagFraSatsendringBehandling.behandlingId).isNotEqualTo(grunnlagFraFørsteBehandling.behandlingId)
+        assertThat(grunnlagFraSatsendringBehandling.personer.single { it.aktør.aktivFødselsnummer() == morId }.harFalskIdentitet).isTrue
+        assertThat(grunnlagFraSatsendringBehandling.personer.single { it.aktør.aktivFødselsnummer() == barnId }.harFalskIdentitet).isFalse
+        validerAtPersonerIGrunnlagErLike(grunnlagFraFørsteBehandling, grunnlagFraSatsendringBehandling, false)
+    }
+
     private fun avsluttOgLagreBehandling(behandling: Behandling) {
         behandling.status = BehandlingStatus.AVSLUTTET
         behandling.leggTilBehandlingStegTilstand(StegType.BEHANDLING_AVSLUTTET)
@@ -314,6 +393,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
                         "arbeidsforhold",
                         "sivilstander",
                         "dødsfall",
+                        "harFalskIdentitet",
                         *baseEntitetFelter,
                     ).isEqualTo(forrigePerson)
                 assertThat(kopiertPerson.id).isNotEqualTo(forrigePerson?.id)

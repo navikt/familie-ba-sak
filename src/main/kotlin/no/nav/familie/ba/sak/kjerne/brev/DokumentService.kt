@@ -260,7 +260,7 @@ class DokumentService(
 
                     arbeidsfordelingService
                         .hentArbeidsfordelingsenhetPåIdenter(
-                            søkerIdent = fagsak.aktør.aktivFødselsnummer(),
+                            fagsak = fagsak,
                             barnIdenter = manueltBrevRequest.barnIBrev,
                             behandlingstype = sisteVedtatteBehandling?.kategori?.tilOppgavebehandlingType(),
                         ).run {
@@ -270,7 +270,7 @@ class DokumentService(
             } else {
                 arbeidsfordelingService
                     .hentArbeidsfordelingsenhetPåIdenter(
-                        søkerIdent = fagsak.aktør.aktivFødselsnummer(),
+                        fagsak = fagsak,
                         barnIdenter = manueltBrevRequest.barnIBrev,
                         behandlingstype = null,
                     ).run {

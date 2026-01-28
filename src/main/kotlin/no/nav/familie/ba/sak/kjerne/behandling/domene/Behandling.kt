@@ -265,6 +265,8 @@ data class Behandling(
 
     fun erOmregning() = this.opprettetÅrsak.erOmregningsårsak()
 
+    fun erFalskIdentitet() = this.opprettetÅrsak == BehandlingÅrsak.FALSK_IDENTITET
+
     private fun erFødselshendelse() = this.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
 
     fun harUtførtSteg(steg: StegType) =
@@ -367,6 +369,7 @@ enum class BehandlingÅrsak(
     IVERKSETTE_KA_VEDTAK("Iverksette KA-vedtak"),
     FINNMARKSTILLEGG("Finnmarkstillegg"),
     SVALBARDTILLEGG("Svalbardtillegg"),
+    FALSK_IDENTITET("Falsk identitet"),
     ;
 
     fun erOmregningsårsak(): Boolean = this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG

@@ -97,8 +97,13 @@ data class Person(
     var sivilstander: MutableList<GrSivilstand> = mutableListOf(),
     @OneToOne(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, optional = true)
     var dødsfall: Dødsfall? = null,
+    @Column(name = "har_falsk_identitet", nullable = false)
+    val harFalskIdentitet: Boolean = false,
 ) : BaseEntitet() {
-    fun tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag: PersonopplysningGrunnlag): Person =
+    fun tilKopiForNyttPersonopplysningGrunnlag(
+        nyttPersonopplysningGrunnlag: PersonopplysningGrunnlag,
+        harFalskIdentitet: Boolean = false,
+    ): Person =
         copy(
             id = 0,
             personopplysningGrunnlag = nyttPersonopplysningGrunnlag,
@@ -109,6 +114,7 @@ data class Person(
             opphold = mutableListOf(),
             arbeidsforhold = mutableListOf(),
             sivilstander = mutableListOf(),
+            harFalskIdentitet = harFalskIdentitet,
         ).also {
             it.bostedsadresser.addAll(
                 bostedsadresser.map { grBostedsadresse ->

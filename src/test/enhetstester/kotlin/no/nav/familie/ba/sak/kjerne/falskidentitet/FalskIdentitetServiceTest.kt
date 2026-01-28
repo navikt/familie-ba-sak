@@ -2,19 +2,23 @@ package no.nav.familie.ba.sak.kjerne.falskidentitet
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAktør
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFalskIdentitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 class FalskIdentitetServiceTest {
@@ -102,6 +106,51 @@ class FalskIdentitetServiceTest {
 
             // Assert
             assertThat(falskIdentitet).isNull()
+        }
+    }
+
+    @Nested
+    inner class HarFalskIdentitet {
+        @Test
+        fun `skal returnere true dersom aktør er falsk identitet`() {
+            // Arrange
+            val aktør = lagAktør()
+
+            every { pdlRestKlient.hentFalskIdentitet(aktør.aktivFødselsnummer()) } returns PdlFalskIdentitet(erFalsk = true)
+
+            // Act
+            val harFalskIdentitet = falskIdentitetService.harFalskIdentitet(aktør)
+
+            // Assert
+            assertThat(harFalskIdentitet).isTrue
+        }
+
+        @Test
+        fun `skal returnere false dersom aktør ikke er falsk identitet`() {
+            // Arrange
+            val aktør = lagAktør()
+
+            every { pdlRestKlient.hentFalskIdentitet(aktør.aktivFødselsnummer()) } returns PdlFalskIdentitet(erFalsk = false)
+
+            // Act
+            val harFalskIdentitet = falskIdentitetService.harFalskIdentitet(aktør)
+
+            // Assert
+            assertThat(harFalskIdentitet).isFalse
+        }
+
+        @Test
+        fun `skal returnere false dersom pdl ikke returnerer noen falsk identitet for aktør`() {
+            // Arrange
+            val aktør = lagAktør()
+
+            every { pdlRestKlient.hentFalskIdentitet(aktør.aktivFødselsnummer()) } returns null
+
+            // Act
+            val harFalskIdentitet = falskIdentitetService.harFalskIdentitet(aktør)
+
+            // Assert
+            assertThat(harFalskIdentitet).isFalse
         }
     }
 }

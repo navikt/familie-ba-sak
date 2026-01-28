@@ -63,6 +63,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.utbetaling.UtbetalingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
+import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.småbarnstillegg.SmåbarnstilleggService
@@ -156,6 +157,7 @@ class CucumberMock(
     val behandlingSøknadsinfoRepository = mockBehandlingSøknadsinfoRepository()
     val systemOnlyPdlRestKlient = mockSystemOnlyPdlRestKlient(dataFraCucumber)
     val integrasjonKlient = mockk<IntegrasjonKlient>()
+    val falskIdentitetService = mockk<FalskIdentitetService>()
 
     init {
         dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
@@ -544,6 +546,7 @@ class CucumberMock(
             personidentService = personidentService,
             beregningService = beregningService,
             persongrunnlagService = persongrunnlagService,
+            falskIdentitetService = falskIdentitetService,
         )
 
     val endretUtbetalingAndelService =
