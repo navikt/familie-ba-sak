@@ -59,6 +59,6 @@ class KodeverkService(
     companion object {
         // Kodeverk har satt tom-dato til 1. januar 2020, men pga overgangsordningen er dette datoen i praksis
         val BREXIT_OVERGANGSORDNING_TOM_DATO = LocalDate.of(2020, 12, 31)
-        val STORBRITTANNIA_LANDKODE = "GBR"
+        val STORBRITANNIA_LANDKODE = "GBR"
     }
 }
