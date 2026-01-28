@@ -96,7 +96,6 @@ class StegService(
         when (nyBehandling.behandlingÅrsak) {
             BehandlingÅrsak.HELMANUELL_MIGRERING -> validerHelmanuelMigrering(nyBehandling)
             BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> validerEndreMigreringsdato(nyBehandling)
-            BehandlingÅrsak.IVERKSETTE_KA_VEDTAK -> validerIverksettKAVedtak()
             BehandlingÅrsak.FALSK_IDENTITET -> validerFalskIdentitet(nyBehandling)
             else -> Unit
         }
@@ -159,12 +158,6 @@ class StegService(
             } else if (satskjøring.ferdigTidspunkt == null) {
                 throw FunksjonellFeil("Det kjøres satsendring på fagsaken. Vennligst prøv igjen senere")
             }
-        }
-    }
-
-    private fun validerIverksettKAVedtak() {
-        if (!featureToggleService.isEnabled(FeatureToggle.KAN_OPPRETTE_REVURDERING_MED_ÅRSAK_IVERKSETTE_KA_VEDTAK)) {
-            throw FunksjonellFeil("Det er ikke mulig å opprette behandling med årsak Iverksette KA-vedtak")
         }
     }
 

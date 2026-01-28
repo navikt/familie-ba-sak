@@ -221,24 +221,6 @@ class StegServiceTest {
         }
 
         @Test
-        fun `skal kaste feil dersom behandlingsårsak er IVERKSETTE_KA_VEDTAK og toggle ikke er skrudd på`() {
-            // Arrange
-            val nyBehandling =
-                NyBehandling(
-                    søkersIdent = randomFnr(),
-                    behandlingType = BehandlingType.REVURDERING,
-                    behandlingÅrsak = BehandlingÅrsak.IVERKSETTE_KA_VEDTAK,
-                    fagsakId = 1L,
-                )
-
-            every { featureToggleService.isEnabled(FeatureToggle.KAN_OPPRETTE_REVURDERING_MED_ÅRSAK_IVERKSETTE_KA_VEDTAK) } returns false
-
-            // Act & assert
-            val exception = assertThrows<FunksjonellFeil> { stegService.håndterNyBehandling(nyBehandling) }
-            assertThat(exception.melding).isEqualTo("Det er ikke mulig å opprette behandling med årsak Iverksette KA-vedtak")
-        }
-
-        @Test
         fun `skal kaste feil dersom behandlingsårsak er FALSK_IDENTITET og toggle ikke er skrudd på`() {
             // Arrange
             val nyBehandling =

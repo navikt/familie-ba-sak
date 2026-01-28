@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.SKAL_PREUTFYLLE_BOSATT_I_RIKET_I_FØDSELSHENDELSER
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -214,9 +213,9 @@ class VilkårsvurderingForNyBehandlingService(
                         ?.map { it.aktør } ?: emptyList(),
             )
 
-        if (!behandling.skalBehandlesAutomatisk) {
+        if (!behandling.skalBehandlesAutomatisk && !behandling.erTekniskEndring()) {
             preutfyllVilkårService.preutfyllVilkår(vilkårsvurdering = initiellVilkårsvurdering)
-        } else if (behandling.opprettetÅrsak == FØDSELSHENDELSE && featureToggleService.isEnabled(SKAL_PREUTFYLLE_BOSATT_I_RIKET_I_FØDSELSHENDELSER)) {
+        } else if (behandling.opprettetÅrsak == FØDSELSHENDELSE) {
             val identerVilkårSkalPreutfyllesFor =
                 barnSomSkalVurderesIFødselshendelse?.let {
                     if (behandling.type == FØRSTEGANGSBEHANDLING) {

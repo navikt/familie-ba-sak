@@ -5,6 +5,7 @@ import io.mockk.just
 import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.unmockkObject
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
@@ -41,9 +42,11 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 class AutovedtakSatsendringServiceTest(
@@ -57,6 +60,7 @@ class AutovedtakSatsendringServiceTest(
     @Autowired private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val registrerPersongrunnlag: RegistrerPersongrunnlag,
+    @Autowired private val satsendringService: SatsendringService,
 ) : AbstractSpringIntegrationTest() {
     private lateinit var fagsak: Fagsak
     private lateinit var aktørBarn: Aktør
@@ -86,6 +90,140 @@ class AutovedtakSatsendringServiceTest(
     fun tearDown() {
         unmockkObject(SatsTidspunkt)
         unmockkObject(TilkjentYtelseValidering)
+    }
+
+    @Nested
+    inner class Satskjøring {
+        @Test
+        fun `Skal ikke slette satskjøringer dersom en av satskjøringene er ferdig`() {
+            // Arrange
+            val fagsaker =
+                setOf(
+                    opprettLøpendeFagsak(),
+                    opprettLøpendeFagsak(),
+                )
+
+            val satskjøringer =
+                listOf(
+                    Satskjøring(
+                        fagsakId = fagsaker.first().id,
+                        satsTidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt(),
+                        ferdigTidspunkt = LocalDateTime.now(),
+                    ),
+                    Satskjøring(
+                        fagsakId = fagsaker.last().id,
+                        satsTidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt(),
+                    ),
+                )
+
+            satskjøringRepository.saveAll(satskjøringer)
+
+            // Act
+            val sletteSatskjøringerFeil = assertThrows<Feil> { satsendringService.slettSatskjøringer(fagsaker.map { it.id }.toSet()) }
+
+            // Assert
+            assertThat(sletteSatskjøringerFeil.message).isEqualTo("Det finnes en eller flere satskjøringer for fagsaker [${fagsaker.first().id}] som er ferdige. Kan ikke slette.")
+        }
+
+        @Test
+        fun `Skal slette satskjøringer`() {
+            // Arrange
+            val fagsaker =
+                setOf(
+                    opprettLøpendeFagsak(),
+                    opprettLøpendeFagsak(),
+                )
+
+            val satskjøringer =
+                listOf(
+                    Satskjøring(
+                        fagsakId = fagsaker.first().id,
+                        satsTidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt(),
+                    ),
+                    Satskjøring(
+                        fagsakId = fagsaker.last().id,
+                        satsTidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt(),
+                    ),
+                )
+
+            satskjøringRepository.saveAll(satskjøringer)
+            // Act
+            val slettedeSatskjøringer = satsendringService.slettSatskjøringer(fagsaker.map { it.id }.toSet())
+
+            // Assert
+            assertThat(slettedeSatskjøringer).isEqualTo(fagsaker.map { it.id })
+        }
+
+        @Test
+        fun `Sletter ikke satskjøringer med andre satstidspunkt enn det som er oppgitt`() {
+            // Arrange
+            val fagsaker =
+                setOf(
+                    opprettLøpendeFagsak(),
+                )
+
+            val satskjøringer =
+                listOf(
+                    Satskjøring(
+                        fagsakId = fagsaker.first().id,
+                        satsTidspunkt = YearMonth.of(2024, 1),
+                    ),
+                    Satskjøring(
+                        fagsakId = fagsaker.first().id,
+                        satsTidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt(),
+                    ),
+                )
+
+            satskjøringRepository.saveAll(satskjøringer)
+            // Act
+            val slettedeSatskjøringer = satsendringService.slettSatskjøringer(fagsaker.map { it.id }.toSet())
+
+            // Assert
+            assertThat(slettedeSatskjøringer).isEqualTo(fagsaker.map { it.id })
+
+            val satskjøringerIDb = satskjøringRepository.findAll()
+
+            @Suppress("AssertBetweenInconvertibleTypes")
+            assertThat(satskjøringerIDb).contains(satskjøringer.first())
+        }
+
+        @Test
+        fun `finnUferdigeSatskjøringer finner kun uferdige satskjøringer av spesifikk type`() {
+            // Arrange
+            val fagsaker =
+                listOf(
+                    opprettLøpendeFagsak(),
+                    opprettLøpendeFagsak(),
+                    opprettLøpendeFagsak(),
+                )
+
+            val satskjøringer =
+                listOf(
+                    Satskjøring(
+                        fagsakId = fagsaker[0].id,
+                        satsTidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt(),
+                        feiltype = SatsendringSvar.BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT.name,
+                    ),
+                    Satskjøring(
+                        fagsakId = fagsaker[1].id,
+                        satsTidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt(),
+                        feiltype = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_VILKÅR.name,
+                    ),
+                    Satskjøring(
+                        fagsakId = fagsaker[2].id,
+                        satsTidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt(),
+                        ferdigTidspunkt = LocalDateTime.now(),
+                    ),
+                )
+
+            satskjøringRepository.saveAll(satskjøringer)
+
+            // Act
+            val uferdigeSatsendringer = satsendringService.finnUferdigeSatskjøringer(feiltyper = listOf(SatsendringSvar.BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT))
+
+            // Assert
+            assertThat(uferdigeSatsendringer).isEqualTo(listOf(fagsaker[0].id))
+        }
     }
 
     @Nested

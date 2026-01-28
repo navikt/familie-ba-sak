@@ -26,11 +26,17 @@ import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilKronerPer
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilMånedligValutabeløp
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilIKompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -166,6 +172,24 @@ fun List<UtfyltUtenlandskPeriodebeløp>.tilTidslinje() =
         }.tilTidslinje()
 
 fun Collection<UtenlandskPeriodebeløp>.filtrerErUtfylt() = this.map { it.tilIUtenlandskPeriodebeløp() }.filterIsInstance<UtfyltUtenlandskPeriodebeløp>()
+
+fun Collection<UtenlandskPeriodebeløp>.tilUtfylteUtenlandskPeriodebeløpEtterEndringstidpunktPerAktør(endringstidspunkt: YearMonth): Map<Aktør, List<UtfyltUtenlandskPeriodebeløp>> {
+    val alleBarnAktørIder = this.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
+
+    val utfylteUtenlandskPeriodebeløp =
+        this
+            .map { it.tilIUtenlandskPeriodebeløp() }
+            .filterIsInstance<UtfyltUtenlandskPeriodebeløp>()
+
+    return alleBarnAktørIder.associateWith { aktør ->
+        utfylteUtenlandskPeriodebeløp
+            .filter { it.barnAktører.contains(aktør) }
+            .tilTidslinje()
+            .beskjærFraOgMed(endringstidspunkt.førsteDagIInneværendeMåned())
+            .tilPerioder()
+            .mapNotNull { it.verdi }
+    }
+}
 
 fun UtenlandskPeriodebeløp.tilUtbetaltFraAnnetLand(valutakurs: Valutakurs?): UtbetaltFraAnnetLand =
     try {

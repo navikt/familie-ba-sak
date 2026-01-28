@@ -26,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
-import no.nav.familie.ba.sak.kjerne.porteføljejustering.StartPorteføljejusteringTask
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
@@ -40,7 +39,6 @@ import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
-import no.nav.familie.ba.sak.task.PorteføljejusteringTask
 import no.nav.familie.ba.sak.task.SlettKompetanserTask
 import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
@@ -321,27 +319,6 @@ class ForvalterController(
         return ResponseEntity.ok("Ok")
     }
 
-    @PostMapping("/satsendringer/{satstid}/feiltype/{feiltype}/rekjør")
-    @Operation(
-        summary = "Rekjør satsendringer med feiltype lik feiltypen som er sendt inn",
-        description =
-            "Dette endepunktet sletter alle rader fra Satskjøring der ferdigtid ikke er satt og med feiltypen som er sendt inn. " +
-                "Det gjør at satsendringen kjøres på nytt på fagsaken.",
-    )
-    fun rekjørSatsendringMedFeiltype(
-        @PathVariable satstid: YearMonth,
-        @PathVariable feiltype: String,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Rekjør satsendring med feiltype",
-        )
-
-        val satskjøringerSomSkalRekjøres = satskjøringRepository.finnPåFeilTypeOgFerdigTidIkkeNull(feiltype, satstid)
-        satskjøringRepository.deleteAll(satskjøringerSomSkalRekjøres)
-        return ResponseEntity.ok("Ok")
-    }
-
     @GetMapping(path = ["/kjor-intern-konsistensavstemming/{maksAntallTasker}"])
     fun kjørInternKonsistensavstemming(
         @PathVariable maksAntallTasker: Int = Int.MAX_VALUE,
@@ -521,43 +498,6 @@ class ForvalterController(
         return ResponseEntity.ok(utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId).map { it.tilUtbetalingsperioder() })
     }
 
-    @GetMapping("/start-portefoljejustering-task")
-    fun startPorteføljejusteringTask(
-        @RequestParam("antallOppgaver") antallOppgaver: Long,
-    ): ResponseEntity<Long> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Start porteføljejustering",
-        )
-
-        val opprettetTask = taskRepository.save(PorteføljejusteringTask.opprettTask(antallOppgaver = antallOppgaver))
-
-        return ResponseEntity.ok(opprettetTask.id)
-    }
-
-    @PostMapping("/opprett-tasker-for-flytting-av-steinkjer-oppgaver")
-    @Operation(
-        summary = "Oppretter tasker flytting av steinkjer oppgaver",
-    )
-    fun opprettTaskerForFlyttingAvSteinkjerOppgaver(
-        @RequestParam("antallFlytteTasks") antallFlytteTasks: Int? = null,
-        @RequestParam("behandlesAvApplikasjon") behandlesAvApplikasjon: BehandlesAvApplikasjon? = null,
-        @RequestParam("dryRun") dryRun: Boolean = true,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Opprett tasker for flytting av steinkjer oppgaver",
-        )
-
-        if (!featureToggleService.isEnabled(FeatureToggle.PORTEFØLJEJUSTERING)) {
-            return ResponseEntity.ok("Toggle for porteføljejustering er skrudd av")
-        }
-
-        taskService.save(StartPorteføljejusteringTask.opprettTask(antallFlytteTasks, behandlesAvApplikasjon, dryRun))
-
-        return ResponseEntity.ok("Opprettet task for flytting av Steinkjer oppgaver")
-    }
-
     @PostMapping("/aktiver-minside-for-ident")
     @Operation(
         summary = "Sender Kafka-melding om å aktivere MinSide for en ident",
@@ -646,12 +586,4 @@ class ForvalterController(
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandlingId)
         return ResponseEntity.ok("Sendt behandlingsstatistikk for behandling $behandlingId til Datavarehus")
     }
-}
-
-enum class BehandlesAvApplikasjon(
-    val applikasjonNavn: String,
-) {
-    FAMILIE_BA_SAK("familie-ba-sak"),
-    FAMILIE_TILBAKE("familie-tilbake"),
-    FAMILIE_KLAGE("familie-klage"),
 }

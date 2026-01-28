@@ -1,15 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
-import io.mockk.Called
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.HENT_ARBEIDSFORDELING_FOR_AUTOMATISK_BEHANDLING_ETTER_PORTEFØLJEJUSTERING
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -74,40 +70,30 @@ class ArbeidsfordelingServiceTest {
             featureToggleService = featureToggleService,
         )
 
-    @BeforeEach
-    fun setup() {
-        every { featureToggleService.isEnabled(HENT_ARBEIDSFORDELING_FOR_AUTOMATISK_BEHANDLING_ETTER_PORTEFØLJEJUSTERING) } returns false
-    }
-
     @Nested
     inner class FastsettBehandlendeEnhet {
+        @BeforeEach
+        fun setup() {
+            every { personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(any()) } returns emptyList()
+            every { personopplysningerService.hentPdlPersonInfoEnkel(any()) } returns PdlPersonInfo.Person(lagPersonInfo())
+            every { arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any()) } returns null
+        }
+
         @Test
         fun `skal overstyre behandlende enhet fra NORG dersom enhet fra finnArbeidsfordelingForOppgave er en annen`() {
             // Arrange
             val behandling = lagBehandling()
             val søker = lagPersonEnkel(PersonType.SØKER, behandling.fagsak.aktør)
-            val barn = lagPersonEnkel(PersonType.BARN)
             val arbeidsfordelingsenhet =
                 Arbeidsfordelingsenhet(
                     enhetId = MIDLERTIDIG_ENHET.enhetsnummer,
                     enhetNavn = MIDLERTIDIG_ENHET.enhetsnavn,
                 )
 
-            every {
-                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
-            } returns null
-
-            every { personopplysningerService.hentPdlPersonInfoEnkel(any()) } returns PdlPersonInfo.Person(lagPersonInfo(adressebeskyttelseGradering = null))
-
-            every {
-                personopplysningGrunnlagRepository
-                    .finnSøkerOgBarnAktørerTilAktiv(behandling.id)
-            } returns listOf(søker, barn)
+            every { personopplysningerService.hentPdlPersonInfoEnkel(any()) } returns PdlPersonInfo.Person(lagPersonInfo())
 
             every { integrasjonKlient.hentBehandlendeEnhet(søker.aktør.aktivFødselsnummer(), any()) } returns
-                listOf(
-                    arbeidsfordelingsenhet,
-                )
+                listOf(arbeidsfordelingsenhet)
 
             every {
                 tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
@@ -137,10 +123,6 @@ class ArbeidsfordelingServiceTest {
             // Arrange
             val behandling = lagBehandling(årsak = behandlingÅrsak)
 
-            every {
-                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any())
-            } returns null
-
             // Act & Assert
             val exception =
                 assertThrows<Feil> {
@@ -159,14 +141,18 @@ class ArbeidsfordelingServiceTest {
             val arbeidsfordelingPåBehandlingSlot = slot<ArbeidsfordelingPåBehandling>()
 
             every {
-                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any())
-            } returns null
-
-            every {
                 arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(behandling.fagsak.id)
             } returns null
 
             every { arbeidsfordelingPåBehandlingRepository.save(capture(arbeidsfordelingPåBehandlingSlot)) } answers { firstArg() }
+
+            every { integrasjonKlient.hentBehandlendeEnhet(any(), any()) } returns
+                listOf(
+                    Arbeidsfordelingsenhet(
+                        enhetId = MIDLERTIDIG_ENHET.enhetsnummer,
+                        enhetNavn = MIDLERTIDIG_ENHET.enhetsnavn,
+                    ),
+                )
 
             // Act
             arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, forrigeBehandling)
@@ -187,10 +173,6 @@ class ArbeidsfordelingServiceTest {
             val behandling = lagBehandling(årsak = behandlingÅrsak)
 
             val arbeidsfordelingPåBehandlingSlot = slot<ArbeidsfordelingPåBehandling>()
-
-            every {
-                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any())
-            } returns null
 
             every {
                 arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(behandling.fagsak.id)
@@ -236,10 +218,6 @@ class ArbeidsfordelingServiceTest {
             val fagsak = lagFagsak(aktør = søker.aktør)
             val forrigeBehandling = lagBehandling(fagsak = fagsak)
             val behandling = lagBehandling(fagsak = fagsak, behandlingType = BehandlingType.REVURDERING)
-
-            every {
-                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any())
-            } returns null
 
             every {
                 personopplysningGrunnlagRepository
@@ -326,9 +304,8 @@ class ArbeidsfordelingServiceTest {
     inner class FastsettBehandlendeEnhetEtterPorteføljejustering {
         @BeforeEach
         fun setup() {
-            every { featureToggleService.isEnabled(HENT_ARBEIDSFORDELING_FOR_AUTOMATISK_BEHANDLING_ETTER_PORTEFØLJEJUSTERING) } returns true
             every { personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(any()) } returns emptyList()
-            every { personopplysningerService.hentPersoninfoEnkel(any()).adressebeskyttelseGradering } returns null
+            every { personopplysningerService.hentPdlPersonInfoEnkel(any()) } returns PdlPersonInfo.Person(lagPersonInfo())
             every { arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any()) } returns null
         }
 
@@ -348,8 +325,6 @@ class ArbeidsfordelingServiceTest {
                     behandlendeEnhetId = STEINKJER.enhetsnummer,
                     behandlendeEnhetNavn = STEINKJER.enhetsnavn,
                 )
-
-            every { personopplysningerService.hentPdlPersonInfoEnkel(behandling.fagsak.aktør) } returns PdlPersonInfo.Person(lagPersonInfo())
 
             // Ny enhet
             every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer(), any()) } returns
@@ -390,8 +365,6 @@ class ArbeidsfordelingServiceTest {
                     behandlendeEnhetNavn = MIDLERTIDIG_ENHET.enhetsnavn,
                 )
 
-            every { personopplysningerService.hentPdlPersonInfoEnkel(behandling.fagsak.aktør) } returns PdlPersonInfo.Person(lagPersonInfo())
-
             // Ny enhet
             every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer(), any()) } returns
                 listOf(
@@ -431,8 +404,6 @@ class ArbeidsfordelingServiceTest {
                     behandlendeEnhetNavn = MIDLERTIDIG_ENHET.enhetsnavn,
                 )
 
-            every { personopplysningerService.hentPdlPersonInfoEnkel(behandling.fagsak.aktør) } returns PdlPersonInfo.Person(lagPersonInfo())
-
             // Ny enhet
             every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer(), any()) } returns
                 listOf(
@@ -453,131 +424,6 @@ class ArbeidsfordelingServiceTest {
             assertThat(arbeidsfordelingPåBehandling.behandlendeEnhetNavn).isEqualTo(MIDLERTIDIG_ENHET.enhetsnavn)
             assertThat(arbeidsfordelingPåBehandling.behandlingId).isEqualTo(behandling.id)
             assertThat(arbeidsfordelingPåBehandling.id).isEqualTo(0)
-        }
-
-        @ParameterizedTest
-        @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG", "FINNMARKSTILLEGG", "SVALBARDTILLEGG"], mode = EnumSource.Mode.INCLUDE)
-        fun `fastsettBehandlendeEnhet skal kaste feil hvis ny enhet fra NORG er 4817`(behandlingÅrsak: BehandlingÅrsak) {
-            // Arrange
-            val forrigeBehandling = lagBehandling()
-            val behandling = lagBehandling(årsak = behandlingÅrsak)
-
-            // Forrige enhet
-            every { arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(behandling.fagsak.id) } returns
-                ArbeidsfordelingPåBehandling(
-                    behandlingId = forrigeBehandling.id,
-                    behandlendeEnhetId = STEINKJER.enhetsnummer,
-                    behandlendeEnhetNavn = STEINKJER.enhetsnavn,
-                )
-
-            every { personopplysningerService.hentPdlPersonInfoEnkel(behandling.fagsak.aktør) } returns PdlPersonInfo.Person(lagPersonInfo())
-
-            // Ny enhet
-            every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer(), any()) } returns
-                listOf(
-                    Arbeidsfordelingsenhet(
-                        enhetId = STEINKJER.enhetsnummer,
-                        enhetNavn = STEINKJER.enhetsnavn,
-                    ),
-                )
-
-            every { arbeidsfordelingPåBehandlingRepository.save(any()) } returns mockk()
-
-            // Act
-            val feil =
-                assertThrows<Feil> {
-                    arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, forrigeBehandling)
-                }
-
-            // Assert
-            assertThat(feil.message).isEqualTo("Kan ikke sette behandlende enhet til 'Nav familie- og pensjonsytelser Steinkjer' etter porteføljejustering.")
-        }
-    }
-
-    @Nested
-    inner class OppdaterBehandlendeEnhetPåBehandlingIForbindelseMedPorteføljejusteringTest {
-        @Test
-        fun `Skal ikke oppdatere enhet hvis ny enhet er det samme som gamle`() {
-            // Arrange
-            val behandling = lagBehandling()
-            val nåværendeArbeidsfordelingsenhetPåBehandling =
-                ArbeidsfordelingPåBehandling(
-                    behandlendeEnhetId = OSLO.enhetsnummer,
-                    id = 0,
-                    behandlingId = behandling.id,
-                    behandlendeEnhetNavn = OSLO.enhetsnavn,
-                )
-
-            every {
-                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any())
-            } returns nåværendeArbeidsfordelingsenhetPåBehandling
-
-            // Act
-            arbeidsfordelingService.oppdaterBehandlendeEnhetPåBehandlingIForbindelseMedPorteføljejustering(
-                behandling = behandling,
-                nyEnhetId = OSLO.enhetsnummer,
-            )
-
-            // Assert
-            verify(exactly = 0) { arbeidsfordelingPåBehandlingRepository.save(any()) }
-            verify { loggService wasNot Called }
-            verify { saksstatistikkEventPublisher wasNot Called }
-        }
-
-        @Test
-        fun `Skal oppdatere enhet, opprette logg, og publisere sakstatistikk hvis ny enhet er ulikt gammel`() {
-            // Arrange
-            val behandling = lagBehandling()
-            val nåværendeArbeidsfordelingsenhetPåBehandling =
-                ArbeidsfordelingPåBehandling(
-                    behandlendeEnhetId = STEINKJER.enhetsnummer,
-                    id = 0,
-                    behandlingId = behandling.id,
-                    behandlendeEnhetNavn = STEINKJER.enhetsnavn,
-                )
-
-            every {
-                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any())
-            } returns nåværendeArbeidsfordelingsenhetPåBehandling
-
-            val lagretArbeidsfordelingPåBehandlingSlot = slot<ArbeidsfordelingPåBehandling>()
-            every { arbeidsfordelingPåBehandlingRepository.save(capture(lagretArbeidsfordelingPåBehandlingSlot)) } returnsArgument 0
-
-            every {
-                loggService.opprettBehandlendeEnhetEndret(
-                    behandling,
-                    fraEnhet = any(),
-                    tilEnhet = any(),
-                    manuellOppdatering = false,
-                    begrunnelse = "Porteføljejustering",
-                )
-            } just runs
-
-            every { saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id) } just runs
-
-            // Act
-            arbeidsfordelingService.oppdaterBehandlendeEnhetPåBehandlingIForbindelseMedPorteføljejustering(
-                behandling = behandling,
-                nyEnhetId = OSLO.enhetsnummer,
-            )
-
-            // Assert
-            val lagretArbeidsfordelingPåBehandling = lagretArbeidsfordelingPåBehandlingSlot.captured
-
-            assertThat(lagretArbeidsfordelingPåBehandling.behandlendeEnhetId).isEqualTo(OSLO.enhetsnummer)
-            assertThat(lagretArbeidsfordelingPåBehandling.behandlendeEnhetNavn).isEqualTo(OSLO.enhetsnavn)
-
-            verify(exactly = 1) { arbeidsfordelingPåBehandlingRepository.save(any()) }
-            verify(exactly = 1) {
-                loggService.opprettBehandlendeEnhetEndret(
-                    behandling,
-                    fraEnhet = Arbeidsfordelingsenhet(STEINKJER.enhetsnummer, STEINKJER.enhetsnavn),
-                    tilEnhet = lagretArbeidsfordelingPåBehandling,
-                    manuellOppdatering = false,
-                    begrunnelse = "Porteføljejustering",
-                )
-            }
-            verify(exactly = 1) { saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id) }
         }
     }
 
