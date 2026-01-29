@@ -30,8 +30,7 @@ fun Person.tilRegisterhistorikkDto(eldsteBarnsFødselsdato: LocalDate?) =
         historiskeIdenter =
             this.aktør.personidenter
                 .filter { ident ->
-                    eldsteBarnsFødselsdato == null ||
-                        ident.gjelderTil?.toLocalDate()?.isSameOrAfter(eldsteBarnsFødselsdato) != false
+                    !ident.aktiv && (ident.gjelderTil == null || eldsteBarnsFødselsdato == null || ident.gjelderTil?.toLocalDate()?.isSameOrAfter(eldsteBarnsFødselsdato) == true)
                 }.map {
                     RegisteropplysningDto(
                         fom = null,
