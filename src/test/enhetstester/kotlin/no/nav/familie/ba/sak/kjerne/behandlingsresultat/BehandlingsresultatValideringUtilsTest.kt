@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -349,5 +350,42 @@ internal class BehandlingsresultatValideringUtilsTest {
         assertDoesNotThrow {
             BehandlingsresultatValideringUtils.validerBehandlingsresultat(behandling)
         }
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = Behandlingsresultat::class,
+        names = ["OPPHØRT", "IKKE_VURDERT"],
+        mode = EnumSource.Mode.EXCLUDE,
+    )
+    fun `skal kaste feil dersom behandlingsresultat i 'Falsk identitet'-behandling er noe annet enn OPPHØRT`(behandlingsresultat: Behandlingsresultat) {
+        // Arrange
+        val behandling =
+            lagBehandling(
+                behandlingType = BehandlingType.REVURDERING,
+                årsak = BehandlingÅrsak.FALSK_IDENTITET,
+                resultat = behandlingsresultat,
+            )
+
+        // Act & Assert
+        val funksjonellFeil =
+            assertThrows<FunksjonellFeil> {
+                BehandlingsresultatValideringUtils.validerBehandlingsresultat(behandling)
+            }
+        assertThat(funksjonellFeil.message).isEqualTo("Du har fått behandlingsresultatet ${behandlingsresultat.displayName}. 'Falsk identitet'-behandlinger kan kun ha behandlingsresultat: '${OPPHØRT.displayName}'")
+    }
+
+    @Test
+    fun `skal ikke kaste feil dersom behandlingsresultat i 'Falsk identitet'-behandling er OPPHØRT`() {
+        // Arrange
+        val behandling =
+            lagBehandling(
+                behandlingType = BehandlingType.REVURDERING,
+                årsak = BehandlingÅrsak.FALSK_IDENTITET,
+                resultat = OPPHØRT,
+            )
+
+        // Act & Assert
+        assertDoesNotThrow { BehandlingsresultatValideringUtils.validerBehandlingsresultat(behandling) }
     }
 }
