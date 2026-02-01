@@ -21,6 +21,7 @@ fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkår(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
     utvidetVilkårPåSøkerIPeriode: VilkårResultatForVedtaksperiode?,
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
+    vedtaksperiode: VedtaksperiodeMedBegrunnelser,
 ): Boolean {
     if (this.vilkår.isEmpty()) return false
     val utgjørendeVilkårResultater =
@@ -29,6 +30,7 @@ fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkår(
             sanityBegrunnelse = this,
             utvidetVilkårPåSøkerIPeriode = utvidetVilkårPåSøkerIPeriode,
             utvidetVilkårPåSøkerIForrigePeriode = utvidetVilkårPåSøkerIForrigePeriode,
+            vedtaksperiode = vedtaksperiode,
         )
 
     return this.erLikVilkårOgUtdypendeVilkårIPeriode(utgjørendeVilkårResultater)
@@ -72,6 +74,7 @@ private fun finnUtgjørendeVilkår(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
     utvidetVilkårPåSøkerIPeriode: VilkårResultatForVedtaksperiode?,
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
+    vedtaksperiode: VedtaksperiodeMedBegrunnelser,
 ): Set<VilkårResultatForVedtaksperiode> {
     val vilkårResultater = (begrunnelseGrunnlag.dennePerioden.vilkårResultater + utvidetVilkårPåSøkerIPeriode).filterNotNull()
     val vilkårResultaterForrigePeriode =
@@ -86,6 +89,10 @@ private fun finnUtgjørendeVilkår(
     val oppfylteVilkårResultaterForrigePeriode =
         vilkårResultaterForrigePeriode?.filter { it.resultat == Resultat.OPPFYLT }
             ?: emptyList()
+
+    val vilkårResultaterOppfyltMånedenFørVedtaksperiode = vilkårResultater.filter {
+        it.resultat == Resultat.OPPFYLT &&
+            it.fom?.toYearMonth()?.plusMonths(1) == vedtaksperiode.fom?.toYearMonth() }
 
     val vilkårTjent =
         hentVilkårResultaterTjent(
@@ -111,7 +118,7 @@ private fun finnUtgjørendeVilkår(
         when (sanityBegrunnelse.periodeResultat) {
             SanityPeriodeResultat.INNVILGET_ELLER_ØKNING,
             SanityPeriodeResultat.IKKE_RELEVANT,
-            -> vilkårTjent + vilkårEndret
+            -> vilkårTjent + vilkårEndret + vilkårResultaterOppfyltMånedenFørVedtaksperiode
 
             SanityPeriodeResultat.INGEN_ENDRING -> vilkårEndret
 
