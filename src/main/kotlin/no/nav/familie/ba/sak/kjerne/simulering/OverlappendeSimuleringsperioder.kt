@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.kjerne.simulering.domene.OverlappendePerioderMedAndreFagsaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
+import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.tomTidslinje
@@ -19,11 +20,15 @@ fun finnOverlappendePerioder(
     val fagsakPerioder =
         økonomiSimuleringMottakere
             .flatMap { mottaker ->
-                mottaker.økonomiSimuleringPostering.mapNotNull { postering ->
-                    postering.fagsakId?.let {
-                        Periode(it, postering.fom, postering.tom)
+                mottaker.økonomiSimuleringPostering
+                    .filter {
+                        it.fagOmrådeKode == FagOmrådeKode.BARNETRYGD ||
+                            it.fagOmrådeKode == FagOmrådeKode.BARNETRYGD_MANUELT
+                    }.mapNotNull { postering ->
+                        postering.fagsakId?.let {
+                            Periode(it, postering.fom, postering.tom)
+                        }
                     }
-                }
             }.distinct()
 
     val perioderForForskjelligeFagsaker = fagsakPerioder.groupBy { it.verdi }
