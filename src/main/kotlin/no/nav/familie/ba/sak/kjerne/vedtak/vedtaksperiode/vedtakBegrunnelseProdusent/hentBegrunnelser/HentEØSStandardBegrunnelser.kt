@@ -48,6 +48,7 @@ internal fun hentEØSStandardBegrunnelser(
                 begrunnelseGrunnlag,
                 utvidetVilkårPåSøkerIPeriode,
                 utvidetVilkårPåSøkerIForrigePeriode,
+                vedtaksperiode,
             )
         }
 
