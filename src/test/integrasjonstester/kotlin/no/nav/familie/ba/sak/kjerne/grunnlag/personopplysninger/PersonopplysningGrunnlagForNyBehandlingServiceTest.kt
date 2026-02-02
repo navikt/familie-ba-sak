@@ -253,18 +253,18 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
             listOf(barnId),
         )
 
-        val grunnlagFraSatsendringBehandling =
+        val grunnlagFraFalskIdentitetBehandling =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = falskIdentitetBehandling.id)
 
-        assertThat(grunnlagFraSatsendringBehandling!!.personer.size).isEqualTo(2)
-        assertThat(grunnlagFraSatsendringBehandling.personer.any { it.aktør.aktivFødselsnummer() == morId })
-        assertThat(grunnlagFraSatsendringBehandling.personer.any { it.aktør.aktivFødselsnummer() == barnId })
-        assertThat(grunnlagFraSatsendringBehandling.id)
+        assertThat(grunnlagFraFalskIdentitetBehandling!!.personer.size).isEqualTo(2)
+        assertThat(grunnlagFraFalskIdentitetBehandling.personer.any { it.aktør.aktivFødselsnummer() == morId })
+        assertThat(grunnlagFraFalskIdentitetBehandling.personer.any { it.aktør.aktivFødselsnummer() == barnId })
+        assertThat(grunnlagFraFalskIdentitetBehandling.id)
             .isNotEqualTo(grunnlagFraFørsteBehandling.id)
-        assertThat(grunnlagFraSatsendringBehandling.behandlingId).isNotEqualTo(grunnlagFraFørsteBehandling.behandlingId)
-        assertThat(grunnlagFraSatsendringBehandling.personer.single { it.aktør.aktivFødselsnummer() == morId }.harFalskIdentitet).isTrue
-        assertThat(grunnlagFraSatsendringBehandling.personer.single { it.aktør.aktivFødselsnummer() == barnId }.harFalskIdentitet).isFalse
-        validerAtPersonerIGrunnlagErLike(grunnlagFraFørsteBehandling, grunnlagFraSatsendringBehandling, false)
+        assertThat(grunnlagFraFalskIdentitetBehandling.behandlingId).isNotEqualTo(grunnlagFraFørsteBehandling.behandlingId)
+        assertThat(grunnlagFraFalskIdentitetBehandling.personer.single { it.aktør.aktivFødselsnummer() == morId }.harFalskIdentitet).isTrue
+        assertThat(grunnlagFraFalskIdentitetBehandling.personer.single { it.aktør.aktivFødselsnummer() == barnId }.harFalskIdentitet).isFalse
+        validerAtPersonerIGrunnlagErLike(grunnlagFraFørsteBehandling, grunnlagFraFalskIdentitetBehandling, false)
     }
 
     private fun avsluttOgLagreBehandling(behandling: Behandling) {

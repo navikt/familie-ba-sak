@@ -90,8 +90,6 @@ class ArbeidsfordelingServiceTest {
                     enhetNavn = MIDLERTIDIG_ENHET.enhetsnavn,
                 )
 
-            every { personopplysningerService.hentPdlPersonInfoEnkel(any()) } returns PdlPersonInfo.Person(lagPersonInfo())
-
             every { integrasjonKlient.hentBehandlendeEnhet(søker.aktør.aktivFødselsnummer(), any()) } returns
                 listOf(arbeidsfordelingsenhet)
 
@@ -329,10 +327,7 @@ class ArbeidsfordelingServiceTest {
             // Ny enhet
             every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer(), any()) } returns
                 listOf(
-                    Arbeidsfordelingsenhet(
-                        enhetId = OSLO.enhetsnummer,
-                        enhetNavn = OSLO.enhetsnavn,
-                    ),
+                    Arbeidsfordelingsenhet.opprettFra(BarnetrygdEnhet.OSLO),
                 )
 
             every { arbeidsfordelingPåBehandlingRepository.save(capture(arbeidsfordelingPåBehandlingSlot)) } answers { firstArg() }
@@ -368,10 +363,7 @@ class ArbeidsfordelingServiceTest {
             // Ny enhet
             every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer(), any()) } returns
                 listOf(
-                    Arbeidsfordelingsenhet(
-                        enhetId = OSLO.enhetsnummer,
-                        enhetNavn = OSLO.enhetsnavn,
-                    ),
+                    Arbeidsfordelingsenhet.opprettFra(BarnetrygdEnhet.OSLO),
                 )
 
             every { arbeidsfordelingPåBehandlingRepository.save(capture(arbeidsfordelingPåBehandlingSlot)) } answers { firstArg() }

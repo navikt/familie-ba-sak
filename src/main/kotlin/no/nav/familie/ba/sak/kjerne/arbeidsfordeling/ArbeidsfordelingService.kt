@@ -231,9 +231,9 @@ class ArbeidsfordelingService(
                 .finnSøkerOgBarnAktørerTilAktiv(behandling.id)
                 .barn()
                 .associate {
-                    it.aktør.aktivFødselsnummer() to arbeidsfordelingPerson(it.aktør, PersonType.BARN)
+                    it.aktør.aktivFødselsnummer() to utledArbeidsfordelingPerson(it.aktør, PersonType.BARN)
                 }.plus(
-                    søkerIdent to arbeidsfordelingPerson(behandling.fagsak.aktør, PersonType.SØKER),
+                    søkerIdent to utledArbeidsfordelingPerson(behandling.fagsak.aktør, PersonType.SØKER),
                 )
 
         return hentArbeidsfordelingForPersoner(
@@ -243,7 +243,7 @@ class ArbeidsfordelingService(
         )
     }
 
-    private fun arbeidsfordelingPerson(
+    private fun utledArbeidsfordelingPerson(
         aktør: Aktør,
         personType: PersonType,
     ): ArbeidsfordelingPerson {
@@ -271,13 +271,13 @@ class ArbeidsfordelingService(
         val arbeidsfordelingPersoner: Map<String, ArbeidsfordelingPerson> =
             mapOf(
                 søkerIdent to
-                    arbeidsfordelingPerson(
+                    utledArbeidsfordelingPerson(
                         aktør = personidentService.hentAktør(søkerIdent),
                         personType = PersonType.SØKER,
                     ),
             ).plus(
                 barnIdenter.associateWith {
-                    arbeidsfordelingPerson(
+                    utledArbeidsfordelingPerson(
                         aktør = personidentService.hentAktør(it),
                         personType = PersonType.BARN,
                     )

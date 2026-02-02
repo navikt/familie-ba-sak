@@ -1419,7 +1419,6 @@ class BehandlingsresultatStegValideringServiceTest {
             every { beregningService.hentAndelerFraForrigeVedtatteBehandling(tilkjentYtelse.behandling) } returns forrigeAndeler
 
             // Act
-
             val funksjonellFeil = assertThrows<FunksjonellFeil> { behandlingsresultatStegValideringService.validerFalskIdentitetBehandling(tilkjentYtelse) }
 
             // Assert
