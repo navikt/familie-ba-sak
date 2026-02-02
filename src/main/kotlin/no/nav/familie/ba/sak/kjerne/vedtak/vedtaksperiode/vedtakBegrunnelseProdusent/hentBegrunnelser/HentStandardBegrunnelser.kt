@@ -239,7 +239,7 @@ private fun SanityBegrunnelse.erGjeldendeForFinnmarkstillegg(
 
     val erEndringIFinnmarkstillegg = harKravPåFinnmarkstilleggForrigePeriode != harKravPåFinnmarkstilleggDennePeriode
 
-    return begrunnelseMatcherPeriodeResultat && (erEndringIFinnmarkstillegg || erEndringIFinnmarkstilleggFraForrigeBehandling)
+    return (begrunnelseMatcherPeriodeResultat && erEndringIFinnmarkstillegg) || erEndringIFinnmarkstilleggFraForrigeBehandling
 }
 
 private fun SanityBegrunnelse.erGjeldendeForSvalbardtillegg(
