@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
+import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkSpråk
 import no.nav.familie.tidslinje.Periode
@@ -25,8 +26,8 @@ class KodeverkService(
             ?.storForbokstav()
 
     fun henteEøsMedlemskapsPerioderForValgtLand(land: String): List<BetydningDto> =
-        integrasjonKlient.hentAlleEØSLand().betydninger[land].apply {
-            if (land == STORBRITTANNIA_LANDKODE) {
+        integrasjonKlient.hentAlleEØSLand().betydninger[land].run {
+            if (land == STORBRITANNIA_LANDKODE) {
                 this?.map {
                     BetydningDto(
                         gyldigFra = it.gyldigFra,
@@ -34,6 +35,8 @@ class KodeverkService(
                         beskrivelser = it.beskrivelser,
                     )
                 }
+            } else {
+                this
             }
         } ?: emptyList()
 
@@ -45,7 +48,7 @@ class KodeverkService(
                     fom = betydningsDto.gyldigFra,
                     tom =
                         betydningsDto.gyldigTil.let {
-                            if (it.isAfter(LocalDate.of(5000, 1, 1))) {
+                            if (it.isSameOrAfter(KODEVERK_UENDELIGHET_DATO)) {
                                 null
                             } else {
                                 it
@@ -59,6 +62,7 @@ class KodeverkService(
     companion object {
         // Kodeverk har satt tom-dato til 1. januar 2020, men pga overgangsordningen er dette datoen i praksis
         val BREXIT_OVERGANGSORDNING_TOM_DATO = LocalDate.of(2020, 12, 31)
+        val KODEVERK_UENDELIGHET_DATO = LocalDate.of(9999, 12, 31)
         val STORBRITANNIA_LANDKODE = "GBR"
     }
 }

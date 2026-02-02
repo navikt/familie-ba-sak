@@ -135,7 +135,7 @@ class PreutfyllLovligOppholdService(
                 val gjeldende = it.first()
                 val neste = it.getOrNull(1)
 
-                val erEØSBorger = statsborgerskapService.hentSterkesteMedlemskap(gjeldende) == Medlemskap.EØS
+                val erEØSBorger = statsborgerskapService.hentSterkesteMedlemskapVedTidspunkt(gjeldende) == Medlemskap.EØS
 
                 Periode(
                     verdi = erEØSBorger,

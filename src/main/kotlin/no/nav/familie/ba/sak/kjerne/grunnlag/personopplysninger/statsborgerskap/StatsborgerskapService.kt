@@ -7,12 +7,15 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
+import no.nav.familie.tidslinje.utvidelser.verdiPåTidspunkt
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -28,18 +31,21 @@ class StatsborgerskapService(
         person: Person,
     ): List<GrStatsborgerskap> {
         if (featureToggleService.isEnabled(FeatureToggle.HARDKODET_EEAFREG_STATSBORGERSKAP)) {
-            return lagMedlemskapPerioderForStatsborgerskap(statsborgerskap, person.fødselsdato).map {
-                GrStatsborgerskap(
-                    gyldigPeriode =
-                        DatoIntervallEntitet(
-                            fom = it.fom,
-                            tom = it.tom,
-                        ),
-                    landkode = statsborgerskap.land,
-                    medlemskap = it.verdi,
-                    person = person,
-                )
-            }
+            return lagMedlemskapTIdslinjeForStatsborgerskap(statsborgerskap)
+                .beskjærFraOgMed(person.fødselsdato)
+                .tilPerioderIkkeNull()
+                .map {
+                    GrStatsborgerskap(
+                        gyldigPeriode =
+                            DatoIntervallEntitet(
+                                fom = it.fom,
+                                tom = it.tom,
+                            ),
+                        landkode = statsborgerskap.land,
+                        medlemskap = it.verdi,
+                        person = person,
+                    )
+                }
         }
 
         if (statsborgerskap.iNordiskLand()) {
@@ -103,10 +109,9 @@ class StatsborgerskapService(
         }
     }
 
-    fun lagMedlemskapPerioderForStatsborgerskap(
+    fun lagMedlemskapTIdslinjeForStatsborgerskap(
         statsborgerskap: Statsborgerskap,
-        cutOffFomDato: LocalDate?,
-    ): List<Periode<Medlemskap>> {
+    ): Tidslinje<Medlemskap> {
         val datoFra = statsborgerskap.hentFom()
 
         val eøsTidslinje = kodeverkService.hentEøsMedlemskapsTidslinje(statsborgerskap.land)
@@ -121,10 +126,6 @@ class StatsborgerskapService(
         return statsborgerskapTidslinje
             .kombinerMed(eøsTidslinje) { statsborgerskap, erEøsland ->
                 statsborgerskap?.let { finnMedlemskap(it, erEøsland ?: false) }
-            }.tilPerioderIkkeNull()
-            .filter { it.tom == null || it.tom!! >= cutOffFomDato }
-            .apply {
-                beskjærFomDato(cutOffFomDato)
             }
     }
 
@@ -142,13 +143,14 @@ class StatsborgerskapService(
         }
     }
 
-    fun hentSterkesteMedlemskap(statsborgerskap: Statsborgerskap): Medlemskap? {
+    fun hentSterkesteMedlemskapVedTidspunkt(
+        statsborgerskap: Statsborgerskap,
+        tidspunkt: LocalDate = statsborgerskap.gyldigTilOgMed ?: LocalDate.now(),
+    ): Medlemskap? {
         if (featureToggleService.isEnabled(FeatureToggle.HARDKODET_EEAFREG_STATSBORGERSKAP)) {
-            val datoFra = statsborgerskap.hentFom() ?: LocalDate.now()
+            val medlemskapsPerioder = lagMedlemskapTIdslinjeForStatsborgerskap(statsborgerskap).verdiPåTidspunkt(tidspunkt)
 
-            val medlemskapsPerioder = lagMedlemskapPerioderForStatsborgerskap(statsborgerskap, datoFra)
-
-            return medlemskapsPerioder.map { it.verdi }.finnSterkesteMedlemskap()
+            return medlemskapsPerioder
         }
 
         if (statsborgerskap.iNordiskLand()) {
