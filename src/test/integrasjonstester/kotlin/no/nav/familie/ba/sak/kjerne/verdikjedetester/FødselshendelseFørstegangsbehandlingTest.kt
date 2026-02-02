@@ -172,6 +172,9 @@ class FødselshendelseFørstegangsbehandlingTest(
 
     @Test
     fun `Skal innvilge fødselshendelse på mor med 2 barn der barna er født i hver sin måned`() {
+        val fødselsdagBarn2 = LocalDate.now().førsteDagIInneværendeMåned()
+        val fødselsdagBarn1 = fødselsdagBarn2.minusDays(1)
+
         val scenario =
             ScenarioDto(
                 søker = ScenarioPersonDto(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
@@ -179,16 +182,13 @@ class FødselshendelseFørstegangsbehandlingTest(
                     listOf(
                         ScenarioPersonDto(
                             fødselsdato =
-                                LocalDate
-                                    .now()
-                                    .førsteDagIInneværendeMåned()
-                                    .minusDays(1)
+                                fødselsdagBarn1
                                     .toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen",
                         ),
                         ScenarioPersonDto(
-                            fødselsdato = LocalDate.now().førsteDagIInneværendeMåned().toString(),
+                            fødselsdato = fødselsdagBarn2.toString(),
                             fornavn = "Barn",
                             etternavn = "Barnesen 2",
                         ),
@@ -225,18 +225,19 @@ class FødselshendelseFørstegangsbehandlingTest(
 
         assertThat(utbetalingsperioder).hasSize(3)
 
-        val gjeldendeUtbetalingsperiode =
-            utbetalingsperioder.find {
-                it.periodeFom.toYearMonth() >= ordinærSatsNesteMånedTilTester().gyldigFom.toYearMonth() &&
-                    it.periodeFom.toYearMonth() <= ordinærSatsNesteMånedTilTester().gyldigTom.toYearMonth()
-            }!!
-
-        val antallBarn = 2
+        val utbetalingsPeriodeMånedEtterBarn1 = utbetalingsperioder.find { fødselsdagBarn1.toYearMonth().plusMonths(1) == it.periodeFom.toYearMonth() }!!
+        val utbetalingsPeriodeMånedEtterBarn2 = utbetalingsperioder.find { fødselsdagBarn2.toYearMonth().plusMonths(1) == it.periodeFom.toYearMonth() }!!
 
         assertUtbetalingsperiode(
-            gjeldendeUtbetalingsperiode,
-            antallBarn,
-            ordinærSatsNesteMånedTilTester().beløp * antallBarn,
+            utbetalingsPeriodeMånedEtterBarn1,
+            1,
+            ordinærSatsNesteMånedTilTester().beløp,
+        )
+
+        assertUtbetalingsperiode(
+            utbetalingsPeriodeMånedEtterBarn2,
+            2,
+            ordinærSatsNesteMånedTilTester().beløp * 2,
         )
     }
 }

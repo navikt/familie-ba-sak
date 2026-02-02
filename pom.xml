@@ -31,8 +31,8 @@
         <familie.kontrakter.saksstatistikk>2.0_20251208131828_1ec398d</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20260127152808_4f00dcf</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20251127080440_b935966</utbetalingsgenerator.version>
-        <cucumber.version>7.33.0</cucumber.version>
-        <mockk.version>1.14.7</mockk.version>
+        <cucumber.version>7.34.1</cucumber.version>
+        <mockk.version>1.14.9</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
         <token-validation-spring.version>5.0.39</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
@@ -553,6 +553,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.4</version>
                 <configuration>
+                    <argLine>-XX:MinRAMPercentage=25 -XX:MaxRAMPercentage=75</argLine>
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->
                     <excludedGroups>${excludedGroups}</excludedGroups>

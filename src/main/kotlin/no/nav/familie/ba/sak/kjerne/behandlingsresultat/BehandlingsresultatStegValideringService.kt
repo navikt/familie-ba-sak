@@ -87,11 +87,11 @@ class BehandlingsresultatStegValideringService(
             BehandlingsresultatSteg.logger.warn("Feil i behandling $behandling.\n\nEndring i måned ${endringIUtbetalingEtterDato.first { it.verdi == true }.fom?.toYearMonth()}.")
             throw FunksjonellFeil(
                 "Det finnes endringer i behandlingen som har økonomisk konsekvens for bruker." +
-                    "Det skal ikke skje for endre migreringsdatobehandlinger." +
-                    "Endringer må gjøres i en separat behandling.",
+                    " Det skal ikke skje for endre migreringsdatobehandlinger." +
+                    " Endringer må gjøres i en separat behandling.",
                 "Det finnes endringer i behandlingen som har økonomisk konsekvens for bruker." +
-                    "Det skal ikke skje for endre migreringsdatobehandlinger." +
-                    "Endringer må gjøres i en separat behandling.",
+                    " Det skal ikke skje for endre migreringsdatobehandlinger." +
+                    " Endringer må gjøres i en separat behandling. Perioder med endring: ${endringIUtbetalingEtterDato.filter { it.verdi == true }.map { "(${it.fom?.toYearMonth()} - ${it.tom?.toYearMonth()})" }}.",
             )
         }
     }
