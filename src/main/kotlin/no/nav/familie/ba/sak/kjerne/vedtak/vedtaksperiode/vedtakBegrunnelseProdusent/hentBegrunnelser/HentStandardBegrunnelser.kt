@@ -75,6 +75,7 @@ internal fun hentStandardBegrunnelser(
                         begrunnelseGrunnlag,
                         utvidetVilkårPåSøkerIPeriode,
                         utvidetVilkårPåSøkerIForrigePeriode,
+                        vedtaksperiode,
                     ) &&
                         filtrerPåEndretUtbetaling(it, endretUtbetalingDennePerioden)
                 }
@@ -85,6 +86,7 @@ internal fun hentStandardBegrunnelser(
                         begrunnelseGrunnlag,
                         utvidetVilkårPåSøkerIPeriode,
                         utvidetVilkårPåSøkerIForrigePeriode,
+                        vedtaksperiode,
                     )
                 }
 
@@ -168,11 +170,13 @@ private fun filtrerPåVilkår(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
     utvidetVilkårPåSøkerIPeriode: VilkårResultatForVedtaksperiode?,
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
+    vedtaksperiode: VedtaksperiodeMedBegrunnelser,
 ) = !it.begrunnelseSkalTriggesForReduksjonFraForrigeBehandling() &&
     it.erGjeldendeForUtgjørendeVilkår(
         begrunnelseGrunnlag,
         utvidetVilkårPåSøkerIPeriode,
         utvidetVilkårPåSøkerIForrigePeriode,
+        vedtaksperiode,
     ) &&
     it.erGjeldendeForRegelverk(
         begrunnelseGrunnlag,
