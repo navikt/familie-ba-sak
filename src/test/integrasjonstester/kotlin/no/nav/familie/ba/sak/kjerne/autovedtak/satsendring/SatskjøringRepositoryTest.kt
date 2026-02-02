@@ -24,7 +24,7 @@ class SatskjøringRepositoryTest(
         val aktør = lagAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
         val fagsakId = lagFagsakUtenId(aktør = aktør).also { fagsakRepository.saveAndFlush(it) }.id
 
-        val satsTidspunkt = YearMonth.now()
+        val satsTidspunkt = YearMonth.of(2025, 11)
         val satskjøring =
             satskjøringRepository.saveAndFlush(
                 Satskjøring(
@@ -56,13 +56,13 @@ class SatskjøringRepositoryTest(
         satskjøringRepository.saveAndFlush(
             Satskjøring(
                 fagsakId = fagsakId,
-                satsTidspunkt = YearMonth.now().minusMonths(1),
+                satsTidspunkt = YearMonth.of(2025, 11).minusMonths(1),
             ),
         )
 
         val satskjøringer =
             satskjøringRepository.findBySatsTidspunktAndFerdigTidspunktIsNullAndFeiltypeIsNotNull(
-                YearMonth.now(),
+                YearMonth.of(2025, 11),
             )
 
         assertThat(satskjøringer).hasSize(0)
@@ -77,7 +77,7 @@ class SatskjøringRepositoryTest(
             satskjøringRepository.saveAndFlush(
                 Satskjøring(
                     fagsakId = fagsakId,
-                    satsTidspunkt = YearMonth.now(),
+                    satsTidspunkt = YearMonth.of(2025, 11),
                     ferdigTidspunkt = LocalDateTime.now(),
                     feiltype = "feiltype",
                 ),
@@ -85,7 +85,7 @@ class SatskjøringRepositoryTest(
 
         val satskjøringer =
             satskjøringRepository.findBySatsTidspunktAndFerdigTidspunktIsNullAndFeiltypeIsNotNull(
-                YearMonth.now(),
+                YearMonth.of(2025, 11),
             )
 
         assertThat(satskjøringer).allMatch { it.ferdigTidspunkt == null }
@@ -101,13 +101,13 @@ class SatskjøringRepositoryTest(
             satskjøringRepository.saveAndFlush(
                 Satskjøring(
                     fagsakId = fagsakId,
-                    satsTidspunkt = YearMonth.now(),
+                    satsTidspunkt = YearMonth.of(2025, 11),
                 ),
             )
 
         val satskjøringer =
             satskjøringRepository.findBySatsTidspunktAndFerdigTidspunktIsNullAndFeiltypeIsNotNull(
-                YearMonth.now(),
+                YearMonth.of(2025, 11),
             )
 
         assertThat(satskjøringer).doesNotContain(satskjøring)
@@ -123,7 +123,7 @@ class SatskjøringRepositoryTest(
         satskjøringRepository.saveAndFlush(
             Satskjøring(
                 fagsakId = fagsakId,
-                satsTidspunkt = YearMonth.now(),
+                satsTidspunkt = YearMonth.of(2025, 11),
                 feiltype = "feiltype",
                 ferdigTidspunkt = LocalDateTime.now(),
             ),
@@ -133,7 +133,7 @@ class SatskjøringRepositoryTest(
         val satskjøringer =
             satskjøringRepository.finnPåFeilTypeOgFerdigTidNull(
                 feiltype = "feiltype",
-                satsTidspunkt = YearMonth.now(),
+                satsTidspunkt = YearMonth.of(2025, 11),
             )
 
         // Assert
@@ -153,13 +153,13 @@ class SatskjøringRepositoryTest(
             listOf(
                 Satskjøring(
                     fagsakId = fagsakId,
-                    satsTidspunkt = YearMonth.now(),
+                    satsTidspunkt = YearMonth.of(2025, 11),
                     feiltype = "feiltype",
                     ferdigTidspunkt = null,
                 ),
                 Satskjøring(
                     fagsakId = fagsakId2,
-                    satsTidspunkt = YearMonth.now(),
+                    satsTidspunkt = YearMonth.of(2025, 11),
                     feiltype = "feiltype",
                     ferdigTidspunkt = LocalDateTime.now(),
                 ),
@@ -170,7 +170,7 @@ class SatskjøringRepositoryTest(
         val satskjøringer =
             satskjøringRepository.finnPåFeilTypeOgFerdigTidNull(
                 feiltype = "feiltype",
-                satsTidspunkt = YearMonth.now(),
+                satsTidspunkt = YearMonth.of(2025, 11),
             )
 
         // Assert
