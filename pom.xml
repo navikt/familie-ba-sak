@@ -553,6 +553,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.4</version>
                 <configuration>
+                    <argLine>-XX:MinRAMPercentage=25 -XX:MaxRAMPercentage=75</argLine>
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->
                     <excludedGroups>${excludedGroups}</excludedGroups>
