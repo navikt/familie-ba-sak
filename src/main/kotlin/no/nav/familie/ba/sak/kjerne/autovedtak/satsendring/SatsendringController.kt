@@ -125,7 +125,7 @@ class SatsendringController(
         val feiledeSatskjøringer =
             satsendringService.finnUferdigeSatskjøringer(
                 feiltyper = finnUferdigeSatskjøringerRequest.feiltype,
-                satsTidspunkt = finnUferdigeSatskjøringerRequest.satsTid,
+                satsTidspunkt = finnUferdigeSatskjøringerRequest.satsTid ?: StartSatsendring.hentAktivSatsendringstidspunkt(),
             )
 
         return ResponseEntity.ok(Ressurs.success(feiledeSatskjøringer))
@@ -137,7 +137,7 @@ class SatsendringController(
     ): ResponseEntity<Ressurs<String>> {
         tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.FORVALTER, "Slett satskjøringer som ikke er ferdigkjørt.")
 
-        satsendringService.slettSatskjøringer(slettSatskjøringerRequest.fagsakIder, slettSatskjøringerRequest.satsTid)
+        satsendringService.slettSatskjøringer(slettSatskjøringerRequest.fagsakIder, slettSatskjøringerRequest.satsTid ?: StartSatsendring.hentAktivSatsendringstidspunkt())
         return ResponseEntity.ok(Ressurs.success("Slettet satskjøringer for fagsakIder: ${slettSatskjøringerRequest.fagsakIder}"))
     }
 
@@ -165,10 +165,10 @@ class SatsendringController(
 
 data class FinnUferdigeSatskjøringerRequest(
     val feiltype: List<SatsendringSvar> = SatsendringSvar.entries,
-    val satsTid: YearMonth = StartSatsendring.hentAktivSatsendringstidspunkt(),
+    val satsTid: YearMonth? = StartSatsendring.hentAktivSatsendringstidspunkt(),
 )
 
 data class SlettSatskjøringerRequest(
     val fagsakIder: Set<Long>,
-    val satsTid: YearMonth = StartSatsendring.hentAktivSatsendringstidspunkt(),
+    val satsTid: YearMonth? = StartSatsendring.hentAktivSatsendringstidspunkt(),
 )
