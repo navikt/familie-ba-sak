@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring.Companion.SATSENDRINGMÅNED_FEB_2026
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -119,7 +120,7 @@ class AutovedtakSatsendringServiceTest(
             satskjøringRepository.saveAll(satskjøringer)
 
             // Act
-            val sletteSatskjøringerFeil = assertThrows<Feil> { satsendringService.slettSatskjøringer(fagsaker.map { it.id }.toSet()) }
+            val sletteSatskjøringerFeil = assertThrows<Feil> { satsendringService.slettSatskjøringer(fagsakIder = fagsaker.map { it.id }.toSet(), satsTidspunkt = SATSENDRINGMÅNED_FEB_2026) }
 
             // Assert
             assertThat(sletteSatskjøringerFeil.message).isEqualTo("Det finnes en eller flere satskjøringer for fagsaker [${fagsaker.first().id}] som er ferdige. Kan ikke slette.")
@@ -148,7 +149,7 @@ class AutovedtakSatsendringServiceTest(
 
             satskjøringRepository.saveAll(satskjøringer)
             // Act
-            val slettedeSatskjøringer = satsendringService.slettSatskjøringer(fagsaker.map { it.id }.toSet())
+            val slettedeSatskjøringer = satsendringService.slettSatskjøringer(fagsaker.map { it.id }.toSet(), SATSENDRINGMÅNED_FEB_2026)
 
             // Assert
             assertThat(slettedeSatskjøringer).isEqualTo(fagsaker.map { it.id })
@@ -176,7 +177,7 @@ class AutovedtakSatsendringServiceTest(
 
             satskjøringRepository.saveAll(satskjøringer)
             // Act
-            val slettedeSatskjøringer = satsendringService.slettSatskjøringer(fagsaker.map { it.id }.toSet())
+            val slettedeSatskjøringer = satsendringService.slettSatskjøringer(fagsaker.map { it.id }.toSet(), SATSENDRINGMÅNED_FEB_2026)
 
             // Assert
             assertThat(slettedeSatskjøringer).isEqualTo(fagsaker.map { it.id })
@@ -219,7 +220,11 @@ class AutovedtakSatsendringServiceTest(
             satskjøringRepository.saveAll(satskjøringer)
 
             // Act
-            val uferdigeSatsendringer = satsendringService.finnUferdigeSatskjøringer(feiltyper = listOf(SatsendringSvar.BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT))
+            val uferdigeSatsendringer =
+                satsendringService.finnUferdigeSatskjøringer(
+                    feiltyper = listOf(SatsendringSvar.BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT),
+                    satsTidspunkt = SATSENDRINGMÅNED_FEB_2026,
+                )
 
             // Assert
             assertThat(uferdigeSatsendringer).isEqualTo(listOf(fagsaker[0].id))

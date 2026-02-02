@@ -80,18 +80,26 @@ class SatsendringService(
 
     fun finnUferdigeSatskjøringer(
         feiltyper: List<SatsendringSvar>,
-        satsTidspunkt: YearMonth = StartSatsendring.hentAktivSatsendringstidspunkt(),
+        satsTidspunkt: YearMonth,
     ): List<Long> =
         feiltyper.flatMap { feiltype ->
-            satskjøringRepository.finnPåFeilTypeOgFerdigTidNull(feiltype.name, satsTidspunkt).map { it.fagsakId }
+            satskjøringRepository
+                .finnPåFeilTypeOgFerdigTidNull(
+                    feiltype = feiltype.name,
+                    satsTidspunkt = satsTidspunkt,
+                ).map { it.fagsakId }
         }
 
     fun slettSatskjøringer(
         fagsakIder: Set<Long>,
-        satsTidspunkt: YearMonth = StartSatsendring.hentAktivSatsendringstidspunkt(),
+        satsTidspunkt: YearMonth,
     ): List<Long> {
         logger.info("Sletter satskjøringer for fagsakIder: $fagsakIder")
-        val satskjøringer = satskjøringRepository.findBySatsTidspunktAndFagsakIdIn(satsTidspunkt, fagsakIder)
+        val satskjøringer =
+            satskjøringRepository.findBySatsTidspunktAndFagsakIdIn(
+                satsTidspunkt = satsTidspunkt,
+                fagsakIds = fagsakIder,
+            )
 
         val ferdigeSatskjøringer = satskjøringer.filter { it.ferdigTidspunkt != null }
         if (ferdigeSatskjøringer.isNotEmpty()) {
