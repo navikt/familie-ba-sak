@@ -90,9 +90,11 @@ private fun finnUtgjørendeVilkår(
         vilkårResultaterForrigePeriode?.filter { it.resultat == Resultat.OPPFYLT }
             ?: emptyList()
 
-    val vilkårResultaterOppfyltMånedenFørVedtaksperiode = vilkårResultater.filter {
-        it.resultat == Resultat.OPPFYLT &&
-            it.fom?.toYearMonth()?.plusMonths(1) == vedtaksperiode.fom?.toYearMonth() }
+    val vilkårResultaterOppfyltMånedenFørVedtaksperiode =
+        vilkårResultater.filter {
+            it.resultat == Resultat.OPPFYLT &&
+                it.fom?.toYearMonth()?.plusMonths(1) == vedtaksperiode.fom?.toYearMonth()
+        }
 
     val vilkårTjent =
         hentVilkårResultaterTjent(
