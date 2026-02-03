@@ -355,7 +355,7 @@ internal class BehandlingsresultatValideringUtilsTest {
     @ParameterizedTest
     @EnumSource(
         value = Behandlingsresultat::class,
-        names = ["OPPHØRT", "IKKE_VURDERT"],
+        names = ["OPPHØRT", "ENDRET_OG_OPPHØRT", "IKKE_VURDERT"],
         mode = EnumSource.Mode.EXCLUDE,
     )
     fun `skal kaste feil dersom behandlingsresultat i 'Falsk identitet'-behandling er noe annet enn OPPHØRT`(behandlingsresultat: Behandlingsresultat) {
@@ -375,14 +375,19 @@ internal class BehandlingsresultatValideringUtilsTest {
         assertThat(funksjonellFeil.message).isEqualTo("Du har fått behandlingsresultatet ${behandlingsresultat.displayName}. 'Falsk identitet'-behandlinger kan kun ha behandlingsresultat: '${OPPHØRT.displayName}'")
     }
 
-    @Test
-    fun `skal ikke kaste feil dersom behandlingsresultat i 'Falsk identitet'-behandling er OPPHØRT`() {
+    @ParameterizedTest
+    @EnumSource(
+        value = Behandlingsresultat::class,
+        names = ["OPPHØRT", "ENDRET_OG_OPPHØRT"],
+        mode = INCLUDE,
+    )
+    fun `skal ikke kaste feil dersom behandlingsresultat i 'Falsk identitet'-behandling er OPPHØRT`(behandlingsresultat: Behandlingsresultat) {
         // Arrange
         val behandling =
             lagBehandling(
                 behandlingType = BehandlingType.REVURDERING,
                 årsak = BehandlingÅrsak.FALSK_IDENTITET,
-                resultat = OPPHØRT,
+                resultat = behandlingsresultat,
             )
 
         // Act & Assert
