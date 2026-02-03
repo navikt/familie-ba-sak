@@ -1,0 +1,2 @@
+ALTER TABLE po_person
+    ADD COLUMN har_falsk_identitet BOOLEAN DEFAULT FALSE NOT NULL;

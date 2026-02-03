@@ -39,6 +39,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
@@ -95,6 +96,7 @@ class StegService(
         when (nyBehandling.behandlingÅrsak) {
             BehandlingÅrsak.HELMANUELL_MIGRERING -> validerHelmanuelMigrering(nyBehandling)
             BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> validerEndreMigreringsdato(nyBehandling)
+            BehandlingÅrsak.FALSK_IDENTITET -> validerFalskIdentitet(nyBehandling)
             else -> Unit
         }
 
@@ -168,6 +170,14 @@ class StegService(
                 frontendFeilmelding = "Det finnes allerede en vedtatt behandling med løpende utbetalinger på fagsak." + "Behandling kan ikke opprettes med årsak " + BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
             )
         }
+    }
+
+    private fun validerFalskIdentitet(nyBehandling: NyBehandling) {
+        if (!featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET)) {
+            throw FunksjonellFeil("Det er ikke mulig å opprette behandling med årsak 'Falsk identitet'. ${FalskIdentitetService.Companion.KAN_IKKE_HÅNDTERE_FALSK_IDENTITET}")
+        }
+
+        behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId) ?: throw FunksjonellFeil("Kan ikke opprette behandling med årsak 'Falsk identitet' dersom det ikke finnes en tidligere behandling.")
     }
 
     private fun hentBarnFraForrigeAvsluttedeBehandling(behandling: Behandling): List<String> {

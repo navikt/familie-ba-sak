@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SVALBARDTILLEGG
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
@@ -265,5 +266,17 @@ class BehandlingsresultatStegValideringService(
                     throw FunksjonellFeil(melding = meldingTilSaksbehandler)
                 }
             }
+    }
+
+    fun validerFalskIdentitetBehandling(tilkjentYtelse: TilkjentYtelse) {
+        val andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse.tilTidslinjerPerAktørOgType()
+        val andelerForrigeBehandling = beregningService.hentAndelerFraForrigeVedtatteBehandling(tilkjentYtelse.behandling).tilTidslinjerPerAktørOgType()
+
+        andelerDenneBehandlingen.outerJoin(andelerForrigeBehandling) { andelDenneBehandling, andelForrigeBehandling ->
+            // Det finnes andeler i denne behandlingen som ikke fantes i forrige behandling
+            if (andelDenneBehandling != null && andelForrigeBehandling == null) {
+                throw FunksjonellFeil("Det finnes nye andeler i behandling. Kan ikke innvilge nye andeler i 'Falsk identitet'-behandling.")
+            }
+        }
     }
 }
