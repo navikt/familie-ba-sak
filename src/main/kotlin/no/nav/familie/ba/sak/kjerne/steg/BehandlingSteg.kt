@@ -274,6 +274,7 @@ fun hentNesteSteg(
 
         BehandlingÅrsak.IVERKSETTE_KA_VEDTAK,
         BehandlingÅrsak.TEKNISK_ENDRING,
+        BehandlingÅrsak.FALSK_IDENTITET,
         -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING

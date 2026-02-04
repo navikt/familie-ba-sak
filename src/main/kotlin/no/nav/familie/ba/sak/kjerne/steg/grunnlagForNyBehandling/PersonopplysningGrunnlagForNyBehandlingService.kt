@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.skalTaMedBarnFraForrigeBehandling
@@ -15,6 +17,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
     private val personidentService: PersonidentService,
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val falskIdentitetService: FalskIdentitetService,
 ) {
     fun opprettKopiEllerNyttPersonopplysningGrunnlag(
         behandling: Behandling,
@@ -22,13 +25,15 @@ class PersonopplysningGrunnlagForNyBehandlingService(
         søkerIdent: String,
         barnasIdenter: List<String>,
     ) {
-        if (behandling.erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() || behandling.erTekniskEndring()) {
+        if (behandling.erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() || behandling.erTekniskEndring() || behandling.erFalskIdentitet()) {
             if (forrigeBehandlingSomErVedtatt == null) {
                 throw Feil("Vi kan ikke kjøre behandling med årsak ${behandling.opprettetÅrsak} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}")
             }
 
             if (behandling.erFinnmarksEllerSvalbardtillegg()) {
                 opprettKopiAvPersonopplysningGrunnlagMedNyAdresse(behandling, forrigeBehandlingSomErVedtatt, søkerIdent)
+            } else if (behandling.erFalskIdentitet()) {
+                opprettKopiAvPersonopplysningGrunnlagMedFalskIdentitet(behandling, forrigeBehandlingSomErVedtatt, søkerIdent)
             } else {
                 opprettKopiAvPersonopplysningGrunnlag(behandling, forrigeBehandlingSomErVedtatt, søkerIdent)
             }
@@ -68,6 +73,34 @@ class PersonopplysningGrunnlagForNyBehandlingService(
                 .tilKopiForNyBehandling(behandling, listOf(søkerAktør).plus(barnaAktør))
 
         persongrunnlagService.oppdaterAdresserPåPersoner(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+    }
+
+    private fun opprettKopiAvPersonopplysningGrunnlagMedFalskIdentitet(
+        behandling: Behandling,
+        forrigeBehandlingSomErVedtatt: Behandling,
+        søkerIdent: String,
+    ) {
+        val søkerAktør = personidentService.hentOgLagreAktør(søkerIdent, true)
+
+        val barnaAktør = finnBarnMedTilkjentYtelseIForrigeBehandling(behandling, forrigeBehandlingSomErVedtatt)
+
+        val aktørerIBehandling = listOf(søkerAktør).plus(barnaAktør)
+
+        val aktørerMedFalskIdentitet =
+            aktørerIBehandling.filter { aktør ->
+                falskIdentitetService.harFalskIdentitet(aktør)
+            }
+
+        if (aktørerMedFalskIdentitet.isEmpty()) {
+            throw FunksjonellFeil("Kan ikke opprette behandling med årsak 'Falsk identitet'. Ingen av aktørene i behandlingen har falsk identitet.")
+        }
+
+        val personopplysningGrunnlag =
+            persongrunnlagService
+                .hentAktivThrows(forrigeBehandlingSomErVedtatt.id)
+                .tilKopiForNyBehandling(behandling, aktørerIBehandling, aktørerMedFalskIdentitet)
+
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
     }
 

@@ -303,8 +303,8 @@ class PdlRestKlient(
             ident = ident,
             pdlResponse = pdlResponse,
         ) {
-            it.person.falskIdentitet
-        }
+            it.person
+        }.falskIdentitet
     }
 
     fun httpHeaders(): HttpHeaders =
