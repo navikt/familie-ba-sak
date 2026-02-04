@@ -344,7 +344,7 @@ class PersongrunnlagService(
         val filtrerOpphold = featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO)
         val filtrerSivilstand = featureToggleService.isEnabled(FeatureToggle.FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
 
-        lagreHistoriskeIdenter(personinfo.historiskeIdenter, aktør)
+        lagreHistoriskeIdenter(personInfo.historiskeIdenter, aktør)
 
         return Person(
             type = personType,
