@@ -606,7 +606,7 @@ class ForvalterController(
             handling = "Endre status på fagsak",
         )
 
-        forvalterService.endreFagsakStatusFraLøpendeTilOprettetOmIngenVedtatteBehandlinger(fagsakId)
+        forvalterService.endreFagsakStatusFraLøpendeTilOpprettet(fagsakId)
         return ResponseEntity.ok("Endret status på fagsak $fagsakId fra løpende til opprettet.")
     }
 }

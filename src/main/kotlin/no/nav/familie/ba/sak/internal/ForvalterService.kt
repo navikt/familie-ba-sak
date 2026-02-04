@@ -226,7 +226,7 @@ class ForvalterService(
     }
 
     @Transactional
-    fun endreFagsakStatusFraLøpendeTilOprettetOmIngenVedtatteBehandlinger(fagsakId: Long) {
+    fun endreFagsakStatusFraLøpendeTilOpprettet(fagsakId: Long) {
         val fagsak =
             fagsakRepository.finnFagsak(fagsakId)
                 ?: throw Feil("Finner ikke fagsak med id $fagsakId")
