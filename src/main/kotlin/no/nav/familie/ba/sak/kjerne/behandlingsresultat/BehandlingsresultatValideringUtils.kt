@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT_OG_ENDRET
@@ -107,6 +108,12 @@ object BehandlingsresultatValideringUtils {
             behandling.erOmregning() -> {
                 if (behandling.resultat !in setOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT)) {
                     throw Feil("Behandling $behandling er omregningssak, men er ikke uendret behandlingsresultat")
+                }
+            }
+
+            behandling.erFalskIdentitet() -> {
+                if (behandling.resultat !in setOf(OPPHØRT, ENDRET_OG_OPPHØRT)) {
+                    throw FunksjonellFeil("Du har fått behandlingsresultatet ${behandling.resultat.displayName}. 'Falsk identitet'-behandlinger kan kun ha behandlingsresultat: '${OPPHØRT.displayName}'")
                 }
             }
         }

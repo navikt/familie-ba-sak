@@ -1389,4 +1389,70 @@ class BehandlingsresultatStegValideringServiceTest {
             }
         }
     }
+
+    @Nested
+    inner class ValiderFalskIdentitetBehandling {
+        @Test
+        fun `skal kaste feil dersom det er innvilget nye andeler i behandling`() {
+            // Arrange
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2025, 1),
+                        tom = YearMonth.of(2042, 12),
+                        beløp = 1000,
+                        aktør = barn.aktør,
+                    ),
+                )
+            val nåværendeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2024, 1),
+                        tom = YearMonth.of(2042, 12),
+                        beløp = 1000,
+                        aktør = barn.aktør,
+                    ),
+                )
+
+            val tilkjentYtelse = lagTilkjentYtelse { nåværendeAndeler.toSet() }
+
+            every { beregningService.hentAndelerFraForrigeVedtatteBehandling(tilkjentYtelse.behandling) } returns forrigeAndeler
+
+            // Act
+            val funksjonellFeil = assertThrows<FunksjonellFeil> { behandlingsresultatStegValideringService.validerFalskIdentitetBehandling(tilkjentYtelse) }
+
+            // Assert
+            assertThat(funksjonellFeil.message).isEqualTo("Det finnes nye andeler i behandling. Kan ikke innvilge nye andeler i 'Falsk identitet'-behandling.")
+        }
+
+        @Test
+        fun `skal ikke kaste feil dersom det er fjernet andeler i behandling`() {
+            // Arrange
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2025, 1),
+                        tom = YearMonth.of(2042, 12),
+                        beløp = 1000,
+                        aktør = barn.aktør,
+                    ),
+                )
+            val nåværendeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2025, 1),
+                        tom = YearMonth.of(2026, 1),
+                        beløp = 1000,
+                        aktør = barn.aktør,
+                    ),
+                )
+
+            val tilkjentYtelse = lagTilkjentYtelse { nåværendeAndeler.toSet() }
+
+            every { beregningService.hentAndelerFraForrigeVedtatteBehandling(tilkjentYtelse.behandling) } returns forrigeAndeler
+
+            // Act
+            assertDoesNotThrow { behandlingsresultatStegValideringService.validerFalskIdentitetBehandling(tilkjentYtelse) }
+        }
+    }
 }

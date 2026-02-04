@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.OverlappendePerioderMedAndreFagsaker
+import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -65,6 +66,46 @@ class FinnOverlappendePerioderTest {
 
         assertThat(overlappendePerioder.none { it.fagsaker.contains(1L) }).`as`("Genererer overlappende perioder for samme fagsak det skal finnes overlapp for").isTrue()
         assertThat(overlappendePerioder.none { it.fagsaker.contains(4L) }).`as`("Genererer overlappende perioder for fagsak som ikke skal overlappe").isTrue()
+    }
+
+    @Test
+    fun `finnOverlappendePerioder skal ikke bry seg om overlappende perioder i forskjellige fagområder enn BARNETRYGD og BARNETRYGD_MANUELT`() {
+        // Arrange
+        val økonomiSimuleringMottakere =
+            listOf(
+                lagØkonomiSimuleringMottaker(
+                    økonomiSimuleringPostering =
+                        listOf(
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.now().minusYears(1),
+                                tom = LocalDate.now(),
+                                beløp = 100,
+                                fagsakId = 1,
+                                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD,
+                            ),
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.now().minusYears(1),
+                                tom = LocalDate.now(),
+                                beløp = 100,
+                                fagsakId = 4,
+                                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD,
+                            ),
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.now().minusYears(1),
+                                tom = LocalDate.now(),
+                                beløp = 100,
+                                fagsakId = 2,
+                                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+                            ),
+                        ),
+                ),
+            )
+
+        // Act
+        val overlappendePerioder = finnOverlappendePerioder(økonomiSimuleringMottakere = økonomiSimuleringMottakere, 2)
+
+        // Assert
+        assertThat(overlappendePerioder).isEmpty()
     }
 
     @Test

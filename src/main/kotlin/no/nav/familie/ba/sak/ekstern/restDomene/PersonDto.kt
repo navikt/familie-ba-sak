@@ -20,6 +20,7 @@ data class PersonDto(
     val målform: Målform,
     val dødsfallDato: LocalDate? = null,
     val erManueltLagtTilISøknad: Boolean? = null,
+    val harFalskIdentitet: Boolean? = false,
 )
 
 fun Person.tilPersonDto(
@@ -36,4 +37,5 @@ fun Person.tilPersonDto(
         målform = this.målform,
         dødsfallDato = this.dødsfall?.dødsfallDato,
         erManueltLagtTilISøknad = erManueltLagtTilISøknad,
+        harFalskIdentitet = this.harFalskIdentitet,
     )

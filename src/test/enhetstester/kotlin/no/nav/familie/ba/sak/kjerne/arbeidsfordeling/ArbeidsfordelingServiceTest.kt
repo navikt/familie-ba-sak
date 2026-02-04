@@ -7,17 +7,25 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.datagenerator.lagArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonEnkel
+import no.nav.familie.ba.sak.datagenerator.lagPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FalskIdentitetPersonInfo
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.MIDLERTIDIG_ENHET
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.OSLO
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.STEINKJER
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -26,6 +34,8 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.NavIdent
+import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -65,7 +75,7 @@ class ArbeidsfordelingServiceTest {
         @BeforeEach
         fun setup() {
             every { personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(any()) } returns emptyList()
-            every { personopplysningerService.hentPersoninfoEnkel(any()).adressebeskyttelseGradering } returns null
+            every { personopplysningerService.hentPdlPersonInfoEnkel(any()) } returns PdlPersonInfo.Person(lagPersonInfo())
             every { arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any()) } returns null
         }
 
@@ -198,6 +208,105 @@ class ArbeidsfordelingServiceTest {
             verify(exactly = 0) { oppgaveService.endreTilordnetEnhetPåOppgaverForBehandling(any(), any()) }
         }
 
+        @Test
+        fun `fastsettBehandlendeEnhet skal bruke behandlende enhet fra forrige behandling dersom person med sterkest adressebeskyttelse har falsk identitet`() {
+            // Arrange
+            val søker = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val fagsak = lagFagsak(aktør = søker.aktør)
+            val forrigeBehandling = lagBehandling(fagsak = fagsak)
+            val behandling = lagBehandling(fagsak = fagsak, behandlingType = BehandlingType.REVURDERING)
+
+            every {
+                personopplysningGrunnlagRepository
+                    .finnSøkerOgBarnAktørerTilAktiv(behandling.id)
+            } returns listOf(lagPersonEnkel(PersonType.SØKER, søker.aktør), lagPersonEnkel(PersonType.BARN, barn.aktør))
+
+            every { personopplysningerService.hentPdlPersonInfoEnkel(barn.aktør) } returns PdlPersonInfo.Person(lagPersonInfo(adressebeskyttelseGradering = null))
+            every { personopplysningerService.hentPdlPersonInfoEnkel(søker.aktør) } returns PdlPersonInfo.FalskPerson(FalskIdentitetPersonInfo())
+
+            every { arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(fagsak.id) } returns
+                lagArbeidsfordelingPåBehandling(
+                    behandlendeEnhetId = OSLO.enhetsnummer,
+                    behandlendeEnhetNavn = OSLO.enhetsnavn,
+                    behandlingId = forrigeBehandling.id,
+                    manueltOverstyrt = false,
+                )
+
+            every { tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(any(), any()) } returns
+                Arbeidsfordelingsenhet(
+                    enhetId = OSLO.enhetsnummer,
+                    enhetNavn = OSLO.enhetsnavn,
+                )
+
+            val arbeidsfordelingPåBehandlingSlot = slot<ArbeidsfordelingPåBehandling>()
+            every { arbeidsfordelingPåBehandlingRepository.save(capture(arbeidsfordelingPåBehandlingSlot)) } answers { firstArg() }
+
+            // Act
+            arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, forrigeBehandling)
+
+            // Assert
+            val arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandlingSlot.captured
+            assertThat(arbeidsfordelingPåBehandling.behandlendeEnhetId).isEqualTo(OSLO.enhetsnummer)
+            assertThat(arbeidsfordelingPåBehandling.behandlendeEnhetNavn).isEqualTo(OSLO.enhetsnavn)
+        }
+
+        @Test
+        fun `fastsettBehandlendeEnhet skal hente behandlende enhet fra NORG dersom person med sterkest adressebeskyttelse ikke har falsk identitet`() {
+            // Arrange
+            val søker = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val fagsak = lagFagsak(aktør = søker.aktør)
+            val forrigeBehandling = lagBehandling(fagsak = fagsak)
+            val behandling = lagBehandling(fagsak = fagsak, behandlingType = BehandlingType.REVURDERING)
+
+            every {
+                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any())
+            } returns null
+
+            every {
+                personopplysningGrunnlagRepository
+                    .finnSøkerOgBarnAktørerTilAktiv(behandling.id)
+            } returns listOf(lagPersonEnkel(PersonType.SØKER, søker.aktør), lagPersonEnkel(PersonType.BARN, barn.aktør))
+
+            every { personopplysningerService.hentPdlPersonInfoEnkel(barn.aktør) } returns PdlPersonInfo.Person(lagPersonInfo(adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG))
+            every { personopplysningerService.hentPdlPersonInfoEnkel(søker.aktør) } returns PdlPersonInfo.FalskPerson(FalskIdentitetPersonInfo())
+            every { integrasjonKlient.hentBehandlendeEnhet(barn.aktør.aktivFødselsnummer(), Behandlingstype.NASJONAL) } returns
+                listOf(
+                    Arbeidsfordelingsenhet(
+                        enhetId = BarnetrygdEnhet.DRAMMEN.enhetsnummer,
+                        enhetNavn = BarnetrygdEnhet.DRAMMEN.enhetsnavn,
+                    ),
+                )
+
+            every { tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(any(), any()) } returns
+                Arbeidsfordelingsenhet(
+                    enhetId = BarnetrygdEnhet.DRAMMEN.enhetsnummer,
+                    enhetNavn = BarnetrygdEnhet.DRAMMEN.enhetsnavn,
+                )
+
+            val arbeidsfordelingPåBehandlingSlot = slot<ArbeidsfordelingPåBehandling>()
+            every { arbeidsfordelingPåBehandlingRepository.save(capture(arbeidsfordelingPåBehandlingSlot)) } answers { firstArg() }
+
+            // Act
+            arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, forrigeBehandling)
+
+            // Assert
+            val arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandlingSlot.captured
+            assertThat(arbeidsfordelingPåBehandling.behandlendeEnhetId).isEqualTo(BarnetrygdEnhet.DRAMMEN.enhetsnummer)
+            assertThat(arbeidsfordelingPåBehandling.behandlendeEnhetNavn).isEqualTo(BarnetrygdEnhet.DRAMMEN.enhetsnavn)
+        }
+    }
+
+    @Nested
+    inner class FastsettBehandlendeEnhetEtterPorteføljejustering {
+        @BeforeEach
+        fun setup() {
+            every { personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(any()) } returns emptyList()
+            every { personopplysningerService.hentPdlPersonInfoEnkel(any()) } returns PdlPersonInfo.Person(lagPersonInfo())
+            every { arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any()) } returns null
+        }
+
         @ParameterizedTest
         @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG", "FINNMARKSTILLEGG", "SVALBARDTILLEGG"], mode = EnumSource.Mode.INCLUDE)
         fun `fastsettBehandlendeEnhet skal bruke ny enhet fra NORG hvis forrige enhet var 4817`(behandlingÅrsak: BehandlingÅrsak) {
@@ -218,10 +327,7 @@ class ArbeidsfordelingServiceTest {
             // Ny enhet
             every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer(), any()) } returns
                 listOf(
-                    Arbeidsfordelingsenhet(
-                        enhetId = OSLO.enhetsnummer,
-                        enhetNavn = OSLO.enhetsnavn,
-                    ),
+                    Arbeidsfordelingsenhet.opprettFra(BarnetrygdEnhet.OSLO),
                 )
 
             every { arbeidsfordelingPåBehandlingRepository.save(capture(arbeidsfordelingPåBehandlingSlot)) } answers { firstArg() }
@@ -257,10 +363,7 @@ class ArbeidsfordelingServiceTest {
             // Ny enhet
             every { integrasjonKlient.hentBehandlendeEnhet(behandling.fagsak.aktør.aktivFødselsnummer(), any()) } returns
                 listOf(
-                    Arbeidsfordelingsenhet(
-                        enhetId = OSLO.enhetsnummer,
-                        enhetNavn = OSLO.enhetsnavn,
-                    ),
+                    Arbeidsfordelingsenhet.opprettFra(BarnetrygdEnhet.OSLO),
                 )
 
             every { arbeidsfordelingPåBehandlingRepository.save(capture(arbeidsfordelingPåBehandlingSlot)) } answers { firstArg() }

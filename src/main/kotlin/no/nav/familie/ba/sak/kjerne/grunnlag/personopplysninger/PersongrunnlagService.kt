@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.SKJERMET_BARN
+import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortBostedsadresserFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortDeltBostedForSøker
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortIkkeRelevanteSivilstander
@@ -70,6 +71,7 @@ class PersongrunnlagService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val kodeverkService: KodeverkService,
     private val featureToggleService: FeatureToggleService,
+    private val falskIdentitetService: FalskIdentitetService,
 ) {
     fun mapTilPersonDtoMedStatsborgerskapLand(
         person: Person,
@@ -330,7 +332,7 @@ class PersongrunnlagService(
         hentArbeidsforhold: Boolean = false,
         eldsteBarnsFødselsdato: LocalDate,
     ): Person {
-        val personinfo =
+        val personInfo =
             if (skalHenteEnkelPersonInfo) {
                 personopplysningerService.hentPersoninfoEnkel(aktør)
             } else {
@@ -347,19 +349,19 @@ class PersongrunnlagService(
         return Person(
             type = personType,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            fødselsdato = personinfo.fødselsdato,
+            fødselsdato = personInfo.fødselsdato,
             aktør = aktør,
-            navn = personinfo.navn ?: "",
-            kjønn = personinfo.kjønn,
+            navn = personInfo.navn ?: "",
+            kjønn = personInfo.kjønn,
             målform = målform,
         ).also { person ->
             person.opphold =
-                personinfo.opphold
+                personInfo.opphold
                     ?.filtrerBortOppholdFørEldsteBarn(eldsteBarnsFødselsdato, filtrerOpphold)
                     ?.map { GrOpphold.fraOpphold(it, person) }
                     ?.toMutableList() ?: mutableListOf()
             person.bostedsadresser =
-                personinfo.bostedsadresser
+                personInfo.bostedsadresser
                     .filtrerUtKunNorskeBostedsadresser()
                     .filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
                     .map {
@@ -370,7 +372,7 @@ class PersongrunnlagService(
                         )
                     }.toMutableList()
             person.oppholdsadresser =
-                personinfo.oppholdsadresser
+                personInfo.oppholdsadresser
                     .filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
@@ -380,7 +382,7 @@ class PersongrunnlagService(
                         )
                     }.toMutableList()
             person.deltBosted =
-                personinfo.deltBosted
+                personInfo.deltBosted
                     .filtrerBortDeltBostedForSøker(person.type, filtrerAdresser)
                     .map {
                         GrDeltBosted.fraDeltBosted(
@@ -390,12 +392,12 @@ class PersongrunnlagService(
                         )
                     }.toMutableList()
             person.sivilstander =
-                personinfo.sivilstander
+                personInfo.sivilstander
                     .filtrerBortIkkeRelevanteSivilstander(filtrerSivilstand, behandlingKategori, behandlingUnderkategori, personType)
                     .map { GrSivilstand.fraSivilstand(it, person) }
                     .toMutableList()
             person.statsborgerskap =
-                personinfo.statsborgerskap
+                personInfo.statsborgerskap
                     ?.filtrerBortStatsborgerskapFørEldsteBarn(eldsteBarnsFødselsdato, filtrerStatsborgerskap)
                     ?.flatMap {
                         statsborgerskapService.hentStatsborgerskapMedMedlemskap(
@@ -407,8 +409,8 @@ class PersongrunnlagService(
             person.dødsfall =
                 lagDødsfallFraPdl(
                     person = person,
-                    dødsfallDatoFraPdl = personinfo.dødsfall?.dødsdato,
-                    dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo?.adresse,
+                    dødsfallDatoFraPdl = personInfo.dødsfall?.dødsdato,
+                    dødsfallAdresseFraPdl = personInfo.kontaktinformasjonForDoedsbo?.adresse,
                 )
 
             if (featureToggleService.isEnabled(FeatureToggle.ARBEIDSFORHOLD_STRENGERE_NEDHENTING)) {
