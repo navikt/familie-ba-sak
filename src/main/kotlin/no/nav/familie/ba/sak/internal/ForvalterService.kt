@@ -226,7 +226,7 @@ class ForvalterService(
     }
 
     @Transactional
-    fun endreFagsakStatusTilOprettetOmIngenVedtatteBehandlinger(fagsakId: Long) {
+    fun endreFagsakStatusFraLøpendeTilOprettetOmIngenVedtatteBehandlinger(fagsakId: Long) {
         val fagsak =
             fagsakRepository.finnFagsak(fagsakId)
                 ?: throw Feil("Finner ikke fagsak med id $fagsakId")
@@ -236,15 +236,14 @@ class ForvalterService(
         }
 
         val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsak.id)
-
-        if (behandlinger.any { it.status != BehandlingStatus.AVSLUTTET || !it.erVedtatt() }) {
-            throw Feil("Fagsak $fagsakId har aktive behandlinger og status kan ikke endres.")
+        if (behandlinger.any { it.status != BehandlingStatus.AVSLUTTET || !it.erHenlagt() }) {
+            throw Feil("Fagsak $fagsakId har behandlinger som ikke er henlagt og status kan ikke endres.")
         }
 
         fagsak.status = FagsakStatus.OPPRETTET
         fagsakRepository.save(fagsak)
 
-        logger.info("Endret fagsakstatus til OPPRETTET for fagsak $fagsakId.")
+        logger.info("Endret status fra LØPENDE til OPPRETTET for fagsak $fagsakId.")
     }
 }
 
