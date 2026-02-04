@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
@@ -14,9 +15,11 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
@@ -30,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -294,6 +298,60 @@ class ForvalterServiceTest {
                     assertTrue(vilkårResultat.periodeFom?.isSameOrAfter(barn.fødselsdato) ?: false)
                 }
             }
+    }
+
+    @Nested
+    inner class EndreFagsakStatusTilOpprettetTest {
+        @Test
+        fun `skal endre fagsakstatus fra LØPENDE til OPPRETTET når alle behandlinger er henlagt og avsluttet`() {
+            // Arrange
+            val fagsak = lagFagsak(status = FagsakStatus.LØPENDE)
+            val henlagtBehandling = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET, resultat = Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE)
+
+            every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
+            every { behandlingHentOgPersisterService.hentBehandlinger(fagsak.id) } returns listOf(henlagtBehandling)
+            every { fagsakRepository.save(any()) } returns fagsak
+
+            // Act
+            forvalterService.`endreFagsakStatusFraLøpendeTilOprettet`(fagsak.id)
+
+            // Assert
+            assertThat(fagsak.status).isEqualTo(FagsakStatus.OPPRETTET)
+        }
+
+        @Test
+        fun `skal kaste feil når fagsak ikke har status løpende`() {
+            // Arrange
+            val fagsak = lagFagsak(status = FagsakStatus.AVSLUTTET)
+
+            every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
+
+            // Act & Assert
+            val exception =
+                assertThrows<Feil> {
+                    forvalterService.`endreFagsakStatusFraLøpendeTilOprettet`(fagsak.id)
+                }
+            assertThat(exception.message).contains("Fagsak ${fagsak.id} har status ${fagsak.status}. Kan bare endre fra LØPENDE til OPPRETTET.")
+        }
+
+        @Test
+        fun `Skal kaste feil når det finnes vedtatte behandlinger`() {
+            // Arrange
+            val fagsak = lagFagsak(status = FagsakStatus.LØPENDE)
+            val vedtattBehandling =
+                lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET, resultat = Behandlingsresultat.INNVILGET)
+            val henlagtBehandling = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET, resultat = Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE)
+
+            every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
+            every { behandlingHentOgPersisterService.hentBehandlinger(fagsak.id) } returns listOf(vedtattBehandling, henlagtBehandling)
+
+            // Act & Assert
+            val exception =
+                assertThrows<Feil> {
+                    forvalterService.`endreFagsakStatusFraLøpendeTilOprettet`(fagsak.id)
+                }
+            assertThat(exception.message).contains("Fagsak ${fagsak.id} har behandlinger som ikke er henlagt og status kan ikke endres.")
+        }
     }
 
     private fun personTilPersonEnkel(barn: Person) =
