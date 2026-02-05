@@ -78,7 +78,6 @@ data class PersonInfo(
     val dødsfall: DødsfallData? = null,
     val kontaktinformasjonForDoedsbo: PdlKontaktinformasjonForDødsbo? = null,
     override val erEgenAnsatt: Boolean? = null,
-    val historiskeIdenter: List<PdlFolkeregisteridentifikator>? = null,
 ) : PersonInfoBase {
     fun eldsteBarnsFødselsdato(): LocalDate? =
         forelderBarnRelasjon
@@ -110,6 +109,10 @@ data class ForelderBarnRelasjonMaskert(
 ) {
     override fun toString(): String = "ForelderBarnRelasjonMaskert(relasjonsrolle=$relasjonsrolle)"
 }
+
+data class Personident(
+    val id: String,
+)
 
 data class DødsfallData(
     val erDød: Boolean,

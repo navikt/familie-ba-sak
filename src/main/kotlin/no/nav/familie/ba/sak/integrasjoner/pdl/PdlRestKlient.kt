@@ -129,7 +129,6 @@ class PdlRestKlient(
                     sivilstander = it.sivilstand,
                     dødsfall = hentDødsfallDataFraListeMedDødsfall(it.doedsfall),
                     kontaktinformasjonForDoedsbo = it.kontaktinformasjonForDoedsbo.firstOrNull(),
-                    historiskeIdenter = it.folkeregisteridentifikator,
                 )
             }
         }

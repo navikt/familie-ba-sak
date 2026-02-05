@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -76,9 +75,8 @@ class PersongrunnlagService(
     fun mapTilPersonDtoMedStatsborgerskapLand(
         person: Person,
         erManueltLagtTilISøknad: Boolean? = null,
-        eldsteBarnsFødselsdato: LocalDate? = null,
     ): PersonDto {
-        val restPerson = person.tilPersonDto(erManueltLagtTilISøknad, eldsteBarnsFødselsdato)
+        val restPerson = person.tilPersonDto(erManueltLagtTilISøknad)
         restPerson.registerhistorikk
             ?.statsborgerskap
             ?.forEach { lagret ->
@@ -344,8 +342,6 @@ class PersongrunnlagService(
         val filtrerOpphold = featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO)
         val filtrerSivilstand = featureToggleService.isEnabled(FeatureToggle.FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
 
-        lagreHistoriskeIdenter(personInfo.historiskeIdenter, aktør)
-
         return Person(
             type = personType,
             personopplysningGrunnlag = personopplysningGrunnlag,
@@ -454,16 +450,6 @@ class PersongrunnlagService(
         return barnasFarEllerMedmorAktører.singleOrNull()?.also {
             personidentService.hentOgLagreAktør(ident = it.aktørId, lagre = true)
         }
-    }
-
-    private fun lagreHistoriskeIdenter(
-        historiskeIdenter: List<PdlFolkeregisteridentifikator>?,
-        aktør: Aktør,
-    ) {
-        if (historiskeIdenter.isNullOrEmpty()) {
-            return
-        }
-        personidentService.lagreHistoriskeIdenter(aktivtFødselsnummer = aktør.aktivFødselsnummer(), identer = historiskeIdenter)
     }
 
     fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {

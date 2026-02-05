@@ -5,9 +5,7 @@ import no.nav.familie.ba.sak.common.saner
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestKlient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FolkeregisteridentifikatorStatus.OPPHOERT
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivAktørId
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivFødselsnummer
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivFødselsnummerOrNull
@@ -165,41 +163,6 @@ class PersonidentService(
             if (lagreNyAktør) aktørIdRepository.saveAndFlush(aktør)
         }
         return aktør
-    }
-
-    fun lagreHistoriskeIdenter(
-        aktivtFødselsnummer: String,
-        identer: List<PdlFolkeregisteridentifikator>,
-    ) {
-        try {
-            val aktør = hentAktør(aktivtFødselsnummer)
-            val eksisterendeIdenter = aktør.personidenter.map { it.fødselsnummer }.toSet()
-            val nyeHistoriskeIdenter =
-                identer
-                    .filter {
-                        it.identifikasjonsnummer != null &&
-                            it.status == OPPHOERT &&
-                            it.identifikasjonsnummer !in eksisterendeIdenter
-                    }
-
-            if (nyeHistoriskeIdenter.isNotEmpty()) {
-                secureLogger.info("Lagrer ${nyeHistoriskeIdenter.map { it.identifikasjonsnummer }} som historiske folkeregisteridentifikatorer på aktør ${aktør.aktørId}: ")
-
-                nyeHistoriskeIdenter.forEach { pdlIdent ->
-                    aktør.personidenter.add(
-                        Personident(
-                            fødselsnummer = pdlIdent.identifikasjonsnummer!!,
-                            aktør = aktør,
-                            aktiv = false,
-                            gjelderTil = null,
-                        ),
-                    )
-                }
-                aktørIdRepository.saveAndFlush(aktør)
-            }
-        } catch (e: Exception) {
-            secureLogger.warn("Kunne ikke lagre historiske folketregisteridentifikatorer for $aktivtFødselsnummer", e)
-        }
     }
 
     companion object {
