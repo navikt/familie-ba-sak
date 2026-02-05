@@ -41,7 +41,7 @@ data class PdlPersonData(
             throw PdlPersonKanIkkeBehandlesIFagsystem(PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
         }
 
-        if (folkeregisteridentifikator.firstOrNull()?.status == FolkeregisteridentifikatorStatus.OPPHOERT) {
+        if (folkeregisteridentifikator.all { it.status == FolkeregisteridentifikatorStatus.OPPHOERT }) {
             throw PdlPersonKanIkkeBehandlesIFagsystem(
                 PdlPersonKanIkkeBehandlesIFagSystemÅrsak.OPPHØRT,
             )
