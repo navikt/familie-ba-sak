@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.BatchService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.DataChunkRepository
 import no.nav.familie.ba.sak.integrasjoner.økonomi.KjøreStatus
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingAvsluttTaskDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -31,7 +31,7 @@ class KonsistensavstemMotOppdragAvsluttTask(
     @WithSpan
     override fun doTask(task: Task) {
         val konsistensavstemmingAvsluttTask =
-            objectMapper.readValue(task.payload, KonsistensavstemmingAvsluttTaskDTO::class.java)
+            jsonMapper.readValue(task.payload, KonsistensavstemmingAvsluttTaskDTO::class.java)
 
         val dataChunks = dataChunkRepository.findByTransaksjonsId(konsistensavstemmingAvsluttTask.transaksjonsId)
         if (dataChunks.any { !it.erSendt }) {

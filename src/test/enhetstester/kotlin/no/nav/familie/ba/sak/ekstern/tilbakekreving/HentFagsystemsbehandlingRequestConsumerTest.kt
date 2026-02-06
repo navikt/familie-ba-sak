@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -136,7 +136,7 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
     }
 
     private fun lagRequest(): String =
-        objectMapper.writeValueAsString(
+        jsonMapper.writeValueAsString(
             HentFagsystemsbehandlingRequest(
                 eksternFagsakId = behandling.fagsak.id.toString(),
                 eksternId = behandling.id.toString(),

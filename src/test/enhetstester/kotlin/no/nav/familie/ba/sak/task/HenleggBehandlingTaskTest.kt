@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.HenleggBehandlingInfoDto
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
@@ -86,7 +86,7 @@ internal class HenleggBehandlingTaskTest {
         Task(
             type = HenleggBehandlingTask.TASK_STEP_TYPE,
             payload =
-                objectMapper.writeValueAsString(
+                jsonMapper.writeValueAsString(
                     HenleggBehandlingTaskDTO(
                         behandlingId = 1,
                         årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,

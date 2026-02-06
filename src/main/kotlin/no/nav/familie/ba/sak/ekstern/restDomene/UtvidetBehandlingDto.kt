@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -11,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 data class UtvidetBehandlingDto(
     val behandlingId: Long,
     val steg: StegType,

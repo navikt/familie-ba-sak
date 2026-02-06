@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task.dto
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -22,7 +22,7 @@ class HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask(
     @WithSpan
     override fun doTask(task: Task) {
         val meldingIOppgave = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
-        val behandlingId = objectMapper.readValue(task.payload, Long::class.java)
+        val behandlingId = jsonMapper.readValue(task.payload, Long::class.java)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val metric =
             autovedtakSmåbarnstilleggService
@@ -37,7 +37,7 @@ class HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask(
         fun opprettTask(behandlingId: Long) =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(behandlingId),
+                payload = jsonMapper.writeValueAsString(behandlingId),
                 properties = mapOf("behandlingId" to behandlingId.toString()).toProperties(),
             )
     }

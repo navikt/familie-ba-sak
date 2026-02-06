@@ -17,8 +17,8 @@ import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBServiceException
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
-import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.restklient.client.RessursException
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
 import org.slf4j.LoggerFactory
 import org.springframework.core.NestedExceptionUtils

@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.validation.autoconfigure.ValidationAutoConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles

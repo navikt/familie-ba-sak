@@ -188,7 +188,7 @@ class BeregningServiceTest {
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
-        every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { tilkjentYtelseRepository.saveAndFlush(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
                 søker.aktør.aktivFødselsnummer(),
@@ -200,7 +200,7 @@ class BeregningServiceTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
-        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+        verify(exactly = 1) { tilkjentYtelseRepository.saveAndFlush(capture(slot)) }
 
         Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelse.size)
         Assertions.assertEquals(
@@ -270,7 +270,7 @@ class BeregningServiceTest {
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
-        every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { tilkjentYtelseRepository.saveAndFlush(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
                 søker.aktør.aktivFødselsnummer(),
@@ -282,7 +282,7 @@ class BeregningServiceTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
-        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+        verify(exactly = 1) { tilkjentYtelseRepository.saveAndFlush(capture(slot)) }
 
         Assertions.assertEquals(2, slot.captured.andelerTilkjentYtelse.size)
 
@@ -351,7 +351,7 @@ class BeregningServiceTest {
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
-        every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { tilkjentYtelseRepository.saveAndFlush(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
                 søker.aktør.aktivFødselsnummer(),
@@ -388,7 +388,7 @@ class BeregningServiceTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
-        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+        verify(exactly = 1) { tilkjentYtelseRepository.saveAndFlush(capture(slot)) }
 
         Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelse.size)
 
@@ -439,7 +439,7 @@ class BeregningServiceTest {
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
-        every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { tilkjentYtelseRepository.saveAndFlush(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
                 søker.aktør.aktivFødselsnummer(),
@@ -451,7 +451,7 @@ class BeregningServiceTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
-        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+        verify(exactly = 1) { tilkjentYtelseRepository.saveAndFlush(capture(slot)) }
 
         Assertions.assertTrue(slot.captured.andelerTilkjentYtelse.isEmpty())
     }
@@ -554,7 +554,7 @@ class BeregningServiceTest {
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
-        every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { tilkjentYtelseRepository.saveAndFlush(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
                 søker.aktør.aktivFødselsnummer(),
@@ -566,7 +566,7 @@ class BeregningServiceTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
-        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+        verify(exactly = 1) { tilkjentYtelseRepository.saveAndFlush(capture(slot)) }
 
         Assertions.assertEquals(5, slot.captured.andelerTilkjentYtelse.size)
         val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }
@@ -1193,7 +1193,7 @@ class BeregningServiceTest {
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
-        every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { tilkjentYtelseRepository.saveAndFlush(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
                 søker.aktør.aktivFødselsnummer(),
@@ -1205,7 +1205,7 @@ class BeregningServiceTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
-        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+        verify(exactly = 1) { tilkjentYtelseRepository.saveAndFlush(capture(slot)) }
 
         Assertions.assertEquals(if (skalLageSplitt) 4 else 3, slot.captured.andelerTilkjentYtelse.size)
         val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }
@@ -1427,7 +1427,7 @@ class BeregningServiceTest {
         }
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } answers { vilkårsvurdering }
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandling.id) } answers { vilkårsvurdering }
-        every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { tilkjentYtelseRepository.saveAndFlush(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { overgangsstønadService.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } just Runs
         every { overgangsstønadService.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers {
             listOf(
@@ -1444,7 +1444,7 @@ class BeregningServiceTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             nyEndretUtbetalingAndel = endretUtbetalingAndel,
         )
-        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+        verify(exactly = 1) { tilkjentYtelseRepository.saveAndFlush(capture(slot)) }
         return slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }
     }
 }

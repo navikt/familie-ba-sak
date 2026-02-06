@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingDataTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppdrag.PerioderForBehandling
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -42,7 +42,7 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTaskTest {
                 sendTilØkonomi = true,
             )
 
-        val task = Task(type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE, payload = objectMapper.writeValueAsString(konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO))
+        val task = Task(type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE, payload = jsonMapper.writeValueAsString(konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO))
 
         every { avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.transaksjonsId, konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.chunkNr) } returns true
 
@@ -66,7 +66,7 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTaskTest {
                 sendTilØkonomi = true,
             )
 
-        val task = Task(type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE, payload = objectMapper.writeValueAsString(taskDto))
+        val task = Task(type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE, payload = jsonMapper.writeValueAsString(taskDto))
 
         every {
             avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(
@@ -104,7 +104,7 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTaskTest {
         assertThat(lagretTask.metadata["chunkNr"]).isEqualTo(taskDto.chunkNr.toString())
         assertThat(lagretTask.metadata["transaksjonsId"]).isEqualTo(taskDto.transaksjonsId.toString())
 
-        val konsistensavstemmingDataTaskDTO = objectMapper.readValue(lagretTask.payload, KonsistensavstemmingDataTaskDTO::class.java)
+        val konsistensavstemmingDataTaskDTO = jsonMapper.readValue(lagretTask.payload, KonsistensavstemmingDataTaskDTO::class.java)
 
         assertThat(konsistensavstemmingDataTaskDTO.perioderForBehandling).isEqualTo(perioderTilAvstemming)
         assertThat(konsistensavstemmingDataTaskDTO.chunkNr).isEqualTo(taskDto.chunkNr)

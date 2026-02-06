@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving.domene
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
@@ -7,6 +8,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype
 import java.time.LocalDateTime
 import java.util.UUID
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class TilbakekrevingsbehandlingDto(
     val behandlingId: UUID,
     val opprettetTidspunkt: LocalDateTime,

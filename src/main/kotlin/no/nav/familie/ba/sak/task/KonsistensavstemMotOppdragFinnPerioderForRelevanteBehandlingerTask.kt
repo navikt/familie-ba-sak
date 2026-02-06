@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingDataTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -29,7 +29,7 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
     @WithSpan
     override fun doTask(task: Task) {
         val taskDto =
-            objectMapper.readValue(
+            jsonMapper.readValue(
                 task.payload,
                 KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO::class.java,
             )
@@ -54,7 +54,7 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
             Task(
                 type = KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE,
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         KonsistensavstemmingDataTaskDTO(
                             transaksjonsId = taskDto.transaksjonsId,
                             chunkNr = taskDto.chunkNr,

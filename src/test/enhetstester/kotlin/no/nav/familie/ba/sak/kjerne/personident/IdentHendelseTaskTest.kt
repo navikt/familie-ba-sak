@@ -4,7 +4,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.kontrakter.felles.PersonIdent
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -16,7 +16,7 @@ internal class IdentHendelseTaskTest {
     fun opprettTask() {
         val nyPersonIdent = PersonIdent("123")
         val task = IdentHendelseTask.opprettTask(nyPersonIdent)
-        assertEquals(nyPersonIdent, objectMapper.readValue(task.payload, PersonIdent::class.java))
+        assertEquals(nyPersonIdent, jsonMapper.readValue(task.payload, PersonIdent::class.java))
         assertEquals("123", task.metadata["nyPersonIdent"])
         assertEquals("IdentHendelseTask", task.type)
 

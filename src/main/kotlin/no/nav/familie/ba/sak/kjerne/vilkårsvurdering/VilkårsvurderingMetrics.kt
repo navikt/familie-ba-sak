@@ -68,7 +68,7 @@ class VilkårsvurderingMetrics(
                                 "resultat",
                                 resultat.name,
                                 "personType",
-                                personTypeToDisplayedType[personType],
+                                personTypeToDisplayedType[personType] ?: "UKJENT",
                                 "beskrivelse",
                                 årsak.hentMetrikkBeskrivelse(),
                             )

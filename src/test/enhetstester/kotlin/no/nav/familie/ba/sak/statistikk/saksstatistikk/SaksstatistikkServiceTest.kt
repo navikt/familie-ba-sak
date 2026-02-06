@@ -55,7 +55,7 @@ import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.ResultatBegrunnelseDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SettPåVent
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
@@ -146,7 +146,7 @@ internal class SaksstatistikkServiceTest {
         every { vedtakService.hentAktivForBehandling(any()) } returns null
 
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
-        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
+        println(jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
         assertThat(behandlingDvh?.resultat).isEqualTo("HENLAGT_FEILAKTIG_OPPRETTET")
         assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(0)
@@ -220,7 +220,7 @@ internal class SaksstatistikkServiceTest {
             )
 
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
-        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
+        println(jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
         assertThat(behandlingDvh?.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
@@ -303,7 +303,7 @@ internal class SaksstatistikkServiceTest {
             )
 
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
-        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
+        println(jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
         assertThat(behandlingDvh?.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
@@ -386,7 +386,7 @@ internal class SaksstatistikkServiceTest {
         every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns null
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
-        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
+        println(jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
 
         assertThat(sakDvh?.aktorId).isEqualTo(1234567891000)
         assertThat(sakDvh?.aktorer).hasSize(1).extracting("rolle").contains("SØKER")
@@ -418,7 +418,7 @@ internal class SaksstatistikkServiceTest {
         every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns null
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
-        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
+        println(jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
 
         assertThat(sakDvh?.aktorId).isEqualTo(1234567891000)
         assertThat(sakDvh?.aktorer).hasSize(1).extracting("rolle").contains("SØKER")
@@ -447,7 +447,7 @@ internal class SaksstatistikkServiceTest {
         every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns lagBehandling(fagsak)
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
-        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
+        println(sakstatistikkObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
 
         assertThat(sakDvh?.aktorId).isEqualTo(randomAktørId.aktørId.toLong())
         assertThat(sakDvh?.aktorer).hasSize(2).extracting("rolle").containsOnly("SØKER", "BARN")

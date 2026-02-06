@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragStartTask
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
@@ -37,7 +37,7 @@ class KonsistensavstemmingScheduler(
             Task(
                 type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE,
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         KonsistensavstemmingStartTaskDTO(
                             batchId = plukketBatch.id,
                             avstemmingdato = LocalDateTime.now(),

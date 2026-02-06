@@ -40,7 +40,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlVergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.hentGraphqlQuery
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
@@ -66,13 +66,13 @@ fun stubScenario(scenario: ScenarioDto) {
 private fun stubHentSøknad(scenarioPersonDto: ScenarioPersonDto) {
     stubFor(
         post(urlEqualTo("/rest/api/"))
-            .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString("")))
+            .withRequestBody(WireMock.equalToJson(jsonMapper.writeValueAsString("")))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        objectMapper.writeValueAsString(""),
+                        jsonMapper.writeValueAsString(""),
                     ),
             ),
     )
@@ -100,13 +100,13 @@ private fun stubHentStatsborgerskap(scenarioPersonDto: ScenarioPersonDto) {
 
     stubFor(
         post(urlEqualTo("/rest/api/pdl/graphql"))
-            .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+            .withRequestBody(WireMock.equalToJson(jsonMapper.writeValueAsString(pdlRequestBody)))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        objectMapper.writeValueAsString(response),
+                        jsonMapper.writeValueAsString(response),
                     ),
             ),
     )
@@ -134,13 +134,13 @@ private fun stubHentOppholdstillatelse(scenarioPersonDto: ScenarioPersonDto) {
 
     stubFor(
         post(urlEqualTo("/rest/api/pdl/graphql"))
-            .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+            .withRequestBody(WireMock.equalToJson(jsonMapper.writeValueAsString(pdlRequestBody)))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        objectMapper.writeValueAsString(response),
+                        jsonMapper.writeValueAsString(response),
                     ),
             ),
     )
@@ -159,7 +159,7 @@ private fun stubHentArbeidsforhold(ident: String) {
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        objectMapper.writeValueAsString(ressursResponse),
+                        jsonMapper.writeValueAsString(ressursResponse),
                     ),
             ),
     )
@@ -196,12 +196,12 @@ private fun stubHentBostedsadresserOgDeltBostedForPerson(scenarioDto: ScenarioDt
 
         stubFor(
             post(urlEqualTo("/rest/api/pdl/graphql"))
-                .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody), true, true))
+                .withRequestBody(WireMock.equalToJson(jsonMapper.writeValueAsString(pdlRequestBody), true, true))
                 .willReturn(
                     aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(response)),
+                        .withBody(jsonMapper.writeValueAsString(response)),
                 ),
         )
     }
@@ -238,12 +238,12 @@ private fun stubHenthentBostedsadresseDeltBostedOgOppholdsadresseForPerson(scena
 
         stubFor(
             post(urlEqualTo("/rest/api/pdl/graphql"))
-                .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody), true, true))
+                .withRequestBody(WireMock.equalToJson(jsonMapper.writeValueAsString(pdlRequestBody), true, true))
                 .willReturn(
                     aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(response)),
+                        .withBody(jsonMapper.writeValueAsString(response)),
                 ),
         )
     }
@@ -283,13 +283,13 @@ private fun stubHentIdenter(personIdent: String) {
 
     stubFor(
         post(urlEqualTo("/rest/api/pdl/graphql"))
-            .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+            .withRequestBody(WireMock.equalToJson(jsonMapper.writeValueAsString(pdlRequestBody)))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        objectMapper.writeValueAsString(response),
+                        jsonMapper.writeValueAsString(response),
                     ),
             ),
     )
@@ -331,13 +331,13 @@ private fun stubHentPersonMedRelasjonSøker(scenario: ScenarioDto) {
 
     stubFor(
         post(urlEqualTo("/rest/api/pdl/graphql"))
-            .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+            .withRequestBody(WireMock.equalToJson(jsonMapper.writeValueAsString(pdlRequestBody)))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        objectMapper.writeValueAsString(response),
+                        jsonMapper.writeValueAsString(response),
                     ),
             ),
     )
@@ -375,13 +375,13 @@ private fun stubHentPersonMedRelasjonBarn(
 
     stubFor(
         post(urlEqualTo("/rest/api/pdl/graphql"))
-            .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+            .withRequestBody(WireMock.equalToJson(jsonMapper.writeValueAsString(pdlRequestBody)))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        objectMapper.writeValueAsString(response),
+                        jsonMapper.writeValueAsString(response),
                     ),
             ),
     )
@@ -441,13 +441,13 @@ private fun stubHentPersonEnkel(scenarioPerson: ScenarioPersonDto) {
 
     stubFor(
         post(urlEqualTo("/rest/api/pdl/graphql"))
-            .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+            .withRequestBody(WireMock.equalToJson(jsonMapper.writeValueAsString(pdlRequestBody)))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        objectMapper.writeValueAsString(response),
+                        jsonMapper.writeValueAsString(response),
                     ),
             ),
     )
@@ -475,13 +475,13 @@ private fun stubHentPersonStatsborgerskap(scenarioPerson: ScenarioPersonDto) {
 
     stubFor(
         post(urlEqualTo("/rest/api/pdl/graphql"))
-            .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+            .withRequestBody(WireMock.equalToJson(jsonMapper.writeValueAsString(pdlRequestBody)))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        objectMapper.writeValueAsString(response),
+                        jsonMapper.writeValueAsString(response),
                     ),
             ),
     )
@@ -509,13 +509,13 @@ private fun stubHentPersonVergemaalEllerFretidfullmakt(scenarioPerson: ScenarioP
 
     stubFor(
         post(urlEqualTo("/rest/api/pdl/graphql"))
-            .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+            .withRequestBody(WireMock.equalToJson(jsonMapper.writeValueAsString(pdlRequestBody)))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        objectMapper.writeValueAsString(response),
+                        jsonMapper.writeValueAsString(response),
                     ),
             ),
     )

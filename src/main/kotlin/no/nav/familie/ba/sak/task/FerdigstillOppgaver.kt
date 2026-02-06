@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.task.dto.FerdigstillOppgaveDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -21,7 +21,7 @@ class FerdigstillOppgaver(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val ferdigstillOppgave = objectMapper.readValue(task.payload, FerdigstillOppgaveDTO::class.java)
+        val ferdigstillOppgave = jsonMapper.readValue(task.payload, FerdigstillOppgaveDTO::class.java)
         oppgaveService.ferdigstillOppgaver(
             behandlingId = ferdigstillOppgave.behandlingId,
             oppgavetype = ferdigstillOppgave.oppgavetype,
@@ -38,7 +38,7 @@ class FerdigstillOppgaver(
             Task(
                 type = TASK_STEP_TYPE,
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         FerdigstillOppgaveDTO(
                             behandlingId = behandlingId,
                             oppgavetype = oppgavetype,

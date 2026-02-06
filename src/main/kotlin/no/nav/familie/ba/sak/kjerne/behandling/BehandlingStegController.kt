@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
@@ -217,6 +218,7 @@ class BehandlingStegController(
     }
 }
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class HenleggBehandlingInfoDto(
     val årsak: HenleggÅrsak,
     val begrunnelse: String,

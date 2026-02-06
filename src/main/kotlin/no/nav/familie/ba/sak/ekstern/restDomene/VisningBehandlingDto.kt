@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -10,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Visningsbehandling
 import java.time.LocalDateTime
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class VisningBehandlingDto(
     val behandlingId: Long,
     val opprettetTidspunkt: LocalDateTime,

@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.springframework.stereotype.Component
 import java.time.YearMonth
 
@@ -58,7 +58,7 @@ class EndretMigreringsdatoUtleder(
             tilkjentYtelseRepository
                 .findByFagsak(fagsakId = fagsak.id)
                 .filter { it.behandling.aktivertTidspunkt > behandlingMigreringsinfo.endretTidspunkt && it.utbetalingsoppdrag != null }
-                .map { objectMapper.readValue(it.utbetalingsoppdrag, Utbetalingsoppdrag::class.java) }
+                .map { jsonMapper.readValue(it.utbetalingsoppdrag, Utbetalingsoppdrag::class.java) }
                 // Viktig at vi omgjør til YearMonth før sammenligning her da vi alltid bruker YearMonth for endretMigreringsdato inn i utbetalingsgenerator
                 .any { utbetalingsoppdrag -> utbetalingsoppdrag.utbetalingsperiode.any { utbetalingsperiode -> utbetalingsperiode.opphør?.opphørDatoFom?.toYearMonth() == migreringsdatoPåFagsakPlussEnMnd.toYearMonth() } }
 
