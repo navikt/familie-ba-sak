@@ -267,7 +267,7 @@ class OpprettTaskService(
         dto: PatchMergetAktørDto,
     ) = taskRepository.save(
         Task(
-            type = PatchMergetIdentTask.TASK_STEP_TYPE,
+            type = PatchMergetAktørTask.TASK_STEP_TYPE,
             payload = objectMapper.writeValueAsString(dto),
             properties =
                 Properties().apply {
