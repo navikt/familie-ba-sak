@@ -263,6 +263,22 @@ class OpprettTaskService(
     )
 
     @Transactional
+    fun opprettTaskForÅPatcheAktørIdent(
+        dto: PatchMergetAktørDto,
+    ) = taskRepository.save(
+        Task(
+            type = PatchMergetIdentTask.TASK_STEP_TYPE,
+            payload = objectMapper.writeValueAsString(dto),
+            properties =
+                Properties().apply {
+                    this["fagsakId"] = dto.fagsakId.toString()
+                    this["gammelAktørId"] = dto.gammelAktørId
+                    this["nyAktørId"] = dto.nyAktørId
+                },
+        ),
+    )
+
+    @Transactional
     fun opprettTaskForÅPatcheVilkårFom(
         dto: PatchFomPåVilkårTilFødselsdato,
     ) {
