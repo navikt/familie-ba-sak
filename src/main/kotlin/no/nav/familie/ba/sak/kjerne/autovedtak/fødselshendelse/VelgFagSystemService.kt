@@ -93,7 +93,7 @@ class VelgFagSystemService(
 
     internal fun harMorGyldigStatsborgerskapForAutomatiskVurdering(morsAktør: Aktør): Boolean {
         val gjeldendeStatsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(morsAktør)
-        val medlemskap = statsborgerskapService.hentSterkesteMedlemskap(statsborgerskap = gjeldendeStatsborgerskap)
+        val medlemskap = statsborgerskapService.hentSterkesteMedlemskapVedTidspunkt(statsborgerskap = gjeldendeStatsborgerskap)
 
         secureLogger.info(
             "Gjeldende statsborgerskap for ${morsAktør.aktivFødselsnummer()}=" +
