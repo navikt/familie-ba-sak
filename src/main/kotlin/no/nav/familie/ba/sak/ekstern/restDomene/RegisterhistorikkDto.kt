@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -13,9 +14,10 @@ data class RegisterhistorikkDto(
     val deltBosted: List<RegisteropplysningDto>? = emptyList(),
     val oppholdsadresse: List<RegisteropplysningDto>? = emptyList(),
     val dødsboadresse: List<RegisteropplysningDto>? = emptyList(),
+    val historiskeIdenter: List<RegisteropplysningDto>? = emptyList(),
 )
 
-fun Person.tilRegisterhistorikkDto() =
+fun Person.tilRegisterhistorikkDto(eldsteBarnsFødselsdato: LocalDate?) =
     RegisterhistorikkDto(
         hentetTidspunkt = this.personopplysningGrunnlag.opprettetTidspunkt,
         oppholdstillatelse = opphold.map { it.tilRegisteropplysningDto() },
@@ -25,6 +27,17 @@ fun Person.tilRegisterhistorikkDto() =
         deltBosted = this.deltBosted.map { it.tilRegisteropplysningDto() }.fyllInnTomDatoer(),
         sivilstand = this.sivilstander.map { it.tilRegisteropplysningDto() },
         dødsboadresse = if (this.dødsfall == null) emptyList() else listOf(this.dødsfall!!.tilRegisteropplysningDto()),
+        historiskeIdenter =
+            this.aktør.personidenter
+                .filter { ident ->
+                    !ident.aktiv && (ident.gjelderTil == null || eldsteBarnsFødselsdato == null || ident.gjelderTil?.toLocalDate()?.isSameOrAfter(eldsteBarnsFødselsdato) == true)
+                }.map {
+                    RegisteropplysningDto(
+                        fom = null,
+                        tom = it.gjelderTil?.toLocalDate(),
+                        verdi = it.fødselsnummer,
+                    )
+                },
     )
 
 data class RegisteropplysningDto(
