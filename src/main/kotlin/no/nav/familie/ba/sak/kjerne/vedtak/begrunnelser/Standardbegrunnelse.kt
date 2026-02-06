@@ -1533,6 +1533,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetSvalbardtillegg"
     },
+    FORTSATT_INNVILGET_SMÅBARNSTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetSmaabarnstillegg"
+    },
     ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingDeltBostedIngenUtbetaling"
