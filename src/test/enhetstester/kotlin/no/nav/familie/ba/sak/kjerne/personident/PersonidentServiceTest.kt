@@ -9,7 +9,10 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestKlient
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FolkeregisteridentifikatorStatus
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FolkeregisteridentifikatorType
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Task
@@ -293,6 +296,214 @@ internal class PersonidentServiceTest {
             personidentService.opprettTaskForIdentHendelse(ident)
 
             verify(exactly = 0) { taskRepositoryMock.save(any()) }
+        }
+    }
+
+    @Nested
+    inner class LagreHistoriskeIdenterTest {
+        @Test
+        fun `Skal lagre flere nye historiske identer`() {
+            // Arrange
+            val aktivIdent = randomFnr()
+            val historiskIdent1 = randomFnr()
+            val historiskIdent2 = randomFnr()
+            val historiskIdent3 = randomFnr()
+
+            val aktør = lagAktør(aktivIdent)
+            aktør.personidenter.add(
+                Personident(
+                    fødselsnummer = aktivIdent,
+                    aktør = aktør,
+                    aktiv = true,
+                ),
+            )
+
+            every { personidentRepository.findByFødselsnummerOrNull(aktivIdent) } returns
+                aktør.personidenter.first { it.aktiv }
+
+            val pdlIdenter =
+                listOf(
+                    PdlFolkeregisteridentifikator(
+                        historiskIdent1,
+                        FolkeregisteridentifikatorStatus.OPPHOERT,
+                        FolkeregisteridentifikatorType.FNR,
+                    ),
+                    PdlFolkeregisteridentifikator(
+                        historiskIdent2,
+                        FolkeregisteridentifikatorStatus.OPPHOERT,
+                        FolkeregisteridentifikatorType.FNR,
+                    ),
+                    PdlFolkeregisteridentifikator(
+                        historiskIdent3,
+                        FolkeregisteridentifikatorStatus.OPPHOERT,
+                        FolkeregisteridentifikatorType.FNR,
+                    ),
+                )
+
+            // Act
+            personidentService.lagreHistoriskeIdenter(aktivIdent, pdlIdenter)
+
+            // Assert
+            verify(exactly = 1) { aktørIdRepository.saveAndFlush(any()) }
+            val lagretAktør = aktørSlot.captured
+            assertEquals(4, lagretAktør.personidenter.size) // 1 aktiv + 3 historiske
+            assertEquals(1, lagretAktør.personidenter.count { it.aktiv })
+            assertEquals(3, lagretAktør.personidenter.count { !it.aktiv })
+
+            val historiskeFnr = lagretAktør.personidenter.filter { !it.aktiv }.map { it.fødselsnummer }
+            assert(historiskeFnr.contains(historiskIdent1))
+            assert(historiskeFnr.contains(historiskIdent2))
+            assert(historiskeFnr.contains(historiskIdent3))
+        }
+
+        @Test
+        fun `Skal ikke lagre historiske identer som allerede finnes`() {
+            // Arrange
+            val aktivIdent = randomFnr()
+            val eksisterendeHistoriskIdent = randomFnr()
+            val nyHistoriskIdent = randomFnr()
+            val aktør = lagAktør(aktivIdent)
+
+            aktør.personidenter.add(
+                Personident(
+                    fødselsnummer = aktivIdent,
+                    aktør = aktør,
+                    aktiv = true,
+                ),
+            )
+
+            aktør.personidenter.add(
+                Personident(
+                    fødselsnummer = eksisterendeHistoriskIdent,
+                    aktør = aktør,
+                    aktiv = false,
+                ),
+            )
+
+            every { personidentRepository.findByFødselsnummerOrNull(aktivIdent) } returns
+                aktør.personidenter.first { it.aktiv }
+
+            val pdlIdenter =
+                listOf(
+                    PdlFolkeregisteridentifikator(
+                        eksisterendeHistoriskIdent,
+                        FolkeregisteridentifikatorStatus.OPPHOERT,
+                        FolkeregisteridentifikatorType.FNR,
+                    ),
+                    PdlFolkeregisteridentifikator(
+                        nyHistoriskIdent,
+                        FolkeregisteridentifikatorStatus.OPPHOERT,
+                        FolkeregisteridentifikatorType.FNR,
+                    ),
+                )
+
+            // Act
+            personidentService.lagreHistoriskeIdenter(aktivIdent, pdlIdenter)
+
+            // Assert
+            verify(exactly = 1) { aktørIdRepository.saveAndFlush(any()) }
+            val lagretAktør = aktørSlot.captured
+
+            assertEquals(3, lagretAktør.personidenter.size)
+
+            val historiskeFnr = lagretAktør.personidenter.filter { !it.aktiv }.map { it.fødselsnummer }
+            assert(historiskeFnr.contains(eksisterendeHistoriskIdent))
+            assert(historiskeFnr.contains(nyHistoriskIdent))
+
+            assertEquals(1, lagretAktør.personidenter.count { it.fødselsnummer == eksisterendeHistoriskIdent })
+        }
+
+        @Test
+        fun `Skal ikke lagre aktive identer fra PDL`() {
+            // Arrange
+            val aktivIdent = randomFnr()
+            val nyAktivIdentFraPDL = randomFnr()
+            val historiskIdent = randomFnr()
+            val aktør = lagAktør(aktivIdent)
+
+            aktør.personidenter.add(
+                Personident(
+                    fødselsnummer = aktivIdent,
+                    aktør = aktør,
+                    aktiv = true,
+                ),
+            )
+
+            every { personidentRepository.findByFødselsnummerOrNull(aktivIdent) } returns
+                aktør.personidenter.first { it.aktiv }
+
+            val pdlIdenter =
+                listOf(
+                    PdlFolkeregisteridentifikator(
+                        nyAktivIdentFraPDL,
+                        FolkeregisteridentifikatorStatus.I_BRUK,
+                        FolkeregisteridentifikatorType.FNR,
+                    ),
+                    PdlFolkeregisteridentifikator(
+                        historiskIdent,
+                        FolkeregisteridentifikatorStatus.OPPHOERT,
+                        FolkeregisteridentifikatorType.FNR,
+                    ),
+                )
+
+            // Act
+            personidentService.lagreHistoriskeIdenter(aktivIdent, pdlIdenter)
+
+            // Assert
+            verify(exactly = 1) { aktørIdRepository.saveAndFlush(any()) }
+            val lagretAktør = aktørSlot.captured
+
+            assertEquals(2, lagretAktør.personidenter.size)
+            assertEquals(1, lagretAktør.personidenter.count { it.aktiv })
+
+            assert(!lagretAktør.personidenter.any { it.fødselsnummer == nyAktivIdentFraPDL })
+            assert(lagretAktør.personidenter.any { it.fødselsnummer == historiskIdent && !it.aktiv })
+
+            val aktivPersonident = lagretAktør.personidenter.find { it.aktiv }
+            assertEquals(aktivIdent, aktivPersonident?.fødselsnummer)
+        }
+
+        @Test
+        fun `Skal filtrere bort identer med null identifikasjonsnummer`() {
+            // Arrange
+            val aktivIdent = randomFnr()
+            val gyldigHistoriskIdent = randomFnr()
+            val aktør = lagAktør(aktivIdent)
+
+            aktør.personidenter.add(
+                Personident(
+                    fødselsnummer = aktivIdent,
+                    aktør = aktør,
+                    aktiv = true,
+                ),
+            )
+
+            every { personidentRepository.findByFødselsnummerOrNull(aktivIdent) } returns
+                aktør.personidenter.first { it.aktiv }
+
+            val pdlIdenter =
+                listOf(
+                    PdlFolkeregisteridentifikator(
+                        null,
+                        FolkeregisteridentifikatorStatus.OPPHOERT,
+                        FolkeregisteridentifikatorType.FNR,
+                    ),
+                    PdlFolkeregisteridentifikator(
+                        gyldigHistoriskIdent,
+                        FolkeregisteridentifikatorStatus.OPPHOERT,
+                        FolkeregisteridentifikatorType.FNR,
+                    ),
+                )
+
+            // Act
+            personidentService.lagreHistoriskeIdenter(aktivIdent, pdlIdenter)
+
+            // Assert
+            verify(exactly = 1) { aktørIdRepository.saveAndFlush(any()) }
+            val lagretAktør = aktørSlot.captured
+
+            assertEquals(2, lagretAktør.personidenter.size)
+            assert(lagretAktør.personidenter.any { it.fødselsnummer == gyldigHistoriskIdent })
         }
     }
 }

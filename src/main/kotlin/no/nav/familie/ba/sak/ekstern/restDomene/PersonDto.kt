@@ -23,14 +23,17 @@ data class PersonDto(
     val harFalskIdentitet: Boolean? = false,
 )
 
-fun Person.tilPersonDto(erManueltLagtTilISøknad: Boolean? = null): PersonDto =
+fun Person.tilPersonDto(
+    erManueltLagtTilISøknad: Boolean? = null,
+    eldsteBarnsFødselsdato: LocalDate? = null,
+): PersonDto =
     PersonDto(
         type = this.type,
         fødselsdato = this.fødselsdato,
         personIdent = this.aktør.aktivFødselsnummer(),
         navn = this.navn,
         kjønn = this.kjønn,
-        registerhistorikk = this.tilRegisterhistorikkDto(),
+        registerhistorikk = this.tilRegisterhistorikkDto(eldsteBarnsFødselsdato),
         målform = this.målform,
         dødsfallDato = this.dødsfall?.dødsfallDato,
         erManueltLagtTilISøknad = erManueltLagtTilISøknad,

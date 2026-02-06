@@ -15,9 +15,11 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -221,6 +223,27 @@ class ForvalterService(
         val fødselsnummer = if (aktør.personidenter.isNotEmpty()) aktør.aktivFødselsnummer() else null
         aktørIdRepository.delete(aktør)
         secureLogger.info("Slettet aktør med aktørId=$aktørId og fnr=$fødselsnummer")
+    }
+
+    @Transactional
+    fun endreFagsakStatusFraLøpendeTilOpprettet(fagsakId: Long) {
+        val fagsak =
+            fagsakRepository.finnFagsak(fagsakId)
+                ?: throw Feil("Finner ikke fagsak med id $fagsakId")
+
+        if (fagsak.status != FagsakStatus.LØPENDE) {
+            throw Feil("Fagsak $fagsakId har status ${fagsak.status}. Kan bare endre fra LØPENDE til OPPRETTET.")
+        }
+
+        val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsak.id)
+        if (behandlinger.any { it.status != BehandlingStatus.AVSLUTTET || !it.erHenlagt() }) {
+            throw Feil("Fagsak $fagsakId har behandlinger som ikke er henlagt og status kan ikke endres.")
+        }
+
+        fagsak.status = FagsakStatus.OPPRETTET
+        fagsakRepository.save(fagsak)
+
+        logger.info("Endret status fra LØPENDE til OPPRETTET for fagsak $fagsakId.")
     }
 }
 

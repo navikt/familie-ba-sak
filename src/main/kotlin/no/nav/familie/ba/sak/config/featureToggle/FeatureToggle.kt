@@ -49,6 +49,8 @@ enum class FeatureToggle(
     // NAV-25256
     SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN("familie-ba-sak.skjermet-barn"),
 
+    HARDKODET_EEAFREG_STATSBORGERSKAP("familie-ba-sak.hardkodet-eeafreg-statsborgerskap"),
+
     SKAL_HÅNDTERE_FALSK_IDENTITET("familie-ba-sak.skal-handtere-falsk-identitet"),
 
     HENT_ARBEIDSFORDELING_MED_BEHANDLINGSTYPE("familie-ba-sak.hent-arbeidsfordeling-med-behandlingstype"),
