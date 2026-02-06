@@ -595,4 +595,21 @@ class ForvalterController(
         )
         return ResponseEntity.ok(personidentService.hentIdenter(ident, true))
     }
+
+    @PatchMapping("/fagsak/{fagsakId}/endre-status-til-opprettet")
+    @Operation(
+        summary = " Endrer fagsakstatus fra løpende til opprettet om det kun finnes henlagte behandlinger.",
+        description = "En fagsak som har status løpende uten vedtatte behandlinger feiler opprettelse av revurdering. I en fødselshendelse med tvillinger hvor første task gir henlagt behandling, og andre task skal vedta behandling, må man endre status på fagsak til opprettet for å kunne kjøre automatisk behandling.",
+    )
+    fun endreStatusPåFagsak(
+        @PathVariable fagsakId: Long,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Endre status på fagsak",
+        )
+
+        forvalterService.endreFagsakStatusFraLøpendeTilOpprettet(fagsakId)
+        return ResponseEntity.ok("Endret status på fagsak $fagsakId fra løpende til opprettet.")
+    }
 }
