@@ -38,6 +38,7 @@ import no.nav.familie.ba.sak.task.MaskineltUnderkjennVedtakTask
 import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
+import no.nav.familie.ba.sak.task.PatchMergetAktørDto
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
 import no.nav.familie.ba.sak.task.SlettKompetanserTask
 import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask
@@ -245,6 +246,27 @@ class ForvalterController(
         )
 
         opprettTaskService.opprettTaskForÅPatcheMergetIdent(patchMergetIdentDto)
+        return ResponseEntity.ok("ok")
+    }
+
+    @PatchMapping("/patch-fagsak-med-ny-aktoer")
+    fun patchMergetIdent(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description =
+                "skalSjekkeAtGammelIdentErHistoriskAvNyIdent - Sjekker at " +
+                    "gammel aktørId er historisk av ny. Hvis man ønsker å patche med en aktørId hvor den gamle ikke er historisk av ny, så settes " +
+                    "denne til false. OBS: Du må da være sikker på at identen man ønsker å patche til er samme person.",
+        )
+        @RequestBody
+        @Valid
+        patchMergetAktørDto: PatchMergetAktørDto,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Patch merget ident",
+        )
+
+        opprettTaskService.opprettTaskForÅPatcheAktørIdent(patchMergetAktørDto)
         return ResponseEntity.ok("ok")
     }
 
