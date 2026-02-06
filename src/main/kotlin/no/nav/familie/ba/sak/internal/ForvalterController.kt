@@ -598,8 +598,8 @@ class ForvalterController(
 
     @PatchMapping("/fagsak/{fagsakId}/endre-status-til-opprettet")
     @Operation(
-        summary = " Endrer fagsakstatus fra løpende til opprettet om det ikke finnes noen vedtatte behandlinger.",
-        description = "En fagsak som har status løpende uten vedtatte behandlinger feiler opprettelse av revurdering. I en fødselshendelse med tvillinger hvor første task gir henlagt behandling, og andre task skal vedta behandling, må man endre status på fagsak til opprettet for å kjøre automatisk behandling.",
+        summary = " Endrer fagsakstatus fra løpende til opprettet om det kun finnes henlagte behandlinger.",
+        description = "En fagsak som har status løpende uten vedtatte behandlinger feiler opprettelse av revurdering. I en fødselshendelse med tvillinger hvor første task gir henlagt behandling, og andre task skal vedta behandling, må man endre status på fagsak til opprettet for å kunne kjøre automatisk behandling.",
     )
     fun endreStatusPåFagsak(
         @PathVariable fagsakId: Long,
