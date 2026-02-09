@@ -4,15 +4,10 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestKlient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivAktørId
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLogg
 import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLoggRepository
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
