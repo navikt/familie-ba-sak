@@ -13,8 +13,7 @@ import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.retry.annotation.Backoff
-import org.springframework.retry.annotation.Retryable
+import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import java.net.URI
@@ -38,11 +37,7 @@ class ØkonomiKlient(
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_500MS),
-    )
+    @Retryable(value = [Exception::class], maxRetries = 3, delayString = RETRY_BACKOFF_500MS)
     fun hentSimulering(utbetalingsoppdrag: Utbetalingsoppdrag): DetaljertSimuleringResultat {
         val uri = URI.create("$familieOppdragUri/simulering/v1")
 

@@ -7,8 +7,7 @@ import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_500
 import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.retry.annotation.Backoff
-import org.springframework.retry.annotation.Retryable
+import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
@@ -20,11 +19,7 @@ class SystemOnlyIntegrasjonKlient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
     @Qualifier("jwtBearerClientCredentials") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "integrasjon") {
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
+    @Retryable(value = [Exception::class], maxRetries = 3, delayString = RETRY_BACKOFF_5000MS)
     fun hentArbeidsforholdMedSystembruker(
         ident: String,
         ansettelsesperiodeFom: LocalDate,

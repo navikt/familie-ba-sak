@@ -6,10 +6,9 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelseDto
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.SanityEØSBegrunnelseDto
-import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.retry.annotation.Backoff
-import org.springframework.retry.annotation.Retryable
+import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.getForEntity
@@ -22,11 +21,7 @@ class SanityKlient(
     @Value("\${SANITY_DATASET}") private val datasett: String,
     private val restTemplate: RestTemplate,
 ) {
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = OpprettTaskService.RETRY_BACKOFF_5000MS),
-    )
+    @Retryable(value = [Exception::class], maxRetries = 3, delayString = RETRY_BACKOFF_5000MS)
     fun hentBegrunnelser(): List<SanityBegrunnelse> {
         val sanityUrl = "$SANITY_BASE_URL/$datasett"
         val hentBegrunnelserQuery = java.net.URLEncoder.encode(HENT_BEGRUNNELSER, "utf-8")
@@ -46,11 +41,7 @@ class SanityKlient(
         return restSanityBegrunnelser.mapNotNull { it.tilSanityBegrunnelse() }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = OpprettTaskService.RETRY_BACKOFF_5000MS),
-    )
+    @Retryable(value = [Exception::class], maxRetries = 3, delayString = RETRY_BACKOFF_5000MS)
     fun hentEØSBegrunnelser(): List<SanityEØSBegrunnelse> {
         val sanityUrl = "$SANITY_BASE_URL/$datasett"
         val hentEØSBegrunnelserQuery = java.net.URLEncoder.encode(HENT_EØS_BEGRUNNELSER, "utf-8")

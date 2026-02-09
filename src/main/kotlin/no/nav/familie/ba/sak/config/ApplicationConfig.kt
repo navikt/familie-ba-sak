@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Primary
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
-import org.springframework.retry.annotation.EnableRetry
+import org.springframework.resilience.annotation.EnableResilientMethods
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestTemplate
 import java.time.Duration
@@ -31,7 +31,7 @@ import java.time.temporal.ChronoUnit
 @SpringBootConfiguration
 @EntityScan("no.nav.familie.prosessering", ApplicationConfig.PAKKENAVN)
 @ComponentScan("no.nav.familie.prosessering", "no.nav.familie.unleash", ApplicationConfig.PAKKENAVN, "no.nav.familie.metrikker")
-@EnableRetry
+@EnableResilientMethods
 @ConfigurationPropertiesScan
 @EnableJwtTokenValidation(ignore = ["org.springdoc"])
 @EnableOAuth2Client(cacheEnabled = true)

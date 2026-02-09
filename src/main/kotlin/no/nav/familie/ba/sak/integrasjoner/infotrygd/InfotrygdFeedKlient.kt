@@ -10,8 +10,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.retry.annotation.Backoff
-import org.springframework.retry.annotation.Retryable
+import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
@@ -62,11 +61,7 @@ class InfotrygdFeedKlient(
         throw e
     }
 
-    @Retryable(
-        value = [IOException::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
+    @Retryable(value = [IOException::class], maxRetries = 3, delayString = RETRY_BACKOFF_5000MS)
     private fun sendFeedTilInfotrygd(
         endpoint: URI,
         feed: Any,

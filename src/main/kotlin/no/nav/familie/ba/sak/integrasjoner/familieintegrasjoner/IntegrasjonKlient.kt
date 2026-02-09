@@ -52,8 +52,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
-import org.springframework.retry.annotation.Backoff
-import org.springframework.retry.annotation.Retryable
+import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
@@ -98,11 +97,7 @@ class IntegrasjonKlient(
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
+    @Retryable(value = [Exception::class], maxRetries = 3, delayString = RETRY_BACKOFF_5000MS)
     @Cacheable("poststeder", cacheManager = "dailyCache")
     fun hentPoststeder(): KodeverkDto {
         val uri = URI.create("$integrasjonUri/kodeverk/poststed")
@@ -116,11 +111,7 @@ class IntegrasjonKlient(
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
+    @Retryable(value = [Exception::class], maxRetries = 3, delayString = RETRY_BACKOFF_5000MS)
     @Cacheable("behandlendeEnhet", cacheManager = "shortCache")
     fun hentBehandlendeEnhet(
         ident: String,
@@ -149,11 +140,7 @@ class IntegrasjonKlient(
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
+    @Retryable(value = [Exception::class], maxRetries = 3, delayString = RETRY_BACKOFF_5000MS)
     @Cacheable("saksbehandler", cacheManager = "shortCache")
     fun hentSaksbehandler(id: String): Saksbehandler {
         val uri =
@@ -172,11 +159,7 @@ class IntegrasjonKlient(
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
+    @Retryable(value = [Exception::class], maxRetries = 3, delayString = RETRY_BACKOFF_5000MS)
     @Cacheable("saksbehandler", cacheManager = "shortCache")
     fun hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent: NavIdent): List<BarnetrygdEnhet> {
         val uri =
@@ -200,11 +183,7 @@ class IntegrasjonKlient(
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
+    @Retryable(value = [Exception::class], maxRetries = 3, delayString = RETRY_BACKOFF_5000MS)
     fun hentArbeidsforhold(
         ident: String,
         ansettelsesperiodeFom: LocalDate,
@@ -427,11 +406,7 @@ class IntegrasjonKlient(
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
+    @Retryable(value = [Exception::class], maxRetries = 3, delayString = RETRY_BACKOFF_5000MS)
     fun hentJournalpost(journalpostId: String): Journalpost {
         val uri = URI.create("$integrasjonUri/journalpost/tilgangsstyrt/baks?journalpostId=$journalpostId")
 
@@ -444,11 +419,7 @@ class IntegrasjonKlient(
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
+    @Retryable(value = [Exception::class], maxRetries = 3, delayString = RETRY_BACKOFF_5000MS)
     fun hentJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
         val uri = URI.create("$integrasjonUri/journalpost")
 
@@ -461,11 +432,7 @@ class IntegrasjonKlient(
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
+    @Retryable(value = [Exception::class], maxRetries = 3, delayString = RETRY_BACKOFF_5000MS)
     fun hentTilgangsstyrteJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<TilgangsstyrtJournalpost> {
         val uri = URI.create("$integrasjonUri/journalpost/tilgangsstyrt/baks")
 
