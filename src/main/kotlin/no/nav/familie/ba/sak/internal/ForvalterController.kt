@@ -250,7 +250,7 @@ class ForvalterController(
     }
 
     @PatchMapping("/patch-fagsak-med-ny-aktoer")
-    fun patchMergetIdent(
+    fun patchAktørIdent(
         @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description =
                 "skalSjekkeAtGammelIdentErHistoriskAvNyIdent - Sjekker at " +

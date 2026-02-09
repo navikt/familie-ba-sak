@@ -139,6 +139,70 @@ class PatchMergetAktørTaskTest(
     }
 
     @Test
+    @Transactional
+    fun `kjører ok dersom gammel aktør er historisk av ny og flagg for sjekk er på`() {
+        // Arrange
+        val gammelAktør = aktørIdRepository.saveAndFlush(lagAktør())
+
+        val fagsak = fagsakRepository.saveAndFlush(lagFagsakUtenId(aktør = gammelAktør))
+
+        val nyAktørId = randomAktør().aktørId
+        fakePdlIdentRestKlient.leggTilIdent(
+            nyAktørId,
+            listOf(
+                IdentInformasjon(
+                    ident = nyAktørId,
+                    historisk = false,
+                    gruppe = "AKTORID",
+                ),
+                IdentInformasjon(
+                    ident = gammelAktør.aktørId,
+                    historisk = true,
+                    gruppe = "AKTORID",
+                ),
+                IdentInformasjon(
+                    ident = gammelAktør.aktivFødselsnummer(),
+                    historisk = false,
+                    gruppe = "FOLKEREGISTERIDENT",
+                ),
+            ),
+        )
+
+        // Act & Assert
+
+        patchMergetAktørTask.doTask(
+            Task(
+                payload =
+                    objectMapper.writeValueAsString(
+                        PatchMergetAktørDto(
+                            fagsakId = fagsak.id,
+                            gammelAktørId = gammelAktør.aktørId,
+                            nyAktørId = nyAktørId,
+                            skalSjekkeAtGammelAktørIdErHistoriskAvNyAktørId = true,
+                        ),
+                    ),
+                type = PatchMergetAktørTask.TASK_STEP_TYPE,
+            ),
+        )
+
+        aktørMergeLoggRepository.flush()
+        // PatchMergetAktørTask bruker on cascade update (ikke JPA), så vi må tømme entityManager for å hente oppdatert data
+        entityManager.clear()
+
+        // Assert
+        val oppdatertFagsak = fagsakRepository.findByIdOrNull(fagsak.id)
+
+        assertThat(oppdatertFagsak?.aktør?.aktørId).isEqualTo(nyAktørId)
+
+        val aktørMergeLogg =
+            aktørMergeLoggRepository.findAll().singleOrNull { it.fagsakId == fagsak.id }
+
+        assertThat(aktørMergeLogg).isNotNull
+        assertThat(aktørMergeLogg?.historiskAktørId).isEqualTo(gammelAktør.aktørId)
+        assertThat(aktørMergeLogg?.nyAktørId).isEqualTo(nyAktørId)
+    }
+
+    @Test
     fun `kaster feil dersom man gir inn samme aktørId som ny og gammel`() {
         // Arrange
         val gammelAktør = aktørIdRepository.saveAndFlush(lagAktør())

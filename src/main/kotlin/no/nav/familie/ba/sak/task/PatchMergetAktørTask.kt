@@ -12,9 +12,11 @@ import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLoggRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.person.pdl.aktor.v2.Type
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -39,7 +41,10 @@ class PatchMergetAktørTask(
             throw IllegalArgumentException("id som skal patches er lik id som det skal patches til")
         }
 
-        val identer = pdlIdentRestKlient.hentIdenter(personIdent = dto.nyAktørId, historikk = true)
+        val identer =
+            pdlIdentRestKlient
+                .hentIdenter(personIdent = dto.nyAktørId, historikk = true)
+                .filter { it.gruppe == Type.AKTORID.name }
 
         if (dto.skalSjekkeAtGammelAktørIdErHistoriskAvNyAktørId) {
             if (identer.none { it.ident == dto.gammelAktørId && it.historisk }) {
