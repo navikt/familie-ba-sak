@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedKlient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.StartBehandlingDto
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -25,7 +25,7 @@ class SendStartBehandlingTilInfotrygdTask(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val startBehandlingDto = objectMapper.readValue(task.payload, StartBehandlingDto::class.java)
+        val startBehandlingDto = jsonMapper.readValue(task.payload, StartBehandlingDto::class.java)
         infotrygdFeedKlient.sendStartBehandlingTilInfotrygd(startBehandlingDto)
     }
 
@@ -46,7 +46,7 @@ class SendStartBehandlingTilInfotrygdTask(
             return Task(
                 type = TASK_STEP_TYPE,
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         StartBehandlingDto(
                             fnrStoenadsmottaker = aktørStoenadsmottaker.aktivFødselsnummer(),
                         ),

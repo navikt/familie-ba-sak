@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.Folkeregisteridentifikator
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
 import no.nav.familie.kontrakter.felles.PersonIdent
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -212,7 +212,7 @@ internal class PersonidentServiceTest {
             personidentService.opprettTaskForIdentHendelse(ident)
 
             verify(exactly = 1) { taskRepositoryMock.save(any()) }
-            assertEquals(ident, objectMapper.readValue(slot.captured.payload, PersonIdent::class.java))
+            assertEquals(ident, jsonMapper.readValue(slot.captured.payload, PersonIdent::class.java))
         }
 
         @Test
@@ -256,7 +256,7 @@ internal class PersonidentServiceTest {
             personidentService.opprettTaskForIdentHendelse(ident)
 
             verify(exactly = 1) { taskRepositoryMock.save(any()) }
-            assertEquals(ident, objectMapper.readValue(slot.captured.payload, PersonIdent::class.java))
+            assertEquals(ident, jsonMapper.readValue(slot.captured.payload, PersonIdent::class.java))
         }
 
         @Test

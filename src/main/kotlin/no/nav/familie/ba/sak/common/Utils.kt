@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.common
 
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.slf4j.LoggerFactory
@@ -77,4 +77,4 @@ object Utils {
     fun <T, R> List<T>.tilEtterfølgendePar(transform: (a: T, b: T?) -> R): List<R> = this.windowed(size = 2, step = 1, partialWindows = true) { transform(it[0], it.getOrNull(1)) }
 }
 
-fun Any.convertDataClassToJson(): String = objectMapper.writeValueAsString(this)
+fun Any.convertDataClassToJson(): String = jsonMapper.writeValueAsString(this)

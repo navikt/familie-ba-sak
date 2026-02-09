@@ -6,11 +6,11 @@ import no.nav.familie.ba.sak.ekstern.bisys.BisysUtvidetBarnetrygdResponse
 import no.nav.familie.ba.sak.ekstern.pensjon.BarnetrygdTilPensjonRequest
 import no.nav.familie.ba.sak.ekstern.pensjon.BarnetrygdTilPensjonResponse
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
-import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
+import no.nav.familie.restklient.client.AbstractRestClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier

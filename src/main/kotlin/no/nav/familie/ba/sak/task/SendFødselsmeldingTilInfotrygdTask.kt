@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedKlient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedTaskDto
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -25,7 +25,7 @@ class SendFødselsmeldingTilInfotrygdTask(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val infotrygdFeedTaskDto = objectMapper.readValue(task.payload, InfotrygdFødselhendelsesFeedTaskDto::class.java)
+        val infotrygdFeedTaskDto = jsonMapper.readValue(task.payload, InfotrygdFødselhendelsesFeedTaskDto::class.java)
 
         infotrygdFeedTaskDto.fnrBarn.forEach {
             infotrygdFeedKlient.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto(fnrBarn = it))
@@ -49,7 +49,7 @@ class SendFødselsmeldingTilInfotrygdTask(
             return Task(
                 type = TASK_STEP_TYPE,
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         InfotrygdFødselhendelsesFeedTaskDto(
                             fnrBarn = fnrBarn,
                         ),

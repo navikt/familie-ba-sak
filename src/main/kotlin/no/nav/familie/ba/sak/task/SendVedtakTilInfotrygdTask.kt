@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedD
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedTaskDto
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -33,7 +33,7 @@ class SendVedtakTilInfotrygdTask(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val infotrygdVedtakFeedTaskDto = objectMapper.readValue(task.payload, InfotrygdVedtakFeedTaskDto::class.java)
+        val infotrygdVedtakFeedTaskDto = jsonMapper.readValue(task.payload, InfotrygdVedtakFeedTaskDto::class.java)
 
         infotrygdFeedKlient.sendVedtakFeedTilInfotrygd(
             InfotrygdVedtakFeedDto(
@@ -84,7 +84,7 @@ class SendVedtakTilInfotrygdTask(
             return Task(
                 type = TASK_STEP_TYPE,
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         InfotrygdVedtakFeedTaskDto(
                             fnrStoenadsmottaker = fnrStoenadsmottaker,
                             behandlingId = behandlingId,

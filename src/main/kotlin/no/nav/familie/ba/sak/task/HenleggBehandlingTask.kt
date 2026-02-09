@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -9,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.HenleggBehandlingInfoDto
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -31,7 +32,7 @@ class HenleggBehandlingTask(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val henleggBehandlingTaskDTO = objectMapper.readValue(task.payload, HenleggBehandlingTaskDTO::class.java)
+        val henleggBehandlingTaskDTO = jsonMapper.readValue(task.payload, HenleggBehandlingTaskDTO::class.java)
         val behandling =
             behandlingHentOgPersisterService.hent(henleggBehandlingTaskDTO.behandlingId).apply {
                 task.metadata["fagsakId"] = fagsak.id.toString()
@@ -72,6 +73,7 @@ class HenleggBehandlingTask(
     }
 }
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class HenleggBehandlingTaskDTO(
     val behandlingId: Long,
     val årsak: HenleggÅrsak,

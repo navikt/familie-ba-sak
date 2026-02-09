@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingAvsluttTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -28,7 +28,7 @@ class KonsistensavstemMotOppdragStartTask(
     @WithSpan
     override fun doTask(task: Task) {
         val konsistensavstemmingTask =
-            objectMapper.readValue(task.payload, KonsistensavstemmingStartTaskDTO::class.java)
+            jsonMapper.readValue(task.payload, KonsistensavstemmingStartTaskDTO::class.java)
 
         val avstemmingsdato = LocalDateTime.now()
         logger.info("Konsistensavstemming ble initielt trigget ${konsistensavstemmingTask.avstemmingdato}, men bruker $avstemmingsdato som avstemmingsdato")

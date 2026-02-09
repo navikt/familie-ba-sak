@@ -1,10 +1,7 @@
 package no.nav.familie.ba.sak.config
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import no.nav.familie.kontrakter.felles.Applikasjon
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -49,7 +46,7 @@ class KafkaAivenConfig(
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.setConcurrency(1)
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
-        factory.consumerFactory = consumerFactory()
+        factory.setConsumerFactory(consumerFactory())
         factory.setCommonErrorHandler(kafkaErrorHandler)
         return factory
     }
@@ -58,15 +55,12 @@ class KafkaAivenConfig(
     fun kafkaAivenHendelseListenerAvroLatestContainerFactory(kafkaErrorHandler: KafkaAivenErrorHandler): ConcurrentKafkaListenerContainerFactory<String, String> =
         ConcurrentKafkaListenerContainerFactory<String, String>().apply {
             containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
-            consumerFactory = DefaultKafkaConsumerFactory(consumerConfigsLatestAvro())
+            setConsumerFactory(DefaultKafkaConsumerFactory(consumerConfigsLatestAvro()))
             setCommonErrorHandler(kafkaErrorHandler)
         }
 
     @Bean(name = [KafkaListenerConfigUtils.KAFKA_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME])
     fun kafkaListenerEndpointRegistry(): KafkaListenerEndpointRegistry? = KafkaListenerEndpointRegistry()
-
-    @Bean("kafkaObjectMapper")
-    fun kafkaObjectMapper(): ObjectMapper = objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
     private fun producerConfigs(): Map<String, Any> {
         val kafkaBrokers = System.getenv("KAFKA_BROKERS") ?: LOCAL_KAFKA_BROKER

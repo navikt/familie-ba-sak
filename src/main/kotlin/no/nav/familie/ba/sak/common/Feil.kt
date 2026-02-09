@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.common
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringSvar
 import no.nav.familie.log.mdc.MDCConstants
@@ -98,12 +100,16 @@ enum class PdlPersonKanIkkeBehandlesIFagSystemÅrsak {
 @JsonPropertyOrder(value = ["melding", "path", "timestamp", "status", "exception", "stackTrace"])
 data class EksternTjenesteFeil(
     val path: String,
+    @JsonIgnore
     val status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
     var exception: String? = null,
     val timestamp: LocalDateTime = LocalDateTime.now(),
     var stackTrace: String? = null,
 ) {
     lateinit var melding: String
+
+    @JsonProperty("status")
+    fun getStatusName(): String = status.name
 }
 
 open class EksternTjenesteFeilException(

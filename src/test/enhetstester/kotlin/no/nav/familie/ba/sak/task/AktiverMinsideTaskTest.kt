@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.task.AktiverMinsideTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.ba.sak.task.dto.MinsideDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -37,7 +37,7 @@ class AktiverMinsideTaskTest {
             val task =
                 Task(
                     type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(MinsideDTO(aktørId)),
+                    payload = jsonMapper.writeValueAsString(MinsideDTO(aktørId)),
                 )
 
             every { aktørIdRepository.findByAktørIdOrNull(aktørId) } returns null
@@ -58,7 +58,7 @@ class AktiverMinsideTaskTest {
             val task =
                 Task(
                     type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(MinsideDTO(aktør.aktørId)),
+                    payload = jsonMapper.writeValueAsString(MinsideDTO(aktør.aktørId)),
                 )
 
             every { aktørIdRepository.findByAktørIdOrNull(aktør.aktørId) } returns aktør
@@ -84,7 +84,7 @@ class AktiverMinsideTaskTest {
             val task =
                 Task(
                     type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(MinsideDTO(aktør.aktørId)),
+                    payload = jsonMapper.writeValueAsString(MinsideDTO(aktør.aktørId)),
                 )
 
             every { aktørIdRepository.findByAktørIdOrNull(aktør.aktørId) } returns aktør
@@ -111,7 +111,7 @@ class AktiverMinsideTaskTest {
             val task =
                 Task(
                     type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(MinsideDTO(aktør.aktørId)),
+                    payload = jsonMapper.writeValueAsString(MinsideDTO(aktør.aktørId)),
                 )
 
             every { aktørIdRepository.findByAktørIdOrNull(aktør.aktørId) } returns aktør
@@ -141,7 +141,7 @@ class AktiverMinsideTaskTest {
             val task =
                 Task(
                     type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(MinsideDTO(aktør.aktørId)),
+                    payload = jsonMapper.writeValueAsString(MinsideDTO(aktør.aktørId)),
                 )
 
             every { aktørIdRepository.findByAktørIdOrNull(aktør.aktørId) } returns aktør
@@ -175,7 +175,7 @@ class AktiverMinsideTaskTest {
 
             // Assert
             assertThat(task.type).isEqualTo(TASK_STEP_TYPE)
-            assertThat(task.payload).isEqualTo(objectMapper.writeValueAsString(MinsideDTO(aktør.aktørId)))
+            assertThat(task.payload).isEqualTo(jsonMapper.writeValueAsString(MinsideDTO(aktør.aktørId)))
             assertThat(task.metadata["aktørId"]).isEqualTo(aktør.aktørId)
             assertThat(task.metadata["fnr"]).isEqualTo(aktør.aktivFødselsnummer())
         }

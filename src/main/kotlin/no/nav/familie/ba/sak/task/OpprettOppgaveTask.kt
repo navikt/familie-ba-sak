@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -28,7 +28,7 @@ class OpprettOppgaveTask(
 
     @WithSpan
     override fun doTask(task: Task) {
-        val opprettOppgaveTaskDTO = objectMapper.readValue(task.payload, OpprettOppgaveTaskDTO::class.java)
+        val opprettOppgaveTaskDTO = jsonMapper.readValue(task.payload, OpprettOppgaveTaskDTO::class.java)
 
         val behandling = behandlingHentOgPersisterService.hent(opprettOppgaveTaskDTO.behandlingId)
         if (behandling.status.erStatusIverksetterVedtakEllerAvsluttet() &&
@@ -66,7 +66,7 @@ class OpprettOppgaveTask(
             Task(
                 type = TASK_STEP_TYPE,
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         OpprettOppgaveTaskDTO(
                             behandlingId,
                             oppgavetype,

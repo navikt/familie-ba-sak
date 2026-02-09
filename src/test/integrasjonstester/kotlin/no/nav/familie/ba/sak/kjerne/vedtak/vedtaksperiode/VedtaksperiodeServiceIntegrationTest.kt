@@ -117,7 +117,7 @@ class VedtaksperiodeServiceIntegrationTest(
                                 barnaMedOpplysninger =
                                     listOf(
                                         BarnMedOpplysninger(
-                                            ident = "",
+                                            ident = "ident",
                                             erFolkeregistrert = false,
                                             inkludertISøknaden = true,
                                         ),
@@ -175,7 +175,7 @@ class VedtaksperiodeServiceIntegrationTest(
                                 barnaMedOpplysninger =
                                     listOf(
                                         BarnMedOpplysninger(
-                                            ident = "",
+                                            ident = "ident",
                                             erFolkeregistrert = false,
                                             inkludertISøknaden = true,
                                         ),

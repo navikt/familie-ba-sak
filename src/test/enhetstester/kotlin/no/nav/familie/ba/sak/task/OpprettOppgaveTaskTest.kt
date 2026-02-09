@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -38,7 +38,7 @@ class OpprettOppgaveTaskTest {
                 beskrivelse = "Testoppgave",
                 manuellOppgaveType = null,
             )
-        val task = Task(type = OpprettOppgaveTask.TASK_STEP_TYPE, payload = objectMapper.writeValueAsString(dto))
+        val task = Task(type = OpprettOppgaveTask.TASK_STEP_TYPE, payload = jsonMapper.writeValueAsString(dto))
 
         every { behandlingHentOgPersisterService.hent(1L) } returns behandling
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns "12345"
@@ -77,7 +77,7 @@ class OpprettOppgaveTaskTest {
                 beskrivelse = null,
                 manuellOppgaveType = null,
             )
-        val task = Task(type = OpprettOppgaveTask.TASK_STEP_TYPE, payload = objectMapper.writeValueAsString(dto))
+        val task = Task(type = OpprettOppgaveTask.TASK_STEP_TYPE, payload = jsonMapper.writeValueAsString(dto))
 
         every { behandlingHentOgPersisterService.hent(2L) } returns behandling
 
@@ -105,7 +105,7 @@ class OpprettOppgaveTaskTest {
                 beskrivelse = null,
                 manuellOppgaveType = null,
             )
-        val task = Task(type = OpprettOppgaveTask.TASK_STEP_TYPE, payload = objectMapper.writeValueAsString(dto))
+        val task = Task(type = OpprettOppgaveTask.TASK_STEP_TYPE, payload = jsonMapper.writeValueAsString(dto))
 
         every { behandlingHentOgPersisterService.hent(3L) } returns behandling
 
@@ -133,7 +133,7 @@ class OpprettOppgaveTaskTest {
                 beskrivelse = null,
                 manuellOppgaveType = null,
             )
-        val task = Task(type = OpprettOppgaveTask.TASK_STEP_TYPE, payload = objectMapper.writeValueAsString(dto))
+        val task = Task(type = OpprettOppgaveTask.TASK_STEP_TYPE, payload = jsonMapper.writeValueAsString(dto))
 
         every { behandlingHentOgPersisterService.hent(4L) } returns behandling
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns "67890"
@@ -162,7 +162,7 @@ class OpprettOppgaveTaskTest {
                 beskrivelse = "Detaljert beskrivelse",
                 manuellOppgaveType = ManuellOppgaveType.ÅPEN_BEHANDLING,
             )
-        val task = Task(type = OpprettOppgaveTask.TASK_STEP_TYPE, payload = objectMapper.writeValueAsString(dto))
+        val task = Task(type = OpprettOppgaveTask.TASK_STEP_TYPE, payload = jsonMapper.writeValueAsString(dto))
 
         every { behandlingHentOgPersisterService.hent(5L) } returns behandling
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns "11111"

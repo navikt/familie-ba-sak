@@ -4,7 +4,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.dto.OpprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -23,7 +23,7 @@ class OpprettVurderFødselshendelseKonsekvensForYtelseOppgave(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO = objectMapper.readValue(task.payload, OpprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO::class.java)
+        val opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO = jsonMapper.readValue(task.payload, OpprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO::class.java)
         task.metadata["oppgaveId"] =
             oppgaveService.opprettOppgaveForFødselshendelse(
                 aktørId = opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO.ident,
@@ -44,7 +44,7 @@ class OpprettVurderFødselshendelseKonsekvensForYtelseOppgave(
             Task(
                 type = TASK_STEP_TYPE,
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         OpprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO(
                             aktør.aktørId,
                             oppgavetype,

@@ -1,19 +1,12 @@
 package no.nav.familie.ba.sak.integrasjoner
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class DeserializeTest {
-    private val mapper =
-        ObjectMapper()
-            .registerKotlinModule()
-            .registerModule(JavaTimeModule())
-
     @Test
     fun testDeserializaPersoninfo() {
         assertThat(getPersoninfo("M").kjønn).isEqualTo(Kjønn.MANN)
@@ -31,6 +24,6 @@ class DeserializeTest {
                 "fødselsdato": "1982-08-05"
               }
             """.trimIndent()
-        return mapper.readValue(json, PersonInfo::class.java)
+        return jsonMapper.readValue(json, PersonInfo::class.java)
     }
 }

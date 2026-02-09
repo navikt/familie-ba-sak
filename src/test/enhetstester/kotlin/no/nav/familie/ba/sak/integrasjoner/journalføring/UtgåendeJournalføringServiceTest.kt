@@ -4,9 +4,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
-import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.restklient.client.RessursException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

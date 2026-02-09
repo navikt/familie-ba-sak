@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.felles.utbetalingsgenerator.domain.Opphør
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -91,7 +91,7 @@ class TilkjentYtelseRepositoryTest(
                 lagTilkjentYtelse(
                     behandling = behandling,
                     utbetalingsoppdrag =
-                        objectMapper.writeValueAsString(
+                        jsonMapper.writeValueAsString(
                             lagUtbetalingsoppdrag(
                                 listOf(
                                     lagUtbetalingsperiode(

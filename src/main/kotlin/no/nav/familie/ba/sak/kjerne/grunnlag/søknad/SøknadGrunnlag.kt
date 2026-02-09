@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import java.time.LocalDateTime
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -34,7 +34,7 @@ data class SøknadGrunnlag(
     @Column(name = "aktiv", nullable = false)
     var aktiv: Boolean = true,
 ) {
-    fun hentSøknadDto(): SøknadDTO = objectMapper.readValue(this.søknad, SøknadDTO::class.java)
+    fun hentSøknadDto(): SøknadDTO = jsonMapper.readValue(this.søknad, SøknadDTO::class.java)
 
     fun hentUregistrerteBarn(): List<BarnMedOpplysninger> = hentSøknadDto().barnaMedOpplysninger.filter { !it.erFolkeregistrert && it.inkludertISøknaden }
 }

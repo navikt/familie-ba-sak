@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingAvsluttTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingDataTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
@@ -80,7 +80,7 @@ class KonsistensavstemmingTest {
         konistensavstemmingStartTask.doTask(
             Task(
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         KonsistensavstemmingStartTaskDTO(
                             batchId,
                             avstemmingsdato,
@@ -102,7 +102,7 @@ class KonsistensavstemmingTest {
             )
         assertThat(finnPerioderForRelevanteBehandlingerTask).isNotNull
         val finnPerioderForRelevanteBehandlingerDto =
-            objectMapper.readValue(
+            jsonMapper.readValue(
                 finnPerioderForRelevanteBehandlingerTask!!.payload,
                 KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO::class.java,
             )
@@ -119,7 +119,7 @@ class KonsistensavstemmingTest {
                 KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE,
             )
         val finnAvsluttTaskDto =
-            objectMapper.readValue(
+            jsonMapper.readValue(
                 finnAvsluttTask!!.payload,
                 KonsistensavstemmingAvsluttTaskDTO::class.java,
             )
@@ -160,7 +160,7 @@ class KonsistensavstemmingTest {
         konistensavstemmingStartTask.doTask(
             Task(
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         KonsistensavstemmingStartTaskDTO(
                             batchId,
                             avstemmingsdato,
@@ -205,7 +205,7 @@ class KonsistensavstemmingTest {
         konistensavstemmingStartTask.doTask(
             Task(
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         KonsistensavstemmingStartTaskDTO(
                             batchId,
                             avstemmingsdato,
@@ -225,7 +225,7 @@ class KonsistensavstemmingTest {
             taskSlots[0].type,
         )
         val finnPerioderForRelevanteBehandlingerDto =
-            objectMapper.readValue(
+            jsonMapper.readValue(
                 taskSlots[0].payload,
                 KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO::class.java,
             )
@@ -245,7 +245,7 @@ class KonsistensavstemmingTest {
         konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.doTask(
             Task(
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO(
                             batchId,
                             transaksjonsId,
@@ -261,7 +261,7 @@ class KonsistensavstemmingTest {
         val taskSlots = mutableListOf<Task>()
         verify(atLeast = 1) { taskService.save(capture(taskSlots)) }
         val konsistensavstemmingDataDto =
-            objectMapper.readValue(taskSlots.last().payload, KonsistensavstemmingDataTaskDTO::class.java)
+            jsonMapper.readValue(taskSlots.last().payload, KonsistensavstemmingDataTaskDTO::class.java)
         assertEquals(konsistensavstemmingDataDto.chunkNr, 1)
         assertEquals(konsistensavstemmingDataDto.transaksjonsId, transaksjonsId)
         assertThat(konsistensavstemmingDataDto.perioderForBehandling)
@@ -291,7 +291,7 @@ class KonsistensavstemmingTest {
         konsistensavstemMotOppdragDataTask.doTask(
             Task(
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         KonsistensavstemmingDataTaskDTO(
                             transaksjonsId = transaksjonsId,
                             chunkNr = 1,
@@ -328,7 +328,7 @@ class KonsistensavstemmingTest {
         konistensavstemmingStartTask.doTask(
             Task(
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         KonsistensavstemmingStartTaskDTO(
                             batchId,
                             avstemmingsdato,
@@ -380,7 +380,7 @@ class KonsistensavstemmingTest {
         verify(atLeast = 2) { dataChunkRepository.save(capture(datachunksSlot)) }
         assertThat(datachunksSlot.last { it.transaksjonsId == transaksjonsId }.erSendt).isTrue()
 
-        val dataTaskDto = objectMapper.readValue(dataTask.payload, KonsistensavstemmingDataTaskDTO::class.java)
+        val dataTaskDto = jsonMapper.readValue(dataTask.payload, KonsistensavstemmingDataTaskDTO::class.java)
         assertThat(dataTaskDto.chunkNr).isEqualTo(1)
         assertThat(dataTaskDto.transaksjonsId).isEqualTo(transaksjonsId)
         assertThat(dataTaskDto.perioderForBehandling).hasSize(1)
@@ -412,7 +412,7 @@ class KonsistensavstemmingTest {
         konistensavstemmingStartTask.doTask(
             Task(
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         KonsistensavstemmingStartTaskDTO(
                             batchId,
                             avstemmingsdato,
