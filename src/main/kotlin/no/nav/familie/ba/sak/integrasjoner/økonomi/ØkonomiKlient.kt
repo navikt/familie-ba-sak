@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
 import no.nav.familie.ba.sak.config.RestTemplateConfig.Companion.RETRY_BACKOFF_500MS
+import no.nav.familie.ba.sak.integrasjoner.retryVedException
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.GrensesnittavstemmingRequest
 import no.nav.familie.kontrakter.felles.oppdrag.KonsistensavstemmingRequestV2
@@ -13,7 +14,6 @@ import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import java.net.URI
@@ -37,7 +37,6 @@ class ØkonomiKlient(
         }
     }
 
-    @Retryable(value = [Exception::class], maxRetries = 3, delayString = RETRY_BACKOFF_500MS)
     fun hentSimulering(utbetalingsoppdrag: Utbetalingsoppdrag): DetaljertSimuleringResultat {
         val uri = URI.create("$familieOppdragUri/simulering/v1")
 
@@ -46,7 +45,9 @@ class ØkonomiKlient(
             uri = uri,
             formål = "Henter simulering på fagsak ${utbetalingsoppdrag.saksnummer} fra Økonomi",
         ) {
-            postForEntity(uri = uri, utbetalingsoppdrag)
+            retryVedException(5000).execute {
+                postForEntity(uri = uri, utbetalingsoppdrag)
+            }
         }
     }
 

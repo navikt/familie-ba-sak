@@ -2,13 +2,12 @@ package no.nav.familie.ba.sak.integrasjoner.sanity
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
+import no.nav.familie.ba.sak.integrasjoner.retryVedException
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelseDto
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.SanityEØSBegrunnelseDto
-import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.getForEntity
@@ -21,7 +20,6 @@ class SanityKlient(
     @Value("\${SANITY_DATASET}") private val datasett: String,
     private val restTemplate: RestTemplate,
 ) {
-    @Retryable(value = [Exception::class], maxRetries = 3, delayString = RETRY_BACKOFF_5000MS)
     fun hentBegrunnelser(): List<SanityBegrunnelse> {
         val sanityUrl = "$SANITY_BASE_URL/$datasett"
         val hentBegrunnelserQuery = java.net.URLEncoder.encode(HENT_BEGRUNNELSER, "utf-8")
@@ -34,14 +32,15 @@ class SanityKlient(
                 uri = uri,
                 formål = "Henter begrunnelser fra sanity",
             ) {
-                restTemplate.getForEntity<SanityBegrunnelserRespons>(uri).body?.result
-                    ?: throw Feil("Klarer ikke å hente begrunnelser fra sanity")
+                retryVedException(5000).execute {
+                    restTemplate.getForEntity<SanityBegrunnelserRespons>(uri).body?.result
+                        ?: throw Feil("Klarer ikke å hente begrunnelser fra sanity")
+                }
             }
 
         return restSanityBegrunnelser.mapNotNull { it.tilSanityBegrunnelse() }
     }
 
-    @Retryable(value = [Exception::class], maxRetries = 3, delayString = RETRY_BACKOFF_5000MS)
     fun hentEØSBegrunnelser(): List<SanityEØSBegrunnelse> {
         val sanityUrl = "$SANITY_BASE_URL/$datasett"
         val hentEØSBegrunnelserQuery = java.net.URLEncoder.encode(HENT_EØS_BEGRUNNELSER, "utf-8")
@@ -53,12 +52,14 @@ class SanityKlient(
             uri = uri,
             formål = "Henter EØS-begrunnelser fra sanity",
         ) {
-            restTemplate
-                .getForEntity<SanityEØSBegrunnelserRespons>(uri)
-                .body
-                ?.result
-                ?.mapNotNull { it.tilSanityEØSBegrunnelse() }
-                ?: throw Feil("Klarer ikke å hente EØS-begrunnelser fra sanity")
+            retryVedException(5000).execute {
+                restTemplate
+                    .getForEntity<SanityEØSBegrunnelserRespons>(uri)
+                    .body
+                    ?.result
+                    ?.mapNotNull { it.tilSanityEØSBegrunnelse() }
+                    ?: throw Feil("Klarer ikke å hente EØS-begrunnelser fra sanity")
+            }
         }
     }
 }
