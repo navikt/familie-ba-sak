@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLoggRepository
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -63,7 +63,7 @@ class PatchMergetAktørTaskTest(
         patchMergetAktørTask.doTask(
             Task(
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         PatchMergetAktørDto(
                             fagsakId = fagsak.id,
                             gammelAktørId = gammelAktør.aktørId,
@@ -122,7 +122,7 @@ class PatchMergetAktørTaskTest(
                 patchMergetAktørTask.doTask(
                     Task(
                         payload =
-                            objectMapper.writeValueAsString(
+                            jsonMapper.writeValueAsString(
                                 PatchMergetAktørDto(
                                     fagsakId = fagsak.id,
                                     gammelAktørId = gammelAktør.aktørId,
@@ -173,7 +173,7 @@ class PatchMergetAktørTaskTest(
         patchMergetAktørTask.doTask(
             Task(
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         PatchMergetAktørDto(
                             fagsakId = fagsak.id,
                             gammelAktørId = gammelAktør.aktørId,
@@ -215,7 +215,7 @@ class PatchMergetAktørTaskTest(
                 patchMergetAktørTask.doTask(
                     Task(
                         payload =
-                            objectMapper.writeValueAsString(
+                            jsonMapper.writeValueAsString(
                                 PatchMergetAktørDto(
                                     fagsakId = fagsak.id,
                                     gammelAktørId = gammelAktør.aktørId,

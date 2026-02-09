@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestKlient
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLogg
 import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLoggRepository
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -29,7 +29,7 @@ class PatchMergetAktørTask(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val dto = objectMapper.readValue(task.payload, PatchMergetAktørDto::class.java)
+        val dto = jsonMapper.readValue(task.payload, PatchMergetAktørDto::class.java)
         secureLogger.info("Patcher ident på fagsak $dto")
 
         if (dto.gammelAktørId == dto.nyAktørId) {

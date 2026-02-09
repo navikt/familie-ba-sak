@@ -268,7 +268,7 @@ class OpprettTaskService(
     ) = taskRepository.save(
         Task(
             type = PatchMergetAktørTask.TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(dto),
+            payload = jsonMapper.writeValueAsString(dto),
             properties =
                 Properties().apply {
                     this["fagsakId"] = dto.fagsakId.toString()
