@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.hentSterkesteMedlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.lagErNordiskStatsborgerTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -24,6 +23,7 @@ import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.springframework.stereotype.Service
@@ -129,18 +129,17 @@ class PreutfyllLovligOppholdMedLagringIPersongrunnlagService(
 
     private fun lagErEØSBorgerTidslinje(alleStatsborgerskap: List<GrStatsborgerskap>): Tidslinje<Boolean> =
         alleStatsborgerskap
-            .windowed(size = 2, step = 1, partialWindows = true) {
-                val gjeldende = it.first()
-                val neste = it.getOrNull(1)
-
-                val erEØSBorger = alleStatsborgerskap.hentSterkesteMedlemskap() == Medlemskap.EØS
-
-                Periode(
-                    verdi = erEØSBorger,
-                    fom = gjeldende.gyldigPeriode?.fom,
-                    tom = gjeldende.gyldigPeriode?.tom ?: neste?.gyldigPeriode?.fom?.minusDays(1),
-                )
-            }.tilTidslinje()
+            .map { statsborgerskap ->
+                listOf(
+                    Periode(
+                        verdi = statsborgerskap.medlemskap == Medlemskap.EØS,
+                        fom = statsborgerskap.gyldigPeriode?.fom,
+                        tom = statsborgerskap.gyldigPeriode?.tom,
+                    ),
+                ).tilTidslinje()
+            }.kombiner { erEøs ->
+                erEøs.any()
+            }
 
     private fun lagHarArbeidsforholdTidslinje(
         arbeidsforhold: List<GrArbeidsforhold>,
