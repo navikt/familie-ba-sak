@@ -362,6 +362,8 @@ class PreutfyllLovligOppholdServiceTest {
             val aktør = behandling.fagsak.aktør
             val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
 
+            val tjueÅrSiden = LocalDate.now().minusYears(20)
+
             val persongrunnlag =
                 lagPersonopplysningGrunnlag(
                     behandlingId = behandling.id,
@@ -381,8 +383,8 @@ class PreutfyllLovligOppholdServiceTest {
                                 )
                             statsborgerskap =
                                 mutableListOf(
-                                    GrStatsborgerskap(landkode = "BE", gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(20), tom = null), medlemskap = Medlemskap.EØS, person = this),
-                                    GrStatsborgerskap(landkode = "BE", gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(20), tom = null), medlemskap = Medlemskap.EØS, person = this),
+                                    GrStatsborgerskap(landkode = "BE", gyldigPeriode = DatoIntervallEntitet(fom = tjueÅrSiden, tom = null), medlemskap = Medlemskap.EØS, person = this),
+                                    GrStatsborgerskap(landkode = "BE", gyldigPeriode = DatoIntervallEntitet(fom = tjueÅrSiden, tom = null), medlemskap = Medlemskap.EØS, person = this),
                                     GrStatsborgerskap(landkode = "GUF", gyldigPeriode = DatoIntervallEntitet(fom = null, tom = null), medlemskap = Medlemskap.TREDJELANDSBORGER, person = this),
                                     GrStatsborgerskap(landkode = "GUF", gyldigPeriode = DatoIntervallEntitet(fom = null, tom = null), medlemskap = Medlemskap.TREDJELANDSBORGER, person = this),
                                 )
