@@ -45,4 +45,4 @@ viktig at alle fagsaker har oppdaterte satser for å sikre korrekt utbetaling.
 ## Hvordan satsendring fungerer
 Satsendring fungerer ved at det opprettes en ny behandling for hver fagsak som skal få oppdatert satsene. Denne behandlingen kjører gjennom hele autovedtak-prosessen, og oppdaterer satsene i fagsaken. Det er viktig at denne prosessen fungerer korrekt, da det kan påvirke utbetalingene til brukerne.
 
-Når en satsendring er vellykket for en behandling, eller det er sjekket at nye satser er kommet med for en fagsak, vil det legge til en rad i satskjoering-tabellen i databasen. Her vil det også legge seg satskjøringer som feiler, men tilhørende feiltype osv. Anbefaler å gjøre seg godt kjent med denne før man begynner.  
+Når en satsendring er vellykket for en behandling, eller det er sjekket at nye satser er kommet med for en fagsak, vil det legge til en rad i satskjoering-tabellen i databasen. Her vil det også legge seg satskjøringer som feiler, med tilhørende feiltype osv. Anbefaler å gjøre seg godt kjent med denne før man begynner.  
