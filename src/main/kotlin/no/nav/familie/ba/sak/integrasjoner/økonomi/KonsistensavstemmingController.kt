@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragStartTask
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -60,7 +60,7 @@ class KonsistensavstemmingController(
                 Task(
                     type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE,
                     payload =
-                        objectMapper.writeValueAsString(
+                        jsonMapper.writeValueAsString(
                             KonsistensavstemmingStartTaskDTO(
                                 batchId = batch.id,
                                 avstemmingdato = triggerTid,

@@ -8,15 +8,15 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.testfiler.Testfil.SANITY_BEGRUNNELSER
 import no.nav.familie.ba.sak.testfiler.Testfil.SANITY_EØS_BEGRUNNELSER
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 
 // For å laste ned begrunnelsene kjør scriptet "src/test/resources/oppdater-sanity-mock.sh" eller
 // se https://familie-brev.sanity.studio/ba-brev/vision med query fra SanityQueries.kt.
 object SanityData {
     fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
         val sanityBegrunnelserDto =
-            objectMapper
-                .readValue(SANITY_BEGRUNNELSER, Array<SanityBegrunnelseDto>::class.java)
+            jsonMapper
+                .readValue(SANITY_BEGRUNNELSER.readText(), Array<SanityBegrunnelseDto>::class.java)
                 .toList()
 
         return sanityBegrunnelserDto.mapNotNull { it.tilSanityBegrunnelse() }
@@ -39,9 +39,9 @@ object SanityData {
 
     fun hentSanityEØSBegrunnelser(): List<SanityEØSBegrunnelse> {
         val sanityEØSBegrunnelserDto =
-            objectMapper
+            jsonMapper
                 .readValue(
-                    SANITY_EØS_BEGRUNNELSER,
+                    SANITY_EØS_BEGRUNNELSER.readText(),
                     Array<SanityEØSBegrunnelseDto>::class.java,
                 ).toList()
 

@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.Fødselsnummer
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -47,7 +47,7 @@ class BehandleFødselshendelseTask(
     @WithSpan
     override fun doTask(task: Task) {
         val behandleFødselshendelseTaskDTO =
-            objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
+            jsonMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
 
         val nyBehandling = behandleFødselshendelseTaskDTO.nyBehandling
 
@@ -111,7 +111,7 @@ class BehandleFødselshendelseTask(
             val triggerTid = if (erKlokkenMellom21Og06()) utledKl06IdagEllerNesteDag() else LocalDateTime.now()
             return Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
+                payload = jsonMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
                 properties =
                     Properties().apply {
                         this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent

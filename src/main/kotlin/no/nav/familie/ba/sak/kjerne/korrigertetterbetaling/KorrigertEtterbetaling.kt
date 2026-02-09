@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.korrigertetterbetaling
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
@@ -42,6 +43,7 @@ class KorrigertEtterbetaling(
     var aktiv: Boolean,
 ) : BaseEntitet()
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 data class KorrigertEtterbetalingRequest(
     val årsak: KorrigertEtterbetalingÅrsak,
     val begrunnelse: String?,

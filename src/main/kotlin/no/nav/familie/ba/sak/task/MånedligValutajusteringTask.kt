@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.overstyrTaskMedNyCallId
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -28,7 +28,7 @@ class MånedligValutajusteringTask(
 
     @WithSpan
     override fun doTask(task: Task) {
-        val taskdto = objectMapper.readValue(task.payload, MånedligValutajusteringTaskDto::class.java)
+        val taskdto = jsonMapper.readValue(task.payload, MånedligValutajusteringTaskDto::class.java)
 
         if (!YearMonth.now().equals(taskdto.måned)) {
             logger.info("Task for månedlig valutajustering må kjøres innenfor måneden det skal sjekkes mot.")
@@ -55,7 +55,7 @@ class MånedligValutajusteringTask(
             overstyrTaskMedNyCallId(IdUtils.generateId()) {
                 Task(
                     type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(MånedligValutajusteringTaskDto(fagsakId = fagsakId, måned = valutajusteringsMåned)),
+                    payload = jsonMapper.writeValueAsString(MånedligValutajusteringTaskDto(fagsakId = fagsakId, måned = valutajusteringsMåned)),
                     properties =
                         mapOf(
                             "fagsakId" to fagsakId.toString(),

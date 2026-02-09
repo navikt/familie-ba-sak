@@ -4,7 +4,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.dto.IverksettMotFamilieTilbakeDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -23,7 +23,7 @@ class IverksettMotFamilieTilbakeTask(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val iverksettMotFamilieTilbake = objectMapper.readValue(task.payload, IverksettMotFamilieTilbakeDTO::class.java)
+        val iverksettMotFamilieTilbake = jsonMapper.readValue(task.payload, IverksettMotFamilieTilbakeDTO::class.java)
         stegService.håndterIverksettMotFamilieTilbake(
             behandling = behandlingHentOgPersisterService.hent(iverksettMotFamilieTilbake.behandlingsId),
             task.metadata,
@@ -39,7 +39,7 @@ class IverksettMotFamilieTilbakeTask(
         ): Task =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(IverksettMotFamilieTilbakeDTO(behandlingsId)),
+                payload = jsonMapper.writeValueAsString(IverksettMotFamilieTilbakeDTO(behandlingsId)),
                 properties =
                     metadata.apply {
                         this["behandlingId"] = behandlingsId.toString()

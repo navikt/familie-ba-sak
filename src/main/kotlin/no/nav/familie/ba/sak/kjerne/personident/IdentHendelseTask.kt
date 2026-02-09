@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.personident
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.kontrakter.felles.PersonIdent
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -25,7 +25,7 @@ class IdentHendelseTask(
     @WithSpan
     override fun doTask(task: Task) {
         logger.info("Kjører task for håntering av identhendelse.")
-        val personIdent = objectMapper.readValue(task.payload, PersonIdent::class.java)
+        val personIdent = jsonMapper.readValue(task.payload, PersonIdent::class.java)
         håndterNyIdentService.håndterNyIdent(personIdent)
     }
 
@@ -36,7 +36,7 @@ class IdentHendelseTask(
         fun opprettTask(nyIdent: PersonIdent): Task =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(nyIdent),
+                payload = jsonMapper.writeValueAsString(nyIdent),
                 properties =
                     Properties().apply {
                         this["nyPersonIdent"] = nyIdent.ident

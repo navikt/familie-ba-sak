@@ -20,7 +20,6 @@ import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
-import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknad
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.NavIdent
@@ -48,6 +47,7 @@ import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import no.nav.familie.kontrakter.felles.saksbehandler.SaksbehandlerGrupper
+import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable

@@ -1,13 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPostering
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
@@ -16,6 +14,7 @@ import no.nav.familie.kontrakter.felles.simulering.SimulertPostering
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.readValue
 import java.io.File
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -250,9 +249,7 @@ class SimuleringUtilTest {
         val fil = File("./src/test/resources/kjerne/simulering/simulering_med_manuell_postering.json")
 
         val ytelseMedManuellePosteringer =
-            objectMapper
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true)
+            jsonMapper
                 .readValue<DetaljertSimuleringResultat>(fil)
 
         val vedtakSimuleringMottakere =

@@ -45,7 +45,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.assertj.core.api.Assertions.assertThat
@@ -179,7 +179,7 @@ class OppdragSteg {
         } returns tidligereTilkjenteYtelser.lastOrNull()?.behandling
         every {
             tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(any())
-        } returns tidligereTilkjenteYtelser.lastOrNull()?.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[tidligereTilkjenteYtelser.last().behandling.id]?.utbetalingsoppdrag))
+        } returns tidligereTilkjenteYtelser.lastOrNull()?.copy(utbetalingsoppdrag = jsonMapper.writeValueAsString(beregnetUtbetalingsoppdrag[tidligereTilkjenteYtelser.last().behandling.id]?.utbetalingsoppdrag))
         every {
             behandlingHentOgPersisterService.hentBehandlinger(any())
         } returns behandlinger.filter { it.value.fagsak.id == tilkjentYtelse.behandling.fagsak.id }.values.toList()
@@ -193,7 +193,7 @@ class OppdragSteg {
         } returns endretMigreringsdatoMap[tilkjentYtelse.behandling.id]
         every {
             tilkjentYtelseRepository.findByFagsak(any())
-        } returns tidligereTilkjenteYtelser.filter { it.behandling.fagsak.id == tilkjentYtelse.behandling.fagsak.id }.map { it.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[it.behandling.id]?.utbetalingsoppdrag)) }
+        } returns tidligereTilkjenteYtelser.filter { it.behandling.fagsak.id == tilkjentYtelse.behandling.fagsak.id }.map { it.copy(utbetalingsoppdrag = jsonMapper.writeValueAsString(beregnetUtbetalingsoppdrag[it.behandling.id]?.utbetalingsoppdrag)) }
         every {
             featureToggleService.isEnabled(
                 any<FeatureToggle>(),

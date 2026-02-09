@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.institusjon
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
-import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.ba.tss.SamhandlerInfo
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.restklient.client.RessursException
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated

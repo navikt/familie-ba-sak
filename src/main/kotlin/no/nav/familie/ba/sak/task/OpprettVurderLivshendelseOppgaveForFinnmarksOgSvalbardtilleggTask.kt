@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.task.dto.OpprettVurderLivshendelseOppgaveForFinnmarksOgSvalbardtilleggTaskDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -20,7 +20,7 @@ class OpprettVurderLivshendelseOppgaveForFinnmarksOgSvalbardtilleggTask(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val taskDTO = objectMapper.readValue(task.payload, OpprettVurderLivshendelseOppgaveForFinnmarksOgSvalbardtilleggTaskDTO::class.java)
+        val taskDTO = jsonMapper.readValue(task.payload, OpprettVurderLivshendelseOppgaveForFinnmarksOgSvalbardtilleggTaskDTO::class.java)
         task.metadata["oppgaveId"] =
             oppgaveService.opprettOppgaveForFinnmarksOgSvalbardtillegg(
                 fagsakId = taskDTO.fagsakId,
@@ -38,7 +38,7 @@ class OpprettVurderLivshendelseOppgaveForFinnmarksOgSvalbardtilleggTask(
             Task(
                 type = TASK_STEP_TYPE,
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         OpprettVurderLivshendelseOppgaveForFinnmarksOgSvalbardtilleggTaskDTO(
                             fagsakId,
                             beskrivelse,

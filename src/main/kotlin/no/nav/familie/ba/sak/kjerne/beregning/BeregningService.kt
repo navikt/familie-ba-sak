@@ -187,7 +187,7 @@ class BeregningService(
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
             )
 
-        val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
+        val lagretTilkjentYtelse = tilkjentYtelseRepository.saveAndFlush(tilkjentYtelse)
         tilkjentYtelseEndretAbonnenter.forEach { it.endretTilkjentYtelse(lagretTilkjentYtelse) }
         return lagretTilkjentYtelse
     }

@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import java.time.LocalDate
 import java.time.YearMonth
@@ -68,6 +68,6 @@ fun TilkjentYtelse.tilTidslinjeMedAndeler() =
         .values
         .kombiner()
 
-fun TilkjentYtelse.utbetalingsoppdrag(): Utbetalingsoppdrag? = this.utbetalingsoppdrag?.let { objectMapper.readValue(it, Utbetalingsoppdrag::class.java) }
+fun TilkjentYtelse.utbetalingsoppdrag(): Utbetalingsoppdrag? = this.utbetalingsoppdrag?.let { jsonMapper.readValue(it, Utbetalingsoppdrag::class.java) }
 
 fun TilkjentYtelse.utbetalingsperioder() = this.utbetalingsoppdrag()?.utbetalingsperiode ?: emptyList()

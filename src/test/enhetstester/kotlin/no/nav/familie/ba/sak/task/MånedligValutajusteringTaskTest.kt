@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Test
@@ -21,7 +21,7 @@ class MånedligValutajusteringTaskTest {
                 fagsakId = 123L,
                 måned = currentMonth,
             )
-        val taskPayload = objectMapper.writeValueAsString(taskDto)
+        val taskPayload = jsonMapper.writeValueAsString(taskDto)
         val taskInstance = Task(type = MånedligValutajusteringTask.TASK_STEP_TYPE, payload = taskPayload)
 
         assertDoesNotThrow {
@@ -43,7 +43,7 @@ class MånedligValutajusteringTaskTest {
                 fagsakId = 123L,
                 måned = YearMonth.now().minusMonths(1),
             )
-        val taskPayload = objectMapper.writeValueAsString(taskDto)
+        val taskPayload = jsonMapper.writeValueAsString(taskDto)
         val taskInstance = Task(type = MånedligValutajusteringTask.TASK_STEP_TYPE, payload = taskPayload)
 
         assertDoesNotThrow {

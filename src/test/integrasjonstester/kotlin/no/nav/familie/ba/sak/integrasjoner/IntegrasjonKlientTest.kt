@@ -47,7 +47,6 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalførin
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
-import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -60,13 +59,14 @@ import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.log.NavHttpHeaders
+import no.nav.familie.restklient.client.RessursException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -120,7 +120,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
         MDC.put("callId", "opprettOppgave")
         wireMockServer.stubFor(
             post("/api/oppgave/opprett").willReturn(
-                okJson(objectMapper.writeValueAsString(success(OppgaveResponse(oppgaveId = 1234)))),
+                okJson(jsonMapper.writeValueAsString(success(OppgaveResponse(oppgaveId = 1234)))),
             ),
         )
 
@@ -133,7 +133,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
             anyRequestedFor(anyUrl())
                 .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("opprettOppgave"))
                 .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("srvfamilie-ba-sak"))
-                .withRequestBody(equalToJson(objectMapper.writeValueAsString(request))),
+                .withRequestBody(equalToJson(jsonMapper.writeValueAsString(request), true, true)),
         )
     }
 
@@ -144,7 +144,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
             post("/api/oppgave/opprett").willReturn(
                 aResponse()
                     .withStatus(500)
-                    .withBody(objectMapper.writeValueAsString(failure<String>("test"))),
+                    .withBody(jsonMapper.writeValueAsString(failure<String>("test"))),
             ),
         )
 
@@ -159,7 +159,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             post("/api/oppgave/v4").willReturn(
                 okJson(
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         success(FinnOppgaveResponseDto(1, listOf(oppgave))),
                     ),
                 ),
@@ -181,7 +181,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
                     aResponse()
                         .withStatus(201)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(journalpostOkResponse())),
+                        .withBody(jsonMapper.writeValueAsString(journalpostOkResponse())),
                 ),
         )
 
@@ -222,12 +222,14 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
                 .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("srvfamilie-ba-sak"))
                 .withRequestBody(
                     equalToJson(
-                        objectMapper.writeValueAsString(
+                        jsonMapper.writeValueAsString(
                             forventetRequestArkiverDokument(
                                 fagsakId = vedtak.behandling.fagsak.id,
                                 behandlingId = vedtak.behandling.id,
                             ),
                         ),
+                        true,
+                        true,
                     ),
                 ),
         )
@@ -240,7 +242,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             post("/api/dist/v1")
                 .withHeader("Accept", containing("json"))
-                .willReturn(okJson(objectMapper.writeValueAsString(success("1234567")))),
+                .willReturn(okJson(jsonMapper.writeValueAsString(success("1234567")))),
         )
 
         assertDoesNotThrow { integrasjonKlient.distribuerBrev(lagDistribuerDokumentDTO()) }
@@ -268,7 +270,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             post("/api/dist/v1")
                 .withHeader("Accept", containing("json"))
-                .willReturn(okJson(objectMapper.writeValueAsString(success("")))),
+                .willReturn(okJson(jsonMapper.writeValueAsString(success("")))),
         )
 
         assertThrows<Feil> { integrasjonKlient.distribuerBrev(lagDistribuerDokumentDTO()) }
@@ -280,7 +282,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             post("/api/dist/v1")
                 .withHeader("Accept", containing("json"))
-                .willReturn(okJson(objectMapper.writeValueAsString(failure<Any>("")))),
+                .willReturn(okJson(jsonMapper.writeValueAsString(failure<Any>("")))),
         )
 
         val feil = assertThrows<IntegrasjonException> { integrasjonKlient.distribuerBrev(lagDistribuerDokumentDTO()) }
@@ -310,7 +312,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             patch(urlEqualTo("/api/oppgave/123/ferdigstill"))
                 .withHeader("Accept", containing("json"))
-                .willReturn(okJson(objectMapper.writeValueAsString(success(OppgaveResponse(1))))),
+                .willReturn(okJson(jsonMapper.writeValueAsString(success(OppgaveResponse(1))))),
         )
 
         integrasjonKlient.ferdigstillOppgave(123)
@@ -333,7 +335,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
                     aResponse()
                         .withStatus(400)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(failure<String>("test"))),
+                        .withBody(jsonMapper.writeValueAsString(failure<String>("test"))),
                 ),
         )
 
@@ -351,7 +353,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
                 .withHeader("Accept", containing("json"))
                 .willReturn(
                     okJson(
-                        objectMapper.writeValueAsString(
+                        jsonMapper.writeValueAsString(
                             success(
                                 listOf(
                                     Arbeidsfordelingsenhet("2", "foo"),
@@ -376,7 +378,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
                 .withHeader("Accept", containing("json"))
                 .willReturn(
                     okJson(
-                        objectMapper.writeValueAsString(
+                        jsonMapper.writeValueAsString(
                             success(
                                 listOf(
                                     Arbeidsfordelingsenhet("2", "foo"),
@@ -399,7 +401,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             get("/api/oppgave/$oppgaveId").willReturn(
                 okJson(
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         success(
                             lagTestOppgaveDTO(
                                 oppgaveId,
@@ -424,7 +426,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             get("/api/journalpost/tilgangsstyrt/baks?journalpostId=$journalpostId").willReturn(
                 okJson(
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         success(
                             lagTestJournalpost(fnr, journalpostId, AvsenderMottakerIdType.FNR, "NAV_NO"),
                         ),
@@ -449,7 +451,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             get("/api/journalpost/hentdokument/tilgangsstyrt/baks/$journalpostId/$dokumentId").willReturn(
                 okJson(
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         success(
                             "Test".toByteArray(),
                         ),
@@ -481,7 +483,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             post("/api/aareg/arbeidsforhold").willReturn(
                 okJson(
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         success(
                             arbeidsforhold,
                         ),
@@ -519,7 +521,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
     fun `skal opprette skyggesak for Sak`() {
         val aktørId = randomAktør()
 
-        wireMockServer.stubFor(post("/api/skyggesak/v1").willReturn(okJson(objectMapper.writeValueAsString(success(null)))))
+        wireMockServer.stubFor(post("/api/skyggesak/v1").willReturn(okJson(jsonMapper.writeValueAsString(success(null)))))
 
         integrasjonKlient.opprettSkyggesak(aktørId, MOCK_FAGSAK_ID.toLong())
 
@@ -527,7 +529,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
             postRequestedFor(urlEqualTo("/api/skyggesak/v1"))
                 .withRequestBody(
                     equalToJson(
-                        objectMapper.writeValueAsString(
+                        jsonMapper.writeValueAsString(
                             Skyggesak(
                                 aktoerId = aktørId.aktørId,
                                 MOCK_FAGSAK_ID,
@@ -637,7 +639,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
             get("/api/baks/versjonertsoknad/ba/$journalpostId")
                 .willReturn(
                     okJson(
-                        objectMapper.writeValueAsString(
+                        jsonMapper.writeValueAsString(
                             success(
                                 versjonertBarnetrygdSøknadV9,
                             ),
@@ -659,7 +661,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             post("/api/arbeid-og-inntekt/hent-url")
                 .willReturn(
-                    okJson(objectMapper.writeValueAsString(success(url))),
+                    okJson(jsonMapper.writeValueAsString(success(url))),
                 ),
         )
 
@@ -678,7 +680,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
     }
 
     private fun modiaContextResponse(ressursFunksjon: (ModiaContext) -> Ressurs<ModiaContext>) =
-        objectMapper.writeValueAsString(
+        jsonMapper.writeValueAsString(
             ressursFunksjon(
                 ModiaContext(
                     aktivBruker = "13025514402",
@@ -689,7 +691,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
 
     private fun modiaContextRequest() =
         equalToJson(
-            objectMapper.writeValueAsString(
+            jsonMapper.writeValueAsString(
                 NyAktivBrukerIModiaContextDto(personIdent = "13025514402"),
             ),
         )

@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import java.time.LocalDate
 
 interface Brev {
@@ -495,7 +495,7 @@ interface BrevData {
     val delmalData: Any
     val flettefelter: FlettefelterForDokument
 
-    fun toBrevString(): String = objectMapper.writeValueAsString(this)
+    fun toBrevString(): String = jsonMapper.writeValueAsString(this)
 }
 
 interface FlettefelterForDokument {

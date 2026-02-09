@@ -5,7 +5,7 @@ import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppd
 import no.nav.familie.felles.utbetalingsgenerator.domain.Opphør
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -24,7 +24,7 @@ fun lagMinimalUtbetalingsoppdragString(
     behandlingId: Long,
     ytelseTypeBa: YtelsetypeBA? = YtelsetypeBA.ORDINÆR_BARNETRYGD,
 ): String =
-    objectMapper.writeValueAsString(
+    jsonMapper.writeValueAsString(
         Utbetalingsoppdrag(
             kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
             fagSystem = "BA",

@@ -136,6 +136,7 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
     }
     statsborgerskap(historikk: true)  {
         land
+        bekreftelsesdato
         gyldigFraOgMed
         gyldigTilOgMed
     }

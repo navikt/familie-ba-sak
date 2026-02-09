@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevOpphørSmåbarnstilleggService
 import no.nav.familie.ba.sak.task.dto.AutobrevOpphørSmåbarnstilleggDTO
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -22,7 +22,7 @@ class SendAutobrevOpphørSmåbarnstilleggTask(
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
-        val autobrevDTO = objectMapper.readValue(task.payload, AutobrevOpphørSmåbarnstilleggDTO::class.java)
+        val autobrevDTO = jsonMapper.readValue(task.payload, AutobrevOpphørSmåbarnstilleggDTO::class.java)
 
         autobrevOpphørSmåbarnstilleggService.kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(
             fagsakId = autobrevDTO.fagsakId,

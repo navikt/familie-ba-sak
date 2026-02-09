@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.integrasjoner.samhandler
 
 import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
-import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.ba.tss.SamhandlerInfo
 import no.nav.familie.kontrakter.ba.tss.SøkSamhandlerInfo
 import no.nav.familie.kontrakter.ba.tss.SøkSamhandlerInfoRequest
+import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
