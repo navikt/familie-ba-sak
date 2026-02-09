@@ -356,6 +356,60 @@ class PreutfyllLovligOppholdServiceTest {
         }
 
         @Test
+        fun `skal håndtere flere av samme statsborgerskap ved EØS-sjekk`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val aktør = behandling.fagsak.aktør
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+
+            val tjueÅrSiden = LocalDate.now().minusYears(20)
+
+            val persongrunnlag =
+                lagPersonopplysningGrunnlag(
+                    behandlingId = behandling.id,
+                ) { grunnlag ->
+                    setOf(
+                        lagPerson(aktør = aktør, personopplysningGrunnlag = grunnlag).apply {
+                            bostedsadresser =
+                                mutableListOf(
+                                    GrBostedsadresse.fraBostedsadresse(
+                                        Bostedsadresse(
+                                            gyldigFraOgMed = LocalDate.now().minusYears(10),
+                                            gyldigTilOgMed = null,
+                                            vegadresse = lagVegadresse(12345L),
+                                        ),
+                                        person = this,
+                                    ),
+                                )
+                            statsborgerskap =
+                                mutableListOf(
+                                    GrStatsborgerskap(landkode = "BE", gyldigPeriode = DatoIntervallEntitet(fom = tjueÅrSiden, tom = null), medlemskap = Medlemskap.EØS, person = this),
+                                    GrStatsborgerskap(landkode = "BE", gyldigPeriode = DatoIntervallEntitet(fom = tjueÅrSiden, tom = null), medlemskap = Medlemskap.EØS, person = this),
+                                    GrStatsborgerskap(landkode = "GUF", gyldigPeriode = DatoIntervallEntitet(fom = null, tom = null), medlemskap = Medlemskap.TREDJELANDSBORGER, person = this),
+                                    GrStatsborgerskap(landkode = "GUF", gyldigPeriode = DatoIntervallEntitet(fom = null, tom = null), medlemskap = Medlemskap.TREDJELANDSBORGER, person = this),
+                                )
+                            arbeidsforhold = mutableListOf(GrArbeidsforhold(arbeidsgiverId = null, periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(10), tom = null), person = this, arbeidsgiverType = ArbeidsgiverType.Person.name))
+                        },
+                    )
+                }
+
+            every { persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id) } returns persongrunnlag
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+
+            // Assert
+            val lovligOppholdResultater =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == aktør }
+                    .vilkårResultater
+                    .find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+            assertThat(lovligOppholdResultater?.periodeFom).isEqualTo(LocalDate.now().minusYears(10))
+            assertThat(lovligOppholdResultater?.periodeTom).isNull()
+            assertThat(lovligOppholdResultater?.resultat).isEqualTo(Resultat.OPPFYLT)
+        }
+
+        @Test
         fun `skal gi riktig begrunnelse for oppfylt lovlig opphold vilkår hvis EØS borger og har arbeidsforhold`() {
             // Arrange
             val behandling = lagBehandling()
