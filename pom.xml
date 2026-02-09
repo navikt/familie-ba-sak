@@ -18,14 +18,14 @@
     <properties>
 
         <java.version>25</java.version>
-        <kotlin.version>2.3.0</kotlin.version>
+        <kotlin.version>2.3.10</kotlin.version>
         <kotlin.compiler.languageVersion>2.3</kotlin.compiler.languageVersion>
         <kotlin.compiler.apiVersion>2.3</kotlin.compiler.apiVersion>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20251205101334_e75fc2d</prosessering.version>
-        <felles.version>4.20260128165036_0708695</felles.version>
+        <felles.version>4.20260205101028_6754677</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20260127152808_4f00dcf</eksterne-kontrakter-bisys.version>
         <familie.kontrakter.saksstatistikk>2.0_20260127152808_4f00dcf</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20260127152808_4f00dcf</familie.kontrakter.stønadsstatistikk>
@@ -42,7 +42,7 @@
         <mock-oauth2-server.version>3.0.1</mock-oauth2-server.version>
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <unleash.version>11.2.1</unleash.version>
+        <unleash.version>12.1.1</unleash.version>
         <testcontainers.postgresql.version>1.21.4</testcontainers.postgresql.version>
         <maven.model.version>3.9.12</maven.model.version>
         <avro.version>1.12.1</avro.version>
@@ -85,7 +85,7 @@
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
-                <version>2.2.41</version>
+                <version>2.2.42</version>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
@@ -184,7 +184,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.8</version>
+            <version>42.7.9</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
