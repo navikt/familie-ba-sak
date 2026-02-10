@@ -210,6 +210,18 @@ class BehandlingTest {
             assertThat(erBehandlingMedVedtaksbrevutsending).isFalse()
         }
 
+        @Test
+        fun `kan ikke sende vedtaksbrev for når årsak er FALKS_IDENTITET`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.FALSK_IDENTITET)
+
+            // Act
+            val erBehandlingMedVedtaksbrevutsending = behandling.erBehandlingMedVedtaksbrevutsending()
+
+            // Assert
+            assertThat(erBehandlingMedVedtaksbrevutsending).isFalse()
+        }
+
         @ParameterizedTest
         @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING"])
         fun `kan ikke sende vedtaksbrev for revurdering med årsak satsendring eller månedlig valutajustering`(
