@@ -88,7 +88,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBorHosSøkerMedDataFraPersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
@@ -569,16 +568,6 @@ class CucumberMock(
             persongrunnlagService = persongrunnlagService,
         )
 
-    val preutfyllBosattIRiketService =
-        PreutfyllBosattIRiketService(
-            pdlRestKlient = systemOnlyPdlRestKlient,
-            søknadService = mockk(),
-            persongrunnlagService = persongrunnlagService,
-            featureToggleService = featureToggleService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            preutfyllBosattIRiketMedLagringIPersonopplysningsgrunnlagService = preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService,
-        )
-
     val preutfyllBorHosSøkerMedDataFraPersongrunnlagService =
         PreutfyllBorHosSøkerMedDataFraPersongrunnlagService(
             persongrunnlagService = persongrunnlagService,
@@ -592,12 +581,11 @@ class CucumberMock(
 
     val preutfyllVilkårService =
         PreutfyllVilkårService(
-            preutfyllLovligOppholdService = mockk(),
-            preutfyllBosattIRiketService = preutfyllBosattIRiketService,
-            featureToggleService = featureToggleService,
-            preutfyllBorHosSøkerService = mockk(),
-            persongrunnlagService = persongrunnlagService,
+            preutfyllLovligOppholdMedPersongrunnlagService = mockk(),
+            preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService = preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService,
             preutfyllBorHosSøkerMedDataFraPersongrunnlagService = preutfyllBorHosSøkerMedDataFraPersongrunnlagService,
+            featureToggleService = featureToggleService,
+            persongrunnlagService = persongrunnlagService,
         )
 
     val vilkårsvurderingForNyBehandlingService =
@@ -611,8 +599,6 @@ class CucumberMock(
             andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             preutfyllVilkårService = preutfyllVilkårService,
             oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService = oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService,
-            preutfyllBosattIRiketService = preutfyllBosattIRiketService,
-            featureToggleService = featureToggleService,
         )
 
     val registrerPersongrunnlag =

@@ -3,14 +3,11 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -20,14 +17,12 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bosteds
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -36,28 +31,8 @@ class PreutfyllLovligOppholdServiceTest {
     @Nested
     inner class GenererLovligOppholdVilkårResultatTest {
         private val pdlRestKlient: SystemOnlyPdlRestKlient = mockk(relaxed = true)
-        private val statsborgerskapService = mockk<StatsborgerskapService>(relaxed = true)
-        private val systemOnlyIntegrasjonKlient: SystemOnlyIntegrasjonKlient = mockk(relaxed = true)
         private val persongrunnlagService: PersongrunnlagService = mockk(relaxed = true)
-        private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
-        private val preutfyllLovligOppholdMedLagringIPersongrunnlagService =
-            PreutfyllLovligOppholdMedLagringIPersongrunnlagService(
-                persongrunnlagService,
-            )
-        private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService =
-            PreutfyllLovligOppholdService(
-                pdlRestKlient,
-                statsborgerskapService,
-                systemOnlyIntegrasjonKlient,
-                persongrunnlagService,
-                preutfyllLovligOppholdMedLagringIPersongrunnlagService,
-                featureToggleService,
-            )
-
-        @BeforeEach
-        fun setup() {
-            every { featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG) } returns true
-        }
+        private val preutfyllLovligOppholdService = PreutfyllLovligOppholdMedLagringIPersongrunnlagService(persongrunnlagService)
 
         @Test
         fun `skal preutfylle oppfylt lovlig opphold vilkår basert på norsk eller nordisk statsborgerskap`() {
