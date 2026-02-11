@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class PreutfyllLovligOppholdMedLagringIPersongrunnlagService(
+class PreutfyllLovligOppholdService(
     private val persongrunnlagService: PersongrunnlagService,
 ) {
     fun preutfyllLovligOpphold(vilkårsvurdering: Vilkårsvurdering) {

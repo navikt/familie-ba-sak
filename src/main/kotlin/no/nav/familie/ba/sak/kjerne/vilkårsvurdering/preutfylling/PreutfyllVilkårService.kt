@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class PreutfyllVilkårService(
-    private val preutfyllLovligOppholdMedPersongrunnlagService: PreutfyllLovligOppholdMedLagringIPersongrunnlagService,
-    private val preutfyllBorHosSøkerMedDataFraPersongrunnlagService: PreutfyllBorHosSøkerMedDataFraPersongrunnlagService,
-    private val preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService: PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService,
+    private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService,
+    private val preutfyllBorHosSøkerService: PreutfyllBorHosSøkerService,
+    private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService,
     private val persongrunnlagService: PersongrunnlagService,
     private val featureToggleService: FeatureToggleService,
 ) {
@@ -25,13 +25,13 @@ class PreutfyllVilkårService(
         }
 
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR)) {
-            preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService.preutfyllBosattIRiket(vilkårsvurdering)
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
         }
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR_LOVLIG_OPPHOLD)) {
-            preutfyllLovligOppholdMedPersongrunnlagService.preutfyllLovligOpphold(vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering)
         }
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_BOR_HOS_SØKER)) {
-            preutfyllBorHosSøkerMedDataFraPersongrunnlagService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
+            preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
         }
     }
 
@@ -39,7 +39,7 @@ class PreutfyllVilkårService(
         vilkårsvurdering: Vilkårsvurdering,
         identerVilkårSkalPreutfyllesFor: List<String>?,
     ) {
-        preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService.preutfyllBosattIRiket(
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(
             vilkårsvurdering = vilkårsvurdering,
             identerVilkårSkalPreutfyllesFor = identerVilkårSkalPreutfyllesFor,
         )

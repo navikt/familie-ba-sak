@@ -32,7 +32,7 @@ class PreutfyllLovligOppholdServiceTest {
     inner class GenererLovligOppholdVilkårResultatTest {
         private val pdlRestKlient: SystemOnlyPdlRestKlient = mockk(relaxed = true)
         private val persongrunnlagService: PersongrunnlagService = mockk(relaxed = true)
-        private val preutfyllLovligOppholdService = PreutfyllLovligOppholdMedLagringIPersongrunnlagService(persongrunnlagService)
+        private val preutfyllLovligOppholdService = PreutfyllLovligOppholdService(persongrunnlagService)
 
         @Test
         fun `skal preutfylle oppfylt lovlig opphold vilkår basert på norsk eller nordisk statsborgerskap`() {

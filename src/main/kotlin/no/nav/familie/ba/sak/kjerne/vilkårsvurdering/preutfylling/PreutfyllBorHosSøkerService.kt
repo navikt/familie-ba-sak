@@ -22,7 +22,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 @Service
-class PreutfyllBorHosSøkerMedDataFraPersongrunnlagService(
+class PreutfyllBorHosSøkerService(
     private val persongrunnlagService: PersongrunnlagService,
 ) {
     fun preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering: Vilkårsvurdering) {

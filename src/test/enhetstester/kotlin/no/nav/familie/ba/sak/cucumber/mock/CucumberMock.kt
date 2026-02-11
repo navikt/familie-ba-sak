@@ -86,8 +86,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.Tilba
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBorHosSøkerMedDataFraPersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBorHosSøkerService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
@@ -562,14 +562,14 @@ class CucumberMock(
             featureToggleService = featureToggleService,
         )
 
-    val preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService =
-        PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
+    val preutfyllBosattIRiketService =
+        PreutfyllBosattIRiketService(
             søknadService = mockk(),
             persongrunnlagService = persongrunnlagService,
         )
 
-    val preutfyllBorHosSøkerMedDataFraPersongrunnlagService =
-        PreutfyllBorHosSøkerMedDataFraPersongrunnlagService(
+    val preutfyllBorHosSøkerService =
+        PreutfyllBorHosSøkerService(
             persongrunnlagService = persongrunnlagService,
         )
 
@@ -581,9 +581,9 @@ class CucumberMock(
 
     val preutfyllVilkårService =
         PreutfyllVilkårService(
-            preutfyllLovligOppholdMedPersongrunnlagService = mockk(),
-            preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService = preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService,
-            preutfyllBorHosSøkerMedDataFraPersongrunnlagService = preutfyllBorHosSøkerMedDataFraPersongrunnlagService,
+            preutfyllLovligOppholdService = mockk(),
+            preutfyllBosattIRiketService = preutfyllBosattIRiketService,
+            preutfyllBorHosSøkerService = preutfyllBorHosSøkerService,
             featureToggleService = featureToggleService,
             persongrunnlagService = persongrunnlagService,
         )

@@ -34,10 +34,9 @@ import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import kotlin.collections.filter
 
 @Service
-class PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
+class PreutfyllBosattIRiketService(
     private val søknadService: SøknadService,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
