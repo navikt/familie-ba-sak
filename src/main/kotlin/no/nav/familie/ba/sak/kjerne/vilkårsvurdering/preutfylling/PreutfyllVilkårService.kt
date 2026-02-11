@@ -10,10 +10,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class PreutfyllVilkårService(
-    private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService,
-    private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService,
-    private val preutfyllBorHosSøkerService: PreutfyllBorHosSøkerService,
+    private val preutfyllLovligOppholdMedPersongrunnlagService: PreutfyllLovligOppholdMedLagringIPersongrunnlagService,
     private val preutfyllBorHosSøkerMedDataFraPersongrunnlagService: PreutfyllBorHosSøkerMedDataFraPersongrunnlagService,
+    private val preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService: PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService,
     private val persongrunnlagService: PersongrunnlagService,
     private val featureToggleService: FeatureToggleService,
 ) {
@@ -26,17 +25,13 @@ class PreutfyllVilkårService(
         }
 
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR)) {
-            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+            preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService.preutfyllBosattIRiket(vilkårsvurdering)
         }
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR_LOVLIG_OPPHOLD)) {
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering)
+            preutfyllLovligOppholdMedPersongrunnlagService.preutfyllLovligOpphold(vilkårsvurdering)
         }
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_BOR_HOS_SØKER)) {
-            if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
-                preutfyllBorHosSøkerMedDataFraPersongrunnlagService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
-            } else {
-                preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
-            }
+            preutfyllBorHosSøkerMedDataFraPersongrunnlagService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
         }
     }
 
@@ -44,7 +39,7 @@ class PreutfyllVilkårService(
         vilkårsvurdering: Vilkårsvurdering,
         identerVilkårSkalPreutfyllesFor: List<String>?,
     ) {
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(
+        preutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService.preutfyllBosattIRiket(
             vilkårsvurdering = vilkårsvurdering,
             identerVilkårSkalPreutfyllesFor = identerVilkårSkalPreutfyllesFor,
         )
