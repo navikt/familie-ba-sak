@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 @Service
 class PreutfyllVilkårService(
     private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService,
-    private val preutfyllBorHosSøkerService: PreutfyllBorHosSøkerService,
+    private val preutfyllBorMedSøkerService: PreutfyllBorMedSøkerService,
     private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService,
     private val persongrunnlagService: PersongrunnlagService,
     private val featureToggleService: FeatureToggleService,
@@ -31,7 +31,7 @@ class PreutfyllVilkårService(
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering)
         }
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_BOR_HOS_SØKER)) {
-            preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
+            preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)
         }
     }
 

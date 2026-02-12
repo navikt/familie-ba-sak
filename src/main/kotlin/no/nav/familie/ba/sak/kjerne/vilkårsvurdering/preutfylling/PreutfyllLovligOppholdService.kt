@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -10,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.lagErNordiskStatsborgerTidslinje
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.LOVLIG_OPPHOLD
@@ -18,7 +18,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_ARBEIDSFORHOLD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_OPPHOLDSTILLATELSE
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
-import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE.MIDLERTIDIG
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE.PERMANENT
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
@@ -34,50 +35,54 @@ class PreutfyllLovligOppholdService(
     private val persongrunnlagService: PersongrunnlagService,
 ) {
     fun preutfyllLovligOpphold(vilkårsvurdering: Vilkårsvurdering) {
-        val personOpplysningsgrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id)
 
         val søkersResultater = vilkårsvurdering.personResultater.first { it.erSøkersResultater() }
-        val søker = personOpplysningsgrunnlag.personer.find { it.aktør == søkersResultater.aktør } ?: throw Feil("Aktør ${søkersResultater.aktør.aktørId} har personresultat men ikke persongrunnlag")
-        val bostedsadresserSøker = Adresser.opprettFra(søker).bostedsadresser
+        val bostedsadresserSøker = Adresser.opprettFra(personopplysningGrunnlag.søker).bostedsadresser
 
-        val fomDatoForBeskjæring = finnFomDatoForBeskjæring(søkersResultater, vilkårsvurdering, bostedsadresserSøker) ?: PRAKTISK_TIDLIGSTE_DAG
-        val erEØSBorgerOgHarArbeidsforholdTidslinjeSøker = lagErEØSBorgerOgHarArbeidsforholdTidslinje(søker.statsborgerskap.toList(), søker.arbeidsforhold.toList(), fomDatoForBeskjæring)
+        val datoForBeskjæringAvFom = finnDatoForBeskjæringAvFom(søkersResultater, vilkårsvurdering, bostedsadresserSøker) ?: PRAKTISK_TIDLIGSTE_DAG
+        val søkerErEøsBorgerOgHarArbeidsforholdTidslinje = lagErEøsBorgerOgHarArbeidsforholdTidslinje(personopplysningGrunnlag.søker, datoForBeskjæringAvFom)
 
-        vilkårsvurdering.personResultater.forEach { personResultat ->
-            val person = personOpplysningsgrunnlag.personer.find { it.aktør == personResultat.aktør } ?: throw Feil("Aktør ${personResultat.aktør.aktørId} har personresultat men ikke persongrunnlag")
+        vilkårsvurdering.personResultater
+            .forEach { personResultat ->
+                val person = personResultat.aktør.tilPerson(personopplysningGrunnlag)
 
-            val lovligOppholdVilkårResultat =
-                genererLovligOppholdVilkårResultat(personResultat, person, erEØSBorgerOgHarArbeidsforholdTidslinjeSøker)
+                val nyeLovligOppholdVilkårResultat =
+                    genererLovligOppholdVilkårResultat(
+                        personResultat = personResultat,
+                        person = person,
+                        søkerErEøsBorgerOgHarArbeidsforholdTidslinje = søkerErEøsBorgerOgHarArbeidsforholdTidslinje,
+                    )
 
-            if (lovligOppholdVilkårResultat.isNotEmpty()) {
-                personResultat.vilkårResultater.removeIf { it.vilkårType == LOVLIG_OPPHOLD }
-                personResultat.vilkårResultater.addAll(lovligOppholdVilkårResultat)
+                if (nyeLovligOppholdVilkårResultat.isNotEmpty()) {
+                    personResultat.vilkårResultater.removeIf { it.vilkårType == LOVLIG_OPPHOLD }
+                    personResultat.vilkårResultater.addAll(nyeLovligOppholdVilkårResultat)
+                }
             }
-        }
     }
 
     private fun genererLovligOppholdVilkårResultat(
         personResultat: PersonResultat,
-        personInfo: Person,
-        erEØSBorgerOgHarArbeidsforholdTidslinje: Tidslinje<Boolean>,
+        person: Person,
+        søkerErEøsBorgerOgHarArbeidsforholdTidslinje: Tidslinje<Boolean>,
     ): Set<VilkårResultat> {
-        val erNordiskStatsborgerTidslinje = lagErNordiskStatsborgerTidslinje(personInfo.statsborgerskap)
+        val bostedsadresserForPerson = Adresser.opprettFra(person).bostedsadresser
 
-        val bostedsadresserForPerson = Adresser.opprettFra(personInfo).bostedsadresser
-        val fomDatoForBeskjæring = finnFomDatoForBeskjæring(personResultat, personResultat.vilkårsvurdering, bostedsadresserForPerson) ?: PRAKTISK_TIDLIGSTE_DAG
+        val erNordiskStatsborgerTidslinje = lagErNordiskStatsborgerTidslinje(person.statsborgerskap)
+        val harOppholdstillatelseTidslinje = lagHarOppholdstillatelseTidslinje(person.opphold)
 
-        val harOppholdstillatelseTidslinje = lagHarOppholdstillatelseTidslinje(personInfo.opphold)
+        val datoForBeskjæringAvFom = finnDatoForBeskjæringAvFom(personResultat, personResultat.vilkårsvurdering, bostedsadresserForPerson) ?: PRAKTISK_TIDLIGSTE_DAG
 
         val harLovligOppholdTidslinje =
             erNordiskStatsborgerTidslinje
-                .kombinerMed(erEØSBorgerOgHarArbeidsforholdTidslinje, harOppholdstillatelseTidslinje) { erNordisk, erEØSBorgerOgArbeidsforhold, harOppholdstillatelse ->
+                .kombinerMed(søkerErEøsBorgerOgHarArbeidsforholdTidslinje, harOppholdstillatelseTidslinje) { erNordisk, erEØSBorgerOgArbeidsforhold, harOppholdstillatelse ->
                     when {
                         erNordisk == true -> OppfyltDelvilkår("- Norsk/nordisk statsborgerskap.")
                         erEØSBorgerOgArbeidsforhold == true -> OppfyltDelvilkår("- EØS-borger og har arbeidsforhold i Norge.", begrunnelseForManuellKontroll = INFORMASJON_OM_ARBEIDSFORHOLD)
                         harOppholdstillatelse == true -> OppfyltDelvilkår("- Har gyldig oppholdstillatelse i Norge.", begrunnelseForManuellKontroll = INFORMASJON_OM_OPPHOLDSTILLATELSE)
                         else -> IkkeOppfyltDelvilkår()
                     }
-                }.beskjærFraOgMed(fomDatoForBeskjæring)
+                }.beskjærFraOgMed(datoForBeskjæringAvFom)
 
         return harLovligOppholdTidslinje
             .tilPerioderIkkeNull()
@@ -97,37 +102,41 @@ class PreutfyllLovligOppholdService(
             }.toSet()
     }
 
-    private fun finnFomDatoForBeskjæring(
+    private fun finnDatoForBeskjæringAvFom(
         personResultat: PersonResultat,
         vilkårsvurdering: Vilkårsvurdering,
         bostedsadresser: List<Adresse>,
     ): LocalDate? {
-        val førsteBostedFomDato =
+        val tidligsteFomDatoPåBostedadresse =
             bostedsadresser
                 .filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
                 .mapNotNull { it.gyldigFraOgMed }
                 .minOrNull()
 
-        val barna = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id).barna
-
-        return førsteBostedFomDato ?: if (personResultat.erSøkersResultater()) {
-            barna.minOfOrNull { it.fødselsdato }
-        } else {
-            barna.find { it.aktør.aktørId == personResultat.aktør.aktørId }?.fødselsdato
+        return tidligsteFomDatoPåBostedadresse ?: run {
+            val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id)
+            if (personResultat.erSøkersResultater()) {
+                personopplysningGrunnlag.eldsteBarnSinFødselsdato
+            } else {
+                personResultat.aktør.tilPerson(personopplysningGrunnlag).fødselsdato
+            }
         }
     }
 
-    private fun lagErEØSBorgerOgHarArbeidsforholdTidslinje(
-        statsborgerskap: List<GrStatsborgerskap>,
-        arbeidsforhold: List<GrArbeidsforhold>,
-        fomDatoForBeskjæring: LocalDate,
-    ): Tidslinje<Boolean> =
-        lagErEØSBorgerTidslinje(statsborgerskap)
-            .kombinerMed(lagHarArbeidsforholdTidslinje(arbeidsforhold, fomDatoForBeskjæring)) { erEØSBorger, harArbeidsforhold ->
-                erEØSBorger == true && harArbeidsforhold == true
-            }
+    private fun lagErEøsBorgerOgHarArbeidsforholdTidslinje(
+        person: Person,
+        datoForBeskjæringAvFom: LocalDate,
+    ): Tidslinje<Boolean> {
+        val erEøsBorgerTidslinje = lagErEøsBorgerTidslinje(person.statsborgerskap)
+        val harArbeidsforholdTidslinje = lagHarArbeidsforholdTidslinje(person.arbeidsforhold)
 
-    private fun lagErEØSBorgerTidslinje(alleStatsborgerskap: List<GrStatsborgerskap>): Tidslinje<Boolean> =
+        return erEøsBorgerTidslinje
+            .kombinerMed(harArbeidsforholdTidslinje) { erEØSBorger, harArbeidsforhold ->
+                erEØSBorger == true && harArbeidsforhold == true
+            }.beskjærFraOgMed(datoForBeskjæringAvFom)
+    }
+
+    private fun lagErEøsBorgerTidslinje(alleStatsborgerskap: List<GrStatsborgerskap>): Tidslinje<Boolean> =
         alleStatsborgerskap
             .map { statsborgerskap ->
                 listOf(
@@ -137,29 +146,24 @@ class PreutfyllLovligOppholdService(
                         tom = statsborgerskap.gyldigPeriode?.tom,
                     ),
                 ).tilTidslinje()
-            }.kombiner { erEøs ->
-                erEøs.any()
-            }
+            }.kombiner { it.any() }
 
     private fun lagHarArbeidsforholdTidslinje(
         arbeidsforhold: List<GrArbeidsforhold>,
-        fomDatoForBeskjæring: LocalDate,
     ): Tidslinje<Boolean> =
         arbeidsforhold
             .mapNotNull { it.periode }
             .map { Periode(verdi = true, fom = it.fom, tom = it.tom) }
-            .filter { it.fom != null && it.fom!! >= fomDatoForBeskjæring }
             .tilTidslinje()
 
     private fun lagHarOppholdstillatelseTidslinje(oppholdstillatelse: List<GrOpphold>): Tidslinje<Boolean> =
         oppholdstillatelse
-            .filter { it.type == OPPHOLDSTILLATELSE.PERMANENT || it.type == OPPHOLDSTILLATELSE.MIDLERTIDIG }
+            .filter { it.type in setOf(PERMANENT, MIDLERTIDIG) }
             .mapIndexed { index, it ->
-                val erSiste = index == oppholdstillatelse.lastIndex
                 Periode(
                     verdi = true,
                     fom = it.gyldigPeriode?.fom,
-                    tom = if (erSiste) null else it.gyldigPeriode?.tom,
+                    tom = it.gyldigPeriode?.tom.takeUnless { index == oppholdstillatelse.lastIndex },
                 )
             }.tilTidslinje()
 }

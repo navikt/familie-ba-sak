@@ -19,11 +19,11 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class PreutfyllBorHosSøkerServiceTest {
+class PreutfyllBorMedSøkerServiceTest {
     private val persongrunnlagService: PersongrunnlagService = mockk(relaxed = true)
 
-    private val preutfyllBorHosSøkerService =
-        PreutfyllBorHosSøkerService(
+    private val preutfyllBorMedSøkerService =
+        PreutfyllBorMedSøkerService(
             persongrunnlagService,
         )
 
@@ -70,7 +70,7 @@ class PreutfyllBorHosSøkerServiceTest {
             )
 
         // Act
-        preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -135,7 +135,7 @@ class PreutfyllBorHosSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagForskjelligAdresseForSøkerOgBarn
 
         // Act
-        preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -192,7 +192,7 @@ class PreutfyllBorHosSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagBarnHarBoddKun2MånederPåSammeAdresseSomSøker
 
         // Act
-        preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -264,7 +264,7 @@ class PreutfyllBorHosSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagSøkerOgBarnFLyttetMellomDiverseAdresser
 
         // Act
-        preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -325,7 +325,7 @@ class PreutfyllBorHosSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagAlleHarSammeAdresse
 
         // Act
-        preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -383,7 +383,7 @@ class PreutfyllBorHosSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagBarnHarBoddKortereEnnSøkerPåSammeAdresse
 
         // Act
-        preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -440,7 +440,7 @@ class PreutfyllBorHosSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagBarnHarBoddLengerEnnSøkerPåSammeAdresse
 
         // Act
-        preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)
 
         // Assert
         val borFastHosSøkerVilkår =
