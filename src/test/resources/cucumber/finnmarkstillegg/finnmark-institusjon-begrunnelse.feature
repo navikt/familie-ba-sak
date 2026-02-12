@@ -15,7 +15,6 @@ Egenskap: Innvilget finnmarkstillegg institusjon
     Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 2       | BARN       | 05.08.2015  |
-      | 1            | 2       | BARN       | 05.08.2015  |
 
   Scenario: Dersom det innvilges Finnmarkstillegg fordi institusjon ligger i Finnmark skal innvilgetFinnmarkstilleggInstitusjon-begrunnelse være gyldig
     Og dagens dato er 23.09.2025
