@@ -39,7 +39,7 @@ import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AutomatiskOppdaterValutakursServiceTest {
-    val dagensDato = LocalDate.of(2020, 9, 15)
+    val dagensDato = LocalDate.of(2025, 9, 15)
     val clockProvider = TestClockProvider()
 
     val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs> = mockPeriodeBarnSkjemaRepository()
