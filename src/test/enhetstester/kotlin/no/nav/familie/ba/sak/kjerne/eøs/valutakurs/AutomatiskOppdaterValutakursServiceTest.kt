@@ -185,18 +185,18 @@ class AutomatiskOppdaterValutakursServiceTest {
             every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2023, 2, 15)
             val tomDatoSisteManuellePostering = LocalDate.of(2023, 4, 30)
             every { simuleringService.oppdaterSimuleringPåBehandlingVedBehov(any()) } returns
-                    listOf(
-                        lagØkonomiSimuleringMottaker(
-                            økonomiSimuleringPostering =
-                                listOf(
-                                    lagØkonomiSimuleringPostering(
-                                        fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT,
-                                        fom = LocalDate.of(2023, 4, 1),
-                                        tom = tomDatoSisteManuellePostering,
-                                    ),
+                listOf(
+                    lagØkonomiSimuleringMottaker(
+                        økonomiSimuleringPostering =
+                            listOf(
+                                lagØkonomiSimuleringPostering(
+                                    fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT,
+                                    fom = LocalDate.of(2023, 4, 1),
+                                    tom = tomDatoSisteManuellePostering,
                                 ),
-                        ),
-                    )
+                            ),
+                    ),
+                )
 
             UtenlandskPeriodebeløpBuilder(jan(2023), behandlingId)
                 .medBeløp("777777777", "EUR", "N", barn1, barn2, barn3)
@@ -305,7 +305,6 @@ class AutomatiskOppdaterValutakursServiceTest {
                 .isEqualTo(forventetOppdaterteValutakurser)
         }
     }
-
 
     @Nested
     inner class ResettValutakurserOgLagValutakurserEtterEndringstidspunkt {

@@ -24,7 +24,7 @@ class UtvidetBehandlingController(
     private val tilgangService: TilgangService,
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    ) {
+) {
     @GetMapping(path = ["/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentUtvidetBehandling(
         @PathVariable behandlingId: Long,

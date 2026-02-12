@@ -299,83 +299,93 @@ internal class SimuleringServiceEnhetTest {
     inner class SimuleringErUtdatert {
         @Test
         fun `simulering er utdatert når tidSimuleringHentet er null`() {
-            val erUtdatert = simuleringService.simuleringErUtdatert(
-                lagForenkletSimulering(
-                    tidSimuleringHentet = null,
-                    forfallsdatoNestePeriode = LocalDate.now(),
+            val erUtdatert =
+                simuleringService.simuleringErUtdatert(
+                    lagForenkletSimulering(
+                        tidSimuleringHentet = null,
+                        forfallsdatoNestePeriode = LocalDate.now(),
+                    ),
                 )
-            )
             assertThat(erUtdatert).isTrue()
         }
 
         @Test
         fun `simulering er utdatert når forfallsdato har passert og simulering ble hentet før forfallsdato`() {
-            val erUtdatert = simuleringService.simuleringErUtdatert(
-                lagForenkletSimulering(
-                    tidSimuleringHentet = LocalDate.now().minusDays(10),
-                    forfallsdatoNestePeriode = LocalDate.now().minusDays(5),
+            val erUtdatert =
+                simuleringService.simuleringErUtdatert(
+                    lagForenkletSimulering(
+                        tidSimuleringHentet = LocalDate.now().minusDays(10),
+                        forfallsdatoNestePeriode = LocalDate.now().minusDays(5),
+                    ),
                 )
-            )
             assertThat(erUtdatert).isTrue()
         }
 
         @Test
         fun `simulering er ikke utdatert når forfallsdatoNestePeriode er null`() {
-            val erUtdatert = simuleringService.simuleringErUtdatert(
-                lagForenkletSimulering(
-                    tidSimuleringHentet = LocalDate.now(),
-                    forfallsdatoNestePeriode = null,
+            val erUtdatert =
+                simuleringService.simuleringErUtdatert(
+                    lagForenkletSimulering(
+                        tidSimuleringHentet = LocalDate.now(),
+                        forfallsdatoNestePeriode = null,
+                    ),
                 )
-            )
             assertThat(erUtdatert).isFalse()
         }
 
         @Test
         fun `simulering er ikke utdatert når tidSimuleringHentet og forfallsdatoNestePeriode er nåværende dato`() {
-            val erUtdatert = simuleringService.simuleringErUtdatert(
-                lagForenkletSimulering(
-                    tidSimuleringHentet = LocalDate.now(),
-                    forfallsdatoNestePeriode = LocalDate.now(),
+            val erUtdatert =
+                simuleringService.simuleringErUtdatert(
+                    lagForenkletSimulering(
+                        tidSimuleringHentet = LocalDate.now(),
+                        forfallsdatoNestePeriode = LocalDate.now(),
+                    ),
                 )
-            )
             assertThat(erUtdatert).isFalse()
         }
 
         @Test
         fun `simulering er ikke utdatert når forfallsdato ikke har passert enda`() {
-            val erUtdatert = simuleringService.simuleringErUtdatert(
-                lagForenkletSimulering(
-                    tidSimuleringHentet = LocalDate.now().minusDays(10),
-                    forfallsdatoNestePeriode = LocalDate.now().plusDays(5),
+            val erUtdatert =
+                simuleringService.simuleringErUtdatert(
+                    lagForenkletSimulering(
+                        tidSimuleringHentet = LocalDate.now().minusDays(10),
+                        forfallsdatoNestePeriode = LocalDate.now().plusDays(5),
+                    ),
                 )
-            )
             assertThat(erUtdatert).isFalse()
         }
 
         @Test
         fun `simulering er ikke utdatert når tidSimuleringHentet er lik forfallsdatoNestePeriode og forfallsdato har passert`() {
-            val erUtdatert = simuleringService.simuleringErUtdatert(
-                lagForenkletSimulering(
-                    tidSimuleringHentet = LocalDate.now().minusDays(5),
-                    forfallsdatoNestePeriode = LocalDate.now().minusDays(5),
+            val erUtdatert =
+                simuleringService.simuleringErUtdatert(
+                    lagForenkletSimulering(
+                        tidSimuleringHentet = LocalDate.now().minusDays(5),
+                        forfallsdatoNestePeriode = LocalDate.now().minusDays(5),
+                    ),
                 )
-            )
             assertThat(erUtdatert).isFalse()
         }
 
         @Test
         fun `simulering er ikke utdatert når simulering ble hentet etter forfallsdato`() {
-            val erUtdatert = simuleringService.simuleringErUtdatert(
-                lagForenkletSimulering(
-                    tidSimuleringHentet = LocalDate.now().minusDays(1),
-                    forfallsdatoNestePeriode = LocalDate.now().minusDays(5),
+            val erUtdatert =
+                simuleringService.simuleringErUtdatert(
+                    lagForenkletSimulering(
+                        tidSimuleringHentet = LocalDate.now().minusDays(1),
+                        forfallsdatoNestePeriode = LocalDate.now().minusDays(5),
+                    ),
                 )
-            )
             assertThat(erUtdatert).isFalse()
         }
     }
 
-    private fun lagForenkletSimulering(tidSimuleringHentet: LocalDate?, forfallsdatoNestePeriode: LocalDate?): Simulering =
+    private fun lagForenkletSimulering(
+        tidSimuleringHentet: LocalDate?,
+        forfallsdatoNestePeriode: LocalDate?,
+    ): Simulering =
         Simulering(
             tidSimuleringHentet = tidSimuleringHentet,
             forfallsdatoNestePeriode = forfallsdatoNestePeriode,

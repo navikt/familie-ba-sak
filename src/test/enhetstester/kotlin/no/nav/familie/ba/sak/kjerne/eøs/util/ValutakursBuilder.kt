@@ -44,7 +44,7 @@ class ValutakursBuilder(
             medTransformasjon { valutakurs ->
                 if (valutakurs.fom != null && valutakurs.valutakursdato == null) {
                     valutakurs.copy(
-                        valutakursdato = valutakurs.fom.minusMonths(1).tilSisteVirkedag()
+                        valutakursdato = valutakurs.fom.minusMonths(1).tilSisteVirkedag(),
                     )
                 } else {
                     valutakurs
