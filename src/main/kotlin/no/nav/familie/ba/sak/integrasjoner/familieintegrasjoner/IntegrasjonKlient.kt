@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.kallEksternTjenesteUtenRespons
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.NyAktivBrukerIModiaContextDto
+import no.nav.familie.ba.sak.integrasjoner.RETRY_BACKOFF_5000MS
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsforholdRequest
@@ -14,12 +15,12 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
+import no.nav.familie.ba.sak.integrasjoner.retryVedException
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.ManuellAdresseInfo
 import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
-import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknad
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.NavIdent
@@ -52,8 +53,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
-import org.springframework.retry.annotation.Backoff
-import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
@@ -67,6 +66,7 @@ class IntegrasjonKlient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
     private val featureToggleService: FeatureToggleService,
+    @Value("$RETRY_BACKOFF_5000MS") private val retryBackoffDelay: Long,
 ) : AbstractRestClient(restOperations, "integrasjon") {
     @Cacheable("alle-eøs-land", cacheManager = "dailyCache")
     fun hentAlleEØSLand(): KodeverkDto {
@@ -98,11 +98,6 @@ class IntegrasjonKlient(
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
     @Cacheable("poststeder", cacheManager = "dailyCache")
     fun hentPoststeder(): KodeverkDto {
         val uri = URI.create("$integrasjonUri/kodeverk/poststed")
@@ -112,15 +107,12 @@ class IntegrasjonKlient(
             uri = uri,
             formål = "Hent postnumre",
         ) {
-            getForEntity(uri)
+            retryVedException(retryBackoffDelay).execute {
+                getForEntity(uri)
+            }
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
     @Cacheable("behandlendeEnhet", cacheManager = "shortCache")
     fun hentBehandlendeEnhet(
         ident: String,
@@ -145,15 +137,12 @@ class IntegrasjonKlient(
             uri = uri,
             formål = "Hent behandlende enhet",
         ) {
-            postForEntity(uri, mapOf("ident" to ident))
+            retryVedException(retryBackoffDelay).execute {
+                postForEntity(uri, mapOf("ident" to ident))
+            }
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
     @Cacheable("saksbehandler", cacheManager = "shortCache")
     fun hentSaksbehandler(id: String): Saksbehandler {
         val uri =
@@ -168,15 +157,12 @@ class IntegrasjonKlient(
             uri = uri,
             formål = "Hent saksbehandler",
         ) {
-            getForEntity(uri)
+            retryVedException(retryBackoffDelay).execute {
+                getForEntity(uri)
+            }
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
     @Cacheable("saksbehandler", cacheManager = "shortCache")
     fun hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent: NavIdent): List<BarnetrygdEnhet> {
         val uri =
@@ -192,7 +178,9 @@ class IntegrasjonKlient(
                 uri = uri,
                 formål = "Henter gruppene til saksbehandler",
             ) {
-                getForEntity(uri)
+                retryVedException(retryBackoffDelay).execute {
+                    getForEntity(uri)
+                }
             }
 
         return saksbehandlerSineGrupper.value.mapNotNull { navn ->
@@ -200,11 +188,6 @@ class IntegrasjonKlient(
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
     fun hentArbeidsforhold(
         ident: String,
         ansettelsesperiodeFom: LocalDate,
@@ -221,7 +204,9 @@ class IntegrasjonKlient(
             uri = uri,
             formål = "Hent arbeidsforhold",
         ) {
-            postForEntity(uri, ArbeidsforholdRequest(ident, ansettelsesperiodeFom))
+            retryVedException(retryBackoffDelay).execute {
+                postForEntity(uri, ArbeidsforholdRequest(ident, ansettelsesperiodeFom))
+            }
         }
     }
 
@@ -427,11 +412,6 @@ class IntegrasjonKlient(
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
     fun hentJournalpost(journalpostId: String): Journalpost {
         val uri = URI.create("$integrasjonUri/journalpost/tilgangsstyrt/baks?journalpostId=$journalpostId")
 
@@ -440,15 +420,12 @@ class IntegrasjonKlient(
             uri = uri,
             formål = "Hent journalpost id $journalpostId",
         ) {
-            getForEntity(uri)
+            retryVedException(retryBackoffDelay).execute {
+                getForEntity(uri)
+            }
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
     fun hentJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
         val uri = URI.create("$integrasjonUri/journalpost")
 
@@ -457,15 +434,12 @@ class IntegrasjonKlient(
             uri = uri,
             formål = "Hent journalposter for bruker",
         ) {
-            postForEntity(uri, journalposterForBrukerRequest)
+            retryVedException(retryBackoffDelay).execute {
+                postForEntity(uri, journalposterForBrukerRequest)
+            }
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
     fun hentTilgangsstyrteJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<TilgangsstyrtJournalpost> {
         val uri = URI.create("$integrasjonUri/journalpost/tilgangsstyrt/baks")
 
@@ -474,7 +448,9 @@ class IntegrasjonKlient(
             uri = uri,
             formål = "Hent tilgangsstyrte journalposter for bruker",
         ) {
-            postForEntity(uri, journalposterForBrukerRequest)
+            retryVedException(retryBackoffDelay).execute {
+                postForEntity(uri, journalposterForBrukerRequest)
+            }
         }
     }
 

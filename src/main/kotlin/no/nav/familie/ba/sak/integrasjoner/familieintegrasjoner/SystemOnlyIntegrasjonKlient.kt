@@ -1,14 +1,13 @@
 package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 
 import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
+import no.nav.familie.ba.sak.integrasjoner.RETRY_BACKOFF_5000MS
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsforholdRequest
-import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
+import no.nav.familie.ba.sak.integrasjoner.retryVedException
 import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.retry.annotation.Backoff
-import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
@@ -19,12 +18,8 @@ import java.time.LocalDate
 class SystemOnlyIntegrasjonKlient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
     @Qualifier("jwtBearerClientCredentials") restOperations: RestOperations,
+    @Value("$RETRY_BACKOFF_5000MS") private val retryBackoffDelay: Long,
 ) : AbstractRestClient(restOperations, "integrasjon") {
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
     fun hentArbeidsforholdMedSystembruker(
         ident: String,
         ansettelsesperiodeFom: LocalDate,
@@ -42,7 +37,9 @@ class SystemOnlyIntegrasjonKlient(
             uri = uri,
             formål = "Hent arbeidsforhold",
         ) {
-            postForEntity(uri, ArbeidsforholdRequest(ident, ansettelsesperiodeFom, ansettelsesperiodeTom))
+            retryVedException(retryBackoffDelay).execute {
+                postForEntity(uri, ArbeidsforholdRequest(ident, ansettelsesperiodeFom, ansettelsesperiodeTom))
+            }
         }
     }
 }

@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.bisys.BisysUtvidetBarnetrygdResponse
 import no.nav.familie.ba.sak.ekstern.pensjon.BarnetrygdTilPensjonRequest
 import no.nav.familie.ba.sak.ekstern.pensjon.BarnetrygdTilPensjonResponse
-import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
+import no.nav.familie.ba.sak.integrasjoner.retryVedException
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
@@ -15,13 +15,13 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.retry.RetryException
 import org.springframework.http.HttpStatus
-import org.springframework.retry.annotation.Backoff
-import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
+import java.time.Duration
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -29,6 +29,7 @@ import java.time.YearMonth
 class InfotrygdBarnetrygdKlient(
     @Value("\${FAMILIE_BA_INFOTRYGD_API_URL}") private val klientUri: URI,
     @Qualifier("jwtBearerMedLangTimeout") restOperations: RestOperations,
+    @Value("$RETRY_BACKOFF_3_MIN") private val retryBackoffDelay: Long,
 ) : AbstractRestClient(restOperations, "infotrygd") {
     fun harLøpendeSakIInfotrygd(
         søkersIdenter: List<String>,
@@ -106,11 +107,6 @@ class InfotrygdBarnetrygdKlient(
         val fraDato: YearMonth,
     )
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
     fun hentUtvidetBarnetrygd(
         personIdent: String,
         fraDato: YearMonth,
@@ -118,10 +114,14 @@ class InfotrygdBarnetrygdKlient(
         val uri = URI.create("$klientUri/infotrygd/barnetrygd/utvidet")
         val body = HentUtvidetBarnetrygdRequest(personIdent, fraDato)
         return try {
-            postForEntity(uri, body)
+            retryVedException(retryBackoffDelay).execute {
+                postForEntity(uri, body)
+            }
         } catch (ex: Exception) {
-            loggFeil(ex, uri)
-            throw RuntimeException("Henting av utvidet barnetrygd feilet. Gav feil: ${ex.message}", ex)
+            val lastException = if (ex is RetryException) ex.lastException else ex
+
+            loggFeil(lastException, uri)
+            throw RuntimeException("Henting av utvidet barnetrygd feilet. Gav feil: ${lastException.message}", lastException)
         }
     }
 
@@ -139,15 +139,12 @@ class InfotrygdBarnetrygdKlient(
         }
     }
 
-    @Retryable(
-        value = [Exception::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_3_MIN),
-    )
     fun hentPersonerMedBarnetrygdTilPensjon(år: Int): List<String> {
         val uri = URI.create("$klientUri/infotrygd/barnetrygd/pensjon?aar=$år")
         return try {
-            getForEntity(uri)
+            retryVedException(Duration.ofMinutes(3).toMillis()).execute {
+                getForEntity(uri)
+            }
         } catch (ex: Exception) {
             loggFeil(ex, uri)
             throw RuntimeException("Henting av personer med barnetrygd feilet. Gav feil: ${ex.message}", ex)
@@ -196,7 +193,7 @@ class InfotrygdBarnetrygdKlient(
     )
 
     private fun loggFeil(
-        ex: Exception,
+        ex: Throwable,
         uri: URI,
     ) {
         when (ex) {

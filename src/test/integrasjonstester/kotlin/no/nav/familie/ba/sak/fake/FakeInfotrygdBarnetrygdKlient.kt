@@ -12,7 +12,7 @@ import java.time.LocalDate
 
 class FakeInfotrygdBarnetrygdKlient(
     restOperations: RestOperations,
-) : InfotrygdBarnetrygdKlient(URI.create("http://fake-infotrygd-barnetrygd"), restOperations) {
+) : InfotrygdBarnetrygdKlient(URI.create("http://fake-infotrygd-barnetrygd"), restOperations, 1) {
     val løpendeSakerIInfotrygd = mutableMapOf<Pair<String, List<String>>, Boolean>()
     val stønaderIInfotrygd = mutableMapOf<Pair<String, List<String>>, InfotrygdSøkResponse<Stønad>>()
     val barnerygdTilPensjon = mutableMapOf<String, BarnetrygdTilPensjonResponse>()

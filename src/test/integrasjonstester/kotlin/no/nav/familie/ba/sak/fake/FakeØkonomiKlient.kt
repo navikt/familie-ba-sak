@@ -18,7 +18,7 @@ import java.time.LocalDate
 
 class FakeØkonomiKlient(
     restOperations: RestOperations,
-) : ØkonomiKlient(familieOppdragUri = "http://familie-oppdrag-fake-uri", restOperations = restOperations) {
+) : ØkonomiKlient(familieOppdragUri = "http://familie-oppdrag-fake-uri", restOperations = restOperations, retryBackoffDelay = 1L) {
     override fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): String = "Utbetalingsoppdrag iverksatt"
 
     override fun hentStatus(oppdragId: OppdragId): OppdragStatus = OppdragStatus.KVITTERT_OK

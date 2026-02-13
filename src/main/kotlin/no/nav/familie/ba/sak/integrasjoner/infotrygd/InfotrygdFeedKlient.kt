@@ -1,27 +1,25 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
+import no.nav.familie.ba.sak.integrasjoner.RETRY_BACKOFF_5000MS
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.StartBehandlingDto
-import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.restklient.client.AbstractRestClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.retry.annotation.Backoff
-import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
-import java.io.IOException
 import java.net.URI
 
 @Component
 class InfotrygdFeedKlient(
     @Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") private val klientUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
+    @Value("$RETRY_BACKOFF_5000MS") private val retryBackoffDelay: Long,
 ) : AbstractRestClient(restOperations, "infotrygd_feed") {
     fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) =
         try {
@@ -62,11 +60,6 @@ class InfotrygdFeedKlient(
         throw e
     }
 
-    @Retryable(
-        value = [IOException::class],
-        maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
-    )
     private fun sendFeedTilInfotrygd(
         endpoint: URI,
         feed: Any,

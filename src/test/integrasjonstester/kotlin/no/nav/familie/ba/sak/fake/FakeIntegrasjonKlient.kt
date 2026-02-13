@@ -60,7 +60,7 @@ import java.util.UUID
 
 class FakeIntegrasjonKlient(
     restOperations: RestOperations,
-) : IntegrasjonKlient(URI("integrasjoner-url"), restOperations, mockk()) {
+) : IntegrasjonKlient(URI("integrasjoner-url"), restOperations, mockk(), 1) {
     private val egenansatt = mutableSetOf<String>()
     private val behandlendeEnhetForIdent = mutableMapOf<String, List<Arbeidsfordelingsenhet>>()
     private val versjonerteBarnetrygdSøknader = mutableMapOf<String, VersjonertBarnetrygdSøknad>()

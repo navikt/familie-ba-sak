@@ -37,6 +37,7 @@ class InfotrygdFeedKlientTest : AbstractSpringIntegrationTest() {
             InfotrygdFeedKlient(
                 URI.create(wireMockServer.baseUrl() + "/api"),
                 restOperations,
+                1L,
             )
     }
 
