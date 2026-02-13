@@ -5,6 +5,8 @@ import org.springframework.core.retry.RetryTemplate
 import java.io.IOException
 import java.time.Duration
 
+const val RETRY_BACKOFF_5000MS = "\${retry.backoff.delay:5000}"
+
 fun retryVedException(delayInMs: Long) =
     RetryTemplate(
         RetryPolicy

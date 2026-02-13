@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.sanity
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
+import no.nav.familie.ba.sak.integrasjoner.RETRY_BACKOFF_5000MS
 import no.nav.familie.ba.sak.integrasjoner.retryVedException
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelseDto
@@ -19,7 +20,7 @@ const val SANITY_BASE_URL = "https://xsrv1mh6.api.sanity.io/v2021-06-07/data/que
 class SanityKlient(
     @Value("\${SANITY_DATASET}") private val datasett: String,
     private val restTemplate: RestTemplate,
-    @Value("\${retry.backoff.delay:5000}") private val retryBackoffDelay: Long,
+    @Value("$RETRY_BACKOFF_5000MS") private val retryBackoffDelay: Long,
 ) {
     fun hentBegrunnelser(): List<SanityBegrunnelse> {
         val sanityUrl = "$SANITY_BASE_URL/$datasett"

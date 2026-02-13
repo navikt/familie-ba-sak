@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.kallEksternTjenesteUtenRespons
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.NyAktivBrukerIModiaContextDto
+import no.nav.familie.ba.sak.integrasjoner.RETRY_BACKOFF_5000MS
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsforholdRequest
@@ -20,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.brev.mottaker.ManuellAdresseInfo
 import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
-import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknad
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.NavIdent
@@ -66,7 +66,7 @@ class IntegrasjonKlient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
     private val featureToggleService: FeatureToggleService,
-    @Value("\${retry.backoff.delay:5000}") private val retryBackoffDelay: Long,
+    @Value("$RETRY_BACKOFF_5000MS") private val retryBackoffDelay: Long,
 ) : AbstractRestClient(restOperations, "integrasjon") {
     @Cacheable("alle-eøs-land", cacheManager = "dailyCache")
     fun hentAlleEØSLand(): KodeverkDto {

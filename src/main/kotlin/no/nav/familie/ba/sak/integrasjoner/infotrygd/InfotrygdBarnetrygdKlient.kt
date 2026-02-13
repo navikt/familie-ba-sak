@@ -28,7 +28,7 @@ import java.time.YearMonth
 class InfotrygdBarnetrygdKlient(
     @Value("\${FAMILIE_BA_INFOTRYGD_API_URL}") private val klientUri: URI,
     @Qualifier("jwtBearerMedLangTimeout") restOperations: RestOperations,
-    @Value("\${retry.backoff.delay:5000}") private val retryBackoffDelay: Long,
+    @Value("$RETRY_BACKOFF_3_MIN") private val retryBackoffDelay: Long,
 ) : AbstractRestClient(restOperations, "infotrygd") {
     fun harLøpendeSakIInfotrygd(
         søkersIdenter: List<String>,

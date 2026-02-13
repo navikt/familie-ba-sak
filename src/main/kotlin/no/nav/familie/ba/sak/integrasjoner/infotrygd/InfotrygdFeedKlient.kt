@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
+import no.nav.familie.ba.sak.integrasjoner.RETRY_BACKOFF_5000MS
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.StartBehandlingDto
-import no.nav.familie.ba.sak.integrasjoner.retryVedException
 import no.nav.familie.ba.sak.integrasjoner.retryVedIOException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.restklient.client.AbstractRestClient
@@ -20,7 +20,7 @@ import java.net.URI
 class InfotrygdFeedKlient(
     @Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") private val klientUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
-    @Value("\${retry.backoff.delay:5000}") private val retryBackoffDelay: Long,
+    @Value("$RETRY_BACKOFF_5000MS") private val retryBackoffDelay: Long,
 ) : AbstractRestClient(restOperations, "infotrygd_feed") {
     fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) =
         try {
