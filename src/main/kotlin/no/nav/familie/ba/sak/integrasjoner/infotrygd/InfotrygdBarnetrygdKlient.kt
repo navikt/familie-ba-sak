@@ -15,6 +15,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.retry.RetryException
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
@@ -117,8 +118,10 @@ class InfotrygdBarnetrygdKlient(
                 postForEntity(uri, body)
             }
         } catch (ex: Exception) {
-            loggFeil(ex, uri)
-            throw RuntimeException("Henting av utvidet barnetrygd feilet. Gav feil: ${ex.message}", ex)
+            val lastException = if (ex is RetryException) ex.lastException else ex
+
+            loggFeil(lastException, uri)
+            throw RuntimeException("Henting av utvidet barnetrygd feilet. Gav feil: ${lastException.message}", lastException)
         }
     }
 
@@ -190,7 +193,7 @@ class InfotrygdBarnetrygdKlient(
     )
 
     private fun loggFeil(
-        ex: Exception,
+        ex: Throwable,
         uri: URI,
     ) {
         when (ex) {
