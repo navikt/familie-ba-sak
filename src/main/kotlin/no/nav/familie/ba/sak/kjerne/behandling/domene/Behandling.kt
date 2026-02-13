@@ -123,6 +123,7 @@ data class Behandling(
             erMigrering() -> false
             erIverksetteKAVedtak() -> false
             erFinnmarksEllerSvalbardtillegg() && resultat in setOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT) -> false
+            erFalskIdentitet() -> false
             else -> true
         }
 

@@ -31,7 +31,7 @@ data class PdlFolkeregistermetadata(
 
 data class PdlFalskIdentitetMetadata(
     val master: String?,
-    val historisk: Boolean,
+    val historisk: Boolean?,
 )
 
 data class PdlEndring(

@@ -33,12 +33,12 @@
         <utbetalingsgenerator.version>1.0_20251127080440_b935966</utbetalingsgenerator.version>
         <cucumber.version>7.34.2</cucumber.version>
         <mockk.version>1.14.9</mockk.version>
-        <token-validation-spring.version>6.0.1</token-validation-spring.version>
+        <token-validation-spring.version>6.0.2</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>3.0.1</springdoc.version>
         <sentry.version>8.31.0</sentry.version>
         <kotlinx.version>1.10.2</kotlinx.version>
-        <kotlinx-kover.version>0.9.5</kotlinx-kover.version>
+        <kotlinx-kover.version>0.9.6</kotlinx-kover.version>
         <mock-oauth2-server.version>3.0.1</mock-oauth2-server.version>
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
