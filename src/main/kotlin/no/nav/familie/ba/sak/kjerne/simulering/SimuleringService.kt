@@ -112,12 +112,12 @@ class SimuleringService(
         }
     }
 
-    private fun simuleringErUtdatert(simulering: Simulering) =
+    fun simuleringErUtdatert(simulering: Simulering) =
         simulering.tidSimuleringHentet == null ||
             (
                 simulering.forfallsdatoNestePeriode != null &&
                     simulering.tidSimuleringHentet < simulering.forfallsdatoNestePeriode &&
-                    LocalDate.now() > simulering.forfallsdatoNestePeriode
+                    simulering.forfallsdatoNestePeriode < LocalDate.now()
             )
 
     @Transactional

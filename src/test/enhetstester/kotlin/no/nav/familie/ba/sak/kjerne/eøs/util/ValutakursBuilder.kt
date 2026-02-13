@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.util
 
+import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.tilSisteVirkedag
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
@@ -10,6 +11,7 @@ import java.time.YearMonth
 class ValutakursBuilder(
     startMåned: YearMonth = jan(2020),
     behandlingId: BehandlingId = BehandlingId(1),
+    private val automatiskSettValutakursdato: Boolean = false,
 ) : SkjemaBuilder<Valutakurs, ValutakursBuilder>(startMåned, behandlingId) {
     fun medKurs(
         k: String,
@@ -35,6 +37,18 @@ class ValutakursBuilder(
 
             else -> {
                 null
+            }
+        }
+    }.apply {
+        if (automatiskSettValutakursdato) {
+            medTransformasjon { valutakurs ->
+                if (valutakurs.fom != null && valutakurs.valutakursdato == null) {
+                    valutakurs.copy(
+                        valutakursdato = valutakurs.fom.minusMonths(1).tilSisteVirkedag(),
+                    )
+                } else {
+                    valutakurs
+                }
             }
         }
     }
