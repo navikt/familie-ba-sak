@@ -60,5 +60,7 @@
     <logger name="org.apache.http.client.protocol.ResponseProcessCookies" level="ERROR"/>
     <logger name="org.apache.wss4j.common.crypto.CryptoBase" level="ERROR"/>
     <logger name="org.flywaydb.core.FlywayExecutor" level="WARN"/>
+    <logger name="org.springframework.aop.framework.CglibAopProxy" level="ERROR"/>
+
 
 </configuration>
