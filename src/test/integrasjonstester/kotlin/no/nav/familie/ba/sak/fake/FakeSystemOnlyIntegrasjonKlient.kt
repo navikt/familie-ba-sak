@@ -13,6 +13,7 @@ class FakeSystemOnlyIntegrasjonKlient :
     SystemOnlyIntegrasjonKlient(
         integrasjonUri = URI("http://dummy-uri"),
         restOperations = RestTemplate(),
+        retryBackoffDelay = 1L,
     ) {
     override fun hentArbeidsforholdMedSystembruker(
         ident: String,

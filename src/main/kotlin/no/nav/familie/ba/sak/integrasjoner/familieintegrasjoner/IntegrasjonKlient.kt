@@ -66,6 +66,7 @@ class IntegrasjonKlient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
     private val featureToggleService: FeatureToggleService,
+    @Value("\${retry.backoff.delay:5000}") private val retryBackoffDelay: Long,
 ) : AbstractRestClient(restOperations, "integrasjon") {
     @Cacheable("alle-eøs-land", cacheManager = "dailyCache")
     fun hentAlleEØSLand(): KodeverkDto {
@@ -106,7 +107,7 @@ class IntegrasjonKlient(
             uri = uri,
             formål = "Hent postnumre",
         ) {
-            retryVedException(5000).execute {
+            retryVedException(retryBackoffDelay).execute {
                 getForEntity(uri)
             }
         }
@@ -136,7 +137,7 @@ class IntegrasjonKlient(
             uri = uri,
             formål = "Hent behandlende enhet",
         ) {
-            retryVedException(5000).execute {
+            retryVedException(retryBackoffDelay).execute {
                 postForEntity(uri, mapOf("ident" to ident))
             }
         }
@@ -156,7 +157,7 @@ class IntegrasjonKlient(
             uri = uri,
             formål = "Hent saksbehandler",
         ) {
-            retryVedException(5000).execute {
+            retryVedException(retryBackoffDelay).execute {
                 getForEntity(uri)
             }
         }
@@ -177,7 +178,7 @@ class IntegrasjonKlient(
                 uri = uri,
                 formål = "Henter gruppene til saksbehandler",
             ) {
-                retryVedException(5000).execute {
+                retryVedException(retryBackoffDelay).execute {
                     getForEntity(uri)
                 }
             }
@@ -203,7 +204,7 @@ class IntegrasjonKlient(
             uri = uri,
             formål = "Hent arbeidsforhold",
         ) {
-            retryVedException(5000).execute {
+            retryVedException(retryBackoffDelay).execute {
                 postForEntity(uri, ArbeidsforholdRequest(ident, ansettelsesperiodeFom))
             }
         }
@@ -419,7 +420,7 @@ class IntegrasjonKlient(
             uri = uri,
             formål = "Hent journalpost id $journalpostId",
         ) {
-            retryVedException(5000).execute {
+            retryVedException(retryBackoffDelay).execute {
                 getForEntity(uri)
             }
         }
@@ -433,7 +434,7 @@ class IntegrasjonKlient(
             uri = uri,
             formål = "Hent journalposter for bruker",
         ) {
-            retryVedException(5000).execute {
+            retryVedException(retryBackoffDelay).execute {
                 postForEntity(uri, journalposterForBrukerRequest)
             }
         }
@@ -447,7 +448,7 @@ class IntegrasjonKlient(
             uri = uri,
             formål = "Hent tilgangsstyrte journalposter for bruker",
         ) {
-            retryVedException(5000).execute {
+            retryVedException(retryBackoffDelay).execute {
                 postForEntity(uri, journalposterForBrukerRequest)
             }
         }

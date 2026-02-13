@@ -40,6 +40,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
                 URI.create(wireMockServer.baseUrl() + "/api"),
                 restOperations,
                 mockk(),
+                1,
             )
     }
 

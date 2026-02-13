@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
-import no.nav.familie.ba.sak.config.RestTemplateConfig.Companion.RETRY_BACKOFF_500MS
 import no.nav.familie.ba.sak.integrasjoner.retryVedException
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.GrensesnittavstemmingRequest
@@ -25,6 +24,7 @@ class ØkonomiKlient(
     @Value("\${FAMILIE_OPPDRAG_API_URL}")
     private val familieOppdragUri: String,
     @Qualifier("jwtBearer") restOperations: RestOperations,
+    @Value("\${retry.backoff.delay:5000}") private val retryBackoffDelay: Long,
 ) : AbstractRestClient(restOperations, "økonomi_barnetrygd") {
     fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): String {
         val uri = URI.create("$familieOppdragUri/oppdrag")
@@ -45,7 +45,7 @@ class ØkonomiKlient(
             uri = uri,
             formål = "Henter simulering på fagsak ${utbetalingsoppdrag.saksnummer} fra Økonomi",
         ) {
-            retryVedException(5000).execute {
+            retryVedException(retryBackoffDelay).execute {
                 postForEntity(uri = uri, utbetalingsoppdrag)
             }
         }

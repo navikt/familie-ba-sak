@@ -17,6 +17,7 @@ import java.time.LocalDate
 class SystemOnlyIntegrasjonKlient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
     @Qualifier("jwtBearerClientCredentials") restOperations: RestOperations,
+    @Value("\${retry.backoff.delay:5000}") private val retryBackoffDelay: Long,
 ) : AbstractRestClient(restOperations, "integrasjon") {
     fun hentArbeidsforholdMedSystembruker(
         ident: String,
@@ -35,7 +36,7 @@ class SystemOnlyIntegrasjonKlient(
             uri = uri,
             formål = "Hent arbeidsforhold",
         ) {
-            retryVedException(5000).execute {
+            retryVedException(retryBackoffDelay).execute {
                 postForEntity(uri, ArbeidsforholdRequest(ident, ansettelsesperiodeFom, ansettelsesperiodeTom))
             }
         }

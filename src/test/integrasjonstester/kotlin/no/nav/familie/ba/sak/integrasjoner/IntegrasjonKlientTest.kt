@@ -101,6 +101,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
                 URI.create(wireMockServer.baseUrl() + "/api"),
                 restOperations,
                 featureToggleService,
+                1L,
             )
         utgåendeJournalføringService =
             UtgåendeJournalføringService(

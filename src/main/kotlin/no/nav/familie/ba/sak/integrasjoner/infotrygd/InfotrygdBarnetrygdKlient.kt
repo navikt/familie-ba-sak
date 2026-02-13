@@ -28,6 +28,7 @@ import java.time.YearMonth
 class InfotrygdBarnetrygdKlient(
     @Value("\${FAMILIE_BA_INFOTRYGD_API_URL}") private val klientUri: URI,
     @Qualifier("jwtBearerMedLangTimeout") restOperations: RestOperations,
+    @Value("\${retry.backoff.delay:5000}") private val retryBackoffDelay: Long,
 ) : AbstractRestClient(restOperations, "infotrygd") {
     fun harLøpendeSakIInfotrygd(
         søkersIdenter: List<String>,
@@ -112,7 +113,7 @@ class InfotrygdBarnetrygdKlient(
         val uri = URI.create("$klientUri/infotrygd/barnetrygd/utvidet")
         val body = HentUtvidetBarnetrygdRequest(personIdent, fraDato)
         return try {
-            retryVedException(5000).execute {
+            retryVedException(retryBackoffDelay).execute {
                 postForEntity(uri, body)
             }
         } catch (ex: Exception) {
