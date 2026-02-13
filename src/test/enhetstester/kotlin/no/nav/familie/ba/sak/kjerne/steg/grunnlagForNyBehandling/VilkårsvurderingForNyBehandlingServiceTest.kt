@@ -34,7 +34,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -54,7 +53,6 @@ class VilkårsvurderingForNyBehandlingServiceTest {
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val preutfyllVilkårService = mockk<PreutfyllVilkårService>()
-    private val preutfyllBosattIRiketService = mockk<PreutfyllBosattIRiketService>()
     private val oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService = mockk<OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService>()
 
     private val vilkårsvurderingForNyBehandlingService =
@@ -68,8 +66,6 @@ class VilkårsvurderingForNyBehandlingServiceTest {
             andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             preutfyllVilkårService = preutfyllVilkårService,
             oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService = oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService,
-            preutfyllBosattIRiketService = preutfyllBosattIRiketService,
-            featureToggleService = featureToggleService,
         )
 
     @BeforeEach()

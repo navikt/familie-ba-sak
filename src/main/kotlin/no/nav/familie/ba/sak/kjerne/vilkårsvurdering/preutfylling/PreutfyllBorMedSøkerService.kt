@@ -1,13 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
-import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.erSammeAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
@@ -19,39 +22,43 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 @Service
-class PreutfyllBorHosSøkerService(
-    private val pdlRestKlient: SystemOnlyPdlRestKlient,
+class PreutfyllBorMedSøkerService(
+    private val persongrunnlagService: PersongrunnlagService,
 ) {
-    fun preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering: Vilkårsvurdering) {
-        val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
-        val bostedsadresser = pdlRestKlient.hentBostedsadresseOgDeltBostedForPersoner(identer)
-
-        val søkersResultater = vilkårsvurdering.personResultater.first { it.erSøkersResultater() }
-        val bostedsadresserSøker = bostedsadresser[søkersResultater.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
+    fun preutfyllBorMedSøker(vilkårsvurdering: Vilkårsvurdering) {
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id)
+        val bostedsadresserSøker = Adresser.opprettFra(personopplysningGrunnlag.søker)
 
         vilkårsvurdering.personResultater
             .filterNot { it.erSøkersResultater() }
             .forEach { personResultat ->
-                val bostedsadresserBarn = bostedsadresser[personResultat.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
-                val borFastHosSøkerVilkårResultat = genererBorHosSøkerVilkårResultat(personResultat, bostedsadresserBarn, bostedsadresserSøker)
+                val person = personResultat.aktør.tilPerson(personopplysningGrunnlag)
+                val adresserForPerson = Adresser.opprettFra(person)
 
-                if (borFastHosSøkerVilkårResultat.isNotEmpty()) {
+                val nyeBorMedSøkerVilkårResultat =
+                    genererBorMedSøkerVilkårResultat(
+                        personResultat = personResultat,
+                        bostedsadresserBarn = adresserForPerson,
+                        bostedsadresserSøker = bostedsadresserSøker,
+                    )
+
+                if (nyeBorMedSøkerVilkårResultat.isNotEmpty()) {
                     personResultat.vilkårResultater.removeIf { it.vilkårType == BOR_MED_SØKER }
-                    personResultat.vilkårResultater.addAll(borFastHosSøkerVilkårResultat)
+                    personResultat.vilkårResultater.addAll(nyeBorMedSøkerVilkårResultat)
                 }
             }
     }
 
-    private fun genererBorHosSøkerVilkårResultat(
+    private fun genererBorMedSøkerVilkårResultat(
         personResultat: PersonResultat,
-        bostedsadresserBarn: List<Bostedsadresse>,
-        bostedsadresserSøker: List<Bostedsadresse>,
+        bostedsadresserBarn: Adresser,
+        bostedsadresserSøker: Adresser,
     ): Set<VilkårResultat> {
         val harSammeBostedsadresseTidslinje =
-            lagBorHosSøkerTidslinje(
-                bostedsadresserBarn = bostedsadresserBarn,
-                bostedsadresserSøker = bostedsadresserSøker,
-                fødselsdatoForBeskjæring = hentInnflytningsdatoForBeskjæring(bostedsadresserBarn, bostedsadresserSøker),
+            lagBorMedSøkerTidslinje(
+                bostedsadresserBarn = bostedsadresserBarn.bostedsadresser,
+                bostedsadresserSøker = bostedsadresserSøker.bostedsadresser,
+                datoForBeskjæringAvFom = finnDatoForBeskjæringAvFom(bostedsadresserBarn.bostedsadresser, bostedsadresserSøker.bostedsadresser),
             )
 
         return harSammeBostedsadresseTidslinje
@@ -71,30 +78,30 @@ class PreutfyllBorHosSøkerService(
             }.toSet()
     }
 
-    private fun hentInnflytningsdatoForBeskjæring(
-        bostedsadresserBarn: List<Bostedsadresse>,
-        bostedsadresserSøker: List<Bostedsadresse>,
+    private fun finnDatoForBeskjæringAvFom(
+        bostedsadresserBarn: List<Adresse>,
+        bostedsadresserSøker: List<Adresse>,
     ): LocalDate {
-        val innflytningsdatoForBeskjæringBarn =
+        val tidligsteFomDatoPåBostedadresseBarn =
             bostedsadresserBarn
                 .mapNotNull { it.gyldigFraOgMed }
                 .minOrNull() ?: PRAKTISK_TIDLIGSTE_DAG
 
-        val innflytningsdatoForBeskjæringSøker =
+        val tidligsteFomDatoPåBostedadresseSøker =
             bostedsadresserSøker
                 .mapNotNull { it.gyldigFraOgMed }
                 .minOrNull() ?: PRAKTISK_TIDLIGSTE_DAG
 
-        return maxOf(innflytningsdatoForBeskjæringBarn, innflytningsdatoForBeskjæringSøker)
+        return maxOf(tidligsteFomDatoPåBostedadresseBarn, tidligsteFomDatoPåBostedadresseSøker)
     }
 
-    private fun lagBorHosSøkerTidslinje(
-        bostedsadresserBarn: List<Bostedsadresse>,
-        bostedsadresserSøker: List<Bostedsadresse>,
-        fødselsdatoForBeskjæring: LocalDate,
+    private fun lagBorMedSøkerTidslinje(
+        bostedsadresserBarn: List<Adresse>,
+        bostedsadresserSøker: List<Adresse>,
+        datoForBeskjæringAvFom: LocalDate,
     ): Tidslinje<Delvilkår> {
-        val bostedsadresserBarnTidslinje = lagBostedsadresseTidslinje(bostedsadresserBarn, fødselsdatoForBeskjæring)
-        val bostedsadresserSøkerTidslinje = lagBostedsadresseTidslinje(bostedsadresserSøker, fødselsdatoForBeskjæring)
+        val bostedsadresserBarnTidslinje = lagBostedsadresseTidslinje(bostedsadresserBarn, datoForBeskjæringAvFom)
+        val bostedsadresserSøkerTidslinje = lagBostedsadresseTidslinje(bostedsadresserSøker, datoForBeskjæringAvFom)
 
         return bostedsadresserBarnTidslinje.kombinerMed(bostedsadresserSøkerTidslinje) { barnAdresse, søkerAdresse ->
             if (barnAdresse != null && harVærtSammeAdresseMinst3Mnd(barnAdresse, søkerAdresse)) {
@@ -106,9 +113,9 @@ class PreutfyllBorHosSøkerService(
     }
 
     private fun lagBostedsadresseTidslinje(
-        bostedsadresser: List<Bostedsadresse>,
-        fødselsdatoForBeskjæring: LocalDate,
-    ): Tidslinje<Bostedsadresse> =
+        bostedsadresser: List<Adresse>,
+        datoForBeskjæringAvFom: LocalDate,
+    ): Tidslinje<Adresse> =
         bostedsadresser
             .sortedBy { it.gyldigFraOgMed }
             .windowed(size = 2, step = 1, partialWindows = true) {
@@ -121,20 +128,14 @@ class PreutfyllBorHosSøkerService(
                     tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
                 )
             }.tilTidslinje()
-            .beskjærFraOgMed(fødselsdatoForBeskjæring)
+            .beskjærFraOgMed(datoForBeskjæringAvFom)
 
     private fun harVærtSammeAdresseMinst3Mnd(
-        barnAdresse: Bostedsadresse,
-        søkerAdresse: Bostedsadresse?,
+        barnAdresse: Adresse,
+        søkerAdresse: Adresse?,
     ): Boolean =
         søkerAdresse
             ?.takeIf { barnAdresse.erSammeAdresse(it) }
             ?.let { ChronoUnit.MONTHS.between(barnAdresse.gyldigFraOgMed, barnAdresse.gyldigTilOgMed ?: LocalDate.now()) >= 3 }
             ?: false
-
-    private fun Bostedsadresse.erSammeAdresse(søkersAdresse: Bostedsadresse?): Boolean =
-        søkersAdresse != null && (
-            (this.vegadresse != null && this.vegadresse == søkersAdresse.vegadresse) ||
-                (this.matrikkeladresse != null && this.matrikkeladresse == søkersAdresse.matrikkeladresse)
-        )
 }
