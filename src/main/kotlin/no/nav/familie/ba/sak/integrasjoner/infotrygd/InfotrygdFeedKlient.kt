@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.integrasjoner.RETRY_BACKOFF_5000MS
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.StartBehandlingDto
-import no.nav.familie.ba.sak.integrasjoner.retryVedIOException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.restklient.client.AbstractRestClient
 import org.slf4j.Logger
@@ -65,9 +64,7 @@ class InfotrygdFeedKlient(
         endpoint: URI,
         feed: Any,
     ) {
-        retryVedIOException(retryBackoffDelay).execute {
-            postForEntity<Ressurs<String>>(endpoint, feed)
-        }
+        postForEntity<Ressurs<String>>(endpoint, feed)
     }
 
     companion object {
