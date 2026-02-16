@@ -57,6 +57,7 @@ class PreutfyllBorMedSøkerService(
         val harSammeBostedsadresseTidslinje =
             lagBorMedSøkerTidslinje(
                 bostedsadresserBarn = bostedsadresserBarn.bostedsadresser,
+                deltBostedsadresserBarn = bostedsadresserBarn.delteBosteder,
                 bostedsadresserSøker = bostedsadresserSøker.bostedsadresser,
                 datoForBeskjæringAvFom = finnDatoForBeskjæringAvFom(bostedsadresserBarn.bostedsadresser, bostedsadresserSøker.bostedsadresser),
             )
@@ -97,17 +98,27 @@ class PreutfyllBorMedSøkerService(
 
     private fun lagBorMedSøkerTidslinje(
         bostedsadresserBarn: List<Adresse>,
+        deltBostedsadresserBarn: List<Adresse>,
         bostedsadresserSøker: List<Adresse>,
         datoForBeskjæringAvFom: LocalDate,
     ): Tidslinje<Delvilkår> {
         val bostedsadresserBarnTidslinje = lagBostedsadresseTidslinje(bostedsadresserBarn, datoForBeskjæringAvFom)
+        val deltBostedsadresserBarnTidslinje = lagBostedsadresseTidslinje(deltBostedsadresserBarn, datoForBeskjæringAvFom)
         val bostedsadresserSøkerTidslinje = lagBostedsadresseTidslinje(bostedsadresserSøker, datoForBeskjæringAvFom)
 
-        return bostedsadresserBarnTidslinje.kombinerMed(bostedsadresserSøkerTidslinje) { barnAdresse, søkerAdresse ->
-            if (barnAdresse != null && harVærtSammeAdresseMinst3Mnd(barnAdresse, søkerAdresse)) {
-                OppfyltDelvilkår(begrunnelse = "- Har samme bostedsadresse som søker.")
-            } else {
-                IkkeOppfyltDelvilkår()
+        return bostedsadresserBarnTidslinje.kombinerMed(deltBostedsadresserBarnTidslinje, bostedsadresserSøkerTidslinje) { barnAdresse, barnDeltBostedAdresse, søkerAdresse ->
+            when {
+                barnAdresse != null && harVærtSammeAdresseMinst3Mnd(barnAdresse, søkerAdresse) -> {
+                    OppfyltDelvilkår(begrunnelse = "- Har samme bostedsadresse som søker.")
+                }
+
+                barnDeltBostedAdresse != null && barnDeltBostedAdresse.erSammeAdresse(søkerAdresse) -> {
+                    IkkeVurdertDelvilkår()
+                }
+
+                else -> {
+                    IkkeOppfyltDelvilkår()
+                }
             }
         }
     }
