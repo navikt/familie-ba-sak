@@ -18,6 +18,7 @@ jobs:
     name: Deploy with existing image
     if: inputs.image != ''
     permissions:
+      contents: read
       id-token: write
     uses: navikt/familie-baks-gha-workflows/.github/workflows/deploy-with-tag.yaml@main # ratchet:exclude
     with:
