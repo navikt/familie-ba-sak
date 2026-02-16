@@ -6,6 +6,8 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagSystemÅrsak
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -271,6 +273,52 @@ class ArbeidsfordelingServiceTest {
             every { personopplysningerService.hentPdlPersonInfoEnkel(barn.aktør) } returns PdlPersonInfo.Person(lagPersonInfo(adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG))
             every { personopplysningerService.hentPdlPersonInfoEnkel(søker.aktør) } returns PdlPersonInfo.FalskPerson(FalskIdentitetPersonInfo())
             every { integrasjonKlient.hentBehandlendeEnhet(barn.aktør.aktivFødselsnummer(), Behandlingstype.NASJONAL) } returns
+                listOf(
+                    Arbeidsfordelingsenhet(
+                        enhetId = BarnetrygdEnhet.DRAMMEN.enhetsnummer,
+                        enhetNavn = BarnetrygdEnhet.DRAMMEN.enhetsnavn,
+                    ),
+                )
+
+            every { tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(any(), any()) } returns
+                Arbeidsfordelingsenhet(
+                    enhetId = BarnetrygdEnhet.DRAMMEN.enhetsnummer,
+                    enhetNavn = BarnetrygdEnhet.DRAMMEN.enhetsnavn,
+                )
+
+            val arbeidsfordelingPåBehandlingSlot = slot<ArbeidsfordelingPåBehandling>()
+            every { arbeidsfordelingPåBehandlingRepository.save(capture(arbeidsfordelingPåBehandlingSlot)) } answers { firstArg() }
+
+            // Act
+            arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, forrigeBehandling)
+
+            // Assert
+            val arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandlingSlot.captured
+            assertThat(arbeidsfordelingPåBehandling.behandlendeEnhetId).isEqualTo(BarnetrygdEnhet.DRAMMEN.enhetsnummer)
+            assertThat(arbeidsfordelingPåBehandling.behandlendeEnhetNavn).isEqualTo(BarnetrygdEnhet.DRAMMEN.enhetsnavn)
+        }
+
+        @Test
+        fun `fastsettBehandlendeEnhet skal ignorere personer som feiler med PdlPersonKanIkkeBehandlesIFagsystem`() {
+            // Arrange
+            val søker = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val fagsak = lagFagsak(aktør = søker.aktør)
+            val forrigeBehandling = lagBehandling(fagsak = fagsak)
+            val behandling = lagBehandling(fagsak = fagsak, behandlingType = BehandlingType.REVURDERING)
+
+            every {
+                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any())
+            } returns null
+
+            every {
+                personopplysningGrunnlagRepository
+                    .finnSøkerOgBarnAktørerTilAktiv(behandling.id)
+            } returns listOf(lagPersonEnkel(PersonType.SØKER, søker.aktør), lagPersonEnkel(PersonType.BARN, barn.aktør))
+
+            every { personopplysningerService.hentPdlPersonInfoEnkel(barn.aktør) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.OPPHØRT)
+            every { personopplysningerService.hentPdlPersonInfoEnkel(søker.aktør) } returns PdlPersonInfo.Person(lagPersonInfo())
+            every { integrasjonKlient.hentBehandlendeEnhet(søker.aktør.aktivFødselsnummer(), Behandlingstype.NASJONAL) } returns
                 listOf(
                     Arbeidsfordelingsenhet(
                         enhetId = BarnetrygdEnhet.DRAMMEN.enhetsnummer,
