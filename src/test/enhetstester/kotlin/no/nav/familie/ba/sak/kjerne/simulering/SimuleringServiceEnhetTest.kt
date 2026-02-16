@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.simulering.domene.Simulering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottakerRepository
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPostering
@@ -27,13 +28,14 @@ import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
 import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
-import org.hamcrest.MatcherAssert.assertThat
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.LocalDate
-import org.hamcrest.CoreMatchers.`is` as Is
 
 internal class SimuleringServiceEnhetTest {
     private val økonomiKlient: ØkonomiKlient = mockk()
@@ -96,7 +98,7 @@ internal class SimuleringServiceEnhetTest {
         val behandlingHarAvvikInnenforBeløpsgrenser =
             simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
 
-        assertThat(behandlingHarAvvikInnenforBeløpsgrenser, Is(true))
+        assertThat(behandlingHarAvvikInnenforBeløpsgrenser).isTrue
     }
 
     @ParameterizedTest
@@ -147,7 +149,7 @@ internal class SimuleringServiceEnhetTest {
         val behandlingHarAvvikInnenforBeløpsgrenser =
             simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
 
-        assertThat(behandlingHarAvvikInnenforBeløpsgrenser, Is(true))
+        assertThat(behandlingHarAvvikInnenforBeløpsgrenser).isTrue
     }
 
     @ParameterizedTest
@@ -183,7 +185,7 @@ internal class SimuleringServiceEnhetTest {
         val behandlingHarAvvikInnenforBeløpsgrenser =
             simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
 
-        assertThat(behandlingHarAvvikInnenforBeløpsgrenser, Is(false))
+        assertThat(behandlingHarAvvikInnenforBeløpsgrenser).isFalse
     }
 
     @ParameterizedTest
@@ -237,7 +239,7 @@ internal class SimuleringServiceEnhetTest {
         val behandlingHarManuellePosteringerFørMars2023 =
             simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
 
-        assertThat(behandlingHarManuellePosteringerFørMars2023, Is(true))
+        assertThat(behandlingHarManuellePosteringerFørMars2023).isTrue
     }
 
     @ParameterizedTest
@@ -271,7 +273,7 @@ internal class SimuleringServiceEnhetTest {
         val behandlingHarManuellePosteringerFørMars2023 =
             simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
 
-        assertThat(behandlingHarManuellePosteringerFørMars2023, Is(false))
+        assertThat(behandlingHarManuellePosteringerFørMars2023).isFalse
     }
 
     @ParameterizedTest
@@ -292,6 +294,109 @@ internal class SimuleringServiceEnhetTest {
 
         assertThrows<Feil> { simuleringService.harMigreringsbehandlingManuellePosteringer(behandling) }
     }
+
+    @Nested
+    inner class SimuleringErUtdatert {
+        @Test
+        fun `simulering er utdatert når tidSimuleringHentet er null`() {
+            val erUtdatert =
+                simuleringService.simuleringErUtdatert(
+                    lagForenkletSimulering(
+                        tidSimuleringHentet = null,
+                        forfallsdatoNestePeriode = LocalDate.now(),
+                    ),
+                )
+            assertThat(erUtdatert).isTrue()
+        }
+
+        @Test
+        fun `simulering er utdatert når forfallsdato har passert og simulering ble hentet før forfallsdato`() {
+            val erUtdatert =
+                simuleringService.simuleringErUtdatert(
+                    lagForenkletSimulering(
+                        tidSimuleringHentet = LocalDate.now().minusDays(10),
+                        forfallsdatoNestePeriode = LocalDate.now().minusDays(5),
+                    ),
+                )
+            assertThat(erUtdatert).isTrue()
+        }
+
+        @Test
+        fun `simulering er ikke utdatert når forfallsdatoNestePeriode er null`() {
+            val erUtdatert =
+                simuleringService.simuleringErUtdatert(
+                    lagForenkletSimulering(
+                        tidSimuleringHentet = LocalDate.now(),
+                        forfallsdatoNestePeriode = null,
+                    ),
+                )
+            assertThat(erUtdatert).isFalse()
+        }
+
+        @Test
+        fun `simulering er ikke utdatert når tidSimuleringHentet og forfallsdatoNestePeriode er nåværende dato`() {
+            val erUtdatert =
+                simuleringService.simuleringErUtdatert(
+                    lagForenkletSimulering(
+                        tidSimuleringHentet = LocalDate.now(),
+                        forfallsdatoNestePeriode = LocalDate.now(),
+                    ),
+                )
+            assertThat(erUtdatert).isFalse()
+        }
+
+        @Test
+        fun `simulering er ikke utdatert når forfallsdato ikke har passert enda`() {
+            val erUtdatert =
+                simuleringService.simuleringErUtdatert(
+                    lagForenkletSimulering(
+                        tidSimuleringHentet = LocalDate.now().minusDays(10),
+                        forfallsdatoNestePeriode = LocalDate.now().plusDays(5),
+                    ),
+                )
+            assertThat(erUtdatert).isFalse()
+        }
+
+        @Test
+        fun `simulering er ikke utdatert når tidSimuleringHentet er lik forfallsdatoNestePeriode og forfallsdato har passert`() {
+            val erUtdatert =
+                simuleringService.simuleringErUtdatert(
+                    lagForenkletSimulering(
+                        tidSimuleringHentet = LocalDate.now().minusDays(5),
+                        forfallsdatoNestePeriode = LocalDate.now().minusDays(5),
+                    ),
+                )
+            assertThat(erUtdatert).isFalse()
+        }
+
+        @Test
+        fun `simulering er ikke utdatert når simulering ble hentet etter forfallsdato`() {
+            val erUtdatert =
+                simuleringService.simuleringErUtdatert(
+                    lagForenkletSimulering(
+                        tidSimuleringHentet = LocalDate.now().minusDays(1),
+                        forfallsdatoNestePeriode = LocalDate.now().minusDays(5),
+                    ),
+                )
+            assertThat(erUtdatert).isFalse()
+        }
+    }
+
+    private fun lagForenkletSimulering(
+        tidSimuleringHentet: LocalDate?,
+        forfallsdatoNestePeriode: LocalDate?,
+    ): Simulering =
+        Simulering(
+            tidSimuleringHentet = tidSimuleringHentet,
+            forfallsdatoNestePeriode = forfallsdatoNestePeriode,
+            perioder = listOf(),
+            fomDatoNestePeriode = null,
+            etterbetaling = 0.toBigDecimal(),
+            feilutbetaling = 0.toBigDecimal(),
+            fom = null,
+            tomDatoNestePeriode = null,
+            tomSisteUtbetaling = null,
+        )
 
     private fun mockØkonomiSimuleringMottaker(
         id: Long = 0,

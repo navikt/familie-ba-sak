@@ -255,6 +255,19 @@ class AutomatiskOppdaterValutakursService(
         oppdaterValutakurserEtterEndringstidspunkt(behandling)
         simuleringService.oppdaterSimuleringPåBehandling(behandling)
     }
+
+    @Transactional
+    fun oppdaterValutakurserOgSimulerVedBehov(behandlingId: Long) {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+
+        val valutakurser = valutakursService.hentValutakurser(BehandlingId(behandlingId))
+        val inneværendeMåned = YearMonth.now(clockProvider.get())
+
+        if (valutakurser.måValutakurserOppdateresForMåned(inneværendeMåned)) {
+            oppdaterValutakurserEtterEndringstidspunkt(behandling)
+            simuleringService.oppdaterSimuleringPåBehandling(behandling)
+        }
+    }
 }
 
 private fun List<ØkonomiSimuleringMottaker>.finnDatoSisteManuellePostering() = this.flatMap { it.økonomiSimuleringPostering }.filter { it.erManuellPostering }.maxOfOrNull { it.tom }
