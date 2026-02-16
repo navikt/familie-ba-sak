@@ -75,6 +75,7 @@ jobs:
   deploy-with-new-image:
     name: Deploy with new image
     permissions:
+      contents: read
       id-token: write
     needs: [build, enhetstest, integrasjonstest, verdikjedetest-feature-toggle-av, verdikjedetest-feature-toggle-paa]
     if: |
