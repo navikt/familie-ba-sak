@@ -42,7 +42,7 @@ class PreutfyllBosattIRiketServiceTest {
     private val persongrunnlagService: PersongrunnlagService = mockk(relaxed = true)
 
     private val preutfyllBosattIRiketService =
-        PreutfyllBosattIRiketMedLagringIPersonopplyningsgrunnlagService(
+        PreutfyllBosattIRiketService(
             søknadService = søknadService,
             persongrunnlagService = persongrunnlagService,
         )

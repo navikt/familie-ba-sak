@@ -314,8 +314,6 @@ class OpprettTaskService(
     }
 
     companion object {
-        const val RETRY_BACKOFF_5000MS = "\${retry.backoff.delay:5000}"
-
         fun <T> overstyrTaskMedNyCallId(
             callId: String,
             body: () -> T,

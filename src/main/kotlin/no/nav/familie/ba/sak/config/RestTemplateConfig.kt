@@ -98,10 +98,6 @@ class RestTemplateConfig {
             .connectTimeout(Duration.ofSeconds(5))
             .readTimeout(Duration.ofSeconds(5))
             .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
-
-    companion object {
-        const val RETRY_BACKOFF_500MS = "\${retry.backoff.delay:500}"
-    }
 }
 
 val restTemplate =

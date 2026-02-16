@@ -6,17 +6,16 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
-import org.junit.Test
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 class PersonDtoTest {
     @Test
-    fun `historiskeIdenter skal kun inkludere identer med gjelderTil lik eller etter eldste barn sin fødselsdato`() {
+    fun `historiskeIdenter skal kun inkludere inaktive identer med gjelderTil lik eller etter eldste barn sin fødselsdato`() {
         // Arrange
-        val aktør = Aktør(aktørId = "123")
+        val aktør = Aktør(aktørId = "1234567891011")
         val eldsteBarnFødselsdato = LocalDate.of(2020, 1, 1)
 
         val personopplysningGrunnlag =
@@ -46,9 +45,7 @@ class PersonDtoTest {
 
         // Assert
         val historiskeIdenter = restPerson.registerhistorikk?.historiskeIdenter
-        assertEquals(2, historiskeIdenter?.size)
-
-        val fødselsnummer = historiskeIdenter?.map { it.verdi }
-        assertTrue(fødselsnummer?.containsAll(listOf("22222222222", "33333333333")) == true)
+        assertThat(historiskeIdenter).hasSize(1)
+        assertThat(historiskeIdenter!!.single().verdi).isEqualTo("22222222222")
     }
 }
