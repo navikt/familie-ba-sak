@@ -30,6 +30,7 @@ class SystemOnlyIntegrasjonKlient(
         ansettelsesperiodeFom: LocalDate,
         ansettelsesperiodeTom: LocalDate? = null,
     ): List<Arbeidsforhold> {
+        secureLogger.info("Henter arbeidsforhold for ${ident.take(5)} i periode: $ansettelsesperiodeFom - $ansettelsesperiodeTom")
         val uri =
             UriComponentsBuilder
                 .fromUri(integrasjonUri)
