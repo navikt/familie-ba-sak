@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
@@ -226,15 +227,23 @@ class ArbeidsfordelingService(
     fun hentArbeidsfordelingsenhet(behandling: Behandling): Arbeidsfordelingsenhet {
         val søkerIdent = behandling.fagsak.aktør.aktivFødselsnummer()
 
-        val arbeidsfordelingPersoner: Map<String, ArbeidsfordelingPerson> =
-            personopplysningGrunnlagRepository
-                .finnSøkerOgBarnAktørerTilAktiv(behandling.id)
-                .barn()
-                .associate {
-                    it.aktør.aktivFødselsnummer() to utledArbeidsfordelingPerson(it.aktør, PersonType.BARN)
-                }.plus(
-                    søkerIdent to utledArbeidsfordelingPerson(behandling.fagsak.aktør, PersonType.SØKER),
-                )
+        val arbeidsfordelingPersoner =
+            buildMap {
+                utledArbeidsfordelingPerson(
+                    aktør = behandling.fagsak.aktør,
+                    personType = PersonType.SØKER,
+                )?.let { arbeidsfordelingPerson -> put(søkerIdent, arbeidsfordelingPerson) }
+
+                personopplysningGrunnlagRepository
+                    .finnSøkerOgBarnAktørerTilAktiv(behandling.id)
+                    .barn()
+                    .forEach { person ->
+                        utledArbeidsfordelingPerson(
+                            aktør = person.aktør,
+                            personType = PersonType.BARN,
+                        )?.let { arbeidsfordelingPerson -> put(person.aktør.aktivFødselsnummer(), arbeidsfordelingPerson) }
+                    }
+            }
 
         return hentArbeidsfordelingForPersoner(
             fagsak = behandling.fagsak,
@@ -246,8 +255,14 @@ class ArbeidsfordelingService(
     private fun utledArbeidsfordelingPerson(
         aktør: Aktør,
         personType: PersonType,
-    ): ArbeidsfordelingPerson {
-        val pdlPersonInfo = personopplysningerService.hentPdlPersonInfoEnkel(aktør)
+    ): ArbeidsfordelingPerson? {
+        val pdlPersonInfo =
+            try {
+                personopplysningerService.hentPdlPersonInfoEnkel(aktør)
+            } catch (e: PdlPersonKanIkkeBehandlesIFagsystem) {
+                // Ignorerer personer som ikke kan behandles i fagsystemet, da disse ikke skal påvirke arbeidsfordelingen
+                return null
+            }
         return ArbeidsfordelingPerson(
             pdlPersonInfo,
             IdentMedAdressebeskyttelse(
@@ -269,20 +284,19 @@ class ArbeidsfordelingService(
         val søkerIdent = fagsak.aktør.aktivFødselsnummer()
 
         val arbeidsfordelingPersoner: Map<String, ArbeidsfordelingPerson> =
-            mapOf(
-                søkerIdent to
+            buildMap {
+                utledArbeidsfordelingPerson(
+                    aktør = personidentService.hentAktør(søkerIdent),
+                    personType = PersonType.SØKER,
+                )?.let { arbeidsfordelingPerson -> put(søkerIdent, arbeidsfordelingPerson) }
+
+                barnIdenter.forEach { barnIdent ->
                     utledArbeidsfordelingPerson(
-                        aktør = personidentService.hentAktør(søkerIdent),
-                        personType = PersonType.SØKER,
-                    ),
-            ).plus(
-                barnIdenter.associateWith {
-                    utledArbeidsfordelingPerson(
-                        aktør = personidentService.hentAktør(it),
+                        aktør = personidentService.hentAktør(barnIdent),
                         personType = PersonType.BARN,
-                    )
-                },
-            )
+                    )?.let { arbeidsfordelingPerson -> put(barnIdent, arbeidsfordelingPerson) }
+                }
+            }
 
         return hentArbeidsfordelingForPersoner(
             fagsak = fagsak,
