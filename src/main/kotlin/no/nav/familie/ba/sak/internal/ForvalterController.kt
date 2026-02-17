@@ -22,11 +22,13 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
@@ -93,6 +95,7 @@ class ForvalterController(
     private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val behandlingService: BehandlingService,
     private val stønadsstatistikkService: StønadsstatistikkService,
     private val persongrunnlagService: PersongrunnlagService,
     private val hentAlleIdenterTilPsysTask: HentAlleIdenterTilPsysTask,
@@ -643,7 +646,7 @@ class ForvalterController(
         summary = "Oppretter en ferdigstill behandling task for en behandling",
         description = """
             Kan brukes hvis distribuer dokument har blitt avvikshåndtert og behandlingen ikke har blitt ferdigstilt.
-            
+
             Hvis man ikke fikk distribuert brevet gjennom dokdist og saksbehandler manuelt har sendt printet og sendt, så vil 
             aldri behandlingen gå viderere til ferdigstill behandling-steget. I de tilfellene kan man bruke dette endepunktet
         """,
@@ -658,8 +661,17 @@ class ForvalterController(
 
         val behandling = behandlingHentOgPersisterService.hent(dto.behandlingsId)
         if (behandling.status != BehandlingStatus.IVERKSETTER_VEDTAK) {
-            return ResponseEntity.ok("Kan bare opprette ferdigstill behandling task for behandlinger som er i status IVERKSETTER_VEDTAK")
+            return ResponseEntity.badRequest().body("Kan bare opprette ferdigstill behandling task for behandlinger som er i status IVERKSETTER_VEDTAK")
         }
+
+        if (behandling.steg != StegType.DISTRIBUER_VEDTAKSBREV) {
+            return ResponseEntity.badRequest().body("Kan bare opprette ferdigstill behandling task for behandlinger som er i steg DISTRIBUER_VEDTAKSBREV")
+        }
+
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
+            behandlingId = dto.behandlingsId,
+            steg = StegType.FERDIGSTILLE_BEHANDLING,
+        )
 
         val task =
             FerdigstillBehandlingTask.opprettTask(
