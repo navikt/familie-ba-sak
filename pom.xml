@@ -53,6 +53,7 @@
         <sonar.tests>src/test</sonar.tests>
         <sonar.projectKey>navikt_familie-ba-sak</sonar.projectKey>
         <sonar-maven-plugin.version>5.5.0.6356</sonar-maven-plugin.version>
+        <argLine></argLine>
 
 
         <kover.reportXml.path>${project.build.directory}/site/kover/report.xml</kover.reportXml.path>
