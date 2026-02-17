@@ -265,7 +265,7 @@ class AutomatiskOppdaterValutakursService(
 
         if (valutakurser.måValutakurserOppdateresForMåned(inneværendeMåned)) {
             val sisteValutakursdato = valutakurser.lastOrNull { it.valutakursdato != null }?.valutakursdato
-            logger.info("Valutakurs for behandling: $behandlingId er utdatert, siste valutakursDato: ${sisteValutakursdato}. Oppdaterer valutakurser og simulering.")
+            logger.info("Valutakurs for behandling: $behandlingId er utdatert, siste valutakursDato: $sisteValutakursdato. Oppdaterer valutakurser og simulering.")
             oppdaterValutakurserEtterEndringstidspunkt(behandling)
             simuleringService.oppdaterSimuleringPåBehandling(behandling)
         }
