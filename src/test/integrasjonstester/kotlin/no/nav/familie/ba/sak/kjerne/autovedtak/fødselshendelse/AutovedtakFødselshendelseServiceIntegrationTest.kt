@@ -180,7 +180,7 @@ class AutovedtakFødselshendelseServiceIntegrationTest(
         }
 
         @Test
-        fun `skal henlegge behandling og opprette manuell vurder livshendelse oppgave med begrunnelse IKKE_BODD_I_RIKET_I_12_MND når krav om 12 mnd ikke er møtt`() {
+        fun `skal henlegge behandling og opprette manuell vurder livshendelse oppgave med begrunnelse IKKE_BODD_I_RIKET_I_6_MND når krav om 6 mnd ikke er møtt`() {
             // Arrange
             val mor = lagPerson(fødselsdato = LocalDate.of(2004, 5, 2))
             val fnrMor = mor.aktør.aktivFødselsnummer()
@@ -300,7 +300,7 @@ class AutovedtakFødselshendelseServiceIntegrationTest(
 
             // Assert
             assertThat(resultat).contains("Henlegger behandling")
-            assertThat(opprettOppgaveTask.beskrivelse).isEqualTo("Fødselshendelse: Mor bosatt i riket i mindre enn 12 måneder.")
+            assertThat(opprettOppgaveTask.beskrivelse).isEqualTo("Fødselshendelse: Mor bosatt i riket i mindre enn 6 måneder.")
         }
     }
 }
