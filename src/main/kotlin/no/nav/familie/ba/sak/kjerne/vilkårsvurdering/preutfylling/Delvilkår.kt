@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat.IKKE_OPPFYLT
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat.IKKE_VURDERT
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat.OPPFYLT
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -16,6 +17,7 @@ sealed class Delvilkår {
         when (this) {
             is OppfyltDelvilkår -> OPPFYLT
             is IkkeOppfyltDelvilkår -> IKKE_OPPFYLT
+            is IkkeVurdertDelvilkår -> IKKE_VURDERT
         }
 }
 
@@ -28,3 +30,5 @@ data class OppfyltDelvilkår(
 data class IkkeOppfyltDelvilkår(
     override val ikkeOppfyltEvalueringÅrsaker: Set<VilkårIkkeOppfyltÅrsak> = emptySet(),
 ) : Delvilkår()
+
+class IkkeVurdertDelvilkår : Delvilkår()
