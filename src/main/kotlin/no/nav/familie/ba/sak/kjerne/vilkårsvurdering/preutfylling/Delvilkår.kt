@@ -27,4 +27,5 @@ data class OppfyltDelvilkår(
 
 data class IkkeOppfyltDelvilkår(
     override val ikkeOppfyltEvalueringÅrsaker: Set<VilkårIkkeOppfyltÅrsak> = emptySet(),
+    override val begrunnelse: String = "",
 ) : Delvilkår()
