@@ -5,9 +5,11 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -15,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -529,6 +532,69 @@ class PreutfyllLovligOppholdServiceTest {
             assertThat(lovligOppholdResultater?.resultat).isEqualTo(Resultat.OPPFYLT)
             assertThat(lovligOppholdResultater?.periodeFom).isEqualTo(LocalDate.now().minusYears(5))
             assertThat(lovligOppholdResultater?.periodeTom).isNull()
+        }
+
+        @Test
+        fun `skal ikke preutfylle lovlig opphold om personen har ukrainsk statsborgerskap`() {
+            // Arrange
+            val aktør = randomAktør()
+            val persongrunnlag =
+                lagPersonopplysningGrunnlag {
+                    setOf(
+                        lagPerson(
+                            personIdent = PersonIdent(aktør.aktivFødselsnummer()),
+                            aktør = aktør,
+                        ).also { person ->
+                            person.opphold =
+                                mutableListOf(
+                                    GrOpphold(
+                                        type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                        gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(1), tom = LocalDate.now().plusYears(1)),
+                                        person = person,
+                                    ),
+                                )
+                            person.statsborgerskap =
+                                mutableListOf(
+                                    GrStatsborgerskap(
+                                        landkode = "UKR",
+                                        gyldigPeriode =
+                                            DatoIntervallEntitet(
+                                                fom = LocalDate.now().minusYears(10),
+                                                tom = null,
+                                            ),
+                                        person = person,
+                                    ),
+                                )
+                        },
+                    )
+                }
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    lagPersonResultater = {
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                aktør = aktør,
+                                lagVilkårResultater = { emptySet() },
+                                lagAnnenVurderinger = { emptySet() },
+                            ),
+                        )
+                    },
+                )
+
+            every { persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id) } returns persongrunnlag
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+
+            // Assert
+            val lovligOppholdVilkårResultater =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == aktør }
+                    .vilkårResultater
+
+            assertThat(lovligOppholdVilkårResultater).isEmpty()
         }
     }
 }
