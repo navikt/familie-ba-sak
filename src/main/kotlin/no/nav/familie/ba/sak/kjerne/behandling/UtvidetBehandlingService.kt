@@ -140,7 +140,9 @@ class UtvidetBehandlingService(
             underkategori = behandling.underkategori.tilDto(),
             årsak = behandling.opprettetÅrsak,
             opprettetTidspunkt = behandling.opprettetTidspunkt,
+            aktivertTidspunkt = behandling.aktivertTidspunkt,
             endretAv = behandling.endretAv,
+            aktiv = behandling.aktiv,
             arbeidsfordelingPåBehandling = arbeidsfordeling.tilArbeidsfordelingPåBehandlingDto(),
             søknadsgrunnlag = søknadsgrunnlag,
             personer =
