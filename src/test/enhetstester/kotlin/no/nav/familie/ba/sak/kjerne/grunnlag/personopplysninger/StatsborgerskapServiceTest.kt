@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -30,17 +31,16 @@ internal class StatsborgerskapServiceTest {
     private val kodeverkService = KodeverkService(integrasjonKlient)
     private val featureToggleService = mockk<FeatureToggleService>()
 
-    private lateinit var statsborgerskapService: StatsborgerskapService
+    private val statsborgerskapService: StatsborgerskapService = StatsborgerskapService(kodeverkService, featureToggleService)
 
     @BeforeEach
     fun setUp() {
-        statsborgerskapService = StatsborgerskapService(kodeverkService, featureToggleService)
         every { integrasjonKlient.hentAlleEØSLand() } returns lagKodeverkLand()
         every { featureToggleService.isEnabled(FeatureToggle.HARDKODET_EEAFREG_STATSBORGERSKAP) } returns true
     }
 
     @Nested
-    inner class NåværendeMedlemskapTest {
+    inner class FinnNåværendeMedlemskap {
         @Test
         fun `Lovlig opphold - valider at alle gjeldende medlemskap blir returnert`() {
             // Arrange
@@ -89,7 +89,7 @@ internal class StatsborgerskapServiceTest {
     }
 
     @Nested
-    inner class HentStatsborgerskapMedMedlemskapTest {
+    inner class HentStatsborgerskapMedMedlemskap {
         @Nested
         inner class Storbrittannia {
             @Test
@@ -117,6 +117,8 @@ internal class StatsborgerskapServiceTest {
 
                 // Arrange
                 val person = lagPerson()
+                // Sørger for at barnets fødselsdato er før brexit slik at vi her først får en EØS-periode, etterfulgt av en tredjelandsborger-periode før vi igjen får en EØS-periode.
+                val barn = lagPerson(fødselsdato = LocalDate.of(2010, 1, 1))
                 val statsborgerskap =
                     Statsborgerskap(
                         land = "GBR",
@@ -126,7 +128,7 @@ internal class StatsborgerskapServiceTest {
                     )
 
                 // Act
-                val grStatsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskap(statsborgerskap = statsborgerskap, person = person)
+                val grStatsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskap(statsborgerskap = statsborgerskap, person = person, barn.fødselsdato)
 
                 // Assert
                 val eøsStatsborgerskapPerioder = grStatsborgerskap.filter { it.medlemskap == Medlemskap.EØS }
@@ -148,11 +150,16 @@ internal class StatsborgerskapServiceTest {
                         bekreftelsesdato = null,
                     )
 
+                val person = lagPerson()
+                // Igjen fødselsdato til barn før brexit slik at vi får EØS-periode før brexit og deretter en tredjelandsperiode.
+                val barn = lagPerson(fødselsdato = LocalDate.of(2010, 1, 1))
+
                 // Act
                 val grStatsborgerskapUtenPeriode =
                     statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                         statsborgerskap = statsborgerStorbritanniaUtenPeriode,
-                        person = lagPerson(),
+                        person = person,
+                        eldsteBarnFødselsdato = barn.fødselsdato,
                     )
 
                 // Assert
@@ -177,16 +184,21 @@ internal class StatsborgerskapServiceTest {
                         bekreftelsesdato = null,
                     )
 
+                val person = lagPerson(fødselsdato = datoFørBrexit.minusYears(2))
+                // Igjen fødselsdato til barn før brexit slik at vi får EØS-periode før brexit og deretter en tredjelandsperiode.
+                val barn = lagPerson(fødselsdato = LocalDate.of(2010, 1, 1))
+
                 // Act
                 val grStatsborgerskapUnderBrexit =
                     statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                         statsborgerskap = statsborgerStorbritanniaMedPeriodeUnderBrexit,
-                        person = lagPerson(fødselsdato = datoFørBrexit.minusYears(2)),
+                        person = person,
+                        eldsteBarnFødselsdato = barn.fødselsdato,
                     )
 
                 // Assert
                 assertEquals(2, grStatsborgerskapUnderBrexit.size)
-                assertEquals(datoFørBrexit, grStatsborgerskapUnderBrexit.first().gyldigPeriode?.fom)
+                assertEquals(barn.fødselsdato, grStatsborgerskapUnderBrexit.first().gyldigPeriode?.fom)
                 assertEquals(KodeverkService.BREXIT_OVERGANGSORDNING_TOM_DATO, grStatsborgerskapUnderBrexit.first().gyldigPeriode?.tom)
                 assertEquals(Medlemskap.EØS, grStatsborgerskapUnderBrexit.sortedBy { it.gyldigPeriode?.fom }.first().medlemskap)
                 assertEquals(
@@ -197,13 +209,41 @@ internal class StatsborgerskapServiceTest {
         }
 
         @Test
-        fun `Skal ikke være mulig å få med perioder før persons fødselsdato`() {
-            val fødselsdato = LocalDate.of(2020, 1, 1)
-            val person = lagPerson(fødselsdato = fødselsdato)
+        fun `Skal ikke være mulig å få med perioder før eldste barns fødselsdato når statsborgerskap ikke har fom eller tom`() {
             val statsborgerskap =
                 Statsborgerskap(
                     land = "DEU",
                     gyldigFraOgMed = null,
+                    gyldigTilOgMed = null,
+                    bekreftelsesdato = null,
+                )
+            val person = lagPerson()
+            val barnFødselsdato = LocalDate.of(2020, 1, 1)
+            val barn = lagPerson(fødselsdato = barnFødselsdato)
+
+            // Act
+            val grStatsborgerskap =
+                statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+                    statsborgerskap = statsborgerskap,
+                    person = person,
+                    eldsteBarnFødselsdato = barn.fødselsdato,
+                )
+
+            // Assert
+            assertEquals(1, grStatsborgerskap.size)
+            assertEquals(barnFødselsdato, grStatsborgerskap.first().gyldigPeriode?.fom)
+        }
+
+        @Test
+        fun `Skal ikke være mulig å få med perioder før eldste barns fødselsdato når statsborgerskap fom er før eldste barns fødselsdato`() {
+            val person = lagPerson()
+            val barnFødselsdato = LocalDate.of(2020, 1, 1)
+            val barn = lagPerson(fødselsdato = barnFødselsdato)
+
+            val statsborgerskap =
+                Statsborgerskap(
+                    land = "DEU",
+                    gyldigFraOgMed = barnFødselsdato.minusYears(1),
                     gyldigTilOgMed = null,
                     bekreftelsesdato = null,
                 )
@@ -213,16 +253,18 @@ internal class StatsborgerskapServiceTest {
                 statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                     statsborgerskap = statsborgerskap,
                     person = person,
+                    eldsteBarnFødselsdato = barn.fødselsdato,
                 )
 
             // Assert
             assertEquals(1, grStatsborgerskap.size)
-            assertEquals(fødselsdato, grStatsborgerskap.first().gyldigPeriode?.fom)
+            assertEquals(barnFødselsdato, grStatsborgerskap.first().gyldigPeriode?.fom)
         }
 
         @Test
         fun `Skal behandle kodeverk uendelig dato som uendelig og ikke lage tredjelandsperiode på slutten av statsborgerskap`() {
             val person = lagPerson()
+            val barn = lagPerson(fødselsdato = LocalDate.of(2010, 1, 1))
             val statsborgerskap =
                 Statsborgerskap(
                     land = "DEU",
@@ -232,7 +274,7 @@ internal class StatsborgerskapServiceTest {
                 )
 
             // Act
-            val grStatsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskap(statsborgerskap = statsborgerskap, person = person)
+            val grStatsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskap(statsborgerskap = statsborgerskap, person = person, eldsteBarnFødselsdato = barn.fødselsdato)
 
             // Assert
             assertEquals(1, grStatsborgerskap.size)
@@ -253,17 +295,22 @@ internal class StatsborgerskapServiceTest {
                     gyldigTilOgMed = stasborgerskapPolenTom,
                 )
 
+            val person = lagPerson()
+            // Sørger for at barnets fødselsdato er før Polen ble medlem av EØS slik at vi får en tredjelands-periode før Polen ble medlem av EØS og deretter en EØS-periode etter at Polen ble medlem av EØS.
+            val barn = lagPerson(fødselsdato = LocalDate.of(2003, 1, 1))
+
             // Act
             val grStatsborgerskap =
                 statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                     statsborgerskap = statsborgerskapMedGyldigFom,
-                    person = lagPerson(fødselsdato = LocalDate.of(1990, Month.JANUARY, 1)),
+                    person = person,
+                    eldsteBarnFødselsdato = barn.fødselsdato,
                 )
 
             // Assert
             assertEquals(2, grStatsborgerskap.size)
             assertEquals(
-                statsborgerskapPolenFom,
+                barn.fødselsdato,
                 grStatsborgerskap
                     .sortedBy { it.gyldigPeriode?.fom }
                     .first()
@@ -295,7 +342,7 @@ internal class StatsborgerskapServiceTest {
         }
 
         @Test
-        fun `Skal evaluere polske statsborgere med ukjent periode som EØS-borgere`() {
+        fun `Skal evaluere polske statsborgere med ukjent periode som EØS-borgere fra dato Polen ble medlem av EØS`() {
             // Arrange
             val statsborgerPolenUtenPeriode =
                 Statsborgerskap(
@@ -305,17 +352,23 @@ internal class StatsborgerskapServiceTest {
                     bekreftelsesdato = null,
                 )
 
+            val person = lagPerson()
+            // Sørger for at barnets fødselsdato er før Polen ble medlem av EØS slik at vi får en tredjelands-periode før Polen ble medlem av EØS og deretter en EØS-periode etter at Polen ble medlem av EØS.
+            val barn = lagPerson(fødselsdato = LocalDate.of(2003, 1, 1))
+
             // Act
             val grStatsborgerskapUtenPeriode =
                 statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                     statsborgerskap = statsborgerPolenUtenPeriode,
-                    person = lagPerson(),
+                    person = person,
+                    eldsteBarnFødselsdato = barn.fødselsdato,
                 )
 
             // Assert
-            assertEquals(1, grStatsborgerskapUtenPeriode.size)
-            assertEquals(Medlemskap.EØS, grStatsborgerskapUtenPeriode.single().medlemskap)
-            assertTrue(grStatsborgerskapUtenPeriode.single().gjeldendeNå())
+            assertEquals(2, grStatsborgerskapUtenPeriode.size)
+            assertThat(grStatsborgerskapUtenPeriode.first().medlemskap).isEqualTo(Medlemskap.TREDJELANDSBORGER)
+            assertThat(grStatsborgerskapUtenPeriode.last().medlemskap).isEqualTo(Medlemskap.EØS)
+            assertTrue(grStatsborgerskapUtenPeriode.last().gjeldendeNå())
         }
 
         @Test
@@ -329,11 +382,15 @@ internal class StatsborgerskapServiceTest {
                     bekreftelsesdato = null,
                 )
 
+            val person = lagPerson()
+            val barn = lagPerson(fødselsdato = LocalDate.of(2010, 1, 1))
+
             // Act
             val grStatsborgerskapUtenPeriode =
                 statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                     statsborgerskap = statsborgerStorbritanniaUtenPeriode,
-                    person = lagPerson(),
+                    person = person,
+                    eldsteBarnFødselsdato = barn.fødselsdato,
                 )
 
             // Assert
@@ -341,6 +398,68 @@ internal class StatsborgerskapServiceTest {
             assertEquals(Medlemskap.EØS, grStatsborgerskapUtenPeriode.first().medlemskap)
             assertEquals(Medlemskap.TREDJELANDSBORGER, grStatsborgerskapUtenPeriode.last().medlemskap)
             assertTrue(grStatsborgerskapUtenPeriode.last().gjeldendeNå())
+        }
+
+        @Test
+        fun `Dersom person er statsløs skal vi lage én periode fra eldste barns fødselsdato med medlemskap statsløs`() {
+            // Arrange
+            val statsborgerskapStatsløsUtenPeriode =
+                Statsborgerskap(
+                    land = StatsborgerskapService.LANDKODE_STATSLØS,
+                    gyldigFraOgMed = null,
+                    gyldigTilOgMed = null,
+                    bekreftelsesdato = null,
+                )
+
+            val person = lagPerson()
+            val barn = lagPerson(fødselsdato = LocalDate.of(2010, 1, 1))
+
+            // Act
+            val grStatsborgerskapMedMedlemskap =
+                statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+                    statsborgerskap = statsborgerskapStatsløsUtenPeriode,
+                    person = person,
+                    eldsteBarnFødselsdato = barn.fødselsdato,
+                )
+
+            // Assert
+            assertEquals(1, grStatsborgerskapMedMedlemskap.size)
+            val grStatsborgerskap = grStatsborgerskapMedMedlemskap.single()
+
+            assertEquals(Medlemskap.STATSLØS, grStatsborgerskap.medlemskap)
+            assertThat(grStatsborgerskap.gyldigPeriode?.fom).isEqualTo(barn.fødselsdato)
+            assertTrue(grStatsborgerskap.gjeldendeNå())
+        }
+
+        @Test
+        fun `Dersom person har ukjent statsborgerskap skal vi lage én periode fra eldste barns fødselsdato med medlemskap ukjent`() {
+            // Arrange
+            val statsborgerskapStatsløsUtenPeriode =
+                Statsborgerskap(
+                    land = StatsborgerskapService.LANDKODE_UKJENT,
+                    gyldigFraOgMed = null,
+                    gyldigTilOgMed = null,
+                    bekreftelsesdato = null,
+                )
+
+            val person = lagPerson()
+            val barn = lagPerson(fødselsdato = LocalDate.of(2010, 1, 1))
+
+            // Act
+            val grStatsborgerskapMedMedlemskap =
+                statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+                    statsborgerskap = statsborgerskapStatsløsUtenPeriode,
+                    person = person,
+                    eldsteBarnFødselsdato = barn.fødselsdato,
+                )
+
+            // Assert
+            assertEquals(1, grStatsborgerskapMedMedlemskap.size)
+            val grStatsborgerskap = grStatsborgerskapMedMedlemskap.single()
+
+            assertEquals(Medlemskap.UKJENT, grStatsborgerskap.medlemskap)
+            assertThat(grStatsborgerskap.gyldigPeriode?.fom).isEqualTo(barn.fødselsdato)
+            assertTrue(grStatsborgerskap.gjeldendeNå())
         }
     }
 
