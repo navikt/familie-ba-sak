@@ -504,6 +504,7 @@ class PreutfyllLovligOppholdServiceTest {
             assertThat(lovligOppholdVilkårResultater).isEmpty()
         }
 
+        // Dummy
         private fun lagPersonopplysningGrunnlagMedSøkerOgBarn(
             søker: (Person) -> Person = { it },
         ): PersonopplysningGrunnlag =
