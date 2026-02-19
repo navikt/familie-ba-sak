@@ -3,8 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
@@ -38,10 +37,7 @@ class PreutfyllLovligOppholdService(
     fun preutfyllLovligOpphold(vilkårsvurdering: Vilkårsvurdering) {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id)
 
-        val søkersResultater = vilkårsvurdering.personResultater.first { it.erSøkersResultater() }
-        val bostedsadresserSøker = Adresser.opprettFra(personopplysningGrunnlag.søker).bostedsadresser
-
-        val datoForBeskjæringAvFom = finnDatoForBeskjæringAvFom(søkersResultater, vilkårsvurdering, bostedsadresserSøker) ?: PRAKTISK_TIDLIGSTE_DAG
+        val datoForBeskjæringAvFom = finnDatoForBeskjæringAvFom(personopplysningGrunnlag.søker, personopplysningGrunnlag)
         val søkerErEøsBorgerOgHarArbeidsforholdTidslinje = lagErEøsBorgerOgHarArbeidsforholdTidslinje(personopplysningGrunnlag.søker, datoForBeskjæringAvFom)
 
         vilkårsvurdering.personResultater
@@ -51,11 +47,14 @@ class PreutfyllLovligOppholdService(
                     return@forEach
                 }
 
+                val datoForBeskjæringAvFom = finnDatoForBeskjæringAvFom(person, personopplysningGrunnlag)
+
                 val nyeLovligOppholdVilkårResultat =
                     genererLovligOppholdVilkårResultat(
                         personResultat = personResultat,
                         person = person,
                         søkerErEøsBorgerOgHarArbeidsforholdTidslinje = søkerErEøsBorgerOgHarArbeidsforholdTidslinje,
+                        datoForBeskjæringAvFom = datoForBeskjæringAvFom,
                     )
 
                 if (nyeLovligOppholdVilkårResultat.isNotEmpty()) {
@@ -69,13 +68,10 @@ class PreutfyllLovligOppholdService(
         personResultat: PersonResultat,
         person: Person,
         søkerErEøsBorgerOgHarArbeidsforholdTidslinje: Tidslinje<Boolean>,
+        datoForBeskjæringAvFom: LocalDate,
     ): Set<VilkårResultat> {
-        val bostedsadresserForPerson = Adresser.opprettFra(person).bostedsadresser
-
         val erNordiskStatsborgerTidslinje = lagErNordiskStatsborgerTidslinje(person.statsborgerskap)
         val harOppholdstillatelseTidslinje = lagHarOppholdstillatelseTidslinje(person.opphold)
-
-        val datoForBeskjæringAvFom = finnDatoForBeskjæringAvFom(personResultat, personResultat.vilkårsvurdering, bostedsadresserForPerson) ?: PRAKTISK_TIDLIGSTE_DAG
 
         val harLovligOppholdTidslinje =
             erNordiskStatsborgerTidslinje
@@ -107,25 +103,13 @@ class PreutfyllLovligOppholdService(
     }
 
     private fun finnDatoForBeskjæringAvFom(
-        personResultat: PersonResultat,
-        vilkårsvurdering: Vilkårsvurdering,
-        bostedsadresser: List<Adresse>,
-    ): LocalDate? {
-        val tidligsteFomDatoPåBostedadresse =
-            bostedsadresser
-                .filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
-                .mapNotNull { it.gyldigFraOgMed }
-                .minOrNull()
-
-        return tidligsteFomDatoPåBostedadresse ?: run {
-            val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id)
-            if (personResultat.erSøkersResultater()) {
-                personopplysningGrunnlag.eldsteBarnSinFødselsdato
-            } else {
-                personResultat.aktør.tilPerson(personopplysningGrunnlag).fødselsdato
-            }
-        }
-    }
+        person: Person,
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+    ): LocalDate =
+        maxOf(
+            personopplysningGrunnlag.eldsteBarnSinFødselsdato ?: PRAKTISK_TIDLIGSTE_DAG,
+            person.fødselsdato,
+        )
 
     private fun lagErEøsBorgerOgHarArbeidsforholdTidslinje(
         person: Person,
