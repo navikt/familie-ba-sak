@@ -30,6 +30,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserPerPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
@@ -285,24 +287,35 @@ private fun håndterVilkårsvurderingSteg(
     return stegService.håndterVilkårsvurdering(behandling)
 }
 
+// Overskriv initiell vilkårsvurdering med egendefinert vilkårsvurdering.
 fun Vilkårsvurdering.oppdaterMedDataFra(vilkårsvurdering: Vilkårsvurdering) {
     this.personResultater.forEach { personResultatSomSkalOppdateres ->
+
         val nyttPersonresultat =
             vilkårsvurdering.personResultater.find { it.aktør.aktørId == personResultatSomSkalOppdateres.aktør.aktørId }!!
 
-        personResultatSomSkalOppdateres.vilkårResultater.forEach { vilkårResultatSomSkalOppdateres ->
+        val vilkårMap: Map<Vilkår, VilkårResultat> =
+            personResultatSomSkalOppdateres.vilkårResultater.fold(mutableMapOf()) { acc, vilkårResultatSomSkalOppdateres ->
+                acc[vilkårResultatSomSkalOppdateres.vilkårType] = vilkårResultatSomSkalOppdateres
+                acc
+            }
+
+        vilkårMap.forEach { (key, value) ->
             val nyttVilkårResultat =
                 nyttPersonresultat.vilkårResultater
-                    .find { it.vilkårType == vilkårResultatSomSkalOppdateres.vilkårType }
+                    .find { it.vilkårType == key }
                     ?: throw Feil(
-                        "Fant ikke ${vilkårResultatSomSkalOppdateres.vilkårType} i vilkårene som ble sendt med for " +
+                        "Fant ikke $key i vilkårene som ble sendt med for " +
                             "${personResultatSomSkalOppdateres.aktør.aktivFødselsnummer()}.",
                     )
 
-            vilkårResultatSomSkalOppdateres.resultat = nyttVilkårResultat.resultat
-            vilkårResultatSomSkalOppdateres.periodeFom = nyttVilkårResultat.periodeFom
-            vilkårResultatSomSkalOppdateres.periodeTom = nyttVilkårResultat.periodeTom
+            value.resultat = nyttVilkårResultat.resultat
+            value.periodeFom = nyttVilkårResultat.periodeFom
+            value.periodeTom = nyttVilkårResultat.periodeTom
         }
+
+        personResultatSomSkalOppdateres.vilkårResultater.clear()
+        personResultatSomSkalOppdateres.vilkårResultater.addAll(vilkårMap.values)
     }
 }
 

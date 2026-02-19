@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.gjelderAlltidFraBarnetsFødselsdato
 import java.time.LocalDate
 import java.time.YearMonth
+import kotlin.collections.set
 
 fun lagPersonResultaterForSøkerOgToBarn(
     vilkårsvurdering: Vilkårsvurdering,
@@ -142,6 +143,7 @@ fun lagPersonResultat(
     return personResultat
 }
 
+// Setter alle vilkår til oppfylt.
 fun vurderVilkårsvurderingTilInnvilget(
     vilkårsvurdering: Vilkårsvurdering,
     barn: Person,
@@ -155,7 +157,7 @@ fun vurderVilkårsvurderingTilInnvilget(
                 it.periodeTom = barn.fødselsdato.plusYears(18)
             } else {
                 it.resultat = OPPFYLT
-                it.periodeFom = innvilgetFom ?: barn.fødselsdato
+                it.periodeFom = innvilgetFom ?: it.periodeFom ?: barn.fødselsdato
             }
         }
     }
