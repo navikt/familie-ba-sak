@@ -145,6 +145,7 @@ class PreutfyllBorMedSøkerServiceTest {
                 .single { it.vilkårType == Vilkår.BOR_MED_SØKER }
 
         assertThat(borFastHosSøkerVilkår.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
+        assertThat(borFastHosSøkerVilkår.begrunnelse).isEqualTo("$PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT- Har ikke samme fast eller delt bostedsadresse som søker")
     }
 
     @Test
