@@ -403,6 +403,7 @@ class PersongrunnlagService(
                         statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                             statsborgerskap = it,
                             person = person,
+                            eldsteBarnFødselsdato = eldsteBarnsFødselsdato,
                         )
                     }?.sortedBy { it.gyldigPeriode?.fom }
                     ?.toMutableList() ?: mutableListOf()

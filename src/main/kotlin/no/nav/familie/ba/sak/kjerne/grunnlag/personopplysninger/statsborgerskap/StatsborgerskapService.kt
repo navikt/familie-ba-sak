@@ -29,10 +29,11 @@ class StatsborgerskapService(
     fun hentStatsborgerskapMedMedlemskap(
         statsborgerskap: Statsborgerskap,
         person: Person,
+        eldsteBarnFødselsdato: LocalDate,
     ): List<GrStatsborgerskap> {
         if (featureToggleService.isEnabled(FeatureToggle.HARDKODET_EEAFREG_STATSBORGERSKAP)) {
             return lagMedlemskapTIdslinjeForStatsborgerskap(statsborgerskap)
-                .beskjærFraOgMed(person.fødselsdato)
+                .beskjærFraOgMed(eldsteBarnFødselsdato)
                 .tilPerioderIkkeNull()
                 .map {
                     GrStatsborgerskap(
@@ -129,20 +130,6 @@ class StatsborgerskapService(
             }
     }
 
-    private fun List<Periode<Medlemskap>>.beskjærFomDato(
-        cutOffFomDato: LocalDate?,
-    ) {
-        map { periode ->
-            periode.fom.let {
-                if (it == null || it < cutOffFomDato) {
-                    periode.copy(fom = cutOffFomDato)
-                } else {
-                    periode
-                }
-            }
-        }
-    }
-
     fun hentSterkesteMedlemskapVedTidspunkt(
         statsborgerskap: Statsborgerskap,
         tidspunkt: LocalDate = statsborgerskap.gyldigTilOgMed ?: LocalDate.now(),
@@ -223,9 +210,9 @@ class StatsborgerskapService(
         when {
             statsborgerskap.iNordiskLand() -> Medlemskap.NORDEN
             erEøsland -> Medlemskap.EØS
-            statsborgerskap.iTredjeland() -> Medlemskap.TREDJELANDSBORGER
             statsborgerskap.erStatsløs() -> Medlemskap.STATSLØS
-            else -> Medlemskap.UKJENT
+            statsborgerskap.erUkjent() -> Medlemskap.UKJENT
+            else -> Medlemskap.TREDJELANDSBORGER
         }
 
     private fun finnMedlemskap(
@@ -295,6 +282,8 @@ fun Statsborgerskap.iNordiskLand() = Norden.entries.map { it.name }.contains(thi
 fun Statsborgerskap.iTredjeland() = this.land != StatsborgerskapService.LANDKODE_UKJENT
 
 fun Statsborgerskap.erStatsløs() = this.land == StatsborgerskapService.LANDKODE_STATSLØS
+
+fun Statsborgerskap.erUkjent() = this.land == StatsborgerskapService.LANDKODE_UKJENT
 
 fun Statsborgerskap.erUkraina() = this.land == "UKR"
 
