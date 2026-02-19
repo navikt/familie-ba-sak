@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
 import no.nav.familie.ba.sak.datagenerator.lagDeltBosted
 import no.nav.familie.ba.sak.datagenerator.lagOppholdsadresse
@@ -9,6 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.fake.FakePdlRestKlient
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilRelasjonIPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
@@ -31,8 +33,10 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -43,6 +47,8 @@ class PersongrunnlagIntegrationTest(
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    @Autowired private val fakePersonopplysningerService: FakePersonopplysningerService,
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Skal lagre dødsfall på person når person er død`() {
@@ -488,5 +494,253 @@ class PersongrunnlagIntegrationTest(
         assertThat(bostedsadresseForBarn).hasSize(1)
         assertThat(oppholdsadresseForBarn).hasSize(1)
         assertThat(deltBostedForBarn).hasSize(1)
+    }
+
+    @Nested
+    inner class HentOgLagreSøkerOgBarnINyttGrunnlag {
+        @Nested
+        inner class ToggleAv {
+            @Test
+            fun `Skal lagre nytt personopplysninggrunnlag selv om det er uendret`() {
+                // Arrange
+                System.setProperty(FeatureToggle.IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG.navn, "false")
+
+                val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+                val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true)
+                val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+                val barnAktør = personidentService.hentOgLagreAktør(barnFnr, true)
+
+                val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
+                val behandling =
+                    behandlingService.opprettBehandling(
+                        nyOrdinærBehandling(
+                            søkersIdent = søkerAktør.aktivFødselsnummer(),
+                            fagsakId = fagsak.data!!.id,
+                        ),
+                    )
+
+                val forrigePersonopplysningGrunnlag =
+                    persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                        aktør = søkerAktør,
+                        barnFraInneværendeBehandling = listOf(barnAktør),
+                        behandling = behandling,
+                        målform = Målform.NB,
+                    )
+
+                // Act
+                val nyttPersonopplysningGrunnlag =
+                    persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                        aktør = søkerAktør,
+                        barnFraInneværendeBehandling = listOf(barnAktør),
+                        behandling = behandling,
+                        målform = Målform.NB,
+                    )
+
+                // Assert
+                assertThat(nyttPersonopplysningGrunnlag.id).isNotEqualTo(forrigePersonopplysningGrunnlag.id)
+                assertThat(nyttPersonopplysningGrunnlag.aktiv).isTrue()
+                assertThat(nyttPersonopplysningGrunnlag.personer).hasSize(2)
+                assertThat(nyttPersonopplysningGrunnlag.personer).extracting("aktør.aktørId").containsExactlyInAnyOrder(søkerAktør.aktørId, barnAktør.aktørId)
+
+                System.clearProperty(FeatureToggle.IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG.navn)
+            }
+        }
+
+        @Nested
+        inner class TogglePå {
+            @BeforeEach
+            fun setup() {
+                System.setProperty(FeatureToggle.IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG.navn, "true")
+            }
+
+            @AfterEach
+            fun tearDown() {
+                System.clearProperty(FeatureToggle.IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG.navn)
+            }
+
+            @Test
+            fun `Skal returnere aktivt personopplysninggrunnlag når nytt personopplysninggrunnlag er uendret`() {
+                // Arrange
+                val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+                val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true)
+                val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+                val barnAktør = personidentService.hentOgLagreAktør(barnFnr, true)
+
+                val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
+                val behandling =
+                    behandlingService.opprettBehandling(
+                        nyOrdinærBehandling(
+                            søkersIdent = søkerAktør.aktivFødselsnummer(),
+                            fagsakId = fagsak.data!!.id,
+                        ),
+                    )
+
+                val forrigePersonopplysningGrunnlag =
+                    persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                        aktør = søkerAktør,
+                        barnFraInneværendeBehandling = listOf(barnAktør),
+                        behandling = behandling,
+                        målform = Målform.NB,
+                    )
+
+                assertThat(forrigePersonopplysningGrunnlag.aktiv).isTrue()
+
+                // Act
+                val nyttPersonopplysningGrunnlag =
+                    persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                        aktør = søkerAktør,
+                        barnFraInneværendeBehandling = listOf(barnAktør),
+                        behandling = behandling,
+                        målform = Målform.NB,
+                    )
+
+                // Assert
+                assertThat(nyttPersonopplysningGrunnlag).isEqualTo(forrigePersonopplysningGrunnlag)
+            }
+
+            @Test
+            fun `Skal lagre og returnere nytt personopplysninggrunnlag når barn legges til`() {
+                // Arrange
+                val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+                val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true)
+                val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+                val barnAktør = personidentService.hentOgLagreAktør(barnFnr, true)
+
+                val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
+                val behandling =
+                    behandlingService.opprettBehandling(
+                        nyOrdinærBehandling(
+                            søkersIdent = søkerAktør.aktivFødselsnummer(),
+                            fagsakId = fagsak.data!!.id,
+                        ),
+                    )
+
+                val forrigePersonopplysningGrunnlag =
+                    persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                        aktør = søkerAktør,
+                        barnFraInneværendeBehandling = emptyList(),
+                        behandling = behandling,
+                        målform = Målform.NB,
+                    )
+
+                assertThat(forrigePersonopplysningGrunnlag.aktiv).isTrue()
+
+                // Act
+                val nyttPersonopplysningGrunnlag =
+                    persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                        aktør = søkerAktør,
+                        barnFraInneværendeBehandling = listOf(barnAktør),
+                        behandling = behandling,
+                        målform = Målform.NB,
+                    )
+
+                // Assert
+                assertThat(nyttPersonopplysningGrunnlag.id).isNotEqualTo(forrigePersonopplysningGrunnlag.id)
+                assertThat(nyttPersonopplysningGrunnlag.aktiv).isTrue()
+                assertThat(nyttPersonopplysningGrunnlag.personer).extracting("aktør").containsExactlyInAnyOrder(søkerAktør, barnAktør)
+
+                val forrigePersonopplysningGrunnlagEtterOppdatering = personopplysningGrunnlagRepository.findById(forrigePersonopplysningGrunnlag.id).get()
+                assertThat(forrigePersonopplysningGrunnlagEtterOppdatering.aktiv).isFalse()
+            }
+
+            @Test
+            fun `Skal lagre og returnere nytt personopplysninggrunnlag når barn fjernes`() {
+                // Arrange
+                val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+                val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true)
+                val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+                val barnAktør = personidentService.hentOgLagreAktør(barnFnr, true)
+
+                val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
+                val behandling =
+                    behandlingService.opprettBehandling(
+                        nyOrdinærBehandling(
+                            søkersIdent = søkerAktør.aktivFødselsnummer(),
+                            fagsakId = fagsak.data!!.id,
+                        ),
+                    )
+
+                val forrigePersonopplysningGrunnlag =
+                    persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                        aktør = søkerAktør,
+                        barnFraInneværendeBehandling = listOf(barnAktør),
+                        behandling = behandling,
+                        målform = Målform.NB,
+                    )
+
+                assertThat(forrigePersonopplysningGrunnlag.aktiv).isTrue()
+
+                // Act
+                val nyttPersonopplysningGrunnlag =
+                    persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                        aktør = søkerAktør,
+                        barnFraInneværendeBehandling = emptyList(),
+                        behandling = behandling,
+                        målform = Målform.NB,
+                    )
+
+                // Assert
+                assertThat(nyttPersonopplysningGrunnlag.id).isNotEqualTo(forrigePersonopplysningGrunnlag.id)
+                assertThat(nyttPersonopplysningGrunnlag.aktiv).isTrue()
+                assertThat(nyttPersonopplysningGrunnlag.personer).extracting("aktør").containsExactly(søkerAktør)
+
+                val forrigePersonopplysningGrunnlagEtterOppdatering = personopplysningGrunnlagRepository.findById(forrigePersonopplysningGrunnlag.id).get()
+                assertThat(forrigePersonopplysningGrunnlagEtterOppdatering.aktiv).isFalse()
+            }
+
+            @Test
+            fun `Skal lagre og returnere nytt personopplysninggrunnlag når person endres`() {
+                // Arrange
+                val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+                val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true)
+                val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+                val barnAktør = personidentService.hentOgLagreAktør(barnFnr, true)
+
+                val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
+                val behandling =
+                    behandlingService.opprettBehandling(
+                        nyOrdinærBehandling(
+                            søkersIdent = søkerAktør.aktivFødselsnummer(),
+                            fagsakId = fagsak.data!!.id,
+                        ),
+                    )
+
+                val forrigePersonopplysningGrunnlag =
+                    persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                        aktør = søkerAktør,
+                        barnFraInneværendeBehandling = listOf(barnAktør),
+                        behandling = behandling,
+                        målform = Målform.NB,
+                    )
+
+                assertThat(forrigePersonopplysningGrunnlag.aktiv).isTrue()
+
+                fakePersonopplysningerService.hentPersoninfoEnkel(søkerAktør).also {
+                    leggTilPersonInfo(
+                        fødselsdato = it.fødselsdato,
+                        egendefinertMock = it.copy(navn = "Søker sitt nye navn"),
+                        personIdent = søkerFnr,
+                    )
+                }
+
+                // Act
+                val nyttPersonopplysningGrunnlag =
+                    persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                        aktør = søkerAktør,
+                        barnFraInneværendeBehandling = listOf(barnAktør),
+                        behandling = behandling,
+                        målform = Målform.NB,
+                    )
+
+                // Assert
+                assertThat(nyttPersonopplysningGrunnlag.id).isNotEqualTo(forrigePersonopplysningGrunnlag.id)
+                assertThat(nyttPersonopplysningGrunnlag.aktiv).isTrue()
+                assertThat(nyttPersonopplysningGrunnlag.personer).extracting("aktør").containsExactlyInAnyOrder(søkerAktør, barnAktør)
+                assertThat(nyttPersonopplysningGrunnlag.personer.first { it.aktør == søkerAktør }.navn).isEqualTo("Søker sitt nye navn")
+
+                val forrigePersonopplysningGrunnlagEtterOppdatering = personopplysningGrunnlagRepository.findById(forrigePersonopplysningGrunnlag.id).get()
+                assertThat(forrigePersonopplysningGrunnlagEtterOppdatering.aktiv).isFalse()
+            }
+        }
     }
 }
