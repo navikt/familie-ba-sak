@@ -33,7 +33,7 @@
         <utbetalingsgenerator.version>1.0_20251127080440_b935966</utbetalingsgenerator.version>
         <cucumber.version>7.34.2</cucumber.version>
         <mockk.version>1.14.9</mockk.version>
-        <token-validation-spring.version>6.0.2</token-validation-spring.version>
+        <token-validation-spring.version>6.0.3</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>3.0.1</springdoc.version>
         <sentry.version>8.31.0</sentry.version>
