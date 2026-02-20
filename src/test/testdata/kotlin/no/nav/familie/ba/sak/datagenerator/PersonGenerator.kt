@@ -66,6 +66,7 @@ fun lagPerson(
     målform: Målform = Målform.NB,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     aktør: Aktør = lagAktør(),
+    harFalskIdentitet: Boolean = false,
     bostedsadresser: (person: Person) -> List<GrBostedsadresse> = { listOf() },
     oppholdsadresser: (person: Person) -> List<GrOppholdsadresse> = { listOf() },
     deltBosted: (person: Person) -> List<GrDeltBosted> = { listOf() },
@@ -73,7 +74,7 @@ fun lagPerson(
     opphold: (person: Person) -> List<GrOpphold> = { listOf() },
     arbeidsforhold: (person: Person) -> List<GrArbeidsforhold> = { listOf() },
     sivilstander: (person: Person) -> List<GrSivilstand> = { listOf() },
-    dødsfall: Dødsfall? = null,
+    dødsfall: (person: Person) -> Dødsfall? = { null },
 ): Person {
     val person =
         Person(
@@ -85,8 +86,9 @@ fun lagPerson(
             målform = målform,
             personopplysningGrunnlag = personopplysningGrunnlag,
             aktør = aktør,
-            dødsfall = dødsfall,
+            harFalskIdentitet = harFalskIdentitet,
         )
+    person.dødsfall = dødsfall(person)
     person.bostedsadresser.addAll(bostedsadresser(person))
     person.oppholdsadresser.addAll(oppholdsadresser(person))
     person.deltBosted.addAll(deltBosted(person))

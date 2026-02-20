@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.datagenerator
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrMatrikkeladresseBostedsadresse
@@ -58,6 +59,7 @@ fun lagGrVegadresse(
     husnummer: String? = null,
     husbokstav: String? = null,
     postnummer: String? = null,
+    person: Person? = null,
 ) = GrVegadresseBostedsadresse(
     matrikkelId = matrikkelId,
     husnummer = husnummer,
@@ -68,7 +70,9 @@ fun lagGrVegadresse(
     tilleggsnavn = null,
     postnummer = postnummer,
     poststed = null,
-)
+).also {
+    it.person = person
+}
 
 fun lagBostedsadresse(
     gyldigFraOgMed: LocalDate? = LocalDate.now().minusYears(1),
@@ -174,6 +178,7 @@ fun lagGrVegadresseOppholdsadresse(
     postnummer: String? = null,
     periode: DatoIntervallEntitet? = null,
     poststed: String? = null,
+    person: Person? = null,
 ) = GrVegadresseOppholdsadresse(
     matrikkelId = matrikkelId,
     husnummer = husnummer,
@@ -184,7 +189,10 @@ fun lagGrVegadresseOppholdsadresse(
     tilleggsnavn = tilleggsnavn,
     postnummer = postnummer,
     poststed = poststed,
-).also { it.periode = periode }
+).also {
+    it.periode = periode
+    it.person = person
+}
 
 fun lagGrVegadresseBostedsadresse(
     matrikkelId: Long? = null,
@@ -197,6 +205,7 @@ fun lagGrVegadresseBostedsadresse(
     postnummer: String? = null,
     periode: DatoIntervallEntitet? = null,
     poststed: String? = null,
+    person: Person? = null,
 ) = GrVegadresseBostedsadresse(
     matrikkelId = matrikkelId,
     husnummer = husnummer,
@@ -207,7 +216,10 @@ fun lagGrVegadresseBostedsadresse(
     tilleggsnavn = tilleggsnavn,
     postnummer = postnummer,
     poststed = poststed,
-).also { it.periode = periode }
+).also {
+    it.periode = periode
+    it.person = person
+}
 
 fun lagGrVegadresseDeltBosted(
     matrikkelId: Long? = null,
@@ -220,6 +232,7 @@ fun lagGrVegadresseDeltBosted(
     postnummer: String? = null,
     periode: DatoIntervallEntitet? = null,
     poststed: String? = null,
+    person: Person? = null,
 ) = GrVegadresseDeltBosted(
     matrikkelId = matrikkelId,
     husnummer = husnummer,
@@ -230,7 +243,10 @@ fun lagGrVegadresseDeltBosted(
     tilleggsnavn = tilleggsnavn,
     postnummer = postnummer,
     poststed = poststed,
-).also { it.periode = periode }
+).also {
+    it.periode = periode
+    it.person = person
+}
 
 fun lagGrMatrikkelOppholdsadresse(
     matrikkelId: Long? = null,
@@ -240,6 +256,7 @@ fun lagGrMatrikkelOppholdsadresse(
     postnummer: String? = null,
     periode: DatoIntervallEntitet? = null,
     poststed: String? = null,
+    person: Person? = null,
 ) = GrMatrikkeladresseOppholdsadresse(
     matrikkelId = matrikkelId,
     bruksenhetsnummer = bruksenhetsnummer,
@@ -247,7 +264,10 @@ fun lagGrMatrikkelOppholdsadresse(
     tilleggsnavn = tilleggsnavn,
     postnummer = postnummer,
     poststed = poststed,
-).also { it.periode = periode }
+).also {
+    it.periode = periode
+    it.person = person
+}
 
 fun lagGrMatrikkelBostedsadresse(
     matrikkelId: Long? = null,
@@ -257,6 +277,7 @@ fun lagGrMatrikkelBostedsadresse(
     postnummer: String? = null,
     periode: DatoIntervallEntitet? = null,
     poststed: String? = null,
+    person: Person? = null,
 ) = GrMatrikkeladresseBostedsadresse(
     matrikkelId = matrikkelId,
     bruksenhetsnummer = bruksenhetsnummer,
@@ -264,7 +285,10 @@ fun lagGrMatrikkelBostedsadresse(
     tilleggsnavn = tilleggsnavn,
     postnummer = postnummer,
     poststed = poststed,
-).also { it.periode = periode }
+).also {
+    it.periode = periode
+    it.person = person
+}
 
 fun lagGrMatrikkelDeltBosted(
     matrikkelId: Long? = null,
@@ -274,6 +298,7 @@ fun lagGrMatrikkelDeltBosted(
     postnummer: String? = null,
     periode: DatoIntervallEntitet? = null,
     poststed: String? = null,
+    person: Person? = null,
 ) = GrMatrikkeladresseDeltBosted(
     matrikkelId = matrikkelId,
     bruksenhetsnummer = bruksenhetsnummer,
@@ -281,7 +306,10 @@ fun lagGrMatrikkelDeltBosted(
     tilleggsnavn = tilleggsnavn,
     postnummer = postnummer,
     poststed = poststed,
-).also { it.periode = periode }
+).also {
+    it.periode = periode
+    it.person = person
+}
 
 fun lagGrUtenlandskOppholdsadresse(
     adressenavnNummer: String? = null,
@@ -293,6 +321,7 @@ fun lagGrUtenlandskOppholdsadresse(
     landkode: String = "",
     periode: DatoIntervallEntitet? = null,
     oppholdAnnetSted: OppholdAnnetSted? = null,
+    person: Person? = null,
 ) = GrUtenlandskAdresseOppholdsadresse(
     adressenavnNummer = adressenavnNummer,
     bygningEtasjeLeilighet = bygningEtasjeLeilighet,
@@ -304,21 +333,26 @@ fun lagGrUtenlandskOppholdsadresse(
 ).also {
     it.periode = periode
     it.oppholdAnnetSted = oppholdAnnetSted
+    it.person = person
 }
 
 fun lagGrUkjentAdresseOppholdsadresse(
     periode: DatoIntervallEntitet? = null,
     oppholdAnnetSted: OppholdAnnetSted? = null,
+    person: Person? = null,
 ) = GrUkjentAdresseOppholdsadresse().also {
     it.periode = periode
     it.oppholdAnnetSted = oppholdAnnetSted
+    it.person = person
 }
 
 fun lagGrUkjentBostedBostedsadresse(
     periode: DatoIntervallEntitet? = null,
     bostedskommune: String,
+    person: Person? = null,
 ) = GrUkjentBostedBostedsadresse(bostedskommune).also {
     it.periode = periode
+    it.person = person
 }
 
 fun lagFolkeregistermetadata(
