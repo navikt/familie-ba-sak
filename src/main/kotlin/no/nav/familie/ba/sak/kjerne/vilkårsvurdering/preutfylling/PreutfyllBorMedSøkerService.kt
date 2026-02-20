@@ -107,7 +107,7 @@ class PreutfyllBorMedSøkerService(
             if (barnAdresse != null && harVærtSammeAdresseMinst3Mnd(barnAdresse, søkerAdresse)) {
                 OppfyltDelvilkår(begrunnelse = "- Har samme bostedsadresse som søker.")
             } else {
-                IkkeOppfyltDelvilkår()
+                IkkeOppfyltDelvilkår(begrunnelse = "- Har ikke samme fast eller delt bostedsadresse som søker")
             }
         }
     }
