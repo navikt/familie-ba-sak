@@ -315,7 +315,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
         // Godkjenner alle vilkår på førstegangsbehandling.
         assertEquals(
-            4,
+            3,
             utvidetBehandlingDto.data!!
                 .personResultater
                 .find { it.personIdent == scenario.søker.ident }

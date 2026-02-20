@@ -143,7 +143,6 @@ fun lagPersonResultat(
     return personResultat
 }
 
-// Setter alle vilkår til oppfylt.
 fun vurderVilkårsvurderingTilInnvilget(
     vilkårsvurdering: Vilkårsvurdering,
     barn: Person,
@@ -157,7 +156,7 @@ fun vurderVilkårsvurderingTilInnvilget(
                 it.periodeTom = barn.fødselsdato.plusYears(18)
             } else {
                 it.resultat = OPPFYLT
-                it.periodeFom = innvilgetFom ?: it.periodeFom ?: barn.fødselsdato
+                it.periodeFom = innvilgetFom ?: barn.fødselsdato
             }
         }
     }

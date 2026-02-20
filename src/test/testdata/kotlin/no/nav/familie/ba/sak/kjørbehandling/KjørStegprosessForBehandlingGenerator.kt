@@ -287,35 +287,26 @@ private fun håndterVilkårsvurderingSteg(
     return stegService.håndterVilkårsvurdering(behandling)
 }
 
-// Overskriv initiell vilkårsvurdering med egendefinert vilkårsvurdering.
+// Overskriv initiell vilkårsvurdering med egendefinert vilkårsvurdering. Kode vil ikke fungere dersom det er mer enn ett VilkårResultat per VilkårType per person.
 fun Vilkårsvurdering.oppdaterMedDataFra(vilkårsvurdering: Vilkårsvurdering) {
     this.personResultater.forEach { personResultatSomSkalOppdateres ->
 
         val nyttPersonresultat =
             vilkårsvurdering.personResultater.find { it.aktør.aktørId == personResultatSomSkalOppdateres.aktør.aktørId }!!
 
-        val vilkårMap: Map<Vilkår, VilkårResultat> =
-            personResultatSomSkalOppdateres.vilkårResultater.fold(mutableMapOf()) { acc, vilkårResultatSomSkalOppdateres ->
-                acc[vilkårResultatSomSkalOppdateres.vilkårType] = vilkårResultatSomSkalOppdateres
-                acc
-            }
-
-        vilkårMap.forEach { (key, value) ->
+        personResultatSomSkalOppdateres.vilkårResultater.forEach { vilkårResultatSomSkalOppdateres ->
             val nyttVilkårResultat =
                 nyttPersonresultat.vilkårResultater
-                    .find { it.vilkårType == key }
+                    .find { it.vilkårType == vilkårResultatSomSkalOppdateres.vilkårType }
                     ?: throw Feil(
-                        "Fant ikke $key i vilkårene som ble sendt med for " +
+                        "Fant ikke ${vilkårResultatSomSkalOppdateres.vilkårType} i vilkårene som ble sendt med for " +
                             "${personResultatSomSkalOppdateres.aktør.aktivFødselsnummer()}.",
                     )
 
-            value.resultat = nyttVilkårResultat.resultat
-            value.periodeFom = nyttVilkårResultat.periodeFom
-            value.periodeTom = nyttVilkårResultat.periodeTom
+            vilkårResultatSomSkalOppdateres.resultat = nyttVilkårResultat.resultat
+            vilkårResultatSomSkalOppdateres.periodeFom = nyttVilkårResultat.periodeFom
+            vilkårResultatSomSkalOppdateres.periodeTom = nyttVilkårResultat.periodeTom
         }
-
-        personResultatSomSkalOppdateres.vilkårResultater.clear()
-        personResultatSomSkalOppdateres.vilkårResultater.addAll(vilkårMap.values)
     }
 }
 
