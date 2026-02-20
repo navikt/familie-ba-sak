@@ -294,6 +294,13 @@ class AutovedtakFødselshendelseService(
             }
         ) {
             return "Mor bosatt i riket i mindre enn 12 måneder."
+        } else if (vilkårResultat.evalueringÅrsaker.any {
+                VilkårIkkeOppfyltÅrsak.valueOf(
+                    it,
+                ) == VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_6_MND
+            }
+        ) {
+            return "Mor bosatt i riket i mindre enn 6 måneder."
         }
         return "Mor er ikke bosatt i riket."
     }

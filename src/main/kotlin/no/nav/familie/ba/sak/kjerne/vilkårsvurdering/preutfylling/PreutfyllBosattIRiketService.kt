@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.utils.erMinst12Måneder
 import no.nav.familie.ba.sak.kjerne.tidslinje.utils.erMinst12MånederMedNullTomSomUendelig
+import no.nav.familie.ba.sak.kjerne.tidslinje.utils.erMinst6Måneder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD
@@ -133,7 +134,7 @@ class PreutfyllBosattIRiketService(
                     when {
                         erNordiskOgBosatt is OppfyltDelvilkår -> erNordiskOgBosatt
                         erØvrigeKravOppfylt is OppfyltDelvilkår -> erØvrigeKravOppfylt
-                        else -> IkkeOppfyltDelvilkår((erNordiskOgBosatt?.ikkeOppfyltEvalueringÅrsaker.orEmpty() + erØvrigeKravOppfylt?.ikkeOppfyltEvalueringÅrsaker.orEmpty()))
+                        else -> IkkeOppfyltDelvilkår(ikkeOppfyltEvalueringÅrsaker = (erNordiskOgBosatt?.ikkeOppfyltEvalueringÅrsaker.orEmpty() + erØvrigeKravOppfylt?.ikkeOppfyltEvalueringÅrsaker.orEmpty()))
                     }
                 }.kombinerMed(erBosattIFinnmarkEllerNordTromsTidslinje, erOppholdsadressePåSvalbardTidslinje) { erBosattIRiket, erBosattIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
                     when (erBosattIRiket) {
@@ -186,7 +187,7 @@ class PreutfyllBosattIRiketService(
                     verdi =
                         when (erBosattINorgePeriode.verdi) {
                             true -> sjekkØvrigeKravForPeriode(behandlingÅrsak, erBosattINorgePeriode, personResultat, person)
-                            else -> IkkeOppfyltDelvilkår(setOf(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET))
+                            else -> IkkeOppfyltDelvilkår(ikkeOppfyltEvalueringÅrsaker = setOf(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET))
                         },
                     fom = erBosattINorgePeriode.fom,
                     tom = erBosattINorgePeriode.tom,
@@ -200,8 +201,12 @@ class PreutfyllBosattIRiketService(
         person: Person,
     ): Delvilkår =
         when {
-            erBosattINorgePeriode.erMinst12Måneder() -> {
+            behandlingÅrsak != BehandlingÅrsak.FØDSELSHENDELSE && erBosattINorgePeriode.erMinst12Måneder() -> {
                 OppfyltDelvilkår("- Norsk bostedsadresse i minst 12 måneder.")
+            }
+
+            behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE && erBosattINorgePeriode.erMinst6Måneder() -> {
+                OppfyltDelvilkår("- Norsk bostedsadresse i minst 6 måneder.")
             }
 
             erBosattINorgePeriode.omfatter(person.fødselsdato) -> {
@@ -219,7 +224,13 @@ class PreutfyllBosattIRiketService(
             }
 
             else -> {
-                IkkeOppfyltDelvilkår(setOf(VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_12_MND))
+                val ikkeOppfyltÅrsak =
+                    if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+                        VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_6_MND
+                    } else {
+                        VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_12_MND
+                    }
+                IkkeOppfyltDelvilkår(ikkeOppfyltEvalueringÅrsaker = setOf(ikkeOppfyltÅrsak))
             }
         }
 

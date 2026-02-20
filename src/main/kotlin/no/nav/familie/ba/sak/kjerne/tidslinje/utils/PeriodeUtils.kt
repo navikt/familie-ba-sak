@@ -24,4 +24,6 @@ fun <V> Periode<V>.splitPerMåned(tilOgMedMåned: YearMonth): List<Periode<V>> {
 
 fun Periode<*>.erMinst12Måneder(): Boolean = ChronoUnit.MONTHS.between(fom, tom ?: LocalDate.now()) >= 12
 
+fun Periode<*>.erMinst6Måneder(): Boolean = ChronoUnit.MONTHS.between(fom, tom ?: LocalDate.now()) >= 6
+
 fun Periode<*>.erMinst12MånederMedNullTomSomUendelig(): Boolean = tom?.let { ChronoUnit.MONTHS.between(fom, tom) >= 12 } ?: true
