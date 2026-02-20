@@ -151,7 +151,7 @@ internal class StatsborgerskapServiceTest {
                     )
 
                 val person = lagPerson()
-                // Igjen fødselsdato til barn før brexit slik at vi får EØS-periode før brexit og deretter en tredjelandsperiode.
+                // Fødselsdato til barn før brexit slik at vi får EØS-periode før brexit og deretter en tredjelandsperiode.
                 val barn = lagPerson(fødselsdato = LocalDate.of(2010, 1, 1))
 
                 // Act
@@ -185,7 +185,7 @@ internal class StatsborgerskapServiceTest {
                     )
 
                 val person = lagPerson(fødselsdato = datoFørBrexit.minusYears(2))
-                // Igjen fødselsdato til barn før brexit slik at vi får EØS-periode før brexit og deretter en tredjelandsperiode.
+                // Fødselsdato til barn før brexit slik at vi får EØS-periode før brexit og deretter en tredjelandsperiode.
                 val barn = lagPerson(fødselsdato = LocalDate.of(2010, 1, 1))
 
                 // Act

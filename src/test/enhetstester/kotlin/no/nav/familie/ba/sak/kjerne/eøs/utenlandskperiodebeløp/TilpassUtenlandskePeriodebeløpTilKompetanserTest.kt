@@ -98,4 +98,29 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserTest {
 
         assertThat(faktiskeUtenlandskPeriodebeløp).isEqualTo(forventedeUtenlandskePeriodebeløp)
     }
+
+    @Test
+    fun `det skal genereres utenlandsk periodebeløp dersom siste kompetanse starter i inneværende måned`() {
+        val gjeldendeUtenlandskePeriodeBeløp =
+            UtenlandskPeriodebeløpBuilder(nov2020)
+                .medBeløp("12", "PLN", "PL", barn1, barn2)
+                .bygg()
+
+        val kompetanser =
+            KompetanseBuilder(nov2020)
+                .medKompetanse("SS", barn1, barn2, annenForeldersAktivitetsland = "PL")
+                .medKompetanse("  S>", barn2, annenForeldersAktivitetsland = "PL")
+                .bygg()
+
+        val forventedeUtenlandskePeriodebeløp =
+            UtenlandskPeriodebeløpBuilder(nov2020)
+                .medBeløp("12", "PLN", "PL", barn1, barn2)
+                .medBeløp("  ->", "PLN", "PL", barn2)
+                .bygg()
+
+        val faktiskeUtenlandskPeriodebeløp =
+            tilpassUtenlandskePeriodebeløpTilKompetanser(gjeldendeUtenlandskePeriodeBeløp, kompetanser, inneværendeMåned)
+
+        assertThat(faktiskeUtenlandskPeriodebeløp).isEqualTo(forventedeUtenlandskePeriodebeløp)
+    }
 }
