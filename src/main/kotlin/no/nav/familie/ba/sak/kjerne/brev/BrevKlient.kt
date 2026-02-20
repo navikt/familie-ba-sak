@@ -49,22 +49,23 @@ class BrevKlient(
         begrunnelseData: BegrunnelseMedData,
         vedtaksperiode: VedtaksperiodeMedBegrunnelser,
     ): String {
+        val behandlingId = vedtaksperiode.vedtak.behandling.id
         val uri = URI.create("$familieBrevUri/ba-sak/begrunnelser/${begrunnelseData.apiNavn}/tekst/")
-        secureLogger.info("Kaller familie brev($uri) med data $begrunnelseData")
-        logger.info("Henter begrunnelse ${begrunnelseData.apiNavn} på periode ${vedtaksperiode.fom} - ${vedtaksperiode.tom} i behandling ${vedtaksperiode.vedtak.behandling}")
+        secureLogger.info("Kaller familie brev($uri) med data $begrunnelseData for behandlingId=$behandlingId")
+        logger.info("Henter begrunnelse ${begrunnelseData.apiNavn} på periode ${vedtaksperiode.fom} - ${vedtaksperiode.tom} for behandlingId=$behandlingId.")
 
         return try {
             kallEksternTjeneste(FAMILIE_BREV_TJENESTENAVN, uri, "Henter begrunnelsestekst") {
                 postForEntity(uri, begrunnelseData)
             }
         } catch (exception: HttpClientErrorException.BadRequest) {
-            log.warn("En bad request oppstod ved henting av begrunneelsetekst. Se SecureLogs for detaljer,")
-            secureLogger.warn("En bad request oppstod ved henting av begrunnelsetekst", exception)
+            log.warn("En bad request oppstod ved henting av begrunneelsetekst for behandlingId=$behandlingId. Se SecureLogs for detaljer,")
+            secureLogger.warn("En bad request oppstod ved henting av begrunnelsetekst for behandlingId=$behandlingId. Autogenerert test:" + testVerktøyService.hentBegrunnelsetest(behandlingId), exception)
             throw FunksjonellFeil(
                 "Begrunnelsen ${begrunnelseData.apiNavn} passer ikke vedtaksperioden. Hvis du mener dette er feil, ta kontakt med team BAKS.",
             )
         } catch (e: Exception) {
-            secureLogger.info("Kall for å hente begrunnelsetekst feilet. Autogenerert test:\"" + testVerktøyService.hentBegrunnelsetest(vedtaksperiode.vedtak.behandling.id))
+            secureLogger.info("Kall for å hente begrunnelsetekst feilet for behandlingId=$behandlingId. Autogenerert test:\"" + testVerktøyService.hentBegrunnelsetest(behandlingId))
             throw e
         }
     }
