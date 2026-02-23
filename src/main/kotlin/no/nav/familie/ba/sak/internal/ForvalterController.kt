@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.validation.Valid
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
@@ -103,6 +104,7 @@ class ForvalterController(
     private val personidentRepository: PersonidentRepository,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val personidentService: PersonidentService,
+    private val envService: EnvService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -683,5 +685,22 @@ class ForvalterController(
         logger.info("Opprettet ferdigstill behandling task for behandling ${dto.behandlingsId} gjennom forvalter-endepunktet")
 
         return ResponseEntity.ok("Task opprettet ${task.id}")
+    }
+
+    @PostMapping("/opprett-test-institusjoner-for-klage")
+    @Operation(
+        summary = "Oppretter institusjoner for klage",
+        description = """Oppretter predefinerte institusjoner for klage og kobler dem til predefinerte fagsaker.""",
+    )
+    fun opprettInstitusjonerOgKobleFagsaker(): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Oppretter institusjoner for klage",
+        )
+        if (!envService.erPreprod()) {
+            return ResponseEntity.internalServerError().body("Skal bare kjøres i preprod")
+        }
+        forvalterService.opprettInstitusjonerOgKobleFagsaker()
+        return ResponseEntity.ok("Institusjoner opprettet og koblet til fagsaker")
     }
 }

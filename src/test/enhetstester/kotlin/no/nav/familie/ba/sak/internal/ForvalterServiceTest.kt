@@ -62,6 +62,9 @@ class ForvalterServiceTest {
             vilkårsvurderingService = vilkårsvurderingService,
             persongrunnlagService = persongrunnlagService,
             aktørIdRepository = mockk(relaxed = true),
+            institusjonRepository = mockk(relaxed = true),
+            institusjonsinfoRepository = mockk(relaxed = true),
+            behandlingRepository = mockk(relaxed = true),
         )
 
     @Test

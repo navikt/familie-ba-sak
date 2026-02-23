@@ -8,6 +8,7 @@ import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.secureLogger
@@ -15,12 +16,17 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
+import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonRepository
+import no.nav.familie.ba.sak.kjerne.institusjon.Institusjonsinfo
+import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonsinfoRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -49,6 +55,9 @@ class ForvalterService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val persongrunnlagService: PersongrunnlagService,
     private val aktørIdRepository: AktørIdRepository,
+    private val institusjonRepository: InstitusjonRepository,
+    private val institusjonsinfoRepository: InstitusjonsinfoRepository,
+    private val behandlingRepository: BehandlingRepository,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -244,6 +253,77 @@ class ForvalterService(
         fagsakRepository.save(fagsak)
 
         logger.info("Endret status fra LØPENDE til OPPRETTET for fagsak $fagsakId.")
+    }
+
+    @Transactional
+    fun opprettInstitusjonerOgKobleFagsaker() {
+        data class Data(
+            val fagsakId: Long,
+            val orgNummer: String,
+            val tssEksternId: String,
+        )
+
+        val dagensDato = LocalDate.now()
+
+        listOf(
+            Data(
+                fagsakId = 200142003L, // Hentet fra preprod
+                orgNummer = "813935376", // Opprettet i Dolly i q1 og q2
+                tssEksternId = "80000985460", // Funnet via oppslag i ba-sak-frontend
+            ),
+            Data(
+                fagsakId = 200142004L, // Hentet fra preprod
+                orgNummer = "817022308", // Opprettet i Dolly i q1 og q2
+                tssEksternId = "80000991386", // Funnet via oppslag i ba-sak-frontend
+            ),
+            Data(
+                fagsakId = 200142052L, // Hentet fra preprod
+                orgNummer = "890805396", // Opprettet i Dolly i q1 og q2
+                tssEksternId = "80000993294", // Funnet via oppslag i ba-sak-frontend
+            ),
+        ).forEach { data ->
+            if (institusjonRepository.findByOrgNummer(data.orgNummer) != null) {
+                throw Feil("Fant allerede en institusjon med orgnummer ${data.orgNummer}")
+            }
+
+            val institusjon =
+                institusjonRepository.save(
+                    Institusjon(
+                        orgNummer = data.orgNummer,
+                        tssEksternId = data.tssEksternId,
+                    ),
+                )
+
+            val fagsak = fagsakRepository.finnFagsak(data.fagsakId) ?: throw Feil("Fant ikke fagsak med id $data.fagsakId")
+            fagsak.institusjon = institusjon
+            fagsakRepository.save(fagsak)
+
+            val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id)
+            behandlinger.forEachIndexed { index, behandling ->
+                val institusjonsinfo = institusjonsinfoRepository.findByBehandlingId(behandling.id)
+                if (institusjonsinfo != null) {
+                    institusjonsinfoRepository.delete(institusjonsinfo)
+                    institusjonsinfoRepository.save(
+                        Institusjonsinfo(
+                            institusjon = institusjon,
+                            behandlingId = behandling.id,
+                            type = "Forretningsadresse",
+                            navn = "Testinstitusjon for Klage " + (index + 1),
+                            adresselinje1 = "Schous Plass " + (index + 1),
+                            adresselinje2 = null,
+                            adresselinje3 = null,
+                            postnummer = "0552",
+                            poststed = "Oslo",
+                            kommunenummer = "0301",
+                            gyldighetsperiode =
+                                DatoIntervallEntitet(
+                                    fom = dagensDato.minusYears(3),
+                                ),
+                        ),
+                    )
+                }
+            }
+        }
     }
 }
 
