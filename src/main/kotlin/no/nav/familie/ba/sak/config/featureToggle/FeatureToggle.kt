@@ -31,6 +31,9 @@ enum class FeatureToggle(
     // Toggle for å kunne skru av tungtkjørende statistikk for grafana når man f.eks. kjører autovedtak som satsendring/finnmarkstillegg
     TUNGTKJØRENDE_GRAFANA_STATISTIKK("familie-ba-sak.generer-grafana-statistikk"),
 
+    // Kjører satsendring før autobehandlling småbarnstillegg om behandling har gammel sats
+    AUTOMATISK_SATSENDRING_SMÅBARNSTILLEGG("familie-ba-sak.automatisk.satsendring.smaabarnstillegg"),
+
     // Release
 
     // Preutfylling
