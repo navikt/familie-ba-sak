@@ -360,7 +360,24 @@ class AutomatiskOppdaterValutakursServiceTest {
     @Nested
     inner class OppdaterValutakurserOgSimulerVedBehov {
         @Test
+        fun `skal ikke oppdatere valutakurs og simulering når det ikke er utenlandske periodebeløp`() {
+            // Arrange
+            val behandling = lagBehandling()
+            every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
+
+            // Act
+            automatiskOppdaterValutakursService.oppdaterValutakurserOgSimulerVedBehov(behandling.id)
+
+            // Assert
+            verify(exactly = 0) { simuleringService.oppdaterSimuleringPåBehandling(behandling) }
+
+            val valutakurser = valutakursService.hentValutakurser(BehandlingId(behandling.id))
+            assertThat(valutakurser).isEmpty()
+        }
+
+        @Test
         fun `skal oppdatere valutakurs og simulering når valutakurs er utdatert`() {
+            // Arrange
             val inneværendeMåned = dagensDato.toYearMonth()
             val forrigeMåned = dagensDato.minusMonths(1).toYearMonth()
             val forrigeForrigeMåned = dagensDato.minusMonths(2).toYearMonth()
@@ -394,6 +411,7 @@ class AutomatiskOppdaterValutakursServiceTest {
 
         @Test
         fun `skal ikke oppdatere valutakurs og simulering når valutakurs er oppdatert`() {
+            // Arrange
             val inneværendeMåned = dagensDato.toYearMonth()
             val forrigeMåned = dagensDato.minusMonths(1).toYearMonth()
 
