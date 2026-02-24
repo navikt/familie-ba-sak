@@ -526,9 +526,13 @@ class PreutfyllBorMedSøkerServiceTest {
         preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)
 
         // Assert
-        val borFastHosSøkerVilkår =
+
+        val personResultat =
             vilkårsvurdering.personResultater
                 .first { it.aktør == aktørBarn }
+
+        val borFastHosSøkerVilkår =
+            personResultat
                 .vilkårResultater
                 .single {
                     it.vilkårType == Vilkår.BOR_MED_SØKER
@@ -537,5 +541,6 @@ class PreutfyllBorMedSøkerServiceTest {
         assertThat(borFastHosSøkerVilkår.periodeFom).isEqualTo(LocalDate.now().minusYears(2))
         assertThat(borFastHosSøkerVilkår.resultat).isEqualTo(Resultat.OPPFYLT)
         assertThat(borFastHosSøkerVilkår.begrunnelse).isEqualTo("Fylt ut automatisk fra registerdata i PDL\n- Har samme delte bostedsadresse som søker.")
+        assertThat(borFastHosSøkerVilkår.begrunnelseForManuellKontroll).isEqualTo(BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_DELT_BOSTED)
     }
 }
