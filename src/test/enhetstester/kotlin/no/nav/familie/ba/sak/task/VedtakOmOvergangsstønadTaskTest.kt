@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.task
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.AUTOMATISK_SATSENDRING_SMÅBARNSTILLEGG
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
@@ -21,13 +19,11 @@ internal class VedtakOmOvergangsstønadTaskTest {
     private val autovedtakStegService = mockk<AutovedtakStegService>()
     private val personidentService = mockk<PersonidentService>()
     private val startSatsendring = mockk<StartSatsendring>()
-    private val featureToggleService = mockk<FeatureToggleService>()
     private val vedtakOmOvergangsstønadTask =
         VedtakOmOvergangsstønadTask(
             autovedtakStegService = autovedtakStegService,
             personidentService = personidentService,
             startSatsendring = startSatsendring,
-            featureToggleService = featureToggleService,
         )
 
     @Test
@@ -43,7 +39,6 @@ internal class VedtakOmOvergangsstønadTaskTest {
 
         every { personidentService.hentAktør(personIdent) } returns aktør
         every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(personIdent) } returns true
-        every { featureToggleService.isEnabled(AUTOMATISK_SATSENDRING_SMÅBARNSTILLEGG) } returns true
 
         // Act
         val rekjørSenereException = assertThrows<RekjørSenereException> { vedtakOmOvergangsstønadTask.doTask(task) }
@@ -67,7 +62,6 @@ internal class VedtakOmOvergangsstønadTaskTest {
 
         every { personidentService.hentAktør(personIdent) } returns aktør
         every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(personIdent) } returns true
-        every { featureToggleService.isEnabled(AUTOMATISK_SATSENDRING_SMÅBARNSTILLEGG) } returns true
 
         // Act & Assert
         assertThrows<RekjørSenereException> { vedtakOmOvergangsstønadTask.doTask(task) }
@@ -88,7 +82,6 @@ internal class VedtakOmOvergangsstønadTaskTest {
 
         every { personidentService.hentAktør(personIdent) } returns aktør
         every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(personIdent) } returns false
-        every { featureToggleService.isEnabled(AUTOMATISK_SATSENDRING_SMÅBARNSTILLEGG) } returns true
         every {
             autovedtakStegService.kjørBehandlingSmåbarnstillegg(
                 mottakersAktør = aktør,
