@@ -56,8 +56,8 @@ class PreutfyllBorMedSøkerService(
     ): Set<VilkårResultat> {
         val harSammeBostedsadresseTidslinje =
             lagBorMedSøkerTidslinje(
-                bostedsadresserBarn = bostedsadresserBarn.bostedsadresser,
-                bostedsadresserSøker = bostedsadresserSøker.bostedsadresser,
+                bostedsadresserBarn = bostedsadresserBarn,
+                bostedsadresserSøker = bostedsadresserSøker,
                 datoForBeskjæringAvFom = finnDatoForBeskjæringAvFom(bostedsadresserBarn.bostedsadresser, bostedsadresserSøker.bostedsadresser),
             )
 
@@ -96,18 +96,27 @@ class PreutfyllBorMedSøkerService(
     }
 
     private fun lagBorMedSøkerTidslinje(
-        bostedsadresserBarn: List<Adresse>,
-        bostedsadresserSøker: List<Adresse>,
+        bostedsadresserBarn: Adresser,
+        bostedsadresserSøker: Adresser,
         datoForBeskjæringAvFom: LocalDate,
     ): Tidslinje<Delvilkår> {
-        val bostedsadresserBarnTidslinje = lagBostedsadresseTidslinje(bostedsadresserBarn, datoForBeskjæringAvFom)
-        val bostedsadresserSøkerTidslinje = lagBostedsadresseTidslinje(bostedsadresserSøker, datoForBeskjæringAvFom)
+        val bostedsadresserBarnTidslinje = lagBostedsadresseTidslinje(bostedsadresserBarn.bostedsadresser, datoForBeskjæringAvFom)
+        val deltBostedsadresserBarnTidslinje = lagBostedsadresseTidslinje(bostedsadresserBarn.delteBosteder, datoForBeskjæringAvFom)
+        val bostedsadresserSøkerTidslinje = lagBostedsadresseTidslinje(bostedsadresserSøker.bostedsadresser, datoForBeskjæringAvFom)
 
-        return bostedsadresserBarnTidslinje.kombinerMed(bostedsadresserSøkerTidslinje) { barnAdresse, søkerAdresse ->
-            if (barnAdresse != null && harVærtSammeAdresseMinst3Mnd(barnAdresse, søkerAdresse)) {
-                OppfyltDelvilkår(begrunnelse = "- Har samme bostedsadresse som søker.")
-            } else {
-                IkkeOppfyltDelvilkår(begrunnelse = "- Har ikke samme fast eller delt bostedsadresse som søker")
+        return bostedsadresserSøkerTidslinje.kombinerMed(bostedsadresserBarnTidslinje, deltBostedsadresserBarnTidslinje) { søkerAdresse, barnBostedAdresse, barnDeltBostedAdresse ->
+            when {
+                barnBostedAdresse != null && harVærtSammeAdresseMinst3Mnd(barnBostedAdresse, søkerAdresse) -> {
+                    OppfyltDelvilkår(begrunnelse = "- Har samme bostedsadresse som søker.")
+                }
+
+                barnDeltBostedAdresse != null && harVærtSammeAdresseMinst3Mnd(barnDeltBostedAdresse, søkerAdresse) -> {
+                    OppfyltDelvilkår(begrunnelse = "- Har samme delte bostedsadresse som søker.")
+                }
+
+                else -> {
+                    IkkeOppfyltDelvilkår(begrunnelse = "- Har ikke samme fast eller delt bostedsadresse som søker")
+                }
             }
         }
     }
