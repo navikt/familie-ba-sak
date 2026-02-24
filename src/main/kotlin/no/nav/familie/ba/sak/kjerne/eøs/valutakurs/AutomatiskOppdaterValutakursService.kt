@@ -260,13 +260,16 @@ class AutomatiskOppdaterValutakursService(
     fun oppdaterValutakurserOgSimulerVedBehov(behandlingId: Long) {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
+        val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId)
+        if (utenlandskePeriodebeløp.isEmpty()) return
+
         val valutakurser = valutakursService.hentValutakurser(BehandlingId(behandlingId))
         val inneværendeMåned = YearMonth.now(clockProvider.get())
 
         if (valutakurser.måValutakurserOppdateresForMåned(inneværendeMåned)) {
             val sisteValutakursdato = valutakurser.lastOrNull { it.valutakursdato != null }?.valutakursdato
             logger.info("Valutakurs for behandling: $behandlingId er utdatert, siste valutakursDato: $sisteValutakursdato. Oppdaterer valutakurser og simulering.")
-            oppdaterValutakurserEtterEndringstidspunkt(behandling)
+            oppdaterValutakurserEtterEndringstidspunkt(behandling, utenlandskePeriodebeløp)
             simuleringService.oppdaterSimuleringPåBehandling(behandling)
         }
     }

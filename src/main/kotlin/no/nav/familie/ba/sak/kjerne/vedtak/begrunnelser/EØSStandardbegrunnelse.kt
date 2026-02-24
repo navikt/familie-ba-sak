@@ -386,6 +386,18 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
         override val sanityApiNavn = "innvilgetSekundaerToArbeidslandSokerFaarPensjonFraAnnetLand"
     },
+    INNVILGET_NASJONAL_RETT_SEKUNDÆRLAND_ALENEANSVAR_ARBEID_ANNET_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetNasjonalRettSekundarlandAleneansvarArbeidAnnetLand"
+    },
+    INNVILGET_NASJONAL_RETT_SEKUNDÆR_ALENEANSVAR_FÅR_PENGER_SOM_ERSTATTER_LØNN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetNasjonalRettSekundarAleneansvarFaarPengerSomErstatterLonn"
+    },
+    INNVILGET_NASJONAL_RETT_SEKUNDÆR_ALENEANSVAR_FÅR_PENSJON_FRA_ANNET_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetNasjonalRettSekundarAleneansvarFaarPensjonFraAnnetLand"
+    },
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosStandard"
