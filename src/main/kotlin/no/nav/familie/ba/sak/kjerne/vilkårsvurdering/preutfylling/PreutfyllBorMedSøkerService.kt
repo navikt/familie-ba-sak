@@ -110,12 +110,12 @@ class PreutfyllBorMedSøkerService(
             .kombinerMed(bostedsadresserBarnTidslinje, deltBostedsadresserBarnTidslinje) { søkerAdresse, barnBostedAdresse, barnDeltBostedAdresse ->
                 when {
                     barnBostedAdresse != null && harVærtSammeAdresseMinst3Mnd(barnBostedAdresse, søkerAdresse) -> {
-                        OppfyltDelvilkår(begrunnelse = "- Har samme bostedsadresse som søker.")
+                        OppfyltDelvilkår(begrunnelse = "- Har delt bostedsadresse hos søker.")
                     }
 
                     barnDeltBostedAdresse != null && harVærtSammeAdresseMinst3Mnd(barnDeltBostedAdresse, søkerAdresse) -> {
                         OppfyltDelvilkår(
-                            begrunnelse = "- Har samme delte bostedsadresse som søker.",
+                            begrunnelse = "- Har delt bostedsadresse hos søker.",
                             begrunnelseForManuellKontroll = INFORMASJON_OM_DELT_BOSTED,
                         )
                     }
