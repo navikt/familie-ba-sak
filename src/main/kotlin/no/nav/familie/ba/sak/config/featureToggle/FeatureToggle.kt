@@ -45,6 +45,7 @@ enum class FeatureToggle(
     FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO("familie-ba-sak.filtrer-sivilstand-for-soker-paa-eldste-barns-fodselsdato"),
     FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO("familie-ba-sak.filtrer-opphold-paa-eldste-barns-fodselsdato"),
     VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR("familie-ba-sak.valider-endring-av-preutfylte-vilkaar"),
+    IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG("familie-ba-sak.ikke-lagre-duplikat-av-personopplysningsgrunnlag"),
 
     // NAV-25256
     SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN("familie-ba-sak.skjermet-barn"),

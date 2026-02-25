@@ -50,6 +50,32 @@ data class Dødsfall(
             tom = null,
             verdi = if (dødsfallAdresse == null) "-" else hentAdresseToString(),
         )
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Dødsfall
+
+        if (dødsfallDato != other.dødsfallDato) return false
+        if (dødsfallAdresse != other.dødsfallAdresse) return false
+        if (dødsfallPostnummer != other.dødsfallPostnummer) return false
+        if (dødsfallPoststed != other.dødsfallPoststed) return false
+        if (manuellRegistrert != other.manuellRegistrert) return false
+        if (person != other.person) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = dødsfallDato.hashCode()
+        result = 31 * result + (dødsfallAdresse?.hashCode() ?: 0)
+        result = 31 * result + (dødsfallPostnummer?.hashCode() ?: 0)
+        result = 31 * result + (dødsfallPoststed?.hashCode() ?: 0)
+        result = 31 * result + manuellRegistrert.hashCode()
+        result = 31 * result + person.hashCode()
+        return result
+    }
 }
 
 fun lagDødsfallFraPdl(
