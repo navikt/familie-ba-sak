@@ -54,6 +54,7 @@ data class GrArbeidsforhold(
         if (periode != other.periode) return false
         if (arbeidsgiverId != other.arbeidsgiverId) return false
         if (arbeidsgiverType != other.arbeidsgiverType) return false
+        if (person != other.person) return false
 
         return true
     }
@@ -62,6 +63,7 @@ data class GrArbeidsforhold(
         var result = periode?.hashCode() ?: 0
         result = 31 * result + (arbeidsgiverId?.hashCode() ?: 0)
         result = 31 * result + (arbeidsgiverType?.hashCode() ?: 0)
+        result = 31 * result + person.hashCode()
         return result
     }
 

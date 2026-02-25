@@ -62,6 +62,7 @@ data class Dødsfall(
         if (dødsfallPostnummer != other.dødsfallPostnummer) return false
         if (dødsfallPoststed != other.dødsfallPoststed) return false
         if (manuellRegistrert != other.manuellRegistrert) return false
+        if (person != other.person) return false
 
         return true
     }
@@ -72,6 +73,7 @@ data class Dødsfall(
         result = 31 * result + (dødsfallPostnummer?.hashCode() ?: 0)
         result = 31 * result + (dødsfallPoststed?.hashCode() ?: 0)
         result = 31 * result + manuellRegistrert.hashCode()
+        result = 31 * result + person.hashCode()
         return result
     }
 }

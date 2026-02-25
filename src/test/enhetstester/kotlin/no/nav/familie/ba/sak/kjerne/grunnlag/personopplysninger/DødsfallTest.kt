@@ -20,6 +20,12 @@ class DødsfallTest {
     @Nested
     inner class Equals {
         @Test
+        fun `skal returnere false hvis person er ulik`() {
+            val annenDødsfall = dødsfall.copy(person = tilfeldigPerson())
+            assert(dødsfall != annenDødsfall)
+        }
+        
+        @Test
         fun `skal returnere false hvis dødsfallDato er ulik`() {
             val annenDødsfall = dødsfall.copy(dødsfallDato = LocalDate.now().minusDays(1))
             assert(dødsfall != annenDødsfall)

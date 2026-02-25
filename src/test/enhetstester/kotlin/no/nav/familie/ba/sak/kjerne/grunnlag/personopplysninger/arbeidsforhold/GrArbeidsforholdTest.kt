@@ -19,6 +19,12 @@ class GrArbeidsforholdTest {
     @Nested
     inner class Equals {
         @Test
+        fun `skal returnere false hvis person er ulik`() {
+            val annetArbeidsforhold = arbeidsforhold.copy(person = tilfeldigPerson())
+            assert(arbeidsforhold != annetArbeidsforhold)
+        }
+
+        @Test
         fun `skal returnere false hvis periode er ulik`() {
             val annetArbeidsforhold = arbeidsforhold.copy(periode = DatoIntervallEntitet(fom = LocalDate.of(2001, 1, 1), tom = LocalDate.of(2001, 12, 31)))
             assert(arbeidsforhold != annetArbeidsforhold)
