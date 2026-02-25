@@ -24,7 +24,7 @@ class DødsfallTest {
             val annenDødsfall = dødsfall.copy(person = tilfeldigPerson())
             assert(dødsfall != annenDødsfall)
         }
-        
+
         @Test
         fun `skal returnere false hvis dødsfallDato er ulik`() {
             val annenDødsfall = dødsfall.copy(dødsfallDato = LocalDate.now().minusDays(1))
