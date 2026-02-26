@@ -13,6 +13,7 @@ class PreutfyllVilkårService(
     private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService,
     private val preutfyllBorMedSøkerService: PreutfyllBorMedSøkerService,
     private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService,
+    private val preutfyllBosattIRiketForFødselshendelserService: PreutfyllBosattIRiketForFødselshendelserService,
     private val persongrunnlagService: PersongrunnlagService,
     private val featureToggleService: FeatureToggleService,
 ) {
@@ -37,11 +38,11 @@ class PreutfyllVilkårService(
 
     fun preutfyllBosattIRiketForFødselshendelseBehandlinger(
         vilkårsvurdering: Vilkårsvurdering,
-        identerVilkårSkalPreutfyllesFor: List<String>?,
+        barnSomSkalVurderesIFødselshendelse: List<String>?,
     ) {
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(
+        preutfyllBosattIRiketForFødselshendelserService.preutfyllBosattIRiket(
             vilkårsvurdering = vilkårsvurdering,
-            identerVilkårSkalPreutfyllesFor = identerVilkårSkalPreutfyllesFor,
+            barnSomSkalVurderesIFødselshendelse = barnSomSkalVurderesIFødselshendelse,
         )
     }
 
