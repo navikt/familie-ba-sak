@@ -271,7 +271,6 @@ class PreutfyllLovligOppholdServiceTest {
         @Test
         fun `skal håndtere flere av samme statsborgerskap ved EØS-sjekk`() {
             // Arrange
-            val tjueÅrSiden = LocalDate.now().minusYears(20)
             val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
 
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
@@ -509,6 +508,15 @@ class PreutfyllLovligOppholdServiceTest {
                     .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
 
             assertThat(lovligOppholdResultater).hasSize(2)
+
+            val oppfyltPeriode = lovligOppholdResultater.single { it.resultat == Resultat.OPPFYLT }
+            val ikkeOppfyltPeriode = lovligOppholdResultater.single { it.resultat == Resultat.IKKE_OPPFYLT }
+
+            assertThat(oppfyltPeriode.periodeFom).isEqualTo(barn.fødselsdato)
+            assertThat(oppfyltPeriode.periodeTom).isEqualTo(LocalDate.now().minusYears(1))
+
+            assertThat(ikkeOppfyltPeriode.periodeFom).isEqualTo(LocalDate.now().minusYears(1).plusDays(1))
+            assertThat(ikkeOppfyltPeriode.periodeTom).isNull()
         }
 
         private fun lagPersonopplysningGrunnlagMedSøkerOgBarn(
