@@ -127,12 +127,10 @@ class PreutfyllLovligOppholdService(
     private fun lagErEøsBorgerTidslinje(alleStatsborgerskap: List<GrStatsborgerskap>): Tidslinje<Boolean> =
         alleStatsborgerskap
             .map { statsborgerskap ->
-                listOf(
-                    Periode(
-                        verdi = statsborgerskap.medlemskap == Medlemskap.EØS,
-                        fom = statsborgerskap.gyldigPeriode?.fom,
-                        tom = statsborgerskap.gyldigPeriode?.tom,
-                    ),
+                Periode(
+                    verdi = statsborgerskap.medlemskap == Medlemskap.EØS,
+                    fom = statsborgerskap.gyldigPeriode?.fom,
+                    tom = statsborgerskap.gyldigPeriode?.tom,
                 ).tilTidslinje()
             }.kombiner { it.any() }
 
@@ -147,11 +145,11 @@ class PreutfyllLovligOppholdService(
     private fun lagHarOppholdstillatelseTidslinje(oppholdstillatelse: List<GrOpphold>): Tidslinje<Boolean> =
         oppholdstillatelse
             .filter { it.type in setOf(PERMANENT, MIDLERTIDIG) }
-            .mapIndexed { index, it ->
+            .map { oppholdstillatelse ->
                 Periode(
                     verdi = true,
-                    fom = it.gyldigPeriode?.fom,
-                    tom = it.gyldigPeriode?.tom.takeUnless { index == oppholdstillatelse.lastIndex },
-                )
-            }.tilTidslinje()
+                    fom = oppholdstillatelse.gyldigPeriode?.fom,
+                    tom = oppholdstillatelse.gyldigPeriode?.tom,
+                ).tilTidslinje()
+            }.kombiner { it.any() }
 }
