@@ -258,18 +258,21 @@ class AutomatiskOppdaterValutakursService(
 
     @Transactional
     fun oppdaterValutakurserOgSimulerVedBehov(behandlingId: Long) {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val utenlandskPeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId)
+        if (utenlandskPeriodebeløp.isEmpty()) return
 
-        val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId)
-        if (utenlandskePeriodebeløp.isEmpty()) return
+        val inneværendeMåned = YearMonth.now(clockProvider.get())
+        val senesteUpbTom = utenlandskPeriodebeløp.maxOf { upb -> upb.tom ?: inneværendeMåned }
+        val senesteMånedSomKreverValutakurs = minOf(senesteUpbTom, inneværendeMåned)
 
         val valutakurser = valutakursService.hentValutakurser(BehandlingId(behandlingId))
-        val inneværendeMåned = YearMonth.now(clockProvider.get())
+        if (valutakurser.måValutakurserOppdateresForMåned(senesteMånedSomKreverValutakurs)) {
+            val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+            val sisteValutakursdato = valutakurser.maxByOrNull { it.valutakursdato != null }?.valutakursdato
 
-        if (valutakurser.måValutakurserOppdateresForMåned(inneværendeMåned)) {
-            val sisteValutakursdato = valutakurser.lastOrNull { it.valutakursdato != null }?.valutakursdato
-            logger.info("Valutakurs for behandling: $behandlingId er utdatert, siste valutakursDato: $sisteValutakursdato. Oppdaterer valutakurser og simulering.")
-            oppdaterValutakurserEtterEndringstidspunkt(behandling, utenlandskePeriodebeløp)
+            logger.info("Valutakurs for behandling $behandlingId er utdatert for måned $senesteMånedSomKreverValutakurs. " +
+                    "Siste valutakursDato: $sisteValutakursdato. Oppdaterer valutakurser og simulering.")
+            oppdaterValutakurserEtterEndringstidspunkt(behandling, utenlandskPeriodebeløp)
             simuleringService.oppdaterSimuleringPåBehandling(behandling)
         }
     }
