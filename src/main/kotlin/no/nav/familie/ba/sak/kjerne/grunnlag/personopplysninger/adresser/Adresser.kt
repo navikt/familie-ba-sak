@@ -3,8 +3,10 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.tomTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.time.LocalDate
 
 private val FØRSTE_RELEVANTE_ADRESSEDATO_FOR_FINNMARKSTILLEGG = LocalDate.of(2025, 9, 30)
@@ -23,15 +25,7 @@ data class Adresser(
 
     fun harAdresserSomErRelevantForSvalbardtillegg(): Boolean = oppholdsadresse.finnAdressehistorikkFraOgMedDato(FØRSTE_RELEVANTE_ADRESSEDATO_FOR_SVALBARDSTILLEGG).any { it.erPåSvalbard() }
 
-    fun lagErOppholdsadresserPåSvalbardTidslinje(): Tidslinje<Boolean> {
-        if (oppholdsadresse.isEmpty()) {
-            return tomTidslinje()
-        }
-
-        val filtrerteAdresser = oppholdsadresse.filtrereUgyldigeOppholdsadresser()
-
-        return filtrerteAdresser.lagTidslinjeForAdresser("Oppholdsadresse") { it.erPåSvalbard() }
-    }
+    fun lagErOppholdsadresserPåSvalbardTidslinje(): Tidslinje<Boolean> = oppholdsadresse.filtrereUgyldigeOppholdsadresser().lagTidslinjeForAdresser("Oppholdsadresse") { it.erPåSvalbard() }
 
     fun lagErDeltBostedIFinnmarkEllerNordTromsTidslinje(): Tidslinje<Boolean> {
         val filtrerteAdresser = delteBosteder.filtrereUgyldigeAdresser()
@@ -58,6 +52,29 @@ data class Adresser(
         bostedsadresser
             .filtrereUgyldigeAdresser()
             .lagTidslinjeForAdresser("Bostedadresse") { adresse -> adresse.erINorge() }
+
+    fun lagErBosattINorgeEllerSvalbardTidslinje(): Tidslinje<Boolean> {
+        val bostedsadresseINorgeTidslinje = lagErBosattINorgeTidslinje()
+        val oppholdsadressePåSvalbardTidslinje = lagErOppholdsadresserPåSvalbardTidslinje()
+        return bostedsadresseINorgeTidslinje
+            .kombinerMed(oppholdsadressePåSvalbardTidslinje) { erBosattINorge, erBosattPåSvalbard ->
+                when {
+                    erBosattINorge == true || erBosattPåSvalbard == true -> true
+                    erBosattINorge == false && erBosattPåSvalbard == false -> false
+                    else -> null
+                }
+            }.tilPerioderIkkeNull()
+            .tilTidslinje()
+    }
+
+    fun lagErBosattIFinnmarkEllerNordTromsTidslinje(): Tidslinje<Boolean> {
+        val bostedsadresseIFinnmarkEllerNordTromsTidslinje = lagErBostedsadresseIFinnmarkEllerNordTromsTidslinje()
+        val deltBostedIFinnmarkEllerNordTromsTidslinje = lagErDeltBostedIFinnmarkEllerNordTromsTidslinje()
+        return bostedsadresseIFinnmarkEllerNordTromsTidslinje
+            .kombinerMed(deltBostedIFinnmarkEllerNordTromsTidslinje) { erBostedsadresseIFinnmarkEllerNordTroms, erDeltBostedIFinnmarkEllerNordTroms ->
+                erBostedsadresseIFinnmarkEllerNordTroms == true || erDeltBostedIFinnmarkEllerNordTroms == true
+            }
+    }
 
     companion object {
         fun opprettFra(pdlAdresser: PdlAdresserPerson?): Adresser =
