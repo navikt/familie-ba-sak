@@ -75,6 +75,7 @@ class PersongrunnlagServiceTest {
     @BeforeEach
     fun setup() {
         every { featureToggleService.isEnabled(FeatureToggle.ARBEIDSFORHOLD_STRENGERE_NEDHENTING) } returns true
+        every { featureToggleService.isEnabled(FeatureToggle.IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG) } returns true
     }
 
     @Test
@@ -149,19 +150,13 @@ class PersongrunnlagServiceTest {
                     lagBehandling(fagsak = defaultFagsak().copy(type = fagsakType))
                 }
             behandlinger.forEach { behandling ->
-                val nyttGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
-
-                every {
-                    persongrunnlagService.lagreOgDeaktiverGammel(any())
-                } returns nyttGrunnlag
-
+                every { persongrunnlagService.hentAktiv(behandling.id) } returns null
+                every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+                every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
                 every { personopplysningerService.hentPersoninfoEnkel(barnet.aktør) } returns PersonInfo(barnet.fødselsdato)
-
                 every {
                     personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnet.aktør)
                 } returns PersonInfo(barnet.fødselsdato, barnet.navn, barnet.kjønn)
-
-                every { personopplysningGrunnlagRepository.save(nyttGrunnlag) } returns nyttGrunnlag
 
                 every { featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
                 every { featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
@@ -289,9 +284,9 @@ class PersongrunnlagServiceTest {
             val mellomBarnForrigeBehandling = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, 1, 1))
 
             val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING)
-            val nyttGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
 
-            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } returns nyttGrunnlag
+            every { persongrunnlagService.hentAktiv(behandling.id) } returns null
+            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
 
             every { personopplysningerService.hentPersoninfoEnkel(eldsteBarnInneværendeBehandling.aktør) } returns PersonInfo(eldsteBarnInneværendeBehandling.fødselsdato)
             every { personopplysningerService.hentPersoninfoEnkel(yngsteBarnInneværendeBehandling.aktør) } returns PersonInfo(yngsteBarnInneværendeBehandling.fødselsdato)
@@ -306,7 +301,7 @@ class PersongrunnlagServiceTest {
             every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(mellomBarnForrigeBehandling.aktør) } returns
                 PersonInfo(mellomBarnForrigeBehandling.fødselsdato)
 
-            every { personopplysningGrunnlagRepository.save(nyttGrunnlag) } returns nyttGrunnlag
+            every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
             every { featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
             every { featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
             every { featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
@@ -344,9 +339,9 @@ class PersongrunnlagServiceTest {
             val mellomBarnInneværendeBehandling = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2015, 1, 1))
 
             val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
-            val nyttGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
 
-            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } returns nyttGrunnlag
+            every { persongrunnlagService.hentAktiv(behandling.id) } returns null
+            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
 
             every { personopplysningerService.hentPersoninfoEnkel(eldsteBarnForrigeBehandling.aktør) } returns PersonInfo(eldsteBarnForrigeBehandling.fødselsdato)
             every { personopplysningerService.hentPersoninfoEnkel(yngsteBarnForrigeBehandling.aktør) } returns PersonInfo(yngsteBarnForrigeBehandling.fødselsdato)
@@ -361,7 +356,7 @@ class PersongrunnlagServiceTest {
             every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(mellomBarnInneværendeBehandling.aktør) } returns
                 PersonInfo(mellomBarnInneværendeBehandling.fødselsdato)
 
-            every { personopplysningGrunnlagRepository.save(nyttGrunnlag) } returns nyttGrunnlag
+            every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
 
             every { featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
             every { featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
@@ -399,9 +394,8 @@ class PersongrunnlagServiceTest {
             val yngreBarn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 1, 1))
             val behandling = lagBehandling()
 
-            val nyttGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
-
-            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } returns nyttGrunnlag
+            every { persongrunnlagService.hentAktiv(behandling.id) } returns null
+            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
             every { personopplysningerService.hentPersoninfoEnkel(eldsteBarn.aktør) } returns PersonInfo(eldsteBarn.fødselsdato)
             every { personopplysningerService.hentPersoninfoEnkel(yngreBarn.aktør) } returns PersonInfo(yngreBarn.fødselsdato)
 
@@ -434,7 +428,7 @@ class PersongrunnlagServiceTest {
             every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(yngreBarn.aktør) } returns
                 PersonInfo(yngreBarn.fødselsdato)
 
-            every { personopplysningGrunnlagRepository.save(nyttGrunnlag) } returns nyttGrunnlag
+            every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
             every { kodeverkService.hentPoststed(any()) } returns "Oslo"
             every { featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
             every { featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true

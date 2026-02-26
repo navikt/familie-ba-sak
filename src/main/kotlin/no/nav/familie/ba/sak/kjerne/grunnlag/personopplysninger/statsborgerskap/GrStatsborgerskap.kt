@@ -67,6 +67,8 @@ data class GrStatsborgerskap(
 
         if (gyldigPeriode != other.gyldigPeriode) return false
         if (landkode != other.landkode) return false
+        if (medlemskap != other.medlemskap) return false
+        if (person != other.person) return false
 
         return true
     }
@@ -74,6 +76,8 @@ data class GrStatsborgerskap(
     override fun hashCode(): Int {
         var result = gyldigPeriode.hashCode()
         result = 31 * result + landkode.hashCode()
+        result = 31 * result + medlemskap.hashCode()
+        result = 31 * result + person.hashCode()
         return result
     }
 

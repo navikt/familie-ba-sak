@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
@@ -238,6 +239,7 @@ class PersongrunnlagService(
 
     /**
      * Henter oppdatert registerdata og lagrer i nytt aktivt personopplysningsgrunnlag
+     * Lagrer kun dersom det er relevante endringer fra det aktive personopplysningsgrunnlaget.
      */
     @Transactional
     fun hentOgLagreSøkerOgBarnINyttGrunnlag(
@@ -247,7 +249,12 @@ class PersongrunnlagService(
         målform: Målform,
         barnFraForrigeBehandling: List<Aktør> = emptyList(),
     ): PersonopplysningGrunnlag {
-        val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
+        val nyttPersonopplysningGrunnlag =
+            if (featureToggleService.isEnabled(IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG)) {
+                PersonopplysningGrunnlag(behandlingId = behandling.id)
+            } else {
+                lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
+            }
 
         val alleBarna = barnFraInneværendeBehandling.union(barnFraForrigeBehandling).toList()
         val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarna)
@@ -257,7 +264,7 @@ class PersongrunnlagService(
         val søker =
             hentPerson(
                 aktør = aktør,
-                personopplysningGrunnlag = personopplysningGrunnlag,
+                personopplysningGrunnlag = nyttPersonopplysningGrunnlag,
                 målform = målform,
                 personType =
                     when (behandling.fagsak.type) {
@@ -270,13 +277,13 @@ class PersongrunnlagService(
                 hentArbeidsforhold = behandling.skalBehandlesAutomatisk,
                 eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
             )
-        personopplysningGrunnlag.personer.add(søker)
+        nyttPersonopplysningGrunnlag.personer.add(søker)
 
         alleBarna.forEach { barnsAktør ->
-            personopplysningGrunnlag.personer.add(
+            nyttPersonopplysningGrunnlag.personer.add(
                 hentPerson(
                     aktør = barnsAktør,
-                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    personopplysningGrunnlag = nyttPersonopplysningGrunnlag,
                     målform = målform,
                     personType = PersonType.BARN,
                     behandlingKategori = behandling.kategori,
@@ -289,10 +296,10 @@ class PersongrunnlagService(
 
         if (søker.hentSterkesteMedlemskap() == Medlemskap.EØS && behandling.skalBehandlesAutomatisk) {
             hentFarEllerMedmorAktør(barnFraInneværendeBehandling)?.also { farEllerMedmor ->
-                personopplysningGrunnlag.personer.add(
+                nyttPersonopplysningGrunnlag.personer.add(
                     hentPerson(
                         aktør = farEllerMedmor,
-                        personopplysningGrunnlag = personopplysningGrunnlag,
+                        personopplysningGrunnlag = nyttPersonopplysningGrunnlag,
                         målform = målform,
                         personType = PersonType.ANNENPART,
                         behandlingKategori = behandling.kategori,
@@ -305,13 +312,29 @@ class PersongrunnlagService(
             }
         }
 
-        return personopplysningGrunnlagRepository.save(personopplysningGrunnlag).also {
-            /*
-             * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
-             * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
-             */
-            arbeidsfordelingService.fastsettBehandlendeEnhet(behandling)
-            saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
+        if (featureToggleService.isEnabled(IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG)) {
+            val aktivtPersonopplysningGrunnlag = hentAktiv(behandling.id)
+            return if (aktivtPersonopplysningGrunnlag == null || nyttPersonopplysningGrunnlag.harRelevantEndring(aktivtPersonopplysningGrunnlag)) {
+                lagreOgDeaktiverGammel(nyttPersonopplysningGrunnlag).also {
+                    /*
+                     * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
+                     * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
+                     */
+                    arbeidsfordelingService.fastsettBehandlendeEnhet(behandling)
+                    saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
+                }
+            } else {
+                aktivtPersonopplysningGrunnlag
+            }
+        } else {
+            return personopplysningGrunnlagRepository.save(nyttPersonopplysningGrunnlag).also {
+                /*
+                 * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
+                 * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
+                 */
+                arbeidsfordelingService.fastsettBehandlendeEnhet(behandling)
+                saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
+            }
         }
     }
 

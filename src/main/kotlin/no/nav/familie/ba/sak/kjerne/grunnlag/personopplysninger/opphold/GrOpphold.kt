@@ -59,6 +59,7 @@ data class GrOpphold(
 
         if (gyldigPeriode != other.gyldigPeriode) return false
         if (type != other.type) return false
+        if (person != other.person) return false
 
         return true
     }
@@ -66,6 +67,7 @@ data class GrOpphold(
     override fun hashCode(): Int {
         var result = gyldigPeriode.hashCode()
         result = 31 * result + type.hashCode()
+        result = 31 * result + person.hashCode()
         return result
     }
 
