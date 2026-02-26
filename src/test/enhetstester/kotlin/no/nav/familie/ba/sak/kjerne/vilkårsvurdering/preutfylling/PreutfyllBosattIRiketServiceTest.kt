@@ -695,66 +695,6 @@ class PreutfyllBosattIRiketServiceTest {
     }
 
     @Test
-    fun `skal gi ikke oppfylt bosatt i riket vilkår dersom bosatt i Norge i mindre enn 6 mnd og behandlingsårsak er fødselshendelse`() {
-        // Arrange
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
-        val barnAktør = lagAktør()
-        val søkerPersonIdent = randomFnr()
-
-        val søkerAktør =
-            lagAktør(søkerPersonIdent).also {
-                it.personidenter.add(
-                    Personident(
-                        fødselsnummer = søkerPersonIdent,
-                        aktør = it,
-                        aktiv = søkerPersonIdent == it.personidenter.first().fødselsnummer,
-                    ),
-                )
-            }
-
-        val persongrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, barnasFødselsdatoer = listOf(LocalDate.now().minusMonths(2)), søkerPersonIdent = søkerPersonIdent, barnasIdenter = listOf(barnAktør.aktivFødselsnummer()), barnAktør = listOf(barnAktør), søkerAktør = søkerAktør)
-                .also { grunnlag ->
-                    grunnlag.personer.forEach {
-                        it.statsborgerskap = emptyList<GrStatsborgerskap>().toMutableList()
-                        it.bostedsadresser =
-                            mutableListOf(
-                                lagGrVegadresseBostedsadresse(
-                                    periode =
-                                        DatoIntervallEntitet(
-                                            fom = LocalDate.now().minusMonths(6).plusDays(1),
-                                        ),
-                                    matrikkelId = 12345L,
-                                ),
-                            )
-                    }
-                }
-        val vilkårsvurdering =
-            lagVilkårsvurdering(persongrunnlag, behandling).also {
-                it.personResultater =
-                    setOf(
-                        lagPersonResultat(vilkårsvurdering = it, aktør = barnAktør),
-                        lagPersonResultat(vilkårsvurdering = it, aktør = søkerAktør),
-                    )
-            }
-
-        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
-
-        // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
-
-        // Assert
-        val vilkårResultat =
-            vilkårsvurdering.personResultater
-                .find { it.aktør == søkerAktør }
-                ?.vilkårResultater
-                ?.single { it.vilkårType == Vilkår.BOSATT_I_RIKET }
-        assertThat(vilkårResultat!!.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
-        assertThat(vilkårResultat.begrunnelse).isEqualTo(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
-        assertThat(vilkårResultat.begrunnelseForManuellKontroll).isNull()
-    }
-
-    @Test
     fun `skal ikke gi oppfylt delvilkår dersom det eksisterer opphold samtidig som man har adresse i norge for oppfylt periode når behandlingsårsak ikke er fødselshendelse`() {
         // Arrange
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)

@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.cucumber.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagGrUtenlandskOppholdsadresse
 import no.nav.familie.ba.sak.datagenerator.lagGrVegadresseBostedsadresse
 import no.nav.familie.ba.sak.datagenerator.lagGrVegadresseOppholdsadresse
@@ -37,10 +38,12 @@ class PreutfyllBosattIRiketForFødselshendelserServiceTest {
     @Test
     fun `skal gi oppfylt bosatt i riket vilkår for søker og barn dersom søker har vært bosatt i Norge i minst 6 mnd og barn har vært bosatt fra fødsel`() {
         // Arrange
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
+
         val barnFødselsdato = LocalDate.now()
         val barn = lagPerson(fødselsdato = barnFødselsdato, type = PersonType.BARN)
         val søker = lagPerson(type = PersonType.SØKER)
+        val fagsak = lagFagsak(aktør = søker.aktør)
+        val behandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.FØDSELSHENDELSE)
 
         val persongrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -101,7 +104,7 @@ class PreutfyllBosattIRiketForFødselshendelserServiceTest {
         // Act
         preutfyllBosattIRiketForFødselshendelserService.preutfyllBosattIRiket(
             vilkårsvurdering = vilkårsvurdering,
-            identerVilkårSkalPreutfyllesFor = listOf(søker.aktør.aktivFødselsnummer(), barn.aktør.aktivFødselsnummer()),
+            barnSomSkalVurderesIFødselshendelse = listOf(barn.aktør.aktivFødselsnummer()),
         )
 
         // Assert
@@ -128,10 +131,11 @@ class PreutfyllBosattIRiketForFødselshendelserServiceTest {
     @Test
     fun `skal gi ikke oppfylt bosatt i riket vilkår for søker og barn dersom søker ikke har vært bosatt i Norge i minst 6 mnd og barnet ikke har vært bosatt fra fødsel`() {
         // Arrange
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
         val barnFødselsdato = LocalDate.now()
         val barn = lagPerson(fødselsdato = barnFødselsdato, type = PersonType.BARN)
         val søker = lagPerson(type = PersonType.SØKER)
+        val fagsak = lagFagsak(aktør = søker.aktør)
+        val behandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.FØDSELSHENDELSE)
 
         val persongrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -191,7 +195,7 @@ class PreutfyllBosattIRiketForFødselshendelserServiceTest {
         // Act
         preutfyllBosattIRiketForFødselshendelserService.preutfyllBosattIRiket(
             vilkårsvurdering = vilkårsvurdering,
-            identerVilkårSkalPreutfyllesFor = listOf(søker.aktør.aktivFødselsnummer(), barn.aktør.aktivFødselsnummer()),
+            barnSomSkalVurderesIFødselshendelse = listOf(barn.aktør.aktivFødselsnummer()),
         )
 
         // Assert
@@ -216,10 +220,11 @@ class PreutfyllBosattIRiketForFødselshendelserServiceTest {
     @Test
     fun `skal gi oppfylt bosatt i riket vilkår med utdypende vilkårsvurdering bosatt på Svalbard dersom søker og barn bor på Svalbard og øvrige krav er oppfylt`() {
         // Arrange
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
         val barnFødselsdato = LocalDate.now()
         val barn = lagPerson(fødselsdato = barnFødselsdato, type = PersonType.BARN)
         val søker = lagPerson(type = PersonType.SØKER)
+        val fagsak = lagFagsak(aktør = søker.aktør)
+        val behandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.FØDSELSHENDELSE)
 
         val persongrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -300,7 +305,7 @@ class PreutfyllBosattIRiketForFødselshendelserServiceTest {
         // Act
         preutfyllBosattIRiketForFødselshendelserService.preutfyllBosattIRiket(
             vilkårsvurdering = vilkårsvurdering,
-            identerVilkårSkalPreutfyllesFor = listOf(søker.aktør.aktivFødselsnummer(), barn.aktør.aktivFødselsnummer()),
+            barnSomSkalVurderesIFødselshendelse = listOf(barn.aktør.aktivFødselsnummer()),
         )
 
         // Assert
@@ -329,10 +334,11 @@ class PreutfyllBosattIRiketForFødselshendelserServiceTest {
     @Test
     fun `skal gi oppfylt bosatt i riket vilkår med utdypende vilkårsvurdering bosatt i Finnmark eller NordTroms dersom søker og barn bor i Finnmark eller NordTroms og øvrige krav er oppfylt`() {
         // Arrange
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
         val barnFødselsdato = LocalDate.now()
         val barn = lagPerson(fødselsdato = barnFødselsdato, type = PersonType.BARN)
         val søker = lagPerson(type = PersonType.SØKER)
+        val fagsak = lagFagsak(aktør = søker.aktør)
+        val behandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.FØDSELSHENDELSE)
 
         val persongrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -395,7 +401,7 @@ class PreutfyllBosattIRiketForFødselshendelserServiceTest {
         // Act
         preutfyllBosattIRiketForFødselshendelserService.preutfyllBosattIRiket(
             vilkårsvurdering = vilkårsvurdering,
-            identerVilkårSkalPreutfyllesFor = listOf(søker.aktør.aktivFødselsnummer(), barn.aktør.aktivFødselsnummer()),
+            barnSomSkalVurderesIFødselshendelse = listOf(barn.aktør.aktivFødselsnummer()),
         )
 
         // Assert
