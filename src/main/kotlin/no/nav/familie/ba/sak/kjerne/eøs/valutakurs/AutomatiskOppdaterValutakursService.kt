@@ -270,8 +270,10 @@ class AutomatiskOppdaterValutakursService(
             val behandling = behandlingHentOgPersisterService.hent(behandlingId)
             val sisteValutakursdato = valutakurser.maxByOrNull { it.valutakursdato != null }?.valutakursdato
 
-            logger.info("Valutakurs for behandling $behandlingId er utdatert for måned $senesteMånedSomKreverValutakurs. " +
-                    "Siste valutakursDato: $sisteValutakursdato. Oppdaterer valutakurser og simulering.")
+            logger.info(
+                "Valutakurs for behandling $behandlingId er utdatert for måned $senesteMånedSomKreverValutakurs. " +
+                    "Siste valutakursDato: $sisteValutakursdato. Oppdaterer valutakurser og simulering.",
+            )
             oppdaterValutakurserEtterEndringstidspunkt(behandling, utenlandskPeriodebeløp)
             simuleringService.oppdaterSimuleringPåBehandling(behandling)
         }
