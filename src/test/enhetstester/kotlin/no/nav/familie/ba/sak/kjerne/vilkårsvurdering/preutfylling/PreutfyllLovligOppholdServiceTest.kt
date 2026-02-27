@@ -519,6 +519,54 @@ class PreutfyllLovligOppholdServiceTest {
             assertThat(ikkeOppfyltPeriode.periodeTom).isNull()
         }
 
+        @Test
+        fun `skal håndtere overlappende perioder i oppholdstillatelser `() {
+            // Arrange
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+            val personopplysningsgrunnlag =
+                lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
+                    søker.apply {
+                        opphold =
+                            mutableListOf(
+                                GrOpphold(
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(10), tom = null),
+                                    person = this,
+                                ),
+                                GrOpphold(
+                                    type = OPPHOLDSTILLATELSE.PERMANENT,
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(2), tom = null),
+                                    person = this,
+                                ),
+                            )
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "AFG",
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(10), tom = null),
+                                    person = this,
+                                ),
+                            )
+                    }
+                }
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningsgrunnlag
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+
+            // Assert
+            val lovligOppholdResultat =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == søkerAktør }
+                    .vilkårResultater
+                    .single { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+
+            assertThat(lovligOppholdResultat.resultat).isEqualTo(Resultat.OPPFYLT)
+            assertThat(lovligOppholdResultat.periodeFom).isEqualTo(barn.fødselsdato)
+            assertThat(lovligOppholdResultat.periodeTom).isNull()
+        }
+
         private fun lagPersonopplysningGrunnlagMedSøkerOgBarn(
             søker: (Person) -> Person = { it },
         ): PersonopplysningGrunnlag =
