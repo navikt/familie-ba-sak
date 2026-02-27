@@ -75,13 +75,16 @@ enum class Brevmal(
         "varselOmAarligRevurderingEosMedInnhentingAvOpplysninger",
         "Varsel om årlig revurdering EØS med innhenting av opplysninger",
     ),
-
     UTBETALING_ETTER_KA_VEDTAK(
         false,
         "utbetalingEtterKAVedtak",
         "Utbetaling etter KA-vedtak",
     ),
-
+    UTBETALING_ETTER_KA_VEDTAK_INSTITUSJON(
+        false,
+        "utbetalingEtterKaVedtakInstitusjon",
+        "Utbetaling etter KA-vedtak institusjon",
+    ),
     SVARTIDSBREV(false, "svartidsbrev", "Svartidsbrev"),
     SVARTIDSBREV_INSTITUSJON(false, "svartidsbrevInstitusjon", "Svartidsbrev institusjon"),
     FORLENGET_SVARTIDSBREV(false, "forlengetSvartidsbrev", "Forlenget svartidsbrev"),
@@ -210,6 +213,7 @@ enum class Brevmal(
             INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE,
             INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON,
             UTBETALING_ETTER_KA_VEDTAK,
+            UTBETALING_ETTER_KA_VEDTAK_INSTITUSJON,
             -> false
 
             VEDTAK_FØRSTEGANGSVEDTAK,
@@ -306,6 +310,8 @@ enum class Brevmal(
 
             UTBETALING_ETTER_KA_VEDTAK -> Dokumenttype.BARNETRYGD_UTBETALING_ETTER_KA_VEDTAK
 
+            UTBETALING_ETTER_KA_VEDTAK_INSTITUSJON -> Dokumenttype.BARNETRYGD_UTBETALING_ETTER_KA_VEDTAK_INSTITUSJON
+
             VEDTAK_ENDRING,
             VEDTAK_OPPHØRT,
             VEDTAK_OPPHØR_MED_ENDRING,
@@ -353,6 +359,7 @@ enum class Brevmal(
                 INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE,
                 INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON,
                 UTBETALING_ETTER_KA_VEDTAK,
+                UTBETALING_ETTER_KA_VEDTAK_INSTITUSJON,
                 -> Distribusjonstype.VIKTIG
 
                 VEDTAK_FØRSTEGANGSVEDTAK,

@@ -225,9 +225,11 @@ fun ManueltBrevRequest.tilBrev(
             )
         }
 
-        Brevmal.UTBETALING_ETTER_KA_VEDTAK -> {
+        Brevmal.UTBETALING_ETTER_KA_VEDTAK,
+        Brevmal.UTBETALING_ETTER_KA_VEDTAK_INSTITUSJON,
+        -> {
             UtbetalingEtterKAVedtak(
-                mal = Brevmal.UTBETALING_ETTER_KA_VEDTAK,
+                mal = brevmal,
                 data =
                     UtbetalingEtterKAVedtakData(
                         delmalData =
