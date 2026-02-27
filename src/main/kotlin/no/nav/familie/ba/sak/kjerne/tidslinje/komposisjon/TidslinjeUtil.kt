@@ -50,7 +50,7 @@ fun opprettBooleanTidslinje(
 
 fun Tidslinje<Boolean>.tilBooleanTidslinjeHvisTom(verdi: Boolean): Tidslinje<Boolean> {
     if (this.erTom()) {
-        return listOf(Periode(verdi, PRAKTISK_TIDLIGSTE_DAG, PRAKTISK_SENESTE_DAG)).tilTidslinje()
+        return Periode(verdi, PRAKTISK_TIDLIGSTE_DAG, PRAKTISK_SENESTE_DAG).tilTidslinje()
     }
     return this
 }

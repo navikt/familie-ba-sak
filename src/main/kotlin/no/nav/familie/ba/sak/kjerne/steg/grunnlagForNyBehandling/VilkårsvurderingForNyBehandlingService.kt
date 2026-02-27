@@ -203,14 +203,10 @@ class VilkårsvurderingForNyBehandlingService(
         if (!behandling.skalBehandlesAutomatisk && !behandling.erTekniskEndring() && !behandling.erFalskIdentitet()) {
             preutfyllVilkårService.preutfyllVilkår(vilkårsvurdering = initiellVilkårsvurdering)
         } else if (behandling.opprettetÅrsak == FØDSELSHENDELSE) {
-            try {
-                preutfyllVilkårService.preutfyllBosattIRiketForFødselshendelseBehandlinger(
-                    vilkårsvurdering = initiellVilkårsvurdering,
-                    barnSomSkalVurderesIFødselshendelse = barnSomSkalVurderesIFødselshendelse ?: throw Feil("Fødselshendelser må ha en liste over barn som skal vurderes for å kunne preutfylle 'Bosatt i riket'-vilkåret"),
-                )
-            } catch (e: Exception) {
-                logger.warn("Feil ved preutfylling av 'Bosatt i riket'-vilkåret i fødselshendelsebehandling ${behandling.id}", e)
-            }
+            preutfyllVilkårService.preutfyllBosattIRiketForFødselshendelseBehandlinger(
+                vilkårsvurdering = initiellVilkårsvurdering,
+                barnSomSkalVurderesIFødselshendelse = barnSomSkalVurderesIFødselshendelse ?: throw Feil("Fødselshendelser må ha en liste over barn som skal vurderes for å kunne preutfylle 'Bosatt i riket'-vilkåret"),
+            )
         }
 
         tellMetrikkerForFødselshendelse(
