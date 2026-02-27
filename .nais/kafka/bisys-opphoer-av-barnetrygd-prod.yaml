@@ -19,7 +19,7 @@ spec:
       application: familie-ba-sak #owner
       access: write   # readwrite
     - team: bidrag
-      application: bidrag-grunnlag #consumer
+      application: bidrag-automatisk-jobb #consumer
       access: read
     - team: teamfamilie
       application: familie-baks-kafka-manager
