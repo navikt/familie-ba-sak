@@ -15,20 +15,25 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
+import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.ekstern.restDomene.BaseFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilFagsakDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -56,9 +61,11 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -76,6 +83,8 @@ class BeregningServiceTest {
     private val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
     private val overgangsstønadService = mockk<OvergangsstønadService>()
     private val featureToggleService = mockk<FeatureToggleService>()
+    private val fagsakService = mockk<FagsakService>()
+
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService =
         AndelerTilkjentYtelseOgEndreteUtbetalingerService(
             andelTilkjentYtelseRepository,
@@ -102,7 +111,6 @@ class BeregningServiceTest {
 
     @BeforeEach
     fun setUp() {
-        val fagsakService = mockk<FagsakService>()
         val fagsak = defaultFagsak()
 
         beregningService =
@@ -1112,6 +1120,81 @@ class BeregningServiceTest {
         verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
         verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) }
         verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) }
+    }
+
+    @Nested
+    inner class HentRelevanteTilkjentYtelserForBarn {
+        @Test
+        fun `skal returnere tilkjente ytelser tilknyttet behandlinger som er i ferd med å iverksettes`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER)
+            val barn = lagPerson(type = PersonType.BARN)
+            val fagsak = lagFagsak(id = 1L)
+            val annenFagsak = lagFagsak(id = 2L)
+            val behandlingIAnnenFagsak = lagBehandling(fagsak = annenFagsak, status = BehandlingStatus.IVERKSETTER_VEDTAK)
+
+            every { fagsakService.hentFagsakerPåPerson(aktør = barn.aktør) } returns listOf(fagsak, annenFagsak)
+
+            every { behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = annenFagsak.id) } returns listOf(behandlingIAnnenFagsak)
+
+            every { tilkjentYtelseRepository.findByBehandling(behandlingId = behandlingIAnnenFagsak.id) } returns lagTilkjentYtelse(behandling = behandlingIAnnenFagsak)
+
+            every { personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(behandlingId = behandlingIAnnenFagsak.id) } returns listOf(søker.tilPersonEnkel(), barn.tilPersonEnkel())
+
+            // Act
+            val tilkjenteYtelserForBarn = beregningService.hentRelevanteTilkjentYtelserForBarn(barnAktør = barn.aktør, fagsakId = fagsak.id)
+
+            // Assert
+            assertThat(tilkjenteYtelserForBarn).hasSize(1)
+        }
+
+        @Test
+        fun `skal returnere tilkjente ytelser tilknyttet behandlinger som er vedtatt`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER)
+            val barn = lagPerson(type = PersonType.BARN)
+            val fagsak = lagFagsak(id = 1L)
+            val annenFagsak = lagFagsak(id = 2L)
+            val behandlingIAnnenFagsak = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET, resultat = Behandlingsresultat.INNVILGET)
+
+            every { fagsakService.hentFagsakerPåPerson(aktør = barn.aktør) } returns listOf(fagsak, annenFagsak)
+
+            every { behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = annenFagsak.id) } returns emptyList()
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = annenFagsak.id) } returns behandlingIAnnenFagsak
+
+            every { tilkjentYtelseRepository.findByBehandling(behandlingId = behandlingIAnnenFagsak.id) } returns lagTilkjentYtelse(behandling = behandlingIAnnenFagsak)
+
+            every { personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(behandlingId = behandlingIAnnenFagsak.id) } returns listOf(søker.tilPersonEnkel(), barn.tilPersonEnkel())
+
+            // Act
+            val tilkjenteYtelserForBarn = beregningService.hentRelevanteTilkjentYtelserForBarn(barnAktør = barn.aktør, fagsakId = fagsak.id)
+
+            // Assert
+            assertThat(tilkjenteYtelserForBarn).hasSize(1)
+            assertThat(tilkjenteYtelserForBarn.single().behandling.id).isEqualTo(behandlingIAnnenFagsak.id)
+        }
+
+        @Test
+        fun `skal ikke returnere tilkjente ytelser tilknyttet behandlinger som ligger til godkjenning`() {
+            // Arrange
+            val barn = lagPerson(type = PersonType.BARN)
+            val fagsak = lagFagsak(id = 1L)
+            val annenFagsak = lagFagsak(id = 2L)
+            val behandlingIAnnenFagsak = lagBehandling(fagsak = annenFagsak, status = BehandlingStatus.FATTER_VEDTAK)
+
+            every { fagsakService.hentFagsakerPåPerson(aktør = barn.aktør) } returns listOf(fagsak, annenFagsak)
+
+            every { behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = annenFagsak.id) } returns emptyList()
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = annenFagsak.id) } returns null
+
+            every { tilkjentYtelseRepository.findByBehandling(behandlingId = behandlingIAnnenFagsak.id) } returns lagTilkjentYtelse(behandling = behandlingIAnnenFagsak)
+
+            // Act
+            val tilkjenteYtelserForBarn = beregningService.hentRelevanteTilkjentYtelserForBarn(barnAktør = barn.aktør, fagsakId = fagsak.id)
+
+            // Assert
+            assertThat(tilkjenteYtelserForBarn).isEmpty()
+        }
     }
 
     private fun kjørScenarioForBack2Backtester(

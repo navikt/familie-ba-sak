@@ -10,12 +10,15 @@ import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.datagenerator.lagValutakurs
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
@@ -33,6 +36,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
@@ -239,5 +243,218 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val tilkjentYtelse = beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling = behandling, personopplysningGrunnlag = personopplysningGrunnlag)
 
         assertThat(tilkjentYtelse.andelerTilkjentYtelse.any { it.differanseberegnetPeriodebeløp != null }).isEqualTo(true)
+    }
+
+    @Nested
+    inner class HentRelevanteTilkjentYtelserForBarn {
+        @Test
+        fun `skal returnere tilkjente ytelser tilknyttet behandlinger som er i ferd med å iverksettes`() {
+            // Arrange
+            val søker = personidentService.hentOgLagreAktør(randomFnr(), true)
+            val barn = personidentService.hentOgLagreAktør(randomFnr(), true)
+
+            val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktivFødselsnummer())
+            // Oppretter inneværende behandling
+            val behandling =
+                behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                    behandling =
+                        lagBehandlingUtenId(
+                            fagsak = fagsak,
+                            status = BehandlingStatus.UTREDES,
+                            årsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                        ),
+                )
+
+            val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(
+                    behandling.id,
+                    søker.aktivFødselsnummer(),
+                    listOf(barn.aktivFødselsnummer()),
+                )
+            personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+            // Oppretter fagsak for annen forelder
+            val annenForelder = personidentService.hentOgLagreAktør(randomFnr(), true)
+            val annenFagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(annenForelder.aktivFødselsnummer())
+
+            // Oppretter behandling som omfatter samme barn og som er vedtatt
+            val vedtattBehandlingIAnnenFagsak =
+                behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                    behandling =
+                        lagBehandlingUtenId(
+                            fagsak = annenFagsak,
+                            status = BehandlingStatus.AVSLUTTET,
+                        ),
+                )
+
+            personopplysningGrunnlagRepository.save(
+                lagTestPersonopplysningGrunnlag(
+                    vedtattBehandlingIAnnenFagsak.id,
+                    annenForelder.aktivFødselsnummer(),
+                    listOf(barn.aktivFødselsnummer()),
+                ),
+            )
+
+            tilkjentYtelseRepository.save(lagTilkjentYtelse(behandling = vedtattBehandlingIAnnenFagsak))
+
+            // Oppretter behandling for annen forelder som omfatter samme barn og som er i ferd med å iverksettes
+            val behandlingSomIverksettesIAnnenFagsak =
+                behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                    behandling =
+                        lagBehandlingUtenId(
+                            fagsak = annenFagsak,
+                            status = BehandlingStatus.IVERKSETTER_VEDTAK,
+                        ),
+                )
+            val personopplysningGrunnlagBehandlingIAnnenFagsak =
+                lagTestPersonopplysningGrunnlag(
+                    behandlingSomIverksettesIAnnenFagsak.id,
+                    annenForelder.aktivFødselsnummer(),
+                    listOf(barn.aktivFødselsnummer()),
+                )
+            personopplysningGrunnlagRepository.saveAndFlush(personopplysningGrunnlagBehandlingIAnnenFagsak)
+
+            tilkjentYtelseRepository.save(lagTilkjentYtelse(behandling = behandlingSomIverksettesIAnnenFagsak))
+
+            // Act
+            val tilkjenteYtelserForBarn = beregningService.hentRelevanteTilkjentYtelserForBarn(barnAktør = barn, fagsakId = fagsak.id)
+
+            // Assert
+            assertThat(tilkjenteYtelserForBarn).hasSize(1)
+            assertThat(tilkjenteYtelserForBarn.single().behandling.id).isEqualTo(behandlingSomIverksettesIAnnenFagsak.id)
+        }
+
+        @Test
+        fun `skal returnere tilkjente ytelser tilknyttet behandlinger som er vedtatt`() {
+            // Arrange
+            val søker = personidentService.hentOgLagreAktør(randomFnr(), true)
+            val barn = personidentService.hentOgLagreAktør(randomFnr(), true)
+
+            val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktivFødselsnummer())
+            // Oppretter inneværende behandling
+            val behandling =
+                behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                    behandling =
+                        lagBehandlingUtenId(
+                            fagsak = fagsak,
+                            status = BehandlingStatus.UTREDES,
+                            årsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                        ),
+                )
+
+            val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(
+                    behandling.id,
+                    søker.aktivFødselsnummer(),
+                    listOf(barn.aktivFødselsnummer()),
+                )
+            personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+            // Oppretter fagsak for annen forelder
+            val annenForelder = personidentService.hentOgLagreAktør(randomFnr(), true)
+            val annenFagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(annenForelder.aktivFødselsnummer())
+
+            // Oppretter behandling som omfatter samme barn og som er vedtatt
+            val vedtattBehandlingIAnnenFagsak =
+                behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                    behandling =
+                        lagBehandlingUtenId(
+                            fagsak = annenFagsak,
+                            status = BehandlingStatus.AVSLUTTET,
+                        ),
+                )
+
+            personopplysningGrunnlagRepository.save(
+                lagTestPersonopplysningGrunnlag(
+                    vedtattBehandlingIAnnenFagsak.id,
+                    annenForelder.aktivFødselsnummer(),
+                    listOf(barn.aktivFødselsnummer()),
+                ),
+            )
+
+            tilkjentYtelseRepository.save(lagTilkjentYtelse(behandling = vedtattBehandlingIAnnenFagsak))
+
+            // Oppretter behandling for annen forelder som omfatter samme barn og som ligger til godkjenning
+            val behandlingSomLiggerTilGodkjenning =
+                behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                    behandling =
+                        lagBehandlingUtenId(
+                            fagsak = annenFagsak,
+                            status = BehandlingStatus.FATTER_VEDTAK,
+                        ),
+                )
+            val personopplysningGrunnlagBehandlingIAnnenFagsak =
+                lagTestPersonopplysningGrunnlag(
+                    behandlingSomLiggerTilGodkjenning.id,
+                    annenForelder.aktivFødselsnummer(),
+                    listOf(barn.aktivFødselsnummer()),
+                )
+            personopplysningGrunnlagRepository.saveAndFlush(personopplysningGrunnlagBehandlingIAnnenFagsak)
+
+            tilkjentYtelseRepository.save(lagTilkjentYtelse(behandling = behandlingSomLiggerTilGodkjenning))
+
+            // Act
+            val tilkjenteYtelserForBarn = beregningService.hentRelevanteTilkjentYtelserForBarn(barnAktør = barn, fagsakId = fagsak.id)
+
+            // Assert
+            assertThat(tilkjenteYtelserForBarn).hasSize(1)
+            assertThat(tilkjenteYtelserForBarn.single().behandling.id).isEqualTo(vedtattBehandlingIAnnenFagsak.id)
+        }
+
+        @Test
+        fun `skal ikke returnere tilkjente ytelser tilknyttet behandlinger som ligger til godkjenning`() {
+            // Arrange
+            val søker = personidentService.hentOgLagreAktør(randomFnr(), true)
+            val barn = personidentService.hentOgLagreAktør(randomFnr(), true)
+
+            val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktivFødselsnummer())
+            // Oppretter inneværende behandling
+            val behandling =
+                behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                    behandling =
+                        lagBehandlingUtenId(
+                            fagsak = fagsak,
+                            status = BehandlingStatus.UTREDES,
+                            årsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                        ),
+                )
+
+            val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(
+                    behandling.id,
+                    søker.aktivFødselsnummer(),
+                    listOf(barn.aktivFødselsnummer()),
+                )
+            personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+            // Oppretter fagsak for annen forelder
+            val annenForelder = personidentService.hentOgLagreAktør(randomFnr(), true)
+            val annenFagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(annenForelder.aktivFødselsnummer())
+
+            // Oppretter behandling for annen forelder som omfatter samme barn og som ligger til godkjenning
+            val behandlingSomLiggerTilGodkjenning =
+                behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                    behandling =
+                        lagBehandlingUtenId(
+                            fagsak = annenFagsak,
+                            status = BehandlingStatus.FATTER_VEDTAK,
+                        ),
+                )
+            val personopplysningGrunnlagBehandlingIAnnenFagsak =
+                lagTestPersonopplysningGrunnlag(
+                    behandlingSomLiggerTilGodkjenning.id,
+                    annenForelder.aktivFødselsnummer(),
+                    listOf(barn.aktivFødselsnummer()),
+                )
+            personopplysningGrunnlagRepository.saveAndFlush(personopplysningGrunnlagBehandlingIAnnenFagsak)
+
+            tilkjentYtelseRepository.save(lagTilkjentYtelse(behandling = behandlingSomLiggerTilGodkjenning))
+
+            // Act
+            val tilkjenteYtelserForBarn = beregningService.hentRelevanteTilkjentYtelserForBarn(barnAktør = barn, fagsakId = fagsak.id)
+
+            // Assert
+            assertThat(tilkjenteYtelserForBarn).hasSize(0)
+        }
     }
 }
