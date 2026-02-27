@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.FØRSTEGANGSBEHANDLING
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -28,10 +25,14 @@ abstract class AbstractPreutfyllBosattIRiketService(
 ) {
     fun preutfyllBosattIRiket(
         vilkårsvurdering: Vilkårsvurdering,
-        barnSomSkalVurderesIFødselshendelse: List<String>? = null,
+        identerVilkårSkalPreutfyllesFor: List<String>? = null,
     ) {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id)
-        val identer = finnIdenterViSkalPreutfylleFor(vilkårsvurdering, barnSomSkalVurderesIFødselshendelse)
+        val identer =
+            vilkårsvurdering
+                .personResultater
+                .map { it.aktør.aktivFødselsnummer() }
+                .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
 
         vilkårsvurdering.personResultater
             .filter { it.aktør.aktivFødselsnummer() in identer }
@@ -117,30 +118,4 @@ abstract class AbstractPreutfyllBosattIRiketService(
         } else {
             person.fødselsdato
         }
-
-    private fun finnIdenterViSkalPreutfylleFor(
-        vilkårsvurdering: Vilkårsvurdering,
-        barnSomSkalVurderesIFødselshendelse: List<String>?,
-    ): List<String> {
-        val behandling = vilkårsvurdering.behandling
-        val identerIBehandling = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
-
-        return when (vilkårsvurdering.behandling.opprettetÅrsak) {
-            BehandlingÅrsak.FØDSELSHENDELSE -> {
-                if (barnSomSkalVurderesIFødselshendelse.isNullOrEmpty()) throw Feil("Barn som skal vurderes er ikke definert for fødselshendelse")
-                val identerSomSkalPreutfylles =
-                    if (behandling.type == FØRSTEGANGSBEHANDLING) {
-                        barnSomSkalVurderesIFødselshendelse + behandling.fagsak.aktør.aktivFødselsnummer()
-                    } else {
-                        barnSomSkalVurderesIFødselshendelse
-                    }
-
-                identerIBehandling.filter { identerSomSkalPreutfylles.contains(it) }
-            }
-
-            else -> {
-                identerIBehandling
-            }
-        }
-    }
 }

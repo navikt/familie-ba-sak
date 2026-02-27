@@ -104,7 +104,7 @@ class PreutfyllBosattIRiketForFødselshendelserServiceTest {
         // Act
         preutfyllBosattIRiketForFødselshendelserService.preutfyllBosattIRiket(
             vilkårsvurdering = vilkårsvurdering,
-            barnSomSkalVurderesIFødselshendelse = listOf(barn.aktør.aktivFødselsnummer()),
+            identerVilkårSkalPreutfyllesFor = listOf(søker.aktør.aktivFødselsnummer(), barn.aktør.aktivFødselsnummer()),
         )
 
         // Assert
@@ -195,7 +195,7 @@ class PreutfyllBosattIRiketForFødselshendelserServiceTest {
         // Act
         preutfyllBosattIRiketForFødselshendelserService.preutfyllBosattIRiket(
             vilkårsvurdering = vilkårsvurdering,
-            barnSomSkalVurderesIFødselshendelse = listOf(barn.aktør.aktivFødselsnummer()),
+            identerVilkårSkalPreutfyllesFor = listOf(søker.aktør.aktivFødselsnummer(), barn.aktør.aktivFødselsnummer()),
         )
 
         // Assert
@@ -305,7 +305,7 @@ class PreutfyllBosattIRiketForFødselshendelserServiceTest {
         // Act
         preutfyllBosattIRiketForFødselshendelserService.preutfyllBosattIRiket(
             vilkårsvurdering = vilkårsvurdering,
-            barnSomSkalVurderesIFødselshendelse = listOf(barn.aktør.aktivFødselsnummer()),
+            identerVilkårSkalPreutfyllesFor = listOf(søker.aktør.aktivFødselsnummer(), barn.aktør.aktivFødselsnummer()),
         )
 
         // Assert
@@ -401,7 +401,7 @@ class PreutfyllBosattIRiketForFødselshendelserServiceTest {
         // Act
         preutfyllBosattIRiketForFødselshendelserService.preutfyllBosattIRiket(
             vilkårsvurdering = vilkårsvurdering,
-            barnSomSkalVurderesIFødselshendelse = listOf(barn.aktør.aktivFødselsnummer()),
+            identerVilkårSkalPreutfyllesFor = listOf(søker.aktør.aktivFødselsnummer(), barn.aktør.aktivFødselsnummer()),
         )
 
         // Assert
