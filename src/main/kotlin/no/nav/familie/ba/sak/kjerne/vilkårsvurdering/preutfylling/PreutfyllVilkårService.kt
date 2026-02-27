@@ -44,15 +44,17 @@ class PreutfyllVilkårService(
 
     fun preutfyllBosattIRiketForFødselshendelseBehandlinger(
         vilkårsvurdering: Vilkårsvurdering,
-        barnSomSkalVurderesIFødselshendelse: List<String>,
+        barnSomSkalVurderesIFødselshendelse: List<String>? = null,
     ) {
         val identerVilkårSkalPreutfyllesFor =
-            if (vilkårsvurdering.behandling.type == FØRSTEGANGSBEHANDLING) {
-                barnSomSkalVurderesIFødselshendelse +
-                    vilkårsvurdering.behandling.fagsak.aktør
-                        .aktivFødselsnummer()
-            } else {
-                barnSomSkalVurderesIFødselshendelse
+            barnSomSkalVurderesIFødselshendelse?.let {
+                if (vilkårsvurdering.behandling.type == FØRSTEGANGSBEHANDLING) {
+                    it +
+                        vilkårsvurdering.behandling.fagsak.aktør
+                            .aktivFødselsnummer()
+                } else {
+                    it
+                }
             }
 
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_BOSATT_I_RIKET_FOR_FØDSELSHENDELSE)) {

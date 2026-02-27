@@ -205,7 +205,7 @@ class VilkårsvurderingForNyBehandlingService(
         } else if (behandling.opprettetÅrsak == FØDSELSHENDELSE) {
             preutfyllVilkårService.preutfyllBosattIRiketForFødselshendelseBehandlinger(
                 vilkårsvurdering = initiellVilkårsvurdering,
-                barnSomSkalVurderesIFødselshendelse = barnSomSkalVurderesIFødselshendelse ?: throw Feil("Fødselshendelser må ha en liste over barn som skal vurderes for å kunne preutfylle 'Bosatt i riket'-vilkåret"),
+                barnSomSkalVurderesIFødselshendelse = barnSomSkalVurderesIFødselshendelse,
             )
         }
 
