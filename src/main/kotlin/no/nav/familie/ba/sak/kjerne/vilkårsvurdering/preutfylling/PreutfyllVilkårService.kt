@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.springframework.stereotype.Service
@@ -13,6 +14,8 @@ class PreutfyllVilkårService(
     private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService,
     private val preutfyllBorMedSøkerService: PreutfyllBorMedSøkerService,
     private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService,
+    private val preutfyllBosattIRiketForFødselshendelserService: PreutfyllBosattIRiketForFødselshendelserService,
+    private val gammelPreutfyllBosattIRiketService: GammelPreutfyllBosattIRiketService,
     private val persongrunnlagService: PersongrunnlagService,
     private val featureToggleService: FeatureToggleService,
 ) {
@@ -25,7 +28,11 @@ class PreutfyllVilkårService(
         }
 
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR)) {
-            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+            if (featureToggleService.isEnabled(FeatureToggle.OPPDATERT_PREUTFYLLING_BOSATT_I_RIKET)) {
+                preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+            } else {
+                gammelPreutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+            }
         }
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR_LOVLIG_OPPHOLD)) {
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering)
@@ -37,12 +44,30 @@ class PreutfyllVilkårService(
 
     fun preutfyllBosattIRiketForFødselshendelseBehandlinger(
         vilkårsvurdering: Vilkårsvurdering,
-        identerVilkårSkalPreutfyllesFor: List<String>?,
+        barnSomSkalVurderesIFødselshendelse: List<String>? = null,
     ) {
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(
-            vilkårsvurdering = vilkårsvurdering,
-            identerVilkårSkalPreutfyllesFor = identerVilkårSkalPreutfyllesFor,
-        )
+        val identerVilkårSkalPreutfyllesFor =
+            barnSomSkalVurderesIFødselshendelse?.let {
+                if (vilkårsvurdering.behandling.type == FØRSTEGANGSBEHANDLING) {
+                    it +
+                        vilkårsvurdering.behandling.fagsak.aktør
+                            .aktivFødselsnummer()
+                } else {
+                    it
+                }
+            }
+
+        if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_BOSATT_I_RIKET_FOR_FØDSELSHENDELSE)) {
+            preutfyllBosattIRiketForFødselshendelserService.preutfyllBosattIRiket(
+                vilkårsvurdering = vilkårsvurdering,
+                identerVilkårSkalPreutfyllesFor = identerVilkårSkalPreutfyllesFor,
+            )
+        } else {
+            gammelPreutfyllBosattIRiketService.preutfyllBosattIRiket(
+                vilkårsvurdering = vilkårsvurdering,
+                identerVilkårSkalPreutfyllesFor = identerVilkårSkalPreutfyllesFor,
+            )
+        }
     }
 
     companion object {

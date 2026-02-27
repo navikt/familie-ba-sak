@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tilBooleanTidslinjeHvisTom
 import no.nav.familie.kontrakter.ba.finnmarkstillegg.kommuneErIFinnmarkEllerNordTroms
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
@@ -136,6 +137,10 @@ fun List<Adresse>.lagTidslinjeForAdresser(
             )
         }.map { it.tilTidslinje() }
             .kombiner { samletTidslinjer -> samletTidslinjer.any { it } }
+            // Dersom det ikke finnes noen adresser, eller alle adresser har ugyldige datoer, vil vi ende opp med en tidslinje uten perioder.
+            // En tom tidslinje kan føre til følgefeil. Eksempelvis kan det føre til at vi ikke overstyrer initielle vilkårsresultater ved preutfylling, og vilkår blir stående som oppfylte til tross for at de egentlig skulle vært ikke oppfylte.
+            // Her ønsker vi å tolke en tom tidslinje som at personen ikke er bosatt i Norge/Svalbard/Finnmark/NordTroms, og returnerer dermed en tidslinje som er false for alle datoer.
+            .tilBooleanTidslinjeHvisTom(verdi = false)
     } catch (e: IllegalStateException) {
         secureLogger.error("Feil ved oppretting av tidslinjer for $adressetype med adresser $this", e)
         throw e

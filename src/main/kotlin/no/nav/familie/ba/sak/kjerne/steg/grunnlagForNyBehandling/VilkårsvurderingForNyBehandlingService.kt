@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.OppdaterUtdypendeVilkårForBosatt
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.ENDRE_MIGRERINGSDATO
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FINNMARKSTILLEGG
@@ -204,22 +203,10 @@ class VilkårsvurderingForNyBehandlingService(
         if (!behandling.skalBehandlesAutomatisk && !behandling.erTekniskEndring() && !behandling.erFalskIdentitet()) {
             preutfyllVilkårService.preutfyllVilkår(vilkårsvurdering = initiellVilkårsvurdering)
         } else if (behandling.opprettetÅrsak == FØDSELSHENDELSE) {
-            val identerVilkårSkalPreutfyllesFor =
-                barnSomSkalVurderesIFødselshendelse?.let {
-                    if (behandling.type == FØRSTEGANGSBEHANDLING) {
-                        it + behandling.fagsak.aktør.aktivFødselsnummer()
-                    } else {
-                        it
-                    }
-                }
-            try {
-                preutfyllVilkårService.preutfyllBosattIRiketForFødselshendelseBehandlinger(
-                    vilkårsvurdering = initiellVilkårsvurdering,
-                    identerVilkårSkalPreutfyllesFor = identerVilkårSkalPreutfyllesFor,
-                )
-            } catch (e: Exception) {
-                logger.warn("Feil ved preutfylling av 'Bosatt i riket'-vilkåret i fødselshendelsebehandling ${behandling.id}", e)
-            }
+            preutfyllVilkårService.preutfyllBosattIRiketForFødselshendelseBehandlinger(
+                vilkårsvurdering = initiellVilkårsvurdering,
+                barnSomSkalVurderesIFødselshendelse = barnSomSkalVurderesIFødselshendelse,
+            )
         }
 
         tellMetrikkerForFødselshendelse(

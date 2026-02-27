@@ -47,6 +47,12 @@ enum class FeatureToggle(
     VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR("familie-ba-sak.valider-endring-av-preutfylte-vilkaar"),
     IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG("familie-ba-sak.ikke-lagre-duplikat-av-personopplysningsgrunnlag"),
 
+    // Introdusert AbstractPreutfyllBosattIRiketService og tatt den i bruk i PreutfyllBosattIRiketService og PreutfyllBosattIRiketForFødselshendelseService.
+    PREUTFYLLING_BOSATT_I_RIKET_FOR_FØDSELSHENDELSE("familie-ba-sak.preutfylling-bosatt-i-riket-for-fodselshendelse"),
+
+    // Dersom den er på brukes oppdatert PreutfyllBosattIRiketService, men er den av brukes GammelPreutfyllBosattIRiketService som er lik gammel versjon av PreutfyllBosattIRiketService før introduksjon av AbstractPreutfyllBosattIRiketService.
+    OPPDATERT_PREUTFYLLING_BOSATT_I_RIKET("familie-ba-sak.oppdatert-preutfylling-bosatt-i-riket"),
+
     // NAV-25256
     SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN("familie-ba-sak.skjermet-barn"),
 

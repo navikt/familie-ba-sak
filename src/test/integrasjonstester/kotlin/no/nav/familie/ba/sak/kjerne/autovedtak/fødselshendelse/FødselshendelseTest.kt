@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SVALBARDTILLEGG
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
@@ -77,16 +78,124 @@ class FødselshendelseTest(
         )
 
     @Test
-    fun `Skal innvilge finnmarkstillegg i fødselshendelse førstegangsbehandling hvis mor og barn bor i Finnmark`() {
+    fun `Skal innvilge barnetrygd i fødselshendelse førstegangsbehandling hvis mor har bodd minst 6 mnd i Norge og barn bor i Norge ved fødsel`() {
         // Arrange
-        val barnFødselsdato = LocalDate.of(2025, 9, 15)
+        val barnFødselsdato = LocalDate.now()
+        val barnFnr = leggTilPersonInfo(barnFødselsdato)
+        val søkerFnr = leggTilPersonInfo(LocalDate.now().minusYears(30))
+        val søkerAktør = personidentService.hentAktør(søkerFnr)
+
+        val bostedsadresseUtenforFinnmark =
+            Bostedsadresse(
+                gyldigFraOgMed = barnFødselsdato.minusMonths(6),
+                vegadresse = vegadresseUtenforFinnmark,
+            )
+
+        leggTilRelasjonIPersonInfo(
+            personIdent = søkerFnr,
+            relatertPersonsIdent = barnFnr,
+            relatertPersonsRelasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+        )
+
+        leggTilBostedsadresserIPersonInfo(
+            personIdenter = listOf(søkerFnr, barnFnr),
+            bostedsadresser = listOf(bostedsadresseUtenforFinnmark),
+        )
+
+        leggTilBostedsadresseIPDL(
+            personIdenter = listOf(søkerFnr, barnFnr),
+            bostedsadresse = bostedsadresseUtenforFinnmark,
+        )
+
+        // Act
+        autovedtakStegService.kjørBehandlingFødselshendelse(
+            mottakersAktør = søkerAktør,
+            nyBehandlingHendelse =
+                NyBehandlingHendelse(
+                    morsIdent = søkerFnr,
+                    barnasIdenter = listOf(barnFnr),
+                ),
+            førstegangKjørt = LocalDateTime.now(),
+        )
+
+        // Assert
+        val fagsak = fagsakService.hentFagsakerPåPerson(søkerAktør).single()
+        val behandling = behandlingHentOgPersisterService.hentBehandlinger(fagsak.id).single()
+
+        val innvilgedeAndeler = beregningService.hentTilkjentYtelseForBehandling(behandling.id).andelerTilkjentYtelse
+
+        assertThat(innvilgedeAndeler).allSatisfy {
+            assertThat(it.type).isEqualTo(YtelseType.ORDINÆR_BARNETRYGD)
+            assertThat(it.stønadFom).isEqualTo(barnFødselsdato.nesteMåned())
+        }
+
+        val vedtaksperioder = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelserDto(behandling.id)
+        assertThat(vedtaksperioder.single().begrunnelser).allSatisfy {
+            assertThat { it.standardbegrunnelse == Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE.toString() }
+        }
+    }
+
+    @Test
+    fun `Skal ikke innvilge barnetrygd i fødselshendelse førstegangsbehandling hvis mor har bodd mindre enn 6 mnd i Norge`() {
+        // Arrange
+        val barnFødselsdato = LocalDate.now()
+        val barnFnr = leggTilPersonInfo(barnFødselsdato)
+        val søkerFnr = leggTilPersonInfo(LocalDate.now().minusYears(30))
+        val søkerAktør = personidentService.hentAktør(søkerFnr)
+
+        val bostedsadresseUtenforFinnmark =
+            Bostedsadresse(
+                gyldigFraOgMed = barnFødselsdato.minusMonths(6).plusDays(1),
+                vegadresse = vegadresseUtenforFinnmark,
+            )
+
+        leggTilRelasjonIPersonInfo(
+            personIdent = søkerFnr,
+            relatertPersonsIdent = barnFnr,
+            relatertPersonsRelasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+        )
+
+        leggTilBostedsadresserIPersonInfo(
+            personIdenter = listOf(søkerFnr, barnFnr),
+            bostedsadresser = listOf(bostedsadresseUtenforFinnmark),
+        )
+
+        leggTilBostedsadresseIPDL(
+            personIdenter = listOf(søkerFnr, barnFnr),
+            bostedsadresse = bostedsadresseUtenforFinnmark,
+        )
+
+        // Act
+        autovedtakStegService.kjørBehandlingFødselshendelse(
+            mottakersAktør = søkerAktør,
+            nyBehandlingHendelse =
+                NyBehandlingHendelse(
+                    morsIdent = søkerFnr,
+                    barnasIdenter = listOf(barnFnr),
+                ),
+            førstegangKjørt = LocalDateTime.now(),
+        )
+
+        // Assert
+        val fagsak = fagsakService.hentFagsakerPåPerson(søkerAktør).single()
+        val behandling = behandlingHentOgPersisterService.hentBehandlinger(fagsak.id).single()
+
+        val innvilgedeAndeler = beregningService.hentTilkjentYtelseForBehandling(behandling.id).andelerTilkjentYtelse
+
+        assertThat(innvilgedeAndeler).hasSize(0)
+    }
+
+    @Test
+    fun `Skal innvilge finnmarkstillegg i fødselshendelse førstegangsbehandling hvis mor og barn bor i Finnmark og øvrige krav til bosatt i riket er oppfylt`() {
+        // Arrange
+        val barnFødselsdato = LocalDate.now()
         val barnFnr = leggTilPersonInfo(barnFødselsdato)
         val søkerFnr = leggTilPersonInfo(LocalDate.now().minusYears(30))
         val søkerAktør = personidentService.hentAktør(søkerFnr)
 
         val bostedsadresseIFinnmark =
             Bostedsadresse(
-                gyldigFraOgMed = barnFødselsdato,
+                gyldigFraOgMed = barnFødselsdato.minusMonths(6),
                 vegadresse = vegadresseIFinnmark,
             )
 
@@ -222,16 +331,16 @@ class FødselshendelseTest(
     }
 
     @Test
-    fun `Skal innvilge svalbardtillegg i fødselshendelse førstegangsbehandling hvis mor og barn bor på Svalbard`() {
+    fun `Skal innvilge svalbardtillegg i fødselshendelse førstegangsbehandling hvis mor og barn bor på Svalbard og øvrige krav til bosatt i riket er oppfylt`() {
         // Arrange
-        val barnFødselsdato = LocalDate.of(2025, 9, 15)
+        val barnFødselsdato = LocalDate.now()
         val barnFnr = leggTilPersonInfo(barnFødselsdato)
         val søkerFnr = leggTilPersonInfo(LocalDate.now().minusYears(30))
         val søkerAktør = personidentService.hentAktør(søkerFnr)
 
         val oppholdsadressePåSvalbard =
             Oppholdsadresse(
-                gyldigFraOgMed = barnFødselsdato,
+                gyldigFraOgMed = barnFødselsdato.minusMonths(6),
                 gyldigTilOgMed = null,
                 oppholdAnnetSted = OppholdAnnetSted.PAA_SVALBARD.name,
             )
