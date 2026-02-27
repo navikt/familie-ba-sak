@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
+import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AutomatiskOppdaterValutakursServiceTest {
@@ -398,15 +399,74 @@ class AutomatiskOppdaterValutakursServiceTest {
             every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandling.id) } returns forrigeMåned.toLocalDate()
             every { simuleringService.oppdaterSimuleringPåBehandling(behandling) } returns emptyList()
 
+            val sisteFomGamleValutakurser = valutakursService.hentValutakurser(behandlingId).maxBy { it.fom!! }.fom
+            assertThat(sisteFomGamleValutakurser).isEqualTo(forrigeMåned)
+
             // Act
             automatiskOppdaterValutakursService.oppdaterValutakurserOgSimulerVedBehov(behandling.id)
 
             // Assert
             verify(exactly = 1) { simuleringService.oppdaterSimuleringPåBehandling(behandling) }
 
-            val nyeValutakurser = valutakursService.hentValutakurser(behandlingId)
-            val sisteMåned = nyeValutakurser.maxBy { it.fom!! }.fom
-            assertThat(sisteMåned).isEqualTo(inneværendeMåned)
+            val sisteFomNyeValutakurser = valutakursService.hentValutakurser(behandlingId).maxBy { it.fom!! }.fom
+            assertThat(sisteFomNyeValutakurser).isEqualTo(inneværendeMåned)
+        }
+
+        @Test
+        fun `skal ikke oppdatere valutakurs og simulering når utenlandskperiodeBeløp ikke er løpende og valutakursene samsvarer med perioden`() {
+            // Arrange
+            val forrigeMåned = dagensDato.minusMonths(1).toYearMonth()
+            val forrigeForrigeMåned = dagensDato.minusMonths(2).toYearMonth()
+
+            val behandling = lagBehandling()
+            val behandlingId = BehandlingId(behandling.id)
+            every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
+
+            UtenlandskPeriodebeløpBuilder(forrigeForrigeMåned, behandlingId)
+                .medBeløp("12", "EUR", "LV", barn1)
+                .lagreTil(utenlandskPeriodebeløpRepository)
+
+            ValutakursBuilder(forrigeForrigeMåned, behandlingId, automatiskSettValutakursdato = true)
+                .medKurs("12", "EUR", barn1)
+                .medVurderingsform(Vurderingsform.AUTOMATISK)
+                .lagreTil(valutakursRepository)
+
+            // Act
+            automatiskOppdaterValutakursService.oppdaterValutakurserOgSimulerVedBehov(behandling.id)
+
+            // Assert
+            verify(exactly = 0) { simuleringService.oppdaterSimuleringPåBehandling(behandling) }
+
+            val sisteValutakursTom = valutakursService.hentValutakurser(behandlingId).maxBy { it.tom!! }.tom
+            assertThat(sisteValutakursTom).isEqualTo(forrigeMåned)
+        }
+
+        @Test
+        fun `skal oppdatere valutakurs og simulering når utenlandskperiodeBeløp ikke er løpende, men valutakurser samsvarer ikke`() {
+            // Arrange
+            val forrigeForrigeMåned = dagensDato.minusMonths(2).toYearMonth()
+
+            val behandling = lagBehandling()
+            val behandlingId = BehandlingId(behandling.id)
+            every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
+
+            UtenlandskPeriodebeløpBuilder(forrigeForrigeMåned, behandlingId)
+                .medBeløp("12", "EUR", "LV", barn1)
+                .lagreTil(utenlandskPeriodebeløpRepository)
+
+            ValutakursBuilder(YearMonth.of(2025, 6), behandlingId, automatiskSettValutakursdato = true)
+                .medKurs("1", "EUR", barn1)
+                .medVurderingsform(Vurderingsform.AUTOMATISK)
+                .lagreTil(valutakursRepository)
+
+            every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandling.id) } returns forrigeForrigeMåned.toLocalDate()
+            every { simuleringService.oppdaterSimuleringPåBehandling(behandling) } returns emptyList()
+
+            // Act
+            automatiskOppdaterValutakursService.oppdaterValutakurserOgSimulerVedBehov(behandling.id)
+
+            // Assert
+            verify(exactly = 1) { simuleringService.oppdaterSimuleringPåBehandling(behandling) }
         }
 
         @Test
@@ -437,9 +497,8 @@ class AutomatiskOppdaterValutakursServiceTest {
             // Assert
             verify(exactly = 0) { simuleringService.oppdaterSimuleringPåBehandling(behandling) }
 
-            val nyeValutakurser = valutakursService.hentValutakurser(behandlingId)
-            val sisteMåned = nyeValutakurser.maxBy { it.fom!! }.fom
-            assertThat(sisteMåned).isEqualTo(inneværendeMåned)
+            val sisteFomNyeValutakurser = valutakursService.hentValutakurser(behandlingId).maxBy { it.fom!! }.fom
+            assertThat(sisteFomNyeValutakurser).isEqualTo(inneværendeMåned)
         }
     }
 }
