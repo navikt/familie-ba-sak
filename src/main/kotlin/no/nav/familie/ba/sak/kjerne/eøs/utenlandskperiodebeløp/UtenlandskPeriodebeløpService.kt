@@ -53,7 +53,7 @@ class UtenlandskPeriodebeløpService(
     @Transactional
     fun oppdaterBulgarskUtenlandskPeriodebeløpVedBehov(behandlingId: BehandlingId) {
         val nyesteUpb = hentUtenlandskePeriodebeløp(behandlingId).maxByOrNull { upb -> upb.tom ?: TIDENES_ENDE.toYearMonth() }
-        if(nyesteUpb == null) return
+        if (nyesteUpb == null) return
 
         if (løperBulgarskLevEtterCutoff(nyesteUpb)) {
             skjemaService.endreSkjemaer(
