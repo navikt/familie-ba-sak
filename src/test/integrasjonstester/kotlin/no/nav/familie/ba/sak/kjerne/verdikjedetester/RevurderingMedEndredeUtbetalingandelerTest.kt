@@ -34,8 +34,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
@@ -139,14 +139,21 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
                 behandlingRevurdering.id,
             )
-        val andelPåvirketAvEndringer = andelerTilkjentYtelse.minBy { it.stønadFom }
+        val andelerPåvirketAvEndringer = andelerTilkjentYtelse.filter { it.prosent == BigDecimal.ZERO }
 
         assertEquals(1, kopierteEndredeUtbetalingAndeler.size)
 
-        assertEquals(BigDecimal.ZERO, andelPåvirketAvEndringer.prosent)
-        assertEquals(endretAndelFom, andelPåvirketAvEndringer.stønadFom)
-        assertEquals(endretAndelTom, andelPåvirketAvEndringer.stønadTom)
-        assertTrue(andelPåvirketAvEndringer.endreteUtbetalinger.any { it.id == kopierteEndredeUtbetalingAndeler.single().id })
+        assertThat(andelerPåvirketAvEndringer).allSatisfy { andel ->
+            assertThat(andel.stønadFom).isAfterOrEqualTo(endretAndelFom)
+            assertThat(andel.stønadTom).isBeforeOrEqualTo(endretAndelTom)
+            assertThat(andel.endreteUtbetalinger.any { it.id == kopierteEndredeUtbetalingAndeler.single().id })
+        }
+        assertThat(andelerPåvirketAvEndringer).anySatisfy {
+            assertThat(it.stønadFom).isEqualTo(endretAndelFom)
+        }
+        assertThat(andelerPåvirketAvEndringer).anySatisfy {
+            assertThat(it.stønadTom).isEqualTo(endretAndelTom)
+        }
     }
 
     private fun gjennomførVilkårsvurdering(

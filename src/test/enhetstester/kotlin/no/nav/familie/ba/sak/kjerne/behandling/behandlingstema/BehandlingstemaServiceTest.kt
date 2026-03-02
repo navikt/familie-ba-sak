@@ -1704,6 +1704,28 @@ class BehandlingstemaServiceTest {
 
             every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns behandling
             every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns vilkårsvurdering
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id) } returns emptyList()
+
+            // Act
+            val underkategori = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsak.id)
+
+            // Assert
+            assertThat(underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
+        }
+
+        @Test
+        fun `Skal utlede UTVIDET dersom det løper utvidet andel i inneværende behandling`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns behandling
+            every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns lagVilkårsvurdering(behandling = behandling)
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.now().minusMonths(1),
+                        tom = YearMonth.now().plusMonths(1),
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                    ),
+                )
 
             // Act
             val underkategori = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsak.id)
@@ -1741,6 +1763,7 @@ class BehandlingstemaServiceTest {
 
             every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns behandling
             every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns vilkårsvurdering
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id) } returns emptyList()
 
             // Act
             val underkategori = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsak.id)
@@ -1779,6 +1802,7 @@ class BehandlingstemaServiceTest {
 
             every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns behandling
             every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns vilkårsvurdering
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id) } returns emptyList()
 
             // Act
             val underkategori = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsak.id)
