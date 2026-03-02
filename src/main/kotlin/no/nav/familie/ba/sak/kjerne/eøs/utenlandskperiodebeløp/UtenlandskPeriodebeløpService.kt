@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -52,17 +53,17 @@ class UtenlandskPeriodebeløpService(
     // Kan fjernes etter at behandlinger med løpende BGN er patchet
     @Transactional
     fun oppdaterBulgarskUtenlandskPeriodebeløpVedBehov(behandlingId: BehandlingId) {
-        val nyesteUpb = hentUtenlandskePeriodebeløp(behandlingId).maxByOrNull { upb -> upb.tom ?: TIDENES_ENDE.toYearMonth() }
-        if (nyesteUpb == null) return
+        val utenlandskPeriodebeløp =
+            hentUtenlandskePeriodebeløp(behandlingId)
+                .filter { løperBulgarskLevEtterCutoff(it) }
+                .map { it.copy(tom = BULGARSK_LEV_CUTOFF.forrigeMåned()) }
 
-        if (løperBulgarskLevEtterCutoff(nyesteUpb)) {
-            skjemaService.endreSkjemaer(
-                behandlingId,
-                nyesteUpb.copy(
-                    tom = YearMonth.of(2025, 12),
-                ),
-            )
-        }
+        if (utenlandskPeriodebeløp.isEmpty()) return
+
+        skjemaService.endreSkjemaer(
+            behandlingId,
+            utenlandskPeriodebeløp,
+        )
     }
 
     fun løperBulgarskLevEtterCutoff(utenlandskPeriodebeløp: UtenlandskPeriodebeløp): Boolean {
