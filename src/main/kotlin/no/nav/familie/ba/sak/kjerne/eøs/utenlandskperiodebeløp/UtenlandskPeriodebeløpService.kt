@@ -57,9 +57,10 @@ class UtenlandskPeriodebeløpService(
 
         if (løperBulgarskLevEtterCutoff(nyesteUpb)) {
             skjemaService.endreSkjemaer(
-                behandlingId, nyesteUpb.copy(
+                behandlingId,
+                nyesteUpb.copy(
                     tom = YearMonth.of(2025, 12),
-                )
+                ),
             )
         }
     }
@@ -69,7 +70,7 @@ class UtenlandskPeriodebeløpService(
         val tom = utenlandskPeriodebeløp.tom ?: TIDENES_ENDE.toYearMonth()
 
         return utenlandskPeriodebeløp.valutakode == BULGARSK_LEV &&
-                ((fom.isSameOrAfter(BULGARSK_LEV_CUTOFF)) || (tom.isSameOrAfter(BULGARSK_LEV_CUTOFF)))
+            ((fom.isSameOrAfter(BULGARSK_LEV_CUTOFF)) || (tom.isSameOrAfter(BULGARSK_LEV_CUTOFF)))
     }
 
     private fun validerUtenlandskPeriodeBeløp(utenlandskPeriodebeløp: UtenlandskPeriodebeløp) {
