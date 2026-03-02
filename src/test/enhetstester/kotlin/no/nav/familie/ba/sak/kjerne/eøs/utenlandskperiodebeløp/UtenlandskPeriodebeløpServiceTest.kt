@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toLocalDate
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
@@ -198,5 +199,34 @@ internal class UtenlandskPeriodebeløpServiceTest {
             }
 
         assertThat(feilmelding.message).isEqualTo("Bulgarske lev er ikke lenger gyldig valuta fra 01.01.26")
+    }
+
+    @Test
+    fun `Skal splitte utenlandskPeriodebeløp for Bulgarsk Lev til før og etter cut-off`() {
+        val behandling = lagBehandling()
+        val behandlingId = BehandlingId(behandling.id)
+
+        val barn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2025).toLocalDate())
+
+        UtenlandskPeriodebeløpBuilder(jan(2025), behandlingId)
+            .medBeløp("1>", "BGN", "BG", barn)
+            .medIntervall(Intervall.MÅNEDLIG)
+            .lagreTil(utenlandskPeriodebeløpRepository)
+
+        utenlandskPeriodebeløpService.oppdaterBulgarskUtenlandskPeriodebeløpVedBehov(behandlingId)
+
+        val utenlandskPeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId)
+
+        assertThat(utenlandskPeriodebeløp).hasSize(2)
+
+        val første = utenlandskPeriodebeløp.elementAt(0)
+        assertThat(første.fom).isEqualTo(YearMonth.of(2025, 1))
+        assertThat(første.tom).isEqualTo(YearMonth.of(2025, 12))
+        assertThat(første.valutakode).isEqualTo("BGN")
+
+        val siste = utenlandskPeriodebeløp.elementAt(1)
+        assertThat(siste.fom).isEqualTo(YearMonth.of(2026, 1))
+        assertThat(siste.tom).isNull()
+        assertThat(siste.valutakode).isNull()
     }
 }
