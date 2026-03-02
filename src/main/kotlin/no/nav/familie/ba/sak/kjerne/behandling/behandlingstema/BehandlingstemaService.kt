@@ -145,7 +145,12 @@ class BehandlingstemaService(
                 .filter { it.sistEndretIBehandlingId == aktivBehandling.id }
                 .any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
-        return if (erUtvidetVilkårBehandlet) {
+        val erLøpendeUtvidetAndel =
+            andelTilkjentYtelseRepository
+                .finnAndelerTilkjentYtelseForBehandling(behandlingId = aktivBehandling.id)
+                .any { it.erUtvidet() && it.erLøpende() }
+
+        return if (erUtvidetVilkårBehandlet || erLøpendeUtvidetAndel) {
             BehandlingUnderkategori.UTVIDET
         } else {
             BehandlingUnderkategori.ORDINÆR
