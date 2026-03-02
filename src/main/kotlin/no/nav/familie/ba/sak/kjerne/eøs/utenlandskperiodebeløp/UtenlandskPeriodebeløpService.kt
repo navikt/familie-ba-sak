@@ -46,14 +46,34 @@ class UtenlandskPeriodebeløpService(
         tilBehandlingId: BehandlingId,
     ) = skjemaService.kopierOgErstattSkjemaer(fraBehandlingId, tilBehandlingId)
 
-    private fun validerUtenlandskPeriodeBeløp(utenlandskPeriodebeløp: UtenlandskPeriodebeløp) {
+    // Bulgarsk Lev (BGN) er ikke lenger gyldig valuta fra jan. 2026 da de har byttet til EUR
+    // Er det UPB med BGN som løper etter denne tid, patcher vi disse ved å manuelt ved å sette tom til cutoff og oppdatere skjemaer
+    // Da får vi en blank UPB som saksbehandler kan oppdatere til riktige verdier
+    // Kan fjernes etter at behandlinger med løpende BGN er patchet
+    @Transactional
+    fun oppdaterBulgarskUtenlandskPeriodebeløpVedBehov(behandlingId: BehandlingId) {
+        val nyesteUpb = hentUtenlandskePeriodebeløp(behandlingId).maxByOrNull { upb -> upb.tom ?: TIDENES_ENDE.toYearMonth() }
+        if(nyesteUpb == null) return
+
+        if (løperBulgarskLevEtterCutoff(nyesteUpb)) {
+            skjemaService.endreSkjemaer(
+                behandlingId, nyesteUpb.copy(
+                    tom = YearMonth.of(2025, 12),
+                )
+            )
+        }
+    }
+
+    fun løperBulgarskLevEtterCutoff(utenlandskPeriodebeløp: UtenlandskPeriodebeløp): Boolean {
         val fom = utenlandskPeriodebeløp.fom ?: throw FunksjonellFeil("Fra og med dato på utenlandskperiode beløp må være satt")
         val tom = utenlandskPeriodebeløp.tom ?: TIDENES_ENDE.toYearMonth()
-        val januar2026 = YearMonth.of(2026, 1)
 
-        if (utenlandskPeriodebeløp.valutakode == BULGARSK_LEV &&
-            ((fom.isSameOrAfter(januar2026)) || (tom.isSameOrAfter(januar2026)))
-        ) {
+        return utenlandskPeriodebeløp.valutakode == BULGARSK_LEV &&
+                ((fom.isSameOrAfter(BULGARSK_LEV_CUTOFF)) || (tom.isSameOrAfter(BULGARSK_LEV_CUTOFF)))
+    }
+
+    private fun validerUtenlandskPeriodeBeløp(utenlandskPeriodebeløp: UtenlandskPeriodebeløp) {
+        if (løperBulgarskLevEtterCutoff(utenlandskPeriodebeløp)) {
             throw FunksjonellFeil(
                 "Bulgarske lev er ikke lenger gyldig valuta fra 01.01.26",
             )
@@ -62,5 +82,6 @@ class UtenlandskPeriodebeløpService(
 
     companion object {
         const val BULGARSK_LEV = "BGN"
+        val BULGARSK_LEV_CUTOFF: YearMonth = YearMonth.of(2026, 1)
     }
 }
