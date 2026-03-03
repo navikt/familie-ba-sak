@@ -705,6 +705,7 @@ class CucumberMock(
             opprettTaskService = opprettTaskService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
+            utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
         )
 
     val stegService =

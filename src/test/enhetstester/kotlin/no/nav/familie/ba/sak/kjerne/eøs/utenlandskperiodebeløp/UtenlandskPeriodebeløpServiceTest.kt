@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toLocalDate
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
@@ -19,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -198,5 +200,43 @@ internal class UtenlandskPeriodebeløpServiceTest {
             }
 
         assertThat(feilmelding.message).isEqualTo("Bulgarske lev er ikke lenger gyldig valuta fra 01.01.26")
+    }
+
+    @Test
+    fun `Skal splitte utenlandskPeriodebeløp for Bulgarsk Lev til før og etter cut-off`() {
+        val behandling = lagBehandling()
+        val behandlingId = BehandlingId(behandling.id)
+
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2024).toLocalDate())
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2025).toLocalDate())
+
+        UtenlandskPeriodebeløpBuilder(jan(2024), behandlingId)
+            .medBeløp("1>", "BGN", "DK", barn1)
+            .medIntervall(Intervall.MÅNEDLIG)
+            .lagreTil(utenlandskPeriodebeløpRepository)
+
+        UtenlandskPeriodebeløpBuilder(jan(2025), behandlingId)
+            .medBeløp("2>", "BGN", "BG", barn2)
+            .medIntervall(Intervall.MÅNEDLIG)
+            .lagreTil(utenlandskPeriodebeløpRepository)
+
+        utenlandskPeriodebeløpService.oppdaterBulgarskUtenlandskPeriodebeløpVedBehov(behandlingId)
+
+        val utenlandskPeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId)
+
+        assertThat(utenlandskPeriodebeløp).hasSize(4)
+
+        val upbBarn1 = utenlandskPeriodebeløp.filter { it.utbetalingsland == "DK" }
+        val upbBarn2 = utenlandskPeriodebeløp.filter { it.utbetalingsland == "BG" }
+
+        assertThat(upbBarn1).extracting("fom", "tom", "valutakode").containsExactly(
+            tuple(YearMonth.of(2024, 1), YearMonth.of(2025, 12), "BGN"),
+            tuple(YearMonth.of(2026, 1), null, null),
+        )
+
+        assertThat(upbBarn2).extracting("fom", "tom", "valutakode").containsExactly(
+            tuple(YearMonth.of(2025, 1), YearMonth.of(2025, 12), "BGN"),
+            tuple(YearMonth.of(2026, 1), null, null),
+        )
     }
 }
