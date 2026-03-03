@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_DELT_BOSTED
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
@@ -56,8 +57,8 @@ class PreutfyllBorMedSøkerService(
     ): Set<VilkårResultat> {
         val harSammeBostedsadresseTidslinje =
             lagBorMedSøkerTidslinje(
-                bostedsadresserBarn = bostedsadresserBarn.bostedsadresser,
-                bostedsadresserSøker = bostedsadresserSøker.bostedsadresser,
+                bostedsadresserBarn = bostedsadresserBarn,
+                bostedsadresserSøker = bostedsadresserSøker,
                 datoForBeskjæringAvFom = finnDatoForBeskjæringAvFom(bostedsadresserBarn.bostedsadresser, bostedsadresserSøker.bostedsadresser),
             )
 
@@ -74,6 +75,7 @@ class PreutfyllBorMedSøkerService(
                     begrunnelse = PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT + periode.verdi.begrunnelse,
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                     erOpprinneligPreutfylt = true,
+                    begrunnelseForManuellKontroll = periode.verdi.begrunnelseForManuellKontroll,
                 )
             }.toSet()
     }
@@ -96,25 +98,37 @@ class PreutfyllBorMedSøkerService(
     }
 
     private fun lagBorMedSøkerTidslinje(
-        bostedsadresserBarn: List<Adresse>,
-        bostedsadresserSøker: List<Adresse>,
+        bostedsadresserBarn: Adresser,
+        bostedsadresserSøker: Adresser,
         datoForBeskjæringAvFom: LocalDate,
     ): Tidslinje<Delvilkår> {
-        val bostedsadresserBarnTidslinje = lagBostedsadresseTidslinje(bostedsadresserBarn, datoForBeskjæringAvFom)
-        val bostedsadresserSøkerTidslinje = lagBostedsadresseTidslinje(bostedsadresserSøker, datoForBeskjæringAvFom)
+        val bostedsadresserBarnTidslinje = lagBostedsadresseTidslinje(bostedsadresserBarn.bostedsadresser)
+        val deltBostedsadresserBarnTidslinje = lagBostedsadresseTidslinje(bostedsadresserBarn.delteBosteder)
+        val bostedsadresserSøkerTidslinje = lagBostedsadresseTidslinje(bostedsadresserSøker.bostedsadresser)
 
-        return bostedsadresserBarnTidslinje.kombinerMed(bostedsadresserSøkerTidslinje) { barnAdresse, søkerAdresse ->
-            if (barnAdresse != null && harVærtSammeAdresseMinst3Mnd(barnAdresse, søkerAdresse)) {
-                OppfyltDelvilkår(begrunnelse = "- Har samme bostedsadresse som søker.")
-            } else {
-                IkkeOppfyltDelvilkår(begrunnelse = "- Har ikke samme fast eller delt bostedsadresse som søker")
-            }
-        }
+        return bostedsadresserSøkerTidslinje
+            .kombinerMed(bostedsadresserBarnTidslinje, deltBostedsadresserBarnTidslinje) { søkerAdresse, barnBostedAdresse, barnDeltBostedAdresse ->
+                when {
+                    barnBostedAdresse != null && harVærtSammeAdresseMinst3Mnd(barnBostedAdresse, søkerAdresse) -> {
+                        OppfyltDelvilkår(begrunnelse = "- Har delt bostedsadresse hos søker.")
+                    }
+
+                    barnDeltBostedAdresse != null && harVærtSammeAdresseMinst3Mnd(barnDeltBostedAdresse, søkerAdresse) -> {
+                        OppfyltDelvilkår(
+                            begrunnelse = "- Har delt bostedsadresse hos søker.",
+                            begrunnelseForManuellKontroll = INFORMASJON_OM_DELT_BOSTED,
+                        )
+                    }
+
+                    else -> {
+                        IkkeOppfyltDelvilkår(begrunnelse = "- Har ikke samme fast eller delt bostedsadresse som søker")
+                    }
+                }
+            }.beskjærFraOgMed(datoForBeskjæringAvFom)
     }
 
     private fun lagBostedsadresseTidslinje(
         bostedsadresser: List<Adresse>,
-        datoForBeskjæringAvFom: LocalDate,
     ): Tidslinje<Adresse> =
         bostedsadresser
             .sortedBy { it.gyldigFraOgMed }
@@ -128,7 +142,6 @@ class PreutfyllBorMedSøkerService(
                     tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
                 )
             }.tilTidslinje()
-            .beskjærFraOgMed(datoForBeskjæringAvFom)
 
     private fun harVærtSammeAdresseMinst3Mnd(
         barnAdresse: Adresse,
