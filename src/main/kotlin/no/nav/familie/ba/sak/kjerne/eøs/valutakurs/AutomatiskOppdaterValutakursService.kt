@@ -268,7 +268,7 @@ class AutomatiskOppdaterValutakursService(
         val valutakurser = valutakursService.hentValutakurser(BehandlingId(behandlingId))
         if (valutakurser.måValutakurserOppdateresForMåned(senesteMånedSomKreverValutakurs)) {
             val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-            val sisteValutakursdato = valutakurser.maxByOrNull { it.valutakursdato != null }?.valutakursdato
+            val sisteValutakursdato = valutakurser.mapNotNull { it.valutakursdato }.maxOrNull()
 
             logger.info(
                 "Valutakurs for behandling $behandlingId er utdatert for måned $senesteMånedSomKreverValutakurs. " +
