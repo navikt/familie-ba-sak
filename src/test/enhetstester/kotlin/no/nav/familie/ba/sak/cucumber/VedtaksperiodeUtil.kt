@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.cucumber
 
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevPeriodeParser
@@ -485,11 +486,8 @@ fun lagTilkjentYtelse(
                 val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
                 val beløp = parseInt(VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, rad)
                 val differanseberegnetBeløp = parseValgfriInt(VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.DIFFERANSEBEREGNET_BELØP, rad)
-                val sats =
-                    parseValgfriInt(
-                        VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.SATS,
-                        rad,
-                    ) ?: beløp
+                val prosent = parseValgfriLong(VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.PROSENT, rad)?.toBigDecimal() ?: BigDecimal(100)
+                val sats = parseValgfriInt(VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.SATS, rad) ?: beløp
 
                 lagAndelTilkjentYtelse(
                     id = Random.nextLong(),
@@ -503,14 +501,10 @@ fun lagTilkjentYtelse(
                             VedtaksperiodeMedBegrunnelserParser.DomenebegrepAndelTilkjentYtelse.YTELSE_TYPE,
                             rad,
                         ) ?: YtelseType.ORDINÆR_BARNETRYGD,
-                    prosent =
-                        parseValgfriLong(
-                            VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.PROSENT,
-                            rad,
-                        )?.toBigDecimal() ?: BigDecimal(100),
+                    prosent = prosent,
                     sats = sats,
                     differanseberegnetPeriodebeløp = differanseberegnetBeløp,
-                    nasjonaltPeriodebeløp = sats,
+                    nasjonaltPeriodebeløp = sats.avrundetHeltallAvProsent(prosent),
                     beløpUtenEndretUtbetaling = sats,
                 )
             }.groupBy {
