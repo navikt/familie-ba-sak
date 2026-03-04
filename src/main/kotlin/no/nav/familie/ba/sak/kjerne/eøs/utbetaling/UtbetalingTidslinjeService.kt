@@ -125,7 +125,7 @@ private fun EndretUtbetalingAndel.tilPeriode() =
         verdi = this,
     )
 
-private fun AndelTilkjentYtelse?.skalUtbetales() = (this != null && this.kalkulertUtbetalingsbeløp != 0)
+private fun AndelTilkjentYtelse?.skalUtbetales() = (this != null && (this.kalkulertUtbetalingsbeløp != 0 || this.differanseberegnetPeriodebeløp != null))
 
 private fun utvidetBarnetrygdSkalUtbetalesOgKompetanseKreves(
     endretUtbetalingAndel: EndretUtbetalingAndel,
