@@ -66,7 +66,7 @@ class BeregningService(
     /**
      * Denne metoden henter alle relaterte behandlinger på en person.
      * Per fagsak henter man tilkjent ytelse fra:
-     * 1. Behandling som holder på å iverksettes
+     * 1. Behandling som er til godkjenning
      * 2. Siste behandling som er vedtatt
      * 3. Filtrer bort behandlinger der barnet ikke lenger finnes
      */
@@ -81,9 +81,25 @@ class BeregningService(
 
         return andreFagsaker
             .mapNotNull { fagsak ->
-                val godkjentBehandlingerSomIkkeErIverksattEnda =
-                    behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id).singleOrNull()
-                godkjentBehandlingerSomIkkeErIverksattEnda ?: behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
+                val behandlingSomLiggerTilGodkjenning =
+                    behandlingRepository
+                        .finnBehandlingerSomLiggerTilGodkjenning(
+                            fagsakId = fagsak.id,
+                        ).singleOrNull()
+
+                if (behandlingSomLiggerTilGodkjenning != null) {
+                    behandlingSomLiggerTilGodkjenning
+                } else {
+                    val godkjenteBehandlingerSomIkkeErIverksattEnda =
+                        behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id).singleOrNull()
+                    if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) {
+                        godkjenteBehandlingerSomIkkeErIverksattEnda
+                    } else {
+                        val sisteVedtatteBehandling =
+                            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
+                        sisteVedtatteBehandling
+                    }
+                }
             }.map {
                 hentTilkjentYtelseForBehandling(behandlingId = it.id)
             }.filter {
