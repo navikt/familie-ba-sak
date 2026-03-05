@@ -4,11 +4,15 @@ import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.SatsendringFeil
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
@@ -621,6 +625,109 @@ class TilkjentYtelseValideringTest {
                     andelerTilkjentYtelse = nåværendeAndeler,
                 )
             }
+        }
+    }
+
+    @Nested
+    inner class LagErOver100ProsentUtbetalingPåYtelseTidslinje {
+        @Test
+        fun `skal lage en tidslinje som ikke overstiger 100 prosent`() {
+            // Arrange
+            val mor = lagPerson(type = PersonType.SØKER)
+            val far = lagPerson(type = PersonType.ANNENPART)
+            val barn = lagPerson(type = PersonType.BARN)
+
+            val fagsakMor = lagFagsak(aktør = mor.aktør)
+            val behandlingMor = lagBehandling(fagsak = fagsakMor)
+            val tilkjentYtelseMor = lagTilkjentYtelse(behandling = behandlingMor)
+
+            val fagsakFar = lagFagsak(aktør = far.aktør)
+            val behandlingFar = lagBehandling(fagsak = fagsakFar)
+            val tilkjentYtelseFar = lagTilkjentYtelse(behandling = behandlingFar)
+
+            val andelerMor =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        id = 1L,
+                        tilkjentYtelse = tilkjentYtelseMor,
+                        behandling = behandlingMor,
+                        aktør = barn.aktør,
+                        fom = YearMonth.of(2025, 10),
+                        tom = YearMonth.of(2025, 11),
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        kalkulertUtbetalingsbeløp = 1968,
+                        nasjonaltPeriodebeløp = 1968,
+                        beløpUtenEndretUtbetaling = 984,
+                        prosent = BigDecimal(100),
+                        sats = 1968,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        id = 2L,
+                        tilkjentYtelse = tilkjentYtelseMor,
+                        behandling = behandlingMor,
+                        aktør = barn.aktør,
+                        fom = YearMonth.of(2025, 12),
+                        tom = YearMonth.of(2025, 12),
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        kalkulertUtbetalingsbeløp = 984,
+                        nasjonaltPeriodebeløp = 984,
+                        beløpUtenEndretUtbetaling = 984,
+                        prosent = BigDecimal(50),
+                        sats = 1968,
+                    ),
+                )
+
+            val andelerFar =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        id = 3L,
+                        tilkjentYtelse = tilkjentYtelseFar,
+                        behandling = behandlingFar,
+                        aktør = barn.aktør,
+                        fom = YearMonth.of(2025, 10),
+                        tom = YearMonth.of(2025, 11),
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        kalkulertUtbetalingsbeløp = 0,
+                        nasjonaltPeriodebeløp = 0,
+                        beløpUtenEndretUtbetaling = 984,
+                        prosent = BigDecimal(0),
+                        sats = 1968,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        id = 4L,
+                        tilkjentYtelse = tilkjentYtelseFar,
+                        behandling = behandlingFar,
+                        aktør = barn.aktør,
+                        fom = YearMonth.of(2025, 12),
+                        tom = YearMonth.of(2025, 12),
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        kalkulertUtbetalingsbeløp = 984,
+                        nasjonaltPeriodebeløp = 984,
+                        beløpUtenEndretUtbetaling = 984,
+                        prosent = BigDecimal(50),
+                        sats = 1968,
+                    ),
+                )
+
+            // Act
+            val tidslinje =
+                TilkjentYtelseValidering.lagErOver100ProsentUtbetalingPåYtelseTidslinje(
+                    andeler = andelerMor,
+                    barnsAndelerFraAndreBehandlinger = andelerFar,
+                )
+
+            // Asseret
+            assertThat(tidslinje.innhold).hasSize(1)
+            assertThat(
+                tidslinje.innhold[0]
+                    .periodeVerdi.verdi
+                    ?.erOver100Prosent,
+            ).isFalse()
+            assertThat(
+                tidslinje.innhold[0]
+                    .periodeVerdi.verdi
+                    ?.behandlingIds,
+            ).contains(behandlingFar.id, behandlingMor.id)
         }
     }
 }
