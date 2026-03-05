@@ -31,7 +31,7 @@ fun lagAndelTilkjentYtelse(
     sats: Int = sats(ytelseType),
     kalkulertUtbetalingsbeløp: Int? = null,
     nasjonaltPeriodebeløp: Int = beløp,
-    beløpUtenEndretUtbetaling: Int = beløp,
+    beløpUtenEndretUtbetaling: Int? = beløp,
 ): AndelTilkjentYtelse =
     AndelTilkjentYtelse(
         id = id,

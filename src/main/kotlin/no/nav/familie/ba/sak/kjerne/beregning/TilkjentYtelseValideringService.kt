@@ -45,7 +45,7 @@ class TilkjentYtelseValideringService(
                 )
             }
 
-        secureLogger.info("Andeler tilkjent ytelse i inneværende behandling: " + tilkjentYtelse.andelerTilkjentYtelse)
+        secureLogger.info("Andeler tilkjent ytelse i inneværende behandling=${behandling.id}: " + tilkjentYtelse.andelerTilkjentYtelse)
         secureLogger.info(
             "Barn og deres andeler tilkjent ytelse fra andre fagsaker: " +
                 barnMedAndreRelevanteTilkjentYtelser.map {
