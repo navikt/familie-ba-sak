@@ -120,7 +120,6 @@ class AndelTilkjentYtelseOffsetTest(
         )
         val behandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().opprettBehandling(
-                
                 behandlingType = behandlingType,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 fagsakId = fagsak.id,
@@ -182,7 +181,6 @@ class AndelTilkjentYtelseOffsetTest(
         )
         val utvidetBehandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().opprettBehandling(
-                
                 behandlingType = behandlingType,
                 behandlingÅrsak = behandlingÅrsak,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,

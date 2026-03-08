@@ -76,14 +76,12 @@ class KonsistensavstemmingUtplukkingIntegrationTest(
 
         val førstegangsbehandling =
             opprettOgLagreBehandlingMedAndeler(
-             
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
                 medStatus = BehandlingStatus.AVSLUTTET,
                 fagsakId = fagsak.id,
             )
         val revurdering =
             opprettOgLagreRevurderingMedAndeler(
-             
                 kildeOgOffsetPåAndeler =
                     listOf(
                         KildeOgOffsetPåAndel(førstegangsbehandling.id, 1L),
@@ -152,14 +150,12 @@ class KonsistensavstemmingUtplukkingIntegrationTest(
 
         val førstegangsbehandling =
             opprettOgLagreBehandlingMedAndeler(
-             
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
                 medStatus = BehandlingStatus.AVSLUTTET,
                 fagsakId = fagsak.id,
             )
         val revurderingMedOpphør =
             opprettOgLagreRevurderingMedAndeler(
-             
                 kildeOgOffsetPåAndeler = emptyList(),
                 fagsakId = fagsak.id,
             )
@@ -188,14 +184,12 @@ class KonsistensavstemmingUtplukkingIntegrationTest(
             }
         val iverksattBehandling =
             opprettOgLagreBehandlingMedAndeler(
-             
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
                 medStatus = BehandlingStatus.AVSLUTTET,
                 fagsakId = fagsak.id,
             )
 
         opprettOgLagreRevurderingMedAndeler(
-         
             kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 2L)),
             erIverksatt = false,
             fagsakId = fagsak.id,

@@ -204,7 +204,7 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling( fagsakId = fagsak.id))
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fagsakId = fagsak.id))
 
         val lagredeTaskerAvType =
             fakeTaskRepositoryWrapper
@@ -222,7 +222,7 @@ class BehandlingIntegrationTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
-            behandlingService.opprettBehandling(nyOrdinærBehandling( fagsakId = fagsak.id))
+            behandlingService.opprettBehandling(nyOrdinærBehandling(fagsakId = fagsak.id))
 
         assertNotNull(vedtakService.hentAktivForBehandling(behandlingId = behandling.id))
     }
@@ -301,7 +301,6 @@ class BehandlingIntegrationTest(
         val behandling =
             behandlingService.opprettBehandling(
                 nyOrdinærBehandling(
-                    
                     fagsakId = fagsak.data!!.id,
                 ),
             )
@@ -436,7 +435,6 @@ class BehandlingIntegrationTest(
         val behandling =
             behandlingService.opprettBehandling(
                 nyOrdinærBehandling(
-                    
                     fagsakId = fagsak.data!!.id,
                 ),
             )
@@ -601,7 +599,6 @@ class BehandlingIntegrationTest(
         val behandling =
             behandlingService.opprettBehandling(
                 nyOrdinærBehandling(
-                    
                     fagsakId = fagsak.data!!.id,
                 ),
             )
@@ -657,7 +654,7 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         val behandling =
-            behandlingService.opprettBehandling(nyOrdinærBehandling( fagsakId = fagsak.data!!.id))
+            behandlingService.opprettBehandling(nyOrdinærBehandling(fagsakId = fagsak.data!!.id))
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
         val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
 

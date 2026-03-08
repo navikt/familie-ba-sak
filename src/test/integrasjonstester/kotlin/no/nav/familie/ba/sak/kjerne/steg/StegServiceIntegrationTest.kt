@@ -452,7 +452,6 @@ class StegServiceIntegrationTest(
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                    
                     barnasIdenter = barnasIdenter,
                     nyMigreringsdato = nyMigreringsdato,
                     fagsakId = fagsak.id,
@@ -683,7 +682,6 @@ class StegServiceIntegrationTest(
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                    
                     barnasIdenter = barnasIdenter,
                     nyMigreringsdato = nyMigreringsdato,
                     fagsakId = fagsak.id,
@@ -776,7 +774,6 @@ class StegServiceIntegrationTest(
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-                    
                     barnasIdenter = barnasIdenter,
                     nyMigreringsdato = migreringsdato,
                     fagsakId = fagsak.id,
@@ -888,7 +885,6 @@ class StegServiceIntegrationTest(
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-                    
                     barnasIdenter = barnasIdenter,
                     nyMigreringsdato = migreringsdato,
                     fagsakId = fagsak.id,
@@ -1015,7 +1011,6 @@ class StegServiceIntegrationTest(
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-                    
                     barnasIdenter = barnasIdenter,
                     nyMigreringsdato = migreringsdato,
                     fagsakId = fagsak.id,
@@ -1156,7 +1151,6 @@ class StegServiceIntegrationTest(
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                    
                     barnasIdenter = barnasIdenter,
                     nyMigreringsdato = migreringsdato,
                     fagsakId = fagsak.id,

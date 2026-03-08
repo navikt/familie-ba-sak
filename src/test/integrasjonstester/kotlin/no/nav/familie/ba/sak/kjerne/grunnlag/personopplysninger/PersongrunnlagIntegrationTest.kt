@@ -88,7 +88,6 @@ class PersongrunnlagIntegrationTest(
         val behandling =
             behandlingService.opprettBehandling(
                 nyOrdinærBehandling(
-                    
                     fagsakId = fagsak.data!!.id,
                 ),
             )
@@ -146,7 +145,6 @@ class PersongrunnlagIntegrationTest(
             behandlingService.opprettBehandling(
                 NyBehandling(
                     skalBehandlesAutomatisk = true,
-                    
                     behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     // alltid NASJONAL for fødselshendelse
@@ -250,7 +248,6 @@ class PersongrunnlagIntegrationTest(
         val behandling =
             behandlingService.opprettBehandling(
                 nyOrdinærBehandling(
-                    
                     fagsakId = fagsak.data!!.id,
                 ),
             )
@@ -289,7 +286,6 @@ class PersongrunnlagIntegrationTest(
                 behandlingService.opprettBehandling(
                     NyBehandling(
                         skalBehandlesAutomatisk = true,
-                        
                         behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                         kategori = BehandlingKategori.NASJONAL,
@@ -374,7 +370,6 @@ class PersongrunnlagIntegrationTest(
             behandlingService.opprettBehandling(
                 NyBehandling(
                     skalBehandlesAutomatisk = true,
-                    
                     behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     kategori = BehandlingKategori.NASJONAL,
@@ -513,7 +508,6 @@ class PersongrunnlagIntegrationTest(
                 val behandling =
                     behandlingService.opprettBehandling(
                         nyOrdinærBehandling(
-                            
                             fagsakId = fagsak.data!!.id,
                         ),
                     )
@@ -569,7 +563,6 @@ class PersongrunnlagIntegrationTest(
                 val behandling =
                     behandlingService.opprettBehandling(
                         nyOrdinærBehandling(
-                            
                             fagsakId = fagsak.data!!.id,
                         ),
                     )
@@ -609,7 +602,6 @@ class PersongrunnlagIntegrationTest(
                 val behandling =
                     behandlingService.opprettBehandling(
                         nyOrdinærBehandling(
-                            
                             fagsakId = fagsak.data!!.id,
                         ),
                     )
@@ -654,7 +646,6 @@ class PersongrunnlagIntegrationTest(
                 val behandling =
                     behandlingService.opprettBehandling(
                         nyOrdinærBehandling(
-                            
                             fagsakId = fagsak.data!!.id,
                         ),
                     )
@@ -699,7 +690,6 @@ class PersongrunnlagIntegrationTest(
                 val behandling =
                     behandlingService.opprettBehandling(
                         nyOrdinærBehandling(
-                            
                             fagsakId = fagsak.data!!.id,
                         ),
                     )

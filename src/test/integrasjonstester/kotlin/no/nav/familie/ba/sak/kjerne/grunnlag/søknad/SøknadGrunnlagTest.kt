@@ -83,7 +83,7 @@ class SøknadGrunnlagTest(
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling =
             stegService.håndterNyBehandling(
-                lagNyBehandling( fagsak.id),
+                lagNyBehandling(fagsak.id),
             )
 
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
@@ -108,7 +108,7 @@ class SøknadGrunnlagTest(
         val søkerAktør = personidentService.hentAktør(søkerIdent)
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
-        val behandling = stegService.håndterNyBehandling(lagNyBehandling( fagsak.id),)
+        val behandling = stegService.håndterNyBehandling(lagNyBehandling(fagsak.id))
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
 
         val barnIdent2 = randomFnr()

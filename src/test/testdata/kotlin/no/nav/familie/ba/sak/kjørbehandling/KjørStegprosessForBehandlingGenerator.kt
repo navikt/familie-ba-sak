@@ -367,7 +367,6 @@ fun kjørStegprosessForFGB(
                 underkategori = behandlingUnderkategori,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                
                 barnasIdenter = barnasIdenter,
                 søknadMottattDato = LocalDate.now().minusYears(18),
                 fagsakId = fagsak.id,
@@ -528,7 +527,6 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
-                
                 barnasIdenter = barnasIdenter,
                 fagsakId = fagsakId,
             ),
