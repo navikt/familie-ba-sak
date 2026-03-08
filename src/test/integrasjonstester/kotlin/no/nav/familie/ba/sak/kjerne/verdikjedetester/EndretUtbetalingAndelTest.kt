@@ -152,7 +152,6 @@ class EndretUtbetalingAndelTest(
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
         val fagsakDtoMedBehandling =
             familieBaSakKlient().opprettBehandling(
-                søkersIdent = søkersIdent,
                 behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 fagsakId = fagsak.data!!.id,
             )

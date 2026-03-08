@@ -125,7 +125,6 @@ class BehandlingIntegrationTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         behandlingService.opprettBehandling(
             nyOrdinærBehandling(
-                søkersIdent = fnr,
                 fagsakId = fagsak.id,
             ),
         )
@@ -139,7 +138,6 @@ class BehandlingIntegrationTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         behandlingService.opprettBehandling(
             nyOrdinærBehandling(
-                søkersIdent = fnr,
                 fagsakId = fagsak.id,
             ),
         )
@@ -186,7 +184,6 @@ class BehandlingIntegrationTest(
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     skalBehandlesAutomatisk = true,
-                    søkersIdent = fnr,
                     fagsakId = fagsak.id,
                 ),
             )
@@ -207,7 +204,7 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling( fagsakId = fagsak.id))
 
         val lagredeTaskerAvType =
             fakeTaskRepositoryWrapper
@@ -225,7 +222,7 @@ class BehandlingIntegrationTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
-            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
+            behandlingService.opprettBehandling(nyOrdinærBehandling( fagsakId = fagsak.id))
 
         assertNotNull(vedtakService.hentAktivForBehandling(behandlingId = behandling.id))
     }
@@ -240,7 +237,6 @@ class BehandlingIntegrationTest(
                 NyBehandling(
                     kategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.ORDINÆR,
-                    søkersIdent = fnr,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     skalBehandlesAutomatisk = true,
                     søknadMottattDato = LocalDate.now(),
@@ -264,7 +260,7 @@ class BehandlingIntegrationTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morId))
         val behandling =
-            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = morId, fagsakId = fagsak.data!!.id))
+            behandlingService.opprettBehandling(nyOrdinærBehandling(fagsakId = fagsak.data!!.id))
         behandling.behandlingStegTilstand.forEach { it.behandlingStegStatus = BehandlingStegStatus.UTFØRT }
         behandling.behandlingStegTilstand.add(
             BehandlingStegTilstand(
@@ -279,7 +275,6 @@ class BehandlingIntegrationTest(
                 NyBehandling(
                     BehandlingKategori.NASJONAL,
                     BehandlingUnderkategori.ORDINÆR,
-                    morId,
                     BehandlingType.REVURDERING,
                     BehandlingÅrsak.SØKNAD,
                     fagsakId = fagsak.data!!.id,
@@ -306,7 +301,7 @@ class BehandlingIntegrationTest(
         val behandling =
             behandlingService.opprettBehandling(
                 nyOrdinærBehandling(
-                    søkersIdent = søkerFnr,
+                    
                     fagsakId = fagsak.data!!.id,
                 ),
             )
@@ -441,7 +436,7 @@ class BehandlingIntegrationTest(
         val behandling =
             behandlingService.opprettBehandling(
                 nyOrdinærBehandling(
-                    søkersIdent = søkerFnr,
+                    
                     fagsakId = fagsak.data!!.id,
                 ),
             )
@@ -606,7 +601,7 @@ class BehandlingIntegrationTest(
         val behandling =
             behandlingService.opprettBehandling(
                 nyOrdinærBehandling(
-                    søkersIdent = søkerFnr,
+                    
                     fagsakId = fagsak.data!!.id,
                 ),
             )
@@ -662,7 +657,7 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         val behandling =
-            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.data!!.id))
+            behandlingService.opprettBehandling(nyOrdinærBehandling( fagsakId = fagsak.data!!.id))
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
         val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
 

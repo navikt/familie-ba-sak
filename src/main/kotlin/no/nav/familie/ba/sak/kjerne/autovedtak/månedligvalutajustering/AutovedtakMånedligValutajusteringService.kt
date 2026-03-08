@@ -94,7 +94,6 @@ class AutovedtakMånedligValutajusteringService(
 
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
-                aktør = søkerAktør,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING,
                 fagsakId = fagsakId,

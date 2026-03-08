@@ -64,7 +64,6 @@ class AutovedtakSatsendringRollbackService(
 
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
-                aktør = søkerAktør,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.SATSENDRING,
                 fagsakId = sisteVedtatteBehandling.fagsak.id,

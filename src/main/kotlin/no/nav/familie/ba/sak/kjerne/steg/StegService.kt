@@ -101,14 +101,17 @@ class StegService(
         }
 
         val behandling = behandlingService.opprettBehandling(nyBehandling)
+        val fagsak = behandling.fagsak
+
+        val søkersIdent = fagsak.skjermetBarnSøker?.aktør?.aktivFødselsnummer() ?: fagsak.aktør.aktivFødselsnummer()
 
         // Aktiverer minside for fagsak-aktør
-        opprettTaskService.opprettAktiverMinsideTask(behandling.fagsak.aktør)
+        opprettTaskService.opprettAktiverMinsideTask(fagsak.aktør)
 
         val barnasIdenter =
             when {
-                behandling.fagsak.type == FagsakType.SKJERMET_BARN -> {
-                    listOf(behandling.fagsak.aktør.aktivFødselsnummer())
+                fagsak.type == FagsakType.SKJERMET_BARN -> {
+                    listOf(fagsak.aktør.aktivFødselsnummer())
                 }
 
                 nyBehandling.behandlingÅrsak in listOf(BehandlingÅrsak.FØDSELSHENDELSE, BehandlingÅrsak.HELMANUELL_MIGRERING) -> {
@@ -134,7 +137,7 @@ class StegService(
         return håndterPersongrunnlag(
             behandling,
             RegistrerPersongrunnlagDTO(
-                ident = nyBehandling.søkersIdent,
+                ident = søkersIdent,
                 barnasIdenter = barnasIdenter,
                 nyMigreringsdato = nyBehandling.nyMigreringsdato,
             ),
@@ -217,7 +220,6 @@ class StegService(
 
         return håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
-                søkersIdent = nyBehandlingHendelse.morsIdent,
                 behandlingType =
                     if (fagsak.status == FagsakStatus.LØPENDE) {
                         BehandlingType.REVURDERING

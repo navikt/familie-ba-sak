@@ -129,7 +129,6 @@ class AutobrevSmåbarnstilleggOpphørTest(
         )
         val behandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().opprettBehandling(
-                søkersIdent = fagsak.søkerFødselsnummer,
                 behandlingType = behandlingType,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 fagsakId = fagsak.id,
@@ -192,7 +191,6 @@ class AutobrevSmåbarnstilleggOpphørTest(
 
         val utvidetBehandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().opprettBehandling(
-                søkersIdent = fagsak.søkerFødselsnummer,
                 behandlingType = behandlingType,
                 behandlingÅrsak = behandlingÅrsak,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
@@ -239,7 +237,6 @@ class AutobrevSmåbarnstilleggOpphørTest(
         )
         val utvidetBehandlingDto: Ressurs<UtvidetBehandlingDto> =
             familieBaSakKlient().opprettBehandling(
-                søkersIdent = fagsak.søkerFødselsnummer,
                 behandlingType = behandlingType,
                 behandlingÅrsak = behandlingÅrsak,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,

@@ -48,7 +48,6 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
         val utvidetBehandlingDto =
             familieBaSakKlient()
                 .opprettBehandling(
-                    søkersIdent = søkersIdent,
                     behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                     fagsakId = fagsak.data!!.id,
                 ).data!!

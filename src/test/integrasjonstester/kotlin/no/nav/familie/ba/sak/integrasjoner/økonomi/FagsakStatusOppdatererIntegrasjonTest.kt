@@ -151,7 +151,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         andelKalkulertUtbetalingsbeløp: Int,
     ): Behandling {
         val behandling =
-            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = personIdent, fagsakId = fagsakId))
+            behandlingService.opprettBehandling(nyOrdinærBehandling(fagsakId = fagsakId))
         behandling.status = medStatus
         behandlingRepository.save(behandling)
         val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)

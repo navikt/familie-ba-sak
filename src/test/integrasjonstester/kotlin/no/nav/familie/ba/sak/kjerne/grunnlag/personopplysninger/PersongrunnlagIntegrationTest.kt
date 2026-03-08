@@ -88,7 +88,7 @@ class PersongrunnlagIntegrationTest(
         val behandling =
             behandlingService.opprettBehandling(
                 nyOrdinærBehandling(
-                    søkersIdent = søkerAktør.aktivFødselsnummer(),
+                    
                     fagsakId = fagsak.data!!.id,
                 ),
             )
@@ -146,7 +146,7 @@ class PersongrunnlagIntegrationTest(
             behandlingService.opprettBehandling(
                 NyBehandling(
                     skalBehandlesAutomatisk = true,
-                    søkersIdent = morAktør.aktivFødselsnummer(),
+                    
                     behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     // alltid NASJONAL for fødselshendelse
@@ -201,7 +201,6 @@ class PersongrunnlagIntegrationTest(
             behandlingService.opprettBehandling(
                 NyBehandling(
                     skalBehandlesAutomatisk = true,
-                    søkersIdent = morAktør.aktivFødselsnummer(),
                     behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     kategori = BehandlingKategori.NASJONAL,
@@ -251,7 +250,7 @@ class PersongrunnlagIntegrationTest(
         val behandling =
             behandlingService.opprettBehandling(
                 nyOrdinærBehandling(
-                    søkersIdent = søkerAktør.aktivFødselsnummer(),
+                    
                     fagsakId = fagsak.data!!.id,
                 ),
             )
@@ -290,7 +289,7 @@ class PersongrunnlagIntegrationTest(
                 behandlingService.opprettBehandling(
                     NyBehandling(
                         skalBehandlesAutomatisk = true,
-                        søkersIdent = morAktør.aktivFødselsnummer(),
+                        
                         behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                         kategori = BehandlingKategori.NASJONAL,
@@ -375,7 +374,7 @@ class PersongrunnlagIntegrationTest(
             behandlingService.opprettBehandling(
                 NyBehandling(
                     skalBehandlesAutomatisk = true,
-                    søkersIdent = morAktør.aktivFødselsnummer(),
+                    
                     behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     kategori = BehandlingKategori.NASJONAL,
@@ -514,7 +513,7 @@ class PersongrunnlagIntegrationTest(
                 val behandling =
                     behandlingService.opprettBehandling(
                         nyOrdinærBehandling(
-                            søkersIdent = søkerAktør.aktivFødselsnummer(),
+                            
                             fagsakId = fagsak.data!!.id,
                         ),
                     )
@@ -570,7 +569,7 @@ class PersongrunnlagIntegrationTest(
                 val behandling =
                     behandlingService.opprettBehandling(
                         nyOrdinærBehandling(
-                            søkersIdent = søkerAktør.aktivFødselsnummer(),
+                            
                             fagsakId = fagsak.data!!.id,
                         ),
                     )
@@ -610,7 +609,7 @@ class PersongrunnlagIntegrationTest(
                 val behandling =
                     behandlingService.opprettBehandling(
                         nyOrdinærBehandling(
-                            søkersIdent = søkerAktør.aktivFødselsnummer(),
+                            
                             fagsakId = fagsak.data!!.id,
                         ),
                     )
@@ -655,7 +654,7 @@ class PersongrunnlagIntegrationTest(
                 val behandling =
                     behandlingService.opprettBehandling(
                         nyOrdinærBehandling(
-                            søkersIdent = søkerAktør.aktivFødselsnummer(),
+                            
                             fagsakId = fagsak.data!!.id,
                         ),
                     )
@@ -700,7 +699,7 @@ class PersongrunnlagIntegrationTest(
                 val behandling =
                     behandlingService.opprettBehandling(
                         nyOrdinærBehandling(
-                            søkersIdent = søkerAktør.aktivFødselsnummer(),
+                            
                             fagsakId = fagsak.data!!.id,
                         ),
                     )

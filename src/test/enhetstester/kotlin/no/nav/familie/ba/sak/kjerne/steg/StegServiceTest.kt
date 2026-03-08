@@ -91,7 +91,6 @@ class StegServiceTest {
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-                    søkersIdent = foreldre.aktivFødselsnummer(),
                     barnasIdenter = listOf(barn.aktivFødselsnummer()),
                     nyMigreringsdato = LocalDate.now().minusMonths(6),
                     fagsakId = 1L,
@@ -158,7 +157,6 @@ class StegServiceTest {
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-                    søkersIdent = barn.aktivFødselsnummer(),
                     barnasIdenter = emptyList(),
                     nyMigreringsdato = LocalDate.now().minusMonths(6),
                     fagsakId = 1L,
@@ -206,7 +204,6 @@ class StegServiceTest {
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-                    søkersIdent = randomFnr(),
                     barnasIdenter = listOf(randomFnr()),
                     nyMigreringsdato = LocalDate.now().minusMonths(6),
                     fagsakId = 1L,
@@ -225,7 +222,6 @@ class StegServiceTest {
             // Arrange
             val nyBehandling =
                 NyBehandling(
-                    søkersIdent = randomFnr(),
                     behandlingType = BehandlingType.REVURDERING,
                     behandlingÅrsak = BehandlingÅrsak.FALSK_IDENTITET,
                     fagsakId = 1L,
@@ -250,7 +246,6 @@ class StegServiceTest {
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                     behandlingType = BehandlingType.REVURDERING,
                     behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                    søkersIdent = randomFnr(),
                     barnasIdenter = listOf(randomFnr()),
                     nyMigreringsdato = LocalDate.now().minusMonths(6),
                     fagsakId = 1L,
@@ -275,7 +270,6 @@ class StegServiceTest {
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                     behandlingType = BehandlingType.REVURDERING,
                     behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                    søkersIdent = randomFnr(),
                     barnasIdenter = listOf(randomFnr()),
                     nyMigreringsdato = LocalDate.now().minusMonths(6),
                     fagsakId = 1L,

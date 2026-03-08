@@ -136,7 +136,7 @@ class RolletilgangTest(
         )
         val requestEntity =
             HttpEntity<String>(
-                jsonMapper.writeValueAsString(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.data!!.id)),
+                jsonMapper.writeValueAsString(nyOrdinærBehandling(fagsakId = fagsak.data!!.id)),
                 header,
             )
 

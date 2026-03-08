@@ -28,7 +28,6 @@ class AutovedtakService(
     private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService,
 ) {
     fun opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
-        aktør: Aktør,
         behandlingType: BehandlingType,
         behandlingÅrsak: BehandlingÅrsak,
         fagsakId: Long,
@@ -38,7 +37,6 @@ class AutovedtakService(
                 NyBehandling(
                     behandlingType = behandlingType,
                     behandlingÅrsak = behandlingÅrsak,
-                    søkersIdent = aktør.aktivFødselsnummer(),
                     skalBehandlesAutomatisk = true,
                     fagsakId = fagsakId,
                 ),

@@ -55,7 +55,7 @@ class ArbeidsfordelingIntegrationTest(
         // Act
         val behandling =
             stegService.håndterNyBehandling(
-                lagNyBehandling(fagsak.id, søkerFnr),
+                lagNyBehandling(fagsak.id),
             )
 
         // Assert
@@ -85,7 +85,7 @@ class ArbeidsfordelingIntegrationTest(
             )
         val behandling =
             stegService.håndterNyBehandling(
-                lagNyBehandling(fagsak.id, søkerFnr),
+                lagNyBehandling(fagsak.id),
             )
 
         val arbeidsfordelingPåBehandling =
@@ -128,7 +128,7 @@ class ArbeidsfordelingIntegrationTest(
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerFnr)
         val behandling =
             stegService.håndterNyBehandling(
-                lagNyBehandling(fagsak.id, søkerFnr),
+                lagNyBehandling(fagsak.id),
             )
 
         val arbeidsfordelingPåBehandling =
@@ -176,7 +176,7 @@ class ArbeidsfordelingIntegrationTest(
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerFnr)
         val behandling =
             stegService.håndterNyBehandling(
-                lagNyBehandling(fagsak.id, søkerFnr),
+                lagNyBehandling(fagsak.id),
             )
 
         val arbeidsfordelingPåBehandling =
@@ -240,7 +240,7 @@ class ArbeidsfordelingIntegrationTest(
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerFnr)
         val behandling =
             stegService.håndterNyBehandling(
-                lagNyBehandling(fagsak.id, søkerFnr),
+                lagNyBehandling(fagsak.id),
             )
 
         val arbeidsfordelingPåBehandling =
@@ -291,7 +291,7 @@ class ArbeidsfordelingIntegrationTest(
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerFnr)
         val behandling =
             stegService.håndterNyBehandling(
-                lagNyBehandling(fagsak.id, søkerFnr),
+                lagNyBehandling(fagsak.id),
             )
 
         val arbeidsfordelingPåBehandling =
@@ -323,11 +323,9 @@ class ArbeidsfordelingIntegrationTest(
 
     private fun lagNyBehandling(
         fagsakId: Long,
-        søkerFnr: String,
     ) = NyBehandling(
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR,
-        søkersIdent = søkerFnr,
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         søknadMottattDato = now(),
         fagsakId = fagsakId,

@@ -41,7 +41,6 @@ class AutovedtakBrevService(
     ): String {
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
-                aktør = behandlingsdata.aktør,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = behandlingsdata.behandlingsårsak,
                 fagsakId = behandlingsdata.fagsakId,

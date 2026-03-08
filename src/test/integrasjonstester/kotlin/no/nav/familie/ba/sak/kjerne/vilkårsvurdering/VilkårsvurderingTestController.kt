@@ -80,7 +80,6 @@ class VilkårsvurderingTestController(
                 NyBehandling(
                     kategori = BehandlingKategori.EØS,
                     underkategori = BehandlingUnderkategori.ORDINÆR,
-                    søkersIdent = søker.aktør.aktivFødselsnummer(),
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     søknadMottattDato = LocalDate.now(),
                     barnasIdenter = barn.map { it.aktør.aktivFødselsnummer() },

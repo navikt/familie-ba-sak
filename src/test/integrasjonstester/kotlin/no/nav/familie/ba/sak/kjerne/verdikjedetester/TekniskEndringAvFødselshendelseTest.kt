@@ -73,7 +73,6 @@ class TekniskEndringAvFødselshendelseTest(
 
         val utvidetBehandlingDto =
             familieBaSakKlient().opprettBehandling(
-                søkersIdent = scenario.søker.ident,
                 behandlingType = BehandlingType.TEKNISK_ENDRING,
                 behandlingÅrsak = BehandlingÅrsak.TEKNISK_ENDRING,
                 fagsakId = behandling.fagsak.id,

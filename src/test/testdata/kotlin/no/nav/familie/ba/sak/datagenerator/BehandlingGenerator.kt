@@ -103,12 +103,10 @@ fun lagBehandlingUtenId(
 }
 
 fun nyOrdinærBehandling(
-    søkersIdent: String,
     årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
     fagsakId: Long,
 ): NyBehandling =
     NyBehandling(
-        søkersIdent = søkersIdent,
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR,
@@ -118,11 +116,9 @@ fun nyOrdinærBehandling(
     )
 
 fun nyRevurdering(
-    søkersIdent: String,
     fagsakId: Long,
 ): NyBehandling =
     NyBehandling(
-        søkersIdent = søkersIdent,
         behandlingType = BehandlingType.REVURDERING,
         behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
         kategori = BehandlingKategori.NASJONAL,
@@ -161,7 +157,6 @@ fun lagVisningsbehandling(
 fun lagNyBehandling(
     fagsakId: Long = 0L,
     navIdent: String? = "Z123",
-    søkersIdent: String = "10468906606",
     barnasIdenter: List<String> = listOf("08529926074", "27508947807"),
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
@@ -176,7 +171,6 @@ fun lagNyBehandling(
     NyBehandling(
         kategori,
         underkategori,
-        søkersIdent,
         behandlingType,
         behandlingÅrsak,
         skalBehandlesAutomatisk,

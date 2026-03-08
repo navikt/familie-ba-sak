@@ -515,7 +515,6 @@ class FagsakServiceIntegrationTest(
             NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
-                søkersIdent = fagsak.aktør.aktivFødselsnummer(),
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 behandlingÅrsak = BehandlingÅrsak.SØKNAD,
                 navIdent = randomFnr(),

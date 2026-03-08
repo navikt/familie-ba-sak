@@ -87,7 +87,6 @@ class InnkommendeJournalføringService(
     }
 
     private fun opprettBehandlingForJournalføring(
-        personIdent: String,
         navIdent: String,
         type: BehandlingType,
         årsak: BehandlingÅrsak,
@@ -101,7 +100,6 @@ class InnkommendeJournalføringService(
             NyBehandling(
                 kategori = kategori,
                 underkategori = underkategori,
-                søkersIdent = personIdent,
                 behandlingType = type,
                 behandlingÅrsak = årsak,
                 navIdent = navIdent,
@@ -137,7 +135,6 @@ class InnkommendeJournalføringService(
             } else {
                 val nyBehandling =
                     opprettBehandlingForJournalføring(
-                        personIdent = request.bruker.id,
                         navIdent = request.navIdent,
                         type = request.nyBehandlingstype.tilBehandingType(),
                         årsak = request.nyBehandlingsårsak,
@@ -215,7 +212,6 @@ class InnkommendeJournalføringService(
                 val brevkode = journalpost.dokumenter?.firstNotNullOfOrNull { it.brevkode }
                 val nyBehandling =
                     opprettBehandlingForJournalføring(
-                        personIdent = request.bruker.id,
                         navIdent = request.navIdent,
                         type = request.nyBehandlingstype.tilBehandingType(),
                         årsak = request.nyBehandlingsårsak,

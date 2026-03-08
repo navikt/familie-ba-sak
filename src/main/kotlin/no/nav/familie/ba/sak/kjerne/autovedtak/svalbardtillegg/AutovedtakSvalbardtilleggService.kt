@@ -94,7 +94,6 @@ class AutovedtakSvalbardtilleggService(
         val behandlingEtterBehandlingsresultat =
             autovedtakService
                 .opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
-                    aktør = søkerAktør,
                     behandlingType = REVURDERING,
                     behandlingÅrsak = SVALBARDTILLEGG,
                     fagsakId = behandlingsdata.fagsakId,

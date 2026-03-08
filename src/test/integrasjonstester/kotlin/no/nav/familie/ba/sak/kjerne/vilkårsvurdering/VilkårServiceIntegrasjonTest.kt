@@ -141,7 +141,7 @@ class VilkårServiceIntegrasjonTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
-            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
+            behandlingService.opprettBehandling(nyOrdinærBehandling(fagsakId = fagsak.id))
         val forrigeBehandlingSomErIverksatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
@@ -443,7 +443,7 @@ class VilkårServiceIntegrasjonTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         var behandling =
-            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
+            behandlingService.opprettBehandling(nyOrdinærBehandling(fagsakId = fagsak.id))
         val forrigeBehandlingSomErIverksatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
@@ -621,7 +621,7 @@ class VilkårServiceIntegrasjonTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
-            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
+            behandlingService.opprettBehandling(nyOrdinærBehandling(fagsakId = fagsak.id))
         val forrigeBehandlingSomErIverksatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
@@ -1459,7 +1459,7 @@ class VilkårServiceIntegrasjonTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
-            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
+            behandlingService.opprettBehandling(nyOrdinærBehandling(fagsakId = fagsak.id))
 
         val forrigeBehandlingSomErIverksatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)

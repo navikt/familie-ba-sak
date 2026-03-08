@@ -62,8 +62,8 @@ class BehandlingController(
     fun opprettBehandling(
         @RequestBody nyBehandling: NyBehandling,
     ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
-        tilgangService.validerTilgangTilPersoner(
-            personIdenter = listOf(nyBehandling.søkersIdent),
+        tilgangService.validerTilgangTilFagsak(
+            fagsakId = nyBehandling.fagsakId,
             event = AuditLoggerEvent.CREATE,
         )
         tilgangService.verifiserHarTilgangTilHandling(
@@ -153,7 +153,6 @@ class BehandlingController(
 data class NyBehandling(
     val kategori: BehandlingKategori? = null,
     val underkategori: BehandlingUnderkategori? = null,
-    val søkersIdent: String,
     val behandlingType: BehandlingType,
     val behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
     val skalBehandlesAutomatisk: Boolean = false,
@@ -167,13 +166,6 @@ data class NyBehandling(
 ) {
     init { // Initiell validering på request
         when {
-            søkersIdent.isBlank() -> {
-                throw Feil(
-                    message = "Søkers ident kan ikke være blank",
-                    frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker.",
-                )
-            }
-
             BehandlingType.MIGRERING_FRA_INFOTRYGD == behandlingType &&
                 behandlingÅrsak.erManuellMigreringsårsak() &&
                 nyMigreringsdato == null -> {
@@ -192,9 +184,6 @@ data class NyBehandling(
                 )
             }
         }
-
-        // Valider ident
-        Fødselsnummer(søkersIdent)
     }
 }
 

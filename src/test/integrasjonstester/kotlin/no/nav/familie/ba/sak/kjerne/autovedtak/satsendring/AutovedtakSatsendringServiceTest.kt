@@ -343,7 +343,6 @@ class AutovedtakSatsendringServiceTest(
                     behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
                     kategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.ORDINÆR,
-                    søkersIdent = fagsak.aktør.aktivFødselsnummer(),
                 ),
             )
         registrerPersongrunnlag.utførStegOgAngiNeste(

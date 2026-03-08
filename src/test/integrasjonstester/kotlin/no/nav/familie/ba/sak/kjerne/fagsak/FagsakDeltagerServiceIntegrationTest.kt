@@ -149,7 +149,6 @@ class FagsakDeltagerServiceIntegrationTest(
                 NyBehandling(
                     kategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.ORDINÆR,
-                    søkersIdent = søker1Fnr,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     søknadMottattDato = LocalDate.now(),
                     fagsakId = fagsak0.data!!.id,
@@ -167,7 +166,6 @@ class FagsakDeltagerServiceIntegrationTest(
                 NyBehandling(
                     kategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.ORDINÆR,
-                    søkersIdent = søker1Fnr,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     søknadMottattDato = LocalDate.now(),
                     fagsakId = fagsak0.data!!.id,
@@ -186,7 +184,6 @@ class FagsakDeltagerServiceIntegrationTest(
                 NyBehandling(
                     kategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.ORDINÆR,
-                    søkersIdent = søker2Fnr,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     søknadMottattDato = LocalDate.now(),
                     fagsakId = fagsak1.data!!.id,
@@ -260,7 +257,6 @@ class FagsakDeltagerServiceIntegrationTest(
             NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
-                søkersIdent = søker1Fnr,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 søknadMottattDato = LocalDate.now(),
                 fagsakId = fagsak.data!!.id,
