@@ -29,6 +29,8 @@ object Utils {
 
     fun formaterBeløp(beløp: Int): String = NumberFormat.getNumberInstance(nbLocale).format(beløp)
 
+    fun formaterOrganisasjonsnummer(organisasjonsnummer: String): String = organisasjonsnummer.chunked(3).joinToString("\u00A0")
+
     val properties: Properties by lazy {
         val reader = MavenXpp3Reader()
         val model: Model =

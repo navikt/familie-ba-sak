@@ -14,6 +14,8 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Utils.formaterOrganisasjonsnummer
+import no.nav.familie.ba.sak.ekstern.restDomene.RegisteropplysningDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType.Organisasjon
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType.Person
@@ -71,6 +73,18 @@ data class GrArbeidsforhold(
         result = 31 * result + person.hashCode()
         return result
     }
+
+    fun tilRegisteropplysningDto() =
+        RegisteropplysningDto(
+            fom = this.periode?.fom,
+            tom = this.periode?.tom,
+            verdi =
+                when (arbeidsgiverType) {
+                    Organisasjon.name if arbeidsgiverId != null -> "${organisasjonNavn?.let { "$it\n" }.orEmpty()}${formaterOrganisasjonsnummer(arbeidsgiverId)}"
+                    Person.name -> "Privat ansettelse"
+                    else -> "Ukjent arbeidsgiver"
+                },
+        )
 
     companion object {
         fun Arbeidsforhold.tilGrArbeidsforhold(
