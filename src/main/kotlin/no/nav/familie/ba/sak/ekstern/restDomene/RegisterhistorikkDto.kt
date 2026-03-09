@@ -15,6 +15,7 @@ data class RegisterhistorikkDto(
     val oppholdsadresse: List<RegisteropplysningDto>? = emptyList(),
     val dødsboadresse: List<RegisteropplysningDto>? = emptyList(),
     val historiskeIdenter: List<RegisteropplysningDto>? = emptyList(),
+    val arbeidsforhold: List<RegisteropplysningDto>? = emptyList(),
 )
 
 fun Person.tilRegisterhistorikkDto(eldsteBarnsFødselsdato: LocalDate?) =
@@ -38,6 +39,7 @@ fun Person.tilRegisterhistorikkDto(eldsteBarnsFødselsdato: LocalDate?) =
                         verdi = it.fødselsnummer,
                     )
                 },
+        arbeidsforhold = this.arbeidsforhold.map { it.tilRegisteropplysningDto() },
     )
 
 data class RegisteropplysningDto(

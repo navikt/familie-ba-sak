@@ -14,6 +14,7 @@ class GrArbeidsforholdTest {
             periode = DatoIntervallEntitet(fom = LocalDate.of(2000, 1, 1), tom = LocalDate.of(2000, 12, 31)),
             arbeidsgiverId = "123123123",
             arbeidsgiverType = "Organisasjon",
+            organisasjonNavn = "Test AS",
         )
 
     @Nested
@@ -39,6 +40,12 @@ class GrArbeidsforholdTest {
         @Test
         fun `skal returnere false hvis arbeidsgiverType er ulik`() {
             val annetArbeidsforhold = arbeidsforhold.copy(arbeidsgiverType = "Person")
+            assert(arbeidsforhold != annetArbeidsforhold)
+        }
+
+        @Test
+        fun `skal returnere false hvis organisasjonNavn er ulik`() {
+            val annetArbeidsforhold = arbeidsforhold.copy(organisasjonNavn = "Annet navn AS")
             assert(arbeidsforhold != annetArbeidsforhold)
         }
 
