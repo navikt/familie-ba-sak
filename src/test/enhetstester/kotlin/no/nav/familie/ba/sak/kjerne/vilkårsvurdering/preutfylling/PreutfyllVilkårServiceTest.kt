@@ -44,7 +44,6 @@ class PreutfyllVilkårServiceTest {
         preutfyllVilkårService.preutfyllVilkår(vilkårsvurdering = vilkårsvurdering)
 
         // Assert
-
         verify(exactly = 0) { preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering) }
         verify(exactly = 0) { preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering) }
         verify(exactly = 0) { preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering) }
