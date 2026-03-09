@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
@@ -19,6 +20,7 @@ import java.time.LocalDate
 @Service
 class ArbeidsforholdService(
     private val systemOnlyIntegrasjonKlient: SystemOnlyIntegrasjonKlient,
+    private val integrasjonKlient: IntegrasjonKlient,
 ) {
     fun hentArbeidsforhold(person: Person): List<GrArbeidsforhold> {
         val arbeidsforholdForSisteFemÅr = systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(person.aktør.aktivFødselsnummer(), LocalDate.now().minusYears(5))
@@ -75,13 +77,16 @@ class ArbeidsforholdService(
         return sterkesteMedlemskapPerioder
             .filter { it.verdi == Medlemskap.EØS }
             .flatMap { medlemskapPeriode ->
-                val arbeidsforhold =
-                    systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(
+                systemOnlyIntegrasjonKlient
+                    .hentArbeidsforholdMedSystembruker(
                         ident = person.aktør.aktivFødselsnummer(),
                         ansettelsesperiodeFom = medlemskapPeriode.fom ?: cutOffFomDato,
                         ansettelsesperiodeTom = medlemskapPeriode.tom,
-                    )
-                arbeidsforhold.map { it.tilGrArbeidsforhold(person) }
+                    ).associateWith { arbeidsforhold ->
+                        arbeidsforhold.arbeidsgiver?.organisasjonsnummer?.let { integrasjonKlient.hentOrganisasjon(it) }
+                    }.map { (arbeidsforhold, organisasjon) ->
+                        arbeidsforhold.tilGrArbeidsforhold(person, organisasjon)
+                    }
             }
     }
 }

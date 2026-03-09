@@ -15,9 +15,11 @@ import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType.Organisasjon
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import java.time.LocalDate
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -38,6 +40,8 @@ data class GrArbeidsforhold(
     val arbeidsgiverId: String?,
     @Column(name = "arbeidsgiver_type")
     val arbeidsgiverType: String?,
+    @Column(name = "organisasjon_navn")
+    val organisasjonNavn: String? = null,
     @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
@@ -54,6 +58,7 @@ data class GrArbeidsforhold(
         if (periode != other.periode) return false
         if (arbeidsgiverId != other.arbeidsgiverId) return false
         if (arbeidsgiverType != other.arbeidsgiverType) return false
+        if (organisasjonNavn != other.organisasjonNavn) return false
         if (person != other.person) return false
 
         return true
@@ -68,11 +73,14 @@ data class GrArbeidsforhold(
     }
 
     companion object {
-        fun Arbeidsforhold.tilGrArbeidsforhold(person: Person): GrArbeidsforhold {
+        fun Arbeidsforhold.tilGrArbeidsforhold(
+            person: Person,
+            organisasjon: Organisasjon?,
+        ): GrArbeidsforhold {
             val arbeidsgiverId =
                 when (this.arbeidsgiver?.type) {
-                    ArbeidsgiverType.Organisasjon -> this.arbeidsgiver.organisasjonsnummer
-                    ArbeidsgiverType.Person -> this.arbeidsgiver.offentligIdent
+                    Organisasjon -> this.arbeidsgiver.organisasjonsnummer
+                    Person -> this.arbeidsgiver.offentligIdent
                     else -> null
                 }
 
@@ -80,6 +88,7 @@ data class GrArbeidsforhold(
                 periode = DatoIntervallEntitet(ansettelsesperiode?.periode?.fom, ansettelsesperiode?.periode?.tom),
                 arbeidsgiverType = this.arbeidsgiver?.type?.name,
                 arbeidsgiverId = arbeidsgiverId,
+                organisasjonNavn = organisasjon?.navn,
                 person = person,
             )
         }
