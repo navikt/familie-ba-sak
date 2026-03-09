@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.FØRSTEGANGSBEHANDLING
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.springframework.stereotype.Service
@@ -20,11 +21,14 @@ class PreutfyllVilkårService(
     private val featureToggleService: FeatureToggleService,
 ) {
     fun preutfyllVilkår(vilkårsvurdering: Vilkårsvurdering) {
-        if (vilkårsvurdering.behandling.kategori == BehandlingKategori.EØS) return
-        if (vilkårsvurdering.behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) return
+        val behandling = vilkårsvurdering.behandling
+
+        if (behandling.kategori == BehandlingKategori.EØS) return
+        if (behandling.type != FØRSTEGANGSBEHANDLING) return
+        if (behandling.fagsak.type == FagsakType.SKJERMET_BARN) return
 
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
-            persongrunnlagService.oppdaterRegisteropplysninger(vilkårsvurdering.behandling.id)
+            persongrunnlagService.oppdaterRegisteropplysninger(behandling.id)
         }
 
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR)) {
