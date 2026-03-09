@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -193,6 +194,63 @@ class StegServiceTest {
 
             assertThat(registrerPersongrunnlagDTO.barnasIdenter.size).isEqualTo(1)
             assertThat(registrerPersongrunnlagDTO.barnasIdenter.single()).isEqualTo(barn.aktivFødselsnummer())
+        }
+
+        @Test
+        fun `Skal sende inn skjermet barn søker sin ident som søkers ident dersom fagsak type er SKJERMET_BARN`() {
+            // Arrange
+            val barn = randomAktør()
+            val søkerAktør = randomAktør()
+
+            val forrigeBehandling = lagBehandling()
+            val registrerPersongrunnlagDtoSlot = slot<RegistrerPersongrunnlagDTO>()
+
+            val nyBehandling =
+                NyBehandling(
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+                    barnasIdenter = emptyList(),
+                    nyMigreringsdato = LocalDate.now().minusMonths(6),
+                    fagsakId = 1L,
+                )
+
+            val opprettetBehandling =
+                lagBehandling(
+                    fagsak =
+                        lagFagsak(
+                            id = nyBehandling.fagsakId,
+                            aktør = barn,
+                            type = FagsakType.SKJERMET_BARN,
+                            skjermetBarnSøker =
+                                SkjermetBarnSøker(
+                                    id = 1,
+                                    aktør = søkerAktør,
+                                ),
+                        ),
+                    behandlingKategori = nyBehandling.kategori!!,
+                    underkategori = nyBehandling.underkategori!!,
+                    behandlingType = nyBehandling.behandlingType,
+                    årsak = nyBehandling.behandlingÅrsak,
+                )
+
+            every { behandlingHentOgPersisterService.hent(opprettetBehandling.id) } returns opprettetBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId) } returns forrigeBehandling
+            every { behandlingService.erLøpende(forrigeBehandling) } returns false
+            every { behandlingService.opprettBehandling(nyBehandling) } returns opprettetBehandling
+            every { opprettTaskService.opprettAktiverMinsideTask(opprettetBehandling.fagsak.aktør) } just runs
+            every { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(opprettetBehandling.id, any()) } returns opprettetBehandling
+            every { mocketRegistrerPersongrunnlag.stegType() } returns StegType.REGISTRERE_PERSONGRUNNLAG
+            every { mocketRegistrerPersongrunnlag.utførStegOgAngiNeste(opprettetBehandling, capture(registrerPersongrunnlagDtoSlot)) } returns StegType.VILKÅRSVURDERING
+
+            // Act
+            stegService.håndterNyBehandling(nyBehandling)
+
+            // Assert
+            val registrerPersongrunnlagDTO = registrerPersongrunnlagDtoSlot.captured
+
+            assertThat(registrerPersongrunnlagDTO.ident).isEqualTo(søkerAktør.aktivFødselsnummer())
         }
 
         @Test
