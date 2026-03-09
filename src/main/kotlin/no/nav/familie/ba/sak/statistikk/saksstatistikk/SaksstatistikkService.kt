@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
@@ -141,24 +142,29 @@ class SaksstatistikkService(
     fun mapTilSakDvh(sakId: Long): SakDVH? {
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = sakId)
         val fagsak = aktivBehandling?.fagsak ?: fagsakService.hentPåFagsakId(sakId)
+        val fagsakAktørId = fagsak.aktør.aktørId.toLong()
 
-        var landkodeSøker: String = PersonopplysningerService.UKJENT_LANDKODE
+        val (deltagere, landkodeSøker) =
+            when {
+                fagsak.skjermetBarnSøker != null -> {
+                    val søker = fagsak.skjermetBarnSøker!!
 
-        val deltagere =
-            if (aktivBehandling != null) {
-                val personer = persongrunnlagService.hentAktiv(behandlingId = aktivBehandling.id)?.søkerOgBarn ?: emptySet()
-                personer.map {
-                    if (it.type == PersonType.SØKER) {
-                        landkodeSøker = hentLandkode(it)
-                    }
-                    AktørDVH(
-                        it.aktør.aktørId.toLong(),
-                        it.type.name,
-                    )
+                    listOf(
+                        AktørDVH(søker.aktør.aktørId.toLong(), PersonType.SØKER.name),
+                        AktørDVH(fagsakAktørId, PersonType.BARN.name),
+                    ) to hentLandkode(søker.aktør)
                 }
-            } else {
-                landkodeSøker = hentLandkode(fagsak.aktør)
-                listOf(AktørDVH(fagsak.aktør.aktørId.toLong(), PersonType.SØKER.name))
+
+                aktivBehandling != null -> {
+                    val personer = persongrunnlagService.hentAktiv(behandlingId = aktivBehandling.id)?.søkerOgBarn.orEmpty()
+                    val landkode = personer.firstOrNull { it.type == PersonType.SØKER }?.let(::hentLandkode) ?: PersonopplysningerService.UKJENT_LANDKODE
+
+                    personer.map { AktørDVH(it.aktør.aktørId.toLong(), it.type.name) } to landkode
+                }
+
+                else -> {
+                    listOf(AktørDVH(fagsakAktørId, PersonType.SØKER.name)) to hentLandkode(fagsak.aktør)
+                }
             }
 
         return SakDVH(
@@ -167,7 +173,7 @@ class SaksstatistikkService(
             opprettetDato = LocalDate.now(),
             funksjonellId = UUID.randomUUID().toString(),
             sakId = sakId.toString(),
-            aktorId = fagsak.aktør.aktørId.toLong(),
+            aktorId = fagsakAktørId,
             aktorer = deltagere,
             sakStatus = fagsak.status.name,
             avsender = "familie-ba-sak",
