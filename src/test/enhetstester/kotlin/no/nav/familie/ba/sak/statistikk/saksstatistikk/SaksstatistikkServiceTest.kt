@@ -43,6 +43,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -425,6 +426,45 @@ internal class SaksstatistikkServiceTest {
         assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
         assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(sakDvh?.bostedsland).isEqualTo("SE")
+    }
+
+    @Test
+    fun `Skal mappe til sakDVH for skjermet barn fagsak uten aktiv behandling, skal sende med skjermet barn og søker`() {
+        // Arrange
+        val søkerAktør = lagAktør("12345678911")
+        val skjermetBarnAktør = lagAktør("12345678910")
+
+        every { fagsakService.hentPåFagsakId(any()) } answers {
+            Fagsak(
+                status = FagsakStatus.OPPRETTET,
+                aktør = skjermetBarnAktør,
+                type = FagsakType.SKJERMET_BARN,
+                skjermetBarnSøker = SkjermetBarnSøker(id = 0, aktør = søkerAktør),
+            )
+        }
+
+        every { personopplysningerService.hentPersoninfoEnkel(søkerAktør) } returns PersonInfo(fødselsdato = LocalDate.of(2000, 1, 1))
+        every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(søkerAktør) } returns "SE"
+
+        every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns null
+
+        // Act
+        val sakDvh = sakstatistikkService.mapTilSakDvh(1)
+
+        // Assert
+        val barnAktørFraSakDvh = sakDvh?.aktorer?.single { it.rolle == PersonType.BARN.name }
+        val søkerAktørFraSakDvh = sakDvh?.aktorer?.single { it.rolle == PersonType.SØKER.name }
+
+        assertThat(sakDvh?.aktorId).isEqualTo(skjermetBarnAktør.aktørId.toLong())
+        assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
+        assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")
+        assertThat(sakDvh?.bostedsland).isEqualTo("SE")
+
+        assertThat(barnAktørFraSakDvh?.rolle).isEqualTo(PersonType.BARN.name)
+        assertThat(barnAktørFraSakDvh?.aktorId).isEqualTo(skjermetBarnAktør.aktørId.toLong())
+
+        assertThat(søkerAktørFraSakDvh?.rolle).isEqualTo(PersonType.SØKER.name)
+        assertThat(søkerAktørFraSakDvh?.aktorId).isEqualTo(søkerAktør.aktørId.toLong())
     }
 
     @Test
