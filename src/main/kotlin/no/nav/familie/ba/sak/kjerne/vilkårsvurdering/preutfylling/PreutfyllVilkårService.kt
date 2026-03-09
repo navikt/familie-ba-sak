@@ -21,12 +21,14 @@ class PreutfyllVilkårService(
     private val featureToggleService: FeatureToggleService,
 ) {
     fun preutfyllVilkår(vilkårsvurdering: Vilkårsvurdering) {
-        if (vilkårsvurdering.behandling.kategori == BehandlingKategori.EØS) return
-        if (vilkårsvurdering.behandling.type != FØRSTEGANGSBEHANDLING) return
-        if (vilkårsvurdering.behandling.fagsak.type == FagsakType.SKJERMET_BARN) return
+        val behandling = vilkårsvurdering.behandling
+
+        if (behandling.kategori == BehandlingKategori.EØS) return
+        if (behandling.type != FØRSTEGANGSBEHANDLING) return
+        if (behandling.fagsak.type == FagsakType.SKJERMET_BARN) return
 
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
-            persongrunnlagService.oppdaterRegisteropplysninger(vilkårsvurdering.behandling.id)
+            persongrunnlagService.oppdaterRegisteropplysninger(behandling.id)
         }
 
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR)) {
