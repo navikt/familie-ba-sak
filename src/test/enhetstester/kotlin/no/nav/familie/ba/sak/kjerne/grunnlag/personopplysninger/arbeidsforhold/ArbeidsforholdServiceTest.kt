@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.datagenerator.lagGrStatsborgerskap
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsgi
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -77,14 +76,16 @@ class ArbeidsforholdServiceTest {
         // Arrange
         val statsborgerskap =
             listOf(
-                GrStatsborgerskap(
-                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(1), tom = null),
+                lagGrStatsborgerskap(
+                    gyldigFraOgMed = LocalDate.now().minusYears(1),
+                    gyldigTilOgMed = null,
                     landkode = "POL",
                     medlemskap = Medlemskap.EØS,
                     person = person,
                 ),
-                GrStatsborgerskap(
-                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(10), tom = null),
+                lagGrStatsborgerskap(
+                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                    gyldigTilOgMed = null,
                     landkode = "AFG",
                     medlemskap = Medlemskap.TREDJELANDSBORGER,
                     person = person,
@@ -116,14 +117,16 @@ class ArbeidsforholdServiceTest {
 
         val statsborgerskap =
             listOf(
-                GrStatsborgerskap(
-                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(1), tom = null),
+                lagGrStatsborgerskap(
+                    gyldigFraOgMed = LocalDate.now().minusYears(1),
+                    gyldigTilOgMed = null,
                     landkode = "SWE",
                     medlemskap = Medlemskap.NORDEN,
                     person = person,
                 ),
-                GrStatsborgerskap(
-                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(10), tom = null),
+                lagGrStatsborgerskap(
+                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                    gyldigTilOgMed = null,
                     landkode = "AFG",
                     medlemskap = Medlemskap.TREDJELANDSBORGER,
                     person = person,
@@ -147,14 +150,16 @@ class ArbeidsforholdServiceTest {
         // Arrange
         val statsborgerskap =
             listOf(
-                GrStatsborgerskap(
-                    gyldigPeriode = DatoIntervallEntitet(fom = null, tom = null),
+                lagGrStatsborgerskap(
+                    gyldigFraOgMed = null,
+                    gyldigTilOgMed = null,
                     landkode = "POL",
                     medlemskap = Medlemskap.EØS,
                     person = person,
                 ),
-                GrStatsborgerskap(
-                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(10), tom = null),
+                lagGrStatsborgerskap(
+                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                    gyldigTilOgMed = null,
                     landkode = "AFG",
                     medlemskap = Medlemskap.TREDJELANDSBORGER,
                     person = person,
@@ -184,26 +189,30 @@ class ArbeidsforholdServiceTest {
         // Arrange
         val statsborgerskap =
             listOf(
-                GrStatsborgerskap(
-                    gyldigPeriode = DatoIntervallEntitet(fom = null, tom = null),
+                lagGrStatsborgerskap(
+                    gyldigFraOgMed = null,
+                    gyldigTilOgMed = null,
                     landkode = "POL",
                     medlemskap = Medlemskap.EØS,
                     person = person,
                 ),
-                GrStatsborgerskap(
-                    gyldigPeriode = DatoIntervallEntitet(fom = null, tom = null),
+                lagGrStatsborgerskap(
+                    gyldigFraOgMed = null,
+                    gyldigTilOgMed = null,
                     landkode = "POL",
                     medlemskap = Medlemskap.EØS,
                     person = person,
                 ),
-                GrStatsborgerskap(
-                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(20), tom = null),
+                lagGrStatsborgerskap(
+                    gyldigFraOgMed = LocalDate.now().minusYears(20),
+                    gyldigTilOgMed = null,
                     landkode = "POL",
                     medlemskap = Medlemskap.EØS,
                     person = person,
                 ),
-                GrStatsborgerskap(
-                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(10), tom = null),
+                lagGrStatsborgerskap(
+                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                    gyldigTilOgMed = null,
                     landkode = "AFG",
                     medlemskap = Medlemskap.TREDJELANDSBORGER,
                     person = person,
@@ -213,9 +222,9 @@ class ArbeidsforholdServiceTest {
         // Act
         val arbeidsforhold =
             arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
-                statsborgerskap,
-                person,
-                LocalDate.now().minusYears(4),
+                statsborgerskap = statsborgerskap,
+                person = person,
+                cutOffFomDato = LocalDate.now().minusYears(4),
             )
 
         // Assert
@@ -235,26 +244,26 @@ class ArbeidsforholdServiceTest {
 
         val statsborgerskap =
             listOf(
-                GrStatsborgerskap(
-                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(1), tom = null),
+                lagGrStatsborgerskap(
+                    gyldigFraOgMed = LocalDate.now().minusYears(1),
+                    gyldigTilOgMed = null,
                     landkode = "POL",
                     medlemskap = Medlemskap.EØS,
-                    person = person,
                 ),
-                GrStatsborgerskap(
-                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(10), tom = null),
+                lagGrStatsborgerskap(
+                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                    gyldigTilOgMed = null,
                     landkode = "AFG",
                     medlemskap = Medlemskap.TREDJELANDSBORGER,
-                    person = person,
                 ),
             )
 
         // Act
         val arbeidsforhold =
             arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
-                statsborgerskap,
-                person,
-                LocalDate.now().minusYears(20),
+                statsborgerskap = statsborgerskap,
+                person = person,
+                cutOffFomDato = LocalDate.now().minusYears(20),
             )
 
         // Assert
