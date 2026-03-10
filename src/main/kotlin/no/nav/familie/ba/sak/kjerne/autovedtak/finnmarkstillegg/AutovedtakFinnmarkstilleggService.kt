@@ -95,7 +95,6 @@ class AutovedtakFinnmarkstilleggService(
         val søkerAktør = fagsakService.hentAktør(behandlingsdata.fagsakId)
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
-                aktør = søkerAktør,
                 behandlingType = REVURDERING,
                 behandlingÅrsak = FINNMARKSTILLEGG,
                 fagsakId = behandlingsdata.fagsakId,

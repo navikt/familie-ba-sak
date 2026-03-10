@@ -101,7 +101,6 @@ class FamilieBaSakKlient(
     }
 
     fun opprettBehandling(
-        søkersIdent: String,
         behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
         behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
@@ -114,7 +113,6 @@ class FamilieBaSakKlient(
             NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = behandlingUnderkategori,
-                søkersIdent = søkersIdent,
                 behandlingType = behandlingType,
                 behandlingÅrsak = behandlingÅrsak,
                 søknadMottattDato = if (behandlingÅrsak == BehandlingÅrsak.SØKNAD) LocalDate.now().minusYears(18) else null,

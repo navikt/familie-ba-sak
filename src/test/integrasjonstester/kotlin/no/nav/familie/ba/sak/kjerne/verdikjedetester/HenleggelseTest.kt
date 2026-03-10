@@ -137,7 +137,6 @@ class HenleggelseTest(
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
         val fagsakDtoMedBehandling =
             familieBaSakKlient().opprettBehandling(
-                søkersIdent = søkersIdent,
                 fagsakId = fagsak.data!!.id,
             )
 

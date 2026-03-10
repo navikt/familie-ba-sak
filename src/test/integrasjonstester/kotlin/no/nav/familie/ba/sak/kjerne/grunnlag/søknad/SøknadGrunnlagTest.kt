@@ -83,7 +83,7 @@ class SøknadGrunnlagTest(
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling =
             stegService.håndterNyBehandling(
-                lagNyBehandling(søkerIdent, fagsak.id),
+                lagNyBehandling(fagsak.id),
             )
 
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
@@ -108,10 +108,7 @@ class SøknadGrunnlagTest(
         val søkerAktør = personidentService.hentAktør(søkerIdent)
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
-        val behandling =
-            stegService.håndterNyBehandling(
-                lagNyBehandling(søkerIdent, fagsak.id),
-            )
+        val behandling = stegService.håndterNyBehandling(lagNyBehandling(fagsak.id))
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
 
         val barnIdent2 = randomFnr()
@@ -168,7 +165,7 @@ class SøknadGrunnlagTest(
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling =
             stegService.håndterNyBehandling(
-                lagNyBehandling(søkerIdent, fagsak.id),
+                lagNyBehandling(fagsak.id),
             )
 
         stegService.håndterSøknad(
@@ -188,13 +185,11 @@ class SøknadGrunnlagTest(
     }
 
     private fun lagNyBehandling(
-        søkerIdent: String,
         fagsakId: Long,
         journalpostIdSøknad: String? = null,
     ) = NyBehandling(
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR,
-        søkersIdent = søkerIdent,
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         søknadMottattDato = LocalDate.now(),
         fagsakId = fagsakId,
@@ -365,7 +360,6 @@ class SøknadGrunnlagTest(
         val behandling =
             stegService.håndterNyBehandling(
                 lagNyBehandling(
-                    søkerIdent = søker.aktivFødselsnummer(),
                     fagsakId = fagsak.id,
                     journalpostIdSøknad = journalpostIdSøknad,
                 ),
@@ -424,7 +418,6 @@ class SøknadGrunnlagTest(
         val behandling =
             stegService.håndterNyBehandling(
                 lagNyBehandling(
-                    søkerIdent = søkerIdent,
                     fagsakId = fagsak.id,
                     // Sender ikke med journalpostIdSøknad
                 ),

@@ -85,7 +85,7 @@ class TriggingAvAutobrevOmregningPgaAlderTest(
             ).also { stubScenario(it) }
 
         val fagsakId = familieBaSakKlient().opprettFagsak(søkersIdent = scenario.søker.ident).data?.id!!
-        familieBaSakKlient().opprettBehandling(søkersIdent = scenario.søker.ident, fagsakId = fagsakId)
+        familieBaSakKlient().opprettBehandling(fagsakId = fagsakId)
 
         val fagsakDtoEtterOpprettelse = familieBaSakKlient().hentFagsak(fagsakId = fagsakId)
 

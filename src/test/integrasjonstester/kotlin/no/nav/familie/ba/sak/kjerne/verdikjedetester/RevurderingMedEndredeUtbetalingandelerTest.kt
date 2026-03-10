@@ -107,7 +107,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
         // Behandling 2 - revurdering
         val behandlingRevurdering =
-            stegService.håndterNyBehandling(nyRevurdering(søkersIdent = fnr, fagsakId = fagsak.id))
+            stegService.håndterNyBehandling(nyRevurdering(fagsakId = fagsak.id))
 
         persongrunnlagService.lagreOgDeaktiverGammel(
             lagTestPersonopplysningGrunnlag(
@@ -210,7 +210,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         barnetsFødselsdato: LocalDate,
     ): Behandling {
         val førstegangsbehandling =
-            stegService.håndterNyBehandling(nyOrdinærBehandling(søkersIdent = søkersIdent, fagsakId = fagsak.id))
+            stegService.håndterNyBehandling(nyOrdinærBehandling(fagsakId = fagsak.id))
 
         val søknadGrunnlag =
             SøknadGrunnlag(

@@ -39,7 +39,7 @@ class TotrinnskontrollTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
-            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
+            behandlingService.opprettBehandling(nyOrdinærBehandling(fagsakId = fagsak.id))
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
         assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingHentOgPersisterService.hent(behandling.id).status)
@@ -92,7 +92,7 @@ class TotrinnskontrollTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
-            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
+            behandlingService.opprettBehandling(nyOrdinærBehandling(fagsakId = fagsak.id))
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
         assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingHentOgPersisterService.hent(behandling.id).status)

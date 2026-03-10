@@ -116,7 +116,6 @@ class AutovedtakSmåbarnstilleggService(
 
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
-                aktør = aktør,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = if (erEndringIOvergangsstønadFramITid) BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID else BehandlingÅrsak.SMÅBARNSTILLEGG,
                 fagsakId = fagsak.id,

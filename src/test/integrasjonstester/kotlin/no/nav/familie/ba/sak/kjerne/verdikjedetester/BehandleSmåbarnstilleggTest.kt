@@ -136,7 +136,6 @@ class BehandleSmåbarnstilleggTest(
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
         val behandlingDto =
             familieBaSakKlient().opprettBehandling(
-                søkersIdent = søkersIdent,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 fagsakId = fagsak.data!!.id,
             )

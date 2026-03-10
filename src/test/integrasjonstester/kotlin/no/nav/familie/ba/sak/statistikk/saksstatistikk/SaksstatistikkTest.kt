@@ -105,7 +105,6 @@ class SaksstatistikkTest(
         val behandling =
             behandlingService.opprettBehandling(
                 nyOrdinærBehandling(
-                    søkersIdent = fnr,
                     fagsakId = fagsak.id,
                 ),
             )

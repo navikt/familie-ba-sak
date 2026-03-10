@@ -73,7 +73,6 @@ class FagsakDeltagerControllerTest(
         val behandling =
             behandlingService.opprettBehandling(
                 nyOrdinærBehandling(
-                    søkersIdent = søkerFnr,
                     fagsakId = fagsak.id,
                 ),
             )

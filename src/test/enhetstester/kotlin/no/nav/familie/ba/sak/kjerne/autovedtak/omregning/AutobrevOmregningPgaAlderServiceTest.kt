@@ -278,7 +278,6 @@ internal class AutobrevOmregningPgaAlderServiceTest {
                 any(),
                 any(),
                 any(),
-                any(),
             )
         }
         verify(exactly = 0) {

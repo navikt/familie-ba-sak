@@ -100,7 +100,6 @@ class KlageService(
             NyBehandling(
                 kategori = forrigeBehandling.kategori,
                 underkategori = forrigeBehandling.underkategori,
-                søkersIdent = forrigeBehandling.fagsak.aktør.aktivFødselsnummer(),
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.KLAGE,
                 navIdent = SikkerhetContext.hentSaksbehandler(),

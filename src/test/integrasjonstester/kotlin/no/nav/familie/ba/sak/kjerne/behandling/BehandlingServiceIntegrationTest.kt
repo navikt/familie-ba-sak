@@ -43,31 +43,7 @@ class BehandlingServiceIntegrationTest(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     @Autowired
     private val behandlingRepository: BehandlingRepository,
-    @Autowired
-    private val stegService: StegService,
 ) : AbstractSpringIntegrationTest() {
-    @Test
-    fun `Skal rulle tilbake behandling om noe feiler etter opprettelse`() {
-        // Arrange
-        val søkerFnr = "12345678901" // Ugyldig fnr for å trigge feil
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-
-        // Act & Assert
-        val error =
-            assertThrows<IllegalStateException> {
-                stegService.håndterNyBehandlingOgSendInfotrygdFeed(
-                    nyOrdinærBehandling(
-                        søkersIdent = søkerFnr,
-                        fagsakId = fagsak.id,
-                    ),
-                )
-            }
-        assertThat(error.message).isEqualTo("12345678901")
-
-        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId = fagsak.id)
-        assertThat(behandlinger).isEmpty()
-    }
-
     @Test
     fun `Skal svare med behandling som er opprettet før X tid`() {
         // Arrange

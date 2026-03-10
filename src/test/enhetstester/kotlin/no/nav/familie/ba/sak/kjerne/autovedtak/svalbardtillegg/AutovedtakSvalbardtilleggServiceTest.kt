@@ -235,7 +235,7 @@ class AutovedtakSvalbardtilleggServiceTest {
         @BeforeEach
         fun setup() {
             every { fagsakService.hentAktør(fagsak.id) } returns persongrunnlag.søker.aktør
-            every { autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(any(), any(), any(), any()) } returns behandling
+            every { autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(any(), any(), any()) } returns behandling
             every { simuleringService.oppdaterSimuleringPåBehandling(any()) } returns emptyList()
             every { simuleringService.hentFeilutbetaling(any<Long>()) } returns BigDecimal.ZERO
             every { autovedtakSvalbardtilleggBegrunnelseService.begrunnAutovedtakForSvalbardtillegg(any()) } just Runs
@@ -264,7 +264,7 @@ class AutovedtakSvalbardtilleggServiceTest {
             val behandlingEtterBehandlingsresultat = lagBehandling(førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG)
             val taskSlot = slot<Task>()
 
-            every { autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(any(), any(), any(), any()) } returns behandlingEtterBehandlingsresultat
+            every { autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(any(), any(), any()) } returns behandlingEtterBehandlingsresultat
             every { taskService.save(capture(taskSlot)) } returns mockk()
 
             // Act
@@ -284,7 +284,7 @@ class AutovedtakSvalbardtilleggServiceTest {
             val behandlingEtterBehandlingsresultat = lagBehandling(førsteSteg = StegType.FERDIGSTILLE_BEHANDLING)
             val taskSlot = slot<Task>()
 
-            every { autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(any(), any(), any(), any()) } returns behandlingEtterBehandlingsresultat
+            every { autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(any(), any(), any()) } returns behandlingEtterBehandlingsresultat
             every { taskService.save(capture(taskSlot)) } returns mockk()
 
             // Act

@@ -47,7 +47,6 @@ class KonsistensavstemmingUtplukkingIntegrationTest(
             }
         val førstegangsbehandling =
             opprettOgLagreBehandlingMedAndeler(
-                personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
                 fagsakId = fagsak.id,
             )
@@ -77,14 +76,12 @@ class KonsistensavstemmingUtplukkingIntegrationTest(
 
         val førstegangsbehandling =
             opprettOgLagreBehandlingMedAndeler(
-                personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
                 medStatus = BehandlingStatus.AVSLUTTET,
                 fagsakId = fagsak.id,
             )
         val revurdering =
             opprettOgLagreRevurderingMedAndeler(
-                personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler =
                     listOf(
                         KildeOgOffsetPåAndel(førstegangsbehandling.id, 1L),
@@ -117,14 +114,12 @@ class KonsistensavstemmingUtplukkingIntegrationTest(
             }
         val førstegangsbehandling =
             opprettOgLagreBehandlingMedAndeler(
-                personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
                 medStatus = BehandlingStatus.AVSLUTTET,
                 fagsakId = fagsak.id,
             )
         val revurdering =
             opprettOgLagreRevurderingMedAndeler(
-                personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 2L)),
                 fagsakId = fagsak.id,
             )
@@ -155,14 +150,12 @@ class KonsistensavstemmingUtplukkingIntegrationTest(
 
         val førstegangsbehandling =
             opprettOgLagreBehandlingMedAndeler(
-                personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
                 medStatus = BehandlingStatus.AVSLUTTET,
                 fagsakId = fagsak.id,
             )
         val revurderingMedOpphør =
             opprettOgLagreRevurderingMedAndeler(
-                personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler = emptyList(),
                 fagsakId = fagsak.id,
             )
@@ -191,14 +184,12 @@ class KonsistensavstemmingUtplukkingIntegrationTest(
             }
         val iverksattBehandling =
             opprettOgLagreBehandlingMedAndeler(
-                personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
                 medStatus = BehandlingStatus.AVSLUTTET,
                 fagsakId = fagsak.id,
             )
 
         opprettOgLagreRevurderingMedAndeler(
-            personIdent = forelderIdent,
             kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 2L)),
             erIverksatt = false,
             fagsakId = fagsak.id,
@@ -217,14 +208,13 @@ class KonsistensavstemmingUtplukkingIntegrationTest(
     }
 
     private fun opprettOgLagreBehandlingMedAndeler(
-        personIdent: String,
         kildeOgOffsetPåAndeler: List<KildeOgOffsetPåAndel> = emptyList(),
         erIverksatt: Boolean = true,
         medStatus: BehandlingStatus = BehandlingStatus.UTREDES,
         fagsakId: Long,
     ): Behandling {
         val behandling =
-            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = personIdent, fagsakId = fagsakId))
+            behandlingService.opprettBehandling(nyOrdinærBehandling(fagsakId = fagsakId))
         behandling.status = medStatus
         behandlingRepository.save(behandling)
         val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)
@@ -245,13 +235,12 @@ class KonsistensavstemmingUtplukkingIntegrationTest(
     }
 
     private fun opprettOgLagreRevurderingMedAndeler(
-        personIdent: String,
         kildeOgOffsetPåAndeler: List<KildeOgOffsetPåAndel> = emptyList(),
         erIverksatt: Boolean = true,
         fagsakId: Long,
     ): Behandling {
         val behandling =
-            behandlingService.opprettBehandling(nyRevurdering(søkersIdent = personIdent, fagsakId = fagsakId))
+            behandlingService.opprettBehandling(nyRevurdering(fagsakId = fagsakId))
         val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)
         tilkjentYtelseRepository.save(tilkjentYtelse)
         val personFnr = randomFnr()
