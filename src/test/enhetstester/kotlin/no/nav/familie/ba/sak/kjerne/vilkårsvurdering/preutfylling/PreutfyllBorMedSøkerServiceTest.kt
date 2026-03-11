@@ -542,4 +542,109 @@ class PreutfyllBorMedSøkerServiceTest {
         assertThat(borFastHosSøkerVilkår.begrunnelse).isEqualTo("Fylt ut automatisk fra registerdata i PDL\n- Har delt bostedsadresse hos søker.")
         assertThat(borFastHosSøkerVilkår.begrunnelseForManuellKontroll).isEqualTo(BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_DELT_BOSTED)
     }
+
+    @Test
+    fun `Skal sette 'oppfylt' og bor fast med søker ved delt-bosted-adresse og så lenge en av adressene er lik søkers adresse`() {
+        // Arrange
+        val nåDato = LocalDate.now()
+
+        val aktørSøker = randomAktør()
+        val aktørBarn = randomAktør()
+
+        val behandling = lagBehandling()
+
+        val persongrunnlagMedSammeAdresseForAllePersoner =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = aktørSøker.aktivFødselsnummer(),
+                barnasIdenter = listOf(aktørBarn.aktivFødselsnummer()),
+                søkerAktør = aktørSøker,
+                barnAktør = listOf(aktørBarn),
+            ).also { persongrunnlag ->
+                val søker = persongrunnlag.personer.single { it.type == PersonType.SØKER }
+                søker.bostedsadresser =
+                    mutableListOf(
+                        lagGrVegadresse(matrikkelId = 1L)
+                            .also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = nåDato.minusYears(2),
+                                        tom = nåDato,
+                                    )
+                                it.person = søker
+                            },
+                    )
+                val barn = persongrunnlag.personer.single { it.type == PersonType.BARN }
+                barn.bostedsadresser =
+                    mutableListOf(
+                        lagGrVegadresse(matrikkelId = 2L)
+                            .also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = nåDato.minusYears(2),
+                                        tom = nåDato,
+                                    )
+                                it.person = barn
+                            },
+                    )
+                barn.deltBosted =
+                    mutableListOf(
+                        lagGrVegadresseDeltBosted(matrikkelId = 1L)
+                            .also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = nåDato.minusYears(2),
+                                        tom = nåDato,
+                                    )
+                                it.person = barn
+                            },
+                        lagGrVegadresseDeltBosted(matrikkelId = 3L)
+                            .also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = nåDato.minusYears(2),
+                                        tom = nåDato,
+                                    )
+                                it.person = barn
+                            },
+                        lagGrVegadresseDeltBosted(matrikkelId = 4L)
+                            .also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = nåDato.minusYears(2),
+                                        tom = nåDato,
+                                    )
+                                it.person = barn
+                            },
+                    )
+            }
+        every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagMedSammeAdresseForAllePersoner
+
+        val vilkårsvurdering =
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                behandling = behandling,
+                søker = persongrunnlagMedSammeAdresseForAllePersoner.søker,
+                barna = persongrunnlagMedSammeAdresseForAllePersoner.barna,
+                overstyrendeVilkårResultater = emptyMap(),
+            )
+        // Act
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)
+
+        // Assert
+        val personResultat =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == aktørBarn }
+
+        val borFastHosSøkerVilkår =
+            personResultat
+                .vilkårResultater
+                .single {
+                    it.vilkårType == Vilkår.BOR_MED_SØKER
+                }
+
+        assertThat(borFastHosSøkerVilkår.periodeFom).isEqualTo(LocalDate.now().minusYears(2))
+        assertThat(borFastHosSøkerVilkår.resultat).isEqualTo(Resultat.OPPFYLT)
+        assertThat(borFastHosSøkerVilkår.begrunnelse).isEqualTo("Fylt ut automatisk fra registerdata i PDL\n- Har delt bostedsadresse hos søker.")
+        assertThat(borFastHosSøkerVilkår.begrunnelseForManuellKontroll).isEqualTo(BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_DELT_BOSTED)
+    }
 }
