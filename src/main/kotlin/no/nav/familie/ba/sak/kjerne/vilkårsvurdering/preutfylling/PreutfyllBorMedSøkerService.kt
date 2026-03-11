@@ -17,6 +17,7 @@ import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.springframework.stereotype.Service
@@ -114,18 +115,16 @@ class PreutfyllBorMedSøkerService(
                         fom = it.gyldigFraOgMed,
                         tom = it.gyldigTilOgMed,
                     ).tilTidslinje()
-                }.kombiner()
+                }.kombiner { it.toList() }
 
         return bostedsadresserSøkerTidslinje
             .kombinerMed(bostedsadresserBarnTidslinje, deltBostedsadresserBarnTidslinjer) { søkerAdresse, barnBostedAdresse, barnDeltBostedAdresser ->
-                val barnDeltBostedAdresserListe = barnDeltBostedAdresser?.toList() ?: emptyList()
-
                 when {
                     barnBostedAdresse != null && harVærtSammeAdresseMinst3Mnd(barnBostedAdresse, søkerAdresse) -> {
                         OppfyltDelvilkår(begrunnelse = "- Har delt bostedsadresse hos søker.")
                     }
 
-                    barnDeltBostedAdresser != null && barnDeltBostedAdresserListe.isNotEmpty() && harVærtSammeDeltbostedAdresseMinst3Mnd(barnDeltBostedAdresser.toList(), søkerAdresse) -> {
+                    !barnDeltBostedAdresser.isNullOrEmpty() && harVærtSammeDeltbostedAdresseMinst3Mnd(barnDeltBostedAdresser, søkerAdresse) -> {
                         OppfyltDelvilkår(
                             begrunnelse = "- Har delt bostedsadresse hos søker.",
                             begrunnelseForManuellKontroll = INFORMASJON_OM_DELT_BOSTED,
