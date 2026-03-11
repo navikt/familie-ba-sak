@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
@@ -249,12 +248,7 @@ class PersongrunnlagService(
         målform: Målform,
         barnFraForrigeBehandling: List<Aktør> = emptyList(),
     ): PersonopplysningGrunnlag {
-        val nyttPersonopplysningGrunnlag =
-            if (featureToggleService.isEnabled(IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG)) {
-                PersonopplysningGrunnlag(behandlingId = behandling.id)
-            } else {
-                lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
-            }
+        val nyttPersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
 
         val alleBarna = barnFraInneværendeBehandling.union(barnFraForrigeBehandling).toList()
         val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarna)
@@ -312,29 +306,18 @@ class PersongrunnlagService(
             }
         }
 
-        if (featureToggleService.isEnabled(IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG)) {
-            val aktivtPersonopplysningGrunnlag = hentAktiv(behandling.id)
-            return if (aktivtPersonopplysningGrunnlag == null || nyttPersonopplysningGrunnlag.harRelevantEndring(aktivtPersonopplysningGrunnlag)) {
-                lagreOgDeaktiverGammel(nyttPersonopplysningGrunnlag).also {
+        val aktivtPersonopplysningGrunnlag = hentAktiv(behandling.id)
+        return if (aktivtPersonopplysningGrunnlag == null || nyttPersonopplysningGrunnlag.harRelevantEndring(aktivtPersonopplysningGrunnlag)) {
+            lagreOgDeaktiverGammel(nyttPersonopplysningGrunnlag).also {
                     /*
                      * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
                      * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
                      */
-                    arbeidsfordelingService.fastsettBehandlendeEnhet(behandling)
-                    saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
-                }
-            } else {
-                aktivtPersonopplysningGrunnlag
-            }
-        } else {
-            return personopplysningGrunnlagRepository.save(nyttPersonopplysningGrunnlag).also {
-                /*
-                 * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
-                 * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
-                 */
                 arbeidsfordelingService.fastsettBehandlendeEnhet(behandling)
                 saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
             }
+        } else {
+            aktivtPersonopplysningGrunnlag
         }
     }
 
@@ -433,7 +416,7 @@ class PersongrunnlagService(
                     dødsfallAdresseFraPdl = personInfo.kontaktinformasjonForDoedsbo?.adresse,
                 )
 
-            if (featureToggleService.isEnabled(FeatureToggle.ARBEIDSFORHOLD_STRENGERE_NEDHENTING)) {
+            if (filtrerRegisteropplysninger) {
                 val personErSøker = person.type == PersonType.SØKER
                 val harStatsborgerskapIEØS = person.statsborgerskap.any { it.medlemskap == Medlemskap.EØS }
                 if (personErSøker && harStatsborgerskapIEØS) {

@@ -74,8 +74,7 @@ class PersongrunnlagServiceTest {
 
     @BeforeEach
     fun setup() {
-        every { featureToggleService.isEnabled(FeatureToggle.ARBEIDSFORHOLD_STRENGERE_NEDHENTING) } returns true
-        every { featureToggleService.isEnabled(FeatureToggle.IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG) } returns true
+        every { featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER) } returns true
     }
 
     @Test

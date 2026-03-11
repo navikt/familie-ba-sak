@@ -36,11 +36,8 @@ enum class FeatureToggle(
     // Preutfylling
     PREUTFYLLING_VILKÅR("familie-ba-sak.preutfylling-vilkaar"),
     PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG("familie-ba-sak.preutfylling-personopplysningsgrunnlag"),
-    ARBEIDSFORHOLD_STRENGERE_NEDHENTING("familie-ba-sak.arbeidsforhold-strengere-nedhenting"),
     AUTOMAITSK_REGISTRER_SØKNAD("familie-ba-sak.automatisk-registrer-soknad"),
     FILTRERE_REGISTEROPPLYSNINGER("familie-ba-sak.filtrer-registeropplysninger"),
-    VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR("familie-ba-sak.valider-endring-av-preutfylte-vilkaar"),
-    IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG("familie-ba-sak.ikke-lagre-duplikat-av-personopplysningsgrunnlag"),
 
     // Introdusert AbstractPreutfyllBosattIRiketService og tatt den i bruk i PreutfyllBosattIRiketService og PreutfyllBosattIRiketForFødselshendelseService.
     PREUTFYLLING_BOSATT_I_RIKET_FOR_FØDSELSHENDELSE("familie-ba-sak.preutfylling-bosatt-i-riket-for-fodselshendelse"),

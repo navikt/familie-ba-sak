@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.PREUTFYLLING_VILKÅR
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
@@ -71,7 +71,7 @@ class VilkårService(
         val personResultat =
             finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, personResultatDto.personIdent)
 
-        if (featureToggleService.isEnabled(VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR)) {
+        if (featureToggleService.isEnabled(PREUTFYLLING_VILKÅR)) {
             val eksisterendeVilkårResultat =
                 personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
                     ?: throw Feil("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
