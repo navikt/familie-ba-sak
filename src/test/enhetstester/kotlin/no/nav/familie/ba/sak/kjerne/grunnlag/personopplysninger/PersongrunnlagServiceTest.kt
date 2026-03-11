@@ -158,10 +158,7 @@ class PersongrunnlagServiceTest {
                     personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnet.aktør)
                 } returns PersonInfo(barnet.fødselsdato, barnet.navn, barnet.kjønn)
 
-                every { featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
-                every { featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
-                every { featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
-                every { featureToggleService.isEnabled(FeatureToggle.FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+                every { featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER) } returns true
                 every { featureToggleService.isEnabled(FeatureToggle.HARDKODET_EEAFREG_STATSBORGERSKAP) } returns true
 
                 persongrunnlagService
@@ -302,10 +299,7 @@ class PersongrunnlagServiceTest {
                 PersonInfo(mellomBarnForrigeBehandling.fødselsdato)
 
             every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER) } returns true
 
             // Act
             val personopplysningGrunnlag =
@@ -358,10 +352,7 @@ class PersongrunnlagServiceTest {
 
             every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
 
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER) } returns true
 
             // Act
             val personopplysningGrunnlag =
@@ -430,10 +421,7 @@ class PersongrunnlagServiceTest {
 
             every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
             every { kodeverkService.hentPoststed(any()) } returns "Oslo"
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER) } returns true
 
             // Act
             val personopplysningGrunnlag =

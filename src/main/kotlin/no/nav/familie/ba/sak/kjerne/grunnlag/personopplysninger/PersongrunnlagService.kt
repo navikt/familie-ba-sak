@@ -362,10 +362,7 @@ class PersongrunnlagService(
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
             }
 
-        val filtrerAdresser = featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
-        val filtrerStatsborgerskap = featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO)
-        val filtrerOpphold = featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO)
-        val filtrerSivilstand = featureToggleService.isEnabled(FeatureToggle.FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
+        val filtrerRegisteropplysninger = featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER)
 
         lagreHistoriskeIdenter(personInfo.historiskeIdenter, aktør)
 
@@ -380,13 +377,13 @@ class PersongrunnlagService(
         ).also { person ->
             person.opphold =
                 personInfo.opphold
-                    ?.filtrerBortOppholdFørEldsteBarn(eldsteBarnsFødselsdato, filtrerOpphold)
+                    ?.filtrerBortOppholdFørEldsteBarn(eldsteBarnsFødselsdato, filtrerRegisteropplysninger)
                     ?.map { GrOpphold.fraOpphold(it, person) }
                     ?.toMutableList() ?: mutableListOf()
             person.bostedsadresser =
                 personInfo.bostedsadresser
                     .filtrerUtKunNorskeBostedsadresser()
-                    .filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
+                    .filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerRegisteropplysninger)
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
                             bostedsadresse = it,
@@ -396,7 +393,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.oppholdsadresser =
                 personInfo.oppholdsadresser
-                    .filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
+                    .filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerRegisteropplysninger)
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
@@ -406,7 +403,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.deltBosted =
                 personInfo.deltBosted
-                    .filtrerBortDeltBostedForSøker(person.type, filtrerAdresser)
+                    .filtrerBortDeltBostedForSøker(person.type, filtrerRegisteropplysninger)
                     .map {
                         GrDeltBosted.fraDeltBosted(
                             deltBosted = it,
@@ -416,12 +413,12 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.sivilstander =
                 personInfo.sivilstander
-                    .filtrerBortIkkeRelevanteSivilstander(filtrerSivilstand, behandlingKategori, behandlingUnderkategori, personType)
+                    .filtrerBortIkkeRelevanteSivilstander(filtrerRegisteropplysninger, behandlingKategori, behandlingUnderkategori, personType)
                     .map { GrSivilstand.fraSivilstand(it, person) }
                     .toMutableList()
             person.statsborgerskap =
                 personInfo.statsborgerskap
-                    ?.filtrerBortStatsborgerskapFørEldsteBarn(eldsteBarnsFødselsdato, filtrerStatsborgerskap)
+                    ?.filtrerBortStatsborgerskapFørEldsteBarn(eldsteBarnsFødselsdato, filtrerRegisteropplysninger)
                     ?.flatMap {
                         statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                             statsborgerskap = it,
@@ -503,7 +500,7 @@ class PersongrunnlagService(
     fun oppdaterAdresserPåPersoner(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) {
-        val filtrerAdresser = featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
+        val filtrerAdresser = featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER)
         val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarn = personopplysningGrunnlag.barna.map { it.aktør })
 
         val adresserForPersoner =

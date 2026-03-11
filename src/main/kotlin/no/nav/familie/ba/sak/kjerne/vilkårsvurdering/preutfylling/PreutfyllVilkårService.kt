@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -32,17 +31,14 @@ class PreutfyllVilkårService(
         }
 
         if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR)) {
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering)
+            preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)
+
             if (featureToggleService.isEnabled(FeatureToggle.OPPDATERT_PREUTFYLLING_BOSATT_I_RIKET)) {
                 preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
             } else {
                 gammelPreutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
             }
-        }
-        if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR_LOVLIG_OPPHOLD)) {
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering)
-        }
-        if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_BOR_HOS_SØKER)) {
-            preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)
         }
     }
 
