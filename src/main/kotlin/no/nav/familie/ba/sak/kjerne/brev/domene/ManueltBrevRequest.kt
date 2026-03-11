@@ -175,9 +175,27 @@ fun ManueltBrevRequest.tilBrev(
             )
         }
 
-        Brevmal.INNHENTE_OPPLYSNINGER,
-        Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
-        -> {
+        Brevmal.INNHENTE_OPPLYSNINGER -> {
+            InnhenteOpplysningerBrev(
+                mal = brevmal,
+                data =
+                    InnhenteOpplysningerData(
+                        delmalData =
+                            InnhenteOpplysningerData.DelmalData(
+                                signatur = signaturDelmal,
+                                fritekstAvsnitt = fritekstAvsnitt,
+                            ),
+                        flettefelter =
+                            InnhenteOpplysningerData.Flettefelter(
+                                navn = mottakerNavn,
+                                fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
+                                dokumentliste = this.multiselectVerdier,
+                            ),
+                    ),
+            )
+        }
+
+        Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON -> {
             InnhenteOpplysningerBrev(
                 mal = brevmal,
                 data =
@@ -199,9 +217,29 @@ fun ManueltBrevRequest.tilBrev(
             )
         }
 
-        Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE,
-        Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON,
-        -> {
+        Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE -> {
+            if (fritekstAvsnitt == null) {
+                throw FunksjonellFeil("Du må legge til fritekst for å forklare hvilke opplysninger du ønsker å innhente.")
+            }
+            InformasjonsbrevInnhenteOpplysningerKlage(
+                mal = brevmal,
+                data =
+                    InformasjonsbrevInnhenteOpplysningerKlageData(
+                        delmalData =
+                            InformasjonsbrevInnhenteOpplysningerKlageData.DelmalData(
+                                signatur = signaturDelmal,
+                                fritekstAvsnitt = fritekstAvsnitt,
+                            ),
+                        flettefelter =
+                            InformasjonsbrevInnhenteOpplysningerKlageData.Flettefelter(
+                                navn = mottakerNavn,
+                                fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
+                            ),
+                    ),
+            )
+        }
+
+        Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON -> {
             if (fritekstAvsnitt == null) {
                 throw FunksjonellFeil("Du må legge til fritekst for å forklare hvilke opplysninger du ønsker å innhente.")
             }
@@ -225,7 +263,25 @@ fun ManueltBrevRequest.tilBrev(
             )
         }
 
-        Brevmal.UTBETALING_ETTER_KA_VEDTAK,
+        Brevmal.UTBETALING_ETTER_KA_VEDTAK -> {
+            UtbetalingEtterKAVedtak(
+                mal = brevmal,
+                data =
+                    UtbetalingEtterKAVedtakData(
+                        delmalData =
+                            UtbetalingEtterKAVedtakData.DelmalData(
+                                signatur = signaturDelmal,
+                            ),
+                        flettefelter =
+                            UtbetalingEtterKAVedtakData.Flettefelter(
+                                navn = mottakerNavn,
+                                fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
+                            ),
+                        fritekst = this.fritekstAvsnitt,
+                    ),
+            )
+        }
+
         Brevmal.UTBETALING_ETTER_KA_VEDTAK_INSTITUSJON,
         -> {
             UtbetalingEtterKAVedtak(
@@ -376,9 +432,23 @@ fun ManueltBrevRequest.tilBrev(
             )
         }
 
-        Brevmal.FORLENGET_SVARTIDSBREV,
-        Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON,
-        -> {
+        Brevmal.FORLENGET_SVARTIDSBREV -> {
+            ForlengetSvartidsbrev(
+                mal = brevmal,
+                navn = mottakerNavn,
+                fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
+                enhetNavn = this.enhetNavn(),
+                årsaker = this.multiselectVerdier,
+                antallUkerSvarfrist =
+                    this.antallUkerSvarfrist ?: throw FunksjonellFeil(
+                        melding = "Antall uker svarfrist er ikke satt",
+                        frontendFeilmelding = "Antall uker svarfrist er ikke satt",
+                    ),
+                saksbehandlerNavn = saksbehandlerNavn,
+            )
+        }
+
+        Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON -> {
             ForlengetSvartidsbrev(
                 mal = brevmal,
                 navn = mottakerNavn,
