@@ -269,6 +269,58 @@ class FinnOverlappendePerioderTest {
     }
 
     @Test
+    fun `finnOverlappendePerioder skal fjerne like perioder i samme måned uavhengig av hvilke dag det gjelder fra`() {
+        // Arrange
+        val økonomiSimuleringMottakere =
+            listOf(
+                lagØkonomiSimuleringMottaker(
+                    økonomiSimuleringPostering =
+                        listOf(
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.of(2023, 1, 31),
+                                tom = LocalDate.of(2023, 1, 31),
+                                posteringType = PosteringType.YTELSE,
+                                beløp = 100,
+                                fagsakId = 1,
+                            ),
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.of(2023, 1, 1),
+                                tom = LocalDate.of(2023, 1, 30),
+                                posteringType = PosteringType.YTELSE,
+                                beløp = 100,
+                                fagsakId = 1,
+                            ),
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.of(2023, 1, 1),
+                                tom = LocalDate.of(2023, 1, 31),
+                                posteringType = PosteringType.YTELSE,
+                                beløp = 100,
+                                fagsakId = 1,
+                            ),
+                            lagØkonomiSimuleringPostering(
+                                fom = LocalDate.of(2023, 1, 1),
+                                tom = LocalDate.of(2023, 1, 31),
+                                posteringType = PosteringType.YTELSE,
+                                beløp = 100,
+                                fagsakId = 2,
+                            ),
+                        ),
+                ),
+            )
+
+        // Act
+        val overlappendePerioder = finnOverlappendePerioder(økonomiSimuleringMottakere = økonomiSimuleringMottakere, 1)
+
+        // Assert
+        assertThat(overlappendePerioder).hasSize(1)
+
+        val overlappendePeriode = overlappendePerioder.single()
+
+        assertThat(overlappendePeriode.fom).isEqualTo(LocalDate.of(2023, 1, 1))
+        assertThat(overlappendePeriode.tom).isEqualTo(LocalDate.of(2023, 1, 31))
+    }
+
+    @Test
     fun `finnOverlappendePerioder skal ikke ta med perioder som overlapper i inneværende måned eller i fremtiden`() {
         // Arrange
         val økonomiSimuleringMottakere =

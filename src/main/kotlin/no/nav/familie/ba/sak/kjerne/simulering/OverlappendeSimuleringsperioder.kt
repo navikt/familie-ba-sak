@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.simulering.domene.OverlappendePerioderMedAndreFagsaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
@@ -26,7 +28,7 @@ fun finnOverlappendePerioder(
                             it.fagOmrådeKode == FagOmrådeKode.BARNETRYGD_MANUELT
                     }.mapNotNull { postering ->
                         postering.fagsakId?.let {
-                            Periode(it, postering.fom, postering.tom)
+                            Periode(it, postering.fom.førsteDagIInneværendeMåned(), postering.tom.sisteDagIMåned())
                         }
                     }
             }.distinct()
