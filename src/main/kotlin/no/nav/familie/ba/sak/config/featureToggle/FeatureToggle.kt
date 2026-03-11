@@ -35,17 +35,9 @@ enum class FeatureToggle(
 
     // Preutfylling
     PREUTFYLLING_VILKÅR("familie-ba-sak.preutfylling-vilkaar"),
-    PREUTFYLLING_VILKÅR_LOVLIG_OPPHOLD("familie-ba-sak.preutfylling-lovlig-opphold"),
-    PREUTFYLLING_BOR_HOS_SØKER("familie-ba-sak.preutfylling-bor-hos-soker"),
     PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG("familie-ba-sak.preutfylling-personopplysningsgrunnlag"),
-    ARBEIDSFORHOLD_STRENGERE_NEDHENTING("familie-ba-sak.arbeidsforhold-strengere-nedhenting"),
     AUTOMAITSK_REGISTRER_SØKNAD("familie-ba-sak.automatisk-registrer-soknad"),
-    FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO("familie-ba-sak.filtrer-adresse-for-soker-paa-eldste-barns-fodselsdato"),
-    FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO("familie-ba-sak.filtrer-statsborgerskap-paa-eldste-barns-fodselsdato"),
-    FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO("familie-ba-sak.filtrer-sivilstand-for-soker-paa-eldste-barns-fodselsdato"),
-    FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO("familie-ba-sak.filtrer-opphold-paa-eldste-barns-fodselsdato"),
-    VALIDER_ENDRING_AV_PREUTFYLTE_VILKÅR("familie-ba-sak.valider-endring-av-preutfylte-vilkaar"),
-    IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG("familie-ba-sak.ikke-lagre-duplikat-av-personopplysningsgrunnlag"),
+    FILTRERE_REGISTEROPPLYSNINGER("familie-ba-sak.filtrer-registeropplysninger"),
 
     // Introdusert AbstractPreutfyllBosattIRiketService og tatt den i bruk i PreutfyllBosattIRiketService og PreutfyllBosattIRiketForFødselshendelseService.
     PREUTFYLLING_BOSATT_I_RIKET_FOR_FØDSELSHENDELSE("familie-ba-sak.preutfylling-bosatt-i-riket-for-fodselshendelse"),
