@@ -142,7 +142,6 @@ data class VilkårResultat(
         copy(
             id = 0,
             personResultat = nyttPersonResultat,
-            sistEndretIBehandlingId = nyttPersonResultat.vilkårsvurdering.behandling.id,
         )
 
     fun oppdaterPekerTilBehandling() {

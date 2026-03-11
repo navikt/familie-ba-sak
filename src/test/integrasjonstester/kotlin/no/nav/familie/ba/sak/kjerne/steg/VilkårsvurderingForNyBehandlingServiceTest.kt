@@ -1057,6 +1057,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 søker = søkerB2,
                 barna = listOf(barnB2),
                 behandling = behandling2,
+                vilkårSistEndretIBehandling = behandling,
                 overstyrendeVilkårResultater = emptyMap(),
             )
 

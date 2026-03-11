@@ -408,6 +408,7 @@ fun lagPersonResultatAvOverstyrteResultater(
     person: Person,
     overstyrendeVilkårResultater: List<VilkårResultat>,
     vilkårsvurdering: Vilkårsvurdering,
+    vilkårSistEndretIBehandling: Behandling? = null,
     id: Long = 0,
 ): PersonResultat {
     val personResultat =
@@ -449,7 +450,7 @@ fun lagPersonResultatAvOverstyrteResultater(
                             vilkårType = vilkårType,
                             resultat = OPPFYLT,
                             begrunnelse = "",
-                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                            sistEndretIBehandlingId = vilkårSistEndretIBehandling?.id ?: vilkårsvurdering.behandling.id,
                             utdypendeVilkårsvurderinger = emptyList(),
                         ),
                     )
@@ -473,6 +474,7 @@ fun lagVilkårsvurderingMedOverstyrendeResultater(
     søker: Person,
     barna: List<Person>,
     behandling: Behandling? = null,
+    vilkårSistEndretIBehandling: Behandling? = null,
     id: Long = 0,
     overstyrendeVilkårResultater: Map<AktørId, List<VilkårResultat>>,
 ): Vilkårsvurdering {
@@ -483,6 +485,7 @@ fun lagVilkårsvurderingMedOverstyrendeResultater(
             person = søker,
             overstyrendeVilkårResultater = overstyrendeVilkårResultater[søker.aktør.aktørId] ?: emptyList(),
             vilkårsvurdering = vilkårsvurdering,
+            vilkårSistEndretIBehandling = vilkårSistEndretIBehandling,
             id = id,
         )
 
@@ -492,6 +495,7 @@ fun lagVilkårsvurderingMedOverstyrendeResultater(
                 person = it,
                 overstyrendeVilkårResultater = overstyrendeVilkårResultater[it.aktør.aktørId] ?: emptyList(),
                 vilkårsvurdering = vilkårsvurdering,
+                vilkårSistEndretIBehandling = vilkårSistEndretIBehandling,
             )
         }
 

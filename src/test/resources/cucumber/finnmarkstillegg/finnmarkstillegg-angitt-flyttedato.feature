@@ -45,13 +45,13 @@ Egenskap: Innvilgelse av Finnmarkstillegg
     Når vi lager automatisk behandling med id 2 på fagsak 1 på grunn av finnmarkstillegg
 
     Så forvent følgende vilkårresultater for behandling 2
-      | AktørId | Vilkår                       | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Vurderes etter   |
-      | 1       | LOVLIG_OPPHOLD               |                              | 01.10.2024 |            | OPPFYLT  | NASJONALE_REGLER |
-      | 1       | BOSATT_I_RIKET               |                              | 01.10.2024 | 30.10.2025 | OPPFYLT  | NASJONALE_REGLER |
-      | 1       | BOSATT_I_RIKET               | BOSATT_I_FINNMARK_NORD_TROMS | 31.10.2025 |            | OPPFYLT  | NASJONALE_REGLER |
+      | AktørId | Vilkår                       | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Vurderes etter   | Sist endret i behandling |
+      | 1       | LOVLIG_OPPHOLD               |                              | 01.10.2024 |            | OPPFYLT  | NASJONALE_REGLER | 1                        |
+      | 1       | BOSATT_I_RIKET               |                              | 01.10.2024 | 30.10.2025 | OPPFYLT  | NASJONALE_REGLER | 2                        |
+      | 1       | BOSATT_I_RIKET               | BOSATT_I_FINNMARK_NORD_TROMS | 31.10.2025 |            | OPPFYLT  | NASJONALE_REGLER | 2                        |
 
-      | 2       | UNDER_18_ÅR                  |                              | 01.10.2024 | 30.09.2042 | OPPFYLT  |                  |
-      | 2       | BOR_MED_SØKER,LOVLIG_OPPHOLD |                              | 01.10.2024 |            | OPPFYLT  | NASJONALE_REGLER |
-      | 2       | BOSATT_I_RIKET               |                              | 01.10.2024 | 30.10.2025 | OPPFYLT  | NASJONALE_REGLER |
-      | 2       | BOSATT_I_RIKET               | BOSATT_I_FINNMARK_NORD_TROMS | 31.10.2025 |            | OPPFYLT  | NASJONALE_REGLER |
-      | 2       | GIFT_PARTNERSKAP             |                              | 01.10.2024 |            | OPPFYLT  |                  |
+      | 2       | UNDER_18_ÅR                  |                              | 01.10.2024 | 30.09.2042 | OPPFYLT  |                  | 1                        |
+      | 2       | BOR_MED_SØKER,LOVLIG_OPPHOLD |                              | 01.10.2024 |            | OPPFYLT  | NASJONALE_REGLER | 1                        |
+      | 2       | BOSATT_I_RIKET               |                              | 01.10.2024 | 30.10.2025 | OPPFYLT  | NASJONALE_REGLER | 2                        |
+      | 2       | BOSATT_I_RIKET               | BOSATT_I_FINNMARK_NORD_TROMS | 31.10.2025 |            | OPPFYLT  | NASJONALE_REGLER | 2                        |
+      | 2       | GIFT_PARTNERSKAP             |                              | 01.10.2024 |            | OPPFYLT  |                  | 1                        |

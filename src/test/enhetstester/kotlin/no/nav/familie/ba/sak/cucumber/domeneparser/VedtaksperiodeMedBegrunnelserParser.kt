@@ -114,4 +114,10 @@ object VedtaksperiodeMedBegrunnelserParser {
         ADRESSETYPE("Adressetype"),
         KOMMUNENUMMER("Kommunenummer"),
     }
+
+    enum class DomenebegrepVilkårresultat(
+        override val nøkkel: String,
+    ) : Domenenøkkel {
+        SIST_ENDRET_I_BEHANDLING("Sist endret i behandling"),
+    }
 }

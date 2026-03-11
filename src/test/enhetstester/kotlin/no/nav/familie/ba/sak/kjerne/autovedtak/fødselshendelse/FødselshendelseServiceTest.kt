@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.FødselshendelseData
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -42,6 +43,7 @@ import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.any
 import java.time.LocalDate
 import java.time.Month
 
@@ -170,6 +172,7 @@ class FødselshendelseServiceTest {
                 søkerPerson,
                 listOf(barn1Person, barn2Person),
                 nyBehandling,
+                any<Behandling>(),
                 id = 1,
                 mapOf(
                     Pair(
