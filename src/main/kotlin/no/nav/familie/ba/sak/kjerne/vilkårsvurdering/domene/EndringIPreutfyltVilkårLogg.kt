@@ -60,10 +60,10 @@ data class EndringIPreutfyltVilkårLogg(
     @Column(name = "ny_vurderes_etter")
     val nyVurderesEtter: Regelverk?,
     @Convert(converter = UtdypendeVilkårsvurderingerConverter::class)
-    @Column(name = "forrige_utdypende_vilkårsvurdering")
+    @Column(name = "forrige_utdypende_vilkarsvurdering")
     val forrigeUtdypendeVilkårsvurdering: List<UtdypendeVilkårsvurdering>?,
     @Convert(converter = UtdypendeVilkårsvurderingerConverter::class)
-    @Column(name = "ny_utdypende_vilkårsvurdering")
+    @Column(name = "ny_utdypende_vilkarsvurdering")
     val nyUtdypendeVilkårsvurdering: List<UtdypendeVilkårsvurdering>?,
 ) {
     companion object {
