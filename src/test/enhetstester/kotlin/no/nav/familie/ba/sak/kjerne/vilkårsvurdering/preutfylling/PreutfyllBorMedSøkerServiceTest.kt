@@ -339,7 +339,7 @@ class PreutfyllBorMedSøkerServiceTest {
                 }
 
         assertThat(borFastHosSøkerVilkår.begrunnelse)
-            .isEqualTo("$PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT- Har delt bostedsadresse hos søker.")
+            .isEqualTo("$PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT- Har samme bostedsadresse som søker.")
     }
 
     @Test
