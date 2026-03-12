@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.erSammeAdresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
@@ -35,14 +34,15 @@ class PreutfyllBorMedSøkerService(
         vilkårsvurdering.personResultater
             .filterNot { it.erSøkersResultater() }
             .forEach { personResultat ->
-                val person = personResultat.aktør.tilPerson(personopplysningGrunnlag)
-                val adresserForPerson = Adresser.opprettFra(person)
+                val barn = personResultat.aktør.tilPerson(personopplysningGrunnlag)
+                val adresserForBarn = Adresser.opprettFra(barn)
 
                 val nyeBorMedSøkerVilkårResultat =
                     genererBorMedSøkerVilkårResultat(
                         personResultat = personResultat,
-                        bostedsadresserBarn = adresserForPerson,
+                        bostedsadresserBarn = adresserForBarn,
                         bostedsadresserSøker = bostedsadresserSøker,
+                        barnFødselsdato = barn.fødselsdato,
                     )
 
                 if (nyeBorMedSøkerVilkårResultat.isNotEmpty()) {
@@ -56,12 +56,14 @@ class PreutfyllBorMedSøkerService(
         personResultat: PersonResultat,
         bostedsadresserBarn: Adresser,
         bostedsadresserSøker: Adresser,
+        barnFødselsdato: LocalDate,
     ): Set<VilkårResultat> {
         val harSammeBostedsadresseTidslinje =
             lagBorMedSøkerTidslinje(
                 bostedsadresserBarn = bostedsadresserBarn,
                 bostedsadresserSøker = bostedsadresserSøker,
                 datoForBeskjæringAvFom = finnDatoForBeskjæringAvFom(bostedsadresserBarn.bostedsadresser, bostedsadresserSøker.bostedsadresser),
+                barnFødselsdato = barnFødselsdato,
             )
 
         return harSammeBostedsadresseTidslinje
@@ -103,6 +105,7 @@ class PreutfyllBorMedSøkerService(
         bostedsadresserBarn: Adresser,
         bostedsadresserSøker: Adresser,
         datoForBeskjæringAvFom: LocalDate,
+        barnFødselsdato: LocalDate,
     ): Tidslinje<Delvilkår> {
         val bostedsadresserBarnTidslinje = lagBostedsadresseTidslinje(bostedsadresserBarn.bostedsadresser)
         val bostedsadresserSøkerTidslinje = lagBostedsadresseTidslinje(bostedsadresserSøker.bostedsadresser)
@@ -120,11 +123,11 @@ class PreutfyllBorMedSøkerService(
         return bostedsadresserSøkerTidslinje
             .kombinerMed(bostedsadresserBarnTidslinje, deltBostedsadresserBarnTidslinjer) { søkerAdresse, barnBostedAdresse, barnDeltBostedAdresser ->
                 when {
-                    barnBostedAdresse != null && harVærtSammeAdresseMinst3Mnd(barnBostedAdresse, søkerAdresse) -> {
+                    barnBostedAdresse != null && harVærtSammeAdresseMinst3Mnd(barnBostedAdresse, søkerAdresse, barnFødselsdato) -> {
                         OppfyltDelvilkår(begrunnelse = "- Har samme bostedsadresse som søker.")
                     }
 
-                    !barnDeltBostedAdresser.isNullOrEmpty() && harVærtSammeDeltbostedAdresseMinst3Mnd(barnDeltBostedAdresser, søkerAdresse) -> {
+                    !barnDeltBostedAdresser.isNullOrEmpty() && harVærtSammeDeltbostedAdresseMinst3Mnd(barnDeltBostedAdresser, søkerAdresse, barnFødselsdato) -> {
                         OppfyltDelvilkår(
                             begrunnelse = "- Har delt bostedsadresse hos søker.",
                             begrunnelseForManuellKontroll = INFORMASJON_OM_DELT_BOSTED,
@@ -157,20 +160,39 @@ class PreutfyllBorMedSøkerService(
     private fun harVærtSammeAdresseMinst3Mnd(
         barnAdresse: Adresse,
         søkerAdresse: Adresse?,
-    ): Boolean =
-        søkerAdresse
-            ?.takeIf { barnAdresse.erSammeAdresse(it) }
-            ?.let { ChronoUnit.MONTHS.between(barnAdresse.gyldigFraOgMed, barnAdresse.gyldigTilOgMed ?: LocalDate.now()) >= 3 }
-            ?: false
+        barnFødselsdato: LocalDate,
+    ): Boolean {
+        if (!barnAdresse.erSammeAdresse(søkerAdresse)) return false
+
+        val fom = barnAdresse.gyldigFraOgMed
+        val tom = barnAdresse.gyldigTilOgMed ?: LocalDate.now()
+
+        val boddTreMnd = ChronoUnit.MONTHS.between(fom, tom) >= 3
+
+        return boddTreMnd || barnUnder3MndOgBoddSidenFødsel(fom, barnFødselsdato)
+    }
 
     private fun harVærtSammeDeltbostedAdresseMinst3Mnd(
-        barnAdresse: List<Adresse>,
+        barnAdresser: List<Adresse>,
         søkerAdresse: Adresse?,
+        barnFødselsdato: LocalDate,
     ): Boolean =
-        barnAdresse.any {
-            søkerAdresse
-                ?.takeIf { it.erSammeAdresse(it) }
-                ?.let { ChronoUnit.MONTHS.between(it.gyldigFraOgMed, it.gyldigTilOgMed ?: LocalDate.now()) >= 3 }
-                ?: false
+        barnAdresser.any { deltBostedAdresse ->
+            if (!deltBostedAdresse.erSammeAdresse(søkerAdresse)) return@any false
+
+            val fom = deltBostedAdresse.gyldigFraOgMed
+            val tom = deltBostedAdresse.gyldigTilOgMed ?: LocalDate.now()
+
+            val boddTreMnd = ChronoUnit.MONTHS.between(fom, tom) >= 3
+
+            boddTreMnd || barnUnder3MndOgBoddSidenFødsel(fom, barnFødselsdato)
         }
+
+    private fun barnUnder3MndOgBoddSidenFødsel(
+        adresseFom: LocalDate?,
+        fødselsdato: LocalDate,
+    ): Boolean =
+        ChronoUnit.MONTHS.between(fødselsdato, LocalDate.now()) < 3 &&
+            adresseFom != null &&
+            adresseFom <= fødselsdato
 }

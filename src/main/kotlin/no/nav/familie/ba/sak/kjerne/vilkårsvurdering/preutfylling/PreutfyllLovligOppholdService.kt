@@ -139,8 +139,13 @@ class PreutfyllLovligOppholdService(
     ): Tidslinje<Boolean> =
         arbeidsforhold
             .mapNotNull { it.periode }
-            .map { Periode(verdi = true, fom = it.fom, tom = it.tom).tilTidslinje() }
-            .kombiner { it.any() }
+            .map {
+                Periode(
+                    verdi = true,
+                    fom = it.fom,
+                    tom = it.tom,
+                ).tilTidslinje()
+            }.kombiner { it.any() }
 
     private fun lagHarOppholdstillatelseTidslinje(oppholdstillatelse: List<GrOpphold>): Tidslinje<Boolean> =
         oppholdstillatelse
