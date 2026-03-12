@@ -73,11 +73,9 @@ class ManueltBrevRequestTest {
         }
 
         @Test
-        fun `Innhente opplysninger brev til person og institusjon`() {
+        fun `Innhente opplysninger brev institusjon skal fylle ut orgnummer og gjelder feltet`() {
             val fnr = "12345678910"
             val orgnr = "123456789"
-            val brevRequestTilPerson =
-                baseRequest
             val brevRequestTilInstitusjon =
                 baseRequest.copy(
                     brevmal = Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
@@ -87,18 +85,36 @@ class ManueltBrevRequestTest {
                             navn = "navn tilhørende $fnr",
                         ),
                 )
+
+            val mottakerNavn = "mottakerNavn"
+            brevRequestTilInstitusjon.tilBrev(orgnr, mottakerNavn, "saksbehandlerNavn") { emptyMap() }.data.apply {
+                assertThat(flettefelter.organisasjonsnummer).containsExactly(orgnr)
+                assertThat(flettefelter.fodselsnummer).containsExactly(brevRequestTilInstitusjon.vedrørende?.fødselsnummer)
+                assertThat(flettefelter.navn).containsExactly(mottakerNavn)
+                assertThat(flettefelter.gjelder).containsExactly(brevRequestTilInstitusjon.vedrørende?.navn)
+            }
+        }
+
+        @Test
+        fun `Innhente opplysninger brevet skal ikke fylle ut org nummer og gjelder feltet selvom vedrørende er satt`() {
+            val fnr = "12345678910"
+
+            val brevRequestTilPerson =
+                baseRequest.copy(
+                    brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
+                    vedrørende =
+                        PersonForManueltBrevRequest(
+                            fødselsnummer = fnr,
+                            navn = "navn tilhørende $fnr",
+                        ),
+                )
+
             val mottakerNavn = "mottakerNavn"
             brevRequestTilPerson.tilBrev(fnr, mottakerNavn, "saksbehandlerNavn") { emptyMap() }.data.apply {
                 assertThat(flettefelter.fodselsnummer).containsExactly(fnr)
                 assertThat(flettefelter.navn).containsExactly(mottakerNavn)
                 assertThat(flettefelter.organisasjonsnummer).isNull()
                 assertThat(flettefelter.gjelder).isNull()
-            }
-            brevRequestTilInstitusjon.tilBrev(orgnr, mottakerNavn, "saksbehandlerNavn") { emptyMap() }.data.apply {
-                assertThat(flettefelter.organisasjonsnummer).containsExactly(orgnr)
-                assertThat(flettefelter.fodselsnummer).containsExactly(brevRequestTilInstitusjon.vedrørende?.fødselsnummer)
-                assertThat(flettefelter.navn).containsExactly(mottakerNavn)
-                assertThat(flettefelter.gjelder).containsExactly(brevRequestTilInstitusjon.vedrørende?.navn)
             }
         }
 
@@ -130,6 +146,11 @@ class ManueltBrevRequestTest {
                 baseRequest.copy(
                     brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE,
                     fritekstAvsnitt = "Fritekst avsnitt",
+                    vedrørende =
+                        PersonForManueltBrevRequest(
+                            fødselsnummer = fnr,
+                            navn = "navn tilhørende $fnr",
+                        ),
                 )
             val brev = brevRequestTilPerson.tilBrev(fnr, mottakerNavn, "Saks Behandlersen") { emptyMap() }.data as InformasjonsbrevInnhenteOpplysningerKlageData
             with(brev.flettefelter) {
@@ -137,6 +158,32 @@ class ManueltBrevRequestTest {
                 assertThat(navn).containsExactly(mottakerNavn)
                 assertThat(organisasjonsnummer).isNull()
                 assertThat(gjelder).isNull()
+            }
+            assertThat(brev.delmalData.fritekstAvsnitt.fritekstAvsnittTekst).containsExactly("Fritekst avsnitt")
+            assertThat(brev.delmalData.signatur.saksbehandler).containsExactly("Saks Behandlersen")
+        }
+
+        @Test
+        fun `tilBrev genererer 'innhente opplysninger klage'-brev som forventet for institusjon`() {
+            val fnr = "12345678910"
+            val orgnr = "123456789"
+            val mottakerNavn = "mottakerNavn"
+            val brevRequestTilInstitusjon =
+                baseRequest.copy(
+                    brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON,
+                    fritekstAvsnitt = "Fritekst avsnitt",
+                    vedrørende =
+                        PersonForManueltBrevRequest(
+                            fødselsnummer = fnr,
+                            navn = "navn tilhørende $fnr",
+                        ),
+                )
+            val brev = brevRequestTilInstitusjon.tilBrev(orgnr, mottakerNavn, "Saks Behandlersen") { emptyMap() }.data as InformasjonsbrevInnhenteOpplysningerKlageData
+            with(brev.flettefelter) {
+                assertThat(fodselsnummer).containsExactly(fnr)
+                assertThat(navn).containsExactly(mottakerNavn)
+                assertThat(organisasjonsnummer).containsExactly(orgnr)
+                assertThat(gjelder).containsExactly(brevRequestTilInstitusjon.vedrørende?.navn)
             }
             assertThat(brev.delmalData.fritekstAvsnitt.fritekstAvsnittTekst).containsExactly("Fritekst avsnitt")
             assertThat(brev.delmalData.signatur.saksbehandler).containsExactly("Saks Behandlersen")

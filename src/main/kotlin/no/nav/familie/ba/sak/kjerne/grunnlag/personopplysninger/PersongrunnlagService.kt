@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
@@ -249,12 +248,7 @@ class PersongrunnlagService(
         målform: Målform,
         barnFraForrigeBehandling: List<Aktør> = emptyList(),
     ): PersonopplysningGrunnlag {
-        val nyttPersonopplysningGrunnlag =
-            if (featureToggleService.isEnabled(IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG)) {
-                PersonopplysningGrunnlag(behandlingId = behandling.id)
-            } else {
-                lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
-            }
+        val nyttPersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
 
         val alleBarna = barnFraInneværendeBehandling.union(barnFraForrigeBehandling).toList()
         val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarna)
@@ -312,29 +306,18 @@ class PersongrunnlagService(
             }
         }
 
-        if (featureToggleService.isEnabled(IKKE_LAGRE_DUPLIKAT_AV_PERSONOPPLYSNINGGRUNNLAG)) {
-            val aktivtPersonopplysningGrunnlag = hentAktiv(behandling.id)
-            return if (aktivtPersonopplysningGrunnlag == null || nyttPersonopplysningGrunnlag.harRelevantEndring(aktivtPersonopplysningGrunnlag)) {
-                lagreOgDeaktiverGammel(nyttPersonopplysningGrunnlag).also {
+        val aktivtPersonopplysningGrunnlag = hentAktiv(behandling.id)
+        return if (aktivtPersonopplysningGrunnlag == null || nyttPersonopplysningGrunnlag.harRelevantEndring(aktivtPersonopplysningGrunnlag)) {
+            lagreOgDeaktiverGammel(nyttPersonopplysningGrunnlag).also {
                     /*
                      * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
                      * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
                      */
-                    arbeidsfordelingService.fastsettBehandlendeEnhet(behandling)
-                    saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
-                }
-            } else {
-                aktivtPersonopplysningGrunnlag
-            }
-        } else {
-            return personopplysningGrunnlagRepository.save(nyttPersonopplysningGrunnlag).also {
-                /*
-                 * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
-                 * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
-                 */
                 arbeidsfordelingService.fastsettBehandlendeEnhet(behandling)
                 saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
             }
+        } else {
+            aktivtPersonopplysningGrunnlag
         }
     }
 
@@ -362,10 +345,7 @@ class PersongrunnlagService(
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
             }
 
-        val filtrerAdresser = featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
-        val filtrerStatsborgerskap = featureToggleService.isEnabled(FeatureToggle.FILTRER_STATSBORGERSKAP_PÅ_ELDSTE_BARNS_FØDSELSDATO)
-        val filtrerOpphold = featureToggleService.isEnabled(FeatureToggle.FILTRER_OPPHOLD_PÅ_ELDSTE_BARNS_FØDSELSDATO)
-        val filtrerSivilstand = featureToggleService.isEnabled(FeatureToggle.FILTRER_SIVILSTAND_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
+        val filtrerRegisteropplysninger = featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER)
 
         lagreHistoriskeIdenter(personInfo.historiskeIdenter, aktør)
 
@@ -380,13 +360,13 @@ class PersongrunnlagService(
         ).also { person ->
             person.opphold =
                 personInfo.opphold
-                    ?.filtrerBortOppholdFørEldsteBarn(eldsteBarnsFødselsdato, filtrerOpphold)
+                    ?.filtrerBortOppholdFørEldsteBarn(eldsteBarnsFødselsdato, filtrerRegisteropplysninger)
                     ?.map { GrOpphold.fraOpphold(it, person) }
                     ?.toMutableList() ?: mutableListOf()
             person.bostedsadresser =
                 personInfo.bostedsadresser
                     .filtrerUtKunNorskeBostedsadresser()
-                    .filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
+                    .filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerRegisteropplysninger)
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
                             bostedsadresse = it,
@@ -396,7 +376,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.oppholdsadresser =
                 personInfo.oppholdsadresser
-                    .filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
+                    .filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerRegisteropplysninger)
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
@@ -406,7 +386,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.deltBosted =
                 personInfo.deltBosted
-                    .filtrerBortDeltBostedForSøker(person.type, filtrerAdresser)
+                    .filtrerBortDeltBostedForSøker(person.type, filtrerRegisteropplysninger)
                     .map {
                         GrDeltBosted.fraDeltBosted(
                             deltBosted = it,
@@ -416,12 +396,12 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.sivilstander =
                 personInfo.sivilstander
-                    .filtrerBortIkkeRelevanteSivilstander(filtrerSivilstand, behandlingKategori, behandlingUnderkategori, personType)
+                    .filtrerBortIkkeRelevanteSivilstander(filtrerRegisteropplysninger, behandlingKategori, behandlingUnderkategori, personType)
                     .map { GrSivilstand.fraSivilstand(it, person) }
                     .toMutableList()
             person.statsborgerskap =
                 personInfo.statsborgerskap
-                    ?.filtrerBortStatsborgerskapFørEldsteBarn(eldsteBarnsFødselsdato, filtrerStatsborgerskap)
+                    ?.filtrerBortStatsborgerskapFørEldsteBarn(eldsteBarnsFødselsdato, filtrerRegisteropplysninger)
                     ?.flatMap {
                         statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                             statsborgerskap = it,
@@ -436,7 +416,7 @@ class PersongrunnlagService(
                     dødsfallAdresseFraPdl = personInfo.kontaktinformasjonForDoedsbo?.adresse,
                 )
 
-            if (featureToggleService.isEnabled(FeatureToggle.ARBEIDSFORHOLD_STRENGERE_NEDHENTING)) {
+            if (filtrerRegisteropplysninger) {
                 val personErSøker = person.type == PersonType.SØKER
                 val harStatsborgerskapIEØS = person.statsborgerskap.any { it.medlemskap == Medlemskap.EØS }
                 if (personErSøker && harStatsborgerskapIEØS) {
@@ -503,7 +483,7 @@ class PersongrunnlagService(
     fun oppdaterAdresserPåPersoner(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) {
-        val filtrerAdresser = featureToggleService.isEnabled(FeatureToggle.FILTRER_ADRESSE_FOR_SØKER_PÅ_ELDSTE_BARNS_FØDSELSDATO)
+        val filtrerAdresser = featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER)
         val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarn = personopplysningGrunnlag.barna.map { it.aktør })
 
         val adresserForPersoner =
