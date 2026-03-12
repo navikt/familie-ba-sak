@@ -117,7 +117,11 @@ class OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService(
                             .filter { it != BOSATT_I_FINNMARK_NORD_TROMS && it != BOSATT_PÅ_SVALBARD }
                             .plus(gjeldendeFinnmarkEllerSvalbardMarkeringer)
 
-                    eksisterendeVilkårResultat.copy(utdypendeVilkårsvurderinger = oppdaterteUtdypendeVilkårsvurderinger, begrunnelse = PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT)
+                    eksisterendeVilkårResultat.copy(
+                        utdypendeVilkårsvurderinger = oppdaterteUtdypendeVilkårsvurderinger,
+                        begrunnelse = PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT,
+                        sistEndretIBehandlingId = behandling.id,
+                    )
                 } else {
                     eksisterendeVilkårResultat
                 }
@@ -128,6 +132,7 @@ class OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService(
                     periodeFom = it.fom,
                     periodeTom = it.tom,
                     begrunnelse = if (periodeErEndret) PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT else it.verdi.begrunnelse,
+                    sistEndretIBehandlingId = if (periodeErEndret) behandling.id else it.verdi.sistEndretIBehandlingId,
                 )
             }
     }

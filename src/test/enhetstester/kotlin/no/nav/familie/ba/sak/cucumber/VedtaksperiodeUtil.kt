@@ -9,6 +9,12 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.BrevPeriodeParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.ER_EKSPLISITT_AVSLAG
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.RESULTAT
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.UTDYPENDE_VILKÅR
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.VILKÅR
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.VURDERES_ETTER
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepVilkårresultat.SIST_ENDRET_I_BEHANDLING
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseBigDecimal
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnum
@@ -215,45 +221,21 @@ fun parseVilkårResultaterForAktør(
 ): Set<VilkårResultat> =
     vilkårResultatRaderForAktør
         .flatMap { rad ->
-            val vilkårForÉnRad =
-                parseEnumListe<Vilkår>(
-                    VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.VILKÅR,
-                    rad,
-                )
-
-            val utdypendeVilkårsvurderingForÉnRad =
-                parseEnumListe<UtdypendeVilkårsvurdering>(
-                    VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.UTDYPENDE_VILKÅR,
-                    rad,
-                )
-
-            val vurderesEtterForEnRad =
-                parseValgfriEnum<Regelverk>(
-                    VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.VURDERES_ETTER,
-                    rad,
-                ) ?: Regelverk.NASJONALE_REGLER
+            val vilkårForÉnRad = parseEnumListe<Vilkår>(VILKÅR, rad)
 
             val vilkårResultaterForÉnRad =
                 vilkårForÉnRad.map { vilkår ->
                     VilkårResultat(
-                        sistEndretIBehandlingId = behandlingId,
+                        sistEndretIBehandlingId = parseValgfriLong(SIST_ENDRET_I_BEHANDLING, rad) ?: behandlingId,
                         personResultat = personResultat,
                         vilkårType = vilkår,
-                        resultat =
-                            parseEnum(
-                                VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.RESULTAT,
-                                rad,
-                            ),
+                        resultat = parseEnum(RESULTAT, rad),
                         periodeFom = parseValgfriDato(Domenebegrep.FRA_DATO, rad),
                         periodeTom = parseValgfriDato(Domenebegrep.TIL_DATO, rad),
-                        erEksplisittAvslagPåSøknad =
-                            parseValgfriBoolean(
-                                VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.ER_EKSPLISITT_AVSLAG,
-                                rad,
-                            ),
+                        erEksplisittAvslagPåSøknad = parseValgfriBoolean(ER_EKSPLISITT_AVSLAG, rad),
                         begrunnelse = "",
-                        utdypendeVilkårsvurderinger = utdypendeVilkårsvurderingForÉnRad,
-                        vurderesEtter = vurderesEtterForEnRad,
+                        utdypendeVilkårsvurderinger = parseEnumListe<UtdypendeVilkårsvurdering>(UTDYPENDE_VILKÅR, rad),
+                        vurderesEtter = parseValgfriEnum<Regelverk>(VURDERES_ETTER, rad) ?: Regelverk.NASJONALE_REGLER,
                         standardbegrunnelser = hentStandardBegrunnelser(rad),
                     )
                 }

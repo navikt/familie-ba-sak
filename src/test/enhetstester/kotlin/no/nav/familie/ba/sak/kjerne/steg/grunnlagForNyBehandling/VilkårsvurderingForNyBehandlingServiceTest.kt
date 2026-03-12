@@ -99,6 +99,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                         søker = søker,
                         barna = listOf(barn),
                         behandling = behandling,
+                        vilkårSistEndretIBehandling = forrigeBehandling,
                         overstyrendeVilkårResultater = emptyMap(),
                     )
 
@@ -176,6 +177,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                         søker = søker,
                         barna = listOf(barn),
                         behandling = behandling,
+                        vilkårSistEndretIBehandling = forrigeBehandling,
                         overstyrendeVilkårResultater =
                             mapOf(
                                 Pair(
@@ -185,7 +187,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                                             vilkårType = Vilkår.BOSATT_I_RIKET,
                                             resultat = Resultat.OPPFYLT,
                                             periodeTom = LocalDate.now().minusMonths(4),
-                                            behandlingId = behandling.id,
+                                            behandlingId = forrigeBehandling.id,
                                         ),
                                     ),
                                 ),
@@ -240,6 +242,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                         søker = søker,
                         barna = barna,
                         behandling = forrigeBehandling,
+                        vilkårSistEndretIBehandling = forrigeBehandling,
                         overstyrendeVilkårResultater =
                             mapOf(
                                 Pair(
@@ -262,6 +265,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                         søker = søker,
                         barna = listOf(barn2),
                         behandling = behandling,
+                        vilkårSistEndretIBehandling = forrigeBehandling,
                         overstyrendeVilkårResultater = emptyMap(),
                     )
 
@@ -600,6 +604,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                     .usingRecursiveFieldByFieldElementComparatorIgnoringFields(
                         "id",
                         "personResultat",
+//                        "sistEndretIBehandlingId",
                         *baseEntitetFelter,
                     ).isEqualTo(it.second)
             }
