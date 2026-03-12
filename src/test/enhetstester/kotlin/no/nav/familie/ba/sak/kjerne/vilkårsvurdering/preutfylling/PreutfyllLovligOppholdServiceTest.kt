@@ -262,10 +262,65 @@ class PreutfyllLovligOppholdServiceTest {
                 vilkårsvurdering.personResultater
                     .first { it.aktør == søkerAktør }
                     .vilkårResultater
-                    .find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
-            assertThat(lovligOppholdResultater?.periodeFom).isEqualTo(barn.fødselsdato)
-            assertThat(lovligOppholdResultater?.periodeTom).isNull()
-            assertThat(lovligOppholdResultater?.resultat).isEqualTo(Resultat.OPPFYLT)
+                    .single { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+
+            assertThat(lovligOppholdResultater.periodeFom).isEqualTo(barn.fødselsdato)
+            assertThat(lovligOppholdResultater.periodeTom).isNull()
+            assertThat(lovligOppholdResultater.resultat).isEqualTo(Resultat.OPPFYLT)
+            assertThat(lovligOppholdResultater.begrunnelse)
+                .isEqualTo("$PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT- EØS-borger og har arbeidsforhold i Norge.")
+        }
+
+        @Test
+        fun `skal håndtere overlappende arbeidsforhold ved preutfylling av lovlig opphold vilkår`() {
+            // Arrange
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
+                lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
+                    søker.apply {
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "BE",
+                                    gyldigPeriode = sisteTiÅr,
+                                    medlemskap = Medlemskap.EØS,
+                                    person = this,
+                                ),
+                            )
+                        arbeidsforhold =
+                            mutableListOf(
+                                GrArbeidsforhold(
+                                    arbeidsgiverId = null,
+                                    periode = sisteTiÅr,
+                                    person = this,
+                                    arbeidsgiverType = ArbeidsgiverType.Person.name,
+                                ),
+                                GrArbeidsforhold(
+                                    arbeidsgiverId = null,
+                                    periode = sisteTiÅr,
+                                    person = this,
+                                    arbeidsgiverType = ArbeidsgiverType.Organisasjon.name,
+                                ),
+                            )
+                    }
+                }
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+
+            // Assert
+            val lovligOppholdResultater =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == søkerAktør }
+                    .vilkårResultater
+                    .single { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+
+            assertThat(lovligOppholdResultater.periodeFom).isEqualTo(barn.fødselsdato)
+            assertThat(lovligOppholdResultater.periodeTom).isNull()
+            assertThat(lovligOppholdResultater.resultat).isEqualTo(Resultat.OPPFYLT)
+            assertThat(lovligOppholdResultater.begrunnelse)
+                .isEqualTo("$PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT- EØS-borger og har arbeidsforhold i Norge.")
         }
 
         @Test
@@ -327,50 +382,6 @@ class PreutfyllLovligOppholdServiceTest {
             assertThat(lovligOppholdResultater?.periodeFom).isEqualTo(barn.fødselsdato)
             assertThat(lovligOppholdResultater?.periodeTom).isNull()
             assertThat(lovligOppholdResultater?.resultat).isEqualTo(Resultat.OPPFYLT)
-        }
-
-        @Test
-        fun `skal gi riktig begrunnelse for oppfylt lovlig opphold vilkår hvis EØS borger og har arbeidsforhold`() {
-            // Arrange
-            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
-
-            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
-                lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
-                    søker.apply {
-                        statsborgerskap =
-                            mutableListOf(
-                                GrStatsborgerskap(
-                                    landkode = "BE",
-                                    gyldigPeriode = sisteTiÅr,
-                                    medlemskap = Medlemskap.EØS,
-                                    person = this,
-                                ),
-                            )
-                        arbeidsforhold =
-                            mutableListOf(
-                                GrArbeidsforhold(
-                                    arbeidsgiverId = null,
-                                    periode = sisteTiÅr,
-                                    person = this,
-                                    arbeidsgiverType = ArbeidsgiverType.Person.name,
-                                ),
-                            )
-                    }
-                }
-
-            // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
-
-            // Assert
-            val lovligOppholdResultater =
-                vilkårsvurdering.personResultater
-                    .first { it.aktør == søkerAktør }
-                    .vilkårResultater
-                    .single { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
-
-            assertThat(lovligOppholdResultater.resultat).isEqualTo(Resultat.OPPFYLT)
-            assertThat(lovligOppholdResultater.begrunnelse)
-                .isEqualTo("$PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT- EØS-borger og har arbeidsforhold i Norge.")
         }
 
         @Test
