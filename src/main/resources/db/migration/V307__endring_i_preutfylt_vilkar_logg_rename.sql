@@ -1,0 +1,5 @@
+ALTER TABLE endring_i_preutfylt_vilkar_logg
+    RENAME COLUMN forrige_utdypende_vilkårsvurdering TO forrige_utdypende_vilkarsvurdering;
+
+ALTER TABLE endring_i_preutfylt_vilkar_logg
+    RENAME COLUMN ny_utdypende_vilkårsvurdering TO ny_utdypende_vilkarsvurdering;
