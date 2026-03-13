@@ -123,11 +123,11 @@ class PreutfyllBorMedSøkerService(
         return bostedsadresserSøkerTidslinje
             .kombinerMed(bostedsadresserBarnTidslinje, deltBostedsadresserBarnTidslinjer) { søkerAdresse, barnBostedAdresse, barnDeltBostedAdresser ->
                 when {
-                    barnBostedAdresse != null && harVærtSammeAdresseMinst3Mnd(barnBostedAdresse, søkerAdresse, barnFødselsdato) -> {
+                    barnBostedAdresse != null && harVærtSammeBostedsadresseMinst3MndEllerBarnUnder3MndOgBoddSidenFødsel(barnBostedAdresse, søkerAdresse, barnFødselsdato) -> {
                         OppfyltDelvilkår(begrunnelse = "- Har samme bostedsadresse som søker.")
                     }
 
-                    !barnDeltBostedAdresser.isNullOrEmpty() && harVærtSammeDeltbostedAdresseMinst3Mnd(barnDeltBostedAdresser, søkerAdresse, barnFødselsdato) -> {
+                    !barnDeltBostedAdresser.isNullOrEmpty() && harVærtSammeDeltbostedAdresseMinst3MndEllerBarnUnder3MndOgBoddSidenFødsel(barnDeltBostedAdresser, søkerAdresse, barnFødselsdato) -> {
                         OppfyltDelvilkår(
                             begrunnelse = "- Har delt bostedsadresse hos søker.",
                             begrunnelseForManuellKontroll = INFORMASJON_OM_DELT_BOSTED,
@@ -157,7 +157,7 @@ class PreutfyllBorMedSøkerService(
                 )
             }.tilTidslinje()
 
-    private fun harVærtSammeAdresseMinst3Mnd(
+    private fun harVærtSammeBostedsadresseMinst3MndEllerBarnUnder3MndOgBoddSidenFødsel(
         barnAdresse: Adresse,
         søkerAdresse: Adresse?,
         barnFødselsdato: LocalDate,
@@ -167,12 +167,12 @@ class PreutfyllBorMedSøkerService(
         val fom = barnAdresse.gyldigFraOgMed
         val tom = barnAdresse.gyldigTilOgMed ?: LocalDate.now()
 
-        val boddTreMnd = ChronoUnit.MONTHS.between(fom, tom) >= 3
+        val boddMinstTreMnd = ChronoUnit.MONTHS.between(fom, tom) >= 3
 
-        return boddTreMnd || barnUnder3MndOgBoddSidenFødsel(fom, barnFødselsdato)
+        return boddMinstTreMnd || barnUnder3MndOgBoddSidenFødsel(fom, barnFødselsdato)
     }
 
-    private fun harVærtSammeDeltbostedAdresseMinst3Mnd(
+    private fun harVærtSammeDeltbostedAdresseMinst3MndEllerBarnUnder3MndOgBoddSidenFødsel(
         barnAdresser: List<Adresse>,
         søkerAdresse: Adresse?,
         barnFødselsdato: LocalDate,
@@ -183,9 +183,9 @@ class PreutfyllBorMedSøkerService(
             val fom = deltBostedAdresse.gyldigFraOgMed
             val tom = deltBostedAdresse.gyldigTilOgMed ?: LocalDate.now()
 
-            val boddTreMnd = ChronoUnit.MONTHS.between(fom, tom) >= 3
+            val boddMinstTreMnd = ChronoUnit.MONTHS.between(fom, tom) >= 3
 
-            boddTreMnd || barnUnder3MndOgBoddSidenFødsel(fom, barnFødselsdato)
+            boddMinstTreMnd || barnUnder3MndOgBoddSidenFødsel(fom, barnFødselsdato)
         }
 
     private fun barnUnder3MndOgBoddSidenFødsel(
