@@ -57,6 +57,7 @@ class EndringIPreutfyltVilkårLoggTest {
             )
 
         assertThat(logg.behandling).isEqualTo(behandling)
+        assertThat(logg.vilkårResultatId).isEqualTo(forrigeVilkår.id)
         assertThat(logg.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
         assertThat(logg.begrunnelse).isEqualTo("ny begrunnelse")
         assertThat(logg.forrigeFom).isEqualTo(LocalDate.of(2020, 1, 1))
