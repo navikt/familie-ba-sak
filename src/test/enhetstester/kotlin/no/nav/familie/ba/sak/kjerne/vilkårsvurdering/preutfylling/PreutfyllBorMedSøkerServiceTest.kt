@@ -867,4 +867,102 @@ class PreutfyllBorMedSøkerServiceTest {
         assertThat(borFastHosSøkerVilkår.periodeTom).isNull()
         assertThat(borFastHosSøkerVilkår.begrunnelse).isEqualTo("$PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT- Har delt bostedsadresse hos søker.")
     }
+
+    @Test
+    fun `skal oppfylt og ikke oppfylt perioder for barn under 3 måneder som først bor med søker så flytter bort og tilbake til søker`() {
+        // Arrange
+        val aktørSøker = randomAktør()
+        val aktørBarn = randomAktør()
+        val fødselsdatoBarn = LocalDate.now().minusMonths(2).minusWeeks(3)
+
+        val behandling = lagBehandling()
+
+        val persongrunnlagMedFlytting =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = aktørSøker.aktivFødselsnummer(),
+                barnasIdenter = listOf(aktørBarn.aktivFødselsnummer()),
+                barnasFødselsdatoer = listOf(fødselsdatoBarn),
+                søkerAktør = aktørSøker,
+                barnAktør = listOf(aktørBarn),
+            ).also { persongrunnlag ->
+                val søker = persongrunnlag.personer.single { it.type == PersonType.SØKER }
+                søker.bostedsadresser =
+                    mutableListOf(
+                        lagGrVegadresse(matrikkelId = 1L)
+                            .also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = LocalDate.now().minusYears(2),
+                                        tom = null,
+                                    )
+                                it.person = søker
+                            },
+                    )
+                val barn = persongrunnlag.personer.single { it.type == PersonType.BARN }
+                barn.bostedsadresser =
+                    mutableListOf(
+                        lagGrVegadresse(matrikkelId = 1L)
+                            .also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = fødselsdatoBarn,
+                                        tom = fødselsdatoBarn.plusMonths(2),
+                                    )
+                                it.person = barn
+                            },
+                        lagGrVegadresse(matrikkelId = 2L)
+                            .also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = fødselsdatoBarn.plusMonths(2).plusDays(1),
+                                        tom = null,
+                                    )
+                                it.person = barn
+                            },
+                        lagGrVegadresse(matrikkelId = 1L)
+                            .also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = fødselsdatoBarn.plusMonths(2).plusWeeks(2).plusDays(1),
+                                        tom = null,
+                                    )
+                                it.person = barn
+                            },
+                    )
+                barn.deltBosted = mutableListOf()
+            }
+
+        val vilkårsvurdering =
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                søker = persongrunnlagMedFlytting.søker,
+                barna = persongrunnlagMedFlytting.barna,
+                behandling = behandling,
+                overstyrendeVilkårResultater = emptyMap(),
+            )
+
+        every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagMedFlytting
+
+        // Act
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)
+
+        // Assert
+        val borFastHosSøkerVilkår =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == aktørBarn }
+                .vilkårResultater
+                .filter { it.vilkårType == Vilkår.BOR_MED_SØKER }
+
+        assertThat(borFastHosSøkerVilkår).hasSize(2)
+
+        val periode1 = borFastHosSøkerVilkår.first { it.resultat == Resultat.OPPFYLT }
+        assertThat(periode1.periodeFom).isEqualTo(fødselsdatoBarn)
+        assertThat(periode1.periodeTom).isEqualTo(fødselsdatoBarn.plusMonths(2))
+        assertThat(periode1.begrunnelse).contains("Har samme bostedsadresse som søker")
+
+        val periode2 = borFastHosSøkerVilkår.first { it.resultat == Resultat.IKKE_OPPFYLT }
+        assertThat(periode2.periodeFom).isEqualTo(fødselsdatoBarn.plusMonths(2).plusDays(1))
+        assertThat(periode2.periodeTom).isNull()
+        assertThat(periode2.begrunnelse).contains("Har ikke samme fast eller delt bostedsadresse som søker")
+    }
 }
