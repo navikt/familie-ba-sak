@@ -382,7 +382,7 @@ fun lagVilkårResultat(
     erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
     standardbegrunnelser = standardbegrunnelser,
     vurderesEtter = vurderesEtter,
-    erOpprinneligPreutfylt = erPreutfylt,
+    erOpprinneligPreutfyltIBehandling = behandlingId.takeIf { erPreutfylt },
 )
 
 fun oppfyltVilkår(

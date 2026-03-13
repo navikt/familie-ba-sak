@@ -22,7 +22,7 @@ class EndringIPreutfyltVilkårLoggTest {
                 periodeTom = LocalDate.of(2020, 12, 31),
                 begrunnelse = "forrige begrunnelse",
                 sistEndretIBehandlingId = behandling.id,
-                erOpprinneligPreutfylt = true,
+                erOpprinneligPreutfyltIBehandling = behandling.id,
                 vurderesEtter = Regelverk.EØS_FORORDNINGEN,
                 utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
             )
@@ -85,7 +85,7 @@ class EndringIPreutfyltVilkårLoggTest {
                 periodeTom = null,
                 begrunnelse = "",
                 sistEndretIBehandlingId = behandling.id,
-                erOpprinneligPreutfylt = true,
+                erOpprinneligPreutfyltIBehandling = behandling.id,
                 vurderesEtter = null,
                 utdypendeVilkårsvurderinger = emptyList(),
             )
