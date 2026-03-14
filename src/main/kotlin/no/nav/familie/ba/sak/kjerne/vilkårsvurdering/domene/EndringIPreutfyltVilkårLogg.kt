@@ -34,6 +34,8 @@ data class EndringIPreutfyltVilkårLogg(
     @ManyToOne
     @JoinColumn(name = "fk_behandling_id")
     val behandling: Behandling,
+    @Column(name = "vilkar_resultat_id")
+    val vilkårResultatId: Long? = null,
     @Enumerated(EnumType.STRING)
     @Column(name = "vilkar_type")
     val vilkårType: Vilkår,
@@ -74,6 +76,7 @@ data class EndringIPreutfyltVilkårLogg(
         ): EndringIPreutfyltVilkårLogg =
             EndringIPreutfyltVilkårLogg(
                 behandling = behandling,
+                vilkårResultatId = forrigeVilkår.id,
                 vilkårType = nyttVilkår.vilkårType,
                 begrunnelse = nyttVilkår.begrunnelse,
                 forrigeFom = forrigeVilkår.periodeFom,
