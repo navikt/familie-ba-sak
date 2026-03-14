@@ -47,10 +47,12 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -152,7 +154,16 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
                 .mapValues { (_, fagsak) ->
                     val behandlingerPåFagsak = behandlinger.values.filter { it.fagsak.id == fagsak.id }
                     val søkerAktør = persongrunnlag[behandlingerPåFagsak.first().id]!!.søker.aktør
-                    fagsak.copy(aktør = søkerAktør)
+                    val (aktør, skjermetBarnSøker) =
+                        if (fagsak.type == FagsakType.SKJERMET_BARN) {
+                            val barnAktør =
+                                persongrunnlag[behandlingerPåFagsak.first().id]!!.barna.singleOrNull()?.aktør
+                                    ?: throw Feil("Forventet nøyatkig ett barn i fagsak med type ${fagsak.type}")
+                            barnAktør to SkjermetBarnSøker(aktør = søkerAktør)
+                        } else {
+                            søkerAktør to null
+                        }
+                    fagsak.copy(aktør = aktør, skjermetBarnSøker = skjermetBarnSøker)
                 }.toMutableMap()
 
         behandlinger =
@@ -160,6 +171,18 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
                 .mapValues { (_, behandling) ->
                     behandling.copy(fagsak = fagsaker[behandling.fagsak.id]!!)
                 }.toMutableMap()
+
+        vedtaksliste =
+            vedtaksliste
+                .map { vedtak ->
+                    Vedtak(
+                        id = vedtak.id,
+                        behandling = behandlinger[vedtak.behandling.id]!!,
+                        vedtaksdato = vedtak.vedtaksdato,
+                        stønadBrevPdF = vedtak.stønadBrevPdF,
+                        aktiv = vedtak.aktiv,
+                    )
+                }.toMutableList()
     }
 
     @Og("kopier persongrunnlag fra behandling {} til behandling {}")
