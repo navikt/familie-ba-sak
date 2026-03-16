@@ -3,7 +3,7 @@ ALTER TABLE vilkar_resultat
 
 UPDATE vilkar_resultat
 SET er_opprinnelig_preutfylt_i_behandling = sist_endret_i_behandling_id
-WHERE er_opprinnelig_preutfylt = true;
+WHERE er_opprinnelig_preutfylt IS TRUE;
 
 ALTER TABLE vilkar_resultat
     DROP COLUMN er_opprinnelig_preutfylt;
