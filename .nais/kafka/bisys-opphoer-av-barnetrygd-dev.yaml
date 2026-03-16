@@ -17,12 +17,15 @@ spec:
   acl:
     - team: teamfamilie
       application: familie-ba-sak #owner
-      access: write   # readwrite
+      access: write
     - team: bidrag
-      application: bidrag-automatisk-jobb-q1 #consumer
+      application: bidrag-kafka-manager
+      access: write
+    - team: bidrag
+      application: bidrag-automatisk-jobb-q1
       access: read
     - team: bidrag
-      application: bidrag-automatisk-jobb-q2 #consumer
+      application: bidrag-automatisk-jobb-q2
       access: read
     - team: teamfamilie
       application: familie-baks-kafka-manager
