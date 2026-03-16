@@ -173,8 +173,8 @@ spec:
         - ipv4: 34.49.99.193
         - ipv4: 34.110.228.169
   replicas:
-    min: 0
-    max: 0
+    min: 2
+    max: 4
   resources:
     limits:
       memory: 4096Mi
