@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Plassholdertekst for egenskap - s38eEPJdCs
+Egenskap: Månedlig valutajustering for skjermet barn
 
   Bakgrunn:
     Gitt følgende fagsaker
@@ -17,7 +17,7 @@ Egenskap: Plassholdertekst for egenskap - s38eEPJdCs
       | 1            | 1       | SØKER      | 22.02.1986  |
       | 1            | 2       | BARN       | 01.11.2025  |
 
-  Scenario: Plassholdertekst for scenario - rVokeDEt0A
+  Scenario: Skal oppdatere valutakurser og andel tilkjent ytelse i månedlig valutajustering for skjermet barn
     Og dagens dato er 01.03.2026
     Og lag personresultater for behandling 1
 
@@ -65,3 +65,10 @@ Egenskap: Plassholdertekst for egenskap - s38eEPJdCs
       | 2       | 2            | 01.01.2026 | 31.01.2026 | 1421  | ORDINÆR_BARNETRYGD | 100     | 1968 | 1421                     |
       | 2       | 2            | 01.02.2026 | 28.02.2026 | 1471  | ORDINÆR_BARNETRYGD | 100     | 2012 | 1471                     |
       | 2       | 2            | 01.03.2026 | 31.10.2043 | 1487  | ORDINÆR_BARNETRYGD | 100     | 2012 | 1487                     |
+
+    Så forvent følgende valutakurser for behandling 2
+      | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs         | Vurderingsform |
+      | 2       | 01.12.2025 | 31.12.2025 | 2            | 2025-11-28     | SEK         | 1.0724736770 | AUTOMATISK     |
+      | 2       | 01.01.2026 | 31.01.2026 | 2            | 2025-12-31     | SEK         | 1.0943954165 | AUTOMATISK     |
+      | 2       | 01.02.2026 | 28.02.2026 | 2            | 2026-01-30     | SEK         | 1.0825055843 | AUTOMATISK     |
+      | 2       | 01.03.2026 |            | 2            | 2026-02-27     | SEK         | 1.0510300723 | AUTOMATISK     |
