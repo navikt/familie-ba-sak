@@ -381,7 +381,7 @@ class PreutfyllBosattIRiketServiceTest {
     }
 
     @Test
-    fun `ved ingen digital søknad skal vurdering settes til ikke vurdert ved adresse som ikke har vart lengre enn 12 mnd eller omfatter fødselsdato`() {
+    fun `ved ingen digital søknad skal vurdering settes til ikke vurdert ved adresse som ikke har vart lengre enn 12 mnd omfatter fødselsdato`() {
         // Arrange
         val behandling = lagBehandling()
         val barnAktør = lagAktør()
