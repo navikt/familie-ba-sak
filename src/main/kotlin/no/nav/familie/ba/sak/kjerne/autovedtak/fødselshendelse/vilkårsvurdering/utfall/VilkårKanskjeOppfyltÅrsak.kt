@@ -17,6 +17,12 @@ enum class VilkårKanskjeOppfyltÅrsak(
         "Kan ikke avgjøre om annen har lovlig opphold.",
         Vilkår.LOVLIG_OPPHOLD,
     ),
+
+    // Bosatt i riket
+    BOSATT_I_RIKET_IKKE_MULIG_Å_FASTSETTE_SKAL_BO_LENGRE_ENN_12_MND(
+        "Må undersøke søknad om person har planlagt å bo i norge mer enn 12 måneder.",
+        Vilkår.BOSATT_I_RIKET,
+    ),
     ;
 
     override fun hentBeskrivelse(): String = beskrivelse
@@ -24,4 +30,6 @@ enum class VilkårKanskjeOppfyltÅrsak(
     override fun hentMetrikkBeskrivelse(): String = beskrivelse
 
     override fun hentIdentifikator(): String = vilkår.name
+
+    override fun hentNavn(): String = name
 }

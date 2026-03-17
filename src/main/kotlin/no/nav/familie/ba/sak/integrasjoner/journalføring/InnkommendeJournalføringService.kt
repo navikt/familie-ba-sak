@@ -164,7 +164,7 @@ class InnkommendeJournalføringService(
 
         if (erSøknad && !request.opprettOgKnyttTilNyBehandling) {
             barnetrygdBehandlinger.forEach { tidligereBehandling ->
-                lagreNedSøknadsinfoKnyttetTilBehandling(journalpost, brevkode!!, tidligereBehandling)
+                lagreNedSøknadsinfoKnyttetTilBehandling(journalpost, brevkode, tidligereBehandling)
             }
         }
 

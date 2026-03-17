@@ -134,7 +134,7 @@ class GammelPreutfyllBosattIRiketService(
                     when {
                         erNordiskOgBosatt is OppfyltDelvilkår -> erNordiskOgBosatt
                         erØvrigeKravOppfylt is OppfyltDelvilkår -> erØvrigeKravOppfylt
-                        else -> IkkeOppfyltDelvilkår(ikkeOppfyltEvalueringÅrsaker = (erNordiskOgBosatt?.ikkeOppfyltEvalueringÅrsaker.orEmpty() + erØvrigeKravOppfylt?.ikkeOppfyltEvalueringÅrsaker.orEmpty()))
+                        else -> IkkeOppfyltDelvilkår(evalueringÅrsaker = (erNordiskOgBosatt?.evalueringÅrsaker.orEmpty() + erØvrigeKravOppfylt?.evalueringÅrsaker.orEmpty()))
                     }
                 }.kombinerMed(erBosattIFinnmarkEllerNordTromsTidslinje, erOppholdsadressePåSvalbardTidslinje) { erBosattIRiket, erBosattIFinnmarkEllerNordTroms, erOppholdsadressePåSvalbard ->
                     when (erBosattIRiket) {
@@ -169,7 +169,7 @@ class GammelPreutfyllBosattIRiketService(
                     begrunnelseForManuellKontroll = erBosattINorgePeriode.verdi.begrunnelseForManuellKontroll,
                     utdypendeVilkårsvurderinger = erBosattINorgePeriode.verdi.utdypendeVilkårsvurderinger,
                     erOpprinneligPreutfylt = true,
-                    evalueringÅrsaker = erBosattINorgePeriode.verdi.ikkeOppfyltEvalueringÅrsaker.map { it.name },
+                    evalueringÅrsaker = erBosattINorgePeriode.verdi.evalueringÅrsaker.map { it.hentNavn() },
                 )
             }.toSet()
     }
@@ -187,7 +187,7 @@ class GammelPreutfyllBosattIRiketService(
                     verdi =
                         when (erBosattINorgePeriode.verdi) {
                             true -> sjekkØvrigeKravForPeriode(behandlingÅrsak, erBosattINorgePeriode, personResultat, person)
-                            else -> IkkeOppfyltDelvilkår(ikkeOppfyltEvalueringÅrsaker = setOf(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET))
+                            else -> IkkeOppfyltDelvilkår(evalueringÅrsaker = setOf(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET))
                         },
                     fom = erBosattINorgePeriode.fom,
                     tom = erBosattINorgePeriode.tom,
@@ -230,7 +230,7 @@ class GammelPreutfyllBosattIRiketService(
                     } else {
                         VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_12_MND
                     }
-                IkkeOppfyltDelvilkår(ikkeOppfyltEvalueringÅrsaker = setOf(ikkeOppfyltÅrsak))
+                IkkeOppfyltDelvilkår(evalueringÅrsaker = setOf(ikkeOppfyltÅrsak))
             }
         }
 

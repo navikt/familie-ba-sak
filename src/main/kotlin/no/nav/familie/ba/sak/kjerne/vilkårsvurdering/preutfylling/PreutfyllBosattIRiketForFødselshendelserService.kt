@@ -59,7 +59,7 @@ class PreutfyllBosattIRiketForFødselshendelserService(
                     verdi =
                         when (erBosattINorgePeriode.verdi) {
                             true -> sjekkØvrigeKravForPeriode(erBosattINorgePeriode, person)
-                            else -> IkkeOppfyltDelvilkår(ikkeOppfyltEvalueringÅrsaker = setOf(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET))
+                            else -> IkkeOppfyltDelvilkår(evalueringÅrsaker = setOf(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET))
                         },
                     fom = erBosattINorgePeriode.fom,
                     tom = erBosattINorgePeriode.tom,
@@ -75,7 +75,7 @@ class PreutfyllBosattIRiketForFødselshendelserService(
                 if (erBosattINorgePeriode.erMinst6Måneder()) {
                     OppfyltDelvilkår("- Norsk bostedsadresse i minst 6 måneder.")
                 } else {
-                    IkkeOppfyltDelvilkår(ikkeOppfyltEvalueringÅrsaker = setOf(VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_6_MND))
+                    IkkeOppfyltDelvilkår(evalueringÅrsaker = setOf(VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_6_MND))
                 }
             }
 
@@ -83,7 +83,7 @@ class PreutfyllBosattIRiketForFødselshendelserService(
                 if (erBosattINorgePeriode.omfatter(person.fødselsdato)) {
                     OppfyltDelvilkår("- Bosatt i Norge siden fødsel.")
                 } else {
-                    IkkeOppfyltDelvilkår(ikkeOppfyltEvalueringÅrsaker = setOf(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET))
+                    IkkeOppfyltDelvilkår(evalueringÅrsaker = setOf(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET))
                 }
             }
 

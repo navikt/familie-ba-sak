@@ -11,7 +11,7 @@ class SøknadService(
     val søknadMapperLookup: SøknadMapper.Lookup,
 ) {
     fun finnSøknad(behandlingId: Long): Søknad? {
-        val journalpostId = behandlingSøknadsinfoService.hentJournalpostId(behandlingId) ?: return null
+        val journalpostId = behandlingSøknadsinfoService.finnDigitalSøknad(behandlingId)?.journalpostId ?: return null
         val versjonertBarnetrygdSøknad = integrasjonKlient.hentVersjonertBarnetrygdSøknad(journalpostId)
         val søknadMapper = søknadMapperLookup.hentSøknadMapperForVersjon(versjonertBarnetrygdSøknad.barnetrygdSøknad.kontraktVersjon)
         return søknadMapper.mapTilSøknad(versjonertBarnetrygdSøknad)

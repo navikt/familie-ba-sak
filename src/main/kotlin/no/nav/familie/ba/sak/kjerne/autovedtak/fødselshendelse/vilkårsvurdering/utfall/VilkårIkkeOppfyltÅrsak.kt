@@ -73,4 +73,6 @@ enum class VilkårIkkeOppfyltÅrsak(
     override fun hentMetrikkBeskrivelse(): String = metrikkBeskrivelse ?: beskrivelse
 
     override fun hentIdentifikator(): String = vilkår.name
+
+    override fun hentNavn(): String = name
 }
