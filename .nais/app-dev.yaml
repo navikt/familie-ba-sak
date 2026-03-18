@@ -8,7 +8,6 @@ metadata:
   annotations:
     nais.io/run-as-group: "65532"
     nais.io/run-as-user: "65532"
-    nginx.ingress.kubernetes.io/proxy-next-upstream-tries: '1'
 spec:
   envFrom:
     - secret: familie-ba-sak
