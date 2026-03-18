@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.lagErNordiskStatsborgerTidslinje
+import no.nav.familie.ba.sak.kjerne.søknad.Søknad
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.utils.erMinst12Måneder
@@ -62,8 +64,8 @@ class PreutfyllBosattIRiketService(
             .kombinerMed(erØvrigeKravForBosattIRiketOppfyltTidslinje) { erNordiskOgBosatt, erØvrigeKravOppfylt ->
                 when {
                     erNordiskOgBosatt is OppfyltDelvilkår -> erNordiskOgBosatt
-                    erØvrigeKravOppfylt is OppfyltDelvilkår -> erØvrigeKravOppfylt
-                    else -> IkkeOppfyltDelvilkår(ikkeOppfyltEvalueringÅrsaker = (erNordiskOgBosatt?.ikkeOppfyltEvalueringÅrsaker.orEmpty() + erØvrigeKravOppfylt?.ikkeOppfyltEvalueringÅrsaker.orEmpty()))
+                    erØvrigeKravOppfylt is OppfyltDelvilkår || erØvrigeKravOppfylt is IkkeVurdertVilkår -> erØvrigeKravOppfylt
+                    else -> IkkeOppfyltDelvilkår(evalueringÅrsaker = (erNordiskOgBosatt?.evalueringÅrsaker.orEmpty() + erØvrigeKravOppfylt?.evalueringÅrsaker.orEmpty()))
                 }
             }.vurderFinnmarkOgSvalbardtillegg(adresserForPerson)
             .beskjærFraOgMed(maxOf(datoForBeskjæringAvFom, førsteBosattINorgeDato))
@@ -83,7 +85,7 @@ class PreutfyllBosattIRiketService(
                     verdi =
                         when (erBosattINorgePeriode.verdi) {
                             true -> sjekkØvrigeKravForPeriode(erBosattINorgePeriode, personResultat, person)
-                            else -> IkkeOppfyltDelvilkår(ikkeOppfyltEvalueringÅrsaker = setOf(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET))
+                            else -> IkkeOppfyltDelvilkår(evalueringÅrsaker = setOf(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET))
                         },
                     fom = erBosattINorgePeriode.fom,
                     tom = erBosattINorgePeriode.tom,
@@ -94,8 +96,10 @@ class PreutfyllBosattIRiketService(
         erBosattINorgePeriode: Periode<Boolean?>,
         personResultat: PersonResultat,
         person: Person,
-    ): Delvilkår =
-        when {
+    ): Delvilkår {
+        val digitalSøknad by lazy { søknadService.finnDigitalSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id) }
+
+        return when {
             erBosattINorgePeriode.erMinst12Måneder() -> {
                 OppfyltDelvilkår("- Norsk bostedsadresse i minst 12 måneder.")
             }
@@ -104,21 +108,27 @@ class PreutfyllBosattIRiketService(
                 OppfyltDelvilkår("- Bosatt i Norge siden fødsel.")
             }
 
-            erBosattINorgePeriode.omfatter(LocalDate.now()) && erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat) -> {
+            digitalSøknad == null -> {
+                IkkeVurdertVilkår(evalueringÅrsaker = setOf(VilkårKanskjeOppfyltÅrsak.BOSATT_I_RIKET_IKKE_MULIG_Å_FASTSETTE_SKAL_BO_LENGRE_ENN_12_MND))
+            }
+
+            erBosattINorgePeriode.omfatter(LocalDate.now()) && digitalSøknad != null && erOppgittAtPlanleggerÅBoINorge12Måneder(digitalSøknad!!, personResultat) -> {
                 OppfyltDelvilkår("- Oppgitt i søknad at planlegger å bo i Norge i minst 12 måneder.", INFORMASJON_FRA_SØKNAD)
             }
 
             else -> {
-                IkkeOppfyltDelvilkår(ikkeOppfyltEvalueringÅrsaker = setOf(VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_12_MND))
+                IkkeOppfyltDelvilkår(evalueringÅrsaker = setOf(VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_12_MND))
             }
         }
-
-    private fun erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat: PersonResultat): Boolean {
-        val søknad = søknadService.finnSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id) ?: return false
-        return if (personResultat.erSøkersResultater()) {
-            søknad.søker.planleggerÅBoINorge12Mnd
-        } else {
-            søknad.barn.find { it.fnr == personResultat.aktør.aktivFødselsnummer() }?.planleggerÅBoINorge12Mnd ?: false
-        }
     }
+
+    private fun erOppgittAtPlanleggerÅBoINorge12Måneder(
+        digitalSøknad: Søknad,
+        personResultat: PersonResultat,
+    ): Boolean =
+        if (personResultat.erSøkersResultater()) {
+            digitalSøknad.søker.planleggerÅBoINorge12Mnd
+        } else {
+            digitalSøknad.barn.find { it.fnr == personResultat.aktør.aktivFødselsnummer() }?.planleggerÅBoINorge12Mnd ?: false
+        }
 }

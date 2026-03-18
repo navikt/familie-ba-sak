@@ -6,6 +6,8 @@ interface EvalueringÅrsak {
     fun hentMetrikkBeskrivelse(): String
 
     fun hentIdentifikator(): String
+
+    fun hentNavn(): String
 }
 
 data class Evaluering(

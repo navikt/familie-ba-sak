@@ -105,7 +105,7 @@ abstract class AbstractPreutfyllBosattIRiketService(
                     begrunnelseForManuellKontroll = erBosattINorgePeriode.verdi.begrunnelseForManuellKontroll,
                     utdypendeVilkårsvurderinger = erBosattINorgePeriode.verdi.utdypendeVilkårsvurderinger,
                     erOpprinneligPreutfylt = true,
-                    evalueringÅrsaker = erBosattINorgePeriode.verdi.ikkeOppfyltEvalueringÅrsaker.map { it.name },
+                    evalueringÅrsaker = erBosattINorgePeriode.verdi.evalueringÅrsaker.map { it.hentNavn() },
                 )
             }.toSet()
 

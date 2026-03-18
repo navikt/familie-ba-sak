@@ -43,12 +43,12 @@ class SøknadServiceTest {
                     barnetrygdSøknad = lagBarnetrygdSøknadV9(barnFnr = listOf(barn1, barn2), søknadstype = Søknadstype.ORDINÆR, erEøs = true, originalspråk = "nn"),
                 )
 
-            every { behandlingSøknadsinfoService.hentJournalpostId(behandling.id) } returns journalpostId
+            every { behandlingSøknadsinfoService.finnDigitalSøknad(behandling.id)?.journalpostId } returns journalpostId
             every { integrasjonKlient.hentVersjonertBarnetrygdSøknad(journalpostId) } returns versjonertBarnetrygdSøknadV9
             every { søknadMapperLookup.hentSøknadMapperForVersjon(versjonertBarnetrygdSøknadV9.barnetrygdSøknad.kontraktVersjon) } returns SøknadMapperV9()
 
             // Act
-            val søknad = søknadService.finnSøknad(behandlingId = behandling.id)
+            val søknad = søknadService.finnDigitalSøknad(behandlingId = behandling.id)
 
             // Assert
             assertThat(søknad).isNotNull
@@ -71,12 +71,12 @@ class SøknadServiceTest {
                     barnetrygdSøknad = lagBarnetrygdSøknadV10(barnFnr = listOf(barn1, barn2), søknadstype = Søknadstype.ORDINÆR, erEøs = true, originalspråk = "nn"),
                 )
 
-            every { behandlingSøknadsinfoService.hentJournalpostId(behandling.id) } returns journalpostId
+            every { behandlingSøknadsinfoService.finnDigitalSøknad(behandling.id)?.journalpostId } returns journalpostId
             every { integrasjonKlient.hentVersjonertBarnetrygdSøknad(journalpostId) } returns versjonertBarnetrygdSøknadV10
             every { søknadMapperLookup.hentSøknadMapperForVersjon(versjonertBarnetrygdSøknadV10.barnetrygdSøknad.kontraktVersjon) } returns SøknadMapperV10()
 
             // Act
-            val søknad = søknadService.finnSøknad(behandlingId = behandling.id)
+            val søknad = søknadService.finnDigitalSøknad(behandlingId = behandling.id)
 
             // Assert
             assertThat(søknad).isNotNull
@@ -92,10 +92,10 @@ class SøknadServiceTest {
             // Arrange
             val behandling = lagBehandling()
 
-            every { behandlingSøknadsinfoService.hentJournalpostId(behandling.id) } returns null
+            every { behandlingSøknadsinfoService.finnDigitalSøknad(behandling.id)?.journalpostId } returns null
 
             // Act
-            val søknad = søknadService.finnSøknad(behandlingId = behandling.id)
+            val søknad = søknadService.finnDigitalSøknad(behandlingId = behandling.id)
 
             // Assert
             assertThat(søknad).isNull()

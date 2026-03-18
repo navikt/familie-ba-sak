@@ -34,6 +34,8 @@ class BehandlingSøknadsinfoService(
 
     fun hentJournalpostId(behandlingId: Long): String? = behandlingSøknadsinfoRepository.findByBehandlingId(behandlingId).firstOrNull()?.journalpostId
 
+    fun finnDigitalSøknad(behandlingId: Long): BehandlingSøknadsinfo? = behandlingSøknadsinfoRepository.findByBehandlingId(behandlingId).firstOrNull { it.erDigital == true }
+
     fun hentSøknadsstatistikk(
         fom: LocalDate,
         tom: LocalDate,

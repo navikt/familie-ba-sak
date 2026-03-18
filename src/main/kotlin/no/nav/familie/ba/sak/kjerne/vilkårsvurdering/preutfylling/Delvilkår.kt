@@ -1,23 +1,29 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.EvalueringÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat.IKKE_OPPFYLT
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat.IKKE_VURDERT
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat.OPPFYLT
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 
 sealed class Delvilkår {
     open val begrunnelse: String = ""
     open val begrunnelseForManuellKontroll: BegrunnelseForManuellKontrollAvVilkår? = null
     open val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
-    open val ikkeOppfyltEvalueringÅrsaker: Set<VilkårIkkeOppfyltÅrsak> = emptySet()
+    open val evalueringÅrsaker: Set<EvalueringÅrsak> = emptySet()
 
     fun tilResultat(): Resultat =
         when (this) {
             is OppfyltDelvilkår -> OPPFYLT
             is IkkeOppfyltDelvilkår -> IKKE_OPPFYLT
+            is IkkeVurdertVilkår -> IKKE_VURDERT
         }
 }
+
+data class IkkeVurdertVilkår(
+    override val evalueringÅrsaker: Set<EvalueringÅrsak> = emptySet(),
+) : Delvilkår()
 
 data class OppfyltDelvilkår(
     override val begrunnelse: String,
@@ -26,6 +32,6 @@ data class OppfyltDelvilkår(
 ) : Delvilkår()
 
 data class IkkeOppfyltDelvilkår(
-    override val ikkeOppfyltEvalueringÅrsaker: Set<VilkårIkkeOppfyltÅrsak> = emptySet(),
+    override val evalueringÅrsaker: Set<EvalueringÅrsak> = emptySet(),
     override val begrunnelse: String = "",
 ) : Delvilkår()

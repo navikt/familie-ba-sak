@@ -48,4 +48,6 @@ enum class FiltreringsregelOppfylt(
     override fun hentMetrikkBeskrivelse(): String = beskrivelse
 
     override fun hentIdentifikator(): String = filtreringsregel.name
+
+    override fun hentNavn(): String = name
 }

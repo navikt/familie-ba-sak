@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -256,7 +257,7 @@ class PreutfyllBosattIRiketServiceTest {
             }
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
-        every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false)
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false)
 
         // Act
         preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
@@ -303,7 +304,7 @@ class PreutfyllBosattIRiketServiceTest {
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
-        every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = true)
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = true)
 
         // Act
         preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
@@ -364,7 +365,7 @@ class PreutfyllBosattIRiketServiceTest {
             }
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
-        every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false, barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnAktør.aktivFødselsnummer() to true))
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false, barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnAktør.aktivFødselsnummer() to true))
 
         // Act
         preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
@@ -377,6 +378,67 @@ class PreutfyllBosattIRiketServiceTest {
                 ?.first { it.vilkårType == Vilkår.BOSATT_I_RIKET }!!
         assertThat(vilkårResultat.resultat).isEqualTo(Resultat.OPPFYLT)
         assertThat(vilkårResultat.begrunnelseForManuellKontroll).isEqualTo(INFORMASJON_FRA_SØKNAD)
+    }
+
+    @Test
+    fun `ved ingen digital søknad skal vurdering settes til ikke vurdert ved adresse som ikke har vart lengre enn 12 mnd omfatter fødselsdato`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val barnAktør = lagAktør()
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                barnasFødselsdatoer = listOf(LocalDate.now().minusYears(2)),
+                søkerPersonIdent = randomFnr(),
+                barnasIdenter = listOf(barnAktør.aktivFødselsnummer()),
+                barnAktør = listOf(barnAktør),
+            ).also {
+                it.personer.forEach {
+                    it.statsborgerskap = emptyList<GrStatsborgerskap>().toMutableList()
+                    it.bostedsadresser =
+                        mutableListOf(
+                            lagGrVegadresseBostedsadresse(
+                                periode = DatoIntervallEntitet(LocalDate.now().minusMonths(2), null),
+                                matrikkelId = 12345L,
+                            ),
+                        )
+                }
+            }
+
+        val vilkårsvurdering =
+            lagVilkårsvurdering(persongrunnlag, behandling).also {
+                it.personResultater =
+                    setOf(
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            person = lagPerson(personIdent = PersonIdent(barnAktør.aktivFødselsnummer()), type = PersonType.BARN),
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.now().minusMonths(2),
+                            periodeTom = null,
+                            lagFullstendigVilkårResultat = true,
+                            personType = PersonType.BARN,
+                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                            erDeltBosted = false,
+                            erDeltBostedSkalIkkeDeles = false,
+                            erEksplisittAvslagPåSøknad = false,
+                        ),
+                    )
+            }
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns null
+
+        // Act
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+
+        // Assert
+        val vilkårResultat =
+            vilkårsvurdering.personResultater
+                .find { it.aktør == barnAktør }
+                ?.vilkårResultater
+                ?.first { it.vilkårType == Vilkår.BOSATT_I_RIKET }!!
+        assertThat(vilkårResultat.resultat).isEqualTo(Resultat.IKKE_VURDERT)
+        assertThat(vilkårResultat.evalueringÅrsaker.first()).isEqualTo(VilkårKanskjeOppfyltÅrsak.BOSATT_I_RIKET_IKKE_MULIG_Å_FASTSETTE_SKAL_BO_LENGRE_ENN_12_MND.hentNavn())
     }
 
     @Test
@@ -500,7 +562,7 @@ class PreutfyllBosattIRiketServiceTest {
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
-        every { søknadService.finnSøknad(behandling.id) } returns lagSøknad()
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad()
 
         // Act
         preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
@@ -570,7 +632,7 @@ class PreutfyllBosattIRiketServiceTest {
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
-        every { søknadService.finnSøknad(behandling.id) } returns lagSøknad()
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad()
 
         // Act
         preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
