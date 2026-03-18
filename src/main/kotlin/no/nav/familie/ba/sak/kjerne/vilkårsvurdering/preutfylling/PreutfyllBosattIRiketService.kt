@@ -97,7 +97,7 @@ class PreutfyllBosattIRiketService(
         personResultat: PersonResultat,
         person: Person,
     ): Delvilkår {
-        val digitalSøknad by lazy { søknadService.finnSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id) }
+        val digitalSøknad by lazy { søknadService.finnDigitalSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id) }
 
         return when {
             erBosattINorgePeriode.erMinst12Måneder() -> {

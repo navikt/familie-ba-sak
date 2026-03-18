@@ -48,7 +48,7 @@ class SøknadServiceTest {
             every { søknadMapperLookup.hentSøknadMapperForVersjon(versjonertBarnetrygdSøknadV9.barnetrygdSøknad.kontraktVersjon) } returns SøknadMapperV9()
 
             // Act
-            val søknad = søknadService.finnSøknad(behandlingId = behandling.id)
+            val søknad = søknadService.finnDigitalSøknad(behandlingId = behandling.id)
 
             // Assert
             assertThat(søknad).isNotNull
@@ -76,7 +76,7 @@ class SøknadServiceTest {
             every { søknadMapperLookup.hentSøknadMapperForVersjon(versjonertBarnetrygdSøknadV10.barnetrygdSøknad.kontraktVersjon) } returns SøknadMapperV10()
 
             // Act
-            val søknad = søknadService.finnSøknad(behandlingId = behandling.id)
+            val søknad = søknadService.finnDigitalSøknad(behandlingId = behandling.id)
 
             // Assert
             assertThat(søknad).isNotNull
@@ -95,7 +95,7 @@ class SøknadServiceTest {
             every { behandlingSøknadsinfoService.finnDigitalSøknad(behandling.id)?.journalpostId } returns null
 
             // Act
-            val søknad = søknadService.finnSøknad(behandlingId = behandling.id)
+            val søknad = søknadService.finnDigitalSøknad(behandlingId = behandling.id)
 
             // Assert
             assertThat(søknad).isNull()

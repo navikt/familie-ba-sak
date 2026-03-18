@@ -274,7 +274,7 @@ class GammelPreutfyllBosattIRiketService(
             .tilTidslinje()
 
     private fun erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat: PersonResultat): Boolean {
-        val søknad = søknadService.finnSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id) ?: return false
+        val søknad = søknadService.finnDigitalSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id) ?: return false
         return if (personResultat.erSøkersResultater()) {
             søknad.søker.planleggerÅBoINorge12Mnd
         } else {

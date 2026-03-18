@@ -20,7 +20,7 @@ enum class VilkårKanskjeOppfyltÅrsak(
 
     // Bosatt i riket
     BOSATT_I_RIKET_IKKE_MULIG_Å_FASTSETTE_SKAL_BO_LENGRE_ENN_12_MND(
-        "Må undersøke søknad om person har planlagt å bo i norge mer enn 12 måneder.",
+        "Må undersøke i søknaden om personen har planer om å bo i Norge i mer enn 12 måneder.",
         Vilkår.BOSATT_I_RIKET,
     ),
     ;

@@ -22,7 +22,6 @@ sealed class Delvilkår {
 }
 
 data class IkkeVurdertVilkår(
-    override val begrunnelse: String = "",
     override val evalueringÅrsaker: Set<EvalueringÅrsak> = emptySet(),
 ) : Delvilkår()
 

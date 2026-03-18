@@ -257,7 +257,7 @@ class PreutfyllBosattIRiketServiceTest {
             }
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
-        every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false)
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false)
 
         // Act
         preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
@@ -304,7 +304,7 @@ class PreutfyllBosattIRiketServiceTest {
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
-        every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = true)
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = true)
 
         // Act
         preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
@@ -365,7 +365,7 @@ class PreutfyllBosattIRiketServiceTest {
             }
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
-        every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false, barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnAktør.aktivFødselsnummer() to true))
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false, barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnAktør.aktivFødselsnummer() to true))
 
         // Act
         preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
@@ -426,7 +426,7 @@ class PreutfyllBosattIRiketServiceTest {
             }
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
-        every { søknadService.finnSøknad(behandling.id) } returns null
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns null
 
         // Act
         preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
@@ -562,7 +562,7 @@ class PreutfyllBosattIRiketServiceTest {
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
-        every { søknadService.finnSøknad(behandling.id) } returns lagSøknad()
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad()
 
         // Act
         preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
@@ -632,7 +632,7 @@ class PreutfyllBosattIRiketServiceTest {
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
-        every { søknadService.finnSøknad(behandling.id) } returns lagSøknad()
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad()
 
         // Act
         preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)

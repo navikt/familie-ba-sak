@@ -23,7 +23,7 @@ class AutomatiskRegistrerSøknadService(
 ) {
     fun lagRestRegistrerSøknad(behandling: Behandling): RegistrerSøknadDto {
         val søknad =
-            søknadService.finnSøknad(behandling.id)
+            søknadService.finnDigitalSøknad(behandling.id)
                 ?: throw Feil("Fant ikke søknad for behandling med id ${behandling.id}")
 
         val underkategori = søknad.behandlingUnderkategori.tilDto()
