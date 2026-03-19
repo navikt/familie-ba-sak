@@ -1,15 +1,18 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.iUkraina
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.utils.erMinst6Måneder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.omfatter
@@ -22,10 +25,49 @@ import java.time.LocalDate
 
 @Service
 class PreutfyllBosattIRiketForFødselshendelserService(
-    persongrunnlagService: PersongrunnlagService,
-) : AbstractPreutfyllBosattIRiketService(persongrunnlagService) {
-    override fun genererBosattIRiketVilkårResultat(
-        behandling: Behandling,
+    private val persongrunnlagService: PersongrunnlagService,
+) {
+    fun preutfyllBosattIRiket(
+        vilkårsvurdering: Vilkårsvurdering,
+        identerVilkårSkalPreutfyllesFor: List<String>? = null,
+    ) {
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id)
+        val identer =
+            vilkårsvurdering
+                .personResultater
+                .map { it.aktør.aktivFødselsnummer() }
+                .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
+
+        vilkårsvurdering.personResultater
+            .filter { it.aktør.aktivFødselsnummer() in identer }
+            .forEach { personResultat ->
+                val person = personResultat.aktør.tilPerson(personopplysningGrunnlag)
+                if (person.statsborgerskap.iUkraina()) {
+                    return@forEach
+                }
+
+                val datoForBeskjæringAvFom =
+                    if (person.type == PersonType.SØKER) {
+                        personopplysningGrunnlag.eldsteBarnSinFødselsdato ?: person.fødselsdato
+                    } else {
+                        person.fødselsdato
+                    }
+
+                val nyeBosattIRiketVilkårResultater =
+                    genererBosattIRiketVilkårResultat(
+                        personResultat = personResultat,
+                        datoForBeskjæringAvFom = datoForBeskjæringAvFom,
+                        person = person,
+                    )
+
+                if (nyeBosattIRiketVilkårResultater.isNotEmpty()) {
+                    personResultat.vilkårResultater.removeIf { it.vilkårType == BOSATT_I_RIKET }
+                    personResultat.vilkårResultater.addAll(nyeBosattIRiketVilkårResultater)
+                }
+            }
+    }
+
+    private fun genererBosattIRiketVilkårResultat(
         personResultat: PersonResultat,
         datoForBeskjæringAvFom: LocalDate,
         person: Person,
