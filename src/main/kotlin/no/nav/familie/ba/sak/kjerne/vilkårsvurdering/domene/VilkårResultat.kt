@@ -63,6 +63,8 @@ data class VilkårResultat(
     var sistEndretIBehandlingId: Long,
     @Column(name = "er_automatisk_vurdert", nullable = false)
     var erAutomatiskVurdert: Boolean = false,
+    @Column(name = "er_opprinnelig_preutfylt_i_behandling", updatable = false)
+    val erOpprinneligPreutfyltIBehandling: Long? = null,
     @Column(name = "er_opprinnelig_preutfylt", nullable = false, updatable = false)
     val erOpprinneligPreutfylt: Boolean = false,
     @Column(name = "er_eksplisitt_avslag_paa_soknad")

@@ -22,6 +22,7 @@ class EndringIPreutfyltVilkårLoggTest {
                 periodeTom = LocalDate.of(2020, 12, 31),
                 begrunnelse = "forrige begrunnelse",
                 sistEndretIBehandlingId = behandling.id,
+                erOpprinneligPreutfyltIBehandling = behandling.id,
                 erOpprinneligPreutfylt = true,
                 vurderesEtter = Regelverk.EØS_FORORDNINGEN,
                 utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
@@ -56,6 +57,7 @@ class EndringIPreutfyltVilkårLoggTest {
             )
 
         assertThat(logg.behandling).isEqualTo(behandling)
+        assertThat(logg.vilkårResultatId).isEqualTo(forrigeVilkår.id)
         assertThat(logg.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
         assertThat(logg.begrunnelse).isEqualTo("ny begrunnelse")
         assertThat(logg.forrigeFom).isEqualTo(LocalDate.of(2020, 1, 1))
@@ -85,6 +87,7 @@ class EndringIPreutfyltVilkårLoggTest {
                 periodeTom = null,
                 begrunnelse = "",
                 sistEndretIBehandlingId = behandling.id,
+                erOpprinneligPreutfyltIBehandling = behandling.id,
                 erOpprinneligPreutfylt = true,
                 vurderesEtter = null,
                 utdypendeVilkårsvurderinger = emptyList(),

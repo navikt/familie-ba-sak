@@ -338,6 +338,7 @@ class VilkårServiceTest(
                     .single()
 
             assertThat(oppdatertVilkårResultat.erAutomatiskVurdert).isFalse()
+            assertThat(oppdatertVilkårResultat.erOpprinneligPreutfyltIBehandling).isEqualTo(behandling.id)
             assertThat(oppdatertVilkårResultat.erOpprinneligPreutfylt).isTrue()
             assertThat(oppdatertVilkårResultat.begrunnelse).isEqualTo(vilkårResultatDto.begrunnelse + "\nEkstra informasjon")
         }
@@ -400,6 +401,7 @@ class VilkårServiceTest(
 
             assertThat(oppdatertVilkårResultat.periodeFom).isEqualTo(LocalDate.of(2024, 1, 1))
             assertThat(oppdatertVilkårResultat.erAutomatiskVurdert).isFalse()
+            assertThat(oppdatertVilkårResultat.erOpprinneligPreutfyltIBehandling).isEqualTo(behandling.id)
             assertThat(oppdatertVilkårResultat.erOpprinneligPreutfylt).isTrue()
             assertThat(oppdatertVilkårResultat.begrunnelse).isEqualTo("Ny begrunnelse")
         }
@@ -462,6 +464,7 @@ class VilkårServiceTest(
 
             assertThat(endringIPreutfyltVilkårLogger).hasSize(1)
             with(endringIPreutfyltVilkårLogger.single()) {
+                assertThat(vilkårResultatId).isEqualTo(vilkårResultatDto.id)
                 assertThat(nyResultat).isEqualTo(Resultat.OPPFYLT)
                 assertThat(forrigeResultat).isEqualTo(Resultat.IKKE_OPPFYLT)
                 assertThat(forrigeVurderesEtter).isEqualTo(Regelverk.NASJONALE_REGLER)

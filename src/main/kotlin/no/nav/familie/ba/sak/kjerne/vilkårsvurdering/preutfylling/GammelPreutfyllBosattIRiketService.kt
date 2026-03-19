@@ -169,6 +169,7 @@ class GammelPreutfyllBosattIRiketService(
                     begrunnelseForManuellKontroll = erBosattINorgePeriode.verdi.begrunnelseForManuellKontroll,
                     utdypendeVilkårsvurderinger = erBosattINorgePeriode.verdi.utdypendeVilkårsvurderinger,
                     erOpprinneligPreutfylt = true,
+                    erOpprinneligPreutfyltIBehandling = personResultat.vilkårsvurdering.behandling.id,
                     evalueringÅrsaker = erBosattINorgePeriode.verdi.evalueringÅrsaker.map { it.hentNavn() },
                 )
             }.toSet()
