@@ -5,4 +5,5 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 data class BehandlingLoggRequest(
     val behandling: Behandling,
     val barnasIdenter: List<String> = emptyList(),
+    val begrunnelse: String? = null,
 )

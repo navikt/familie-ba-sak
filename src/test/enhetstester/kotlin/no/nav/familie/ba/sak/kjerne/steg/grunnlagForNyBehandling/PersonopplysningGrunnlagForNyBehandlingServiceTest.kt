@@ -316,6 +316,121 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         }
 
         @Test
+        fun `skal kopiere søker og barn med tilkjent ytelse fra persongrunnlaget fra forrige behandling ved teknisk endring`() {
+            val forrigeBehandling = lagBehandling()
+            val nyBehandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
+            val søker = PersonIdent(randomFnr())
+            val barn1 = PersonIdent(randomFnr())
+            val barn2 = PersonIdent(randomFnr())
+            val søkerPerson = lagPerson(personIdent = søker, id = 1)
+            val barnPerson1 = lagPerson(personIdent = barn1, id = 2)
+            val barnPerson2 = lagPerson(personIdent = barn2, id = 3)
+
+            val periode = DatoIntervallEntitet(LocalDate.now(), LocalDate.now().plusMonths(4))
+
+            val kopiertPersonopplysningGrunnlag = slot<PersonopplysningGrunnlag>()
+
+            val grVegadresse =
+                GrVegadresseBostedsadresse(1, "2", null, "123", "Testgate", "23", null, "0682", "Oslo").medPeriodeOgPerson(periode, søkerPerson)
+            val grUkjentBosted = GrUkjentBostedBostedsadresse("Oslo").medPeriodeOgPerson(periode, søkerPerson)
+            val grMatrikkeladresse = GrMatrikkeladresseBostedsadresse(1, "2", null, "0682", "Oslo", "23").medPeriodeOgPerson(periode, søkerPerson)
+
+            val statsborgerskap =
+                GrStatsborgerskap(
+                    id = 1,
+                    gyldigPeriode = periode,
+                    landkode = "N",
+                    medlemskap = Medlemskap.EØS,
+                    person = søkerPerson,
+                )
+            val opphold =
+                GrOpphold(id = 1, gyldigPeriode = periode, type = OPPHOLDSTILLATELSE.PERMANENT, person = søkerPerson)
+            val arbeidsforhold =
+                GrArbeidsforhold(
+                    id = 1,
+                    periode = periode,
+                    arbeidsgiverId = "1",
+                    arbeidsgiverType = "AS",
+                    person = søkerPerson,
+                )
+            val sivilstand =
+                GrSivilstand(id = 1, fom = LocalDate.now(), type = SIVILSTANDTYPE.REGISTRERT_PARTNER, person = søkerPerson)
+            val dødsfall =
+                Dødsfall(
+                    id = 1,
+                    person = søkerPerson,
+                    dødsfallDato = LocalDate.now(),
+                    dødsfallAdresse = "Adresse",
+                    dødsfallPostnummer = "1234",
+                    dødsfallPoststed = "Oslo",
+                )
+
+            val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(forrigeBehandling.id, søkerPerson, barnPerson1, barnPerson2).also {
+                    it.personer.map { person ->
+                        if (person.aktør.aktivFødselsnummer() == søker.ident) {
+                            person.bostedsadresser.addAll(
+                                listOf(
+                                    grVegadresse,
+                                    grUkjentBosted,
+                                    grMatrikkeladresse,
+                                ),
+                            )
+                            person.statsborgerskap.addAll(listOf(statsborgerskap))
+                            person.opphold.addAll(listOf(opphold))
+                            person.arbeidsforhold.addAll(listOf(arbeidsforhold))
+                            person.sivilstander.addAll(listOf(sivilstand))
+                            person.dødsfall = dødsfall
+                        }
+                    }
+                }
+
+            val forventetPersonopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(forrigeBehandling.id, søkerPerson, barnPerson1).also {
+                    it.personer.map { person ->
+                        if (person.aktør.aktivFødselsnummer() == søker.ident) {
+                            person.bostedsadresser.addAll(
+                                listOf(
+                                    grVegadresse,
+                                    grUkjentBosted,
+                                    grMatrikkeladresse,
+                                ),
+                            )
+                            person.statsborgerskap.addAll(listOf(statsborgerskap))
+                            person.opphold.addAll(listOf(opphold))
+                            person.arbeidsforhold.addAll(listOf(arbeidsforhold))
+                            person.sivilstander.addAll(listOf(sivilstand))
+                            person.dødsfall = dødsfall
+                        }
+                    }
+                }
+            every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns personopplysningGrunnlag
+            every { persongrunnlagService.lagreOgDeaktiverGammel(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
+            every { personidentService.hentOgLagreAktør(any(), any()) } returns lagAktør(søker.ident)
+            every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns
+                listOf(
+                    lagAktør(
+                        barn1.ident,
+                    ),
+                )
+            personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
+                nyBehandling,
+                forrigeBehandling,
+                søker.ident,
+                listOf(barn1.ident),
+            )
+
+            assertThat(kopiertPersonopplysningGrunnlag.captured.behandlingId).isEqualTo(nyBehandling.id)
+            assertThat(kopiertPersonopplysningGrunnlag.captured.personer.size).isEqualTo(2)
+
+            validerAtPersonerIGrunnlagErLike(
+                forventetPersonopplysningGrunnlag,
+                kopiertPersonopplysningGrunnlag.captured,
+                true,
+            )
+        }
+
+        @Test
         fun `skal kaste feil dersom behandling er satsendring og forrige behandling er null`() {
             val nyBehandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING)
             val søker = PersonIdent(randomFnr())

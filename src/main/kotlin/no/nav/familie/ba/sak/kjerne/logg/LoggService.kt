@@ -253,7 +253,7 @@ class LoggService(
                         rolleConfig,
                         BehandlerRolle.SAKSBEHANDLER,
                     ),
-                tekst = "",
+                tekst = behandlingLogg.begrunnelse?.let { "Begrunnelse for oppretting av behandling: $it" } ?: "",
             ),
         )
     }
