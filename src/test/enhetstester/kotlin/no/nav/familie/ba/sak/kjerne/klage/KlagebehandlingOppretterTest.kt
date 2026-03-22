@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagInstitusjon
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
@@ -17,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.TilpassArbeidsfordelingServ
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.klage.dto.OpprettKlageDto
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.Klagebehandlingsårsak
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
@@ -26,6 +28,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.util.UUID
 
@@ -254,6 +258,94 @@ class KlagebehandlingOppretterTest {
             // Act & assert
             val exception = assertThrows<Feil> { klagebehandlingOppretter.opprettKlage(fagsak, klageMottattDato) }
             assertThat(exception.message).isEqualTo("Fant ikke forventet institusjon på fagsak ${fagsak.id}.")
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = FagsakType::class, names = ["SKJERMET_BARN"], mode = EnumSource.Mode.EXCLUDE)
+        fun `skal sende fagsakAktør sin ident som søkerIdent i fagsak uten type SKJERMET_BARN`(
+            fagsakType: FagsakType,
+        ) {
+            // Arrange
+            val fagsak = lagFagsak(type = fagsakType, institusjon = lagInstitusjon().takeIf { fagsakType == FagsakType.INSTITUSJON })
+            val arbeidsfordelingsenhet = Arbeidsfordelingsenhet.opprettFra(BarnetrygdEnhet.OSLO)
+            val klagebehandlingId = UUID.randomUUID()
+
+            val opprettKlageRequest = slot<OpprettKlagebehandlingRequest>()
+
+            every { featureToggleService.isEnabled(FeatureToggle.KAN_OPPRETTE_SKJERMET_BARN_KLAGE) } returns true
+            every { integrasjonKlient.hentBehandlendeEnhet(fagsak.aktør.aktivFødselsnummer()) } returns listOf(arbeidsfordelingsenhet)
+            every { klageKlient.opprettKlage(capture(opprettKlageRequest)) } returns klagebehandlingId
+            every { tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(arbeidsfordelingsenhet, any()) } returns arbeidsfordelingsenhet
+
+            // Act
+            val id = klagebehandlingOppretter.opprettKlage(fagsak, dagensDato)
+
+            // Assert
+            assertThat(id).isEqualTo(klagebehandlingId)
+            assertThat(opprettKlageRequest.captured.ident).isEqualTo(fagsak.aktør.aktivFødselsnummer())
+            assertThat(opprettKlageRequest.captured.søkerIdent).isEqualTo(fagsak.aktør.aktivFødselsnummer())
+        }
+
+        @Test
+        fun `skal sende søkerIdent fra skjermetBarnSøker for SKJERMET_BARN-fagsak`() {
+            // Arrange
+            val søkerAktør = lagAktør()
+            val skjermetBarnSøker = SkjermetBarnSøker(aktør = søkerAktør)
+            val fagsak = lagFagsak(type = FagsakType.SKJERMET_BARN, skjermetBarnSøker = skjermetBarnSøker)
+            val arbeidsfordelingsenhet = Arbeidsfordelingsenhet.opprettFra(BarnetrygdEnhet.OSLO)
+            val klagebehandlingId = UUID.randomUUID()
+
+            val opprettKlageRequest = slot<OpprettKlagebehandlingRequest>()
+
+            every { featureToggleService.isEnabled(FeatureToggle.KAN_OPPRETTE_SKJERMET_BARN_KLAGE) } returns true
+            every { integrasjonKlient.hentBehandlendeEnhet(fagsak.aktør.aktivFødselsnummer()) } returns listOf(arbeidsfordelingsenhet)
+            every { klageKlient.opprettKlage(capture(opprettKlageRequest)) } returns klagebehandlingId
+            every { tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(arbeidsfordelingsenhet, any()) } returns arbeidsfordelingsenhet
+
+            // Act
+            val id = klagebehandlingOppretter.opprettKlage(fagsak, dagensDato)
+
+            // Assert
+            assertThat(id).isEqualTo(klagebehandlingId)
+            assertThat(opprettKlageRequest.captured.ident).isEqualTo(fagsak.aktør.aktivFødselsnummer())
+            assertThat(opprettKlageRequest.captured.søkerIdent).isEqualTo(søkerAktør.aktivFødselsnummer())
+        }
+
+        @Test
+        fun `skal kaste feil for SKJERMET_BARN-fagsak uten skjermetBarnSøker`() {
+            // Arrange
+            val fagsak = lagFagsak(type = FagsakType.SKJERMET_BARN, skjermetBarnSøker = null)
+            val arbeidsfordelingsenhet = Arbeidsfordelingsenhet.opprettFra(BarnetrygdEnhet.OSLO)
+
+            every { featureToggleService.isEnabled(FeatureToggle.KAN_OPPRETTE_SKJERMET_BARN_KLAGE) } returns true
+            every { integrasjonKlient.hentBehandlendeEnhet(fagsak.aktør.aktivFødselsnummer()) } returns listOf(arbeidsfordelingsenhet)
+
+            // Act & assert
+            val exception = assertThrows<Feil> { klagebehandlingOppretter.opprettKlage(fagsak, dagensDato) }
+            assertThat(exception.message).isEqualTo("Fant ikke forventet søker på fagsak ${fagsak.id}.")
+        }
+
+        @Test
+        fun `skal ikke sende søkerIdent fra skjermetBarnSøker for SKJERMET_BARN-fagsak når toggle er av`() {
+            // Arrange
+            val søkerAktør = lagAktør()
+            val skjermetBarnSøker = SkjermetBarnSøker(aktør = søkerAktør)
+            val fagsak = lagFagsak(type = FagsakType.SKJERMET_BARN, skjermetBarnSøker = skjermetBarnSøker)
+            val arbeidsfordelingsenhet = Arbeidsfordelingsenhet.opprettFra(BarnetrygdEnhet.OSLO)
+            val klagebehandlingId = UUID.randomUUID()
+
+            val opprettKlageRequest = slot<OpprettKlagebehandlingRequest>()
+
+            every { featureToggleService.isEnabled(FeatureToggle.KAN_OPPRETTE_SKJERMET_BARN_KLAGE) } returns false
+            every { integrasjonKlient.hentBehandlendeEnhet(fagsak.aktør.aktivFødselsnummer()) } returns listOf(arbeidsfordelingsenhet)
+            every { klageKlient.opprettKlage(capture(opprettKlageRequest)) } returns klagebehandlingId
+            every { tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(arbeidsfordelingsenhet, any()) } returns arbeidsfordelingsenhet
+
+            // Act
+            klagebehandlingOppretter.opprettKlage(fagsak, dagensDato)
+
+            // Assert - søkerIdent skal falle tilbake til barnets ident (fagsak.aktør)
+            assertThat(opprettKlageRequest.captured.søkerIdent).isEqualTo(fagsak.aktør.aktivFødselsnummer())
         }
     }
 }
