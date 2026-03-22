@@ -122,11 +122,17 @@ class StegService(
                     emptyList()
                 }
 
-                nyBehandling.behandlingType in listOf(BehandlingType.REVURDERING, BehandlingType.TEKNISK_ENDRING, BehandlingType.MIGRERING_FRA_INFOTRYGD) -> {
+                nyBehandling.behandlingType in listOf(BehandlingType.REVURDERING, BehandlingType.MIGRERING_FRA_INFOTRYGD) -> {
                     if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
                         validerMigreringFraInfotrygd(nyBehandling)
                     }
                     hentBarnFraForrigeAvsluttedeBehandling(behandling)
+                }
+
+                nyBehandling.behandlingType == BehandlingType.TEKNISK_ENDRING -> {
+                    val sistVedtattBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
+
+                    sistVedtattBehandling?.let { hentBarnFraForrigeAvsluttedeBehandling(behandling) } ?: emptyList()
                 }
 
                 else -> {

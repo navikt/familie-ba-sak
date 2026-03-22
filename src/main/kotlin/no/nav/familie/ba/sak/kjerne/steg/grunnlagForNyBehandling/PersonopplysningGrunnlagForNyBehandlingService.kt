@@ -27,7 +27,14 @@ class PersonopplysningGrunnlagForNyBehandlingService(
     ) {
         if (behandling.erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() || behandling.erTekniskEndring() || behandling.erFalskIdentitet()) {
             if (forrigeBehandlingSomErVedtatt == null) {
-                throw Feil("Vi kan ikke kjøre behandling med årsak ${behandling.opprettetÅrsak} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}")
+                if (behandling.erTekniskEndring()) {
+                    opprettPersonopplysningGrunnlag(behandling, null, søkerIdent, barnasIdenter)
+                    return
+                }
+
+                throw Feil(
+                    "Vi kan ikke kjøre behandling med årsak ${behandling.opprettetÅrsak} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}",
+                )
             }
 
             if (behandling.erFinnmarksEllerSvalbardtillegg()) {

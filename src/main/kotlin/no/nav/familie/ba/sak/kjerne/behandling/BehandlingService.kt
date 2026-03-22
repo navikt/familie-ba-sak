@@ -128,7 +128,7 @@ class BehandlingService(
             opprettOgInitierNyttVedtakForBehandling(behandling = lagretBehandling)
 
             loggService.opprettBehandlingLogg(
-                BehandlingLoggRequest(behandling = lagretBehandling, barnasIdenter = nyBehandling.barnasIdenter),
+                BehandlingLoggRequest(behandling = lagretBehandling, barnasIdenter = nyBehandling.barnasIdenter, begrunnelse = nyBehandling.begrunnelse),
             )
             if (lagretBehandling.opprettBehandleSakOppgave()) {
                 /*

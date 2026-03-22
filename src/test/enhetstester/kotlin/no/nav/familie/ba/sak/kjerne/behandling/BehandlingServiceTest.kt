@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.EksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.logg.BehandlingLoggRequest
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -185,65 +186,122 @@ class BehandlingServiceTest {
             assertThat(opprettetBehandling.id).isEqualTo(0L)
             verify { eksternBehandlingRelasjonService wasNot called }
         }
-    }
 
-    @Nested
-    inner class ErLøpende {
         @Test
-        fun `skal returnere true dersom det finnes andeler i en behandling hvor tom er etter YearMonth now`() {
+        fun `skal opprette logg på begrunnelse av hvorfor behandling er opprettet hvis begrunnelse er satt`() {
             // Arrange
-            val behandling = lagBehandling()
+            val fagsak = lagFagsak()
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
-                listOf(
-                    lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
-                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
-                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(3)),
+            val førstegangsbehandling =
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    årsak = BehandlingÅrsak.SØKNAD,
                 )
 
+            val nyBehandling =
+                lagNyBehandling(
+                    fagsakId = fagsak.id,
+                    behandlingType = BehandlingType.REVURDERING,
+                    behandlingÅrsak = BehandlingÅrsak.KLAGE,
+                    nyEksternBehandlingRelasjon =
+                        lagNyEksternBehandlingRelasjon(
+                            eksternBehandlingId = UUID.randomUUID().toString(),
+                            eksternBehandlingFagsystem = EksternBehandlingRelasjon.Fagsystem.KLAGE,
+                        ),
+                    begrunnelse = "Opprettet behandling i test",
+                )
+
+            val eksternBehandlingRelasjonSlot = slot<EksternBehandlingRelasjon>()
+            val behandlingLoggRequestSlot = slot<BehandlingLoggRequest>()
+
+            every { fagsakRepository.finnFagsak(nyBehandling.fagsakId) } returns fagsak
+            every { behandlingHentOgPersisterService.finnAktivForFagsak(nyBehandling.fagsakId) } returns null
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId) } returns førstegangsbehandling
+            every { behandlingstemaService.finnBehandlingKategori(nyBehandling.fagsakId) } returns BehandlingKategori.NASJONAL
+            every { behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(nyBehandling.fagsakId) } returns BehandlingUnderkategori.ORDINÆR
+            every { behandlingstemaService.finnUnderkategoriFraAktivBehandling(nyBehandling.fagsakId) } returns BehandlingUnderkategori.ORDINÆR
+            every { behandlingHentOgPersisterService.lagreEllerOppdater(any(), any()) } returnsArgument 0
+            every { arbeidsfordelingService.fastsettBehandlendeEnhet(any(), any()) } just runs
+            every { behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(any()) } just runs
+            every { eksternBehandlingRelasjonService.lagreEksternBehandlingRelasjon(capture(eksternBehandlingRelasjonSlot)) } returnsArgument 0
+            every { behandlingSøknadsinfoService.lagreSøknadsinfo(any(), any(), any()) } just runs
+            every { saksstatistikkEventPublisher.publiserBehandlingsstatistikk(any()) } just runs
+            every { vedtakRepository.findByBehandlingAndAktivOptional(any()) } returns null
+            every { vedtaksperiodeService.kopierOverVedtaksperioder(any(), any()) } just runs
+            every { vedtakRepository.save(any()) } returnsArgument 0
+            every { loggService.opprettBehandlingLogg(capture(behandlingLoggRequestSlot)) } just runs
+            every { taskRepository.save(any()) } returnsArgument 0
+            every { featureToggleService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
+            every { featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR) } returns true
+
             // Act
-            val erLøpende = behandlingService.erLøpende(behandling)
+            behandlingService.opprettBehandling(nyBehandling)
 
             // Assert
-            assertThat(erLøpende).isTrue()
+            val opprettetLogg = behandlingLoggRequestSlot.captured
+
+            assertThat(opprettetLogg.begrunnelse).isEqualTo("Opprettet behandling i test")
         }
 
-        @Test
-        fun `skal returnere false dersom det finnes andeler i en behandling hvor tom er det samme som YearMonth now`() {
-            // Arrange
-            val behandling = lagBehandling()
+        @Nested
+        inner class ErLøpende {
+            @Test
+            fun `skal returnere true dersom det finnes andeler i en behandling hvor tom er etter YearMonth now`() {
+                // Arrange
+                val behandling = lagBehandling()
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
-                listOf(
-                    lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
-                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
-                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now()),
-                )
+                every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
+                    listOf(
+                        lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
+                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
+                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(3)),
+                    )
 
-            // Act
-            val erLøpende = behandlingService.erLøpende(behandling)
+                // Act
+                val erLøpende = behandlingService.erLøpende(behandling)
 
-            // Assert
-            assertThat(erLøpende).isFalse()
-        }
+                // Assert
+                assertThat(erLøpende).isTrue()
+            }
 
-        @Test
-        fun `skal returnere false dersom alle andeler i en behandling har tom før YearMonth now`() {
-            // Arrange
-            val behandling = lagBehandling()
+            @Test
+            fun `skal returnere false dersom det finnes andeler i en behandling hvor tom er det samme som YearMonth now`() {
+                // Arrange
+                val behandling = lagBehandling()
 
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
-                listOf(
-                    lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
-                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
-                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(1)),
-                )
+                every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
+                    listOf(
+                        lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
+                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
+                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now()),
+                    )
 
-            // Act
-            val erLøpende = behandlingService.erLøpende(behandling)
+                // Act
+                val erLøpende = behandlingService.erLøpende(behandling)
 
-            // Assert
-            assertThat(erLøpende).isFalse()
+                // Assert
+                assertThat(erLøpende).isFalse()
+            }
+
+            @Test
+            fun `skal returnere false dersom alle andeler i en behandling har tom før YearMonth now`() {
+                // Arrange
+                val behandling = lagBehandling()
+
+                every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
+                    listOf(
+                        lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
+                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
+                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(1)),
+                    )
+
+                // Act
+                val erLøpende = behandlingService.erLøpende(behandling)
+
+                // Assert
+                assertThat(erLøpende).isFalse()
+            }
         }
     }
 }
