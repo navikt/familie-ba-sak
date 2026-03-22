@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockAutovedtakFinnmarkstilleggService
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockAutovedtakSatsendringRollbackService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockAutovedtakSvalbardtilleggService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
@@ -655,6 +656,18 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
             fagsakId = fagsakId,
             nyBehanldingId = svalbardtilleggBehandlingId,
         ).kjørBehandling(SvalbardtilleggData(fagsakId))
+    }
+
+    @Når("vi lager automatisk behandling med id {} på fagsak {} på grunn av satsendring")
+    fun `kjør behandling satsendring på fagsak med behandlingsid`(
+        satsendringBehandlingId: Long,
+        fagsakId: Long,
+    ) {
+        mockAutovedtakSatsendringRollbackService(
+            dataFraCucumber = this,
+            fagsakId = fagsakId,
+            nyBehandlingId = satsendringBehandlingId,
+        ).kjørSatsendring(fagsakId)
     }
 
     @Så("forvent at brevmal {} er brukt for behandling {}")
