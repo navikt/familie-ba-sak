@@ -55,6 +55,7 @@ class KlagebehandlingOppretter(
         }
 
         val fødselsnummer = fagsak.aktør.aktivFødselsnummer()
+        val søkerIdent = utledSøkerIdent(fagsak) ?: fødselsnummer
         val navIdent = NavIdent(SikkerhetContext.hentSaksbehandler())
 
         val arbeidsfordelingsenheter = integrasjonKlient.hentBehandlendeEnhet(fødselsnummer)
@@ -80,6 +81,7 @@ class KlagebehandlingOppretter(
         return klageKlient.opprettKlage(
             OpprettKlagebehandlingRequest(
                 ident = fødselsnummer,
+                søkerIdent = søkerIdent,
                 orgNummer = utledOrgNummer(fagsak),
                 stønadstype = Stønadstype.BARNETRYGD,
                 eksternFagsakId = fagsak.id.toString(),
@@ -90,6 +92,18 @@ class KlagebehandlingOppretter(
             ),
         )
     }
+
+    private fun utledSøkerIdent(fagsak: Fagsak): String? =
+        if (fagsak.type === FagsakType.SKJERMET_BARN && featureToggleService.isEnabled(FeatureToggle.KAN_OPPRETTE_SKJERMET_BARN_KLAGE)) {
+            val skjermetBarnSøker = fagsak.skjermetBarnSøker
+            if (skjermetBarnSøker == null) {
+                logger.error("Fant ikke skjermetBarnSøker for fagsak ${fagsak.id} med type ${fagsak.type}.")
+                throw Feil("Fant ikke forventet søker på fagsak ${fagsak.id}.")
+            }
+            skjermetBarnSøker.aktør.aktivFødselsnummer()
+        } else {
+            null
+        }
 
     private fun utledOrgNummer(fagsak: Fagsak): String? =
         if (fagsak.type === FagsakType.INSTITUSJON) {
