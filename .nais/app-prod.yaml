@@ -8,9 +8,6 @@ metadata:
   annotations:
     nais.io/run-as-group: "65532"
     nais.io/run-as-user: "65532"
-    nginx.ingress.kubernetes.io/proxy-next-upstream-tries: '1'
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
 
 spec:
   envFrom:
