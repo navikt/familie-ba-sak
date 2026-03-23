@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Finnmarkstillegg autovedtak
+Egenskap: Autovedtak satsendring
 
   Bakgrunn:
     Gitt følgende fagsaker
@@ -17,7 +17,7 @@ Egenskap: Finnmarkstillegg autovedtak
       | 1            | 1       | SØKER      | 01.01.2000  |
       | 1            | 2       | BARN       | 15.11.2025  |
 
-  Scenario: Skal oppdatere vilkårresultater og generere andeler når autovedtak finnmarkstillegg kjøres
+  Scenario: Skal oppdatere vilkårresultater og generere andeler når autovedtak satsendring kjøres
     Og dagens dato er 01.03.2026
 
     Og lag personresultater for behandling 1
