@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -27,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class AutovedtakSatsendringRollbackService(
     private val taskRepository: TaskRepositoryWrapper,
-    private val behandlingRepository: BehandlingRepository,
     private val autovedtakService: AutovedtakService,
     private val behandlingService: BehandlingService,
     private val snikeIKøenService: SnikeIKøenService,
@@ -43,7 +41,7 @@ class AutovedtakSatsendringRollbackService(
                 ?: throw Feil("Fant ikke siste vedtatte behandling for $fagsakId")
 
         val aktivOgÅpenBehandling =
-            behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = sisteVedtatteBehandling.fagsak.id)
+            behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(sisteVedtatteBehandling.fagsak.id)
         val søkerAktør = sisteVedtatteBehandling.fagsak.aktør
 
         logger.info("Kjører satsendring på $sisteVedtatteBehandling")
