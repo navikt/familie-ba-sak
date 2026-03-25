@@ -39,12 +39,6 @@ enum class FeatureToggle(
     AUTOMAITSK_REGISTRER_SØKNAD("familie-ba-sak.automatisk-registrer-soknad"),
     FILTRERE_REGISTEROPPLYSNINGER("familie-ba-sak.filtrer-registeropplysninger"),
 
-    // Introdusert AbstractPreutfyllBosattIRiketService og tatt den i bruk i PreutfyllBosattIRiketService og PreutfyllBosattIRiketForFødselshendelseService.
-    PREUTFYLLING_BOSATT_I_RIKET_FOR_FØDSELSHENDELSE("familie-ba-sak.preutfylling-bosatt-i-riket-for-fodselshendelse"),
-
-    // Dersom den er på brukes oppdatert PreutfyllBosattIRiketService, men er den av brukes GammelPreutfyllBosattIRiketService som er lik gammel versjon av PreutfyllBosattIRiketService før introduksjon av AbstractPreutfyllBosattIRiketService.
-    OPPDATERT_PREUTFYLLING_BOSATT_I_RIKET("familie-ba-sak.oppdatert-preutfylling-bosatt-i-riket"),
-
     // NAV-25256
     SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN("familie-ba-sak.skjermet-barn"),
 

@@ -15,7 +15,6 @@ class PreutfyllVilkårServiceTest {
     private val preutfyllBorMedSøkerService: PreutfyllBorMedSøkerService = mockk()
     private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService = mockk()
     private val preutfyllBosattIRiketForFødselshendelserService: PreutfyllBosattIRiketForFødselshendelserService = mockk()
-    private val gammelPreutfyllBosattIRiketService: GammelPreutfyllBosattIRiketService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
 
@@ -25,7 +24,6 @@ class PreutfyllVilkårServiceTest {
             preutfyllBorMedSøkerService,
             preutfyllBosattIRiketService,
             preutfyllBosattIRiketForFødselshendelserService,
-            gammelPreutfyllBosattIRiketService,
             persongrunnlagService,
             featureToggleService,
         )

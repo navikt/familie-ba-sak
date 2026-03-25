@@ -15,7 +15,6 @@ class PreutfyllVilkårService(
     private val preutfyllBorMedSøkerService: PreutfyllBorMedSøkerService,
     private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService,
     private val preutfyllBosattIRiketForFødselshendelserService: PreutfyllBosattIRiketForFødselshendelserService,
-    private val gammelPreutfyllBosattIRiketService: GammelPreutfyllBosattIRiketService,
     private val persongrunnlagService: PersongrunnlagService,
     private val featureToggleService: FeatureToggleService,
 ) {
@@ -34,11 +33,7 @@ class PreutfyllVilkårService(
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering)
             preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)
 
-            if (featureToggleService.isEnabled(FeatureToggle.OPPDATERT_PREUTFYLLING_BOSATT_I_RIKET)) {
-                preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
-            } else {
-                gammelPreutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
-            }
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
         }
     }
 
@@ -57,17 +52,10 @@ class PreutfyllVilkårService(
                 }
             }
 
-        if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_BOSATT_I_RIKET_FOR_FØDSELSHENDELSE)) {
-            preutfyllBosattIRiketForFødselshendelserService.preutfyllBosattIRiket(
-                vilkårsvurdering = vilkårsvurdering,
-                identerVilkårSkalPreutfyllesFor = identerVilkårSkalPreutfyllesFor,
-            )
-        } else {
-            gammelPreutfyllBosattIRiketService.preutfyllBosattIRiket(
-                vilkårsvurdering = vilkårsvurdering,
-                identerVilkårSkalPreutfyllesFor = identerVilkårSkalPreutfyllesFor,
-            )
-        }
+        preutfyllBosattIRiketForFødselshendelserService.preutfyllBosattIRiket(
+            vilkårsvurdering = vilkårsvurdering,
+            identerVilkårSkalPreutfyllesFor = identerVilkårSkalPreutfyllesFor,
+        )
     }
 
     companion object {

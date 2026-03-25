@@ -86,7 +86,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.Tilba
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.GammelPreutfyllBosattIRiketService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBorMedSøkerService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketForFødselshendelserService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketService
@@ -575,12 +574,6 @@ class CucumberMock(
             persongrunnlagService = persongrunnlagService,
         )
 
-    val gammelPreutfyllBosattIRiketService =
-        GammelPreutfyllBosattIRiketService(
-            søknadService = mockk(),
-            persongrunnlagService = persongrunnlagService,
-        )
-
     val preutfyllBorMedSøkerService =
         PreutfyllBorMedSøkerService(
             persongrunnlagService = persongrunnlagService,
@@ -598,7 +591,6 @@ class CucumberMock(
             preutfyllBosattIRiketService = preutfyllBosattIRiketService,
             preutfyllBorMedSøkerService = preutfyllBorMedSøkerService,
             preutfyllBosattIRiketForFødselshendelserService = preutfyllBosattIRiketForFødselshendelserService,
-            gammelPreutfyllBosattIRiketService = gammelPreutfyllBosattIRiketService,
             featureToggleService = featureToggleService,
             persongrunnlagService = persongrunnlagService,
         )
