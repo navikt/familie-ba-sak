@@ -62,7 +62,7 @@ class JournalførVedtaksbrevTest {
         every { mockArbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id) } returns arbeidsfordelingPåBehandling
         every { mockFagsakRepository.finnFagsak(behandling.fagsak.id) } returns behandling.fagsak
         every { mockOrganisasjonService.hentOrganisasjon(any()) } returns Organisasjon("orgNummer", "orgNavn")
-        every { mockUtgåendeJournalføringService.journalførDokument(any(), any(), any(), any(), any(), any(), any(),) } returnsMany listOf("1", "2", "3", "4", "5", "6", "7", "8")
+        every { mockUtgåendeJournalføringService.journalførDokument(any(), any(), any(), any(), any(), any(), any()) } returnsMany listOf("1", "2", "3", "4", "5", "6", "7", "8")
         every { mockBrevmalService.hentBrevmal(behandling) } returns Brevmal.VEDTAK_FØRSTEGANGSVEDTAK
         every { mockTaskRepository.save(any()) } returnsArgument 0
     }

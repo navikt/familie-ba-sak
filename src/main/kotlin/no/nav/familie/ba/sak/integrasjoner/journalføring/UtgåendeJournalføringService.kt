@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
@@ -11,6 +12,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
+import no.nav.familie.kontrakter.felles.journalpost.OverstyrInnsynsregel
 import no.nav.familie.restklient.client.RessursException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -34,7 +36,9 @@ class UtgåendeJournalføringService(
         }
 
         val fagsakId = fagsak.id
-        val fnr =  fagsak.aktør.aktivFødselsnummer()
+        val fnr = fagsak.aktør.aktivFødselsnummer()
+        val overstyrInnsynsregler = OverstyrInnsynsregel.SKJULES_BRUKERS_SIKKERHET.takeIf { fagsak.type == FagsakType.SKJERMET_BARN }
+
         val journalpostId =
             try {
                 val journalpost =
@@ -49,6 +53,7 @@ class UtgåendeJournalføringService(
                             journalførendeEnhet = journalførendeEnhet,
                             førsteside = førsteside,
                             eksternReferanseId = eksternReferanseId,
+                            overstyrInnsynsregler = overstyrInnsynsregler,
                         ),
                     )
 
@@ -62,7 +67,7 @@ class UtgåendeJournalføringService(
                     HttpStatus.CONFLICT -> {
                         logger.warn(
                             "Klarte ikke journalføre dokument på fagsak=$fagsakId fordi det allerede finnes en journalpost " +
-                                    "med eksternReferanseId=$eksternReferanseId. Bruker eksisterende journalpost.",
+                                "med eksternReferanseId=$eksternReferanseId. Bruker eksisterende journalpost.",
                         )
 
                         hentEksisterendeJournalpost(eksternReferanseId, fnr)
