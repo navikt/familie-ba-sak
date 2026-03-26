@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils.skalUtledeSøknadsresultatForBehandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
@@ -50,6 +51,7 @@ class BehandlingsresultatService(
 
         val personerIBehandling = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id).personer.toSet()
         val personerIForrigeBehandling = forrigeBehandling?.let { persongrunnlagService.hentAktivThrows(behandlingId = forrigeBehandling.id).personer.toSet() } ?: emptySet()
+        val lagtTilBarnINåværendeBehandling = personerIBehandling.size > personerIForrigeBehandling.size
 
         val personerFremstiltKravFor =
             søknadGrunnlagService.finnPersonerFremstiltKravFor(
@@ -61,18 +63,26 @@ class BehandlingsresultatService(
 
         // 1 SØKNAD
         val søknadsresultat =
-            if (skalUtledeSøknadsresultatForBehandling(behandling)) {
-                BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
-                    nåværendeAndeler = andelerTilkjentYtelse,
-                    forrigeAndeler = forrigeAndelerTilkjentYtelse,
-                    endretUtbetalingAndeler = endretUtbetalingAndeler,
-                    personerFremstiltKravFor = personerFremstiltKravFor,
-                    nåværendePersonResultater = vilkårsvurdering.personResultater,
-                    behandlingÅrsak = behandling.opprettetÅrsak,
-                    finnesUregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn()?.isNotEmpty() ?: false,
-                )
-            } else {
-                null
+            when {
+                skalUtledeSøknadsresultatForBehandling(behandling) -> {
+                    BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
+                        nåværendeAndeler = andelerTilkjentYtelse,
+                        forrigeAndeler = forrigeAndelerTilkjentYtelse,
+                        endretUtbetalingAndeler = endretUtbetalingAndeler,
+                        personerFremstiltKravFor = personerFremstiltKravFor,
+                        nåværendePersonResultater = vilkårsvurdering.personResultater,
+                        behandlingÅrsak = behandling.opprettetÅrsak,
+                        finnesUregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn()?.isNotEmpty() ?: false,
+                    )
+                }
+
+                behandling.opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING && lagtTilBarnINåværendeBehandling -> {
+                    Søknadsresultat.INNVILGET
+                }
+
+                else -> {
+                    null
+                }
             }
 
         // 2 ENDRINGER
