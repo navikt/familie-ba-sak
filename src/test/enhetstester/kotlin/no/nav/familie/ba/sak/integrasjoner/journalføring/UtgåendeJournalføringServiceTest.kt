@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -26,8 +27,10 @@ class UtgåendeJournalføringServiceTest {
             // Arrange
             every { integrasjonKlient.journalførDokument(any()) } returns ArkiverDokumentResponse(journalpostId = "1", ferdigstilt = true)
 
+            val fagsak = lagFagsak()
+
             // Act
-            val journalpostId = utgåendeJournalføringService.journalførDokument(fnr = "", fagsakId = "", brev = emptyList(), eksternReferanseId = "1234")
+            val journalpostId = utgåendeJournalføringService.journalførDokument(fagsak = fagsak, brev = emptyList(), eksternReferanseId = "1234")
 
             // Assert
             verify(exactly = 1) { integrasjonKlient.journalførDokument(any()) }
@@ -38,6 +41,8 @@ class UtgåendeJournalføringServiceTest {
         fun `skal kaste feil dersom journalpost med eksternReferanseId allerede finnes`() {
             // Arrange
             every { integrasjonKlient.journalførDokument(any()) } throws RessursException(ressurs = mockk(), httpStatus = HttpStatus.CONFLICT, cause = mockk())
+
+            val fagsak = lagFagsak()
 
             val eksisterendeJournalpost =
                 mockk<Journalpost> {
@@ -50,7 +55,7 @@ class UtgåendeJournalføringServiceTest {
                 )
 
             // Act
-            val journalpostId = utgåendeJournalføringService.journalførDokument(fnr = "", fagsakId = "", brev = emptyList(), eksternReferanseId = "1234")
+            val journalpostId = utgåendeJournalføringService.journalførDokument(fagsak = fagsak, brev = emptyList(), eksternReferanseId = "1234")
 
             // Assert
             verify(exactly = 1) { integrasjonKlient.journalførDokument(any()) }

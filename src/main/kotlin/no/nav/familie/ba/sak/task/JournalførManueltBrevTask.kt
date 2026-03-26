@@ -64,8 +64,7 @@ class JournalførManueltBrevTask(
         val journalpostId =
             utgåendeJournalføringService
                 .journalførDokument(
-                    fnr = fagsak.aktør.aktivFødselsnummer(),
-                    fagsakId = fagsak.id.toString(),
+                    fagsak = fagsak,
                     journalførendeEnhet = journalførManueltBrevDTO.manuellBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
                     brev =
                         listOf(

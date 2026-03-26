@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
@@ -20,8 +21,7 @@ class UtgåendeJournalføringService(
     private val integrasjonKlient: IntegrasjonKlient,
 ) {
     fun journalførDokument(
-        fnr: String,
-        fagsakId: String,
+        fagsak: Fagsak,
         journalførendeEnhet: String? = null,
         brev: List<Dokument>,
         vedlegg: List<Dokument> = emptyList(),
@@ -33,6 +33,8 @@ class UtgåendeJournalføringService(
             logger.warn("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, $DEFAULT_JOURNALFØRENDE_ENHET")
         }
 
+        val fagsakId = fagsak.id
+        val fnr =  fagsak.aktør.aktivFødselsnummer()
         val journalpostId =
             try {
                 val journalpost =
@@ -43,7 +45,7 @@ class UtgåendeJournalføringService(
                             forsøkFerdigstill = true,
                             hoveddokumentvarianter = brev,
                             vedleggsdokumenter = vedlegg,
-                            fagsakId = fagsakId,
+                            fagsakId = fagsakId.toString(),
                             journalførendeEnhet = journalførendeEnhet,
                             førsteside = førsteside,
                             eksternReferanseId = eksternReferanseId,
@@ -60,7 +62,7 @@ class UtgåendeJournalføringService(
                     HttpStatus.CONFLICT -> {
                         logger.warn(
                             "Klarte ikke journalføre dokument på fagsak=$fagsakId fordi det allerede finnes en journalpost " +
-                                "med eksternReferanseId=$eksternReferanseId. Bruker eksisterende journalpost.",
+                                    "med eksternReferanseId=$eksternReferanseId. Bruker eksisterende journalpost.",
                         )
 
                         hentEksisterendeJournalpost(eksternReferanseId, fnr)
