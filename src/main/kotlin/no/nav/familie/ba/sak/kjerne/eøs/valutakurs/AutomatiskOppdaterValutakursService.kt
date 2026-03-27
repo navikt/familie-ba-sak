@@ -250,13 +250,6 @@ class AutomatiskOppdaterValutakursService(
     }
 
     @Transactional
-    fun oppdaterValutakurserOgSimulering(behandlingId: BehandlingId) {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId.id)
-        oppdaterValutakurserEtterEndringstidspunkt(behandling)
-        simuleringService.oppdaterSimuleringPåBehandling(behandling)
-    }
-
-    @Transactional
     fun oppdaterValutakurserOgSimulerVedBehov(behandlingId: Long) {
         val utenlandskPeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId)
         if (utenlandskPeriodebeløp.isEmpty()) return
