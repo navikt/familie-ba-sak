@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -386,6 +387,148 @@ class UtbetalingssikkerhetTest {
                 }",
             )!!,
         )
+    }
+
+    @Test
+    fun `Skal kaste feil når søker får over 100 prosent gradering for utvidet barnetrygd`() {
+        val søker = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(20))
+        val fagsak = lagFagsak(aktør = søker.aktør)
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = lagBehandling(fagsak))
+
+        val fom = søker.fødselsdato.nesteMåned()
+        val tom = søker.fødselsdato.plusYears(18).forrigeMåned()
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom,
+                    tom,
+                    YtelseType.UTVIDET_BARNETRYGD,
+                    1054,
+                    person = søker,
+                    prosent = BigDecimal(100),
+                ),
+            ),
+        )
+
+        val tilkjentYtelse2 = lagInitiellTilkjentYtelse(lagBehandling(fagsak))
+
+        tilkjentYtelse2.andelerTilkjentYtelse.addAll(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom,
+                    tom,
+                    YtelseType.UTVIDET_BARNETRYGD,
+                    1054,
+                    person = søker,
+                    prosent = BigDecimal(100),
+                ),
+            ),
+        )
+
+        val feil =
+            assertThrows<UtbetalingsikkerhetFeil> {
+                TilkjentYtelseValidering.validerAtSøkerIkkeFårFlereUtvidetUtbetalingerSammePeriode(
+                    behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
+                    andreRelevanteTilkjentYtelser = listOf(tilkjentYtelse),
+                )
+            }
+
+        assertThat(feil.frontendFeilmelding)
+            .isEqualTo("Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% utvidet for søker $fom til $tom. Reduksjonsvedtak til søker må være sendt til godkjenning før du kan gå videre.")
+    }
+
+    @Test
+    fun `Skal ikke kaste feil når søker får tilsammen 100 prosent gradering for utvidet barnetrygd`() {
+        val søker = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(20))
+        val fagsak = lagFagsak(aktør = søker.aktør)
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = lagBehandling(fagsak))
+
+        val fom = søker.fødselsdato.nesteMåned()
+        val tom = søker.fødselsdato.plusYears(18).forrigeMåned()
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom,
+                    tom,
+                    YtelseType.UTVIDET_BARNETRYGD,
+                    1054,
+                    person = søker,
+                    prosent = BigDecimal(50),
+                ),
+            ),
+        )
+
+        val tilkjentYtelse2 = lagInitiellTilkjentYtelse(lagBehandling(fagsak))
+
+        tilkjentYtelse2.andelerTilkjentYtelse.addAll(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom,
+                    tom,
+                    YtelseType.UTVIDET_BARNETRYGD,
+                    1054,
+                    person = søker,
+                    prosent = BigDecimal(50),
+                ),
+            ),
+        )
+
+        assertDoesNotThrow {
+            TilkjentYtelseValidering.validerAtSøkerIkkeFårFlereUtvidetUtbetalingerSammePeriode(
+                behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
+                andreRelevanteTilkjentYtelser = listOf(tilkjentYtelse),
+            )
+        }
+    }
+
+    @Test
+    fun `Skal ikke kaste feil når søker har flere 100 prosent utvidet andeler på tvers av fagsak som ikke overlapper`() {
+        val søker = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(20))
+        val fagsak = lagFagsak(aktør = søker.aktør)
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = lagBehandling(fagsak))
+
+        val fom = søker.fødselsdato.nesteMåned()
+        val tom = søker.fødselsdato.plusYears(18).forrigeMåned()
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom,
+                    tom,
+                    YtelseType.UTVIDET_BARNETRYGD,
+                    1054,
+                    person = søker,
+                    prosent = BigDecimal(100),
+                ),
+            ),
+        )
+
+        val tilkjentYtelse2 = lagInitiellTilkjentYtelse(lagBehandling(fagsak))
+
+        tilkjentYtelse2.andelerTilkjentYtelse.addAll(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    tom.plusYears(1),
+                    tom.plusYears(2),
+                    YtelseType.UTVIDET_BARNETRYGD,
+                    1054,
+                    person = søker,
+                    prosent = BigDecimal(100),
+                ),
+            ),
+        )
+
+        assertDoesNotThrow {
+            TilkjentYtelseValidering.validerAtSøkerIkkeFårFlereUtvidetUtbetalingerSammePeriode(
+                behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
+                andreRelevanteTilkjentYtelser = listOf(tilkjentYtelse),
+            )
+        }
     }
 
     @Test

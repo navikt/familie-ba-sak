@@ -223,7 +223,7 @@ object TilkjentYtelseValidering {
             val perioderMedOverlapp =
                 finnPeriodeMedOverlappAvAndeler(
                     andeler = andeler,
-                    barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger,
+                    andelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger,
                 )
             if (perioderMedOverlapp.isNotEmpty()) {
                 barnMedUtbetalingsikkerhetFeil.put(barn, perioderMedOverlapp)
@@ -244,6 +244,42 @@ object TilkjentYtelseValidering {
                 frontendFeilmelding = "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${
                     barnMedUtbetalingsikkerhetFeil.tilFeilmeldingTekst()
                 }. Reduksjonsvedtak til annen person må være sendt til godkjenning før du kan gå videre.",
+            )
+        }
+    }
+
+    fun validerAtSøkerIkkeFårFlereUtvidetUtbetalingerSammePeriode(
+        behandlendeBehandlingTilkjentYtelse: TilkjentYtelse,
+        andreRelevanteTilkjentYtelser: List<TilkjentYtelse>,
+    ) {
+        val behandlendeFagsak = behandlendeBehandlingTilkjentYtelse.behandling.fagsak
+        val søker = behandlendeFagsak.skjermetBarnSøker?.aktør ?: behandlendeFagsak.aktør
+
+        val søkersUtvidetAndeler = behandlendeBehandlingTilkjentYtelse.andelerTilkjentYtelse.filter { it.type == YtelseType.UTVIDET_BARNETRYGD && it.aktør == søker }
+
+        val søkersUtvidetAndelerFraAndreBehandlinger =
+            andreRelevanteTilkjentYtelser.flatMap { it.andelerTilkjentYtelse }.filter { it.aktør == søker && it.type == YtelseType.UTVIDET_BARNETRYGD }
+
+        val perioderMedOverlapp =
+            finnPeriodeMedOverlappAvAndeler(
+                andeler = søkersUtvidetAndeler,
+                andelerFraAndreBehandlinger = søkersUtvidetAndelerFraAndreBehandlinger,
+            )
+
+        if (perioderMedOverlapp.isNotEmpty()) {
+            val relevanteBehandlingOgFagsak =
+                andreRelevanteTilkjentYtelser
+                    .map { it.behandling.fagsak.id to it.behandling.id }
+                    .map { "fagsak=${it.first}/behandling=${it.second}" }
+
+            throw UtbetalingsikkerhetFeil(
+                melding = "Vi finner utbetalinger som overstiger 100% på utvidet for søker: ${
+                    perioderMedOverlapp.joinToString(", ") { "${it.fom} til ${it.tom}" }
+                }. ${if (relevanteBehandlingOgFagsak.isNotEmpty()) "Sammenligning gjort med ${relevanteBehandlingOgFagsak.joinToString(",") { it }}. Mulig det finnes behandlinger som ligger til godkjenning som vil korrigere feilen." else ""}",
+                frontendFeilmelding =
+                    "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% utvidet for søker ${
+                        perioderMedOverlapp.joinToString(", ") { "${it.fom} til ${it.tom}" }
+                    }. Reduksjonsvedtak til søker må være sendt til godkjenning før du kan gå videre.",
             )
         }
     }
@@ -282,7 +318,7 @@ object TilkjentYtelseValidering {
 
     fun finnPeriodeMedOverlappAvAndeler(
         andeler: List<AndelTilkjentYtelse>,
-        barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
+        andelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
     ): List<MånedPeriode> {
         val kombinertOverlappTidslinje =
             YtelseType
@@ -290,7 +326,7 @@ object TilkjentYtelseValidering {
                 .map { ytelseType ->
                     lagErOver100ProsentUtbetalingPåYtelseTidslinje(
                         andeler = andeler.filter { it.type == ytelseType },
-                        barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger.filter { it.type == ytelseType },
+                        andelerFraAndreBehandlinger = andelerFraAndreBehandlinger.filter { it.type == ytelseType },
                     )
                 }.kombiner { it.minstEnYtelseMedBehandlingIdHarOverlapp() }
 
@@ -311,13 +347,13 @@ object TilkjentYtelseValidering {
 
     fun lagErOver100ProsentUtbetalingPåYtelseTidslinje(
         andeler: List<AndelTilkjentYtelse>,
-        barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
+        andelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
     ): Tidslinje<ErOver100ProsentMedBehandlingId> {
-        if (barnsAndelerFraAndreBehandlinger.isEmpty()) {
+        if (andelerFraAndreBehandlinger.isEmpty()) {
             return tomTidslinje()
         }
 
-        val andelerPerBehandling = (andeler + barnsAndelerFraAndreBehandlinger).groupBy { it.behandlingId }
+        val andelerPerBehandling = (andeler + andelerFraAndreBehandlinger).groupBy { it.behandlingId }
 
         val prosenttidslinjerPerBehandling =
             andelerPerBehandling.mapValues { (_, andelerForBehandling) ->

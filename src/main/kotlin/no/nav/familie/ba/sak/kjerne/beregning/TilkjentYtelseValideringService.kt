@@ -29,6 +29,7 @@ class TilkjentYtelseValideringService(
 
         if (totrinnskontroll?.godkjent == true) {
             validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(behandling)
+            validerAtSøkerIkkeFårFlereUtvidetAndelerSammePeriode(behandling)
         }
     }
 
@@ -41,7 +42,7 @@ class TilkjentYtelseValideringService(
             søkerOgBarn.barn().map {
                 Pair(
                     it,
-                    beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, behandling.fagsak.id),
+                    beregningService.hentRelevanteTilkjentYtelserForPerson(it.aktør, behandling.fagsak.id),
                 )
             }
 
@@ -57,6 +58,22 @@ class TilkjentYtelseValideringService(
             behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
             barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
             søkerOgBarn = søkerOgBarn,
+        )
+    }
+
+    private fun validerAtSøkerIkkeFårFlereUtvidetAndelerSammePeriode(behandling: Behandling) {
+        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        val fagsak = behandling.fagsak
+
+        val søker = fagsak.skjermetBarnSøker?.aktør ?: fagsak.aktør
+        val søkersTilkjentYtelserIAndreFagsak = beregningService.hentRelevanteTilkjentYtelserForPerson(søker, behandling.fagsak.id)
+
+        secureLogger.info("Andeler tilkjent ytelse i inneværende behandling for søker=${behandling.id}: " + tilkjentYtelse.andelerTilkjentYtelse.filter { it.aktør == søker })
+        secureLogger.info("Andeler tilkjent ytelse i andre behandlinger for søker=${behandling.id}: " + søkersTilkjentYtelserIAndreFagsak.flatMap { it.andelerTilkjentYtelse }.filter { it.aktør == søker })
+
+        TilkjentYtelseValidering.validerAtSøkerIkkeFårFlereUtvidetUtbetalingerSammePeriode(
+            behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
+            andreRelevanteTilkjentYtelser = søkersTilkjentYtelserIAndreFagsak,
         )
     }
 
@@ -81,7 +98,7 @@ class TilkjentYtelseValideringService(
     ): Boolean =
         barna.any {
             beregningService
-                .hentRelevanteTilkjentYtelserForBarn(barnAktør = it.aktør, fagsakId = behandling.fagsak.id)
+                .hentRelevanteTilkjentYtelserForPerson(aktør = it.aktør, fagsakId = behandling.fagsak.id)
                 .isNotEmpty()
         }
 
