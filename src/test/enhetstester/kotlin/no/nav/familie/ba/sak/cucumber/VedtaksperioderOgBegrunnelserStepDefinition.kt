@@ -865,7 +865,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
                 nyBehandlingId = behandlingId,
             )
 
-        mock.automatiskOppdaterValutakursService.oppdaterValutakurserOgSimulering(BehandlingId(behandlingId))
+        mock.automatiskOppdaterValutakursService.oppdaterValutakurserOgSimulerVedBehov(behandlingId)
     }
 
     /**

@@ -34,22 +34,6 @@ class ValutakursController(
     private val ecbService: ECBService,
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
 ) {
-    @PutMapping(path = ["{behandlingId}/oppdater-valutakurser-og-simulering-automatisk"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun oppdaterValutakurserOgSimuleringAutomatisk(
-        @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.BESLUTTER,
-            handling = "Oppdaterer valutakurser og simulering automatisk",
-        )
-        tilgangService.validerErPåBeslutteVedtakSteg(behandlingId)
-
-        automatiskOppdaterValutakursService.oppdaterValutakurserOgSimulering(BehandlingId(behandlingId))
-
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)))
-    }
-
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterValutakurs(
         @PathVariable behandlingId: Long,
