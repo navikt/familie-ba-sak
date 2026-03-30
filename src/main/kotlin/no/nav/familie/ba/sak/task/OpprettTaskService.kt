@@ -116,7 +116,7 @@ class OpprettTaskService(
                         ),
                     properties =
                         Properties().apply {
-                            this["fagsak"] = fagsakId.toString()
+                            this["fagsakId"] = fagsakId.toString()
                             this["alder"] = alder.toString()
                             this["månedÅr"] = inneværendeMåned.tilMånedÅr()
                         },
