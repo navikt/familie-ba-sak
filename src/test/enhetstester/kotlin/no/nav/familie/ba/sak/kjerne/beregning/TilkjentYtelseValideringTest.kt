@@ -713,7 +713,7 @@ class TilkjentYtelseValideringTest {
             val tidslinje =
                 TilkjentYtelseValidering.lagErOver100ProsentUtbetalingPåYtelseTidslinje(
                     andeler = andelerMor,
-                    barnsAndelerFraAndreBehandlinger = andelerFar,
+                    andelerFraAndreBehandlinger = andelerFar,
                 )
 
             // Asseret

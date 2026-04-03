@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
 import no.nav.familie.tidslinje.Tidslinje
@@ -68,15 +67,15 @@ class BeregningService(
      * Per fagsak henter man tilkjent ytelse fra:
      * 1. Behandling som er til godkjenning
      * 2. Siste behandling som er vedtatt
-     * 3. Filtrer bort behandlinger der barnet ikke lenger finnes
+     * 3. Filtrer bort behandlinger der person ikke lenger finnes
      */
-    fun hentRelevanteTilkjentYtelserForBarn(
-        barnAktør: Aktør,
+    fun hentRelevanteTilkjentYtelserForPerson(
+        aktør: Aktør,
         fagsakId: Long,
     ): List<TilkjentYtelse> {
         val andreFagsaker =
             fagsakService
-                .hentFagsakerPåPerson(barnAktør)
+                .hentFagsakerPåPerson(aktør)
                 .filter { it.id != fagsakId }
 
         return andreFagsaker
@@ -105,10 +104,9 @@ class BeregningService(
             }.filter {
                 personopplysningGrunnlagRepository
                     .finnSøkerOgBarnAktørerTilAktiv(behandlingId = it.behandling.id)
-                    .barn()
-                    .map { barn -> barn.aktør }
-                    .contains(barnAktør)
-            }.map { it }
+                    .map { person -> person.aktør }
+                    .contains(aktør)
+            }
     }
 
     fun erEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling: Behandling): Boolean = hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING

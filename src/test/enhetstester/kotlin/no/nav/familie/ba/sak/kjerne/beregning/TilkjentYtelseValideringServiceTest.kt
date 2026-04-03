@@ -49,20 +49,20 @@ class TilkjentYtelseValideringServiceTest {
             )
 
         every {
-            beregningServiceMock.hentRelevanteTilkjentYtelserForBarn(
-                barnAktør = barn1.aktør,
+            beregningServiceMock.hentRelevanteTilkjentYtelserForPerson(
+                aktør = barn1.aktør,
                 fagsakId = any(),
             )
         } answers { emptyList() }
         every {
-            beregningServiceMock.hentRelevanteTilkjentYtelserForBarn(
-                barnAktør = barn2.aktør,
+            beregningServiceMock.hentRelevanteTilkjentYtelserForPerson(
+                aktør = barn2.aktør,
                 fagsakId = any(),
             )
         } answers { emptyList() }
         every {
-            beregningServiceMock.hentRelevanteTilkjentYtelserForBarn(
-                barnAktør = barn3MedUtbetalinger.aktør,
+            beregningServiceMock.hentRelevanteTilkjentYtelserForPerson(
+                aktør = barn3MedUtbetalinger.aktør,
                 fagsakId = any(),
             )
         } answers {
@@ -339,7 +339,7 @@ class TilkjentYtelseValideringServiceTest {
                 )
 
             every {
-                beregningServiceMock.hentRelevanteTilkjentYtelserForBarn(any(), eq(fagsakMor.id))
+                beregningServiceMock.hentRelevanteTilkjentYtelserForPerson(any(), eq(fagsakMor.id))
             } returns listOf(tilkjentYtelseFar)
 
             // Act & assert
