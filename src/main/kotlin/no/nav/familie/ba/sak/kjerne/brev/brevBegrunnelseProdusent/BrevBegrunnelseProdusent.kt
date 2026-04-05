@@ -505,10 +505,7 @@ private fun ISanityBegrunnelse.erEksplisittAvslagPåSøker(
             ?.dennePerioden
             ?.eksplisitteAvslagForPerson ?: emptyList()
 
-    return explisitteAvslagsvilkårForSøker.any {
-        this.begrunnelseTypeForPerson == VedtakBegrunnelseType.AVSLAG &&
-            it.vilkårType in this.vilkår
-    }
+    return explisitteAvslagsvilkårForSøker.any { it.vilkårType in this.vilkår }
 }
 
 private fun hentBarnMedOppfylteVilkår(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
