@@ -364,6 +364,73 @@ class EndretUtbetalingAndelServiceTest {
     }
 
     @Nested
+    inner class FjernEndretUtbetalingAndelerForPersonerIkkePåBehandling {
+        @Test
+        fun `Skal slette endret utbetalings andel når alle personer i andelen har blitt fjernet fra person opplysningsgrunnlaget`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val barn = lagPerson(type = PersonType.BARN)
+            val barnSomErFjernet = lagPerson(type = PersonType.BARN)
+            val endretUtbetalingAndel = lagEndretUtbetalingAndel(behandlingId = behandling.id, personer = setOf(barnSomErFjernet))
+            val slettetEndretUtbetalingAndelSlot = slot<EndretUtbetalingAndel>()
+
+            every { mockEndretUtbetalingAndelRepository.findByBehandlingId(behandling.id) } returns listOf(endretUtbetalingAndel)
+            every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns
+                lagTestPersonopplysningGrunnlag(behandling.id, barn)
+            every { mockEndretUtbetalingAndelRepository.delete(capture(slettetEndretUtbetalingAndelSlot)) } returns mockk()
+
+            // Act
+            endretUtbetalingAndelService.slettEndretUtbetalingAndelerForPersonerIkkeIPersonopplysningGrunnlag(behandling)
+
+            // Assert
+            assertThat(slettetEndretUtbetalingAndelSlot.captured).isEqualTo(endretUtbetalingAndel)
+            verify(exactly = 1) { mockEndretUtbetalingAndelRepository.delete(endretUtbetalingAndel) }
+            verify(exactly = 0) { mockEndretUtbetalingAndelRepository.save(any()) }
+        }
+
+        @Test
+        fun `Skal oppdatere endret utbetaling andel når kun noen personer er fjernet fra person opplysningsgrunnlaget`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val barn = lagPerson(type = PersonType.BARN)
+            val fjernetBarn = lagPerson(type = PersonType.BARN)
+
+            val endretUtbetalingAndel = lagEndretUtbetalingAndel(behandlingId = behandling.id, personer = setOf(barn, fjernetBarn))
+            val lagretEndretUtbetalingAndelSlot = slot<EndretUtbetalingAndel>()
+
+            every { mockEndretUtbetalingAndelRepository.findByBehandlingId(behandling.id) } returns listOf(endretUtbetalingAndel)
+            every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns lagTestPersonopplysningGrunnlag(behandling.id, barn)
+            every { mockEndretUtbetalingAndelRepository.save(capture(lagretEndretUtbetalingAndelSlot)) } returnsArgument 0
+
+            // Act
+            endretUtbetalingAndelService.slettEndretUtbetalingAndelerForPersonerIkkeIPersonopplysningGrunnlag(behandling)
+
+            // Assert
+            assertThat(lagretEndretUtbetalingAndelSlot.captured.personer).containsExactly(barn)
+            verify(exactly = 0) { mockEndretUtbetalingAndelRepository.delete(any()) }
+        }
+
+        @Test
+        fun `Skal ikke gjøre noe når alle personer fremdeles er i person opplysningsgrunnlaget`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val barn = lagPerson(type = PersonType.BARN)
+            val endretUtbetalingAndel = lagEndretUtbetalingAndel(behandlingId = behandling.id, personer = setOf(barn))
+
+            every { mockEndretUtbetalingAndelRepository.findByBehandlingId(behandling.id) } returns listOf(endretUtbetalingAndel)
+            every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns
+                lagTestPersonopplysningGrunnlag(behandling.id, barn)
+
+            // Act
+            endretUtbetalingAndelService.slettEndretUtbetalingAndelerForPersonerIkkeIPersonopplysningGrunnlag(behandling)
+
+            // Assert
+            verify(exactly = 0) { mockEndretUtbetalingAndelRepository.delete(any()) }
+            verify(exactly = 0) { mockEndretUtbetalingAndelRepository.save(any()) }
+        }
+    }
+
+    @Nested
     inner class FjernEndretUtbetalingAndelerMedÅrsak3MndEller3ÅrGenerertIDenneBehandlingen {
         @Test
         fun `Skal slette eksisterende endretUtbetalingAndeler hvis den er ugyldig`() {
