@@ -24,7 +24,7 @@ data class HentPersonFraPdlRequest(
     @Schema(example = "false") val visAdressebeskyttelse: Boolean = false,
     @Schema(example = "false") val visBostedsadresse: Boolean = false,
     @Schema(example = "false") val visOppholdsadresse: Boolean = false,
-    @Schema(example = "false") val visFolkeregister: Boolean = false,
+    @Schema(example = "false") val visHistoriskeIdenter: Boolean = false,
     @Schema(example = "false") val visDødsfall: Boolean = false,
     @Schema(example = "false") val visStatsborgerskap: Boolean = false,
     @Schema(example = "false") val visOpphold: Boolean = false,
@@ -63,5 +63,5 @@ fun PersonInfo.tilForvalterPersonInfoDto(hentPersonFraPdlRequest: HentPersonFraP
         statsborgerskap = statsborgerskap.takeIf { hentPersonFraPdlRequest.visStatsborgerskap },
         dødsfall = dødsfall.takeIf { hentPersonFraPdlRequest.visDødsfall },
         kontaktinformasjonForDoedsbo = kontaktinformasjonForDoedsbo.takeIf { hentPersonFraPdlRequest.visKontaktinformasjonForDødsbo },
-        historiskeIdenter = historiskeIdenter.takeIf { hentPersonFraPdlRequest.visFolkeregister },
+        historiskeIdenter = historiskeIdenter.takeIf { hentPersonFraPdlRequest.visHistoriskeIdenter },
     )
