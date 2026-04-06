@@ -161,7 +161,7 @@ class DokumentGenereringServiceTest {
         val brevSlot = slot<Brev>()
 
         every { personopplysningerService.hentPersoninfoEnkel(søkerAktør) } returns
-                PersonInfo(fødselsdato = LocalDate.now(), navn = "Søker Navn")
+            PersonInfo(fødselsdato = LocalDate.now(), navn = "Søker Navn")
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "Z000000"
         every { brevKlient.genererBrev(any(), capture(brevSlot)) } returns byteArrayOf()
 
