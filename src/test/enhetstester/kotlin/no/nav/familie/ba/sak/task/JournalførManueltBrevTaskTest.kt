@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.brev.mottaker.FullmektigEllerVerge
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.Institusjon
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.ManuellAdresseInfo
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.tilAvsenderMottaker
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.task.dto.JournalførManueltBrevDTO
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
@@ -93,8 +94,7 @@ class JournalførManueltBrevTaskTest {
 
             every { fagsakService.hentPåFagsakId(fagsak.id) } returns fagsak
 
-            val fnrSlot = slot<String>()
-            val fagsakIdSlot = slot<String>()
+            val fagsakSlot = slot<Fagsak>()
             val journalførendeEnhetSlot = slot<String>()
             val brevSlot = slot<List<Dokument>>()
             val førstesideSlot = slot<Førsteside?>()
@@ -102,8 +102,7 @@ class JournalførManueltBrevTaskTest {
 
             every {
                 utgåendeJournalføringService.journalførDokument(
-                    fnr = capture(fnrSlot),
-                    fagsakId = capture(fagsakIdSlot),
+                    fagsak = capture(fagsakSlot),
                     journalførendeEnhet = capture(journalførendeEnhetSlot),
                     brev = capture(brevSlot),
                     førsteside = captureNullable(førstesideSlot),
@@ -122,15 +121,13 @@ class JournalførManueltBrevTaskTest {
             journalførManueltBrevTask.doTask(task)
 
             // Assert
-            val capturedFnr = fnrSlot.captured
-            val capturedFagsakId = fagsakIdSlot.captured
+            val capturedFagsak = fagsakSlot.captured
             val capturedJournalførendeEnhetId = journalførendeEnhetSlot.captured
             val capturedBrev = brevSlot.captured
             val capturedFørsteside = førstesideSlot.captured
             val capturedAvsenderMottaker = avsenderMottakerSlot.captured
 
-            assertThat(capturedFnr).isEqualTo(fagsak.aktør.aktivFødselsnummer())
-            assertThat(capturedFagsakId).isEqualTo(fagsak.id.toString())
+            assertThat(capturedFagsak).isEqualTo(fagsak)
             assertThat(capturedJournalførendeEnhetId).isEqualTo(manueltBrevRequest.enhet?.enhetId)
             assertThat(capturedBrev).isNotNull
             assertThat(capturedFørsteside).isNull()
@@ -181,8 +178,7 @@ class JournalførManueltBrevTaskTest {
 
             every { fagsakService.hentPåFagsakId(fagsak.id) } returns fagsak
 
-            val fnrSlot = slot<String>()
-            val fagsakIdSlot = slot<String>()
+            val fagsakSlot = slot<Fagsak>()
             val journalførendeEnhetSlot = slot<String>()
             val brevSlot = slot<List<Dokument>>()
             val førstesideSlot = slot<Førsteside?>()
@@ -190,8 +186,7 @@ class JournalførManueltBrevTaskTest {
 
             every {
                 utgåendeJournalføringService.journalførDokument(
-                    fnr = capture(fnrSlot),
-                    fagsakId = capture(fagsakIdSlot),
+                    fagsak = capture(fagsakSlot),
                     journalførendeEnhet = capture(journalførendeEnhetSlot),
                     brev = capture(brevSlot),
                     førsteside = captureNullable(førstesideSlot),
@@ -210,15 +205,13 @@ class JournalførManueltBrevTaskTest {
             journalførManueltBrevTask.doTask(task)
 
             // Assert
-            val capturedFnr = fnrSlot.captured
-            val capturedFagsakId = fagsakIdSlot.captured
+            val capturedFagsak = fagsakSlot.captured
             val capturedJournalførendeEnhetId = journalførendeEnhetSlot.captured
             val capturedBrev = brevSlot.captured
             val capturedFørsteside = førstesideSlot.captured
             val capturedAvsenderMottaker = avsenderMottakerSlot.captured
 
-            assertThat(capturedFnr).isEqualTo(fagsak.aktør.aktivFødselsnummer())
-            assertThat(capturedFagsakId).isEqualTo(fagsak.id.toString())
+            assertThat(capturedFagsak).isEqualTo(fagsak)
             assertThat(capturedJournalførendeEnhetId).isEqualTo(manueltBrevRequest.enhet?.enhetId)
             assertThat(capturedBrev).isNotNull
             assertThat(capturedFørsteside).isNotNull
@@ -318,8 +311,7 @@ class JournalførManueltBrevTaskTest {
 
             every {
                 utgåendeJournalføringService.journalførDokument(
-                    fnr = any(),
-                    fagsakId = any(),
+                    fagsak = any(),
                     journalførendeEnhet = any(),
                     brev = any(),
                     førsteside = any(),
@@ -371,8 +363,7 @@ class JournalførManueltBrevTaskTest {
 
             every {
                 utgåendeJournalføringService.journalførDokument(
-                    fnr = any(),
-                    fagsakId = any(),
+                    fagsak = any(),
                     journalførendeEnhet = capture(journalførendeEnhetSlot),
                     brev = any(),
                     førsteside = any(),

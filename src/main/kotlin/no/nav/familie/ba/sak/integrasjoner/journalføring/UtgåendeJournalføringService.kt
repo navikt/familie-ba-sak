@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
@@ -10,6 +12,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
+import no.nav.familie.kontrakter.felles.journalpost.OverstyrInnsynsregel
 import no.nav.familie.restklient.client.RessursException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -20,8 +23,7 @@ class UtgåendeJournalføringService(
     private val integrasjonKlient: IntegrasjonKlient,
 ) {
     fun journalførDokument(
-        fnr: String,
-        fagsakId: String,
+        fagsak: Fagsak,
         journalførendeEnhet: String? = null,
         brev: List<Dokument>,
         vedlegg: List<Dokument> = emptyList(),
@@ -33,6 +35,10 @@ class UtgåendeJournalføringService(
             logger.warn("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, $DEFAULT_JOURNALFØRENDE_ENHET")
         }
 
+        val fagsakId = fagsak.id
+        val fnr = fagsak.aktør.aktivFødselsnummer()
+        val overstyrInnsynsregler = OverstyrInnsynsregel.SKJULES_BRUKERS_SIKKERHET.takeIf { fagsak.type == FagsakType.SKJERMET_BARN }
+
         val journalpostId =
             try {
                 val journalpost =
@@ -43,10 +49,11 @@ class UtgåendeJournalføringService(
                             forsøkFerdigstill = true,
                             hoveddokumentvarianter = brev,
                             vedleggsdokumenter = vedlegg,
-                            fagsakId = fagsakId,
+                            fagsakId = fagsakId.toString(),
                             journalførendeEnhet = journalførendeEnhet,
                             førsteside = førsteside,
                             eksternReferanseId = eksternReferanseId,
+                            overstyrInnsynsregler = overstyrInnsynsregler,
                         ),
                     )
 
