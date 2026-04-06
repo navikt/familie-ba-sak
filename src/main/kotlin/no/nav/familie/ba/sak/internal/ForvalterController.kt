@@ -15,6 +15,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinjeService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeDto
@@ -29,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
@@ -103,6 +106,7 @@ class ForvalterController(
     private val personidentRepository: PersonidentRepository,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val personidentService: PersonidentService,
+    private val systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -622,6 +626,38 @@ class ForvalterController(
             handling = "Hent alle identer for ident",
         )
         return ResponseEntity.ok(personidentService.hentIdenter(ident, true))
+    }
+
+    @PostMapping("/hent-person-fra-pdl")
+    @Operation(
+        summary = "Henter personinfo fra PDL via systemklient",
+        description =
+            "Henter ut detaljer om en person fra PDL med systemtoken (client credentials). " +
+                "Sett de ulike vis-flaggene til true for å inkludere ønsket informasjon i responsen. " +
+                "Uthenting av person info logges til securelogger med hvilke flagg som ble satt.",
+    )
+    fun hentPersonFraPdl(
+        @RequestBody hentPersonFraPdlRequest: HentPersonFraPdlRequest,
+    ): ResponseEntity<Ressurs<ForvalterPersonInfoDto>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Hent person fra PDL via systemklient",
+        )
+
+        tilgangService.validerTilgangTilPersoner(
+            personIdenter = listOf(hentPersonFraPdlRequest.ident),
+            event = AuditLoggerEvent.ACCESS,
+        )
+
+        secureLogger.info(
+            "${SikkerhetContext.hentSaksbehandlerNavn()} (${SikkerhetContext.hentSaksbehandler()}) " +
+                "henter person fra PDL via forvalter-endepunktet for ident=${hentPersonFraPdlRequest.ident} " +
+                "med begrunnelse=\"${hentPersonFraPdlRequest.begrunnelse}\" og flagg: $hentPersonFraPdlRequest",
+        )
+
+        val personInfo = systemOnlyPdlRestKlient.hentPerson(hentPersonFraPdlRequest.ident, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
+
+        return ResponseEntity.ok(Ressurs.success(personInfo.tilForvalterPersonInfoDto(hentPersonFraPdlRequest)))
     }
 
     @PatchMapping("/fagsak/{fagsakId}/endre-status-til-opprettet")
