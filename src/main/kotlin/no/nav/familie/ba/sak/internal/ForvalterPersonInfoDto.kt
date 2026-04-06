@@ -45,7 +45,6 @@ data class ForvalterPersonInfoDto(
     val statsborgerskap: List<Statsborgerskap>? = null,
     val dødsfall: DødsfallData? = null,
     val kontaktinformasjonForDoedsbo: PdlKontaktinformasjonForDødsbo? = null,
-    val forelderBarnRelasjoner: List<ForvalterForelderBarnRelasjonDto>? = null,
     val historiskeIdenter: List<PdlFolkeregisteridentifikator>? = null,
 )
 
@@ -65,10 +64,3 @@ fun PersonInfo.tilForvalterPersonInfoDto(hentPersonFraPdlRequest: HentPersonFraP
         kontaktinformasjonForDoedsbo = kontaktinformasjonForDoedsbo.takeIf { hentPersonFraPdlRequest.visKontaktinformasjonForDødsbo },
         historiskeIdenter = historiskeIdenter.takeIf { hentPersonFraPdlRequest.visFolkeregister },
     )
-
-data class ForvalterForelderBarnRelasjonDto(
-    val ident: String,
-    val relasjonsrolle: String,
-    val fødselsdato: LocalDate?,
-    val navn: String?,
-)
