@@ -10,7 +10,9 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.datagenerator.tilfeldigSøker
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
@@ -26,10 +28,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -290,15 +295,54 @@ internal class AutobrevOmregningPgaAlderServiceTest {
         verify(exactly = 0) { taskRepository.save(any()) }
     }
 
+    @Test
+    fun `Verifiser at behandling for omregning blir trigget for skjermet barn fagsak med barn som fyller 18 år inneværende måned`() {
+        val søkerAktør = randomAktør()
+        val skjermetBarnSøker = SkjermetBarnSøker(aktør = søkerAktør)
+        val skjermetBarnFagsak =
+            lagFagsak(
+                type = FagsakType.SKJERMET_BARN,
+                status = FagsakStatus.LØPENDE,
+                skjermetBarnSøker = skjermetBarnSøker,
+            )
+        val behandling = initMock(alder = 18, medSøsken = true, fagsak = skjermetBarnFagsak).first
+
+        val autobrevPgaAlderDTO =
+            AutobrevPgaAlderDTO(
+                fagsakId = behandling.fagsak.id,
+                alder = Alder.ATTEN.år,
+                årMåned = inneværendeMåned(),
+            )
+
+        every { stegService.håndterVilkårsvurdering(any()) } returns behandling
+        every { stegService.håndterNyBehandling(any()) } returns behandling
+        every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
+        every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
+        every { autovedtakStegService.kjørBehandlingOmregning(any(), any(), any()) } returns ""
+
+        assertThat(
+            autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevPgaAlderDTO),
+        ).isEqualTo(AutobrevOmregningSvar.OK)
+
+        verify(exactly = 1) {
+            autovedtakStegService.kjørBehandlingOmregning(
+                any(),
+                any(),
+                any(),
+            )
+        }
+    }
+
     private fun initMock(
         behandlingStatus: BehandlingStatus = BehandlingStatus.AVSLUTTET,
         fagsakStatus: FagsakStatus = FagsakStatus.LØPENDE,
         alder: Long,
         medSøsken: Boolean,
         eøsNullUtbetaling: Boolean = false,
+        fagsak: Fagsak = lagFagsak(status = fagsakStatus),
     ): Triple<Behandling, Person, Person> {
         val behandling =
-            lagBehandling().also {
+            lagBehandling(fagsak = fagsak).also {
                 it.fagsak.status = fagsakStatus
                 it.status = behandlingStatus
                 it.kategori = if (eøsNullUtbetaling) BehandlingKategori.EØS else BehandlingKategori.NASJONAL

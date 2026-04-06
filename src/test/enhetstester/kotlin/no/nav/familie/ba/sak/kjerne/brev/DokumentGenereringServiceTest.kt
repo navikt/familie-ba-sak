@@ -1,5 +1,3 @@
-package no.nav.familie.ba.sak.kjerne.brev
-
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -13,13 +11,19 @@ import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.internal.TestVerktøyService
+import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
+import no.nav.familie.ba.sak.kjerne.brev.BrevService
+import no.nav.familie.ba.sak.kjerne.brev.DokumentGenereringService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevDeltBostedBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrev
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsakService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
+import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -137,5 +141,33 @@ class DokumentGenereringServiceTest {
 
             assertThat(feilmelding).isEqualTo("Fant ikke søker på fagsak id ${fagsak.id}")
         }
+    }
+
+    @Test
+    fun `skal bruke søkerens navn fra skjermetBarnSøker som mottakerens navn for SKJERMET_BARN`() {
+        val søkerAktør = randomAktør()
+        val barnAktør = randomAktør()
+        val fagsak =
+            lagFagsakUtenId(
+                aktør = barnAktør,
+                skjermetBarnSøker = SkjermetBarnSøker(aktør = søkerAktør),
+                type = FagsakType.SKJERMET_BARN,
+            )
+        val request =
+            ManueltBrevRequest(
+                brevmal = Brevmal.INFORMASJONSBREV_DELT_BOSTED,
+                enhet = Enhet("testId", "testNavn"),
+            )
+        val brevSlot = slot<Brev>()
+
+        every { personopplysningerService.hentPersoninfoEnkel(søkerAktør) } returns
+                PersonInfo(fødselsdato = LocalDate.now(), navn = "Søker Navn")
+        every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "Z000000"
+        every { brevKlient.genererBrev(any(), capture(brevSlot)) } returns byteArrayOf()
+
+        dokumentGenereringService.genererManueltBrev(request, fagsak)
+
+        val brev = brevSlot.captured as InformasjonsbrevDeltBostedBrev
+        assertThat(brev.data.flettefelter.navn).isEqualTo(listOf("Søker Navn"))
     }
 }
