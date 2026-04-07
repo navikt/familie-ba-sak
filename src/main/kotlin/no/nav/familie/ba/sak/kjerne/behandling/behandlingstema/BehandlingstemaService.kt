@@ -44,7 +44,12 @@ class BehandlingstemaService(
         if (behandling.skalBehandlesAutomatisk) {
             return behandling
         }
-        return oppdaterBehandlingstemaPåBehandlingHvisNødvendig(behandling, behandling.kategori, nyUnderkategori)
+        return oppdaterBehandlingstemaPåBehandlingHvisNødvendig(
+            behandling = behandling,
+            nyKategori = behandling.kategori,
+            nyUnderkategori = nyUnderkategori,
+            manuellOppdatering = false,
+        )
     }
 
     @Transactional
@@ -56,10 +61,15 @@ class BehandlingstemaService(
         if (behandling.skalBehandlesAutomatisk) {
             throw FunksjonellFeil("Kan ikke oppdatere behandlingstema manuelt på behandlinger som skal behandles automatisk.")
         }
-        val forrigeKategori = behandling.kategori
-        val forrigeUnderkategori = behandling.underkategori
-        val oppdatertBehanding = oppdaterBehandlingstemaPåBehandlingHvisNødvendig(behandling, nyKategori, nyUnderkategori)
-        lagLogginnslagHvisNødvendig(oppdatertBehanding, forrigeKategori, forrigeUnderkategori, nyKategori, nyUnderkategori)
+
+        val oppdatertBehanding =
+            oppdaterBehandlingstemaPåBehandlingHvisNødvendig(
+                behandling = behandling,
+                nyKategori = nyKategori,
+                nyUnderkategori = nyUnderkategori,
+                manuellOppdatering = true,
+            )
+
         return oppdatertBehanding
     }
 
@@ -73,7 +83,7 @@ class BehandlingstemaService(
         }
         val nyKategori = finnBehandlingKategori(behandling.fagsak.id)
         val nyUnderkategori = overstyrtUnderkategori ?: finnUnderkategoriFraAktivBehandling(fagsakId = behandling.fagsak.id)
-        return oppdaterBehandlingstemaPåBehandlingHvisNødvendig(behandling, nyKategori, nyUnderkategori)
+        return oppdaterBehandlingstemaPåBehandlingHvisNødvendig(behandling, nyKategori, nyUnderkategori, false)
     }
 
     fun finnBehandlingKategori(fagsakId: Long): BehandlingKategori {
@@ -161,14 +171,28 @@ class BehandlingstemaService(
         behandling: Behandling,
         nyKategori: BehandlingKategori,
         nyUnderkategori: BehandlingUnderkategori,
+        manuellOppdatering: Boolean,
     ): Behandling {
-        val skalOppdatereKategori = nyKategori != behandling.kategori
-        val skalOppdatereUnderkategori = nyUnderkategori != behandling.underkategori
+        val forrigeKategori = behandling.kategori
+        val forrigeUnderkategori = behandling.underkategori
+
+        val skalOppdatereKategori = nyKategori != forrigeKategori
+        val skalOppdatereUnderkategori = nyUnderkategori != forrigeUnderkategori
         if (skalOppdatereKategori || skalOppdatereUnderkategori) {
             behandling.kategori = nyKategori
             behandling.underkategori = nyUnderkategori
             val lagretBehandling = behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
             patchBehandlingstemaPåOppgaveForBehandlingHvisNødvendig(lagretBehandling)
+
+            loggService.opprettEndretBehandlingstema(
+                behandling = behandling,
+                forrigeKategori = forrigeKategori,
+                forrigeUnderkategori = forrigeUnderkategori,
+                nyKategori = nyKategori,
+                nyUnderkategori = nyUnderkategori,
+                manuellOppdatering = manuellOppdatering,
+            )
+
             return lagretBehandling
         }
         return behandling
@@ -194,26 +218,6 @@ class BehandlingstemaService(
             } else {
                 null
             }
-        }
-    }
-
-    private fun lagLogginnslagHvisNødvendig(
-        behandling: Behandling,
-        forrigeKategori: BehandlingKategori,
-        forrigeUnderkategori: BehandlingUnderkategori,
-        nyKategori: BehandlingKategori,
-        nyUnderkategori: BehandlingUnderkategori,
-    ) {
-        val skalOppdatereKategori = nyKategori != forrigeKategori
-        val skalOppdatereUnderkategori = nyUnderkategori != forrigeUnderkategori
-        if (skalOppdatereKategori || skalOppdatereUnderkategori) {
-            loggService.opprettEndretBehandlingstema(
-                behandling = behandling,
-                forrigeKategori = forrigeKategori,
-                forrigeUnderkategori = forrigeUnderkategori,
-                nyKategori = nyKategori,
-                nyUnderkategori = nyUnderkategori,
-            )
         }
     }
 }

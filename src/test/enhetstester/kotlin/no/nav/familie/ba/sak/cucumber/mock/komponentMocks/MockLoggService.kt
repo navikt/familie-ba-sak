@@ -18,6 +18,7 @@ fun mockLoggService(): LoggService {
     every { loggService.opprettVilkårsvurderingLogg(any(), any(), any()) } returns null
     every { loggService.opprettFerdigstillBehandling(any()) } just runs
     every { loggService.opprettTattAvMaskinellVent(any()) } just runs
+    every { loggService.opprettEndretBehandlingstema(any(), any(), any(), any(), any(), any()) } just runs
     every { loggService.hentLoggForBehandling(any()) } answers {
         val behandlingId = firstArg<Long>()
         listOf(
