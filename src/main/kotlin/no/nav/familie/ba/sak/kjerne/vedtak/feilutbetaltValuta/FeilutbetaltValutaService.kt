@@ -25,7 +25,6 @@ class FeilutbetaltValutaService(
                     fom = feilutbetaltValuta.fom,
                     tom = feilutbetaltValuta.tom,
                     feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp,
-                    // TODO: Sjekk om hele erPerMåned logikken kan fjernes nå som vi ikke ønsker å se på det per måned basis (NAV-21272)
                     erPerMåned = false,
                 ),
             )
