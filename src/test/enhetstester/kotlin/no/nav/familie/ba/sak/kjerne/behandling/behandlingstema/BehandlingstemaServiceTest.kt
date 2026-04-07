@@ -261,7 +261,7 @@ class BehandlingstemaServiceTest {
             verify(exactly = 1) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
             verify(exactly = 1) {
                 loggService.opprettEndretBehandlingstema(
-                    behandling = oppdatertBehandling,
+                    behandlingId = oppdatertBehandling.id,
                     forrigeKategori = NASJONAL,
                     forrigeUnderkategori = BehandlingUnderkategori.ORDINÆR,
                     nyKategori = EØS,
@@ -310,7 +310,7 @@ class BehandlingstemaServiceTest {
             verify(exactly = 1) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
             verify(exactly = 1) {
                 loggService.opprettEndretBehandlingstema(
-                    behandling = oppdatertBehandling,
+                    behandlingId = oppdatertBehandling.id,
                     forrigeKategori = NASJONAL,
                     forrigeUnderkategori = BehandlingUnderkategori.UTVIDET,
                     nyKategori = EØS,
@@ -359,7 +359,7 @@ class BehandlingstemaServiceTest {
             verify(exactly = 1) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
             verify(exactly = 1) {
                 loggService.opprettEndretBehandlingstema(
-                    behandling = oppdatertBehandling,
+                    behandlingId = oppdatertBehandling.id,
                     forrigeKategori = NASJONAL,
                     forrigeUnderkategori = BehandlingUnderkategori.UTVIDET,
                     nyKategori = NASJONAL,
@@ -408,7 +408,7 @@ class BehandlingstemaServiceTest {
             verify(exactly = 0) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
             verify(exactly = 0) {
                 loggService.opprettEndretBehandlingstema(
-                    behandling = any(),
+                    behandlingId = any(),
                     forrigeKategori = any(),
                     forrigeUnderkategori = any(),
                     nyKategori = any(),
@@ -456,7 +456,7 @@ class BehandlingstemaServiceTest {
             verify(exactly = 1) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
             verify(exactly = 1) {
                 loggService.opprettEndretBehandlingstema(
-                    behandling = oppdatertBehandling,
+                    behandlingId = oppdatertBehandling.id,
                     forrigeKategori = NASJONAL,
                     forrigeUnderkategori = BehandlingUnderkategori.ORDINÆR,
                     nyKategori = EØS,

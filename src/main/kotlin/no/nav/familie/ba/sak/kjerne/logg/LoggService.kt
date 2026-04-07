@@ -126,7 +126,7 @@ class LoggService(
     }
 
     fun opprettEndretBehandlingstema(
-        behandling: Behandling,
+        behandlingId: Long,
         forrigeUnderkategori: BehandlingUnderkategori,
         forrigeKategori: BehandlingKategori,
         nyUnderkategori: BehandlingUnderkategori,
@@ -134,7 +134,7 @@ class LoggService(
     ) {
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandlingId,
                 type = LoggType.BEHANDLINGSTYPE_ENDRET,
                 rolle =
                     SikkerhetContext.hentRolletilgangFraSikkerhetscontext(

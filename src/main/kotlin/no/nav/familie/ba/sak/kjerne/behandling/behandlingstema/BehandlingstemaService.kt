@@ -208,7 +208,7 @@ class BehandlingstemaService(
         val skalOppdatereUnderkategori = nyUnderkategori != forrigeUnderkategori
         if (skalOppdatereKategori || skalOppdatereUnderkategori) {
             loggService.opprettEndretBehandlingstema(
-                behandling = behandling,
+                behandlingId = behandling.id,
                 forrigeKategori = forrigeKategori,
                 forrigeUnderkategori = forrigeUnderkategori,
                 nyKategori = nyKategori,
