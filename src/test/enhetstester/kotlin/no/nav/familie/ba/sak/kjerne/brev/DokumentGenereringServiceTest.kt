@@ -1,3 +1,5 @@
+package no.nav.familie.ba.sak.kjerne.brev
+
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -11,9 +13,6 @@ import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.internal.TestVerktøyService
-import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
-import no.nav.familie.ba.sak.kjerne.brev.BrevService
-import no.nav.familie.ba.sak.kjerne.brev.DokumentGenereringService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
