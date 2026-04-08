@@ -45,6 +45,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Skyggesak
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
@@ -189,12 +190,10 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
         val vedtak = lagVedtak(lagBehandlingUtenId())
         vedtak.stønadBrevPdF = mockPdf
 
+        val fagsak = vedtak.behandling.fagsak
         val journalPostId =
             utgåendeJournalføringService.journalførDokument(
-                fnr = MOCK_FNR,
-                fagsakId =
-                    vedtak.behandling.fagsak.id
-                        .toString(),
+                fagsak = fagsak,
                 brev =
                     listOf(
                         Dokument(
@@ -225,7 +224,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
                     equalToJson(
                         jsonMapper.writeValueAsString(
                             forventetRequestArkiverDokument(
-                                fagsakId = vedtak.behandling.fagsak.id,
+                                fagsak = fagsak,
                                 behandlingId = vedtak.behandling.id,
                             ),
                         ),
@@ -700,7 +699,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
     private fun journalpostOkResponse(): Ressurs<ArkiverDokumentResponse> = success(ArkiverDokumentResponse(MOCK_JOURNALPOST_FOR_VEDTAK_ID, true))
 
     private fun forventetRequestArkiverDokument(
-        fagsakId: Long,
+        fagsak: Fagsak,
         behandlingId: Long,
     ): ArkiverDokumentRequest {
         val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)
@@ -722,10 +721,11 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
                 ),
             )
 
+        val fagsakId = fagsak.id.toString()
         return ArkiverDokumentRequest(
-            fnr = MOCK_FNR,
+            fnr = fagsak.aktør.aktivFødselsnummer(),
             forsøkFerdigstill = true,
-            fagsakId = fagsakId.toString(),
+            fagsakId = fagsakId,
             journalførendeEnhet = "1",
             hoveddokumentvarianter = brev,
             vedleggsdokumenter = vedlegg,

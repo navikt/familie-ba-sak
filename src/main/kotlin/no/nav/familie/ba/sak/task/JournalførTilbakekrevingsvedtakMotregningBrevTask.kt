@@ -55,8 +55,7 @@ class JournalførTilbakekrevingsvedtakMotregningBrevTask(
             mottakere.associate { mottakerInfo ->
                 val journalpostId =
                     journalførTilbakekrevingsvedtakMotregningsbrev(
-                        fnr = fagsak.aktør.aktivFødselsnummer(),
-                        fagsakId = fagsak.id,
+                        fagsak = fagsak,
                         journalførendeEnhet = behandlendeEnhet,
                         mottakerInfo = mottakerInfo,
                         eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsak.id, behandling.id, mottakerInfo),
@@ -101,8 +100,7 @@ class JournalførTilbakekrevingsvedtakMotregningBrevTask(
     }
 
     private fun journalførTilbakekrevingsvedtakMotregningsbrev(
-        fnr: String,
-        fagsakId: Long,
+        fagsak: Fagsak,
         tilbakekrevingsvedtakMotregning: TilbakekrevingsvedtakMotregning,
         journalførendeEnhet: String,
         mottakerInfo: MottakerInfo,
@@ -121,8 +119,7 @@ class JournalførTilbakekrevingsvedtakMotregningBrevTask(
         logger.info("Journalfører brev for tilbakekrevingsvedtak ved motregning for behandling ${behandling.id}")
 
         return utgåendeJournalføringService.journalførDokument(
-            fnr = fnr,
-            fagsakId = fagsakId.toString(),
+            fagsak = fagsak,
             journalførendeEnhet = journalførendeEnhet,
             brev = brev,
             avsenderMottaker = mottakerInfo.tilAvsenderMottaker(),

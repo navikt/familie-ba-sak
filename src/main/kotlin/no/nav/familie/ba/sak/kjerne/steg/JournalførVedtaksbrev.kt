@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.brev.mottaker.FullmektigEllerVerge
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.Institusjon
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerInfo
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.tilAvsenderMottaker
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
@@ -86,8 +87,7 @@ class JournalførVedtaksbrev(
 
         mottakere.forEach { mottakerInfo ->
             journalførVedtaksbrev(
-                fnr = fagsak.aktør.aktivFødselsnummer(),
-                fagsakId = fagsakId,
+                fagsak = fagsak,
                 vedtak = vedtak,
                 journalførendeEnhet = behandlendeEnhet,
                 mottakerInfo = mottakerInfo,
@@ -146,8 +146,7 @@ class JournalførVedtaksbrev(
     }
 
     fun journalførVedtaksbrev(
-        fnr: String,
-        fagsakId: String,
+        fagsak: Fagsak,
         vedtak: Vedtak,
         journalførendeEnhet: String,
         mottakerInfo: MottakerInfo,
@@ -180,8 +179,7 @@ class JournalførVedtaksbrev(
                 ),
             )
         return utgåendeJournalføringService.journalførDokument(
-            fnr = fnr,
-            fagsakId = fagsakId,
+            fagsak = fagsak,
             journalførendeEnhet = journalførendeEnhet,
             brev = brev,
             vedlegg = vedlegg,
