@@ -6,12 +6,17 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -175,5 +180,25 @@ internal class BrevmalServiceTest {
             )
 
         assertThat(brevmalService.hentManuellVedtaksbrevtype(behandling), Is(Brevmal.VEDTAK_OPPHØR_MED_ENDRING))
+    }
+
+    @Test
+    fun `hentVedtaksbrevmal skal returnere AUTOVEDTAK_ENDRING for automatisk skjermet barn behandling omregning 18 år`() {
+        val skjermetBarnFagsak =
+            lagFagsak(
+                type = FagsakType.SKJERMET_BARN,
+                status = FagsakStatus.LØPENDE,
+                skjermetBarnSøker = SkjermetBarnSøker(aktør = randomAktør()),
+            )
+        val behandling =
+            lagBehandling(
+                fagsak = skjermetBarnFagsak,
+                årsak = BehandlingÅrsak.OMREGNING_18ÅR,
+                skalBehandlesAutomatisk = true,
+                behandlingType = BehandlingType.REVURDERING,
+                resultat = Behandlingsresultat.ENDRET_OG_OPPHØRT,
+            )
+
+        assertThat(brevmalService.hentVedtaksbrevmal(behandling), Is(Brevmal.AUTOVEDTAK_ENDRING))
     }
 }
