@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.Månedli
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
@@ -683,5 +684,38 @@ class ForvalterController(
         logger.info("Opprettet ferdigstill behandling task for behandling ${dto.behandlingsId} gjennom forvalter-endepunktet")
 
         return ResponseEntity.ok("Task opprettet ${task.id}")
+    }
+
+    @PatchMapping("/deaktiverHenlagtBehandlingOgSettSisteVedtatteBehandlingTilAktiv")
+    @Operation(
+        summary = "Deaktiverer en behandling og setter siste vedtatte behandling til aktiv",
+        description = "Dette endepunktet deaktiverer en behandling og setter siste vedtatte behandling til aktiv. Dette for å fikse en sak som ble feil etter en bug i henlegging",
+    )
+    @Transactional
+    fun deaktiverHenlagtBehandlingOgSettSisteVedtatteBehandlingTilAktiv(
+        @RequestBody behandlingId: BehandlingId,
+    ) {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Deaktiverer en behandling og setter siste vedtatte behandling til aktiv",
+        )
+
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId.id)
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(behandling.fagsak.id) ?: error("Finnes ingen aktiv behandling")
+        if (aktivBehandling.id != behandling.id) {
+            error("Aktiv behandling er ${aktivBehandling.id} og ikke ${behandling.id}")
+        }
+
+        if (!aktivBehandling.erHenlagt()) {
+            error("Aktiv behandling er ikke henlagt")
+        }
+
+        aktivBehandling.aktiv = false
+        behandlingHentOgPersisterService.lagreEllerOppdater(aktivBehandling, sendTilDvh = false)
+        behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)?.apply {
+            aktiv = true
+            behandlingHentOgPersisterService.lagreEllerOppdater(this, sendTilDvh = false)
+            secureLogger.info("Patchet ${behandling.fagsak.id} ved å deaktivere behandling ${behandling.id} og setter siste vedtatte behandling ($id) til aktiv")
+        }
     }
 }
