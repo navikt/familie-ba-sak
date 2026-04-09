@@ -46,7 +46,7 @@ class InstitusjonService(
             val samhandlerAdresse =
                 SamhandlerAdresse(
                     adresselinjer = listOfNotNull(adresse.adresselinje1, adresse.adresselinje2, adresse.adresselinje3),
-                    postNr = adresse.postnummer,
+                    postNr = adresse.postnummer ?: "",
                     postSted = poststed,
                     adresseType = adresse.type,
                     kommunenummer = adresse.kommunenummer,
@@ -126,7 +126,7 @@ class InstitusjonService(
                 adresselinje1 = organisasjonAdresse.adresselinje1,
                 adresselinje2 = organisasjonAdresse.adresselinje2,
                 adresselinje3 = organisasjonAdresse.adresselinje3,
-                postnummer = organisasjonAdresse.postnummer,
+                postnummer = organisasjonAdresse.postnummer ?: "",
                 poststed = kodeverkService.hentPoststed(organisasjonAdresse.postnummer) ?: "",
                 kommunenummer = organisasjonAdresse.kommunenummer,
                 gyldighetsperiode =
