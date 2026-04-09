@@ -561,6 +561,38 @@ class VilkårsvurderingForNyBehandlingServiceTest {
         }
     }
 
+    @Nested
+    inner class InitierVilkårsvurderingForBehandling {
+        @Test
+        fun `skal fortsette uten preutfylling dersom preutfylling feiler`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER)
+            val barn = lagPerson(type = PersonType.BARN)
+            val fagsak = lagFagsak(aktør = søker.aktør)
+            val behandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.SØKNAD)
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
+                lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
+            every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns null
+            every { preutfyllVilkårService.preutfyllVilkår(any()) } throws IllegalStateException("Overlapp på periode")
+            every { behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(behandling.fagsak.id) } returns null
+
+            val vilkårsvurderingSlot = slot<Vilkårsvurdering>()
+            every { vilkårsvurderingService.lagreInitielt(capture(vilkårsvurderingSlot)) } returnsArgument 0
+
+            // Act
+            vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+                behandling = behandling,
+                bekreftEndringerViaFrontend = true,
+                forrigeBehandlingSomErVedtatt = null,
+            )
+
+            // Assert på at initielt vilkår ble lagret selv om det ble kastet en exception av preutfyllVilkårService.preutfyllVilkår
+            verify(exactly = 1) { preutfyllVilkårService.preutfyllVilkår(any()) }
+            verify(exactly = 1) { vilkårsvurderingService.lagreInitielt(any()) }
+        }
+    }
+
     companion object {
         fun validerKopiertVilkårsvurdering(
             kopiertVilkårsvurdering: Vilkårsvurdering,

@@ -131,6 +131,7 @@ class LoggService(
         forrigeKategori: BehandlingKategori,
         nyUnderkategori: BehandlingUnderkategori,
         nyKategori: BehandlingKategori,
+        manuellOppdatering: Boolean,
     ) {
         lagre(
             Logg(
@@ -141,7 +142,7 @@ class LoggService(
                         rolleConfig,
                         BehandlerRolle.SAKSBEHANDLER,
                     ),
-                tekst = "Behandlingstema er manuelt endret fra ${
+                tekst = "Behandlingstema er ${if (manuellOppdatering) "manuelt" else "automatisk"} endret fra ${
                     tilBehandlingstema(
                         underkategori = forrigeUnderkategori,
                         kategori = forrigeKategori,

@@ -123,6 +123,16 @@ class BehandlingstemaServiceTest {
             every { oppgaveService.patchOppgaverForBehandling(eq(behandling), capture(patchOppgaveCallback)) } answers {
                 patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
             }
+            every {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = any(),
+                    forrigeUnderkategori = any(),
+                    forrigeKategori = any(),
+                    nyUnderkategori = any(),
+                    nyKategori = any(),
+                    manuellOppdatering = false,
+                )
+            } just runs
 
             // Act
             val oppdatertBehandling =
@@ -134,6 +144,16 @@ class BehandlingstemaServiceTest {
             // Assert
             verify(exactly = 1) { behandlingHentOgPersisterService.lagreEllerOppdater(any()) }
             verify(exactly = 1) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
+            verify(exactly = 1) {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = any(),
+                    forrigeUnderkategori = any(),
+                    forrigeKategori = any(),
+                    nyUnderkategori = any(),
+                    nyKategori = any(),
+                    manuellOppdatering = false,
+                )
+            }
             assertThat(patchedOppgave?.behandlingstema).isEqualTo(Behandlingstema.OrdinærBarnetrygd.value)
             assertThat(patchedOppgave?.behandlingstype).isEqualTo(Behandlingstype.NASJONAL.value)
             assertThat(oppdatertBehandling.kategori).isEqualTo(behandling.kategori)
@@ -185,6 +205,17 @@ class BehandlingstemaServiceTest {
                 patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
             }
 
+            every {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = any(),
+                    forrigeUnderkategori = any(),
+                    forrigeKategori = any(),
+                    nyUnderkategori = any(),
+                    nyKategori = any(),
+                    manuellOppdatering = false,
+                )
+            } just runs
+
             // Act
             val oppdatertBehandling =
                 behandlingstemaService.oppdaterBehandlingstemaFraRegistrereSøknadSteg(
@@ -195,6 +226,16 @@ class BehandlingstemaServiceTest {
             // Assert
             verify(exactly = 1) { behandlingHentOgPersisterService.lagreEllerOppdater(any()) }
             verify(exactly = 1) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
+            verify(exactly = 1) {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = any(),
+                    forrigeUnderkategori = any(),
+                    forrigeKategori = any(),
+                    nyUnderkategori = any(),
+                    nyKategori = any(),
+                    manuellOppdatering = false,
+                )
+            }
             assertThat(patchedOppgave).isNull()
             assertThat(oppdatertBehandling.kategori).isEqualTo(behandling.kategori)
             assertThat(oppdatertBehandling.underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
@@ -246,7 +287,16 @@ class BehandlingstemaServiceTest {
             every { oppgaveService.patchOppgaverForBehandling(eq(behandling), capture(patchOppgaveCallback)) } answers {
                 patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
             }
-            every { loggService.opprettEndretBehandlingstema(any(), any(), any(), any(), any()) } just runs
+            every {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = any(),
+                    forrigeUnderkategori = any(),
+                    forrigeKategori = any(),
+                    nyUnderkategori = any(),
+                    nyKategori = any(),
+                    manuellOppdatering = true,
+                )
+            } just runs
 
             // Act
             val oppdatertBehandling =
@@ -266,6 +316,7 @@ class BehandlingstemaServiceTest {
                     forrigeUnderkategori = BehandlingUnderkategori.ORDINÆR,
                     nyKategori = EØS,
                     nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+                    manuellOppdatering = true,
                 )
             }
             assertThat(patchedOppgave?.behandlingstema).isEqualTo(Behandlingstema.UtvidetBarnetrygd.value)
@@ -295,7 +346,16 @@ class BehandlingstemaServiceTest {
             every { oppgaveService.patchOppgaverForBehandling(eq(behandling), capture(patchOppgaveCallback)) } answers {
                 patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
             }
-            every { loggService.opprettEndretBehandlingstema(any(), any(), any(), any(), any()) } just runs
+            every {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = any(),
+                    forrigeUnderkategori = any(),
+                    forrigeKategori = any(),
+                    nyUnderkategori = any(),
+                    nyKategori = any(),
+                    manuellOppdatering = true,
+                )
+            } just runs
 
             // Act
             val oppdatertBehandling =
@@ -315,6 +375,7 @@ class BehandlingstemaServiceTest {
                     forrigeUnderkategori = BehandlingUnderkategori.UTVIDET,
                     nyKategori = EØS,
                     nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+                    manuellOppdatering = true,
                 )
             }
             assertThat(patchedOppgave?.behandlingstema).isEqualTo(Behandlingstema.UtvidetBarnetrygd.value)
@@ -344,7 +405,16 @@ class BehandlingstemaServiceTest {
             every { oppgaveService.patchOppgaverForBehandling(eq(behandling), capture(patchOppgaveCallback)) } answers {
                 patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
             }
-            every { loggService.opprettEndretBehandlingstema(any(), any(), any(), any(), any()) } just runs
+            every {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = any(),
+                    forrigeUnderkategori = any(),
+                    forrigeKategori = any(),
+                    nyUnderkategori = any(),
+                    nyKategori = any(),
+                    manuellOppdatering = true,
+                )
+            } just runs
 
             // Act
             val oppdatertBehandling =
@@ -364,6 +434,7 @@ class BehandlingstemaServiceTest {
                     forrigeUnderkategori = BehandlingUnderkategori.UTVIDET,
                     nyKategori = NASJONAL,
                     nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                    manuellOppdatering = true,
                 )
             }
             assertThat(patchedOppgave?.behandlingstema).isEqualTo(Behandlingstema.OrdinærBarnetrygd.value)
@@ -393,7 +464,16 @@ class BehandlingstemaServiceTest {
             every { oppgaveService.patchOppgaverForBehandling(eq(behandling), capture(patchOppgaveCallback)) } answers {
                 patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
             }
-            every { loggService.opprettEndretBehandlingstema(any(), any(), any(), any(), any()) } just runs
+            every {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = any(),
+                    forrigeUnderkategori = any(),
+                    forrigeKategori = any(),
+                    nyUnderkategori = any(),
+                    nyKategori = any(),
+                    manuellOppdatering = true,
+                )
+            } just runs
 
             // Act
             val oppdatertBehandling =
@@ -413,6 +493,7 @@ class BehandlingstemaServiceTest {
                     forrigeUnderkategori = any(),
                     nyKategori = any(),
                     nyUnderkategori = any(),
+                    manuellOppdatering = true,
                 )
             }
             assertThat(patchedOppgave).isNull()
@@ -441,7 +522,16 @@ class BehandlingstemaServiceTest {
             every { oppgaveService.patchOppgaverForBehandling(eq(behandling), capture(patchOppgaveCallback)) } answers {
                 patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
             }
-            every { loggService.opprettEndretBehandlingstema(any(), any(), any(), any(), any()) } just runs
+            every {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = any(),
+                    forrigeUnderkategori = any(),
+                    forrigeKategori = any(),
+                    nyUnderkategori = any(),
+                    nyKategori = any(),
+                    manuellOppdatering = true,
+                )
+            } just runs
 
             // Act
             val oppdatertBehandling =
@@ -461,6 +551,7 @@ class BehandlingstemaServiceTest {
                     forrigeUnderkategori = BehandlingUnderkategori.ORDINÆR,
                     nyKategori = EØS,
                     nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+                    manuellOppdatering = true,
                 )
             }
             assertThat(patchedOppgave).isNull()
@@ -506,6 +597,16 @@ class BehandlingstemaServiceTest {
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
             every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns null
             every { vilkårsvurderingRepository.findByBehandlingAndAktiv(aktivBehandling.id) } returns null
+            every {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = any(),
+                    forrigeUnderkategori = any(),
+                    forrigeKategori = any(),
+                    nyUnderkategori = any(),
+                    nyKategori = any(),
+                    manuellOppdatering = false,
+                )
+            } just runs
 
             val oppgave =
                 Oppgave(
@@ -529,7 +630,16 @@ class BehandlingstemaServiceTest {
             // Assert
             verify(exactly = 1) { behandlingHentOgPersisterService.lagreEllerOppdater(any()) }
             verify(exactly = 1) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
-
+            verify(exactly = 1) {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = any(),
+                    forrigeUnderkategori = any(),
+                    forrigeKategori = any(),
+                    nyUnderkategori = any(),
+                    nyKategori = any(),
+                    manuellOppdatering = false,
+                )
+            }
             assertThat(patchedOppgave?.behandlingstema).isEqualTo(Behandlingstema.UtvidetBarnetrygd.value)
             assertThat(patchedOppgave?.behandlingstype).isEqualTo(Behandlingstype.NASJONAL.value)
             assertThat(oppdatertBehandling.kategori).isEqualTo(NASJONAL)
@@ -562,6 +672,18 @@ class BehandlingstemaServiceTest {
             every { oppgaveService.patchOppgaverForBehandling(eq(aktivBehandling), capture(patchOppgaveCallback)) } answers {
                 patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
             }
+
+            every {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = any(),
+                    forrigeUnderkategori = any(),
+                    forrigeKategori = any(),
+                    nyUnderkategori = any(),
+                    nyKategori = any(),
+                    manuellOppdatering = false,
+                )
+            } just runs
+
             // Act
             val oppdatertBehandling =
                 behandlingstemaService.oppdaterBehandlingstemaForVilkår(
@@ -571,7 +693,16 @@ class BehandlingstemaServiceTest {
             // Assert
             verify(exactly = 1) { behandlingHentOgPersisterService.lagreEllerOppdater(any()) }
             verify(exactly = 1) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
-
+            verify(exactly = 1) {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = any(),
+                    forrigeUnderkategori = any(),
+                    forrigeKategori = any(),
+                    nyUnderkategori = any(),
+                    nyKategori = any(),
+                    manuellOppdatering = false,
+                )
+            }
             assertThat(patchedOppgave?.behandlingstema).isEqualTo(Behandlingstema.OrdinærBarnetrygd.value)
             assertThat(patchedOppgave?.behandlingstype).isEqualTo(Behandlingstype.NASJONAL.value)
             assertThat(oppdatertBehandling.kategori).isEqualTo(NASJONAL)

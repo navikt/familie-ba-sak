@@ -39,7 +39,6 @@ fun lagRestSanityBegrunnelse(
     fagsakType: String? = null,
     regelverk: String? = null,
     brevPeriodeType: String? = null,
-    begrunnelseTypeForPerson: String? = null,
     ikkeIBruk: Boolean? = false,
     stotterFritekst: Boolean? = false,
 ): SanityBegrunnelseDto =
@@ -62,7 +61,6 @@ fun lagRestSanityBegrunnelse(
         fagsakType = fagsakType,
         regelverk = regelverk,
         brevPeriodeType = brevPeriodeType,
-        begrunnelseTypeForPerson = begrunnelseTypeForPerson,
         ikkeIBruk = ikkeIBruk,
         stotterFritekst = stotterFritekst,
     )
@@ -85,7 +83,6 @@ fun lagSanityBegrunnelse(
     resultat: SanityPeriodeResultat? = null,
     fagsakType: FagsakType? = null,
     periodeType: BrevPeriodeType? = null,
-    begrunnelseTypeForPerson: VedtakBegrunnelseType? = null,
 ): SanityBegrunnelse =
     SanityBegrunnelse(
         apiNavn = apiNavn,
@@ -105,7 +102,6 @@ fun lagSanityBegrunnelse(
         periodeResultat = resultat,
         fagsakType = fagsakType,
         periodeType = periodeType,
-        begrunnelseTypeForPerson = begrunnelseTypeForPerson,
     )
 
 fun lagSanityEøsBegrunnelse(

@@ -220,33 +220,6 @@ class OpprettTaskService(
     }
 
     @Transactional
-    fun opprettHenleggBehandlingTask(
-        behandlingId: Long,
-        årsak: HenleggÅrsak,
-        begrunnelse: String,
-        validerOppgavefristErEtterDato: LocalDate? = null,
-    ) {
-        taskRepository.save(
-            Task(
-                type = HenleggBehandlingTask.TASK_STEP_TYPE,
-                payload =
-                    jsonMapper.writeValueAsString(
-                        HenleggBehandlingTaskDTO(
-                            behandlingId = behandlingId,
-                            årsak = årsak,
-                            begrunnelse = begrunnelse,
-                            validerOppgavefristErEtterDato = validerOppgavefristErEtterDato,
-                        ),
-                    ),
-                properties =
-                    Properties().apply {
-                        this["behandlingId"] = behandlingId.toString()
-                    },
-            ),
-        )
-    }
-
-    @Transactional
     fun opprettTaskForÅPatcheMergetIdent(
         dto: PatchMergetIdentDto,
     ) = taskRepository.save(

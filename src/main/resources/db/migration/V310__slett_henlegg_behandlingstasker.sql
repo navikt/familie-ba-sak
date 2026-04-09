@@ -1,0 +1,1 @@
+DELETE FROM task t where t.status = 'AVVIKSHÅNDTERT' and t.type = 'HenleggBehandling';
