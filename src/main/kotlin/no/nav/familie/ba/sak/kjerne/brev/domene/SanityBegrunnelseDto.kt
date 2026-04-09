@@ -41,7 +41,6 @@ data class SanityBegrunnelseDto(
     val fagsakType: String?,
     val regelverk: String?,
     val brevPeriodeType: String?,
-    val begrunnelseTypeForPerson: String?,
     val ikkeIBruk: Boolean?,
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse? {
@@ -102,7 +101,6 @@ data class SanityBegrunnelseDto(
             fagsakType = fagsakType.finnEnumverdiNullable<FagsakType>(),
             tema = (regelverk).finnEnumverdi<Tema>(apiNavn),
             periodeType = (brevPeriodeType).finnEnumverdi<BrevPeriodeType>(apiNavn),
-            begrunnelseTypeForPerson = begrunnelseTypeForPerson.finnEnumverdi<VedtakBegrunnelseType>(apiNavn),
             ikkeIBruk = ikkeIBruk ?: false,
         )
     }

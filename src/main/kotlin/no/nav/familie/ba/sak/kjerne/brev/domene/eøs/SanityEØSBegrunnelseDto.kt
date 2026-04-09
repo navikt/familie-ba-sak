@@ -43,7 +43,6 @@ data class SanityEØSBegrunnelseDto(
     @Deprecated("Skal bruke periodeResultatForPerson i stedet")
     val periodeType: String?,
     val brevPeriodeType: String?,
-    val begrunnelseTypeForPerson: String?,
     val valgbarhet: String?,
     val ikkeIBruk: Boolean?,
     val endringsaarsaker: List<String>? = emptyList(),
@@ -90,7 +89,6 @@ data class SanityEØSBegrunnelseDto(
                 ovrigeTriggere?.mapNotNull {
                     it.finnEnumverdi<ØvrigTrigger>(apiNavn)
                 } ?: emptyList(),
-            begrunnelseTypeForPerson = begrunnelseTypeForPerson.finnEnumverdi<VedtakBegrunnelseType>(apiNavn),
             endringsaarsaker =
                 endringsaarsaker?.mapNotNull {
                     it.finnEnumverdi<Årsak>(apiNavn)
