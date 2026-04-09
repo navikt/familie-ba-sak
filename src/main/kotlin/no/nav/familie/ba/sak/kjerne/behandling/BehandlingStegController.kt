@@ -18,6 +18,8 @@ import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -44,6 +46,7 @@ class BehandlingStegController(
     private val stegService: StegService,
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService,
+    private val totrinnskontrollService: TotrinnskontrollService,
 ) {
     @PostMapping(
         path = ["registrer-søknad"],
@@ -156,10 +159,9 @@ class BehandlingStegController(
         @PathVariable behandlingId: Long,
         @RequestBody beslutningPåVedtakDto: BeslutningPåVedtakDto,
     ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.BESLUTTER,
-            handling = "iverksette vedtak",
-        )
+        val erUnderkjennelse = !beslutningPåVedtakDto.beslutning.erGodkjent()
+
+        verifiserTilgangTilUnderkjennelseEllerBesluttning(behandlingId, erUnderkjennelse)
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
@@ -215,6 +217,27 @@ class BehandlingStegController(
 
         stegService.håndterRegistrerInstitusjon(behandling, institusjon)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id)))
+    }
+
+    private fun verifiserTilgangTilUnderkjennelseEllerBesluttning(
+        behandlingId: Long,
+        erUnderkjennelse: Boolean,
+    ) {
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId)
+        val erEgetVedtak = totrinnskontroll?.saksbehandlerId == SikkerhetContext.hentSaksbehandler()
+        val underkjennelseAvEgetVedtak = erEgetVedtak && erUnderkjennelse
+
+        if (underkjennelseAvEgetVedtak) {
+            tilgangService.verifiserHarTilgangTilHandling(
+                minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                handling = "underkjenne eget vedtak",
+            )
+        } else {
+            tilgangService.verifiserHarTilgangTilHandling(
+                minimumBehandlerRolle = BehandlerRolle.BESLUTTER,
+                handling = "iverksette vedtak",
+            )
+        }
     }
 }
 

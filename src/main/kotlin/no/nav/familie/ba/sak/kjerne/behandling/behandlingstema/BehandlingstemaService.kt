@@ -185,7 +185,7 @@ class BehandlingstemaService(
             patchBehandlingstemaPåOppgaveForBehandlingHvisNødvendig(lagretBehandling)
 
             loggService.opprettEndretBehandlingstema(
-                behandling = behandling,
+                behandlingId = behandling.id,
                 forrigeKategori = forrigeKategori,
                 forrigeUnderkategori = forrigeUnderkategori,
                 nyKategori = nyKategori,
