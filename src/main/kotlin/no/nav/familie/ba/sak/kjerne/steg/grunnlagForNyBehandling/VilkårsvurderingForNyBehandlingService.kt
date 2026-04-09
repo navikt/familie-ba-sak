@@ -188,26 +188,35 @@ class VilkårsvurderingForNyBehandlingService(
 
         val aktivVilkårsvurdering = hentVilkårsvurdering(behandling.id)
 
-        val initiellVilkårsvurdering =
-            VilkårsvurderingForNyBehandlingUtils(personopplysningGrunnlag = personopplysningGrunnlag).genererInitiellVilkårsvurdering(
-                behandling = behandling,
-                barnaAktørSomAlleredeErVurdert =
-                    aktivVilkårsvurdering
-                        ?.personResultater
-                        ?.mapNotNull {
-                            personopplysningGrunnlag.barna.firstOrNull { barn -> barn.aktør == it.aktør }
-                        }?.filter { it.type == PersonType.BARN }
-                        ?.map { it.aktør } ?: emptyList(),
-            )
+        val barnaAktørSomAlleredeErVurdert =
+            aktivVilkårsvurdering
+                ?.personResultater
+                ?.mapNotNull {
+                    personopplysningGrunnlag.barna.firstOrNull { barn -> barn.aktør == it.aktør }
+                }?.filter { it.type == PersonType.BARN }
+                ?.map { it.aktør } ?: emptyList()
 
-        if (!behandling.skalBehandlesAutomatisk && !behandling.erTekniskEndring() && !behandling.erFalskIdentitet()) {
-            preutfyllVilkårService.preutfyllVilkår(vilkårsvurdering = initiellVilkårsvurdering)
-        } else if (behandling.opprettetÅrsak == FØDSELSHENDELSE) {
-            preutfyllVilkårService.preutfyllBosattIRiketForFødselshendelseBehandlinger(
-                vilkårsvurdering = initiellVilkårsvurdering,
-                barnSomSkalVurderesIFødselshendelse = barnSomSkalVurderesIFødselshendelse,
-            )
-        }
+        val initiellVilkårsvurdering =
+            if (!behandling.skalBehandlesAutomatisk && !behandling.erTekniskEndring() && !behandling.erFalskIdentitet()) {
+                genererOgPreutfyllInitiellVilkårsvurdering(
+                    behandling = behandling,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    barnaAktørSomAlleredeErVurdert = barnaAktørSomAlleredeErVurdert,
+                )
+            } else {
+                VilkårsvurderingForNyBehandlingUtils(personopplysningGrunnlag = personopplysningGrunnlag)
+                    .genererInitiellVilkårsvurdering(
+                        behandling = behandling,
+                        barnaAktørSomAlleredeErVurdert = barnaAktørSomAlleredeErVurdert,
+                    ).also {
+                        if (behandling.opprettetÅrsak == FØDSELSHENDELSE) {
+                            preutfyllVilkårService.preutfyllBosattIRiketForFødselshendelseBehandlinger(
+                                vilkårsvurdering = it,
+                                barnSomSkalVurderesIFødselshendelse = barnSomSkalVurderesIFødselshendelse,
+                            )
+                        }
+                    }
+            }
 
         tellMetrikkerForFødselshendelse(
             aktivVilkårsvurdering = aktivVilkårsvurdering,
@@ -241,6 +250,30 @@ class VilkårsvurderingForNyBehandlingService(
             vilkårsvurderingService.lagreInitielt(initiellVilkårsvurdering)
         }
     }
+
+    private fun genererOgPreutfyllInitiellVilkårsvurdering(
+        behandling: Behandling,
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        barnaAktørSomAlleredeErVurdert: List<Aktør>,
+    ): Vilkårsvurdering =
+        try {
+            VilkårsvurderingForNyBehandlingUtils(personopplysningGrunnlag = personopplysningGrunnlag)
+                .genererInitiellVilkårsvurdering(
+                    behandling = behandling,
+                    barnaAktørSomAlleredeErVurdert = barnaAktørSomAlleredeErVurdert,
+                ).also {
+                    preutfyllVilkårService.preutfyllVilkår(vilkårsvurdering = it)
+                }
+        } catch (e: Exception) {
+            logger.warn(
+                "Preutfylling av vilkår feilet for behandling ${behandling.id}, fortsetter uten preutfylling",
+                e,
+            )
+            VilkårsvurderingForNyBehandlingUtils(personopplysningGrunnlag = personopplysningGrunnlag).genererInitiellVilkårsvurdering(
+                behandling = behandling,
+                barnaAktørSomAlleredeErVurdert = barnaAktørSomAlleredeErVurdert,
+            )
+        }
 
     private fun genererNyVilkårsvurderingForBehandling(
         initiellVilkårsvurdering: Vilkårsvurdering,
