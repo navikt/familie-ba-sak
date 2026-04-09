@@ -41,6 +41,7 @@ import no.nav.familie.ba.sak.task.LogJournalpostIdForFagsakTask
 import no.nav.familie.ba.sak.task.MaskineltUnderkjennVedtakTask
 import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.PatchErOpprinneligPreutfyltIBehandlingTask
 import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
 import no.nav.familie.ba.sak.task.PatchMergetAktørDto
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
@@ -683,5 +684,23 @@ class ForvalterController(
         logger.info("Opprettet ferdigstill behandling task for behandling ${dto.behandlingsId} gjennom forvalter-endepunktet")
 
         return ResponseEntity.ok("Task opprettet ${task.id}")
+    }
+
+    @PostMapping("/patch-er-opprinnelig-preutfylt-i-behandling")
+    @Operation(
+        summary = "Patcher erOpprinneligPreutfyltIBehandling på vilkårresultater der feltet mangler",
+        description = "Henter vilkårresultater der erOpprinneligPreutfylt=true og erOpprinneligPreutfyltIBehandling=null, og setter feltet til sistEndretIBehandlingId. Kjøres som dry run som default.",
+    )
+    fun patchErOpprinneligPreutfyltIBehandling(
+        @RequestParam antall: Int,
+        @RequestParam(defaultValue = "true") dryRun: Boolean,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Patch erOpprinneligPreutfyltIBehandling på vilkårresultater",
+        )
+
+        val task = taskService.save(PatchErOpprinneligPreutfyltIBehandlingTask.opprettTask(antall = antall, dryRun = dryRun))
+        return ResponseEntity.ok("Opprettet task ${task.id} (dryRun=$dryRun) for å patche $antall vilkårresultater som mangler erOpprinneligPreutfyltIBehandling")
     }
 }
