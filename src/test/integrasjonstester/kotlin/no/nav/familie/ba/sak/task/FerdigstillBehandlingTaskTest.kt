@@ -287,6 +287,48 @@ class FerdigstillBehandlingTaskTest(
         }
     }
 
+    @Nested
+    inner class HenleggMedIverksetterVedtakStatus {
+        @Test
+        fun `henlegging av behandling i status IVERKSETTER_VEDTAK skal bruke henleggelses-stien og oppdatere aktiv-flagg`() {
+            // Arrange - kjør første behandling til ferdigstilling
+            val (søkerFnr, barnasIdenter) = lagSøkerOgBarn()
+            val behandling1 = kjørSteg(søkerFnr = søkerFnr, barnasIdenter = barnasIdenter, resultat = Resultat.OPPFYLT)
+            stegService.håndterFerdigstillBehandling(behandling1)
+            assertThat(behandlingRepository.finnBehandling(behandling1.id).aktiv).isTrue()
+
+            // Opprett en ny behandling med status IVERKSETTER_VEDTAK og henleggelsesresultat.
+            // Simulerer en behandling som har nådd IVERKSETTER_VEDTAK men som skal henlegges
+            // (f.eks. TEKNISK_VEDLIKEHOLD-henleggelse).
+            val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+            val behandling2 =
+                Behandling(
+                    fagsak = fagsak,
+                    opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                    type = BehandlingType.REVURDERING,
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    status = BehandlingStatus.IVERKSETTER_VEDTAK,
+                    resultat = Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
+                ).initBehandlingStegTilstand()
+            behandling2.behandlingStegTilstand.add(
+                BehandlingStegTilstand(
+                    behandling = behandling2,
+                    behandlingSteg = StegType.FERDIGSTILLE_BEHANDLING,
+                ),
+            )
+            val lagretBehandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(behandling2)
+            // På dette tidspunktet: behandling1.aktiv = false, behandling2.aktiv = true
+
+            // Act
+            stegService.håndterFerdigstillBehandling(lagretBehandling2)
+
+            // Assert - henleggelse skal bruke else-stien, ikke oppdaterFagsakStatus
+            assertThat(behandlingRepository.finnBehandling(lagretBehandling2.id).aktiv).isFalse()
+            assertThat(behandlingRepository.finnBehandling(behandling1.id).aktiv).isTrue()
+        }
+    }
+
     private fun kjørSteg(
         søkerFnr: String,
         barnasIdenter: List<String>,
