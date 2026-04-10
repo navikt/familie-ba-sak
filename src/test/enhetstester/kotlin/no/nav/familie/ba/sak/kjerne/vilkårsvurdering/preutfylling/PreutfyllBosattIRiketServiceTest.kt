@@ -119,6 +119,7 @@ class PreutfyllBosattIRiketServiceTest {
         assertThat(vilkårResultat.find { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
         assertThat(vilkårResultat).allSatisfy {
             assertThat(it.begrunnelseForManuellKontroll).isNull()
+            assertThat(it.erOpprinneligPreutfyltIBehandling).isEqualTo(behandling.id)
         }
     }
 
