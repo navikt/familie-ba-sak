@@ -84,6 +84,7 @@ fun List<Periode<Delvilkår>>.tilVilkårResultater(personResultat: PersonResulta
                 sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                 begrunnelseForManuellKontroll = erBosattINorgePeriode.verdi.begrunnelseForManuellKontroll,
                 utdypendeVilkårsvurderinger = erBosattINorgePeriode.verdi.utdypendeVilkårsvurderinger,
+                erOpprinneligPreutfylt = true,
                 evalueringÅrsaker = erBosattINorgePeriode.verdi.evalueringÅrsaker.map { it.hentNavn() },
                 erOpprinneligPreutfyltIBehandling = personResultat.vilkårsvurdering.behandling.id,
             )
