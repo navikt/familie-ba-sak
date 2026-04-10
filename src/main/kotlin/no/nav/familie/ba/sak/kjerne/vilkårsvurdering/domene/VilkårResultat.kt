@@ -65,8 +65,6 @@ data class VilkårResultat(
     var erAutomatiskVurdert: Boolean = false,
     @Column(name = "er_opprinnelig_preutfylt_i_behandling", updatable = false)
     val erOpprinneligPreutfyltIBehandling: Long? = null,
-    @Column(name = "er_opprinnelig_preutfylt", nullable = false, updatable = false)
-    val erOpprinneligPreutfylt: Boolean = false,
     @Column(name = "er_eksplisitt_avslag_paa_soknad")
     var erEksplisittAvslagPåSøknad: Boolean? = null,
     @Column(name = "evaluering_aarsak")

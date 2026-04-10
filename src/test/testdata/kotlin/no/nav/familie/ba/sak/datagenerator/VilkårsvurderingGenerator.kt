@@ -383,7 +383,6 @@ fun lagVilkårResultat(
     standardbegrunnelser = standardbegrunnelser,
     vurderesEtter = vurderesEtter,
     erOpprinneligPreutfyltIBehandling = behandlingId.takeIf { erPreutfylt },
-    erOpprinneligPreutfylt = erPreutfylt,
 )
 
 fun oppfyltVilkår(
