@@ -23,6 +23,7 @@ class EndringIPreutfyltVilkårLoggTest {
                 begrunnelse = "forrige begrunnelse",
                 sistEndretIBehandlingId = behandling.id,
                 erOpprinneligPreutfyltIBehandling = behandling.id,
+                erOpprinneligPreutfylt = true,
                 vurderesEtter = Regelverk.EØS_FORORDNINGEN,
                 utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
             )
@@ -87,6 +88,7 @@ class EndringIPreutfyltVilkårLoggTest {
                 begrunnelse = "",
                 sistEndretIBehandlingId = behandling.id,
                 erOpprinneligPreutfyltIBehandling = behandling.id,
+                erOpprinneligPreutfylt = true,
                 vurderesEtter = null,
                 utdypendeVilkårsvurderinger = emptyList(),
             )
