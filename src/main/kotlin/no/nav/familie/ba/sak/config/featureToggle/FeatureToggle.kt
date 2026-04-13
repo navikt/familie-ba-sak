@@ -52,4 +52,7 @@ enum class FeatureToggle(
     SKAL_KUNNE_BEHANDLE_BA_INSTITUSJONSFAGSAKER_I_KLAGE("familie-klage.skal-kunne-behandle-ba-institusjon-fagsaker"),
 
     KAN_OPPRETTE_SKJERMET_BARN_KLAGE("familie-ba-sak.kan-opprette-skjermet-barn-klage"),
+
+    // NAV-28471
+    TILLAT_TILGANG_SKJERMET_BARN_UTEN_LØPENDE_ANDELER("familie-ba-sak.tillat-tilgang-skjermet-barn-uten-lopende-andeler"),
 }
