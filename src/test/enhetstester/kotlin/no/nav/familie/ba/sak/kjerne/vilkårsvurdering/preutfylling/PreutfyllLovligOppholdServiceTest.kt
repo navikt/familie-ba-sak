@@ -578,6 +578,83 @@ class PreutfyllLovligOppholdServiceTest {
             assertThat(lovligOppholdResultat.periodeTom).isNull()
         }
 
+        @Test
+        fun `skal fjerne tom på oppholdstillatelse hvis tom er frem i tid`() {
+            // Arrange
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+            val personopplysningsgrunnlag =
+                lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
+                    søker.apply {
+                        opphold =
+                            mutableListOf(
+                                GrOpphold(
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusYears(3)),
+                                    person = this,
+                                ),
+                                GrOpphold(
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(3).plusDays(1), tom = LocalDate.now().minusYears(1)),
+                                    person = this,
+                                ),
+                                GrOpphold(
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(1).plusDays(1), tom = LocalDate.now().plusYears(3)),
+                                    person = this,
+                                ),
+                            )
+                    }
+                }
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningsgrunnlag
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+
+            // Assert
+            val lovligOppholdResultater =
+                vilkårsvurdering.personResultater
+                    .flatMap { it.vilkårResultater }
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+                    .sortedBy { it.periodeFom }
+
+            val sisteOppfylteVilkår = lovligOppholdResultater.last { it.resultat == Resultat.OPPFYLT }
+            assertThat(sisteOppfylteVilkår.periodeTom).isNull()
+        }
+
+        @Test
+        fun `skal ikke fjerne tom på oppholdstillatelse hvis tom ikke er frem i tid`() {
+            // Arrange
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+            val personopplysningsgrunnlag =
+                lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
+                    søker.apply {
+                        opphold =
+                            mutableListOf(
+                                GrOpphold(
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(10), tom = LocalDate.now().minusYears(1)),
+                                    person = this,
+                                ),
+                            )
+                    }
+                }
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningsgrunnlag
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+
+            // Assert
+            val lovligOppholdResultater =
+                vilkårsvurdering.personResultater
+                    .flatMap { it.vilkårResultater }
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+
+            val oppfyltPeriode = lovligOppholdResultater.single { it.resultat == Resultat.OPPFYLT }
+            assertThat(oppfyltPeriode.periodeTom).isNotNull
+        }
+
         private fun lagPersonopplysningGrunnlagMedSøkerOgBarn(
             søker: (Person) -> Person = { it },
         ): PersonopplysningGrunnlag =
