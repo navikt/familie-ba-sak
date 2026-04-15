@@ -165,7 +165,7 @@ data class AndelTilkjentYtelse(
     fun erAndelSomharNullutbetalingPgaDifferanseberegning() =
         this.kalkulertUtbetalingsbeløp == 0 &&
             this.differanseberegnetPeriodebeløp != null &&
-            this.differanseberegnetPeriodebeløp <= 0
+            this.differanseberegnetPeriodebeløp!! <= 0
 
     private fun finnRelevanteVilkårsresulaterForRegelverk(
         personResultater: Set<PersonResultat>,

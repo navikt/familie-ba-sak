@@ -551,7 +551,7 @@ fun VedtaksperiodeMedBegrunnelser.hentMånedOgÅrForBegrunnelse(): String? =
     if (this.fom == null || fom == TIDENES_MORGEN) {
         null
     } else {
-        fom.forrigeMåned().tilMånedÅr()
+        fom!!.forrigeMåned().tilMånedÅr()
     }
 
 private fun hentBeløp(

@@ -109,7 +109,7 @@ class StønadsstatistikkService(
                 annenForeldersAktivitet =
                     if (kompetanse.annenForeldersAktivitet != null) {
                         KompetanseAktivitet.valueOf(
-                            kompetanse.annenForeldersAktivitet.name,
+                            kompetanse.annenForeldersAktivitet!!.name,
                         )
                     } else {
                         null
@@ -119,7 +119,7 @@ class StønadsstatistikkService(
                 fom = kompetanse.fom!!,
                 tom = kompetanse.tom,
                 resultat = KompetanseResultat.valueOf(kompetanse.resultat!!.name),
-                sokersaktivitet = if (kompetanse.søkersAktivitet != null) KompetanseAktivitet.valueOf(kompetanse.søkersAktivitet.name) else null,
+                sokersaktivitet = if (kompetanse.søkersAktivitet != null) KompetanseAktivitet.valueOf(kompetanse.søkersAktivitet!!.name) else null,
                 sokersAktivitetsland = kompetanse.søkersAktivitetsland,
             )
         }

@@ -76,7 +76,7 @@ class KompetanseController(
         if (oppdatertKompetanse.fom == null) {
             throw FunksjonellFeil("Manglende fra-og-med", httpStatus = HttpStatus.BAD_REQUEST)
         }
-        if (oppdatertKompetanse.tom != null && oppdatertKompetanse.fom > oppdatertKompetanse.tom) {
+        if (oppdatertKompetanse.tom != null && oppdatertKompetanse.fom!! > oppdatertKompetanse.tom) {
             throw FunksjonellFeil("Fra-og-med er etter til-og-med", httpStatus = HttpStatus.BAD_REQUEST)
         }
         if (oppdatertKompetanse.barnAktører.isEmpty()) {
@@ -88,7 +88,7 @@ class KompetanseController(
             (oppdatertKompetanse.erAnnenForelderOmfattetAvNorskLovgivning == false && oppdatertKompetanse.søkersAktivitet?.gyldigForSøker == false)
         ) {
             throw FunksjonellFeil(
-                "Valgt verdi for søkers aktivitet er ikke gyldig ${if (oppdatertKompetanse.erAnnenForelderOmfattetAvNorskLovgivning) "når annen forelder er omfattet av norsk lovgivning" else ""}"
+                "Valgt verdi for søkers aktivitet er ikke gyldig ${if (oppdatertKompetanse.erAnnenForelderOmfattetAvNorskLovgivning == true) "når annen forelder er omfattet av norsk lovgivning" else ""}"
                     .trim(),
             )
         }
@@ -97,7 +97,7 @@ class KompetanseController(
             (oppdatertKompetanse.erAnnenForelderOmfattetAvNorskLovgivning == false && oppdatertKompetanse.annenForeldersAktivitet?.gyldigForAnnenForelder == false)
         ) {
             throw FunksjonellFeil(
-                "Valgt verdi for annen forelders aktivitet er ikke gyldig ${if (oppdatertKompetanse.erAnnenForelderOmfattetAvNorskLovgivning) "når annen forelder er omfattet av norsk lovgivning" else ""}"
+                "Valgt verdi for annen forelders aktivitet er ikke gyldig ${if (oppdatertKompetanse.erAnnenForelderOmfattetAvNorskLovgivning == true) "når annen forelder er omfattet av norsk lovgivning" else ""}"
                     .trim(),
             )
         }

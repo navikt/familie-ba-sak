@@ -56,7 +56,7 @@ data class GrStatsborgerskap(
 
     fun gjeldendeNå(): Boolean {
         if (gyldigPeriode == null) return true
-        return LocalDate.now().erInnenfor(gyldigPeriode)
+        return LocalDate.now().erInnenfor(gyldigPeriode!!)
     }
 
     override fun equals(other: Any?): Boolean {

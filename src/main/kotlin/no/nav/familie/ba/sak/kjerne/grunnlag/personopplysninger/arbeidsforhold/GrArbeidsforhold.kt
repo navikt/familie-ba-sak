@@ -81,7 +81,7 @@ data class GrArbeidsforhold(
             tom = this.periode?.tom,
             verdi =
                 when (arbeidsgiverType) {
-                    Organisasjon.name if arbeidsgiverId != null -> "${organisasjonNavn?.let { "$it\n" }.orEmpty()}${formaterOrganisasjonsnummer(arbeidsgiverId)}"
+                    Organisasjon.name if arbeidsgiverId != null -> "${organisasjonNavn?.let { "$it\n" }.orEmpty()}${formaterOrganisasjonsnummer(arbeidsgiverId!!)}"
                     Person.name -> "Privat ansettelse"
                     else -> "Ukjent arbeidsgiver"
                 },
@@ -112,5 +112,5 @@ data class GrArbeidsforhold(
 
 fun List<GrArbeidsforhold>.harLøpendeArbeidsforhold(): Boolean =
     this.any {
-        it.periode?.tom == null || it.periode.tom >= LocalDate.now()
+        it.periode?.tom == null || it.periode!!.tom!! >= LocalDate.now()
     }

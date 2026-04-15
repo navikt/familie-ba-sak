@@ -118,7 +118,7 @@ private fun VedtaksperiodeMedBegrunnelser.hentTomTekstForBrev(
 ) = if (this.tom == null) {
     ""
 } else {
-    val tomDato = this.tom.tilMånedÅr()
+    val tomDato = this.tom!!.tilMånedÅr()
     when (brevPeriodeType) {
         BrevPeriodeType.UTBETALING -> "til $tomDato"
         BrevPeriodeType.INGEN_UTBETALING -> if (this.type == Vedtaksperiodetype.AVSLAG) "til og med $tomDato " else ""
