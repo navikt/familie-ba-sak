@@ -340,6 +340,8 @@ enum class Behandlingsresultat(
     fun erAvslått(): Boolean = this in listOf(AVSLÅTT, AVSLÅTT_OG_OPPHØRT, AVSLÅTT_OG_ENDRET, AVSLÅTT_ENDRET_OG_OPPHØRT)
 
     fun erFortsattInnvilget(): Boolean = this in listOf(FORTSATT_INNVILGET, ENDRET_OG_FORTSATT_INNVILGET)
+
+    fun erEndretOgOpphørt(): Boolean = this in listOf(ENDRET_OG_FORTSATT_OPPHØRT, ENDRET_OG_OPPHØRT, INNVILGET_ENDRET_OG_OPPHØRT, DELVIS_INNVILGET_ENDRET_OG_OPPHØRT, AVSLÅTT_ENDRET_OG_OPPHØRT)
 }
 
 /**

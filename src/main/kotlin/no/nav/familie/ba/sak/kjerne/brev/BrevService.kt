@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
@@ -22,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.finnInnvilgedeOg
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.finnInnvilgedeOgReduserteSvalbardtilleggPerioder
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.filtrerBortIrrelevanteAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
@@ -104,14 +104,12 @@ class BrevService(
     private val testVerktøyService: TestVerktøyService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
-    private val kompetanseRepository: KompetanseRepository,
     private val valutakursRepository: ValutakursRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val hjemmeltekstUtleder: HjemmeltekstUtleder,
     private val avregningService: AvregningService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val clockProvider: ClockProvider,
-    private val featureToggle: FeatureToggleService,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -122,7 +120,7 @@ class BrevService(
             )
 
         val vedtakFellesfelter = lagVedtaksbrevFellesfelter(vedtak)
-        validerBrevdata(brevmal, vedtakFellesfelter)
+        validerBrevdata(brevmal, vedtakFellesfelter, behandling.resultat)
 
         val skalMeldeFraOmEndringerEøsSelvstendigRett by lazy {
             vedtaksperiodeService.skalMeldeFraOmEndringerEøsSelvstendigRett(vedtak)
@@ -363,14 +361,11 @@ class BrevService(
     private fun validerBrevdata(
         brevmal: Brevmal,
         vedtakFellesfelter: VedtakFellesfelter,
+        behandlingsresultat: Behandlingsresultat,
     ) {
-        if (brevmal in
-            listOf(
-                Brevmal.VEDTAK_OPPHØRT,
-                Brevmal.VEDTAK_OPPHØRT_INSTITUSJON,
-            ) &&
-            vedtakFellesfelter.perioder.size > 1
-        ) {
+        val erOpphørtBrevmal = brevmal in listOf(Brevmal.VEDTAK_OPPHØRT, Brevmal.VEDTAK_OPPHØRT_INSTITUSJON)
+
+        if (erOpphørtBrevmal && !behandlingsresultat.erEndretOgOpphørt() && vedtakFellesfelter.perioder.size > 1) {
             throw FunksjonellFeil(
                 "Behandlingsstatusen er \"Opphørt\", men mer enn én periode er begrunnet. Du skal kun begrunne perioden uten utbetaling.",
             )
