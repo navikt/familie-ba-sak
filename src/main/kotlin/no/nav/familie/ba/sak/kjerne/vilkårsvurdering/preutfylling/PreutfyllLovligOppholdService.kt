@@ -23,6 +23,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE.PERM
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.isSameOrBefore
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
@@ -154,7 +155,7 @@ class PreutfyllLovligOppholdService(
                 Periode(
                     verdi = true,
                     fom = oppholdstillatelse.gyldigPeriode?.fom,
-                    tom = oppholdstillatelse.gyldigPeriode?.tom,
+                    tom = oppholdstillatelse.gyldigPeriode?.tom?.takeIf { it.isSameOrBefore(LocalDate.now()) },
                 ).tilTidslinje()
             }.kombiner { it.any() }
 }
