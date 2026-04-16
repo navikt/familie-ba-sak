@@ -39,4 +39,5 @@ data class BarnMedOpplysninger(
     val inkludertISøknaden: Boolean = true,
     val manueltRegistrert: Boolean = false,
     val erFolkeregistrert: Boolean = true,
+    val skjermesForBruker: Boolean = false,
 )
