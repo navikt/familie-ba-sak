@@ -1,18 +1,20 @@
 package no.nav.familie.ba.sak.sikkerhet
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.common.Utils.slåSammen
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.RolleConfig
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.stereotype.Service
 
@@ -24,6 +26,8 @@ class TilgangService(
     private val rolleConfig: RolleConfig,
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val auditLogger: AuditLogger,
+    private val featureToggleService: FeatureToggleService,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
     /**
      * Sjekk om saksbehandler har tilgang til å gjøre en gitt handling.
@@ -90,16 +94,14 @@ class TilgangService(
         behandlingId: Long,
         event: AuditLoggerEvent,
     ) {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val personerPåBehandling = persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
+        val søker = behandling.fagsak.skjermetBarnSøker?.aktør ?: behandling.fagsak.aktør
+
         val personIdenter =
-            persongrunnlagService
-                .hentSøkerOgBarnPåBehandling(behandlingId)
+            personerPåBehandling
                 ?.map { it.aktør.aktivFødselsnummer() }
-                ?: listOf(
-                    behandlingHentOgPersisterService
-                        .hent(behandlingId)
-                        .fagsak.aktør
-                        .aktivFødselsnummer(),
-                )
+                ?: listOf(behandling.fagsak.aktør.aktivFødselsnummer())
 
         if (!SikkerhetContext.erSystemKontekst()) {
             personIdenter.forEach {
@@ -114,7 +116,10 @@ class TilgangService(
         }
 
         val tilgangerTilPersoner = sjekkTilgangTilPersoner(personIdenter)
-        if (!harTilgangTilAllePersoner(tilgangerTilPersoner)) {
+        val allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeAndeler =
+            allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeAndeler(behandling.fagsak.id, tilgangerTilPersoner, søker)
+
+        if (!harTilgangTilAllePersoner(tilgangerTilPersoner) && !allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeAndeler) {
             val adressebeskyttelsegraderingEllerNavAnsatt = tilgangerTilPersoner.tilBegrunnelserForManglendeTilgang()
             throw RolleTilgangskontrollFeil(
                 melding =
@@ -130,14 +135,16 @@ class TilgangService(
         event: AuditLoggerEvent,
     ) {
         val aktør = fagsakService.hentAktør(fagsakId)
+        val fagsak = fagsakService.hentPåFagsakId(fagsakId)
+        val søker = fagsak.skjermetBarnSøker?.aktør ?: fagsak.aktør
+
+        val personerPåFagsak = persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId)
         val personIdenterIFagsak =
             (
-                persongrunnlagService
-                    .hentSøkerOgBarnPåFagsak(fagsakId)
+                personerPåFagsak
                     ?.map { it.aktør.aktivFødselsnummer() }
                     ?: emptyList()
             ).ifEmpty {
-                val fagsak = fagsakService.hentPåFagsakId(fagsakId)
                 listOfNotNull(aktør.aktivFødselsnummer(), fagsak.skjermetBarnSøker?.aktør?.aktivFødselsnummer())
             }
 
@@ -152,7 +159,10 @@ class TilgangService(
         }
 
         val tilgangerTilPersoner = sjekkTilgangTilPersoner(personIdenterIFagsak)
-        if (!harTilgangTilAllePersoner(tilgangerTilPersoner)) {
+        val allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeAndeler =
+            allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeAndeler(fagsak.id, tilgangerTilPersoner, søker)
+
+        if (!harTilgangTilAllePersoner(tilgangerTilPersoner) && !allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeAndeler) {
             val adressebeskyttelsegraderingEllerNavAnsatt = tilgangerTilPersoner.tilBegrunnelserForManglendeTilgang()
             throw RolleTilgangskontrollFeil(
                 melding =
@@ -185,11 +195,52 @@ class TilgangService(
         validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
     }
 
-    fun validerErPåBeslutteVedtakSteg(behandlingId: Long) {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        if (behandling.status != BehandlingStatus.FATTER_VEDTAK && behandling.steg == StegType.BESLUTTE_VEDTAK) {
-            throw Feil(message = "Er ikke i riktig steg eller status. Forventer status FATTER_VEDTAK og steg BESLUTTE_VEDTAK")
+    /**
+     * Sjekker om tilgang til en fagsak kan tillates selv om saksbehandler mangler
+     * strengt fortrolig-tilgang for en eller flere barn. Tilgang tillates dersom:
+     * - Det finnes en iverksatt behandling
+     * - Hvert barn som det mangles tilgang til har ikke lenger løpende andeler per sist iverksatt behandling
+     * - Saksbehandler har tilgang til søker fra før
+     */
+    private fun allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeAndeler(
+        fagsakId: Long,
+        tilgangerTilPersoner: List<Tilgang>,
+        søker: Aktør,
+    ): Boolean {
+        if (!featureToggleService.isEnabled(FeatureToggle.TILLAT_TILGANG_SKJERMET_BARN_UTEN_LØPENDE_ANDELER)) {
+            return false
         }
+
+        if (tilgangerTilPersoner.none { it.harTilgang && it.personIdent == søker.aktivFødselsnummer() }) {
+            return false
+        }
+
+        val personerSaksbehandlerIkkeHarTilgangTilPågrunnAvManglendeStrengtFortroligTilgang =
+            tilgangerTilPersoner
+                .filter { !it.harTilgang }
+                .takeIf { it.isNotEmpty() && it.all { p -> p.begrunnelse?.contains("Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'") == true } }
+                ?.map { it.personIdent }
+                ?: return false
+
+        val sisteIverksatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId) ?: return false
+        val andelerPåBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id)
+
+        val alleSkjermedeBarnHarIngenLøpendeAndeler =
+            personerSaksbehandlerIkkeHarTilgangTilPågrunnAvManglendeStrengtFortroligTilgang.all { ident ->
+                andelerPåBehandling
+                    .filter { it.aktør.aktivFødselsnummer() == ident }
+                    .none { it.erLøpende() }
+            }
+
+        if (alleSkjermedeBarnHarIngenLøpendeAndeler) {
+            secureLogger.info(
+                "Tillater tilgang til fagsak=$fagsakId for saksbehandler=${SikkerhetContext.hentSaksbehandler()}. " +
+                    "Saksbehandler har ikke tilgang til personer med strengt fortrolig addresse, men barn som er skjermet har ikke lenger løpende andeler",
+            )
+            return true
+        }
+
+        return false
     }
 
     private fun harTilgangTilAllePersoner(tilganger: List<Tilgang>): Boolean = tilganger.all { it.harTilgang }
