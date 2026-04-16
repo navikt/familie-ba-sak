@@ -40,7 +40,8 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
                 .filter { it.type == SatsType.FINNMARKSTILLEGG }
                 .minOfOrNull { it.gyldigFom } ?: LocalDate.MAX
 
-        if (vedtaksperiode.fom == null || vedtaksperiode.fom.isSameOrBefore(startdatoForFinnmarkstillegg)) {
+        val fom = vedtaksperiode.fom
+        if (fom == null || fom.isSameOrBefore(startdatoForFinnmarkstillegg)) {
             return false
         }
 
@@ -97,7 +98,8 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
                 .filter { it.type == SatsType.SVALBARDTILLEGG }
                 .minOfOrNull { it.gyldigFom } ?: LocalDate.MAX
 
-        if (vedtaksperiode.fom == null || vedtaksperiode.fom.isSameOrBefore(startdatoForSvalbardtillegg)) {
+        val fom = vedtaksperiode.fom
+        if (fom == null || fom.isSameOrBefore(startdatoForSvalbardtillegg)) {
             return false
         }
 

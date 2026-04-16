@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinitio
 import no.nav.familie.ba.sak.datagenerator.lagVedtakMedId
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
+import java.util.Optional
 
 fun mockVedtakRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): VedtakRepository {
     val vedtakRepository = mockk<VedtakRepository>()
@@ -16,6 +17,11 @@ fun mockVedtakRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefin
     every { vedtakRepository.getReferenceById(any()) } answers {
         val vedtakId = firstArg<Long>()
         dataFraCucumber.vedtaksliste.first { it.id == vedtakId }
+    }
+    every { vedtakRepository.findById(any()) } answers {
+        val vedtakId = firstArg<Long>()
+        val vedtak = dataFraCucumber.vedtaksliste.find { it.id == vedtakId }
+        if (vedtak != null) Optional.of(vedtak) else Optional.empty()
     }
     every { vedtakRepository.findByBehandlingAndAktivOptional(any()) } answers {
         val behandlingId = firstArg<Long>()

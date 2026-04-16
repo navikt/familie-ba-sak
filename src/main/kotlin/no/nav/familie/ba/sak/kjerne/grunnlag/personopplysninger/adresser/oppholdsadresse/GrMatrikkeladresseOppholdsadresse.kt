@@ -58,7 +58,10 @@ data class GrMatrikkeladresseOppholdsadresse(
         return postnummer?.let { "$postnummer$poststed$oppholdAnnetSted" } ?: "Ukjent adresse$oppholdAnnetSted"
     }
 
-    override fun erPåSvalbard(): Boolean = (kommunenummer != null && erKommunePåSvalbard(kommunenummer)) || oppholdAnnetSted == PAA_SVALBARD
+    override fun erPåSvalbard(): Boolean {
+        val kommunenummer = this.kommunenummer
+        return (kommunenummer != null && erKommunePåSvalbard(kommunenummer)) || oppholdAnnetSted == PAA_SVALBARD
+    }
 
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {

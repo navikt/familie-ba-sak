@@ -115,16 +115,19 @@ private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
 
 private fun VedtaksperiodeMedBegrunnelser.hentTomTekstForBrev(
     brevPeriodeType: BrevPeriodeType,
-) = if (this.tom == null) {
-    ""
-} else {
-    val tomDato = this.tom.tilMånedÅr()
-    when (brevPeriodeType) {
-        BrevPeriodeType.UTBETALING -> "til $tomDato"
-        BrevPeriodeType.INGEN_UTBETALING -> if (this.type == Vedtaksperiodetype.AVSLAG) "til og med $tomDato " else ""
-        BrevPeriodeType.INGEN_UTBETALING_UTEN_PERIODE -> ""
-        BrevPeriodeType.FORTSATT_INNVILGET -> ""
-        else -> throw Feil("$brevPeriodeType skal ikke brukes")
+): String {
+    val tom = this.tom
+    return if (tom == null) {
+        ""
+    } else {
+        val tomDato = tom.tilMånedÅr()
+        when (brevPeriodeType) {
+            BrevPeriodeType.UTBETALING -> "til $tomDato"
+            BrevPeriodeType.INGEN_UTBETALING -> if (this.type == Vedtaksperiodetype.AVSLAG) "til og med $tomDato " else ""
+            BrevPeriodeType.INGEN_UTBETALING_UTEN_PERIODE -> ""
+            BrevPeriodeType.FORTSATT_INNVILGET -> ""
+            else -> throw Feil("$brevPeriodeType skal ikke brukes")
+        }
     }
 }
 

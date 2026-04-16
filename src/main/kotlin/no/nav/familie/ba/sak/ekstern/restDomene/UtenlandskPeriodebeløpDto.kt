@@ -53,11 +53,13 @@ fun UtenlandskPeriodebeløpDto.tilKalkulertMånedligBeløp(): BigDecimal? {
 }
 
 fun UtenlandskPeriodebeløp.tilKalkulertMånedligBeløp(): BigDecimal? {
-    if (this.beløp == null || this.intervall == null) {
+    val beløp = this.beløp
+    val intervall = this.intervall
+    if (beløp == null || intervall == null) {
         return null
     }
 
-    return this.intervall.konverterBeløpTilMånedlig(this.beløp)
+    return intervall.konverterBeløpTilMånedlig(beløp)
 }
 
 fun UtenlandskPeriodebeløp.tilUtenlandskPeriodebeløpDto() =
