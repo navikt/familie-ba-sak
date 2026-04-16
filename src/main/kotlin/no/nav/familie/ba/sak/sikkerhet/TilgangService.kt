@@ -117,7 +117,7 @@ class TilgangService(
 
         val tilgangerTilPersoner = sjekkTilgangTilPersoner(personIdenter)
         val allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeAndeler =
-            allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeandeler(behandling.fagsak.id, tilgangerTilPersoner, søker)
+            allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeAndeler(behandling.fagsak.id, tilgangerTilPersoner, søker)
 
         if (!harTilgangTilAllePersoner(tilgangerTilPersoner) && !allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeAndeler) {
             val adressebeskyttelsegraderingEllerNavAnsatt = tilgangerTilPersoner.tilBegrunnelserForManglendeTilgang()
@@ -160,7 +160,7 @@ class TilgangService(
 
         val tilgangerTilPersoner = sjekkTilgangTilPersoner(personIdenterIFagsak)
         val allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeAndeler =
-            allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeandeler(fagsak.id, tilgangerTilPersoner, søker)
+            allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeAndeler(fagsak.id, tilgangerTilPersoner, søker)
 
         if (!harTilgangTilAllePersoner(tilgangerTilPersoner) && !allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeAndeler) {
             val adressebeskyttelsegraderingEllerNavAnsatt = tilgangerTilPersoner.tilBegrunnelserForManglendeTilgang()
@@ -202,7 +202,7 @@ class TilgangService(
      * - Hvert barn som det mangles tilgang til har ikke lenger løpende andeler per sist iverksatt behandling
      * - Saksbehandler har tilgang til søker fra før
      */
-    private fun allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeandeler(
+    private fun allePersonerSaksbehandlerIkkeHarTilgangTilErSkjermetBarnUtenLøpendeAndeler(
         fagsakId: Long,
         tilgangerTilPersoner: List<Tilgang>,
         søker: Aktør,
