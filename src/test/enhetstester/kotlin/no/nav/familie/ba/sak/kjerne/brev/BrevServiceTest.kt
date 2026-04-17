@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
@@ -11,9 +12,15 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Hjemmeltekst
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.hjemler.HjemmeltekstUtleder
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -49,7 +56,6 @@ class BrevServiceTest {
     val mockAvregningService = mockk<AvregningService>()
 
     val clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(LocalDate.of(2025, 12, 1))
-    val mockedFeatureToggleServie = mockFeatureToggleService()
     val brevService =
         BrevService(
             totrinnskontrollService = mockTotrinnskontrollService,
@@ -67,13 +73,11 @@ class BrevServiceTest {
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             utenlandskPeriodebeløpRepository = mockk(),
             valutakursRepository = mockk(),
-            kompetanseRepository = mockk(),
             endretUtbetalingAndelRepository = endretUtbetalingAndelRepository,
             hjemmeltekstUtleder = hjemmeltekstUtleder,
             avregningService = mockAvregningService,
             behandlingHentOgPersisterService = mockk(),
             clockProvider = clockProvider,
-            featureToggle = mockedFeatureToggleServie,
         )
 
     @BeforeEach
