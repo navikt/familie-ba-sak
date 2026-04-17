@@ -94,16 +94,19 @@ class VilkårService(
                     )
                 }
 
-                val eksisterendeLogg =
+                val eksisterendeLogger =
                     endringIPreutfyltVilkårLoggRepository.findByVilkårResultatId(eksisterendeVilkårResultat.id)
 
                 val logg =
-                    eksisterendeLogg?.oppdaterEndringIPreutfyltVilkårLogg(vilkårResultatDto)
-                        ?: opprettLoggForEndringIPreutfyltVilkår(
+                    if (eksisterendeLogger.size == 1) {
+                        eksisterendeLogger.single().oppdaterEndringIPreutfyltVilkårLogg(vilkårResultatDto)
+                    } else {
+                        opprettLoggForEndringIPreutfyltVilkår(
                             behandling = vilkårsvurdering.behandling,
                             forrigeVilkår = eksisterendeVilkårResultat,
                             nyttVilkår = vilkårResultatDto,
                         )
+                    }
 
                 endringIPreutfyltVilkårLoggRepository.save(logg)
             }
