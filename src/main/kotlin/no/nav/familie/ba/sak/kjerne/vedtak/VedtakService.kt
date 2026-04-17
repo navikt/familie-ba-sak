@@ -13,7 +13,10 @@ class VedtakService(
     private val vedtakRepository: VedtakRepository,
     private val dokumentGenereringService: DokumentGenereringService,
 ) {
-    fun hent(vedtakId: Long): Vedtak = vedtakRepository.getReferenceById(vedtakId)
+    fun hent(vedtakId: Long): Vedtak =
+        vedtakRepository.findById(vedtakId).orElseThrow {
+            Feil("Finner ikke vedtak med id=$vedtakId")
+        }
 
     fun hentAktivForBehandling(behandlingId: Long): Vedtak? = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId)
 

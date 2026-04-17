@@ -284,20 +284,22 @@ private fun hentMaxAvstandAvDagerMellomPerioder(
 
     val perioderInnenAngittTidsrom =
         perioderMedTilkobletTom.filter {
-            it.tom == null ||
+            val itFom = it.fom
+            val itTom = it.tom
+            itTom == null ||
                 fom.isBetween(
                     Periode(
-                        fom = it.fom!!,
-                        tom = it.tom,
+                        fom = itFom!!,
+                        tom = itTom,
                     ),
                 ) ||
                 tom.isBetween(
                     Periode(
-                        fom = it.fom,
-                        tom = it.tom,
+                        fom = itFom,
+                        tom = itTom,
                     ),
                 ) ||
-                (it.fom >= fom && it.tom <= tom)
+                (itFom >= fom && itTom <= tom)
         }
 
     if (perioderInnenAngittTidsrom.isEmpty()) return Duration.between(fom.atStartOfDay(), tom.atStartOfDay()).toDays()

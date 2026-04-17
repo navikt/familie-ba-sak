@@ -483,7 +483,10 @@ class VedtaksperiodeService(
     fun skalHaÅrligKontroll(vedtak: Vedtak): Boolean =
         kompetanseRepository
             .finnFraBehandlingId(vedtak.behandling.id)
-            .any { it.tom == null || it.tom.isAfter(YearMonth.now()) }
+            .any {
+                val tom = it.tom
+                tom == null || tom.isAfter(YearMonth.now())
+            }
 
     fun skalMeldeFraOmEndringerEøsSelvstendigRett(vedtak: Vedtak): Boolean {
         val vilkårsvurdering =

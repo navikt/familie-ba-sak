@@ -55,6 +55,7 @@ data class GrStatsborgerskap(
     fun tilKopiForNyPerson(nyPerson: Person): GrStatsborgerskap = copy(id = 0, person = nyPerson)
 
     fun gjeldendeNå(): Boolean {
+        val gyldigPeriode = this.gyldigPeriode
         if (gyldigPeriode == null) return true
         return LocalDate.now().erInnenfor(gyldigPeriode)
     }

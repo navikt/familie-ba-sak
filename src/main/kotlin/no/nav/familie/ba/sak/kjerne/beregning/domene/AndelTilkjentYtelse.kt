@@ -162,10 +162,12 @@ data class AndelTilkjentYtelse(
 
     fun erAndelSomSkalSendesTilOppdrag(): Boolean = this.kalkulertUtbetalingsbeløp != 0
 
-    fun erAndelSomharNullutbetalingPgaDifferanseberegning() =
-        this.kalkulertUtbetalingsbeløp == 0 &&
-            this.differanseberegnetPeriodebeløp != null &&
-            this.differanseberegnetPeriodebeløp <= 0
+    fun erAndelSomharNullutbetalingPgaDifferanseberegning(): Boolean {
+        val differanseberegnetBeløp = this.differanseberegnetPeriodebeløp
+        return this.kalkulertUtbetalingsbeløp == 0 &&
+            differanseberegnetBeløp != null &&
+            differanseberegnetBeløp <= 0
+    }
 
     private fun finnRelevanteVilkårsresulaterForRegelverk(
         personResultater: Set<PersonResultat>,
