@@ -10,6 +10,92 @@ import java.time.LocalDateTime
 
 class EndringIPreutfyltVilkårLoggTest {
     @Test
+    fun `oppdaterEndringIPreutfyltVilkårLogg beholder forrige-verdier og oppdaterer ny-verdier`() {
+        val behandling = lagBehandling(id = 1234)
+        val forrigeVilkår =
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.IKKE_OPPFYLT,
+                resultatBegrunnelse = null,
+                periodeFom = LocalDate.of(2020, 1, 1),
+                periodeTom = LocalDate.of(2020, 12, 31),
+                begrunnelse = "forrige begrunnelse",
+                sistEndretIBehandlingId = behandling.id,
+                erOpprinneligPreutfyltIBehandling = behandling.id,
+                vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+            )
+
+        val førsteEditDto =
+            VilkårResultatDto(
+                id = forrigeVilkår.id,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2021, 1, 1),
+                periodeTom = LocalDate.of(2021, 12, 31),
+                begrunnelse = "første edit",
+                endretAv = "saksbehandler",
+                endretTidspunkt = LocalDateTime.now(),
+                behandlingId = behandling.id,
+                erVurdert = true,
+                erAutomatiskVurdert = false,
+                erEksplisittAvslagPåSøknad = false,
+                avslagBegrunnelser = emptyList(),
+                vurderesEtter = Regelverk.NASJONALE_REGLER,
+                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
+                resultatBegrunnelse = null,
+                begrunnelseForManuellKontroll = null,
+            )
+
+        val andreEditDto =
+            VilkårResultatDto(
+                id = forrigeVilkår.id,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.IKKE_OPPFYLT,
+                periodeFom = LocalDate.of(2022, 6, 1),
+                periodeTom = LocalDate.of(2022, 12, 31),
+                begrunnelse = "andre edit",
+                endretAv = "saksbehandler",
+                endretTidspunkt = LocalDateTime.now(),
+                behandlingId = behandling.id,
+                erVurdert = true,
+                erAutomatiskVurdert = false,
+                erEksplisittAvslagPåSøknad = false,
+                avslagBegrunnelser = emptyList(),
+                vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
+                resultatBegrunnelse = null,
+                begrunnelseForManuellKontroll = null,
+            )
+
+        val opprinneligLogg =
+            EndringIPreutfyltVilkårLogg.opprettLoggForEndringIPreutfyltVilkår(
+                behandling = behandling,
+                forrigeVilkår = forrigeVilkår,
+                nyttVilkår = førsteEditDto,
+            )
+
+        val oppdatertLogg = opprinneligLogg.oppdaterEndringIPreutfyltVilkårLogg(andreEditDto)
+
+        // forrige*-felt er uendret (original preutfylt-tilstand)
+        assertThat(oppdatertLogg.forrigeResultat).isEqualTo(Resultat.IKKE_OPPFYLT)
+        assertThat(oppdatertLogg.forrigeFom).isEqualTo(LocalDate.of(2020, 1, 1))
+        assertThat(oppdatertLogg.forrigeTom).isEqualTo(LocalDate.of(2020, 12, 31))
+        assertThat(oppdatertLogg.forrigeVurderesEtter).isEqualTo(Regelverk.EØS_FORORDNINGEN)
+        assertThat(oppdatertLogg.forrigeUtdypendeVilkårsvurdering).containsExactly(UtdypendeVilkårsvurdering.DELT_BOSTED)
+        // ny*-felt er oppdatert til siste edit
+        assertThat(oppdatertLogg.nyResultat).isEqualTo(Resultat.IKKE_OPPFYLT)
+        assertThat(oppdatertLogg.nyFom).isEqualTo(LocalDate.of(2022, 6, 1))
+        assertThat(oppdatertLogg.nyTom).isEqualTo(LocalDate.of(2022, 12, 31))
+        assertThat(oppdatertLogg.nyVurderesEtter).isEqualTo(Regelverk.EØS_FORORDNINGEN)
+        assertThat(oppdatertLogg.nyUtdypendeVilkårsvurdering).containsExactly(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
+        assertThat(oppdatertLogg.begrunnelse).isEqualTo("andre edit")
+        // id er bevart slik at JPA gjør UPDATE i stedet for INSERT
+        assertThat(oppdatertLogg.id).isEqualTo(opprinneligLogg.id)
+    }
+
+    @Test
     fun `opprettLoggForEndringIPreutfyltVilkår mapper forrige og nye verdier`() {
         val behandling = lagBehandling(id = 1234)
         val forrigeVilkår =

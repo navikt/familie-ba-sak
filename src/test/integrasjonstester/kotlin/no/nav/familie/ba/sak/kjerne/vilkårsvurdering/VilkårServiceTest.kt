@@ -472,6 +472,87 @@ class VilkårServiceTest(
                 assertThat(begrunnelse).isEqualTo("Ny begrunnelse")
             }
         }
+
+        @Test
+        fun `skal oppdatere eksisterende logg i stedet for å opprette ny ved gjentatt endring av preutfylt vilkår`() {
+            // Arrange
+            val vilkårsvurdering =
+                vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+                    lagVilkårsvurdering(behandling = behandling) { vilkårsvurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = søkerAktør,
+                                lagVilkårResultater = {
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = it,
+                                            behandlingId = behandling.id,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                            resultat = Resultat.IKKE_OPPFYLT,
+                                            vurderesEtter = Regelverk.NASJONALE_REGLER,
+                                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
+                                            erPreutfylt = true,
+                                        ),
+                                    )
+                                },
+                            ),
+                        )
+                    },
+                )
+
+            val personResultatDto = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
+            val vilkårResultatDto = personResultatDto.vilkårResultater.single()
+
+            val førsteEndring =
+                personResultatDto.copy(
+                    vilkårResultater =
+                        listOf(
+                            vilkårResultatDto.copy(
+                                periodeFom = LocalDate.of(2024, 1, 1),
+                                begrunnelse = "Første begrunnelse",
+                                resultat = Resultat.OPPFYLT,
+                                vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
+                            ),
+                        ),
+                )
+
+            val andreEndring =
+                personResultatDto.copy(
+                    vilkårResultater =
+                        listOf(
+                            vilkårResultatDto.copy(
+                                periodeFom = LocalDate.of(2025, 3, 1),
+                                begrunnelse = "Andre begrunnelse",
+                                resultat = Resultat.IKKE_OPPFYLT,
+                                vurderesEtter = Regelverk.NASJONALE_REGLER,
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                            ),
+                        ),
+                )
+
+            // Act
+            vilkårService.endreVilkår(behandlingId = behandling.id, vilkårId = vilkårResultatDto.id, personResultatDto = førsteEndring)
+            vilkårService.endreVilkår(behandlingId = behandling.id, vilkårId = vilkårResultatDto.id, personResultatDto = andreEndring)
+
+            // Assert — kun ett logginnslag, forrige*-felt er uendret fra original, ny*-felt er fra siste endring
+            val endringIPreutfyltVilkårLogger = endringIPreutfyltVilkårLoggRepository.findAll().filter { it.behandling.id == behandling.id }
+
+            assertThat(endringIPreutfyltVilkårLogger).hasSize(1)
+            with(endringIPreutfyltVilkårLogger.single()) {
+                assertThat(vilkårResultatId).isEqualTo(vilkårResultatDto.id)
+                // forrige*-felt viser original preutfylt-tilstand
+                assertThat(forrigeResultat).isEqualTo(Resultat.IKKE_OPPFYLT)
+                assertThat(forrigeVurderesEtter).isEqualTo(Regelverk.NASJONALE_REGLER)
+                assertThat(forrigeUtdypendeVilkårsvurdering).containsExactly(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
+                // ny*-felt viser siste endring
+                assertThat(nyResultat).isEqualTo(Resultat.IKKE_OPPFYLT)
+                assertThat(nyVurderesEtter).isEqualTo(Regelverk.NASJONALE_REGLER)
+                assertThat(nyUtdypendeVilkårsvurdering).containsExactly(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                assertThat(begrunnelse).isEqualTo("Andre begrunnelse")
+            }
+        }
     }
 
     @Nested
