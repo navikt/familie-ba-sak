@@ -68,6 +68,16 @@ data class EndringIPreutfyltVilkårLogg(
     @Column(name = "ny_utdypende_vilkarsvurdering")
     val nyUtdypendeVilkårsvurdering: List<UtdypendeVilkårsvurdering>?,
 ) {
+    fun oppdaterEndringIPreutfyltVilkårLogg(nyttVilkår: VilkårResultatDto): EndringIPreutfyltVilkårLogg =
+        copy(
+            begrunnelse = nyttVilkår.begrunnelse,
+            nyFom = nyttVilkår.periodeFom,
+            nyTom = nyttVilkår.periodeTom,
+            nyResultat = nyttVilkår.resultat,
+            nyVurderesEtter = nyttVilkår.vurderesEtter,
+            nyUtdypendeVilkårsvurdering = nyttVilkår.utdypendeVilkårsvurderinger,
+        )
+
     companion object {
         fun opprettLoggForEndringIPreutfyltVilkår(
             behandling: Behandling,
