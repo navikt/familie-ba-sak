@@ -537,7 +537,8 @@ class VilkårServiceTest(
             vilkårService.endreVilkår(behandlingId = behandling.id, vilkårId = vilkårResultatDto.id, personResultatDto = andreEndring)
 
             // Assert — kun ett logginnslag, forrige*-felt er uendret fra original, ny*-felt er fra siste endring
-            val endringIPreutfyltVilkårLogger = endringIPreutfyltVilkårLoggRepository.findAll().filter { it.behandling.id == behandling.id }
+            val endringIPreutfyltVilkårLogger =
+                endringIPreutfyltVilkårLoggRepository.findAll().filter { it.behandling.id == behandling.id }.sortedBy { it.id }
 
             assertThat(endringIPreutfyltVilkårLogger).hasSize(1)
             with(endringIPreutfyltVilkårLogger.single()) {
@@ -547,6 +548,87 @@ class VilkårServiceTest(
                 assertThat(forrigeVurderesEtter).isEqualTo(Regelverk.NASJONALE_REGLER)
                 assertThat(forrigeUtdypendeVilkårsvurdering).containsExactly(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
                 // ny*-felt viser siste endring
+                assertThat(nyResultat).isEqualTo(Resultat.IKKE_OPPFYLT)
+                assertThat(nyVurderesEtter).isEqualTo(Regelverk.NASJONALE_REGLER)
+                assertThat(nyUtdypendeVilkårsvurdering).containsExactly(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                assertThat(begrunnelse).isEqualTo("Andre begrunnelse")
+            }
+        }
+
+        @Test
+        fun `skal opprette ny logg når det allerede eksisterer flere logginnslag for samme vilkår`() {
+            // Arrange
+            val vilkårsvurdering =
+                vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+                    lagVilkårsvurdering(behandling = behandling) { vilkårsvurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = søkerAktør,
+                                lagVilkårResultater = {
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = it,
+                                            behandlingId = behandling.id,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                            resultat = Resultat.IKKE_OPPFYLT,
+                                            vurderesEtter = Regelverk.NASJONALE_REGLER,
+                                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
+                                            erPreutfylt = true,
+                                        ),
+                                    )
+                                },
+                            ),
+                        )
+                    },
+                )
+
+            val personResultatDto = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
+            val vilkårResultatDto = personResultatDto.vilkårResultater.single()
+
+            val førsteEndring =
+                personResultatDto.copy(
+                    vilkårResultater =
+                        listOf(
+                            vilkårResultatDto.copy(
+                                periodeFom = LocalDate.of(2024, 1, 1),
+                                begrunnelse = "Første begrunnelse",
+                                resultat = Resultat.OPPFYLT,
+                                vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
+                            ),
+                        ),
+                )
+
+            val andreEndring =
+                personResultatDto.copy(
+                    vilkårResultater =
+                        listOf(
+                            vilkårResultatDto.copy(
+                                periodeFom = LocalDate.of(2025, 3, 1),
+                                begrunnelse = "Andre begrunnelse",
+                                resultat = Resultat.IKKE_OPPFYLT,
+                                vurderesEtter = Regelverk.NASJONALE_REGLER,
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                            ),
+                        ),
+                )
+
+            // Simuler gammel tilstand der to logginnslag allerede eksisterer for samme vilkårResultatId
+            vilkårService.endreVilkår(behandlingId = behandling.id, vilkårId = vilkårResultatDto.id, personResultatDto = førsteEndring)
+            val eksisterendeLogg = endringIPreutfyltVilkårLoggRepository.findAll().single { it.behandling.id == behandling.id }
+            endringIPreutfyltVilkårLoggRepository.save(eksisterendeLogg.copy(id = 0))
+
+            assertThat(endringIPreutfyltVilkårLoggRepository.findAll().filter { it.behandling.id == behandling.id }).hasSize(2)
+
+            // Act — med >1 eksisterende innslag skal det opprettes en ny rad
+            vilkårService.endreVilkår(behandlingId = behandling.id, vilkårId = vilkårResultatDto.id, personResultatDto = andreEndring)
+
+            // Assert — totalt tre innslag, siste er ny rad
+            val alleLogger =
+                endringIPreutfyltVilkårLoggRepository.findAll().filter { it.behandling.id == behandling.id }.sortedBy { it.id }
+            assertThat(alleLogger).hasSize(3)
+            with(alleLogger.last()) {
                 assertThat(nyResultat).isEqualTo(Resultat.IKKE_OPPFYLT)
                 assertThat(nyVurderesEtter).isEqualTo(Regelverk.NASJONALE_REGLER)
                 assertThat(nyUtdypendeVilkårsvurdering).containsExactly(UtdypendeVilkårsvurdering.DELT_BOSTED)
