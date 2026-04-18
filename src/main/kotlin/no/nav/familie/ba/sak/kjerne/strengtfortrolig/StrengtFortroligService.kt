@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -165,6 +166,27 @@ class StrengtFortroligService(
         val skjermedeBarnUtenAndeler = hentSkjermedeBarnUtenLøpendeAndeler(fagsakId, tilgangerTilPersoner, søker)
 
         return personerSaksbehandlerIkkeHarTilgangTil == skjermedeBarnUtenAndeler
+    }
+
+    fun harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak: Fagsak): Boolean {
+        val identer = hentRelevantePersonidenterIFagsak(fagsak)
+        if (identer.isEmpty()) return false
+        return familieIntegrasjonerTilgangskontrollService
+            .hentIdenterMedStrengtFortroligAdressebeskyttelse(identer)
+            .isNotEmpty()
+    }
+
+    private fun hentRelevantePersonidenterIFagsak(fagsak: Fagsak): List<String> {
+        val søkerIdent = fagsak.aktør.aktivFødselsnummer()
+        val sisteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id)
+                ?: behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id)
+        val identerFraPersongrunnlag =
+            sisteBehandling
+                ?.let { persongrunnlagService.hentSøkerOgBarnPåBehandling(it.id) }
+                ?.map { it.aktør.aktivFødselsnummer() }
+                ?: emptyList()
+        return (listOf(søkerIdent) + identerFraPersongrunnlag).distinct()
     }
 
     private fun hentBarnMedStrengtFortroligKodeSomSkalAnonymiseres(behandlingId: Long): Set<String> {
