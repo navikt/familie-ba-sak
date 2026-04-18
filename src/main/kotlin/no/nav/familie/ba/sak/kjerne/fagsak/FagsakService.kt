@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøkerRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
@@ -52,6 +53,7 @@ class FagsakService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val skjermetBarnSøkerRepository: SkjermetBarnSøkerRepository,
     private val featureToggleService: FeatureToggleService,
+    private val strengtFortroligService: StrengtFortroligService,
 ) {
     private val antallFagsakerOpprettetFraManuell =
         Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "manuell")
@@ -258,6 +260,7 @@ class FagsakService(
                         navn = organisasjonService.hentOrganisasjon(it.orgNummer).navn,
                     )
                 },
+            harStrengtFortroligPersonIFagsak = strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak),
         )
     }
 
