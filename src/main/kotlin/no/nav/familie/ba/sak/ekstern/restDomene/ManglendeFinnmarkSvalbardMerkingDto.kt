@@ -27,6 +27,7 @@ private val cutOffTomDatoForVisningAvManglendeMerkinger = LocalDate.of(2025, 9, 
 data class ManglendeFinnmarkSvalbardMerkingDto(
     val ident: String,
     val manglendeFinnmarkSvalbardMerkingPerioder: List<ManglendeFinnmarkSvalbardMerkingPeriodeDto>,
+    val skjermesForBruker: Boolean = false,
 )
 
 data class ManglendeFinnmarkSvalbardMerkingPeriodeDto(

@@ -19,6 +19,7 @@ data class KompetanseDto(
     val resultat: KompetanseResultat? = null,
     override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT,
     val erAnnenForelderOmfattetAvNorskLovgivning: Boolean? = false,
+    val inneholderBarnSomSkalSkjermes: Boolean = false,
 ) : AbstractUtfyltStatus<KompetanseDto>() {
     override fun medUtfyltStatus(): KompetanseDto {
         var antallUtfylteFelter =
