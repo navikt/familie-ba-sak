@@ -547,12 +547,14 @@ fun hentAntallBarnForBegrunnelse(
     }
 }
 
-fun VedtaksperiodeMedBegrunnelser.hentMånedOgÅrForBegrunnelse(): String? =
-    if (this.fom == null || fom == TIDENES_MORGEN) {
+fun VedtaksperiodeMedBegrunnelser.hentMånedOgÅrForBegrunnelse(): String? {
+    val fom = this.fom
+    return if (fom == null || fom == TIDENES_MORGEN) {
         null
     } else {
         fom.forrigeMåned().tilMånedÅr()
     }
+}
 
 private fun hentBeløp(
     gjelderSøker: Boolean,

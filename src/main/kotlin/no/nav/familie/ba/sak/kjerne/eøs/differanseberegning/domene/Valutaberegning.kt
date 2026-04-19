@@ -27,17 +27,21 @@ operator fun Valutabeløp?.times(kronerPerValutaenhet: KronerPerValutaenhet?): B
 }
 
 fun UtenlandskPeriodebeløp?.tilMånedligValutabeløp(): Valutabeløp? {
-    if (this?.kalkulertMånedligBeløp == null || this.valutakode == null) {
+    val kalkulertMånedligBeløp = this?.kalkulertMånedligBeløp
+    val valutakode = this?.valutakode
+    if (kalkulertMånedligBeløp == null || valutakode == null) {
         return null
     }
 
-    return Valutabeløp(this.kalkulertMånedligBeløp, this.valutakode)
+    return Valutabeløp(kalkulertMånedligBeløp, valutakode)
 }
 
 fun Valutakurs?.tilKronerPerValutaenhet(): KronerPerValutaenhet? {
-    if (this?.kurs == null || this.valutakode == null) {
+    val kurs = this?.kurs
+    val valutakode = this?.valutakode
+    if (kurs == null || valutakode == null) {
         return null
     }
 
-    return KronerPerValutaenhet(this.kurs, this.valutakode)
+    return KronerPerValutaenhet(kurs, valutakode)
 }

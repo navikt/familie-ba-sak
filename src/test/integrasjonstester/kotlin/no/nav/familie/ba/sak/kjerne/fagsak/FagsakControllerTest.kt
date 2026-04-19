@@ -136,9 +136,9 @@ class FagsakControllerTest(
         assertEquals(Ressurs.Status.SUKSESS, nyFagsakDto.body?.status)
         assertEquals(fnr, fagsakService.hentNormalFagsak(aktør)?.aktør?.aktivFødselsnummer())
 
-        personidentRepository.save(
-            personidentRepository.getReferenceById(fnr).also { it.aktiv = false },
-        )
+        val existingPersonident = personidentRepository.findById(fnr).orElseThrow()
+        existingPersonident.aktiv = false
+        personidentRepository.save(existingPersonident)
         personidentRepository.save(Personident(fødselsnummer = nyttFnr, aktør = aktør, aktiv = true))
 
         val eksisterendeFagsakDto =

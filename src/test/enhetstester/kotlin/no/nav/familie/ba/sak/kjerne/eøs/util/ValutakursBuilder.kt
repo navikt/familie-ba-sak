@@ -42,9 +42,10 @@ class ValutakursBuilder(
     }.apply {
         if (automatiskSettValutakursdato) {
             medTransformasjon { valutakurs ->
-                if (valutakurs.fom != null && valutakurs.valutakursdato == null) {
+                val fom = valutakurs.fom
+                if (fom != null && valutakurs.valutakursdato == null) {
                     valutakurs.copy(
-                        valutakursdato = valutakurs.fom.minusMonths(1).tilSisteVirkedag(),
+                        valutakursdato = fom.minusMonths(1).tilSisteVirkedag(),
                     )
                 } else {
                     valutakurs

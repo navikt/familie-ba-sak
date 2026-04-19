@@ -75,8 +75,9 @@ data class GrArbeidsforhold(
         return result
     }
 
-    fun tilRegisteropplysningDto() =
-        RegisteropplysningDto(
+    fun tilRegisteropplysningDto(): RegisteropplysningDto {
+        val arbeidsgiverId = this.arbeidsgiverId
+        return RegisteropplysningDto(
             fom = this.periode?.fom,
             tom = this.periode?.tom,
             verdi =
@@ -86,6 +87,7 @@ data class GrArbeidsforhold(
                     else -> "Ukjent arbeidsgiver"
                 },
         )
+    }
 
     companion object {
         fun Arbeidsforhold.tilGrArbeidsforhold(
@@ -112,5 +114,6 @@ data class GrArbeidsforhold(
 
 fun List<GrArbeidsforhold>.harLøpendeArbeidsforhold(): Boolean =
     this.any {
-        it.periode?.tom == null || it.periode.tom >= LocalDate.now()
+        val tom = it.periode?.tom
+        tom == null || tom >= LocalDate.now()
     }

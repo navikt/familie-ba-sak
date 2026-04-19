@@ -104,12 +104,14 @@ class StønadsstatistikkService(
         val kompetanser = kompetanseService.hentKompetanser(behandlingId)
 
         return kompetanser.filter { it.resultat != null }.map { kompetanse ->
+            val annenForeldersAktivitet = kompetanse.annenForeldersAktivitet
+            val søkersAktivitet = kompetanse.søkersAktivitet
             Kompetanse(
                 barnsIdenter = kompetanse.barnAktører.map { aktør -> aktør.aktivFødselsnummer() },
                 annenForeldersAktivitet =
-                    if (kompetanse.annenForeldersAktivitet != null) {
+                    if (annenForeldersAktivitet != null) {
                         KompetanseAktivitet.valueOf(
-                            kompetanse.annenForeldersAktivitet.name,
+                            annenForeldersAktivitet.name,
                         )
                     } else {
                         null
@@ -119,7 +121,7 @@ class StønadsstatistikkService(
                 fom = kompetanse.fom!!,
                 tom = kompetanse.tom,
                 resultat = KompetanseResultat.valueOf(kompetanse.resultat!!.name),
-                sokersaktivitet = if (kompetanse.søkersAktivitet != null) KompetanseAktivitet.valueOf(kompetanse.søkersAktivitet.name) else null,
+                sokersaktivitet = if (søkersAktivitet != null) KompetanseAktivitet.valueOf(søkersAktivitet.name) else null,
                 sokersAktivitetsland = kompetanse.søkersAktivitetsland,
             )
         }
