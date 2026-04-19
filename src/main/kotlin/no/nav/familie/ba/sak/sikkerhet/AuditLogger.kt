@@ -22,6 +22,7 @@ data class Sporingsdata(
     val custom1: CustomKeyValue? = null,
     val custom2: CustomKeyValue? = null,
     val custom3: CustomKeyValue? = null,
+    val msg: String? = null,
 )
 
 data class CustomKeyValue(
@@ -65,14 +66,15 @@ class AuditLogger(
             "sproc=${getCallId()} " +
             "requestMethod=${request.method} " +
             "request=${request.requestURI} " +
-            createCustomString(data)
+            createAdditionalInformation(data)
     }
 
-    private fun createCustomString(data: Sporingsdata): String =
+    private fun createAdditionalInformation(data: Sporingsdata): String =
         listOfNotNull(
             data.custom1?.let { "cs3Label=${it.key} cs3=${it.value}" },
             data.custom2?.let { "cs5Label=${it.key} cs5=${it.value}" },
             data.custom3?.let { "cs6Label=${it.key} cs6=${it.value}" },
+            data.msg?.let { "msg=$it" },
         ).joinToString(" ")
 
     private fun getCallId(): String = MDC.get(MDCConstants.MDC_CALL_ID) ?: throw Feil("Mangler callId")
