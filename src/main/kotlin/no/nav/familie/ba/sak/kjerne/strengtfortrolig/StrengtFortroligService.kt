@@ -169,24 +169,15 @@ class StrengtFortroligService(
     }
 
     fun harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak: Fagsak): Boolean {
-        val identer = hentRelevantePersonidenterIFagsak(fagsak)
-        if (identer.isEmpty()) return false
+        val identer =
+            persongrunnlagService
+                .hentSøkerOgBarnPåFagsak(fagsak.id)
+                ?.map { it.aktør.aktivFødselsnummer() }
+                ?: listOf(fagsak.skjermetBarnSøker?.aktør?.aktivFødselsnummer() ?: fagsak.aktør.aktivFødselsnummer())
+
         return familieIntegrasjonerTilgangskontrollService
             .hentIdenterMedStrengtFortroligAdressebeskyttelse(identer)
             .isNotEmpty()
-    }
-
-    private fun hentRelevantePersonidenterIFagsak(fagsak: Fagsak): List<String> {
-        val søkerIdent = fagsak.aktør.aktivFødselsnummer()
-        val sisteBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id)
-                ?: behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id)
-        val identerFraPersongrunnlag =
-            sisteBehandling
-                ?.let { persongrunnlagService.hentSøkerOgBarnPåBehandling(it.id) }
-                ?.map { it.aktør.aktivFødselsnummer() }
-                ?: emptyList()
-        return (listOf(søkerIdent) + identerFraPersongrunnlag).distinct()
     }
 
     private fun hentBarnMedStrengtFortroligKodeSomSkalAnonymiseres(behandlingId: Long): Set<String> {

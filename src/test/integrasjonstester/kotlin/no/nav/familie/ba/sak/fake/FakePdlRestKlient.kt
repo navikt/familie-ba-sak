@@ -2,11 +2,13 @@ package no.nav.familie.ba.sak.fake
 
 import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelsePerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFalskIdentitet
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.VergemaalEllerFremtidsfullmakt
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
@@ -111,11 +113,17 @@ class FakePdlRestKlient(
 
     override fun hentFalskIdentitet(ident: String): PdlFalskIdentitet? = falskeIdentiteter[ident]
 
+    override fun hentAdressebeskyttelseBolk(personIdentList: List<String>): Map<String, PdlAdressebeskyttelsePerson> = adressebeskyttelseBolk
+
+    override fun hentAdressebeskyttelse(aktør: Aktør): List<Adressebeskyttelse> = adressebeskyttelse[aktør.aktivFødselsnummer()] ?: emptyList()
+
     companion object {
         private val bostedsadresser = mutableMapOf<String, MutableList<Bostedsadresse>>()
         private val deltBosteder = mutableMapOf<String, MutableList<DeltBosted>>()
         private val oppholdsadresser = mutableMapOf<String, MutableList<Oppholdsadresse>>()
         private val falskeIdentiteter = mutableMapOf<String, PdlFalskIdentitet>()
+        private val adressebeskyttelseBolk = mutableMapOf<String, PdlAdressebeskyttelsePerson>()
+        private val adressebeskyttelse = mutableMapOf<String, List<Adressebeskyttelse>>()
 
         fun leggTilBostedsadresseIPDL(
             personIdenter: List<String>,

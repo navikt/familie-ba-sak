@@ -132,6 +132,7 @@ class BeregningServiceTest {
                     løpendeUnderkategori = null,
                     gjeldendeUtbetalingsperioder = emptyList(),
                     fagsakType = fagsak.type,
+                    finnesStrengtFortroligPersonIFagsak = false,
                 ).tilFagsakDto(emptyList()),
             )
         }

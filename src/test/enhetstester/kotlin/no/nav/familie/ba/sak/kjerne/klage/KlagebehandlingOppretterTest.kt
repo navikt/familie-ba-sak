@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.klage.dto.OpprettKlageDto
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.Klagebehandlingsårsak
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
@@ -42,7 +43,7 @@ class KlagebehandlingOppretterTest {
     private val tilpassArbeidsfordelingService = mockk<TilpassArbeidsfordelingService>()
     private val clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(dagensDato)
     private val featureToggleService = mockk<FeatureToggleService>()
-    private val strengtFortroligService = mockk<no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService>(relaxed = true)
+    private val strengtFortroligService = mockk<StrengtFortroligService>(relaxed = true)
 
     private val klagebehandlingOppretter =
         KlagebehandlingOppretter(

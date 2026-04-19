@@ -75,7 +75,7 @@ class FagsakService(
         val fagsak =
             hentEllerOpprettFagsak(
                 personIdent = fagsakRequest.personIdent,
-                type = fagsakRequest.fagsakType ?: FagsakType.NORMAL,
+                type = fagsakRequest.fagsakType,
                 institusjon = fagsakRequest.institusjon,
                 skjermetBarnSøker = fagsakRequest.skjermetBarnSøker,
             )
@@ -260,7 +260,7 @@ class FagsakService(
                         navn = organisasjonService.hentOrganisasjon(it.orgNummer).navn,
                     )
                 },
-            harStrengtFortroligPersonIFagsak = strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak),
+            finnesStrengtFortroligPersonIFagsak = strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak),
         )
     }
 
