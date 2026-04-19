@@ -21,6 +21,7 @@ data class PersonMedAndelerDto(
     val stønadFom: YearMonth,
     val stønadTom: YearMonth,
     val ytelsePerioder: List<YtelsePeriodeDto>,
+    val skjermesForBruker: Boolean = false,
 )
 
 data class YtelsePeriodeDto(

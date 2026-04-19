@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollKlient
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
@@ -63,6 +64,14 @@ class TilgangServiceTest {
             cacheManager,
             mockk(),
         )
+    private val strengtFortroligService =
+        StrengtFortroligService(
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            persongrunnlagService = persongrunnlagService,
+            familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
+            featureToggleService = featureToggleService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+        )
     private val tilgangService =
         TilgangService(
             familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
@@ -71,8 +80,7 @@ class TilgangServiceTest {
             fagsakService = fagsakService,
             rolleConfig = rolleConfig,
             auditLogger = auditLogger,
-            featureToggleService = featureToggleService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            strengtFortroligService = strengtFortroligService,
         )
 
     private val fagsak = defaultFagsak()

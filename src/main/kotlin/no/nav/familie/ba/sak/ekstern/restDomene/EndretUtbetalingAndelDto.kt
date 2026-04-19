@@ -18,4 +18,5 @@ data class EndretUtbetalingAndelDto(
     val søknadstidspunkt: LocalDate?,
     val begrunnelse: String?,
     val erTilknyttetAndeler: Boolean?,
+    val inneholderBarnSomSkalSkjermes: Boolean = false,
 )

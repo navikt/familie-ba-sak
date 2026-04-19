@@ -19,6 +19,7 @@ data class UtenlandskPeriodebeløpDto(
     val kalkulertMånedligBeløp: BigDecimal?,
     val utbetalingsland: String?,
     override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT,
+    val inneholderBarnSomSkalSkjermes: Boolean = false,
 ) : AbstractUtfyltStatus<UtenlandskPeriodebeløpDto>() {
     override fun medUtfyltStatus(): UtenlandskPeriodebeløpDto =
         this.copy(
