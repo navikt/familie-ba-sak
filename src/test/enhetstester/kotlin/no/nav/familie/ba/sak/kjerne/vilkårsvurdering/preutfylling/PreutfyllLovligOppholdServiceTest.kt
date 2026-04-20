@@ -107,9 +107,9 @@ class PreutfyllLovligOppholdServiceTest {
                     .first { it.aktør == søkerAktør }
                     .vilkårResultater
                     .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
-            assertThat(lovligOppholdResultater).hasSize(2)
-            assertThat(lovligOppholdResultater.first { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
-            assertThat(lovligOppholdResultater.last { it.resultat == Resultat.OPPFYLT }).isNotNull
+            assertThat(lovligOppholdResultater).hasSize(1)
+            assertThat(lovligOppholdResultater.first { it.resultat == Resultat.OPPFYLT }).isNotNull
+            assertThat(lovligOppholdResultater.first { it.periodeFom == LocalDate.now().minusYears(2).plusDays(1) })
         }
 
         @Test
@@ -148,13 +148,10 @@ class PreutfyllLovligOppholdServiceTest {
                     .vilkårResultater
                     .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
 
-            assertThat(lovligOppholdResultater).hasSize(2)
-            assertThat(lovligOppholdResultater.find { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
-            assertThat(lovligOppholdResultater.find { it.resultat == Resultat.OPPFYLT }).isNotNull
-            assertThat(lovligOppholdResultater.first().periodeFom).isEqualTo(barn.fødselsdato)
-            assertThat(lovligOppholdResultater.first().periodeTom).isEqualTo(LocalDate.now().minusYears(5))
-            assertThat(lovligOppholdResultater.last().periodeFom).isEqualTo(LocalDate.now().minusYears(5).plusDays(1))
-            assertThat(lovligOppholdResultater.last().periodeTom).isNull()
+            assertThat(lovligOppholdResultater).hasSize(1)
+            assertThat(lovligOppholdResultater.first { it.resultat == Resultat.OPPFYLT }).isNotNull
+            assertThat(lovligOppholdResultater.first().periodeFom).isEqualTo(LocalDate.now().minusYears(5).plusDays(1))
+            assertThat(lovligOppholdResultater.first().periodeTom).isNull()
         }
 
         @Test
