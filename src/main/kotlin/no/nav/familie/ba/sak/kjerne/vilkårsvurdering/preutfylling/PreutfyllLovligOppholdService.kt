@@ -23,11 +23,13 @@ import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE.PERM
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.Verdi
 import no.nav.familie.tidslinje.isSameOrBefore
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
+import no.nav.familie.tidslinje.utvidelser.trimVenstre
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -38,8 +40,7 @@ class PreutfyllLovligOppholdService(
     fun preutfyllLovligOpphold(vilkårsvurdering: Vilkårsvurdering) {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id)
 
-        val datoForBeskjæringAvFom = finnDatoForBeskjæringAvFom(personopplysningGrunnlag.søker, personopplysningGrunnlag)
-        val søkerErEøsBorgerOgHarArbeidsforholdTidslinje = lagErEøsBorgerOgHarArbeidsforholdTidslinje(personopplysningGrunnlag.søker, datoForBeskjæringAvFom)
+        val søkerErEøsBorgerOgHarArbeidsforholdTidslinje = lagErEøsBorgerOgHarArbeidsforholdTidslinje(personopplysningGrunnlag.søker)
 
         vilkårsvurdering.personResultater
             .forEach { personResultat ->
@@ -83,7 +84,8 @@ class PreutfyllLovligOppholdService(
                         harOppholdstillatelse == true -> OppfyltDelvilkår("- Har gyldig oppholdstillatelse i Norge.", begrunnelseForManuellKontroll = INFORMASJON_OM_OPPHOLDSTILLATELSE)
                         else -> IkkeOppfyltDelvilkår()
                     }
-                }.beskjærFraOgMed(datoForBeskjæringAvFom)
+                }.trimVenstre(Verdi(IkkeOppfyltDelvilkår()))
+                .beskjærFraOgMed(datoForBeskjæringAvFom)
 
         return harLovligOppholdTidslinje
             .tilPerioderIkkeNull()
@@ -114,7 +116,6 @@ class PreutfyllLovligOppholdService(
 
     private fun lagErEøsBorgerOgHarArbeidsforholdTidslinje(
         person: Person,
-        datoForBeskjæringAvFom: LocalDate,
     ): Tidslinje<Boolean> {
         val erEøsBorgerTidslinje = lagErEøsBorgerTidslinje(person.statsborgerskap)
         val harArbeidsforholdTidslinje = lagHarArbeidsforholdTidslinje(person.arbeidsforhold)
@@ -122,7 +123,7 @@ class PreutfyllLovligOppholdService(
         return erEøsBorgerTidslinje
             .kombinerMed(harArbeidsforholdTidslinje) { erEØSBorger, harArbeidsforhold ->
                 erEØSBorger == true && harArbeidsforhold == true
-            }.beskjærFraOgMed(datoForBeskjæringAvFom)
+            }
     }
 
     private fun lagErEøsBorgerTidslinje(alleStatsborgerskap: List<GrStatsborgerskap>): Tidslinje<Boolean> =
@@ -148,7 +149,9 @@ class PreutfyllLovligOppholdService(
                 ).tilTidslinje()
             }.kombiner { it.any() }
 
-    private fun lagHarOppholdstillatelseTidslinje(oppholdstillatelse: List<GrOpphold>): Tidslinje<Boolean> =
+    private fun lagHarOppholdstillatelseTidslinje(
+        oppholdstillatelse: List<GrOpphold>,
+    ): Tidslinje<Boolean> =
         oppholdstillatelse
             .filter { it.type in setOf(PERMANENT, MIDLERTIDIG) }
             .map { oppholdstillatelse ->
