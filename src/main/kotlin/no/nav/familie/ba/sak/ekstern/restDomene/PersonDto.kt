@@ -21,6 +21,7 @@ data class PersonDto(
     val dødsfallDato: LocalDate? = null,
     val erManueltLagtTilISøknad: Boolean? = null,
     val harFalskIdentitet: Boolean? = false,
+    val skjermesForBruker: Boolean = false,
 )
 
 fun Person.tilPersonDto(

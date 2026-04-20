@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.logg
 
 import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 class LoggController(
     private val tilgangService: TilgangService,
     private val loggService: LoggService,
+    private val strengtFortroligService: StrengtFortroligService,
 ) {
     @GetMapping(path = ["/{behandlingId}"])
     fun hentLoggForBehandling(
@@ -27,8 +29,10 @@ class LoggController(
     ): ResponseEntity<Ressurs<List<Logg>>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         return Result
-            .runCatching { loggService.hentLoggForBehandling(behandlingId) }
-            .fold(
+            .runCatching {
+                val logger = loggService.hentLoggForBehandling(behandlingId)
+                strengtFortroligService.filtrerLoggForStrengtFortroligeBarn(logger, behandlingId)
+            }.fold(
                 onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                 onFailure = {
                     badRequest("Henting av logg feilet", it)
