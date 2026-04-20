@@ -17,6 +17,15 @@ import java.time.LocalDate
 
 data class HentPersonFraPdlRequest(
     val ident: String,
+    @Schema(
+        description =
+            "Begrunnelse for hvorfor det er ønskelig å slå opp personen via forvalter-endepunktet. " +
+                "Begrunnelsen logges i tilgangsloggen (audit) for sporing, og bør være konkret og " +
+                "beskrive hvilken behandling/sak og hva som skal feilsøkes. " +
+                "F.eks.: \"For å feilsøke behandling 12345, trenger vi å forstå hvorfor bostedsadressen ikke er gyldig.\" " +
+                "Ikke skriv sensitiv informasjon utover det som er nødvendig.",
+        example = "For å feilsøke behandling 12345, trenger vi å forstå hvorfor bostedsadressen ikke er gyldig.",
+    )
     val begrunnelse: String,
     @Schema(example = "false") val visFødselsdato: Boolean = false,
     @Schema(example = "false") val visNavn: Boolean = false,
