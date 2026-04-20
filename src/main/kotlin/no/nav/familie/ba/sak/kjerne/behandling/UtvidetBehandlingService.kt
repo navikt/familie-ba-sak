@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalingService
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtakService
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
@@ -77,6 +78,7 @@ class UtvidetBehandlingService(
     private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val institusjonService: InstitusjonService,
+    private val strengtFortroligService: StrengtFortroligService,
 ) {
     fun lagUtvidetBehandlingDto(behandlingId: Long): UtvidetBehandlingDto {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
@@ -128,70 +130,73 @@ class UtvidetBehandlingService(
 
         val samhandlerInfo = behandling.fagsak.institusjon?.let { institusjonService.hentSamhandlerForBehandling(BehandlingId(behandlingId)) }
 
-        return UtvidetBehandlingDto(
-            behandlingId = behandling.id,
-            steg = behandling.steg,
-            stegTilstand = behandling.behandlingStegTilstand.map { it.tilBehandlingStegTilstandDto() },
-            status = behandling.status,
-            resultat = behandling.resultat,
-            skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
-            type = behandling.type,
-            kategori = behandling.kategori,
-            underkategori = behandling.underkategori.tilDto(),
-            årsak = behandling.opprettetÅrsak,
-            opprettetTidspunkt = behandling.opprettetTidspunkt,
-            endretAv = behandling.endretAv,
-            arbeidsfordelingPåBehandling = arbeidsfordeling.tilArbeidsfordelingPåBehandlingDto(),
-            søknadsgrunnlag = søknadsgrunnlag,
-            personer =
-                personer?.map { person ->
-                    persongrunnlagService.mapTilPersonDtoMedStatsborgerskapLand(
-                        person = person,
-                        erManueltLagtTilISøknad = søknadsgrunnlag?.barnaMedOpplysninger?.find { it.ident == person.aktør.aktivFødselsnummer() }?.manueltRegistrert,
-                        eldsteBarnsFødselsdato = personopplysningGrunnlag.eldsteBarnSinFødselsdato,
-                    )
-                }
-                    ?: emptyList(),
-            personResultater = personResultater?.map { it.tilPersonResultatDto() } ?: emptyList(),
-            fødselshendelsefiltreringResultater =
-                fødselshendelsefiltreringResultatRepository
-                    .finnFødselshendelsefiltreringResultater(
-                        behandlingId = behandling.id,
-                    ).map { it.tilFødselshendelsefiltreringResultatDto() },
-            utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling, personopplysningGrunnlag),
-            personerMedAndelerTilkjentYtelse =
-                personopplysningGrunnlag?.tilPersonerMedAndelerDto(andelerTilkjentYtelse)
-                    ?: emptyList(),
-            endretUtbetalingAndeler =
-                endreteUtbetalingerMedAndeler
-                    .map { it.tilEndretUtbetalingAndelDto() },
-            tilbakekreving = tilbakekreving?.tilTilbakekrevingDto(),
-            vedtak = vedtak?.tilVedtakDto(),
-            kompetanser = kompetanser.map { it.tilKompetanseDto() }.sortedByDescending { it.fom },
-            totrinnskontroll = totrinnskontroll?.tilTotrinnskontrollDto(),
-            aktivSettPåVent =
-                settPåVentService
-                    .finnAktivSettPåVentPåBehandling(behandlingId = behandlingId)
-                    ?.tilSettPåVentDto(),
-            migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId),
-            valutakurser = valutakurser.map { it.tilValutakursDto() },
-            utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilUtenlandskPeriodebeløpDto() },
-            korrigertEtterbetaling =
-                korrigertEtterbetalingService
-                    .finnAktivtKorrigeringPåBehandling(behandlingId)
-                    ?.tilKorrigertEtterbetalingDto(),
-            korrigertVedtak =
-                korrigertVedtakService
-                    .finnAktivtKorrigertVedtakPåBehandling(behandlingId)
-                    ?.tilKorrigertVedtakDto(),
-            feilutbetaltValuta = feilutbetaltValuta,
-            brevmottakere = brevmottakere,
-            refusjonEøs = refusjonEøs,
-            vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandling.id)?.vurderingsstrategiForValutakurser,
-            søknadMottattDato = søknadMottattDato,
-            tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregning?.tilTilbakekrevingsvedtakMotregningDto(),
-            manglendeSvalbardmerking = personer?.tilManglendeSvalbardmerkingPerioder(personResultater) ?: emptyList(),
-            manglendeFinnmarkmerking = samhandlerInfo?.tilManglendeFinnmarkmerkingPerioder(personResultater),
-        )
+        val utvidetBehandlingDto =
+            UtvidetBehandlingDto(
+                behandlingId = behandling.id,
+                steg = behandling.steg,
+                stegTilstand = behandling.behandlingStegTilstand.map { it.tilBehandlingStegTilstandDto() },
+                status = behandling.status,
+                resultat = behandling.resultat,
+                skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
+                type = behandling.type,
+                kategori = behandling.kategori,
+                underkategori = behandling.underkategori.tilDto(),
+                årsak = behandling.opprettetÅrsak,
+                opprettetTidspunkt = behandling.opprettetTidspunkt,
+                endretAv = behandling.endretAv,
+                arbeidsfordelingPåBehandling = arbeidsfordeling.tilArbeidsfordelingPåBehandlingDto(),
+                søknadsgrunnlag = søknadsgrunnlag,
+                personer =
+                    personer?.map { person ->
+                        persongrunnlagService.mapTilPersonDtoMedStatsborgerskapLand(
+                            person = person,
+                            erManueltLagtTilISøknad = søknadsgrunnlag?.barnaMedOpplysninger?.find { it.ident == person.aktør.aktivFødselsnummer() }?.manueltRegistrert,
+                            eldsteBarnsFødselsdato = personopplysningGrunnlag.eldsteBarnSinFødselsdato,
+                        )
+                    }
+                        ?: emptyList(),
+                personResultater = personResultater?.map { it.tilPersonResultatDto() } ?: emptyList(),
+                fødselshendelsefiltreringResultater =
+                    fødselshendelsefiltreringResultatRepository
+                        .finnFødselshendelsefiltreringResultater(
+                            behandlingId = behandling.id,
+                        ).map { it.tilFødselshendelsefiltreringResultatDto() },
+                utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling, personopplysningGrunnlag),
+                personerMedAndelerTilkjentYtelse =
+                    personopplysningGrunnlag?.tilPersonerMedAndelerDto(andelerTilkjentYtelse)
+                        ?: emptyList(),
+                endretUtbetalingAndeler =
+                    endreteUtbetalingerMedAndeler
+                        .map { it.tilEndretUtbetalingAndelDto() },
+                tilbakekreving = tilbakekreving?.tilTilbakekrevingDto(),
+                vedtak = vedtak?.tilVedtakDto(),
+                kompetanser = kompetanser.map { it.tilKompetanseDto() }.sortedByDescending { it.fom },
+                totrinnskontroll = totrinnskontroll?.tilTotrinnskontrollDto(),
+                aktivSettPåVent =
+                    settPåVentService
+                        .finnAktivSettPåVentPåBehandling(behandlingId = behandlingId)
+                        ?.tilSettPåVentDto(),
+                migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId),
+                valutakurser = valutakurser.map { it.tilValutakursDto() },
+                utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilUtenlandskPeriodebeløpDto() },
+                korrigertEtterbetaling =
+                    korrigertEtterbetalingService
+                        .finnAktivtKorrigeringPåBehandling(behandlingId)
+                        ?.tilKorrigertEtterbetalingDto(),
+                korrigertVedtak =
+                    korrigertVedtakService
+                        .finnAktivtKorrigertVedtakPåBehandling(behandlingId)
+                        ?.tilKorrigertVedtakDto(),
+                feilutbetaltValuta = feilutbetaltValuta,
+                brevmottakere = brevmottakere,
+                refusjonEøs = refusjonEøs,
+                vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandling.id)?.vurderingsstrategiForValutakurser,
+                søknadMottattDato = søknadMottattDato,
+                tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregning?.tilTilbakekrevingsvedtakMotregningDto(),
+                manglendeSvalbardmerking = personer?.tilManglendeSvalbardmerkingPerioder(personResultater) ?: emptyList(),
+                manglendeFinnmarkmerking = samhandlerInfo?.tilManglendeFinnmarkmerkingPerioder(personResultater),
+            )
+
+        return strengtFortroligService.anonymiserStrengtFortroligBarn(utvidetBehandlingDto, behandlingId)
     }
 }

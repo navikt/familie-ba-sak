@@ -19,6 +19,7 @@ data class ValutakursDto(
     val kurs: BigDecimal?,
     val vurderingsform: Vurderingsform?,
     override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT,
+    val inneholderBarnSomSkalSkjermes: Boolean = false,
 ) : AbstractUtfyltStatus<ValutakursDto>() {
     override fun medUtfyltStatus(): ValutakursDto = this.copy(status = utfyltStatus(finnAntallUtfylt(listOf(this.valutakursdato, this.kurs)), 2))
 }
