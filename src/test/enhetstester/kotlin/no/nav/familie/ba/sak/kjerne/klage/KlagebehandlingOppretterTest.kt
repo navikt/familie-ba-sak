@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.klage.dto.OpprettKlageDto
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.Klagebehandlingsårsak
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
@@ -42,6 +43,7 @@ class KlagebehandlingOppretterTest {
     private val tilpassArbeidsfordelingService = mockk<TilpassArbeidsfordelingService>()
     private val clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(dagensDato)
     private val featureToggleService = mockk<FeatureToggleService>()
+    private val strengtFortroligService = mockk<StrengtFortroligService>(relaxed = true)
 
     private val klagebehandlingOppretter =
         KlagebehandlingOppretter(
@@ -51,6 +53,7 @@ class KlagebehandlingOppretterTest {
             tilpassArbeidsfordelingService,
             clockProvider,
             featureToggleService,
+            strengtFortroligService,
         )
 
     @BeforeEach
@@ -88,6 +91,24 @@ class KlagebehandlingOppretterTest {
                     klagebehandlingOppretter.opprettKlage(fagsak, klageMottattDato)
                 }
             assertThat(exception.message).isEqualTo("Kan ikke opprette klage med krav mottatt frem i tid.")
+        }
+
+        @Test
+        fun `skal kaste FunksjonellFeil hvis fagsak inneholder person med strengt fortrolig adressebeskyttelse ved opprettelse av klagebehandling`() {
+            // Arrange
+            val fagsak = lagFagsak()
+            val klageMottattDato = dagensDato
+
+            every { strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak) } returns true
+
+            // Act & assert
+            val exception =
+                assertThrows<FunksjonellFeil> {
+                    klagebehandlingOppretter.opprettKlage(fagsak, klageMottattDato)
+                }
+            assertThat(exception.frontendFeilmelding).isEqualTo(
+                "Klagebehandling kan ikke opprettes når fagsaken inneholder personer med strengt fortrolig adressebeskyttelse. Slike klager må behandles manuelt.",
+            )
         }
 
         @Test

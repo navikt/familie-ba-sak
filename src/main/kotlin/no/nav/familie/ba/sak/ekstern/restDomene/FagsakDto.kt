@@ -20,6 +20,7 @@ open class BaseFagsakDto(
     open val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
     open val fagsakType: FagsakType = FagsakType.NORMAL,
     open val institusjon: InstitusjonDto? = null,
+    open val finnesStrengtFortroligPersonIFagsak: Boolean,
 )
 
 data class FagsakDto(
@@ -34,6 +35,7 @@ data class FagsakDto(
     override val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
     val behandlinger: List<UtvidetBehandlingDto>,
     override val fagsakType: FagsakType = FagsakType.NORMAL,
+    override val finnesStrengtFortroligPersonIFagsak: Boolean,
 ) : BaseFagsakDto(
         opprettetTidspunkt = opprettetTidspunkt,
         id = id,
@@ -45,6 +47,7 @@ data class FagsakDto(
         løpendeUnderkategori = løpendeUnderkategori,
         gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
         fagsakType = fagsakType,
+        finnesStrengtFortroligPersonIFagsak = finnesStrengtFortroligPersonIFagsak,
     )
 
 fun BaseFagsakDto.tilFagsakDto(
@@ -61,6 +64,7 @@ fun BaseFagsakDto.tilFagsakDto(
     gjeldendeUtbetalingsperioder = this.gjeldendeUtbetalingsperioder,
     behandlinger = utvidetBehandlingerDto,
     fagsakType = this.fagsakType,
+    finnesStrengtFortroligPersonIFagsak = this.finnesStrengtFortroligPersonIFagsak,
 )
 
 data class MinimalFagsakDto(
@@ -77,6 +81,7 @@ data class MinimalFagsakDto(
     val migreringsdato: LocalDate? = null,
     override val fagsakType: FagsakType,
     override val institusjon: InstitusjonDto?,
+    override val finnesStrengtFortroligPersonIFagsak: Boolean,
 ) : BaseFagsakDto(
         opprettetTidspunkt = opprettetTidspunkt,
         id = id,
@@ -89,6 +94,7 @@ data class MinimalFagsakDto(
         gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
         fagsakType = fagsakType,
         institusjon = institusjon,
+        finnesStrengtFortroligPersonIFagsak = finnesStrengtFortroligPersonIFagsak,
     )
 
 fun BaseFagsakDto.tilMinimalFagsakDto(
@@ -108,4 +114,5 @@ fun BaseFagsakDto.tilMinimalFagsakDto(
     migreringsdato = migreringsdato,
     fagsakType = this.fagsakType,
     institusjon = this.institusjon,
+    finnesStrengtFortroligPersonIFagsak = this.finnesStrengtFortroligPersonIFagsak,
 )

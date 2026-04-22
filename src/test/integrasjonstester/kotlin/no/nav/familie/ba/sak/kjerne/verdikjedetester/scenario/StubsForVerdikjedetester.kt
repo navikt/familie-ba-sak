@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.containing
+import com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
@@ -16,6 +18,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FolkeregisteridentifikatorStatus
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FolkeregisteridentifikatorType
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelsePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
@@ -56,7 +60,9 @@ fun stubScenario(scenario: ScenarioDto) {
         stubHentStatsborgerskap(it)
         stubHentSøknad(it)
         stubHentOppholdstillatelse(it)
+        stubHentAdressebeskyttelse(it)
     }
+    stubHentAdressebeskyttelseBolk(alleIdenter)
     stubHentBostedsadresserOgDeltBostedForPerson(scenario)
     stubHenthentBostedsadresseDeltBostedOgOppholdsadresseForPerson(scenario)
     stubHentPerson(scenario)
@@ -135,6 +141,73 @@ private fun stubHentOppholdstillatelse(scenarioPersonDto: ScenarioPersonDto) {
     stubFor(
         post(urlEqualTo("/rest/api/pdl/graphql"))
             .withRequestBody(WireMock.equalToJson(jsonMapper.writeValueAsString(pdlRequestBody)))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        jsonMapper.writeValueAsString(response),
+                    ),
+            ),
+    )
+}
+
+private fun stubHentAdressebeskyttelse(scenarioPersonDto: ScenarioPersonDto) {
+    val response =
+        PdlBaseResponse(
+            data =
+                PdlAdressebeskyttelseResponse(
+                    person =
+                        PdlAdressebeskyttelsePerson(
+                            adressebeskyttelse = scenarioPersonDto.adressebeskyttelse,
+                        ),
+                ),
+            errors = null,
+            extensions = null,
+        )
+
+    val pdlRequestBody =
+        PdlPersonRequest(
+            variables = PdlPersonRequestVariables(scenarioPersonDto.ident, historikk = true),
+            query = hentGraphqlQuery("hent-adressebeskyttelse"),
+        )
+
+    stubFor(
+        post(urlEqualTo("/rest/api/pdl/graphql"))
+            .withRequestBody(WireMock.equalToJson(jsonMapper.writeValueAsString(pdlRequestBody)))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        jsonMapper.writeValueAsString(response),
+                    ),
+            ),
+    )
+}
+
+private fun stubHentAdressebeskyttelseBolk(scenario: List<ScenarioPersonDto>) {
+    val response =
+        PdlBolkResponse(
+            data =
+                PersonBolk(
+                    personBolk =
+                        scenario.map {
+                            PersonDataBolk(
+                                ident = it.ident,
+                                code = "ok",
+                                person = PdlAdressebeskyttelsePerson(adressebeskyttelse = it.adressebeskyttelse),
+                            )
+                        },
+                ),
+            errors = null,
+            extensions = null,
+        )
+
+    stubFor(
+        post(urlEqualTo("/rest/api/pdl/graphql"))
+            .withRequestBody(matchingJsonPath("$.query", containing("hentPersonBolk")))
+            .withRequestBody(matchingJsonPath("$.query", containing("adressebeskyttelse { gradering }")))
             .willReturn(
                 aResponse()
                     .withStatus(200)

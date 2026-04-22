@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -165,6 +166,18 @@ class StrengtFortroligService(
         val skjermedeBarnUtenAndeler = hentSkjermedeBarnUtenLøpendeAndeler(fagsakId, tilgangerTilPersoner, søker)
 
         return personerSaksbehandlerIkkeHarTilgangTil == skjermedeBarnUtenAndeler
+    }
+
+    fun harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak: Fagsak): Boolean {
+        val identer =
+            persongrunnlagService
+                .hentSøkerOgBarnPåFagsak(fagsak.id)
+                ?.map { it.aktør.aktivFødselsnummer() }
+                ?: listOf(fagsak.skjermetBarnSøker?.aktør?.aktivFødselsnummer() ?: fagsak.aktør.aktivFødselsnummer())
+
+        return familieIntegrasjonerTilgangskontrollService
+            .hentIdenterMedStrengtFortroligAdressebeskyttelse(identer)
+            .isNotEmpty()
     }
 
     private fun hentBarnMedStrengtFortroligKodeSomSkalAnonymiseres(behandlingId: Long): Set<String> {

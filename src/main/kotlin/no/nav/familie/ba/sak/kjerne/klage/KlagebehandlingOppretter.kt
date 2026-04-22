@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.klage.dto.OpprettKlageDto
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
@@ -31,6 +32,7 @@ class KlagebehandlingOppretter(
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
     private val clockProvider: ClockProvider,
     private val featureToggleService: FeatureToggleService,
+    private val strengtFortroligService: StrengtFortroligService,
 ) {
     private val logger = LoggerFactory.getLogger(KlagebehandlingOppretter::class.java)
 
@@ -52,6 +54,13 @@ class KlagebehandlingOppretter(
 
         if (klageMottattDato.isAfter(LocalDate.now(clockProvider.get()))) {
             throw FunksjonellFeil("Kan ikke opprette klage med krav mottatt frem i tid.")
+        }
+
+        if (strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak)) {
+            throw FunksjonellFeil(
+                melding = "Kan ikke opprette klagebehandling på fagsak ${fagsak.id} fordi den inneholder personer med strengt fortrolig adressebeskyttelse.",
+                frontendFeilmelding = "Klagebehandling kan ikke opprettes når fagsaken inneholder personer med strengt fortrolig adressebeskyttelse. Slike klager må behandles manuelt.",
+            )
         }
 
         val fødselsnummer = fagsak.aktør.aktivFødselsnummer()

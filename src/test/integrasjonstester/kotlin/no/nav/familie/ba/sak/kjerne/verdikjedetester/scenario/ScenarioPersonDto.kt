@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario
 
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
@@ -32,6 +33,7 @@ data class ScenarioPersonDto(
             ),
         ),
     val bostedsadresser: List<Bostedsadresse> = defaultBostedsadresseHistorikk(LocalDate.parse(fødselsdato)),
+    val adressebeskyttelse: List<Adressebeskyttelse> = emptyList(),
 ) {
     val ident: String
         get() = _ident ?: randomFnr(LocalDate.parse(fødselsdato)).also { _ident = it }

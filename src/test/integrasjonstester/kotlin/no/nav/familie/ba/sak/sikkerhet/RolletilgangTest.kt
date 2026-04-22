@@ -27,6 +27,7 @@ import tools.jackson.module.kotlin.readValue
     "integrasjonstest",
     "testcontainers",
     "mock-pdl",
+    "mock-pdl-klient",
     "mock-ident-klient",
     "mock-infotrygd-barnetrygd",
     "fake-tilbakekreving-klient",
