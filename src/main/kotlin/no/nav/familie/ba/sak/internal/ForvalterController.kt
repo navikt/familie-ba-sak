@@ -633,9 +633,10 @@ class ForvalterController(
     @Operation(
         summary = "Henter personinfo fra PDL",
         description =
-            "Henter ut detaljer om en person fra PDL." +
+            "Henter ut detaljer om en person fra PDL. " +
                 "Sett de ulike vis-flaggene til true for å inkludere ønsket informasjon i responsen. " +
-                "Uthenting av person info logges til securelogger med hvilke flagg som ble satt.",
+                "Uthenting av person info logges til tilgangsloggen (audit) med begrunnelsen, " +
+                "og til securelogger med hvilke flagg som ble satt.",
     )
     fun hentPersonFraPdl(
         @RequestBody hentPersonFraPdlRequest: HentPersonFraPdlRequest,
@@ -648,6 +649,7 @@ class ForvalterController(
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(hentPersonFraPdlRequest.ident),
             event = AuditLoggerEvent.ACCESS,
+            begrunnelse = hentPersonFraPdlRequest.begrunnelse,
         )
 
         secureLogger.info(

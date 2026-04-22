@@ -61,8 +61,11 @@ class TilgangService(
     fun validerTilgangTilPersoner(
         personIdenter: List<String>,
         event: AuditLoggerEvent,
+        begrunnelse: String? = null,
     ) {
-        personIdenter.forEach { auditLogger.log(Sporingsdata(event, it)) }
+        personIdenter.forEach {
+            auditLogger.log(Sporingsdata(event = event, personIdent = it, msg = begrunnelse))
+        }
         val tilgangerTilPersoner = sjekkTilgangTilPersoner(personIdenter)
         if (!tilgangerTilPersoner.all { it.harTilgang }) {
             val adressebeskyttelsegraderingEllerNavAnsatt = tilgangerTilPersoner.tilBegrunnelserForManglendeTilgang()

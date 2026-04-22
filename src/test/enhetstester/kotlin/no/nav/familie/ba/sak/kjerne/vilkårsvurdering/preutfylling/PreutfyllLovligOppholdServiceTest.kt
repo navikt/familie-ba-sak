@@ -107,9 +107,9 @@ class PreutfyllLovligOppholdServiceTest {
                     .first { it.aktør == søkerAktør }
                     .vilkårResultater
                     .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
-            assertThat(lovligOppholdResultater).hasSize(2)
-            assertThat(lovligOppholdResultater.first { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
-            assertThat(lovligOppholdResultater.last { it.resultat == Resultat.OPPFYLT }).isNotNull
+            assertThat(lovligOppholdResultater).hasSize(1)
+            assertThat(lovligOppholdResultater.first { it.resultat == Resultat.OPPFYLT }).isNotNull
+            assertThat(lovligOppholdResultater.first { it.periodeFom == LocalDate.now().minusYears(2).plusDays(1) })
         }
 
         @Test
@@ -148,13 +148,10 @@ class PreutfyllLovligOppholdServiceTest {
                     .vilkårResultater
                     .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
 
-            assertThat(lovligOppholdResultater).hasSize(2)
-            assertThat(lovligOppholdResultater.find { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
-            assertThat(lovligOppholdResultater.find { it.resultat == Resultat.OPPFYLT }).isNotNull
-            assertThat(lovligOppholdResultater.first().periodeFom).isEqualTo(barn.fødselsdato)
-            assertThat(lovligOppholdResultater.first().periodeTom).isEqualTo(LocalDate.now().minusYears(5))
-            assertThat(lovligOppholdResultater.last().periodeFom).isEqualTo(LocalDate.now().minusYears(5).plusDays(1))
-            assertThat(lovligOppholdResultater.last().periodeTom).isNull()
+            assertThat(lovligOppholdResultater).hasSize(1)
+            assertThat(lovligOppholdResultater.first { it.resultat == Resultat.OPPFYLT }).isNotNull
+            assertThat(lovligOppholdResultater.first().periodeFom).isEqualTo(LocalDate.now().minusYears(5).plusDays(1))
+            assertThat(lovligOppholdResultater.first().periodeTom).isNull()
         }
 
         @Test
@@ -653,6 +650,119 @@ class PreutfyllLovligOppholdServiceTest {
 
             val oppfyltPeriode = lovligOppholdResultater.single { it.resultat == Resultat.OPPFYLT }
             assertThat(oppfyltPeriode.periodeTom).isNotNull
+        }
+
+        @Test
+        fun `skal ikke preutfylle perioder før oppholdstillatelse for søker som innvandret etter eldste barns fødselsdato`() {
+            // Arrange
+            val innvandringstidspunkt = LocalDate.now().minusYears(3)
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
+                lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
+                    søker.apply {
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "AFG",
+                                    gyldigPeriode = DatoIntervallEntitet(fom = innvandringstidspunkt, tom = null),
+                                    person = this,
+                                ),
+                            )
+                        opphold =
+                            mutableListOf(
+                                GrOpphold(
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    gyldigPeriode = DatoIntervallEntitet(fom = innvandringstidspunkt, tom = null),
+                                    person = this,
+                                ),
+                            )
+                    }
+                }
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+
+            // Assert
+            val lovligOppholdResultater =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == søkerAktør }
+                    .vilkårResultater
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+
+            assertThat(lovligOppholdResultater).hasSize(1)
+            assertThat(lovligOppholdResultater.single().resultat).isEqualTo(Resultat.OPPFYLT)
+            assertThat(lovligOppholdResultater.single().periodeFom).isEqualTo(innvandringstidspunkt)
+        }
+
+        @Test
+        fun `skal ikke preutfylle perioder før oppholdstillatelse for barn som innvandret etter fødselsdato`() {
+            // Arrange
+            val barnFødselsdato = LocalDate.now().minusYears(5)
+            val innvandringstidspunkt = LocalDate.now().minusYears(2)
+            val barnAktør = randomAktør()
+            val barnMedOpphold =
+                lagPerson(aktør = barnAktør, type = PersonType.BARN, fødselsdato = barnFødselsdato).apply {
+                    statsborgerskap =
+                        mutableListOf(
+                            GrStatsborgerskap(
+                                landkode = "AFG",
+                                gyldigPeriode = DatoIntervallEntitet(fom = barnFødselsdato, tom = null),
+                                person = this,
+                            ),
+                        )
+                    opphold =
+                        mutableListOf(
+                            GrOpphold(
+                                type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                gyldigPeriode = DatoIntervallEntitet(fom = innvandringstidspunkt, tom = null),
+                                person = this,
+                            ),
+                        )
+                }
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = behandling,
+                    lagPersonResultater = {
+                        setOf(
+                            lagPersonResultat(vilkårsvurdering = it, aktør = søkerAktør),
+                            lagPersonResultat(vilkårsvurdering = it, aktør = barnAktør),
+                        )
+                    },
+                )
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
+                lagPersonopplysningGrunnlag(behandlingId = behandling.id) { grunnlag ->
+                    setOf(
+                        barnMedOpphold,
+                        lagPerson(aktør = søkerAktør, personopplysningGrunnlag = grunnlag).apply {
+                            statsborgerskap =
+                                mutableListOf(
+                                    GrStatsborgerskap(
+                                        landkode = "NOR",
+                                        gyldigPeriode = sisteTiÅr,
+                                        medlemskap = Medlemskap.NORDEN,
+                                        person = this,
+                                    ),
+                                )
+                        },
+                    )
+                }
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+
+            // Assert
+            val lovligOppholdResultater =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == barnAktør }
+                    .vilkårResultater
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+
+            assertThat(lovligOppholdResultater).hasSize(1)
+            assertThat(lovligOppholdResultater.single().resultat).isEqualTo(Resultat.OPPFYLT)
+            assertThat(lovligOppholdResultater.single().periodeFom).isEqualTo(innvandringstidspunkt)
         }
 
         private fun lagPersonopplysningGrunnlagMedSøkerOgBarn(
