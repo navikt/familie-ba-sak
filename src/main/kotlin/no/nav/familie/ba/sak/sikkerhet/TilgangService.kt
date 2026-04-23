@@ -115,7 +115,7 @@ class TilgangService(
 
         val tilgangerTilPersoner = sjekkTilgangTilPersoner(personIdenter)
 
-        if (!strengtFortroligService.harTilgangTilAllePersonerEllerKunManglendeTilgangTilSkjermedeBarnUtenLøpendeAndeler(behandling.fagsak.id, tilgangerTilPersoner, søker)) {
+        if (!strengtFortroligService.harTilgangTilAllePersonerEllerKunManglendeTilgangTilSkjermedeBarnUtenLøpendeAndeler(behandling.fagsak.id, personIdenter, søker)) {
             val adressebeskyttelsegraderingEllerNavAnsatt = tilgangerTilPersoner.tilBegrunnelserForManglendeTilgang()
             throw RolleTilgangskontrollFeil(
                 melding =
@@ -156,7 +156,7 @@ class TilgangService(
 
         val tilgangerTilPersoner = sjekkTilgangTilPersoner(personIdenterIFagsak)
 
-        if (!strengtFortroligService.harTilgangTilAllePersonerEllerKunManglendeTilgangTilSkjermedeBarnUtenLøpendeAndeler(fagsak.id, tilgangerTilPersoner, søker)) {
+        if (!strengtFortroligService.harTilgangTilAllePersonerEllerKunManglendeTilgangTilSkjermedeBarnUtenLøpendeAndeler(fagsak.id, personIdenterIFagsak, søker)) {
             val adressebeskyttelsegraderingEllerNavAnsatt = tilgangerTilPersoner.tilBegrunnelserForManglendeTilgang()
             throw RolleTilgangskontrollFeil(
                 melding =

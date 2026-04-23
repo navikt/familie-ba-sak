@@ -69,12 +69,14 @@ class PersongrunnlagServiceTest {
                 kodeverkService = kodeverkService,
                 featureToggleService = featureToggleService,
                 falskIdentitetService = falskIdentitetService,
+                strengtFortroligService = mockk(relaxed = true),
             ),
         )
 
     @BeforeEach
     fun setup() {
         every { featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER) } returns true
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns null
     }
 
     @Test

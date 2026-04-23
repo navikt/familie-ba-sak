@@ -42,6 +42,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
@@ -72,6 +73,7 @@ class PersongrunnlagService(
     private val kodeverkService: KodeverkService,
     private val featureToggleService: FeatureToggleService,
     private val falskIdentitetService: FalskIdentitetService,
+    private val strengtFortroligService: StrengtFortroligService,
 ) {
     fun mapTilPersonDtoMedStatsborgerskapLand(
         person: Person,
@@ -251,7 +253,24 @@ class PersongrunnlagService(
         val nyttPersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
 
         val alleBarna = barnFraInneværendeBehandling.union(barnFraForrigeBehandling).toList()
-        val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarna)
+
+        // Skjermede barn (kode 6/19) uten løpende andeler som saksbehandler mangler tilgang til
+        // kopieres fra forrige vedtatte persongrunnlag i stedet for å hentes fra PDL (som vil feile).
+        val sisteBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
+        val aktørerSomSkalKopieres: Set<Aktør> =
+            if (sisteBehandlingSomErVedtatt != null) {
+                strengtFortroligService
+                    .finnSkjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak(behandling.fagsak)
+                    .filter { it in alleBarna }
+                    .toSet()
+            } else {
+                emptySet()
+            }
+        val forrigePersongrunnlag: PersonopplysningGrunnlag? =
+            if (aktørerSomSkalKopieres.isNotEmpty()) hentAktivThrows(sisteBehandlingSomErVedtatt!!.id) else null
+
+        val barnSomSkalHentesFraPdl = alleBarna.filterNot { it in aktørerSomSkalKopieres }
+        val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarna - aktørerSomSkalKopieres)
 
         val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering()
 
@@ -273,7 +292,7 @@ class PersongrunnlagService(
             )
         nyttPersonopplysningGrunnlag.personer.add(søker)
 
-        alleBarna.forEach { barnsAktør ->
+        barnSomSkalHentesFraPdl.forEach { barnsAktør ->
             nyttPersonopplysningGrunnlag.personer.add(
                 hentPerson(
                     aktør = barnsAktør,
@@ -285,6 +304,14 @@ class PersongrunnlagService(
                     skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                     eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
                 ),
+            )
+        }
+
+        aktørerSomSkalKopieres.forEach { skjermetAktør ->
+            val personFraForrige = forrigePersongrunnlag!!.personer.firstOrNull { it.aktør == skjermetAktør }
+                ?: throw Feil("Fant ikke skjermet barn ${skjermetAktør.aktørId} i forrige persongrunnlag ${forrigePersongrunnlag.id}")
+            nyttPersonopplysningGrunnlag.personer.add(
+                personFraForrige.tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag),
             )
         }
 
@@ -313,7 +340,9 @@ class PersongrunnlagService(
                      * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
                      * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
                      */
-                arbeidsfordelingService.fastsettBehandlendeEnhet(behandling)
+                arbeidsfordelingService.fastsettBehandlendeEnhet(
+                    behandling = behandling,
+                )
                 saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
             }
         } else {

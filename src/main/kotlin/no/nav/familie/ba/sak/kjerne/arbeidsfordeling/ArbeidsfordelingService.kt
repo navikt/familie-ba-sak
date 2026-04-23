@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.NavIdent
@@ -45,6 +46,7 @@ class ArbeidsfordelingService(
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
     private val featureToggleService: FeatureToggleService,
+    private val strengtFortroligService: StrengtFortroligService,
 ) {
     @Transactional
     fun manueltOppdaterBehandlendeEnhet(
@@ -224,8 +226,12 @@ class ArbeidsfordelingService(
         arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandlingId)
             ?: throw Feil("Finner ikke tilknyttet arbeidsfordeling på behandling med id $behandlingId")
 
-    fun hentArbeidsfordelingsenhet(behandling: Behandling): Arbeidsfordelingsenhet {
+    fun hentArbeidsfordelingsenhet(
+        behandling: Behandling,
+    ): Arbeidsfordelingsenhet {
         val søkerIdent = behandling.fagsak.aktør.aktivFødselsnummer()
+        val ekskluderteAktører =
+            strengtFortroligService.finnSkjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak(behandling.fagsak)
 
         val arbeidsfordelingPersoner =
             buildMap {
@@ -237,6 +243,7 @@ class ArbeidsfordelingService(
                 personopplysningGrunnlagRepository
                     .finnSøkerOgBarnAktørerTilAktiv(behandling.id)
                     .barn()
+                    .filterNot { it.aktør in ekskluderteAktører }
                     .forEach { person ->
                         utledArbeidsfordelingPerson(
                             aktør = person.aktør,
