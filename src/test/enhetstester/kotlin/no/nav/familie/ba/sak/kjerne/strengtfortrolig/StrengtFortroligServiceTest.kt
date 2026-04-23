@@ -32,13 +32,14 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.logg.LoggType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService.Companion.BEGRUNNELSE_STRENGT_FORTROLIG
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService.Companion.SKJERMET_BARN
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService.Companion.SKJERMET_BARN_FØDSELSDATO
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
@@ -53,7 +54,7 @@ import java.time.YearMonth
 
 class StrengtFortroligServiceTest {
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
-    private val persongrunnlagService: PersongrunnlagService = mockk()
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository = mockk()
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
@@ -61,7 +62,7 @@ class StrengtFortroligServiceTest {
     private val strengtFortroligService =
         StrengtFortroligService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            persongrunnlagService = persongrunnlagService,
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
             featureToggleService = featureToggleService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
@@ -78,19 +79,12 @@ class StrengtFortroligServiceTest {
         mockBrukerContext("testbruker")
         every { featureToggleService.isEnabled(FeatureToggle.TILLAT_TILGANG_SKJERMET_BARN_UTEN_LØPENDE_ANDELER) } returns true
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
-        every { persongrunnlagService.hentSøkerOgBarnPåBehandling(behandling.id) } returns
+        every { personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(behandling.id) } returns
             listOf(
                 PersonEnkel(aktør = søkerAktør, type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 1), dødsfallDato = null, målform = Målform.NB),
                 PersonEnkel(aktør = barnAktør, type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 6, 15), dødsfallDato = null, målform = Målform.NB),
             )
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id) } returns sisteIverksatteBehandling
-        every { persongrunnlagService.hentBarna(behandling.id) } returns
-            listOf(
-                mockk<Person> {
-                    every { aktør } returns barnAktør
-                    every { navn } returns "Barn med diskresjonskode"
-                },
-            )
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteIverksatteBehandling
     }
 
     @AfterEach
@@ -226,22 +220,19 @@ class StrengtFortroligServiceTest {
 
     @Nested
     inner class HarTilgangTilAllePersonerEllerKunManglendeTilgangTilSkjermedeBarnUtenLøpendeAndelerTest {
+        private val personIdenter = listOf(søkerAktør.aktivFødselsnummer(), barnAktør.aktivFødselsnummer())
+
         @Test
         fun `skal returnere false når skjermet barn aldri har hatt andeler`() {
             // Arrange
+            mockSaksbehandlerHarTilgangTilSøkerMenIkkeBarn()
             mockBarnUtenAndeler()
-
-            val tilganger =
-                listOf(
-                    Tilgang(søkerAktør.aktivFødselsnummer(), true),
-                    Tilgang(barnAktør.aktivFødselsnummer(), false, BEGRUNNELSE_STRENGT_FORTROLIG),
-                )
 
             // Act
             val resultat =
                 strengtFortroligService.harTilgangTilAllePersonerEllerKunManglendeTilgangTilSkjermedeBarnUtenLøpendeAndeler(
                     fagsak.id,
-                    tilganger,
+                    personIdenter,
                     søkerAktør,
                 )
 
@@ -252,19 +243,14 @@ class StrengtFortroligServiceTest {
         @Test
         fun `skal returnere true når skjermet barn har hatt andeler som ikke lenger er løpende`() {
             // Arrange
+            mockSaksbehandlerHarTilgangTilSøkerMenIkkeBarn()
             mockBarnUtenLøpendeAndeler()
-
-            val tilganger =
-                listOf(
-                    Tilgang(søkerAktør.aktivFødselsnummer(), true),
-                    Tilgang(barnAktør.aktivFødselsnummer(), false, BEGRUNNELSE_STRENGT_FORTROLIG),
-                )
 
             // Act
             val resultat =
                 strengtFortroligService.harTilgangTilAllePersonerEllerKunManglendeTilgangTilSkjermedeBarnUtenLøpendeAndeler(
                     fagsak.id,
-                    tilganger,
+                    personIdenter,
                     søkerAktør,
                 )
 
@@ -275,17 +261,13 @@ class StrengtFortroligServiceTest {
         @Test
         fun `skal returnere true når saksbehandler har tilgang til alle personer`() {
             // Arrange
-            val tilganger =
-                listOf(
-                    Tilgang(søkerAktør.aktivFødselsnummer(), true),
-                    Tilgang(barnAktør.aktivFødselsnummer(), true),
-                )
+            mockSaksbehandlerHarTilgangTilAllePersoner()
 
             // Act
             val resultat =
                 strengtFortroligService.harTilgangTilAllePersonerEllerKunManglendeTilgangTilSkjermedeBarnUtenLøpendeAndeler(
                     fagsak.id,
-                    tilganger,
+                    personIdenter,
                     søkerAktør,
                 )
 
@@ -296,6 +278,7 @@ class StrengtFortroligServiceTest {
         @Test
         fun `skal returnere false når skjermet barn har løpende andeler og saksbehandler ikke har tilgang til barn`() {
             // Arrange
+            mockSaksbehandlerHarTilgangTilSøkerMenIkkeBarn()
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns
                 listOf(
                     lagAndelTilkjentYtelse(
@@ -306,17 +289,11 @@ class StrengtFortroligServiceTest {
                     ),
                 )
 
-            val tilganger =
-                listOf(
-                    Tilgang(søkerAktør.aktivFødselsnummer(), true),
-                    Tilgang(barnAktør.aktivFødselsnummer(), false, BEGRUNNELSE_STRENGT_FORTROLIG),
-                )
-
             // Act
             val resultat =
                 strengtFortroligService.harTilgangTilAllePersonerEllerKunManglendeTilgangTilSkjermedeBarnUtenLøpendeAndeler(
                     fagsak.id,
-                    tilganger,
+                    personIdenter,
                     søkerAktør,
                 )
 
@@ -324,6 +301,171 @@ class StrengtFortroligServiceTest {
             assertThat(resultat).isFalse()
         }
     }
+
+    @Nested
+    inner class FinnSkjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsakTest {
+        @Test
+        fun `skal returnere tomt sett når saksbehandler har tilgang til alle personer`() {
+            // Arrange
+            mockSaksbehandlerHarTilgangTilAllePersoner()
+            every { personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilFagsak(fagsak.id) } returns
+                setOf(
+                    PersonEnkel(aktør = søkerAktør, type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 1), dødsfallDato = null, målform = Målform.NB),
+                    PersonEnkel(aktør = barnAktør, type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 6, 15), dødsfallDato = null, målform = Målform.NB),
+                )
+
+            // Act
+            val resultat = strengtFortroligService.finnSkjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak(fagsak)
+
+            // Assert
+            assertThat(resultat).isEmpty()
+        }
+
+        @Test
+        fun `skal returnere aktør for skjermet barn uten løpende andeler`() {
+            // Arrange
+            mockSaksbehandlerHarTilgangTilSøkerMenIkkeBarn()
+            mockBarnUtenLøpendeAndeler()
+            every { personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilFagsak(fagsak.id) } returns
+                setOf(
+                    PersonEnkel(aktør = søkerAktør, type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 1), dødsfallDato = null, målform = Målform.NB),
+                    PersonEnkel(aktør = barnAktør, type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 6, 15), dødsfallDato = null, målform = Målform.NB),
+                )
+
+            // Act
+            val resultat = strengtFortroligService.finnSkjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak(fagsak)
+
+            // Assert
+            assertThat(resultat).containsExactly(barnAktør)
+        }
+
+        @Test
+        fun `skal returnere tomt sett når skjermet barn fortsatt har løpende andeler`() {
+            // Arrange
+            mockSaksbehandlerHarTilgangTilSøkerMenIkkeBarn()
+            every { personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilFagsak(fagsak.id) } returns
+                setOf(
+                    PersonEnkel(aktør = søkerAktør, type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 1), dødsfallDato = null, målform = Målform.NB),
+                    PersonEnkel(aktør = barnAktør, type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 6, 15), dødsfallDato = null, målform = Målform.NB),
+                )
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2099, 12),
+                        behandling = sisteIverksatteBehandling,
+                        aktør = barnAktør,
+                    ),
+                )
+
+            // Act
+            val resultat = strengtFortroligService.finnSkjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak(fagsak)
+
+            // Assert
+            assertThat(resultat).isEmpty()
+        }
+
+        @Test
+        fun `skal returnere tomt sett når fagsaken ikke har noe persongrunnlag`() {
+            // Arrange
+            every { personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilFagsak(fagsak.id) } returns emptySet()
+
+            // Act
+            val resultat = strengtFortroligService.finnSkjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak(fagsak)
+
+            // Assert
+            assertThat(resultat).isEmpty()
+        }
+
+        @Test
+        fun `skal returnere tomt sett når kallet er systemkjøring`() {
+            // Arrange
+            clearBrukerContext()
+            mockBrukerContext(SikkerhetContext.SYSTEM_FORKORTELSE)
+
+            // Act
+            val resultat = strengtFortroligService.finnSkjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak(fagsak)
+
+            // Assert
+            assertThat(resultat).isEmpty()
+        }
+    }
+
+    @Nested
+    inner class FiltrerVekkVedtaksperioderMedSkjermetBarnTest {
+        @Test
+        fun `skal filtrere vekk perioder som inneholder skjermet barn`() {
+            // Arrange
+            mockSaksbehandlerHarTilgangTilSøkerMenIkkeBarn()
+            mockBarnUtenLøpendeAndeler()
+
+            val periodeMedSkjermetBarn =
+                lagUtvidetVedtaksperiodeDto(
+                    id = 1L,
+                    identer = listOf(søkerAktør.aktivFødselsnummer(), barnAktør.aktivFødselsnummer()),
+                )
+            val periodeUtenSkjermetBarn =
+                lagUtvidetVedtaksperiodeDto(
+                    id = 2L,
+                    identer = listOf(søkerAktør.aktivFødselsnummer()),
+                )
+
+            // Act
+            val resultat =
+                strengtFortroligService.filtrerVekkVedtaksperioderMedSkjermetBarn(
+                    vedtaksperioder = listOf(periodeMedSkjermetBarn, periodeUtenSkjermetBarn),
+                    behandlingId = behandling.id,
+                )
+
+            // Assert
+            assertThat(resultat).containsExactly(periodeUtenSkjermetBarn)
+        }
+
+        @Test
+        fun `skal ikke filtrere noe når saksbehandler har tilgang til alle personer`() {
+            // Arrange
+            mockSaksbehandlerHarTilgangTilAllePersoner()
+
+            val perioder =
+                listOf(
+                    lagUtvidetVedtaksperiodeDto(id = 1L, identer = listOf(søkerAktør.aktivFødselsnummer(), barnAktør.aktivFødselsnummer())),
+                    lagUtvidetVedtaksperiodeDto(id = 2L, identer = listOf(søkerAktør.aktivFødselsnummer())),
+                )
+
+            // Act
+            val resultat =
+                strengtFortroligService.filtrerVekkVedtaksperioderMedSkjermetBarn(
+                    vedtaksperioder = perioder,
+                    behandlingId = behandling.id,
+                )
+
+            // Assert
+            assertThat(resultat).isEqualTo(perioder)
+        }
+    }
+
+    private fun lagUtvidetVedtaksperiodeDto(
+        id: Long,
+        identer: List<String>,
+    ) = no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelserDto(
+        id = id,
+        fom = LocalDate.of(2023, 1, 1),
+        tom = LocalDate.of(2023, 12, 31),
+        type = no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.UTBETALING,
+        begrunnelser = emptyList(),
+        gyldigeBegrunnelser = emptyList(),
+        utbetalingsperiodeDetaljer =
+            identer.map {
+                no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj(
+                    person = lagPersonDto(it),
+                    ytelseType = no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD,
+                    utbetaltPerMnd = 1000,
+                    erPåvirketAvEndring = false,
+                    endringsårsak = null,
+                    prosent = java.math.BigDecimal.valueOf(100),
+                )
+            },
+    )
 
     private fun lagPersonDto(
         personIdent: String,

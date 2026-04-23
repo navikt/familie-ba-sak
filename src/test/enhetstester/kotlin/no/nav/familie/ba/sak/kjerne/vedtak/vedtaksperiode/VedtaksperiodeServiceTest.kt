@@ -66,6 +66,7 @@ class VedtaksperiodeServiceTest {
                 valutakursRepository = mockk(),
                 utenlandskPeriodebeløpRepository = mockk(),
                 featureToggleService = mockk(),
+                strengtFortroligService = mockk(relaxed = true),
             ),
         )
 

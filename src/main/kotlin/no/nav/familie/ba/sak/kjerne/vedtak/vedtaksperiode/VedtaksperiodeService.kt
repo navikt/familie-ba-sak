@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform.NN
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -82,6 +83,7 @@ class VedtaksperiodeService(
     private val valutakursRepository: ValutakursRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val featureToggleService: FeatureToggleService,
+    private val strengtFortroligService: StrengtFortroligService,
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -356,12 +358,14 @@ class VedtaksperiodeService(
 
         val skalMinimeres = behandling.status != BehandlingStatus.UTREDES
 
+        val filtrerteVedtaksperioder = strengtFortroligService.filtrerVekkVedtaksperioderMedSkjermetBarn(vedtaksperioder, behandlingId)
+
         return if (skalMinimeres) {
-            vedtaksperioder
+            filtrerteVedtaksperioder
                 .filter { it.begrunnelser.isNotEmpty() }
                 .map { it.copy(gyldigeBegrunnelser = emptyList()) }
         } else {
-            vedtaksperioder
+            filtrerteVedtaksperioder
         }
     }
 

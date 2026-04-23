@@ -67,7 +67,7 @@ class TilgangServiceTest {
     private val strengtFortroligService =
         StrengtFortroligService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            persongrunnlagService = persongrunnlagService,
+            personopplysningGrunnlagRepository = mockk(relaxed = true),
             familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
             featureToggleService = featureToggleService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
@@ -400,7 +400,7 @@ class TilgangServiceTest {
         @Test
         fun `validerTilgangTilFagsak - skal tillate tilgang til saksbehandler uten strengt fortrolig tilgang ved skjermet barn uten løpende andeler`() {
             // Arrange
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(testFagsak.id) } returns testBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(testFagsak.id) } returns testBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(testBehandling.id) } returns
                 listOf(
                     lagAndelTilkjentYtelse(
@@ -427,7 +427,7 @@ class TilgangServiceTest {
         @Test
         fun `validerTilgangTilFagsak - skal blokkere tilgang til saksbehandler uten strengt fortrolig tilgang ved skjermet barn med løpende andeler`() {
             // Arrange
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(testFagsak.id) } returns testBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(testFagsak.id) } returns testBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(testBehandling.id) } returns
                 listOf(
                     lagAndelTilkjentYtelse(
@@ -472,7 +472,7 @@ class TilgangServiceTest {
         @Test
         fun `validerTilgangTilFagsak - skal blokkere tilgang uavhengig av årsak hvis ingen behandling er iverksatt på fagsaken`() {
             // Arrange
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(testFagsak.id) } returns null
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(testFagsak.id) } returns null
 
             fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
                 listOf(
@@ -490,7 +490,7 @@ class TilgangServiceTest {
         @Test
         fun `validerTilgangTilFagsak - skal blokkere tilgang når både søker og barn er skjermet, selv om barn ikke har løpende andeler`() {
             // Arrange
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(testFagsak.id) } returns testBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(testFagsak.id) } returns testBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(testBehandling.id) } returns
                 listOf(
                     lagAndelTilkjentYtelse(
@@ -534,7 +534,7 @@ class TilgangServiceTest {
         fun `validerTilgangTilBehandling - skal tillate tilgang til behandling hvis skjermet barn ikke har løpende andeler`() {
             // Arrange
             every { behandlingHentOgPersisterService.hent(testBehandling.id) } returns testBehandling
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(testFagsak.id) } returns testBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(testFagsak.id) } returns testBehandling
             every { persongrunnlagService.hentSøkerOgBarnPåBehandling(testBehandling.id) } returns
                 listOf(
                     PersonEnkel(aktør = barnAktør, type = PersonType.BARN, fødselsdato = LocalDate.now(), dødsfallDato = null, målform = Målform.NB),

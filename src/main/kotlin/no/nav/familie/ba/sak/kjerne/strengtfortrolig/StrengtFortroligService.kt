@@ -9,10 +9,12 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasj
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelserDto
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.stereotype.Service
@@ -21,7 +23,7 @@ import java.time.LocalDate
 @Service
 class StrengtFortroligService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val persongrunnlagService: PersongrunnlagService,
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val featureToggleService: FeatureToggleService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
@@ -152,14 +154,31 @@ class StrengtFortroligService(
     }
 
     /**
+     * Filtrerer vekk vedtaksperioder som inneholder utbetalingsdetaljer for skjermede barn
+     * som saksbehandler ikke har tilgang til.
+     */
+    fun filtrerVekkVedtaksperioderMedSkjermetBarn(
+        vedtaksperioder: List<UtvidetVedtaksperiodeMedBegrunnelserDto>,
+        behandlingId: Long,
+    ): List<UtvidetVedtaksperiodeMedBegrunnelserDto> {
+        val skjermedeIdenter = hentBarnMedStrengtFortroligKodeSomSkalAnonymiseres(behandlingId)
+        if (skjermedeIdenter.isEmpty()) return vedtaksperioder
+
+        return vedtaksperioder.filterNot { periode ->
+            periode.utbetalingsperiodeDetaljer.any { it.person.personIdent in skjermedeIdenter }
+        }
+    }
+
+    /**
      * Sjekker om saksbehandler har tilgang til alle personer, eller om de eneste personene
      * saksbehandler mangler tilgang til er skjermede barn uten løpende andeler.
      */
     fun harTilgangTilAllePersonerEllerKunManglendeTilgangTilSkjermedeBarnUtenLøpendeAndeler(
         fagsakId: Long,
-        tilgangerTilPersoner: List<Tilgang>,
+        personIdenter: List<String>,
         søker: Aktør,
     ): Boolean {
+        val tilgangerTilPersoner = sjekkTilgangTilPersoner(personIdenter)
         if (tilgangerTilPersoner.all { it.harTilgang }) return true
 
         val personerSaksbehandlerIkkeHarTilgangTil = tilgangerTilPersoner.filterNot { it.harTilgang }.map { it.personIdent }.toSet()
@@ -168,10 +187,29 @@ class StrengtFortroligService(
         return personerSaksbehandlerIkkeHarTilgangTil == skjermedeBarnUtenAndeler
     }
 
+    fun finnSkjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak(fagsak: Fagsak): Set<Aktør> {
+        if (SikkerhetContext.erSystemKontekst()) return emptySet()
+
+        val søkerOgBarn = personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilFagsak(fagsak.id).takeIf { it.isNotEmpty() } ?: return emptySet()
+        val søker =
+            søkerOgBarn.firstOrNull { it.type == PersonType.SØKER }?.aktør
+                ?: fagsak.skjermetBarnSøker?.aktør
+                ?: fagsak.aktør
+
+        val tilgangerTilPersoner = sjekkTilgangTilPersoner(søkerOgBarn.map { it.aktør.aktivFødselsnummer() })
+        val skjermedeIdenter = hentSkjermedeBarnUtenLøpendeAndeler(fagsak.id, tilgangerTilPersoner, søker)
+
+        return søkerOgBarn
+            .filter { it.aktør.aktivFødselsnummer() in skjermedeIdenter }
+            .map { it.aktør }
+            .toSet()
+    }
+
     fun harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak: Fagsak): Boolean {
         val identer =
-            persongrunnlagService
-                .hentSøkerOgBarnPåFagsak(fagsak.id)
+            personopplysningGrunnlagRepository
+                .finnSøkerOgBarnAktørerTilFagsak(fagsak.id)
+                .takeIf { it.isNotEmpty() }
                 ?.map { it.aktør.aktivFødselsnummer() }
                 ?: listOf(fagsak.skjermetBarnSøker?.aktør?.aktivFødselsnummer() ?: fagsak.aktør.aktivFødselsnummer())
 
@@ -182,7 +220,7 @@ class StrengtFortroligService(
 
     private fun hentBarnMedStrengtFortroligKodeSomSkalAnonymiseres(behandlingId: Long): Set<String> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val personerPåBehandling = persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
+        val personerPåBehandling = personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(behandlingId).takeIf { it.isNotEmpty() }
         val søker = behandling.fagsak.skjermetBarnSøker?.aktør ?: behandling.fagsak.aktør
 
         val personIdenter =
@@ -220,13 +258,13 @@ class StrengtFortroligService(
                 ?.map { it.personIdent }
                 ?: return emptySet()
 
-        val sisteIverksatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId) ?: return emptySet()
-        val andelerPåBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id)
+        val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId) ?: return emptySet()
+        val andelerPåBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id)
 
         val alleSkjermedeBarnHarAndelerMenIngenLøpende =
             barnUtenStrengtFortroligTilgang.all { ident ->
                 val barnetsAndeler = andelerPåBehandling.filter { it.aktør.aktivFødselsnummer() == ident }
-                barnetsAndeler.isNotEmpty() && barnetsAndeler.none { it.erLøpende() }
+                 barnetsAndeler.none { it.erLøpende() }
             }
 
         if (alleSkjermedeBarnHarAndelerMenIngenLøpende) {

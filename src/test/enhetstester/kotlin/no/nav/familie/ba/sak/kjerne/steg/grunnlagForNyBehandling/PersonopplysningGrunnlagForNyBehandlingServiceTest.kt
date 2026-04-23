@@ -83,11 +83,11 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
 
             every {
                 persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
+                    aktør = any(),
+                    barnFraInneværendeBehandling = any(),
+                    behandling = any(),
+                    målform = any(),
+                    barnFraForrigeBehandling = any(),
                 )
             } returns PersonopplysningGrunnlag(behandlingId = behandling.id)
 

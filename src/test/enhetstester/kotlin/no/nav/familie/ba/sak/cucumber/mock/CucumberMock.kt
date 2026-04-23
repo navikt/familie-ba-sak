@@ -80,6 +80,7 @@ import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingSteg
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.EøsSkjemaerForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.PersonopplysningGrunnlagForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningBrevService
@@ -271,6 +272,9 @@ class CucumberMock(
             valutakursRepository = valutakursRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             featureToggleService = featureToggleService,
+            strengtFortroligService = mockk<StrengtFortroligService>().also {
+                every { it.filtrerVekkVedtaksperioderMedSkjermetBarn(any(), any()) } answers { firstArg() }
+            },
         )
 
     val behandlingService =
