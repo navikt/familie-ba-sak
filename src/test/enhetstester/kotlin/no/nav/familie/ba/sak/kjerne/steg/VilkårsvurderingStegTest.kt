@@ -7,6 +7,7 @@ import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
@@ -26,20 +27,37 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassUtenlandskePeriodebeløpTilKompetanserService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.utbetaling.UtbetalingTidslinjeService
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService.Companion.BULGARSK_LEV
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService.Companion.BULGARSK_LEV_CUTOFF
+import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
+import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.byggVilkårsvurderingTidslinjer
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.tidslinje.tomTidslinje
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -526,6 +544,108 @@ class VilkårsvurderingStegTest {
                 // Assert
                 verify(exactly = 0) { opprettTaskService.opprettOppgaveForFinnmarksOgSvalbardtilleggTask(any(), any()) }
             }
+        }
+    }
+
+    @Nested
+    inner class BulgarskLevPatching {
+        @Test
+        fun `VilkårsvurderingSteg skal patche Bulgarske Lev til før og etter cut-off for`() {
+            val startMåned = jan(2025)
+            val eøsSøker = tilfeldigPerson(personType = PersonType.SØKER)
+            val eøsBarn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = startMåned.atDay(15))
+            val clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(YearMonth.of(2026, 2))
+            val utenlandskPeriodebeløpRepo: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp> = mockPeriodeBarnSkjemaRepository()
+            val kompetanseRepo: PeriodeOgBarnSkjemaRepository<Kompetanse> = mockPeriodeBarnSkjemaRepository()
+
+            // kaster feil hvis man prøver å sette BGN etter cutoff
+            val ecbSimulator =
+                object : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
+                    override fun skjemaerEndret(
+                        behandlingId: BehandlingId,
+                        endretTil: Collection<UtenlandskPeriodebeløp>,
+                    ) {
+                        if (endretTil.any { it.valutakode == BULGARSK_LEV && (it.tom == null || it.tom!! >= BULGARSK_LEV_CUTOFF) }) {
+                            throw FunksjonellFeil("Fant ikke nødvendige valutakurser for BGN - NOK")
+                        }
+                    }
+                }
+
+            val revurdering = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
+            val behandlingId = BehandlingId(revurdering.id)
+
+            UtenlandskPeriodebeløpBuilder(startMåned, behandlingId)
+                .medBeløp("5>", BULGARSK_LEV, "BG", eøsBarn)
+                .lagreTil(utenlandskPeriodebeløpRepo)
+
+            KompetanseBuilder(startMåned, behandlingId)
+                .medKompetanse("-S>", eøsBarn, annenForeldersAktivitetsland = "BG")
+                .lagreTil(kompetanseRepo)
+
+            // BOSATT_I_RIKET stopper feb 2026
+            val vilkårTidslinjer =
+                VilkårsvurderingBuilder()
+                    .forPerson(eøsSøker, startMåned)
+                    .medVilkår("E>", Vilkår.BOSATT_I_RIKET).medVilkår("E>", Vilkår.LOVLIG_OPPHOLD)
+                    .forPerson(eøsBarn, startMåned)
+                    .medVilkår("+>", Vilkår.UNDER_18_ÅR).medVilkår("E".repeat(14), Vilkår.BOSATT_I_RIKET) // Februar 2026
+                    .medVilkår("E>", Vilkår.LOVLIG_OPPHOLD).medVilkår("E>", Vilkår.BOR_MED_SØKER)
+                    .medVilkår("+>", Vilkår.GIFT_PARTNERSKAP)
+                    .byggVilkårsvurderingTidslinjer()
+
+            val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService = mockk {
+                every { hentTidslinjerThrows(behandlingId) } returns vilkårTidslinjer
+                every { hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns tomTidslinje()
+            }
+            val endretUtbetalingHentOgPersister: EndretUtbetalingAndelHentOgPersisterService = mockk {
+                every { hentForBehandling(revurdering.id) } returns emptyList()
+            }
+            val utbetalingTidslinjeService: UtbetalingTidslinjeService = mockk {
+                every { hentEndredeUtbetalingsPerioderSomKreverKompetanseTidslinjer(behandlingId, emptyList()) } returns emptyMap()
+            }
+
+            val tilpassUtenlandskePeriodebeløp = TilpassUtenlandskePeriodebeløpTilKompetanserService(utenlandskPeriodebeløpRepo, listOf(ecbSimulator), kompetanseRepo, clockProvider)
+            val tilpassKompetanser = TilpassKompetanserTilRegelverkService(vilkårsvurderingTidslinjeService, utbetalingTidslinjeService, endretUtbetalingHentOgPersister, clockProvider, kompetanseRepo, listOf(tilpassUtenlandskePeriodebeløp))
+            val realUtenlandskPeriodebeløpService = UtenlandskPeriodebeløpService(utenlandskPeriodebeløpRepo, listOf(ecbSimulator))
+
+            // Standard mocks for steget
+            every { persongrunnlagService.hentAktivThrows(revurdering.id) } returns
+                lagTestPersonopplysningGrunnlag(revurdering.id, eøsSøker.aktør.aktivFødselsnummer(), listOf(eøsBarn.aktør.aktivFødselsnummer()))
+            every { tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(revurdering) } returns Unit
+            every { beregningService.genererTilkjentYtelseFraVilkårsvurdering(any(), any()) } returns lagInitiellTilkjentYtelse(revurdering)
+            justRun { automatiskOppdaterValutakursService.oppdaterAndelerMedValutakurser(any()) }
+            justRun { automatiskOppdaterValutakursService.resettValutakurserOgLagValutakurserEtterEndringstidspunkt(any()) }
+            every { endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(any()) } just runs
+
+            val steg =
+                VilkårsvurderingSteg(
+                    behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+                    behandlingstemaService = behandlingstemaService,
+                    vilkårService = vilkårService,
+                    beregningService = beregningService,
+                    persongrunnlagService = persongrunnlagService,
+                    tilbakestillBehandlingService = tilbakestillBehandlingService,
+                    tilpassKompetanserTilRegelverkService = tilpassKompetanser,
+                    vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
+                    månedligValutajusteringService = mockk(),
+                    automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
+                    opprettTaskService = opprettTaskService,
+                    andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+                    endretUtbetalingAndelService = endretUtbetalingAndelService,
+                    utenlandskPeriodebeløpService = realUtenlandskPeriodebeløpService,
+                )
+
+            // Act/Assert
+            assertDoesNotThrow { steg.utførStegOgAngiNeste(revurdering, null) }
+
+            // BGN utenlandsk periodebeløp til cutoff
+            val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepo.finnFraBehandlingId(behandlingId.id)
+            assertThat(utenlandskePeriodebeløp.filter { it.valutakode == BULGARSK_LEV }).allSatisfy {
+                assertThat(it.tom).isNotNull()
+                assertThat(it.tom!!).isBefore(BULGARSK_LEV_CUTOFF)
+            }
+            // Blank utenlandsk periodebeløp fra cutoff
+            assertThat(utenlandskePeriodebeløp.filter { it.valutakode != BULGARSK_LEV }).isNotEmpty()
         }
     }
 }
