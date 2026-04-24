@@ -586,23 +586,29 @@ class VilkårsvurderingStegTest {
             val vilkårTidslinjer =
                 VilkårsvurderingBuilder()
                     .forPerson(eøsSøker, startMåned)
-                    .medVilkår("E>", Vilkår.BOSATT_I_RIKET).medVilkår("E>", Vilkår.LOVLIG_OPPHOLD)
+                    .medVilkår("E>", Vilkår.BOSATT_I_RIKET)
+                    .medVilkår("E>", Vilkår.LOVLIG_OPPHOLD)
                     .forPerson(eøsBarn, startMåned)
-                    .medVilkår("+>", Vilkår.UNDER_18_ÅR).medVilkår("E".repeat(14), Vilkår.BOSATT_I_RIKET) // Februar 2026
-                    .medVilkår("E>", Vilkår.LOVLIG_OPPHOLD).medVilkår("E>", Vilkår.BOR_MED_SØKER)
+                    .medVilkår("+>", Vilkår.UNDER_18_ÅR)
+                    .medVilkår("E".repeat(14), Vilkår.BOSATT_I_RIKET) // Februar 2026
+                    .medVilkår("E>", Vilkår.LOVLIG_OPPHOLD)
+                    .medVilkår("E>", Vilkår.BOR_MED_SØKER)
                     .medVilkår("+>", Vilkår.GIFT_PARTNERSKAP)
                     .byggVilkårsvurderingTidslinjer()
 
-            val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService = mockk {
-                every { hentTidslinjerThrows(behandlingId) } returns vilkårTidslinjer
-                every { hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns tomTidslinje()
-            }
-            val endretUtbetalingHentOgPersister: EndretUtbetalingAndelHentOgPersisterService = mockk {
-                every { hentForBehandling(revurdering.id) } returns emptyList()
-            }
-            val utbetalingTidslinjeService: UtbetalingTidslinjeService = mockk {
-                every { hentEndredeUtbetalingsPerioderSomKreverKompetanseTidslinjer(behandlingId, emptyList()) } returns emptyMap()
-            }
+            val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService =
+                mockk {
+                    every { hentTidslinjerThrows(behandlingId) } returns vilkårTidslinjer
+                    every { hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns tomTidslinje()
+                }
+            val endretUtbetalingHentOgPersister: EndretUtbetalingAndelHentOgPersisterService =
+                mockk {
+                    every { hentForBehandling(revurdering.id) } returns emptyList()
+                }
+            val utbetalingTidslinjeService: UtbetalingTidslinjeService =
+                mockk {
+                    every { hentEndredeUtbetalingsPerioderSomKreverKompetanseTidslinjer(behandlingId, emptyList()) } returns emptyMap()
+                }
 
             val tilpassUtenlandskePeriodebeløp = TilpassUtenlandskePeriodebeløpTilKompetanserService(utenlandskPeriodebeløpRepo, listOf(ecbSimulator), kompetanseRepo, clockProvider)
             val tilpassKompetanser = TilpassKompetanserTilRegelverkService(vilkårsvurderingTidslinjeService, utbetalingTidslinjeService, endretUtbetalingHentOgPersister, clockProvider, kompetanseRepo, listOf(tilpassUtenlandskePeriodebeløp))
