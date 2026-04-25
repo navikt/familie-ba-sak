@@ -192,7 +192,7 @@ class AutovedtakStegService(
 
         if (håndterÅpenBehandlingOgAvbrytAutovedtak(
                 aktør = mottakersAktør,
-                autovedtaktype = automatiskBehandlingData.type,
+                automatiskBehandlingData = automatiskBehandlingData,
                 fagsakId = hentFagsakIdFraBehandlingsdata(automatiskBehandlingData),
                 førstegangKjørt = førstegangKjørt,
             )
@@ -240,10 +240,11 @@ class AutovedtakStegService(
 
     private fun håndterÅpenBehandlingOgAvbrytAutovedtak(
         aktør: Aktør,
-        autovedtaktype: Autovedtaktype,
+        automatiskBehandlingData: AutomatiskBehandlingData,
         fagsakId: Long?,
         førstegangKjørt: LocalDateTime,
     ): Boolean {
+        val autovedtaktype = automatiskBehandlingData.type
         val fagsak =
             if (fagsakId != null) {
                 fagsakService.hentPåFagsakId(fagsakId)
@@ -299,11 +300,19 @@ class AutovedtakStegService(
         antallAutovedtakÅpenBehandling[autovedtaktype]?.increment()
         oppgaveService.opprettOppgaveForManuellBehandling(
             behandlingId = åpenBehandling.id,
-            begrunnelse = "${autovedtaktype.displayName}: Bruker har åpen behandling",
+            begrunnelse = begrunnelseForÅpenBehandling(automatiskBehandlingData),
             manuellOppgaveType = ManuellOppgaveType.ÅPEN_BEHANDLING,
         )
         return true
     }
+
+    private fun begrunnelseForÅpenBehandling(automatiskBehandlingData: AutomatiskBehandlingData): String =
+        when {
+            automatiskBehandlingData is OmregningBrevData &&
+                automatiskBehandlingData.behandlingsårsak == BehandlingÅrsak.OMREGNING_18ÅR ->
+                "Barn 18 år - vedtaksbrev er ikke sendt ut siden det er en åpen behandling i fagsaken."
+            else -> "${automatiskBehandlingData.type.displayName}: Bruker har åpen behandling"
+        }
 
     private fun secureLoggAutovedtakBehandling(
         autovedtaktype: Autovedtaktype,
