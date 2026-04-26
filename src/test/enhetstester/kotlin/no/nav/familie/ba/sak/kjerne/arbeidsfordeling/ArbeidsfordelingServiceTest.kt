@@ -56,7 +56,6 @@ class ArbeidsfordelingServiceTest {
     private val personopplysningerService: PersonopplysningerService = mockk()
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher = mockk()
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk()
     private val strengtFortroligService: StrengtFortroligService = mockk(relaxed = true)
 
     private val arbeidsfordelingService: ArbeidsfordelingService =
@@ -70,7 +69,6 @@ class ArbeidsfordelingServiceTest {
             personopplysningerService = personopplysningerService,
             saksstatistikkEventPublisher = saksstatistikkEventPublisher,
             tilpassArbeidsfordelingService = tilpassArbeidsfordelingService,
-            featureToggleService = featureToggleService,
             strengtFortroligService = strengtFortroligService,
         )
 
@@ -346,6 +344,7 @@ class ArbeidsfordelingServiceTest {
             assertThat(arbeidsfordelingPåBehandling.behandlendeEnhetId).isEqualTo(BarnetrygdEnhet.DRAMMEN.enhetsnummer)
             assertThat(arbeidsfordelingPåBehandling.behandlendeEnhetNavn).isEqualTo(BarnetrygdEnhet.DRAMMEN.enhetsnavn)
         }
+
         @Test
         fun `fastsettBehandlendeEnhet skal ekskludere skjermede barn uten løpende andeler slik at enheten ikke blir Vikafossen`() {
             // Arrange

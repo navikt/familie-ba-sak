@@ -251,28 +251,38 @@ class PersongrunnlagService(
         barnFraForrigeBehandling: List<Aktør> = emptyList(),
     ): PersonopplysningGrunnlag {
         val nyttPersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
-
         val alleBarna = barnFraInneværendeBehandling.union(barnFraForrigeBehandling).toList()
+        val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering()
 
-        // Skjermede barn (kode 6/19) uten løpende andeler som saksbehandler mangler tilgang til
-        // kopieres fra forrige vedtatte persongrunnlag i stedet for å hentes fra PDL (som vil feile).
-        val sisteBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
-        val aktørerSomSkalKopieres: Set<Aktør> =
-            if (sisteBehandlingSomErVedtatt != null) {
+        val forrigePersongrunnlag =
+            behandlingHentOgPersisterService
+                .hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
+                ?.let { hentAktivThrows(it.id) }
+
+        val skjermedeBarnSaksbehandlerManglerTilgangTil =
+            forrigePersongrunnlag?.let {
                 strengtFortroligService
                     .finnSkjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak(behandling.fagsak)
-                    .filter { it in alleBarna }
-                    .toSet()
-            } else {
-                emptySet()
+                    .filter { barn -> barn in alleBarna }
             }
-        val forrigePersongrunnlag: PersonopplysningGrunnlag? =
-            if (aktørerSomSkalKopieres.isNotEmpty()) hentAktivThrows(sisteBehandlingSomErVedtatt!!.id) else null
+                ?: emptyList()
 
-        val barnSomSkalHentesFraPdl = alleBarna.filterNot { it in aktørerSomSkalKopieres }
-        val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarna - aktørerSomSkalKopieres)
+        val barnSomSkalKopieresFraForrigeGrunnlag =
+            skjermedeBarnSaksbehandlerManglerTilgangTil.mapNotNull { barn ->
+                forrigePersongrunnlag?.personer?.firstOrNull { person -> person.aktør == barn }
+            }
 
-        val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering()
+        barnSomSkalKopieresFraForrigeGrunnlag.forEach { person ->
+            person.tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag)
+        }
+
+        val barnSomSkalHentesFraPdl = alleBarna.filterNot { barn -> barn in skjermedeBarnSaksbehandlerManglerTilgangTil }
+
+        val eldsteBarnsFødselsdato =
+            listOfNotNull(
+                finnEldstebarnsFødselsdato(barnSomSkalHentesFraPdl),
+                barnSomSkalKopieresFraForrigeGrunnlag.maxOfOrNull { person -> person.fødselsdato },
+            ).max()
 
         val søker =
             hentPerson(
@@ -290,6 +300,7 @@ class PersongrunnlagService(
                 hentArbeidsforhold = behandling.skalBehandlesAutomatisk,
                 eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
             )
+
         nyttPersonopplysningGrunnlag.personer.add(søker)
 
         barnSomSkalHentesFraPdl.forEach { barnsAktør ->
@@ -304,14 +315,6 @@ class PersongrunnlagService(
                     skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                     eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
                 ),
-            )
-        }
-
-        aktørerSomSkalKopieres.forEach { skjermetAktør ->
-            val personFraForrige = forrigePersongrunnlag!!.personer.firstOrNull { it.aktør == skjermetAktør }
-                ?: throw Feil("Fant ikke skjermet barn ${skjermetAktør.aktørId} i forrige persongrunnlag ${forrigePersongrunnlag.id}")
-            nyttPersonopplysningGrunnlag.personer.add(
-                personFraForrige.tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag),
             )
         }
 
@@ -334,12 +337,13 @@ class PersongrunnlagService(
         }
 
         val aktivtPersonopplysningGrunnlag = hentAktiv(behandling.id)
+
         return if (aktivtPersonopplysningGrunnlag == null || nyttPersonopplysningGrunnlag.harRelevantEndring(aktivtPersonopplysningGrunnlag)) {
             lagreOgDeaktiverGammel(nyttPersonopplysningGrunnlag).also {
-                    /*
-                     * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
-                     * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
-                     */
+                /*
+                 * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
+                 * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
+                 */
                 arbeidsfordelingService.fastsettBehandlendeEnhet(
                     behandling = behandling,
                 )

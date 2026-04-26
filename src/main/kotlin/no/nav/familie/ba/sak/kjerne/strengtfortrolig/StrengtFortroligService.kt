@@ -264,7 +264,7 @@ class StrengtFortroligService(
         val alleSkjermedeBarnHarAndelerMenIngenLøpende =
             barnUtenStrengtFortroligTilgang.all { ident ->
                 val barnetsAndeler = andelerPåBehandling.filter { it.aktør.aktivFødselsnummer() == ident }
-                 barnetsAndeler.none { it.erLøpende() }
+                barnetsAndeler.none { it.erLøpende() }
             }
 
         if (alleSkjermedeBarnHarAndelerMenIngenLøpende) {

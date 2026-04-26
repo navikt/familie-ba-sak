@@ -272,9 +272,10 @@ class CucumberMock(
             valutakursRepository = valutakursRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             featureToggleService = featureToggleService,
-            strengtFortroligService = mockk<StrengtFortroligService>().also {
-                every { it.filtrerVekkVedtaksperioderMedSkjermetBarn(any(), any()) } answers { firstArg() }
-            },
+            strengtFortroligService =
+                mockk<StrengtFortroligService>().also {
+                    every { it.filtrerVekkVedtaksperioderMedSkjermetBarn(any(), any()) } answers { firstArg() }
+                },
         )
 
     val behandlingService =
