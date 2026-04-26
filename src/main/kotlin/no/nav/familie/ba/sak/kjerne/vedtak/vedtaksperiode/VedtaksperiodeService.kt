@@ -358,7 +358,7 @@ class VedtaksperiodeService(
 
         val skalMinimeres = behandling.status != BehandlingStatus.UTREDES
 
-        val filtrerteVedtaksperioder = strengtFortroligService.filtrerVekkVedtaksperioderMedSkjermetBarn(vedtaksperioder, behandlingId)
+        val filtrerteVedtaksperioder = strengtFortroligService.anonymiserSkjermetBarnIVedtaksperioder(vedtaksperioder, behandling.fagsak)
 
         return if (skalMinimeres) {
             filtrerteVedtaksperioder

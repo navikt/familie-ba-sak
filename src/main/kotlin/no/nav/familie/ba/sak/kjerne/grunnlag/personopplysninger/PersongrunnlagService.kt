@@ -254,18 +254,18 @@ class PersongrunnlagService(
         val alleBarna = barnFraInneværendeBehandling.union(barnFraForrigeBehandling).toList()
         val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering()
 
-        val forrigePersongrunnlag =
-            behandlingHentOgPersisterService
-                .hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
-                ?.let { hentAktivThrows(it.id) }
+        val sisteBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
 
         val skjermedeBarnSaksbehandlerManglerTilgangTil =
-            forrigePersongrunnlag?.let {
-                strengtFortroligService
-                    .finnSkjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak(behandling.fagsak)
-                    .filter { barn -> barn in alleBarna }
+            if (sisteBehandlingSomErVedtatt != null) {
+                val skjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil = strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(behandling.fagsak)
+                alleBarna.filter { barn -> barn.aktivFødselsnummer() in skjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil }
+            } else {
+                emptyList()
             }
-                ?: emptyList()
+
+        val forrigePersongrunnlag =
+            if (skjermedeBarnSaksbehandlerManglerTilgangTil.isNotEmpty()) hentAktivThrows(sisteBehandlingSomErVedtatt!!.id) else null
 
         val barnSomSkalKopieresFraForrigeGrunnlag =
             skjermedeBarnSaksbehandlerManglerTilgangTil.mapNotNull { barn ->
