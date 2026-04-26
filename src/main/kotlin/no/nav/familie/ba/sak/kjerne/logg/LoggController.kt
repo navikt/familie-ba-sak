@@ -31,7 +31,7 @@ class LoggController(
         return Result
             .runCatching {
                 val logger = loggService.hentLoggForBehandling(behandlingId)
-                strengtFortroligService.filtrerLoggForStrengtFortroligeBarn(logger, behandlingId)
+                strengtFortroligService.anonymiserLoggForStrengtFortroligeBarn(logger, behandlingId)
             }.fold(
                 onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                 onFailure = {

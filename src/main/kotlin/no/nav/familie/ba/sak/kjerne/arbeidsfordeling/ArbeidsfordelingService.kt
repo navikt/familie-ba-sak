@@ -237,12 +237,12 @@ class ArbeidsfordelingService(
                 )?.let { arbeidsfordelingPerson -> put(søkerIdent, arbeidsfordelingPerson) }
 
                 val skjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak =
-                    strengtFortroligService.finnSkjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak(behandling.fagsak)
+                    strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(behandling.fagsak)
 
                 personopplysningGrunnlagRepository
                     .finnSøkerOgBarnAktørerTilAktiv(behandling.id)
                     .barn()
-                    .filterNot { it.aktør in skjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak }
+                    .filterNot { it.aktør.aktivFødselsnummer() in skjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak }
                     .forEach { person ->
                         utledArbeidsfordelingPerson(
                             aktør = person.aktør,

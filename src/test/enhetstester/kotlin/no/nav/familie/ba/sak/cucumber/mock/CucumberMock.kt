@@ -274,7 +274,7 @@ class CucumberMock(
             featureToggleService = featureToggleService,
             strengtFortroligService =
                 mockk<StrengtFortroligService>().also {
-                    every { it.filtrerVekkVedtaksperioderMedSkjermetBarn(any(), any()) } answers { firstArg() }
+                    every { it.anonymiserSkjermetBarnIVedtaksperioder(any(), any()) } answers { firstArg() }
                 },
         )
 

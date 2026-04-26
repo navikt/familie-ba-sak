@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollKlient
@@ -64,10 +65,11 @@ class TilgangServiceTest {
             cacheManager,
             mockk(),
         )
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository = mockk(relaxed = true)
     private val strengtFortroligService =
         StrengtFortroligService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            personopplysningGrunnlagRepository = mockk(relaxed = true),
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
             featureToggleService = featureToggleService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
@@ -384,6 +386,11 @@ class TilgangServiceTest {
             every { fagsakService.hentAktør(testFagsak.id) } returns søkerAktør
             every { fagsakService.hentPåFagsakId(testFagsak.id) } returns testFagsak
             every { persongrunnlagService.hentSøkerOgBarnPåFagsak(testFagsak.id) } returns
+                setOf(
+                    PersonEnkel(aktør = søkerAktør, type = PersonType.SØKER, fødselsdato = LocalDate.now(), dødsfallDato = null, målform = Målform.NB),
+                    PersonEnkel(aktør = barnAktør, type = PersonType.BARN, fødselsdato = LocalDate.now(), dødsfallDato = null, målform = Målform.NB),
+                )
+            every { personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilFagsak(testFagsak.id) } returns
                 setOf(
                     PersonEnkel(aktør = søkerAktør, type = PersonType.SØKER, fødselsdato = LocalDate.now(), dødsfallDato = null, målform = Målform.NB),
                     PersonEnkel(aktør = barnAktør, type = PersonType.BARN, fødselsdato = LocalDate.now(), dødsfallDato = null, målform = Målform.NB),

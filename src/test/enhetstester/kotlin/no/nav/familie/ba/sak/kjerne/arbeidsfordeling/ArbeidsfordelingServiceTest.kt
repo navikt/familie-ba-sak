@@ -369,8 +369,8 @@ class ArbeidsfordelingServiceTest {
                 Arbeidsfordelingsenhet(enhetId = OSLO.enhetsnummer, enhetNavn = OSLO.enhetsnavn)
 
             every {
-                strengtFortroligService.finnSkjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak(fagsak)
-            } returns setOf(skjermetBarn.aktør)
+                strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak)
+            } returns setOf(skjermetBarn.aktør.aktivFødselsnummer())
 
             val arbeidsfordelingPåBehandlingSlot = slot<ArbeidsfordelingPåBehandling>()
             every { arbeidsfordelingPåBehandlingRepository.save(capture(arbeidsfordelingPåBehandlingSlot)) } answers { firstArg() }
