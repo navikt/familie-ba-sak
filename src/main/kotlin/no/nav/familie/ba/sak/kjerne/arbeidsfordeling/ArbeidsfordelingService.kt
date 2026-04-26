@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -45,7 +44,6 @@ class ArbeidsfordelingService(
     private val personopplysningerService: PersonopplysningerService,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
-    private val featureToggleService: FeatureToggleService,
     private val strengtFortroligService: StrengtFortroligService,
 ) {
     @Transactional
@@ -230,8 +228,6 @@ class ArbeidsfordelingService(
         behandling: Behandling,
     ): Arbeidsfordelingsenhet {
         val søkerIdent = behandling.fagsak.aktør.aktivFødselsnummer()
-        val ekskluderteAktører =
-            strengtFortroligService.finnSkjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak(behandling.fagsak)
 
         val arbeidsfordelingPersoner =
             buildMap {
@@ -240,10 +236,13 @@ class ArbeidsfordelingService(
                     personType = PersonType.SØKER,
                 )?.let { arbeidsfordelingPerson -> put(søkerIdent, arbeidsfordelingPerson) }
 
+                val skjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak =
+                    strengtFortroligService.finnSkjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak(behandling.fagsak)
+
                 personopplysningGrunnlagRepository
                     .finnSøkerOgBarnAktørerTilAktiv(behandling.id)
                     .barn()
-                    .filterNot { it.aktør in ekskluderteAktører }
+                    .filterNot { it.aktør in skjermedeBarnSaksbehandlerManglerTilgangTilUtenLøpendeAndelerPåFagsak }
                     .forEach { person ->
                         utledArbeidsfordelingPerson(
                             aktør = person.aktør,
