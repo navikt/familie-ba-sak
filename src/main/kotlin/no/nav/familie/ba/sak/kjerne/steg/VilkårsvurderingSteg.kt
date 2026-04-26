@@ -111,15 +111,19 @@ class VilkårsvurderingSteg(
 
         endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling)
 
+        val skalOppdatereBgnOgResetteValutakurser =
+            behandling.type in listOf(BehandlingType.REVURDERING, BehandlingType.TEKNISK_ENDRING) &&
+                !behandling.skalBehandlesAutomatisk
+
+        if (skalOppdatereBgnOgResetteValutakurser) {
+            utenlandskPeriodebeløpService.oppdaterBulgarskUtenlandskPeriodebeløpVedBehov(BehandlingId(behandling.id))
+        }
+
         if (!behandling.erSatsendring()) {
             tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
         }
 
-        if (
-            behandling.type in listOf(BehandlingType.REVURDERING, BehandlingType.TEKNISK_ENDRING) &&
-            !behandling.skalBehandlesAutomatisk
-        ) {
-            utenlandskPeriodebeløpService.oppdaterBulgarskUtenlandskPeriodebeløpVedBehov(BehandlingId(behandling.id))
+        if (skalOppdatereBgnOgResetteValutakurser) {
             automatiskOppdaterValutakursService.resettValutakurserOgLagValutakurserEtterEndringstidspunkt(BehandlingId(behandling.id))
         }
 
