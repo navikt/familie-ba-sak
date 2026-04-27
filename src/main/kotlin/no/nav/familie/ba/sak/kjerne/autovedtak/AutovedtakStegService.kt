@@ -306,11 +306,11 @@ class AutovedtakStegService(
         return true
     }
 
-    private fun begrunnelseForÅpenBehandling(automatiskBehandlingData: AutomatiskBehandlingData): String =
+    private fun begrunnelseForÅpenBehandling(automatiskBehandlingData: AutomatiskBehandlingData) =
         when {
             automatiskBehandlingData is OmregningBrevData &&
-                automatiskBehandlingData.behandlingsårsak == BehandlingÅrsak.OMREGNING_18ÅR ->
-                "Barn 18 år - vedtaksbrev er ikke sendt ut siden det er en åpen behandling i fagsaken."
+                automatiskBehandlingData.behandlingsårsak == BehandlingÅrsak.OMREGNING_18ÅR -> "Barn 18 år - vedtaksbrev er ikke sendt ut siden det er en åpen behandling i fagsaken."
+
             else -> "${automatiskBehandlingData.type.displayName}: Bruker har åpen behandling"
         }
 
