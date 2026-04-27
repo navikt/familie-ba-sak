@@ -438,6 +438,7 @@ class CucumberMock(
             valutakursRepository = valutakursRepository,
             clockProvider = clockProvider,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            strengtFortroligService = mockk(relaxed = true),
         )
 
     val behandlingsresultatSteg =
