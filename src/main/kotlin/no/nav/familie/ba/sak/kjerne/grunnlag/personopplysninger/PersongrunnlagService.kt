@@ -42,6 +42,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
@@ -72,6 +73,7 @@ class PersongrunnlagService(
     private val kodeverkService: KodeverkService,
     private val featureToggleService: FeatureToggleService,
     private val falskIdentitetService: FalskIdentitetService,
+    private val strengtFortroligService: StrengtFortroligService,
 ) {
     fun mapTilPersonDtoMedStatsborgerskapLand(
         person: Person,
@@ -249,11 +251,38 @@ class PersongrunnlagService(
         barnFraForrigeBehandling: List<Aktør> = emptyList(),
     ): PersonopplysningGrunnlag {
         val nyttPersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
-
         val alleBarna = barnFraInneværendeBehandling.union(barnFraForrigeBehandling).toList()
-        val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarna)
-
         val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering()
+
+        val sisteBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
+
+        val skjermedeBarnSaksbehandlerManglerTilgangTil =
+            if (sisteBehandlingSomErVedtatt != null) {
+                val skjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil = strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(behandling.fagsak)
+                alleBarna.filter { barn -> barn.aktivFødselsnummer() in skjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil }
+            } else {
+                emptyList()
+            }
+
+        val forrigePersongrunnlag =
+            if (skjermedeBarnSaksbehandlerManglerTilgangTil.isNotEmpty()) hentAktivThrows(sisteBehandlingSomErVedtatt!!.id) else null
+
+        val barnSomSkalKopieresFraForrigeGrunnlag =
+            skjermedeBarnSaksbehandlerManglerTilgangTil.mapNotNull { barn ->
+                forrigePersongrunnlag?.personer?.firstOrNull { person -> person.aktør == barn }
+            }
+
+        barnSomSkalKopieresFraForrigeGrunnlag.forEach { person ->
+            person.tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag)
+        }
+
+        val barnSomSkalHentesFraPdl = alleBarna.filterNot { barn -> barn in skjermedeBarnSaksbehandlerManglerTilgangTil }
+
+        val eldsteBarnsFødselsdato =
+            listOfNotNull(
+                finnEldstebarnsFødselsdato(barnSomSkalHentesFraPdl),
+                barnSomSkalKopieresFraForrigeGrunnlag.maxOfOrNull { person -> person.fødselsdato },
+            ).max()
 
         val søker =
             hentPerson(
@@ -271,9 +300,10 @@ class PersongrunnlagService(
                 hentArbeidsforhold = behandling.skalBehandlesAutomatisk,
                 eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
             )
+
         nyttPersonopplysningGrunnlag.personer.add(søker)
 
-        alleBarna.forEach { barnsAktør ->
+        barnSomSkalHentesFraPdl.forEach { barnsAktør ->
             nyttPersonopplysningGrunnlag.personer.add(
                 hentPerson(
                     aktør = barnsAktør,
@@ -307,13 +337,16 @@ class PersongrunnlagService(
         }
 
         val aktivtPersonopplysningGrunnlag = hentAktiv(behandling.id)
+
         return if (aktivtPersonopplysningGrunnlag == null || nyttPersonopplysningGrunnlag.harRelevantEndring(aktivtPersonopplysningGrunnlag)) {
             lagreOgDeaktiverGammel(nyttPersonopplysningGrunnlag).also {
-                    /*
-                     * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
-                     * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
-                     */
-                arbeidsfordelingService.fastsettBehandlendeEnhet(behandling)
+                /*
+                 * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
+                 * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
+                 */
+                arbeidsfordelingService.fastsettBehandlendeEnhet(
+                    behandling = behandling,
+                )
                 saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
             }
         } else {

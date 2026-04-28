@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.NavIdent
@@ -55,7 +56,7 @@ class ArbeidsfordelingServiceTest {
     private val personopplysningerService: PersonopplysningerService = mockk()
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher = mockk()
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk()
+    private val strengtFortroligService: StrengtFortroligService = mockk(relaxed = true)
 
     private val arbeidsfordelingService: ArbeidsfordelingService =
         ArbeidsfordelingService(
@@ -68,7 +69,7 @@ class ArbeidsfordelingServiceTest {
             personopplysningerService = personopplysningerService,
             saksstatistikkEventPublisher = saksstatistikkEventPublisher,
             tilpassArbeidsfordelingService = tilpassArbeidsfordelingService,
-            featureToggleService = featureToggleService,
+            strengtFortroligService = strengtFortroligService,
         )
 
     @Nested
@@ -342,6 +343,49 @@ class ArbeidsfordelingServiceTest {
             val arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandlingSlot.captured
             assertThat(arbeidsfordelingPåBehandling.behandlendeEnhetId).isEqualTo(BarnetrygdEnhet.DRAMMEN.enhetsnummer)
             assertThat(arbeidsfordelingPåBehandling.behandlendeEnhetNavn).isEqualTo(BarnetrygdEnhet.DRAMMEN.enhetsnavn)
+        }
+
+        @Test
+        fun `fastsettBehandlendeEnhet skal ekskludere skjermede barn uten løpende andeler slik at enheten ikke blir Vikafossen`() {
+            // Arrange
+            val søker = lagPerson()
+            val skjermetBarn = lagPerson(type = PersonType.BARN)
+            val fagsak = lagFagsak(aktør = søker.aktør)
+            val forrigeBehandling = lagBehandling(fagsak = fagsak)
+            val behandling = lagBehandling(fagsak = fagsak, behandlingType = BehandlingType.REVURDERING)
+
+            every { arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any()) } returns null
+
+            every {
+                personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(behandling.id)
+            } returns listOf(lagPersonEnkel(PersonType.SØKER, søker.aktør), lagPersonEnkel(PersonType.BARN, skjermetBarn.aktør))
+
+            every { personopplysningerService.hentPdlPersonInfoEnkel(søker.aktør) } returns PdlPersonInfo.Person(lagPersonInfo())
+
+            every { integrasjonKlient.hentBehandlendeEnhet(søker.aktør.aktivFødselsnummer(), any()) } returns
+                listOf(Arbeidsfordelingsenhet(enhetId = OSLO.enhetsnummer, enhetNavn = OSLO.enhetsnavn))
+
+            every { tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(any(), any()) } returns
+                Arbeidsfordelingsenhet(enhetId = OSLO.enhetsnummer, enhetNavn = OSLO.enhetsnavn)
+
+            every {
+                strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak)
+            } returns setOf(skjermetBarn.aktør.aktivFødselsnummer())
+
+            val arbeidsfordelingPåBehandlingSlot = slot<ArbeidsfordelingPåBehandling>()
+            every { arbeidsfordelingPåBehandlingRepository.save(capture(arbeidsfordelingPåBehandlingSlot)) } answers { firstArg() }
+
+            // Act
+            arbeidsfordelingService.fastsettBehandlendeEnhet(
+                behandling = behandling,
+                sisteBehandlingSomErIverksatt = forrigeBehandling,
+            )
+
+            // Assert
+            verify(exactly = 0) { personopplysningerService.hentPdlPersonInfoEnkel(skjermetBarn.aktør) }
+            verify(exactly = 0) { integrasjonKlient.hentBehandlendeEnhet(skjermetBarn.aktør.aktivFødselsnummer(), any()) }
+            assertThat(arbeidsfordelingPåBehandlingSlot.captured.behandlendeEnhetId).isEqualTo(OSLO.enhetsnummer)
+            assertThat(arbeidsfordelingPåBehandlingSlot.captured.behandlendeEnhetId).isNotEqualTo(BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer)
         }
     }
 

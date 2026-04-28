@@ -94,7 +94,6 @@ class TilgangService(
     ) {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val personerPåBehandling = persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
-        val søker = behandling.fagsak.skjermetBarnSøker?.aktør ?: behandling.fagsak.aktør
 
         val personIdenter =
             personerPåBehandling
@@ -115,7 +114,7 @@ class TilgangService(
 
         val tilgangerTilPersoner = sjekkTilgangTilPersoner(personIdenter)
 
-        if (!strengtFortroligService.harTilgangTilAllePersonerEllerKunManglendeTilgangTilSkjermedeBarnUtenLøpendeAndeler(behandling.fagsak.id, tilgangerTilPersoner, søker)) {
+        if (tilgangerTilPersoner.any { !it.harTilgang } && !strengtFortroligService.saksbehandlerManglerKunTilgangTilSkjermedeBarnUtenLøpendeAndeler(behandling.fagsak, tilgangerTilPersoner)) {
             val adressebeskyttelsegraderingEllerNavAnsatt = tilgangerTilPersoner.tilBegrunnelserForManglendeTilgang()
             throw RolleTilgangskontrollFeil(
                 melding =
@@ -132,7 +131,6 @@ class TilgangService(
     ) {
         val aktør = fagsakService.hentAktør(fagsakId)
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
-        val søker = fagsak.skjermetBarnSøker?.aktør ?: fagsak.aktør
 
         val personerPåFagsak = persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId)
         val personIdenterIFagsak =
@@ -156,7 +154,9 @@ class TilgangService(
 
         val tilgangerTilPersoner = sjekkTilgangTilPersoner(personIdenterIFagsak)
 
-        if (!strengtFortroligService.harTilgangTilAllePersonerEllerKunManglendeTilgangTilSkjermedeBarnUtenLøpendeAndeler(fagsak.id, tilgangerTilPersoner, søker)) {
+        if (tilgangerTilPersoner.any { !it.harTilgang } &&
+            !strengtFortroligService.saksbehandlerManglerKunTilgangTilSkjermedeBarnUtenLøpendeAndeler(fagsak, tilgangerTilPersoner)
+        ) {
             val adressebeskyttelsegraderingEllerNavAnsatt = tilgangerTilPersoner.tilBegrunnelserForManglendeTilgang()
             throw RolleTilgangskontrollFeil(
                 melding =

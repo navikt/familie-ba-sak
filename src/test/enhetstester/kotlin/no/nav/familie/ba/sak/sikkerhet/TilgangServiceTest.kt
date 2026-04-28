@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollKlient
@@ -64,10 +65,11 @@ class TilgangServiceTest {
             cacheManager,
             mockk(),
         )
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository = mockk(relaxed = true)
     private val strengtFortroligService =
         StrengtFortroligService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            persongrunnlagService = persongrunnlagService,
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
             featureToggleService = featureToggleService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
@@ -388,6 +390,11 @@ class TilgangServiceTest {
                     PersonEnkel(aktør = søkerAktør, type = PersonType.SØKER, fødselsdato = LocalDate.now(), dødsfallDato = null, målform = Målform.NB),
                     PersonEnkel(aktør = barnAktør, type = PersonType.BARN, fødselsdato = LocalDate.now(), dødsfallDato = null, målform = Målform.NB),
                 )
+            every { personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilFagsak(testFagsak.id) } returns
+                setOf(
+                    PersonEnkel(aktør = søkerAktør, type = PersonType.SØKER, fødselsdato = LocalDate.now(), dødsfallDato = null, målform = Målform.NB),
+                    PersonEnkel(aktør = barnAktør, type = PersonType.BARN, fødselsdato = LocalDate.now(), dødsfallDato = null, målform = Målform.NB),
+                )
             every { featureToggleService.isEnabled(FeatureToggle.TILLAT_TILGANG_SKJERMET_BARN_UTEN_LØPENDE_ANDELER) } returns true
             mockBrukerContext("A")
         }
@@ -400,7 +407,7 @@ class TilgangServiceTest {
         @Test
         fun `validerTilgangTilFagsak - skal tillate tilgang til saksbehandler uten strengt fortrolig tilgang ved skjermet barn uten løpende andeler`() {
             // Arrange
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(testFagsak.id) } returns testBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(testFagsak.id) } returns testBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(testBehandling.id) } returns
                 listOf(
                     lagAndelTilkjentYtelse(
@@ -427,7 +434,7 @@ class TilgangServiceTest {
         @Test
         fun `validerTilgangTilFagsak - skal blokkere tilgang til saksbehandler uten strengt fortrolig tilgang ved skjermet barn med løpende andeler`() {
             // Arrange
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(testFagsak.id) } returns testBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(testFagsak.id) } returns testBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(testBehandling.id) } returns
                 listOf(
                     lagAndelTilkjentYtelse(
@@ -472,7 +479,7 @@ class TilgangServiceTest {
         @Test
         fun `validerTilgangTilFagsak - skal blokkere tilgang uavhengig av årsak hvis ingen behandling er iverksatt på fagsaken`() {
             // Arrange
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(testFagsak.id) } returns null
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(testFagsak.id) } returns null
 
             fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
                 listOf(
@@ -490,7 +497,7 @@ class TilgangServiceTest {
         @Test
         fun `validerTilgangTilFagsak - skal blokkere tilgang når både søker og barn er skjermet, selv om barn ikke har løpende andeler`() {
             // Arrange
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(testFagsak.id) } returns testBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(testFagsak.id) } returns testBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(testBehandling.id) } returns
                 listOf(
                     lagAndelTilkjentYtelse(
@@ -534,7 +541,7 @@ class TilgangServiceTest {
         fun `validerTilgangTilBehandling - skal tillate tilgang til behandling hvis skjermet barn ikke har løpende andeler`() {
             // Arrange
             every { behandlingHentOgPersisterService.hent(testBehandling.id) } returns testBehandling
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(testFagsak.id) } returns testBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(testFagsak.id) } returns testBehandling
             every { persongrunnlagService.hentSøkerOgBarnPåBehandling(testBehandling.id) } returns
                 listOf(
                     PersonEnkel(aktør = barnAktør, type = PersonType.BARN, fødselsdato = LocalDate.now(), dødsfallDato = null, målform = Målform.NB),
