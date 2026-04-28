@@ -198,6 +198,12 @@
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
             <version>${unleash.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.squareup.okhttp3</groupId>
+                    <artifactId>okhttp</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency> <!-- Overstyrer versjon default i spring pga sikkerhetshull https://security.snyk.io/package/maven/org.yaml:snakeyaml -->
@@ -293,6 +299,11 @@
         <dependency>
             <groupId>no.nav.familie</groupId>
             <artifactId>prosessering-core</artifactId>
+            <version>${prosessering.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.familie</groupId>
+            <artifactId>prosessering-web-nav-token-support</artifactId>
             <version>${prosessering.version}</version>
         </dependency>
         <dependency>
