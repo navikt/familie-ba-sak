@@ -155,7 +155,7 @@ class StrengtFortroligService(
     }
 
     /**
-     * Anonymiserer vekk vedtaksperioder som inneholder utbetalingsdetaljer for skjermede barn
+     * Anonymiserer vekk vedtaksperioder som inneholder utbetalingsdetaljer for skjermede barn uten løpende andeler
      * som saksbehandler ikke har tilgang til.
      */
     fun anonymiserSkjermetBarnIVedtaksperioder(
