@@ -6,7 +6,7 @@ import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
 import no.nav.familie.prosessering.config.ProsesseringInfoProvider
 import no.nav.familie.restklient.client.RetryOAuth2HttpClient
-import no.nav.familie.sikkerhet.context.FamilieFellesNavTokenSupportKonfigurasjon
+import no.nav.familie.sikkerhet.context.FamilieFellesSpringSecurityKonfigurasjon
 import no.nav.security.token.support.client.core.http.OAuth2HttpClient
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
@@ -37,7 +37,7 @@ import java.time.temporal.ChronoUnit
 @ConfigurationPropertiesScan
 @EnableJwtTokenValidation(ignore = ["org.springdoc"])
 @EnableOAuth2Client(cacheEnabled = true)
-@Import(FamilieFellesNavTokenSupportKonfigurasjon::class)
+@Import(FamilieFellesSpringSecurityKonfigurasjon::class)
 class ApplicationConfig {
     @Bean
     fun logFilter(): FilterRegistrationBean<LogFilter> {

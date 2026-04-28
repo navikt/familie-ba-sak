@@ -296,7 +296,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
-            <artifactId>sikkerhet-token-support</artifactId>
+            <artifactId>sikkerhet-spring-security</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.familie</groupId>
