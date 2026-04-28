@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Brevmottaker
 import no.nav.familie.kontrakter.felles.tilbakekreving.FeilutbetaltePerioderDto
@@ -124,6 +125,18 @@ class TilbakekrevingService(
     }
 
     fun søkerHarÅpenTilbakekreving(fagsakId: Long): Boolean = tilbakekrevingKlient.harÅpenTilbakekrevingsbehandling(fagsakId)
+
+    fun hentBehandlingKnyttetTilÅpenTilbakekreving(fagsakId: Long): Behandling? {
+        val åpenTilbakekrevingsbehandling =
+            tilbakekrevingKlient
+                .hentTilbakekrevingsbehandlinger(fagsakId)
+                .find { it.status != Behandlingsstatus.AVSLUTTET }
+                ?: return null
+
+        return tilbakekrevingRepository
+            .findByTilbakekrevingsbehandlingId(åpenTilbakekrevingsbehandling.behandlingId.toString())
+            ?.behandling
+    }
 
     fun opprettTilbakekreving(behandling: Behandling): TilbakekrevingId = tilbakekrevingKlient.opprettTilbakekrevingBehandling(lagOpprettTilbakekrevingRequest(behandling))
 

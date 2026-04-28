@@ -3,7 +3,10 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -14,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgTyp
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.simulering.domene.AvregningPeriode
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.utvidelser.kombiner
@@ -29,24 +33,59 @@ class AvregningService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val clockProvider: ClockProvider,
+    private val tilbakekrevingService: TilbakekrevingService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun behandlingHarPerioderSomAvregnes(behandlingId: Long): Boolean = hentPerioderMedAvregning(behandlingId).isNotEmpty()
 
     fun hentPerioderMedAvregning(behandlingId: Long): List<AvregningPeriode> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
-        if (behandling.kategori == BehandlingKategori.EØS || behandling.type == BehandlingType.TEKNISK_ENDRING ||
-            behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-        ) {
+        if (skalIkkeUtledePerioderMedAvregning(behandling)) {
             return emptyList()
         }
 
+        val avregningsperioderInnenforBehandling = hentPerioderMedAvregningInnenforBehandling(behandling)
+        val avregningsperioderPåTvers = hentPerioderMedAvregningPåTversAvBehandlinger(behandling)
+
+        return (avregningsperioderInnenforBehandling + avregningsperioderPåTvers).distinctBy { it.fom to it.tom }
+    }
+
+    private fun hentPerioderMedAvregningInnenforBehandling(behandling: Behandling): List<AvregningPeriode> {
         val sisteVedtatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
                 ?: return emptyList()
 
-        val andelerInneværendeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
-        val andelerForrigeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id)
+        return hentPerioderMedAvregningMellomToBehandlinger(behandling.id, sisteVedtatteBehandling.id)
+    }
+
+    private fun hentPerioderMedAvregningPåTversAvBehandlinger(behandling: Behandling): List<AvregningPeriode> {
+        if (!featureToggleService.isEnabled(FeatureToggle.UTLED_AVREGNING_PÅ_TVERS_AV_BEHANDLINGER)) {
+            return emptyList()
+        }
+
+        val behandlingMedÅpenTilbakekreving =
+            tilbakekrevingService.hentBehandlingKnyttetTilÅpenTilbakekreving(behandling.fagsak.id)
+                ?: return emptyList()
+
+        val forrigeBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandlingMedÅpenTilbakekreving)
+                ?: return emptyList()
+
+        return hentPerioderMedAvregningMellomToBehandlinger(behandling.id, forrigeBehandling.id)
+    }
+
+    private fun skalIkkeUtledePerioderMedAvregning(behandling: Behandling): Boolean =
+        behandling.kategori == BehandlingKategori.EØS ||
+            behandling.type == BehandlingType.TEKNISK_ENDRING ||
+            behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+
+    private fun hentPerioderMedAvregningMellomToBehandlinger(
+        behandlingId: Long,
+        forrigeBehandlingId: Long,
+    ): List<AvregningPeriode> {
+        val andelerInneværendeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+        val andelerForrigeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandlingId)
 
         val sisteDagIForrigeMåned = LocalDate.now(clockProvider.get()).sisteDagIForrigeMåned()
 
@@ -55,12 +94,9 @@ class AvregningService(
 
         val tidslinjerMedDifferanser = lagTidslinjerMedDifferanser(andelerInneværendeBehandlingTidslinjer, andelerForrigeBehandlingTidslinjer)
 
-        val perioderMedEtterbetalingerOgFeilutbetalinger =
-            summerEtterbetalingerOgFeilutbetalinger(tidslinjerMedDifferanser)
-                .tilPerioderIkkeNull()
-                .tilAvregningPerioder()
-
-        return perioderMedEtterbetalingerOgFeilutbetalinger
+        return summerEtterbetalingerOgFeilutbetalinger(tidslinjerMedDifferanser)
+            .tilPerioderIkkeNull()
+            .tilAvregningPerioder()
     }
 
     private fun lagTidslinjerMedDifferanser(

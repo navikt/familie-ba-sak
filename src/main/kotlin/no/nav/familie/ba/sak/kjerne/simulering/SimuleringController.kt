@@ -30,7 +30,7 @@ class SimuleringController(
     ): ResponseEntity<Ressurs<SimuleringDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
-        val avregningsperioder = avregningService.hentPerioderMedAvregning(behandlingId)
+        val alleAvregningsperioder = avregningService.hentPerioderMedAvregning(behandlingId)
 
         val fagsakId = behandlingRepository.finnBehandling(behandlingId).fagsak.id
         val overlappendePerioderMedAndreFagsaker = finnOverlappendePerioder(vedtakSimuleringMottaker, fagsakId)
@@ -45,7 +45,7 @@ class SimuleringController(
             )
 
         val restSimulering =
-            simulering.tilSimuleringDto(avregningsperioder, overlappendePerioderMedAndreFagsaker)
+            simulering.tilSimuleringDto(alleAvregningsperioder, overlappendePerioderMedAndreFagsaker)
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }
 
