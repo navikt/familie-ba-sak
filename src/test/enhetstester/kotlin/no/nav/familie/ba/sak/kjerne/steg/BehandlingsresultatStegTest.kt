@@ -111,6 +111,7 @@ class BehandlingsresultatStegTest {
             justRun { behandlingsresultatstegValideringService.validerIngenEndringTilbakeITid(any()) }
             justRun { behandlingsresultatstegValideringService.validerSatsErUendret(any()) }
             justRun { behandlingsresultatstegValideringService.validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(any()) }
+            justRun { behandlingsresultatstegValideringService.validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(any()) }
         }
 
         @ParameterizedTest

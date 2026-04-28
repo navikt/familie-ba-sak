@@ -6,8 +6,11 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -18,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValid
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils.rekjørNesteMånedHvisYtelseTypeErInnvilgetToMånederFramITid
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -35,9 +39,16 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
@@ -53,6 +64,7 @@ class BehandlingsresultatStegValideringService(
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val valutakursRepository: ValutakursRepository,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val strengtFortroligService: StrengtFortroligService,
     private val clockProvider: ClockProvider,
 ) {
     fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {
@@ -268,6 +280,66 @@ class BehandlingsresultatStegValideringService(
             }
     }
 
+    fun validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(behandling: Behandling) {
+        val skjermedeBarnSaksbehandlerIkkeHarTilgangTIl = strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(behandling.fagsak)
+        if (skjermedeBarnSaksbehandlerIkkeHarTilgangTIl.isEmpty()) return
+
+        val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) ?: return
+        val forrigeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeVedtatteBehandling.id)
+        val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+
+        val forrigeAndelerForAndrePersoner = forrigeAndeler.filterNot { it.aktør.aktivFødselsnummer() in skjermedeBarnSaksbehandlerIkkeHarTilgangTIl }
+        val nåværendeAndelerForAndrePersoner = nåværendeAndeler.filterNot { it.aktør.aktivFødselsnummer() in skjermedeBarnSaksbehandlerIkkeHarTilgangTIl }
+
+        val endringIUtbetalingForAndrePersonerTidslinje =
+            EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
+                nåværendeAndeler = nåværendeAndelerForAndrePersoner,
+                forrigeAndeler = forrigeAndelerForAndrePersoner,
+            )
+
+        val skjermedeBarnAndelerIForrigeBehandling = forrigeAndeler.filter { it.aktør.aktivFødselsnummer() in skjermedeBarnSaksbehandlerIkkeHarTilgangTIl }.groupBy { it.aktør }
+        val skjermedeBarnAndelerINåværendeBehandling = nåværendeAndeler.filter { it.aktør.aktivFødselsnummer() in skjermedeBarnSaksbehandlerIkkeHarTilgangTIl }.groupBy { it.aktør }
+
+        val skjermedeBarn = skjermedeBarnAndelerIForrigeBehandling.keys + skjermedeBarnAndelerINåværendeBehandling.keys
+
+        skjermedeBarn.forEach { skjermetBarn ->
+            val skjermetBarnsAndelerForrige = skjermedeBarnAndelerIForrigeBehandling[skjermetBarn].orEmpty()
+            val skjermetBarnsAndelerNåværende = skjermedeBarnAndelerINåværendeBehandling[skjermetBarn].orEmpty()
+
+            val endringIUtbetalingForSkjermetBarnTidslinje =
+                EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
+                    nåværendeAndeler = skjermetBarnsAndelerNåværende,
+                    forrigeAndeler = skjermetBarnsAndelerForrige,
+                )
+
+            val andelTilkjentYtelseTidslinjeForSkjermetBarn = lagAndelTilkjentYtelseTidslinjeForSkjermetBarn(skjermetBarnsAndelerForrige)
+
+            val endringIUtbetalingForAndrePersonerSamtidigSomUtbetalingForSkjermetBarnTidslinje =
+                endringIUtbetalingForAndrePersonerTidslinje.kombinerUtenNullMed(andelTilkjentYtelseTidslinjeForSkjermetBarn) { erEndring, _ ->
+                    if (erEndring) true else null
+                }
+
+            val finnesEndringIUtbetalingForAndrePersonerSamtidigSomUtbetalingForSkjermetBarn = endringIUtbetalingForAndrePersonerSamtidigSomUtbetalingForSkjermetBarnTidslinje.tilPerioder().any { it.verdi == true }
+            val finnesEndringISkjermetBarnsAndeler = endringIUtbetalingForSkjermetBarnTidslinje.tilPerioder().any { it.verdi == true }
+
+            if (finnesEndringIUtbetalingForAndrePersonerSamtidigSomUtbetalingForSkjermetBarn || finnesEndringISkjermetBarnsAndeler) {
+                secureLogger.warn(
+                    "Endring i utbetaling oppdaget i periode hvor skjermet barn=${skjermetBarn.aktørId} har hatt andeler. " +
+                        "Behandling=${behandling.id}, fagsak=${behandling.fagsak.id}, saksbehandler=${SikkerhetContext.hentSaksbehandler()}.",
+                )
+                throw FunksjonellFeil(
+                    melding =
+                        "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} har endret utbetaling for andre personer " +
+                            "i en periode hvor et skjermet barn har hatt andeler på behandling=${behandling.id}. " +
+                            "Behandlingen må overføres til enhet 2103 (Vikafossen) og behandles der.",
+                    frontendFeilmelding =
+                        "Det er gjort endringer i utbetalingen i en periode hvor et skjermet barn har hatt andeler. " +
+                            "Behandlingen må overføres til enhet 2103 (Vikafossen) og behandles der.",
+                )
+            }
+        }
+    }
+
     fun validerFalskIdentitetBehandling(tilkjentYtelse: TilkjentYtelse) {
         val andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse.tilTidslinjerPerAktørOgType()
         val andelerForrigeBehandling = beregningService.hentAndelerFraForrigeVedtatteBehandling(tilkjentYtelse.behandling).tilTidslinjerPerAktørOgType()
@@ -279,4 +351,18 @@ class BehandlingsresultatStegValideringService(
             }
         }
     }
+
+    private fun lagAndelTilkjentYtelseTidslinjeForSkjermetBarn(andelerForBarn: List<AndelTilkjentYtelse>): Tidslinje<Boolean> =
+        andelerForBarn
+            .groupBy { it.type }
+            .map { (_, andelerForType) ->
+                andelerForType
+                    .map {
+                        Periode(
+                            verdi = true,
+                            fom = it.stønadFom.førsteDagIInneværendeMåned(),
+                            tom = it.stønadTom.sisteDagIInneværendeMåned(),
+                        )
+                    }.tilTidslinje()
+            }.kombinerUtenNull { _ -> true }
 }
