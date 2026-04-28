@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.config
 
 import no.nav.familie.kontrakter.felles.jsonMapper
+import no.nav.familie.sikkerhet.context.FamilieFellesNavTokenSupportKonfigurasjon
 import no.nav.familie.log.NavSystemtype
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
@@ -20,6 +21,7 @@ import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.resilience.annotation.EnableResilientMethods
@@ -35,6 +37,7 @@ import java.time.temporal.ChronoUnit
 @ConfigurationPropertiesScan
 @EnableJwtTokenValidation(ignore = ["org.springdoc"])
 @EnableOAuth2Client(cacheEnabled = true)
+@Import(FamilieFellesNavTokenSupportKonfigurasjon::class)
 class ApplicationConfig {
     @Bean
     fun logFilter(): FilterRegistrationBean<LogFilter> {
