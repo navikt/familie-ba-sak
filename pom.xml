@@ -305,7 +305,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.familie</groupId>
-            <artifactId>prosessering-web-nav-token-support</artifactId>
+            <artifactId>prosessering-web-spring-security</artifactId>
             <version>${prosessering.version}</version>
         </dependency>
         <dependency>
