@@ -29,12 +29,10 @@ class PreutfyllVilkårService(
             persongrunnlagService.oppdaterRegisteropplysninger(behandling.id)
         }
 
-        if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR)) {
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering)
-            preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)
+        preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)
 
-            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
-        }
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
     }
 
     fun preutfyllBosattIRiketForFødselshendelseBehandlinger(
