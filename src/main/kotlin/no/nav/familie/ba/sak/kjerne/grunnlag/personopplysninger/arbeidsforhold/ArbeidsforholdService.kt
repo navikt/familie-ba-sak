@@ -10,10 +10,14 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
+import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
+import no.nav.familie.restklient.client.RessursException
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
+import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -22,6 +26,8 @@ class ArbeidsforholdService(
     private val systemOnlyIntegrasjonKlient: SystemOnlyIntegrasjonKlient,
     private val integrasjonKlient: IntegrasjonKlient,
 ) {
+    private val logger = LoggerFactory.getLogger(ArbeidsforholdService::class.java)
+
     fun hentArbeidsforhold(person: Person): List<GrArbeidsforhold> {
         val arbeidsforholdForSisteFemÅr = systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(person.aktør.aktivFødselsnummer(), LocalDate.now().minusYears(5))
 
@@ -83,10 +89,22 @@ class ArbeidsforholdService(
                         ansettelsesperiodeFom = medlemskapPeriode.fom ?: cutOffFomDato,
                         ansettelsesperiodeTom = medlemskapPeriode.tom,
                     ).associateWith { arbeidsforhold ->
-                        arbeidsforhold.arbeidsgiver?.organisasjonsnummer?.let { integrasjonKlient.hentOrganisasjon(it) }
+                        arbeidsforhold.arbeidsgiver?.organisasjonsnummer?.let { hentOrganisasjonMedFallback(it) }
                     }.map { (arbeidsforhold, organisasjon) ->
                         arbeidsforhold.tilGrArbeidsforhold(person, organisasjon)
                     }
             }
     }
+
+    private fun hentOrganisasjonMedFallback(organisasjonsnummer: String): Organisasjon =
+        try {
+            integrasjonKlient.hentOrganisasjon(organisasjonsnummer)
+        } catch (ressursException: RessursException) {
+            if (ressursException.httpStatus == HttpStatus.NOT_FOUND) {
+                logger.warn("Fant ikke organisasjon $organisasjonsnummer i EREG, bruker 'Ukjent navn' som fallback.")
+                Organisasjon(organisasjonsnummer = organisasjonsnummer, navn = "Ukjent navn")
+            } else {
+                throw ressursException
+            }
+        }
 }
