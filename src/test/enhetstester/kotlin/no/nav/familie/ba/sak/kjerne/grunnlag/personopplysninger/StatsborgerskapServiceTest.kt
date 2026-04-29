@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.POL_EØS_FOM
 import no.nav.familie.ba.sak.datagenerator.lagKodeverkLand
@@ -36,7 +35,6 @@ internal class StatsborgerskapServiceTest {
     fun setUp() {
         statsborgerskapService = StatsborgerskapService(kodeverkService, featureToggleService)
         every { integrasjonKlient.hentAlleEØSLand() } returns lagKodeverkLand()
-        every { featureToggleService.isEnabled(FeatureToggle.HARDKODET_EEAFREG_STATSBORGERSKAP) } returns true
     }
 
     @Nested
