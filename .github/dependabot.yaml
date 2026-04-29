@@ -33,10 +33,12 @@ updates:
           - "org.springframework*"
           - "org.springdoc*"
           - "no.nav.security*"
+          - "no.nav.familie*"
       utvikler-avhengigheter:
         dependency-type: "development"
         exclude-patterns:
           - "no.nav.security*"
+          - "no.nav.familie*"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
