@@ -299,7 +299,7 @@ class StegService(
                 behandlingSteg.utførStegOgAngiNeste(behandling, registrerPersongrunnlagDTO)
             }
 
-        return if (featureToggleService.isEnabled(FeatureToggle.AUTOMAITSK_REGISTRER_SØKNAD) && behandlingEtterRegistrerePersongrunnlag.steg == StegType.REGISTRERE_SØKNAD) {
+        return if (behandlingEtterRegistrerePersongrunnlag.steg == StegType.REGISTRERE_SØKNAD) {
             håndterAutomatiskRegistrerSøknad(behandlingEtterRegistrerePersongrunnlag)
         } else {
             behandlingEtterRegistrerePersongrunnlag

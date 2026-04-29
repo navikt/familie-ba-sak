@@ -34,7 +34,6 @@ enum class FeatureToggle(
     // Release
 
     // Preutfylling
-    AUTOMAITSK_REGISTRER_SØKNAD("familie-ba-sak.automatisk-registrer-soknad"),
     FILTRERE_REGISTEROPPLYSNINGER("familie-ba-sak.filtrer-registeropplysninger"),
 
     // NAV-25256
