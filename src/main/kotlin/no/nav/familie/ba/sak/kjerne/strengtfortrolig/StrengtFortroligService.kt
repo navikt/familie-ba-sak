@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.strengtfortrolig
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonDto
@@ -185,6 +186,15 @@ class StrengtFortroligService(
         if (personerSaksbehandlerIkkeHarTilgangTil.isEmpty()) return false
 
         val skjermedeBarnUtenLøpendeAndeler = hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak)
+
+        val manglerBareTilgangTilSkjermedeBarnUtenAndeler = personerSaksbehandlerIkkeHarTilgangTil.all { it in skjermedeBarnUtenLøpendeAndeler }
+
+        if (manglerBareTilgangTilSkjermedeBarnUtenAndeler) {
+            secureLogger.info(
+                "Tillater tilgang til fagsak=${fagsak.id} for saksbehandler=${SikkerhetContext.hentSaksbehandler()}. " +
+                    "Saksbehandler har ikke tilgang til personer med strengt fortrolig adresse, men barn som er skjermet har ikke lenger løpende andeler",
+            )
+        }
 
         return personerSaksbehandlerIkkeHarTilgangTil.all { it in skjermedeBarnUtenLøpendeAndeler }
     }
