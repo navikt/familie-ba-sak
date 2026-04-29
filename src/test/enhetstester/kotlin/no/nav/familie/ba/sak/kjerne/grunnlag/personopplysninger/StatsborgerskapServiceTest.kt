@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.lagKodeverkLand
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortUgyldigeStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnNåværendeMedlemskap
@@ -420,6 +421,70 @@ internal class StatsborgerskapServiceTest {
             assertEquals(Medlemskap.NORDEN, medlemskapNorden.finnSterkesteMedlemskap())
             assertEquals(Medlemskap.UKJENT, medlemskapUkjent.finnSterkesteMedlemskap())
             assertEquals(null, medlemskapIngen.finnSterkesteMedlemskap())
+        }
+    }
+
+    @Nested
+    inner class FiltrereUgyldigeStatsborgerskapTest {
+        @Test
+        fun `skal filtrere bort statsborgerskap der gyldigFraOgMed er etter gyldigTilOgMed`() {
+            // Arrange
+            val ugyldig =
+                Statsborgerskap(
+                    "POL",
+                    gyldigFraOgMed = LocalDate.of(2024, 2, 6),
+                    gyldigTilOgMed = LocalDate.of(2024, 2, 5),
+                    bekreftelsesdato = null,
+                )
+            val gyldig =
+                Statsborgerskap(
+                    "POL",
+                    gyldigFraOgMed = LocalDate.of(2024, 2, 6),
+                    gyldigTilOgMed = null,
+                    bekreftelsesdato = null,
+                )
+
+            // Act
+            val resultat = listOf(ugyldig, gyldig).filtrerBortUgyldigeStatsborgerskap()
+
+            // Assert
+            assertEquals(listOf(gyldig), resultat)
+        }
+
+        @Test
+        fun `skal beholde statsborgerskap med null fom og tom`() {
+            // Arrange
+            val statsborgerskap =
+                Statsborgerskap(
+                    "DEU",
+                    gyldigFraOgMed = null,
+                    gyldigTilOgMed = null,
+                    bekreftelsesdato = null,
+                )
+
+            // Act
+            val resultat = listOf(statsborgerskap).filtrerBortUgyldigeStatsborgerskap()
+
+            // Assert
+            assertEquals(listOf(statsborgerskap), resultat)
+        }
+
+        @Test
+        fun `skal beholde statsborgerskap med samme fom og tom`() {
+            // Arrange
+            val statsborgerskap =
+                Statsborgerskap(
+                    "POL",
+                    gyldigFraOgMed = LocalDate.of(2024, 2, 6),
+                    gyldigTilOgMed = LocalDate.of(2024, 2, 6),
+                    bekreftelsesdato = null,
+                )
+
+            // Act
+            val resultat = listOf(statsborgerskap).filtrerBortUgyldigeStatsborgerskap()
+
+            // Assert
+            assertEquals(listOf(statsborgerskap), resultat)
         }
     }
 }
