@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -16,7 +14,6 @@ class PreutfyllVilkårService(
     private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService,
     private val preutfyllBosattIRiketForFødselshendelserService: PreutfyllBosattIRiketForFødselshendelserService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     fun preutfyllVilkår(vilkårsvurdering: Vilkårsvurdering) {
         val behandling = vilkårsvurdering.behandling
@@ -25,9 +22,7 @@ class PreutfyllVilkårService(
         if (behandling.type != FØRSTEGANGSBEHANDLING) return
         if (behandling.fagsak.type == FagsakType.SKJERMET_BARN) return
 
-        if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
-            persongrunnlagService.oppdaterRegisteropplysninger(behandling.id)
-        }
+        persongrunnlagService.oppdaterRegisteropplysninger(behandling.id)
 
         preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering)
         preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering)

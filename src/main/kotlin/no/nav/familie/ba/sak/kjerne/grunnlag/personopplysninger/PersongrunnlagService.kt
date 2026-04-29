@@ -519,26 +519,13 @@ class PersongrunnlagService(
         val filtrerAdresser = featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER)
         val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarn = personopplysningGrunnlag.barna.map { it.aktør })
 
-        val adresserForPersoner =
-            if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
-                personopplysningerService.hentAdresserForPersoner(personopplysningGrunnlag.personer.map { it.aktør.aktivFødselsnummer() })
-            } else {
-                emptyMap()
-            }
+        val adresserForPersoner = personopplysningerService.hentAdresserForPersoner(personopplysningGrunnlag.personer.map { it.aktør.aktivFødselsnummer() })
 
         personopplysningGrunnlag.personer.forEach { person ->
-            val (bostedsadresse, oppholdsadresse, deltBosted) =
-                if (featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG)) {
-                    val adresser = adresserForPersoner[person.aktør.aktivFødselsnummer()] ?: return@forEach
-                    Triple(adresser.bostedsadresse, adresser.oppholdsadresse, adresser.deltBosted)
-                } else {
-                    val aktør = person.aktør
-                    val personinfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
-                    Triple(personinfo.bostedsadresser, personinfo.oppholdsadresser, personinfo.deltBosted)
-                }
+            val adresser = adresserForPersoner[person.aktør.aktivFødselsnummer()] ?: return@forEach
 
             person.bostedsadresser =
-                bostedsadresse
+                adresser.bostedsadresse
                     .filtrerUtKunNorskeBostedsadresser()
                     .filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
                     .map {
@@ -549,7 +536,7 @@ class PersongrunnlagService(
                         )
                     }.toMutableList()
             person.oppholdsadresser =
-                oppholdsadresse
+                adresser.oppholdsadresse
                     .filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
@@ -559,7 +546,7 @@ class PersongrunnlagService(
                         )
                     }.toMutableList()
             person.deltBosted =
-                deltBosted
+                adresser.deltBosted
                     .filtrerBortDeltBostedForSøker(person.type, filtrerAdresser)
                     .map {
                         GrDeltBosted.fraDeltBosted(
