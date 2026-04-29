@@ -14,65 +14,37 @@ import java.time.LocalDate
 object PersonopplysningsgrunnlagFiltreringUtils {
     fun List<Bostedsadresse>.filtrerBortBostedsadresserFørEldsteBarn(
         eldsteBarnsFødselsdato: LocalDate,
-        filtrerAdresser: Boolean,
-    ): List<Bostedsadresse> {
-        if (!filtrerAdresser) return this
-
-        return this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
-    }
+    ): List<Bostedsadresse> = this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
 
     fun List<Oppholdsadresse>.filtrerBortOppholdsadresserFørEldsteBarn(
         eldsteBarnsFødselsdato: LocalDate,
-        filtrerAdresser: Boolean,
-    ): List<Oppholdsadresse> {
-        if (!filtrerAdresser) return this
-
-        return this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
-    }
+    ): List<Oppholdsadresse> = this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
 
     fun List<DeltBosted>.filtrerBortDeltBostedForSøker(
         personType: PersonType,
-        filtrerAdresser: Boolean,
-    ): List<DeltBosted> {
-        if (!filtrerAdresser) return this
-
-        return if (personType == PersonType.SØKER) {
+    ): List<DeltBosted> =
+        if (personType == PersonType.SØKER) {
             emptyList()
         } else {
             this
         }
-    }
 
     fun List<Statsborgerskap>.filtrerBortStatsborgerskapFørEldsteBarn(
         eldsteBarnsFødselsdato: LocalDate,
-        filtrerStatsborgerskap: Boolean,
-    ): List<Statsborgerskap> {
-        if (!filtrerStatsborgerskap) return this
-
-        return this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
-    }
+    ): List<Statsborgerskap> = this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
 
     fun List<Opphold>.filtrerBortOppholdFørEldsteBarn(
         eldsteBarnsFødselsdato: LocalDate,
-        filtrerOpphold: Boolean,
-    ): List<Opphold> {
-        if (!filtrerOpphold) return this
-
-        return this.filter { it.oppholdTil?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
-    }
+    ): List<Opphold> = this.filter { it.oppholdTil?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
 
     fun List<Sivilstand>.filtrerBortIkkeRelevanteSivilstander(
-        filtrerSivilstand: Boolean,
         behandlingKategori: BehandlingKategori,
         behandlingUnderkategori: BehandlingUnderkategori,
         personType: PersonType,
-    ): List<Sivilstand> {
-        if (!filtrerSivilstand) return this
-
-        return if (behandlingUnderkategori == BehandlingUnderkategori.ORDINÆR && personType != PersonType.BARN && behandlingKategori == BehandlingKategori.NASJONAL) {
+    ): List<Sivilstand> =
+        if (behandlingUnderkategori == BehandlingUnderkategori.ORDINÆR && personType != PersonType.BARN && behandlingKategori == BehandlingKategori.NASJONAL) {
             emptyList()
         } else {
             this
         }
-    }
 }

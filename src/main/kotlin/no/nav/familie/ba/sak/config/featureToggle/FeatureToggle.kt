@@ -33,9 +33,6 @@ enum class FeatureToggle(
 
     // Release
 
-    // Preutfylling
-    FILTRERE_REGISTEROPPLYSNINGER("familie-ba-sak.filtrer-registeropplysninger"),
-
     // NAV-25256
     SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN("familie-ba-sak.skjermet-barn"),
 

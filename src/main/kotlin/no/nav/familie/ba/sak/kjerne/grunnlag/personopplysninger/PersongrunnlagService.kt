@@ -5,8 +5,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonDto
@@ -71,7 +69,6 @@ class PersongrunnlagService(
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val kodeverkService: KodeverkService,
-    private val featureToggleService: FeatureToggleService,
     private val falskIdentitetService: FalskIdentitetService,
     private val strengtFortroligService: StrengtFortroligService,
 ) {
@@ -297,7 +294,6 @@ class PersongrunnlagService(
                 behandlingKategori = behandling.kategori,
                 behandlingUnderkategori = behandling.underkategori,
                 skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
-                hentArbeidsforhold = behandling.skalBehandlesAutomatisk,
                 eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
             )
 
@@ -329,7 +325,6 @@ class PersongrunnlagService(
                         behandlingKategori = behandling.kategori,
                         behandlingUnderkategori = behandling.underkategori,
                         skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
-                        hentArbeidsforhold = true,
                         eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
                     ),
                 )
@@ -368,7 +363,6 @@ class PersongrunnlagService(
         behandlingKategori: BehandlingKategori,
         behandlingUnderkategori: BehandlingUnderkategori,
         skalHenteEnkelPersonInfo: Boolean = false,
-        hentArbeidsforhold: Boolean = false,
         eldsteBarnsFødselsdato: LocalDate,
     ): Person {
         val personInfo =
@@ -377,8 +371,6 @@ class PersongrunnlagService(
             } else {
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
             }
-
-        val filtrerRegisteropplysninger = featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER)
 
         lagreHistoriskeIdenter(personInfo.historiskeIdenter, aktør)
 
@@ -393,13 +385,13 @@ class PersongrunnlagService(
         ).also { person ->
             person.opphold =
                 personInfo.opphold
-                    ?.filtrerBortOppholdFørEldsteBarn(eldsteBarnsFødselsdato, filtrerRegisteropplysninger)
+                    ?.filtrerBortOppholdFørEldsteBarn(eldsteBarnsFødselsdato)
                     ?.map { GrOpphold.fraOpphold(it, person) }
                     ?.toMutableList() ?: mutableListOf()
             person.bostedsadresser =
                 personInfo.bostedsadresser
                     .filtrerUtKunNorskeBostedsadresser()
-                    .filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerRegisteropplysninger)
+                    .filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato)
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
                             bostedsadresse = it,
@@ -409,7 +401,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.oppholdsadresser =
                 personInfo.oppholdsadresser
-                    .filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerRegisteropplysninger)
+                    .filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato)
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
@@ -419,7 +411,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.deltBosted =
                 personInfo.deltBosted
-                    .filtrerBortDeltBostedForSøker(person.type, filtrerRegisteropplysninger)
+                    .filtrerBortDeltBostedForSøker(person.type)
                     .map {
                         GrDeltBosted.fraDeltBosted(
                             deltBosted = it,
@@ -429,12 +421,12 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.sivilstander =
                 personInfo.sivilstander
-                    .filtrerBortIkkeRelevanteSivilstander(filtrerRegisteropplysninger, behandlingKategori, behandlingUnderkategori, personType)
+                    .filtrerBortIkkeRelevanteSivilstander(behandlingKategori, behandlingUnderkategori, personType)
                     .map { GrSivilstand.fraSivilstand(it, person) }
                     .toMutableList()
             person.statsborgerskap =
                 personInfo.statsborgerskap
-                    ?.filtrerBortStatsborgerskapFørEldsteBarn(eldsteBarnsFødselsdato, filtrerRegisteropplysninger)
+                    ?.filtrerBortStatsborgerskapFørEldsteBarn(eldsteBarnsFødselsdato)
                     ?.flatMap {
                         statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                             statsborgerskap = it,
@@ -449,26 +441,16 @@ class PersongrunnlagService(
                     dødsfallAdresseFraPdl = personInfo.kontaktinformasjonForDoedsbo?.adresse,
                 )
 
-            if (filtrerRegisteropplysninger) {
-                val personErSøker = person.type == PersonType.SØKER
-                val harStatsborgerskapIEØS = person.statsborgerskap.any { it.medlemskap == Medlemskap.EØS }
-                if (personErSøker && harStatsborgerskapIEØS) {
-                    val arbeidsforholdForPerson =
-                        arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
-                            statsborgerskap = person.statsborgerskap,
-                            person = person,
-                            cutOffFomDato = eldsteBarnsFødselsdato,
-                        )
-                    person.arbeidsforhold = arbeidsforholdForPerson.toMutableList()
-                }
-            } else {
-                if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
-                    person.arbeidsforhold =
-                        arbeidsforholdService
-                            .hentArbeidsforhold(
-                                person = person,
-                            ).toMutableList()
-                }
+            val personErSøker = person.type == PersonType.SØKER
+            val harStatsborgerskapIEØS = person.statsborgerskap.any { it.medlemskap == Medlemskap.EØS }
+            if (personErSøker && harStatsborgerskapIEØS) {
+                val arbeidsforholdForPerson =
+                    arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
+                        statsborgerskap = person.statsborgerskap,
+                        person = person,
+                        cutOffFomDato = eldsteBarnsFødselsdato,
+                    )
+                person.arbeidsforhold = arbeidsforholdForPerson.toMutableList()
             }
         }
     }
@@ -516,7 +498,6 @@ class PersongrunnlagService(
     fun oppdaterAdresserPåPersoner(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) {
-        val filtrerAdresser = featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER)
         val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarn = personopplysningGrunnlag.barna.map { it.aktør })
 
         val adresserForPersoner = personopplysningerService.hentAdresserForPersoner(personopplysningGrunnlag.personer.map { it.aktør.aktivFødselsnummer() })
@@ -527,7 +508,7 @@ class PersongrunnlagService(
             person.bostedsadresser =
                 adresser.bostedsadresse
                     .filtrerUtKunNorskeBostedsadresser()
-                    .filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
+                    .filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato)
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
                             bostedsadresse = it,
@@ -537,7 +518,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.oppholdsadresser =
                 adresser.oppholdsadresse
-                    .filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato, filtrerAdresser)
+                    .filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato)
                     .map {
                         GrOppholdsadresse.fraOppholdsadresse(
                             oppholdsadresse = it,
@@ -547,7 +528,7 @@ class PersongrunnlagService(
                     }.toMutableList()
             person.deltBosted =
                 adresser.deltBosted
-                    .filtrerBortDeltBostedForSøker(person.type, filtrerAdresser)
+                    .filtrerBortDeltBostedForSøker(person.type)
                     .map {
                         GrDeltBosted.fraDeltBosted(
                             deltBosted = it,

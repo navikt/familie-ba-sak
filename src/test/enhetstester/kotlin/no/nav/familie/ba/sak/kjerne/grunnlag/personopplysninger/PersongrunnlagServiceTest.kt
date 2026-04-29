@@ -67,7 +67,6 @@ class PersongrunnlagServiceTest {
                 arbeidsforholdService = mockk(),
                 vilkårsvurderingService = vilkårsvurderingService,
                 kodeverkService = kodeverkService,
-                featureToggleService = featureToggleService,
                 falskIdentitetService = falskIdentitetService,
                 strengtFortroligService = mockk(relaxed = true),
             ),
@@ -75,7 +74,6 @@ class PersongrunnlagServiceTest {
 
     @BeforeEach
     fun setup() {
-        every { featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER) } returns true
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns null
     }
 
@@ -159,7 +157,6 @@ class PersongrunnlagServiceTest {
                     personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnet.aktør)
                 } returns PersonInfo(barnet.fødselsdato, barnet.navn, barnet.kjønn)
 
-                every { featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER) } returns true
                 every { featureToggleService.isEnabled(FeatureToggle.HARDKODET_EEAFREG_STATSBORGERSKAP) } returns true
 
                 persongrunnlagService
@@ -300,7 +297,6 @@ class PersongrunnlagServiceTest {
                 PersonInfo(mellomBarnForrigeBehandling.fødselsdato)
 
             every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER) } returns true
 
             // Act
             val personopplysningGrunnlag =
@@ -352,8 +348,6 @@ class PersongrunnlagServiceTest {
                 PersonInfo(mellomBarnInneværendeBehandling.fødselsdato)
 
             every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
-
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER) } returns true
 
             // Act
             val personopplysningGrunnlag =
@@ -422,7 +416,6 @@ class PersongrunnlagServiceTest {
 
             every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
             every { kodeverkService.hentPoststed(any()) } returns "Oslo"
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER) } returns true
 
             // Act
             val personopplysningGrunnlag =
