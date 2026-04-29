@@ -281,15 +281,15 @@ class BehandlingsresultatStegValideringService(
     }
 
     fun validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(behandling: Behandling) {
-        val skjermedeBarnSaksbehandlerIkkeHarTilgangTIl = strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(behandling.fagsak)
-        if (skjermedeBarnSaksbehandlerIkkeHarTilgangTIl.isEmpty()) return
+        val skjermedeBarnSaksbehandlerIkkeHarTilgangTil = strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(behandling.fagsak)
+        if (skjermedeBarnSaksbehandlerIkkeHarTilgangTil.isEmpty()) return
 
         val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) ?: return
         val forrigeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeVedtatteBehandling.id)
         val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
-        val forrigeAndelerForAndrePersoner = forrigeAndeler.filterNot { it.aktør.aktivFødselsnummer() in skjermedeBarnSaksbehandlerIkkeHarTilgangTIl }
-        val nåværendeAndelerForAndrePersoner = nåværendeAndeler.filterNot { it.aktør.aktivFødselsnummer() in skjermedeBarnSaksbehandlerIkkeHarTilgangTIl }
+        val forrigeAndelerForAndrePersoner = forrigeAndeler.filterNot { it.aktør.aktivFødselsnummer() in skjermedeBarnSaksbehandlerIkkeHarTilgangTil }
+        val nåværendeAndelerForAndrePersoner = nåværendeAndeler.filterNot { it.aktør.aktivFødselsnummer() in skjermedeBarnSaksbehandlerIkkeHarTilgangTil }
 
         val endringIUtbetalingForAndrePersonerTidslinje =
             EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
@@ -297,10 +297,10 @@ class BehandlingsresultatStegValideringService(
                 forrigeAndeler = forrigeAndelerForAndrePersoner,
             )
 
-        val skjermedeBarnAndelerIForrigeBehandling = forrigeAndeler.filter { it.aktør.aktivFødselsnummer() in skjermedeBarnSaksbehandlerIkkeHarTilgangTIl }.groupBy { it.aktør }
-        val skjermedeBarnAndelerINåværendeBehandling = nåværendeAndeler.filter { it.aktør.aktivFødselsnummer() in skjermedeBarnSaksbehandlerIkkeHarTilgangTIl }.groupBy { it.aktør }
+        val skjermedeBarnAndelerIForrigeBehandling = forrigeAndeler.filter { it.aktør.aktivFødselsnummer() in skjermedeBarnSaksbehandlerIkkeHarTilgangTil }.groupBy { it.aktør }
+        val skjermedeBarnAndelerINåværendeBehandling = nåværendeAndeler.filter { it.aktør.aktivFødselsnummer() in skjermedeBarnSaksbehandlerIkkeHarTilgangTil }.groupBy { it.aktør }
 
-        val skjermedeBarn = skjermedeBarnAndelerIForrigeBehandling.keys + skjermedeBarnAndelerINåværendeBehandling.keys
+        val skjermedeBarn = (skjermedeBarnAndelerIForrigeBehandling.keys + skjermedeBarnAndelerINåværendeBehandling.keys).distinct()
 
         skjermedeBarn.forEach { skjermetBarn ->
             val skjermetBarnsAndelerForrige = skjermedeBarnAndelerIForrigeBehandling[skjermetBarn].orEmpty()
@@ -312,10 +312,10 @@ class BehandlingsresultatStegValideringService(
                     forrigeAndeler = skjermetBarnsAndelerForrige,
                 )
 
-            val andelTilkjentYtelseTidslinjeForSkjermetBarn = lagAndelTilkjentYtelseTidslinjeForSkjermetBarn(skjermetBarnsAndelerForrige)
+            val utbetalingsTidslinjeForSkjermetBarn = lagHarUtbetalingTidslinje(skjermetBarnsAndelerForrige)
 
             val endringIUtbetalingForAndrePersonerSamtidigSomUtbetalingForSkjermetBarnTidslinje =
-                endringIUtbetalingForAndrePersonerTidslinje.kombinerUtenNullMed(andelTilkjentYtelseTidslinjeForSkjermetBarn) { erEndring, _ ->
+                endringIUtbetalingForAndrePersonerTidslinje.kombinerUtenNullMed(utbetalingsTidslinjeForSkjermetBarn) { erEndring, _ ->
                     if (erEndring) true else null
                 }
 
@@ -333,7 +333,7 @@ class BehandlingsresultatStegValideringService(
                             "i en periode hvor et skjermet barn har hatt andeler på behandling=${behandling.id}. " +
                             "Behandlingen må overføres til enhet 2103 (Vikafossen) og behandles der.",
                     frontendFeilmelding =
-                        "Det er gjort endringer i utbetalingen i en periode hvor et skjermet barn har hatt andeler. " +
+                        "Det er gjort endringer i utbetalingen i en periode hvor et skjermet barn har hatt utbetaling. " +
                             "Behandlingen må overføres til enhet 2103 (Vikafossen) og behandles der.",
                 )
             }
@@ -352,7 +352,7 @@ class BehandlingsresultatStegValideringService(
         }
     }
 
-    private fun lagAndelTilkjentYtelseTidslinjeForSkjermetBarn(andelerForBarn: List<AndelTilkjentYtelse>): Tidslinje<Boolean> =
+    private fun lagHarUtbetalingTidslinje(andelerForBarn: List<AndelTilkjentYtelse>): Tidslinje<Boolean> =
         andelerForBarn
             .groupBy { it.type }
             .map { (_, andelerForType) ->
