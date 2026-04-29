@@ -13,9 +13,12 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsgi
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
+import no.nav.familie.restklient.client.RessursException
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpStatus
 import java.time.LocalDate
 
 class ArbeidsforholdServiceTest {
@@ -274,5 +277,76 @@ class ArbeidsforholdServiceTest {
         val ansettelsesperiode = privatArbeidsforhold.ansettelsesperiode?.periode!!
         assertThat(arbeidsforhold.single().periode?.fom).isEqualTo(ansettelsesperiode.fom)
         assertThat(arbeidsforhold.single().periode?.tom).isEqualTo(ansettelsesperiode.tom)
+    }
+
+    @Test
+    fun `setter organisasjonNavn til Ukjent navn når organisasjonen ikke finnes i EREG`() {
+        // Arrange
+        val ukjentOrgArbeidsforhold =
+            Arbeidsforhold(
+                arbeidsgiver = Arbeidsgiver(organisasjonsnummer = "302268428", type = ArbeidsgiverType.Organisasjon),
+                ansettelsesperiode = Ansettelsesperiode(Periode(LocalDate.now().minusYears(2))),
+            )
+        every {
+            systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(person.aktør.aktivFødselsnummer(), any(), any())
+        } returns listOf(nåværendeArbeidsforhold, ukjentOrgArbeidsforhold)
+        every { integrasjonKlient.hentOrganisasjon(ukjentOrgArbeidsforhold.arbeidsgiver!!.organisasjonsnummer!!) } throws
+            RessursException(ressurs = mockk(relaxed = true), httpStatus = HttpStatus.NOT_FOUND, cause = mockk(relaxed = true))
+
+        val statsborgerskap =
+            listOf(
+                lagGrStatsborgerskap(
+                    gyldigFraOgMed = LocalDate.now().minusYears(1),
+                    gyldigTilOgMed = null,
+                    landkode = "POL",
+                    medlemskap = Medlemskap.EØS,
+                    person = person,
+                ),
+            )
+
+        // Act
+        val arbeidsforhold =
+            arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
+                statsborgerskap,
+                person,
+                LocalDate.now().minusYears(20),
+            )
+
+        // Assert
+        assertThat(arbeidsforhold).hasSize(2)
+        val ukjent = arbeidsforhold.single { it.arbeidsgiverId == "302268428" }
+        assertThat(ukjent.organisasjonNavn).isEqualTo("Ukjent navn")
+        val kjent = arbeidsforhold.single { it.arbeidsgiverId == nåværendeArbeidsforhold.arbeidsgiver?.organisasjonsnummer }
+        assertThat(kjent.organisasjonNavn).isEqualTo("Nåværende AS")
+    }
+
+    @Test
+    fun `kaster feil når hentOrganisasjon feiler med annen feil enn 404 NOT_FOUND`() {
+        // Arrange
+        every {
+            systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(person.aktør.aktivFødselsnummer(), any(), any())
+        } returns listOf(nåværendeArbeidsforhold)
+        every { integrasjonKlient.hentOrganisasjon(nåværendeArbeidsforhold.arbeidsgiver!!.organisasjonsnummer!!) } throws
+            RessursException(ressurs = mockk(relaxed = true), httpStatus = HttpStatus.INTERNAL_SERVER_ERROR, cause = mockk(relaxed = true))
+
+        val statsborgerskap =
+            listOf(
+                lagGrStatsborgerskap(
+                    gyldigFraOgMed = LocalDate.now().minusYears(1),
+                    gyldigTilOgMed = null,
+                    landkode = "POL",
+                    medlemskap = Medlemskap.EØS,
+                    person = person,
+                ),
+            )
+
+        // Act & Assert
+        assertThatThrownBy {
+            arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
+                statsborgerskap,
+                person,
+                LocalDate.now().minusYears(20),
+            )
+        }.isInstanceOf(RessursException::class.java)
     }
 }
