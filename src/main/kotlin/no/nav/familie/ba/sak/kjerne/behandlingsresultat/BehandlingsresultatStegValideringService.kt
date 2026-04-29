@@ -49,6 +49,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
@@ -316,7 +317,7 @@ class BehandlingsresultatStegValideringService(
 
             val endringIUtbetalingForAndrePersonerSamtidigSomUtbetalingForSkjermetBarnTidslinje =
                 endringIUtbetalingForAndrePersonerTidslinje.kombinerUtenNullMed(utbetalingsTidslinjeForSkjermetBarn) { erEndring, _ ->
-                    if (erEndring) true else null
+                    erEndring
                 }
 
             val finnesEndringIUtbetalingForAndrePersonerSamtidigSomUtbetalingForSkjermetBarn = endringIUtbetalingForAndrePersonerSamtidigSomUtbetalingForSkjermetBarnTidslinje.tilPerioder().any { it.verdi == true }
@@ -364,5 +365,5 @@ class BehandlingsresultatStegValideringService(
                             tom = it.stønadTom.sisteDagIInneværendeMåned(),
                         )
                     }.tilTidslinje()
-            }.kombinerUtenNull { _ -> true }
+            }.kombiner { it.any() }
 }
