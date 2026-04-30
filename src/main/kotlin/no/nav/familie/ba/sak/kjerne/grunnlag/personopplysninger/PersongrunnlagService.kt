@@ -273,7 +273,7 @@ class PersongrunnlagService(
             }
 
         barnSomSkalKopieresFraForrigeGrunnlag.forEach { person ->
-            person.tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag)
+            nyttPersonopplysningGrunnlag.personer.add(person.tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag))
         }
 
         val barnSomSkalHentesFraPdl = alleBarna.filterNot { barn -> barn in skjermedeBarnSaksbehandlerManglerTilgangTil }
