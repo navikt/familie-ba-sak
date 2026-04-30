@@ -59,7 +59,7 @@ object PersonopplysningsgrunnlagFiltreringUtils {
 
         if (ugyldigeStatsborgerskap.isNotEmpty()) {
             secureLogger.warn(
-                "Filtrerer bort ${ugyldigeStatsborgerskap.size} statsborgerskap fra PDL med gyldigFraOgMed etter gyldigTilOgMed: $ugyldigeStatsborgerskap",
+                "Filtrerer bort ${ugyldigeStatsborgerskap.size} statsborgerskap fra PDL med fom etter gyldigTilOgMed: $ugyldigeStatsborgerskap",
             )
         }
 
