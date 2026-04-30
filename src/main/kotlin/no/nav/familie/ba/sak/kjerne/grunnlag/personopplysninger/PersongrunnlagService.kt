@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortOppholdFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortOppholdsadresserFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortStatsborgerskapFørEldsteBarn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortUgyldigeStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.deltbosted.GrDeltBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse.GrOppholdsadresse
@@ -435,6 +436,7 @@ class PersongrunnlagService(
             person.statsborgerskap =
                 personInfo.statsborgerskap
                     ?.filtrerBortStatsborgerskapFørEldsteBarn(eldsteBarnsFødselsdato, filtrerRegisteropplysninger)
+                    ?.filtrerBortUgyldigeStatsborgerskap(aktør)
                     ?.flatMap {
                         statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                             statsborgerskap = it,
