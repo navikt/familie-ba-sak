@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.POL_EØS_FOM
 import no.nav.familie.ba.sak.datagenerator.lagKodeverkLand
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortUgyldigeStatsborgerskap
@@ -429,6 +430,8 @@ internal class StatsborgerskapServiceTest {
         @Test
         fun `skal filtrere bort statsborgerskap der gyldigFraOgMed er etter gyldigTilOgMed`() {
             // Arrange
+            val aktør = randomAktør()
+
             val ugyldig =
                 Statsborgerskap(
                     "POL",
@@ -445,7 +448,7 @@ internal class StatsborgerskapServiceTest {
                 )
 
             // Act
-            val resultat = listOf(ugyldig, gyldig).filtrerBortUgyldigeStatsborgerskap()
+            val resultat = listOf(ugyldig, gyldig).filtrerBortUgyldigeStatsborgerskap(aktør)
 
             // Assert
             assertEquals(listOf(gyldig), resultat)
@@ -454,6 +457,8 @@ internal class StatsborgerskapServiceTest {
         @Test
         fun `skal beholde statsborgerskap med null fom og tom`() {
             // Arrange
+            val aktør = randomAktør()
+
             val statsborgerskap =
                 Statsborgerskap(
                     "DEU",
@@ -463,7 +468,7 @@ internal class StatsborgerskapServiceTest {
                 )
 
             // Act
-            val resultat = listOf(statsborgerskap).filtrerBortUgyldigeStatsborgerskap()
+            val resultat = listOf(statsborgerskap).filtrerBortUgyldigeStatsborgerskap(aktør)
 
             // Assert
             assertEquals(listOf(statsborgerskap), resultat)
@@ -472,6 +477,8 @@ internal class StatsborgerskapServiceTest {
         @Test
         fun `skal beholde statsborgerskap med samme fom og tom`() {
             // Arrange
+            val aktør = randomAktør()
+
             val statsborgerskap =
                 Statsborgerskap(
                     "POL",
@@ -481,7 +488,7 @@ internal class StatsborgerskapServiceTest {
                 )
 
             // Act
-            val resultat = listOf(statsborgerskap).filtrerBortUgyldigeStatsborgerskap()
+            val resultat = listOf(statsborgerskap).filtrerBortUgyldigeStatsborgerskap(aktør)
 
             // Assert
             assertEquals(listOf(statsborgerskap), resultat)

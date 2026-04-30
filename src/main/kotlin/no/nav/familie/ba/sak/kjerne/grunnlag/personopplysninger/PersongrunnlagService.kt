@@ -436,7 +436,7 @@ class PersongrunnlagService(
             person.statsborgerskap =
                 personInfo.statsborgerskap
                     ?.filtrerBortStatsborgerskapFørEldsteBarn(eldsteBarnsFødselsdato, filtrerRegisteropplysninger)
-                    ?.filtrerBortUgyldigeStatsborgerskap()
+                    ?.filtrerBortUgyldigeStatsborgerskap(aktør)
                     ?.flatMap {
                         statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                             statsborgerskap = it,

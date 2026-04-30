@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.erFomEtterTom
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
@@ -54,12 +55,12 @@ object PersonopplysningsgrunnlagFiltreringUtils {
         return this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
     }
 
-    fun List<Statsborgerskap>.filtrerBortUgyldigeStatsborgerskap(): List<Statsborgerskap> {
+    fun List<Statsborgerskap>.filtrerBortUgyldigeStatsborgerskap(aktør: Aktør): List<Statsborgerskap> {
         val (ugyldigeStatsborgerskap, gyldigeStatsborgerskap) = this.partition { it.erFomEtterTom() }
 
         if (ugyldigeStatsborgerskap.isNotEmpty()) {
             secureLogger.warn(
-                "Filtrerer bort ${ugyldigeStatsborgerskap.size} statsborgerskap fra PDL med fom etter gyldigTilOgMed: $ugyldigeStatsborgerskap",
+                "Filtrerer bort ${ugyldigeStatsborgerskap.size} statsborgerskap fra PDL med fom etter gyldigTilOgMed: $ugyldigeStatsborgerskap - aktør ${aktør.aktørId}",
             )
         }
 
