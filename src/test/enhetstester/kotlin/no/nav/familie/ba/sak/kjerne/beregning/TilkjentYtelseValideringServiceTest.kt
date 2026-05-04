@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
@@ -34,6 +35,7 @@ class TilkjentYtelseValideringServiceTest {
     private val totrinnskontrollServiceMock = mockk<TotrinnskontrollService>()
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
     private val behandlingSøknadsinfoService = mockk<BehandlingSøknadsinfoService>()
+    private val strengtFortroligService = mockk<StrengtFortroligService>()
 
     private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
 
@@ -46,6 +48,7 @@ class TilkjentYtelseValideringServiceTest {
                 persongrunnlagService = persongrunnlagServiceMock,
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
                 behandlingSøknadsinfoService = behandlingSøknadsinfoService,
+                strengtFortroligService = strengtFortroligService,
             )
 
         every {
@@ -153,6 +156,7 @@ class TilkjentYtelseValideringServiceTest {
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = behandling) } answers { forrigeBehandling }
         every { beregningServiceMock.hentOptionalTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) } answers { forrigeTilkjentYtelse }
         every { behandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns behandling.opprettetTidspunkt
+        every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(behandling.fagsak) } returns emptySet()
 
         Assertions.assertTrue(tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id).size == 1)
         Assertions.assertEquals(
@@ -161,6 +165,70 @@ class TilkjentYtelseValideringServiceTest {
                 .finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id)
                 .single(),
         )
+    }
+
+    @Test
+    fun `Skal filtrere ut barn med diskresjonskode uten løpende andeler som saksbehandler ikke har tilgang til`() {
+        val behandling = lagBehandling()
+        val person1 = tilfeldigPerson()
+        val person2 = tilfeldigPerson()
+
+        val tilkjentYtelse =
+            TilkjentYtelse(
+                behandling = behandling,
+                opprettetDato = LocalDate.now(),
+                endretDato = LocalDate.now(),
+                andelerTilkjentYtelse =
+                    mutableSetOf(
+                        lagAndelTilkjentYtelse(
+                            fom = inneværendeMåned().minusYears(4),
+                            tom = inneværendeMåned(),
+                            beløp = 2108,
+                            person = person1,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = inneværendeMåned().minusYears(4),
+                            tom = inneværendeMåned(),
+                            beløp = 2108,
+                            person = person2,
+                        ),
+                    ),
+            )
+
+        val forrigeBehandling = lagBehandling()
+
+        val forrigeTilkjentYtelse =
+            TilkjentYtelse(
+                behandling = forrigeBehandling,
+                opprettetDato = LocalDate.now(),
+                endretDato = LocalDate.now(),
+                andelerTilkjentYtelse =
+                    mutableSetOf(
+                        lagAndelTilkjentYtelse(
+                            fom = inneværendeMåned().minusYears(4),
+                            tom = inneværendeMåned(),
+                            beløp = 2108,
+                            person = person1,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = inneværendeMåned().minusYears(4),
+                            tom = inneværendeMåned(),
+                            beløp = 1054,
+                            person = person2,
+                        ),
+                    ),
+            )
+
+        every { beregningServiceMock.hentOptionalTilkjentYtelseForBehandling(behandlingId = behandling.id) } answers { tilkjentYtelse }
+        every { behandlingHentOgPersisterService.hent(behandlingId = behandling.id) } answers { behandling }
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = behandling) } answers { forrigeBehandling }
+        every { beregningServiceMock.hentOptionalTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) } answers { forrigeTilkjentYtelse }
+        every { behandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns behandling.opprettetTidspunkt
+        every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(behandling.fagsak) } returns setOf(person2.aktør.aktivFødselsnummer())
+
+        val aktørerMedUgyldigEtterbetalingsperiode = tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id)
+
+        assertThat(aktørerMedUgyldigEtterbetalingsperiode).isEmpty()
     }
 
     @Nested

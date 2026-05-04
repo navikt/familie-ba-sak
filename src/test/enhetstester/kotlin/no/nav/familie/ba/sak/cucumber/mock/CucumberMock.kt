@@ -252,6 +252,11 @@ class CucumberMock(
             søknadGrunnlagService = søknadGrunnlagService,
         )
 
+    val strengtFortroligService =
+        mockk<StrengtFortroligService>().also {
+            every { it.anonymiserSkjermetBarnIVedtaksperioder(any(), any()) } answers { firstArg() }
+        }
+
     val vedtaksperiodeService =
         VedtaksperiodeService(
             persongrunnlagService = persongrunnlagService,
@@ -272,10 +277,7 @@ class CucumberMock(
             valutakursRepository = valutakursRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             featureToggleService = featureToggleService,
-            strengtFortroligService =
-                mockk<StrengtFortroligService>().also {
-                    every { it.anonymiserSkjermetBarnIVedtaksperioder(any(), any()) } answers { firstArg() }
-                },
+            strengtFortroligService = strengtFortroligService,
         )
 
     val behandlingService =
@@ -470,6 +472,7 @@ class CucumberMock(
             persongrunnlagService = persongrunnlagService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             behandlingSøknadsinfoService = behandlingSøknadsinfoService,
+            strengtFortroligService = strengtFortroligService,
         )
 
     val utbetalingsoppdragGenerator =
