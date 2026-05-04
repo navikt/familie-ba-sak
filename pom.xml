@@ -25,7 +25,7 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20260420122910_8bfca04</prosessering.version>
-        <felles.version>4.20260420125050_76c5fea</felles.version>
+        <felles.version>4.20260428145828_c16a1d8</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20260323170751_4c02e3c</eksterne-kontrakter-bisys.version>
         <familie.kontrakter.saksstatistikk>2.0_20260323170751_4c02e3c</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20260323170751_4c02e3c</familie.kontrakter.stønadsstatistikk>
@@ -295,6 +295,10 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>sikkerhet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.familie.felles</groupId>
+            <artifactId>sikkerhet-token-support</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.familie</groupId>
