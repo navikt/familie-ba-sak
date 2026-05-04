@@ -733,6 +733,7 @@ class CucumberMock(
                 satskjøringRepository = mockk(),
                 featureToggleService = featureToggleService,
                 automatiskRegistrerSøknadService = mockk(),
+                strengtFortroligService = mockk(relaxed = true),
             ),
         )
 

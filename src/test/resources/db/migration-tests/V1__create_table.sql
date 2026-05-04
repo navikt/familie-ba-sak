@@ -3,11 +3,12 @@
 --
 
 -- Dumped from database version 17.0 (Debian 17.0-1.pgdg120+1)
--- Dumped by pg_dump version 17.4 (Homebrew)
+-- Dumped by pg_dump version 17.6 (Homebrew)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -132,7 +133,8 @@ CREATE TABLE public.andel_tilkjent_ytelse (
     sats bigint NOT NULL,
     fk_aktoer_id character varying,
     nasjonalt_periodebelop numeric,
-    differanseberegnet_periodebelop numeric
+    differanseberegnet_periodebelop numeric,
+    belop_uten_endret_utbetaling numeric
 );
 
 
@@ -476,7 +478,6 @@ CREATE SEQUENCE public.ekstern_behandling_relasjon_seq
 CREATE TABLE public.endret_utbetaling_andel (
     id bigint NOT NULL,
     fk_behandling_id bigint NOT NULL,
-    fk_po_person_id bigint,
     fom timestamp(3) without time zone,
     tom timestamp(3) without time zone,
     prosent numeric,
@@ -497,6 +498,41 @@ CREATE TABLE public.endret_utbetaling_andel (
 --
 
 CREATE SEQUENCE public.endret_utbetaling_andel_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: endring_i_preutfylt_vilkar_logg; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.endring_i_preutfylt_vilkar_logg (
+    id bigint NOT NULL,
+    vilkar_type character varying NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    begrunnelse character varying,
+    forrige_fom timestamp without time zone,
+    ny_fom timestamp without time zone,
+    forrige_tom timestamp without time zone,
+    ny_tom timestamp without time zone,
+    forrige_resultat character varying,
+    ny_resultat character varying,
+    forrige_vurderes_etter character varying,
+    ny_vurderes_etter character varying,
+    forrige_utdypende_vilkarsvurdering character varying,
+    ny_utdypende_vilkarsvurdering character varying,
+    vilkar_resultat_id bigint
+);
+
+
+--
+-- Name: endring_i_preutfylt_vilkar_logg_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.endring_i_preutfylt_vilkar_logg_seq
     START WITH 1000000
     INCREMENT BY 50
     NO MINVALUE
@@ -542,7 +578,8 @@ CREATE TABLE public.fagsak (
     arkivert boolean DEFAULT false NOT NULL,
     fk_aktoer_id character varying,
     type character varying(50) DEFAULT 'NORMAL'::character varying NOT NULL,
-    fk_institusjon_id bigint
+    fk_institusjon_id bigint,
+    fk_skjermet_barn_soker_id bigint
 );
 
 
@@ -747,6 +784,44 @@ CREATE TABLE public.institusjon (
 
 
 --
+-- Name: institusjon_info_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.institusjon_info_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: institusjon_info; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.institusjon_info (
+    id bigint DEFAULT nextval('public.institusjon_info_seq'::regclass) NOT NULL,
+    fk_institusjon_id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    type character varying NOT NULL,
+    navn character varying NOT NULL,
+    adresselinje1 character varying,
+    adresselinje2 character varying,
+    adresselinje3 character varying,
+    postnummer character varying NOT NULL,
+    poststed character varying NOT NULL,
+    kommunenummer character varying,
+    fom date NOT NULL,
+    tom date,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
+);
+
+
+--
 -- Name: institusjon_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -896,6 +971,34 @@ CREATE SEQUENCE public.logg_seq
 
 
 --
+-- Name: minside_aktivering; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.minside_aktivering (
+    id bigint NOT NULL,
+    fk_aktor_id character varying NOT NULL,
+    aktivert boolean NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
+);
+
+
+--
+-- Name: minside_aktivering_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.minside_aktivering_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
 -- Name: okonomi_simulering_mottaker; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -944,7 +1047,8 @@ CREATE TABLE public.okonomi_simulering_postering (
     endret_av character varying(512),
     endret_tid timestamp(3) without time zone,
     versjon bigint DEFAULT 0,
-    er_feilkonto boolean
+    er_feilkonto boolean,
+    fagsak_id bigint
 );
 
 
@@ -1043,6 +1147,16 @@ CREATE TABLE public.person_resultat (
 
 
 --
+-- Name: person_til_endret_utbetaling_andel; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.person_til_endret_utbetaling_andel (
+    fk_endret_utbetaling_andel_id bigint NOT NULL,
+    fk_person_id bigint NOT NULL
+);
+
+
+--
 -- Name: personident; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1074,7 +1188,8 @@ CREATE TABLE public.po_arbeidsforhold (
     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
     endret_av character varying,
     endret_tid timestamp(3) without time zone,
-    versjon bigint DEFAULT 0 NOT NULL
+    versjon bigint DEFAULT 0 NOT NULL,
+    organisasjon_navn character varying
 );
 
 
@@ -1113,7 +1228,8 @@ CREATE TABLE public.po_bostedsadresse (
     matrikkel_id bigint,
     fom date,
     tom date,
-    fk_po_person_id bigint
+    fk_po_person_id bigint,
+    poststed character varying
 );
 
 
@@ -1122,6 +1238,46 @@ CREATE TABLE public.po_bostedsadresse (
 --
 
 CREATE SEQUENCE public.po_bostedsadresse_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: po_delt_bosted; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.po_delt_bosted (
+    id bigint NOT NULL,
+    type character varying NOT NULL,
+    fom date,
+    tom date,
+    fk_po_person_id bigint,
+    matrikkel_id bigint,
+    husnummer character varying,
+    husbokstav character varying,
+    bruksenhetsnummer character varying,
+    adressenavn character varying,
+    kommunenummer character varying,
+    tilleggsnavn character varying,
+    postnummer character varying,
+    poststed character varying,
+    bostedskommune character varying,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    versjon bigint DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: po_delt_bosted_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.po_delt_bosted_seq
     START WITH 1000000
     INCREMENT BY 50
     NO MINVALUE
@@ -1192,6 +1348,50 @@ CREATE SEQUENCE public.po_opphold_seq
 
 
 --
+-- Name: po_oppholdsadresse; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.po_oppholdsadresse (
+    id bigint NOT NULL,
+    type character varying NOT NULL,
+    fom date,
+    tom date,
+    fk_po_person_id bigint,
+    opphold_annet_sted character varying,
+    matrikkel_id bigint,
+    husnummer character varying,
+    husbokstav character varying,
+    bruksenhetsnummer character varying,
+    adressenavn character varying,
+    kommunenummer character varying,
+    tilleggsnavn character varying,
+    postnummer character varying,
+    postboks character varying,
+    by_sted character varying,
+    region character varying,
+    landkode character varying,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    versjon bigint DEFAULT 0 NOT NULL,
+    poststed character varying
+);
+
+
+--
+-- Name: po_oppholdsadresse_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.po_oppholdsadresse_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
 -- Name: po_person; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1208,7 +1408,8 @@ CREATE TABLE public.po_person (
     fk_aktoer_id character varying(50),
     navn character varying DEFAULT ''::character varying,
     kjoenn character varying DEFAULT 'UKJENT'::character varying,
-    maalform character varying(2) DEFAULT 'NB'::character varying NOT NULL
+    maalform character varying(2) DEFAULT 'NB'::character varying NOT NULL,
+    har_falsk_identitet boolean DEFAULT false NOT NULL
 );
 
 
@@ -1446,6 +1647,33 @@ CREATE SEQUENCE public.sett_paa_vent_seq
 
 
 --
+-- Name: skjermet_barn_soker; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.skjermet_barn_soker (
+    id bigint NOT NULL,
+    fk_aktor_id character varying NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
+);
+
+
+--
+-- Name: skjermet_barn_soker_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.skjermet_barn_soker_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
 -- Name: skyggesak; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1479,7 +1707,7 @@ CREATE TABLE public.task (
     versjon bigint DEFAULT 0,
     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
     type character varying(100) NOT NULL,
-    metadata character varying(4000),
+    metadata character varying,
     trigger_tid timestamp without time zone DEFAULT LOCALTIMESTAMP,
     avvikstype character varying(50)
 );
@@ -1915,7 +2143,9 @@ CREATE TABLE public.vilkar_resultat (
     vedtak_begrunnelse_spesifikasjoner text DEFAULT ''::text,
     vurderes_etter character varying,
     utdypende_vilkarsvurderinger character varying,
-    resultat_begrunnelse character varying
+    resultat_begrunnelse character varying,
+    begrunnelse_for_manuell_kontroll character varying,
+    er_opprinnelig_preutfylt_i_behandling bigint
 );
 
 
@@ -2087,6 +2317,18 @@ INSERT INTO public.batch VALUES (1002800, '2025-09-01 00:00:00', 'LEDIG');
 INSERT INTO public.batch VALUES (1002850, '2025-09-29 00:00:00', 'LEDIG');
 INSERT INTO public.batch VALUES (1002900, '2025-10-30 00:00:00', 'LEDIG');
 INSERT INTO public.batch VALUES (1002950, '2025-11-21 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1003000, '2026-01-07 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1003050, '2026-02-03 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1003100, '2026-03-03 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1003150, '2026-03-31 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1003200, '2026-04-27 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1003250, '2026-06-02 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1003300, '2026-06-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1003350, '2026-08-03 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1003400, '2026-09-01 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1003450, '2026-10-01 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1003500, '2026-11-03 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1003550, '2026-11-24 00:00:00', 'LEDIG');
 
 
 --
@@ -2144,6 +2386,12 @@ INSERT INTO public.batch VALUES (1002950, '2025-11-21 00:00:00', 'LEDIG');
 
 
 --
+-- Data for Name: endring_i_preutfylt_vilkar_logg; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
 -- Data for Name: eos_begrunnelse; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -2192,6 +2440,12 @@ INSERT INTO public.batch VALUES (1002950, '2025-11-21 00:00:00', 'LEDIG');
 
 
 --
+-- Data for Name: institusjon_info; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
 -- Data for Name: kompetanse; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -2211,6 +2465,12 @@ INSERT INTO public.batch VALUES (1002950, '2025-11-21 00:00:00', 'LEDIG');
 
 --
 -- Data for Name: logg; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: minside_aktivering; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 
@@ -2246,6 +2506,12 @@ INSERT INTO public.batch VALUES (1002950, '2025-11-21 00:00:00', 'LEDIG');
 
 
 --
+-- Data for Name: person_til_endret_utbetaling_andel; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
 -- Data for Name: personident; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -2264,6 +2530,12 @@ INSERT INTO public.batch VALUES (1002950, '2025-11-21 00:00:00', 'LEDIG');
 
 
 --
+-- Data for Name: po_delt_bosted; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
 -- Data for Name: po_doedsfall; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -2271,6 +2543,12 @@ INSERT INTO public.batch VALUES (1002950, '2025-11-21 00:00:00', 'LEDIG');
 
 --
 -- Data for Name: po_opphold; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: po_oppholdsadresse; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 
@@ -2324,6 +2602,12 @@ INSERT INTO public.batch VALUES (1002950, '2025-11-21 00:00:00', 'LEDIG');
 
 
 --
+-- Data for Name: skjermet_barn_soker; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
 -- Data for Name: skyggesak; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -2333,6 +2617,8 @@ INSERT INTO public.batch VALUES (1002950, '2025-11-21 00:00:00', 'LEDIG');
 -- Data for Name: task; Type: TABLE DATA; Schema: public; Owner: -
 --
 
+INSERT INTO public.task VALUES (51, '1654', 'UBEHANDLET', 1, '2026-05-03 21:14:09.684', 'startsatsendringforallebehandlinger', 'callId=startsatsendringforallebehandlinger-07.01.2022', '2026-05-03 21:14:09.684094', NULL);
+INSERT INTO public.task VALUES (1, '1654', 'UBEHANDLET', 1, '2026-05-03 21:14:09.677', 'startsatsendringforallebehandlinger', 'callId=startsatsendringforallebehandlinger-06.01.2022', '2026-05-03 21:14:09.676904', NULL);
 
 
 --
@@ -2458,7 +2744,7 @@ SELECT pg_catalog.setval('public.arbeidsfordeling_pa_behandling_seq', 1000000, f
 -- Name: batch_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.batch_seq', 1002950, true);
+SELECT pg_catalog.setval('public.batch_seq', 1003550, true);
 
 
 --
@@ -2525,6 +2811,13 @@ SELECT pg_catalog.setval('public.endret_utbetaling_andel_seq', 1000000, false);
 
 
 --
+-- Name: endring_i_preutfylt_vilkar_logg_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.endring_i_preutfylt_vilkar_logg_seq', 1000000, false);
+
+
+--
 -- Name: eos_begrunnelse_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -2588,6 +2881,13 @@ SELECT pg_catalog.setval('public.gr_soknad_seq', 1000000, false);
 
 
 --
+-- Name: institusjon_info_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.institusjon_info_seq', 1000000, false);
+
+
+--
 -- Name: institusjon_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -2627,6 +2927,13 @@ SELECT pg_catalog.setval('public.korrigert_vedtak_seq', 1000000, false);
 --
 
 SELECT pg_catalog.setval('public.logg_seq', 1000000, false);
+
+
+--
+-- Name: minside_aktivering_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.minside_aktivering_seq', 1000000, false);
 
 
 --
@@ -2672,6 +2979,13 @@ SELECT pg_catalog.setval('public.po_bostedsadresse_seq', 1000000, false);
 
 
 --
+-- Name: po_delt_bosted_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.po_delt_bosted_seq', 1000000, false);
+
+
+--
 -- Name: po_doedsfall_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -2683,6 +2997,13 @@ SELECT pg_catalog.setval('public.po_doedsfall_seq', 1000000, false);
 --
 
 SELECT pg_catalog.setval('public.po_opphold_seq', 1000000, false);
+
+
+--
+-- Name: po_oppholdsadresse_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.po_oppholdsadresse_seq', 1000000, false);
 
 
 --
@@ -2746,6 +3067,13 @@ SELECT pg_catalog.setval('public.satskjoering_seq', 1000000, false);
 --
 
 SELECT pg_catalog.setval('public.sett_paa_vent_seq', 1000000, false);
+
+
+--
+-- Name: skjermet_barn_soker_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.skjermet_barn_soker_seq', 1000000, false);
 
 
 --
@@ -3051,6 +3379,14 @@ ALTER TABLE ONLY public.endret_utbetaling_andel
 
 
 --
+-- Name: endring_i_preutfylt_vilkar_logg endring_i_preutfylt_vilkar_logg_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.endring_i_preutfylt_vilkar_logg
+    ADD CONSTRAINT endring_i_preutfylt_vilkar_logg_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: eos_begrunnelse eos_begrunnelse_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3115,6 +3451,14 @@ ALTER TABLE ONLY public.task
 
 
 --
+-- Name: institusjon_info institusjon_info_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.institusjon_info
+    ADD CONSTRAINT institusjon_info_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: institusjon institusjon_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3155,6 +3499,22 @@ ALTER TABLE ONLY public.logg
 
 
 --
+-- Name: minside_aktivering minside_aktivering_fk_aktor_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.minside_aktivering
+    ADD CONSTRAINT minside_aktivering_fk_aktor_id_key UNIQUE (fk_aktor_id);
+
+
+--
+-- Name: minside_aktivering minside_aktivering_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.minside_aktivering
+    ADD CONSTRAINT minside_aktivering_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: oppgave oppgave_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3176,6 +3536,14 @@ ALTER TABLE ONLY public.patchet_andel_tilkjent_ytelse
 
 ALTER TABLE ONLY public.person_resultat
     ADD CONSTRAINT periode_resultat_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: person_til_endret_utbetaling_andel person_til_endret_utbetaling_andel_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.person_til_endret_utbetaling_andel
+    ADD CONSTRAINT person_til_endret_utbetaling_andel_pkey PRIMARY KEY (fk_endret_utbetaling_andel_id, fk_person_id);
 
 
 --
@@ -3211,6 +3579,14 @@ ALTER TABLE ONLY public.po_bostedsadresse
 
 
 --
+-- Name: po_delt_bosted po_delt_bosted_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.po_delt_bosted
+    ADD CONSTRAINT po_delt_bosted_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: po_doedsfall po_doedsfall_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3224,6 +3600,14 @@ ALTER TABLE ONLY public.po_doedsfall
 
 ALTER TABLE ONLY public.po_opphold
     ADD CONSTRAINT po_opphold_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: po_oppholdsadresse po_oppholdsadresse_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.po_oppholdsadresse
+    ADD CONSTRAINT po_oppholdsadresse_pkey PRIMARY KEY (id);
 
 
 --
@@ -3288,6 +3672,14 @@ ALTER TABLE ONLY public.satskjoering
 
 ALTER TABLE ONLY public.sett_paa_vent
     ADD CONSTRAINT sett_paa_vent_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: skjermet_barn_soker skjermet_barn_soker_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.skjermet_barn_soker
+    ADD CONSTRAINT skjermet_barn_soker_pkey PRIMARY KEY (id);
 
 
 --
@@ -3553,13 +3945,6 @@ CREATE INDEX endret_utbetaling_andel_fk_behandling_id_idx ON public.endret_utbet
 
 
 --
--- Name: endret_utbetaling_andel_fk_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX endret_utbetaling_andel_fk_idx ON public.endret_utbetaling_andel USING btree (fk_po_person_id);
-
-
---
 -- Name: eos_begrunnelse_fk_vedtaksperiode_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3634,6 +4019,27 @@ CREATE INDEX henvendelse_logg_henvendelse_id_idx ON public.task_logg USING btree
 --
 
 CREATE INDEX henvendelse_status_idx ON public.task USING btree (status);
+
+
+--
+-- Name: idx_andel_stonad_fom_tom_behandling; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_andel_stonad_fom_tom_behandling ON public.andel_tilkjent_ytelse USING btree (fk_behandling_id, stonad_fom, stonad_tom);
+
+
+--
+-- Name: idx_behandling_fagsak_aktivert; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_behandling_fagsak_aktivert ON public.behandling USING btree (fk_fagsak_id, aktivert_tid DESC);
+
+
+--
+-- Name: idx_task_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_task_type ON public.task USING btree (type);
 
 
 --
@@ -3721,6 +4127,13 @@ CREATE INDEX po_bostedsadresse_fk_idx ON public.po_bostedsadresse USING btree (f
 
 
 --
+-- Name: po_delt_bosted_person_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX po_delt_bosted_person_id_idx ON public.po_delt_bosted USING btree (fk_po_person_id);
+
+
+--
 -- Name: po_doedsfall_fk_po_person_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3732,6 +4145,13 @@ CREATE INDEX po_doedsfall_fk_po_person_id_idx ON public.po_doedsfall USING btree
 --
 
 CREATE INDEX po_opphold_fk_idx ON public.po_opphold USING btree (fk_po_person_id);
+
+
+--
+-- Name: po_oppholdsadresse_person_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX po_oppholdsadresse_person_id_idx ON public.po_oppholdsadresse USING btree (fk_po_person_id);
 
 
 --
@@ -3880,7 +4300,7 @@ END));
 -- Name: uidx_fagsak_type_aktoer_ikke_arkivert; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX uidx_fagsak_type_aktoer_ikke_arkivert ON public.fagsak USING btree (type, fk_aktoer_id) WHERE ((fk_institusjon_id IS NULL) AND (arkivert = false));
+CREATE UNIQUE INDEX uidx_fagsak_type_aktoer_ikke_arkivert ON public.fagsak USING btree (type, fk_aktoer_id) WHERE ((fk_institusjon_id IS NULL) AND (fk_skjermet_barn_soker_id IS NULL) AND (arkivert = false));
 
 
 --
@@ -3888,6 +4308,13 @@ CREATE UNIQUE INDEX uidx_fagsak_type_aktoer_ikke_arkivert ON public.fagsak USING
 --
 
 CREATE UNIQUE INDEX uidx_fagsak_type_aktoer_institusjon_ikke_arkivert ON public.fagsak USING btree (type, fk_aktoer_id, fk_institusjon_id) WHERE ((fk_institusjon_id IS NOT NULL) AND (arkivert = false));
+
+
+--
+-- Name: uidx_fagsak_type_aktoer_skjermet_barn_ikke_arkivert; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uidx_fagsak_type_aktoer_skjermet_barn_ikke_arkivert ON public.fagsak USING btree (type, fk_aktoer_id, fk_skjermet_barn_soker_id) WHERE ((fk_skjermet_barn_soker_id IS NOT NULL) AND (arkivert = false));
 
 
 --
@@ -4238,11 +4665,11 @@ ALTER TABLE ONLY public.endret_utbetaling_andel
 
 
 --
--- Name: endret_utbetaling_andel endret_utbetaling_andel_fk_po_person_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: endring_i_preutfylt_vilkar_logg endring_i_preutfylt_vilkar_logg_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.endret_utbetaling_andel
-    ADD CONSTRAINT endret_utbetaling_andel_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person(id);
+ALTER TABLE ONLY public.endring_i_preutfylt_vilkar_logg
+    ADD CONSTRAINT endring_i_preutfylt_vilkar_logg_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
 
 
 --
@@ -4270,6 +4697,14 @@ ALTER TABLE ONLY public.fagsak
 
 
 --
+-- Name: fagsak fagsak_fk_skjermet_barn_soker_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.fagsak
+    ADD CONSTRAINT fagsak_fk_skjermet_barn_soker_id_fkey FOREIGN KEY (fk_skjermet_barn_soker_id) REFERENCES public.skjermet_barn_soker(id);
+
+
+--
 -- Name: andel_tilkjent_ytelse fk_andel_tilkjent_ytelse; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4278,11 +4713,35 @@ ALTER TABLE ONLY public.andel_tilkjent_ytelse
 
 
 --
+-- Name: institusjon_info fk_behandling; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.institusjon_info
+    ADD CONSTRAINT fk_behandling FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id) ON DELETE CASCADE;
+
+
+--
+-- Name: person_til_endret_utbetaling_andel fk_endret_utbetaling_andel; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.person_til_endret_utbetaling_andel
+    ADD CONSTRAINT fk_endret_utbetaling_andel FOREIGN KEY (fk_endret_utbetaling_andel_id) REFERENCES public.endret_utbetaling_andel(id) ON DELETE CASCADE;
+
+
+--
 -- Name: gr_periode_overgangsstonad fk_gr_periode_overgangsstonad; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.gr_periode_overgangsstonad
     ADD CONSTRAINT fk_gr_periode_overgangsstonad FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer(aktoer_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: institusjon_info fk_institusjon; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.institusjon_info
+    ADD CONSTRAINT fk_institusjon FOREIGN KEY (fk_institusjon_id) REFERENCES public.institusjon(id);
 
 
 --
@@ -4307,6 +4766,14 @@ ALTER TABLE ONLY public.personident
 
 ALTER TABLE ONLY public.po_person
     ADD CONSTRAINT fk_po_person FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer(aktoer_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: person_til_endret_utbetaling_andel fk_po_person; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.person_til_endret_utbetaling_andel
+    ADD CONSTRAINT fk_po_person FOREIGN KEY (fk_person_id) REFERENCES public.po_person(id) ON UPDATE CASCADE;
 
 
 --
@@ -4390,6 +4857,14 @@ ALTER TABLE ONLY public.logg
 
 
 --
+-- Name: minside_aktivering minside_aktivering_fk_aktor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.minside_aktivering
+    ADD CONSTRAINT minside_aktivering_fk_aktor_id_fkey FOREIGN KEY (fk_aktor_id) REFERENCES public.aktoer(aktoer_id) ON UPDATE CASCADE;
+
+
+--
 -- Name: okonomi_simulering_mottaker okonomi_simulering_mottaker_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4430,6 +4905,14 @@ ALTER TABLE ONLY public.po_bostedsadresse
 
 
 --
+-- Name: po_delt_bosted po_delt_bosted_fk_po_person_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.po_delt_bosted
+    ADD CONSTRAINT po_delt_bosted_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person(id) ON DELETE CASCADE;
+
+
+--
 -- Name: po_doedsfall po_doedsfall_fk_po_person_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4443,6 +4926,14 @@ ALTER TABLE ONLY public.po_doedsfall
 
 ALTER TABLE ONLY public.po_opphold
     ADD CONSTRAINT po_opphold_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person(id);
+
+
+--
+-- Name: po_oppholdsadresse po_oppholdsadresse_fk_po_person_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.po_oppholdsadresse
+    ADD CONSTRAINT po_oppholdsadresse_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person(id) ON DELETE CASCADE;
 
 
 --
@@ -4507,6 +4998,14 @@ ALTER TABLE ONLY public.sett_paa_vent
 
 ALTER TABLE ONLY public.vilkar_resultat
     ADD CONSTRAINT sist_endret_i_behandling_id_vilkar_resultat FOREIGN KEY (sist_endret_i_behandling_id) REFERENCES public.behandling(id);
+
+
+--
+-- Name: skjermet_barn_soker skjermet_barn_soker_fk_aktor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.skjermet_barn_soker
+    ADD CONSTRAINT skjermet_barn_soker_fk_aktor_id_fkey FOREIGN KEY (fk_aktor_id) REFERENCES public.aktoer(aktoer_id) ON UPDATE CASCADE;
 
 
 --

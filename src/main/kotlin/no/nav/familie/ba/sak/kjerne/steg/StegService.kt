@@ -43,6 +43,7 @@ import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
@@ -74,6 +75,7 @@ class StegService(
     private val satskjøringRepository: SatskjøringRepository,
     private val featureToggleService: FeatureToggleService,
     private val automatiskRegistrerSøknadService: AutomatiskRegistrerSøknadService,
+    private val strengtFortroligService: StrengtFortroligService,
 ) {
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
 
@@ -191,17 +193,23 @@ class StegService(
 
     private fun hentBarnFraForrigeAvsluttedeBehandling(behandling: Behandling): List<String> {
         val sisteBehandling = hentSisteAvsluttetBehandling(behandling)
-        return beregningService.finnBarnFraBehandlingMedTilkjentYtelse(sisteBehandling.id).mapNotNull {
+        val skjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil =
+            strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(behandling.fagsak)
+
+        return beregningService.finnBarnFraBehandlingMedTilkjentYtelse(sisteBehandling.id).mapNotNull { aktør ->
             try {
-                personopplysningerService.hentPersoninfoEnkel(it)
-                it.aktivFødselsnummer()
+                if (aktør.aktivFødselsnummer() !in skjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil) {
+                    personopplysningerService.hentPersoninfoEnkel(aktør)
+                }
+
+                aktør.aktivFødselsnummer()
             } catch (pdlPersonKanIkkeBehandlesIFagsystem: PdlPersonKanIkkeBehandlesIFagsystem) {
                 if (behandling.opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING && pdlPersonKanIkkeBehandlesIFagsystem.årsak == PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO) {
                     logger.warn("Barn fra forrige behandling mangler fødselsdato. Inkluderes alikevel siden det er en teknisk endring")
-                    it.aktivFødselsnummer()
+                    aktør.aktivFødselsnummer()
                 } else {
                     logger.warn("Ignorerer barn fra forrige avsluttede behandling: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
-                    secureLogger.warn("Ignorerer barn ${it.aktivFødselsnummer()} fra forrige avsluttede behandling: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
+                    secureLogger.warn("Ignorerer barn ${aktør.aktivFødselsnummer()} fra forrige avsluttede behandling: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
                     null
                 }
             }
