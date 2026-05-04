@@ -42,10 +42,6 @@ class SammensattKontrollsakController(
     fun hentSammensattKontrollsak(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<SammensattKontrollsakDto?>> {
-        if (!featureToggleService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
-            throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
-        }
-
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Hent SammensattKontrollsak",
