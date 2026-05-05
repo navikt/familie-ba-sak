@@ -1,4 +1,4 @@
-name: Manual deploy to prod (from main)
+name: Manual deploy to prod
 on:
   workflow_dispatch:
     inputs:
@@ -61,7 +61,6 @@ jobs:
     secrets: inherit
   build:
     name: Build
-    if: github.ref == 'refs/heads/main' # Only deploy to prod from main branch
     permissions:
       contents: read
       id-token: write
@@ -94,3 +93,11 @@ jobs:
       cluster: prod-gcp
       resource: .nais/app-prod.yaml
     secrets: inherit
+  notify-audit:
+    name: Notify if audited deploy
+    if: github.ref != 'refs/heads/main'
+    permissions: {}
+    needs: deploy-with-new-image
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/notify-audited-deploy.yaml@main # ratchet:exclude
+    secrets:
+      BAKS_AUDIT_ALERTS_SLACK_WEBHOOK: ${{ secrets.BAKS_AUDIT_ALERTS_SLACK_WEBHOOK }}
