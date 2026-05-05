@@ -125,7 +125,6 @@ class BehandlingServiceTest {
             every { loggService.opprettBehandlingLogg(any()) } just runs
             every { taskRepository.save(any()) } returnsArgument 0
             every { featureToggleService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
-            every { featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR) } returns true
 
             // Act
             val opprettetBehandling = behandlingService.opprettBehandling(nyBehandling)
@@ -177,7 +176,6 @@ class BehandlingServiceTest {
             every { loggService.opprettBehandlingLogg(any()) } just runs
             every { taskRepository.save(any()) } returnsArgument 0
             every { featureToggleService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
-            every { featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR) } returns true
 
             // Act
             val opprettetBehandling = behandlingService.opprettBehandling(nyBehandling)
@@ -233,7 +231,6 @@ class BehandlingServiceTest {
             every { loggService.opprettBehandlingLogg(capture(behandlingLoggRequestSlot)) } just runs
             every { taskRepository.save(any()) } returnsArgument 0
             every { featureToggleService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
-            every { featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR) } returns true
 
             // Act
             behandlingService.opprettBehandling(nyBehandling)

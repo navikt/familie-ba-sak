@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.PREUTFYLLING_VILKÅR
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
@@ -71,45 +70,43 @@ class VilkårService(
         val personResultat =
             finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, personResultatDto.personIdent)
 
-        if (featureToggleService.isEnabled(PREUTFYLLING_VILKÅR)) {
-            val eksisterendeVilkårResultat =
-                personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
-                    ?: throw Feil("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
+        val eksisterendeVilkårResultat =
+            personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
+                ?: throw Feil("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
 
-            if (eksisterendeVilkårResultat.erOpprinneligPreutfyltIBehandling != null) {
-                val erEndringIBegrunnelse = eksisterendeVilkårResultat.begrunnelse != vilkårResultatDto.begrunnelse
-                val erEndringIAnnetFeltEnnBegrunnelse = erEndringIVilkår(eksisterendeVilkårResultat, vilkårResultatDto)
+        if (eksisterendeVilkårResultat.erOpprinneligPreutfyltIBehandling != null) {
+            val erEndringIBegrunnelse = eksisterendeVilkårResultat.begrunnelse != vilkårResultatDto.begrunnelse
+            val erEndringIAnnetFeltEnnBegrunnelse = erEndringIVilkår(eksisterendeVilkårResultat, vilkårResultatDto)
 
-                if (!erEndringIBegrunnelse && !erEndringIAnnetFeltEnnBegrunnelse) {
-                    return vilkårsvurdering.personResultater.map { it.tilPersonResultatDto() }
-                }
+            if (!erEndringIBegrunnelse && !erEndringIAnnetFeltEnnBegrunnelse) {
+                return vilkårsvurdering.personResultater.map { it.tilPersonResultatDto() }
+            }
 
-                val begrunnelseErTomEllerAutomatiskUtfylt =
-                    vilkårResultatDto.begrunnelse.run { isBlank() || startsWith(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT) }
+            val begrunnelseErTomEllerAutomatiskUtfylt =
+                vilkårResultatDto.begrunnelse.run { isBlank() || startsWith(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT) }
 
-                if (erEndringIAnnetFeltEnnBegrunnelse && begrunnelseErTomEllerAutomatiskUtfylt) {
-                    throw FunksjonellFeil(
-                        melding = "Begrunnelse må være fylt inn ved oppdatering av preutfylt vilkår",
-                        frontendFeilmelding = "Du har endret vilkåret, og må derfor fjerne den automatiske begrunnelsen og fylle inn en ny begrunnelse.",
+            if (erEndringIAnnetFeltEnnBegrunnelse && begrunnelseErTomEllerAutomatiskUtfylt) {
+                throw FunksjonellFeil(
+                    melding = "Begrunnelse må være fylt inn ved oppdatering av preutfylt vilkår",
+                    frontendFeilmelding = "Du har endret vilkåret, og må derfor fjerne den automatiske begrunnelsen og fylle inn en ny begrunnelse.",
+                )
+            }
+
+            val eksisterendeLogger =
+                endringIPreutfyltVilkårLoggRepository.findByVilkårResultatId(eksisterendeVilkårResultat.id)
+
+            val logg =
+                if (eksisterendeLogger.size == 1) {
+                    eksisterendeLogger.single().oppdaterEndringIPreutfyltVilkårLogg(vilkårResultatDto)
+                } else {
+                    opprettLoggForEndringIPreutfyltVilkår(
+                        behandling = vilkårsvurdering.behandling,
+                        forrigeVilkår = eksisterendeVilkårResultat,
+                        nyttVilkår = vilkårResultatDto,
                     )
                 }
 
-                val eksisterendeLogger =
-                    endringIPreutfyltVilkårLoggRepository.findByVilkårResultatId(eksisterendeVilkårResultat.id)
-
-                val logg =
-                    if (eksisterendeLogger.size == 1) {
-                        eksisterendeLogger.single().oppdaterEndringIPreutfyltVilkårLogg(vilkårResultatDto)
-                    } else {
-                        opprettLoggForEndringIPreutfyltVilkår(
-                            behandling = vilkårsvurdering.behandling,
-                            forrigeVilkår = eksisterendeVilkårResultat,
-                            nyttVilkår = vilkårResultatDto,
-                        )
-                    }
-
-                endringIPreutfyltVilkårLoggRepository.save(logg)
-            }
+            endringIPreutfyltVilkårLoggRepository.save(logg)
         }
 
         muterPersonVilkårResultaterPut(personResultat, vilkårResultatDto)

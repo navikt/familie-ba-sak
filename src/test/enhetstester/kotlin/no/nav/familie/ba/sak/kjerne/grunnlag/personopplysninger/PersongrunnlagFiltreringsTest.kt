@@ -40,7 +40,7 @@ class PersongrunnlagFiltreringsTest {
         val eldsteBarnsFødselsdato = LocalDate.of(2019, 1, 1)
 
         // Act
-        val bostedsadresserEtter = bostedsadresserFør.filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato, true)
+        val bostedsadresserEtter = bostedsadresserFør.filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato)
 
         // Assert
         assertThat(bostedsadresserEtter).hasSize(2)
@@ -61,7 +61,7 @@ class PersongrunnlagFiltreringsTest {
         val eldsteBarnsFødselsdato = LocalDate.of(2019, 1, 1)
 
         // Act
-        val oppholdsadresserEtter = oppholdsadresserFør.filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato, true)
+        val oppholdsadresserEtter = oppholdsadresserFør.filtrerBortOppholdsadresserFørEldsteBarn(eldsteBarnsFødselsdato)
 
         // Assert
         assertThat(oppholdsadresserEtter).hasSize(2)
@@ -79,8 +79,8 @@ class PersongrunnlagFiltreringsTest {
             )
 
         // Act
-        val deltBostedBarnEtter = delteBostederFør.filtrerBortDeltBostedForSøker(personType = PersonType.BARN, true)
-        val deltBostedSøkerEtter = delteBostederFør.filtrerBortDeltBostedForSøker(personType = PersonType.SØKER, true)
+        val deltBostedBarnEtter = delteBostederFør.filtrerBortDeltBostedForSøker(personType = PersonType.BARN)
+        val deltBostedSøkerEtter = delteBostederFør.filtrerBortDeltBostedForSøker(personType = PersonType.SØKER)
 
         // Assert
         assertThat(deltBostedBarnEtter).hasSize(2)
@@ -118,7 +118,7 @@ class PersongrunnlagFiltreringsTest {
         val eldsteBarnsFødselsdato = LocalDate.of(2019, 1, 1)
 
         // Act
-        val statsborgerskapEtter = statsborgerskapFør.filtrerBortStatsborgerskapFørEldsteBarn(eldsteBarnsFødselsdato, true)
+        val statsborgerskapEtter = statsborgerskapFør.filtrerBortStatsborgerskapFørEldsteBarn(eldsteBarnsFødselsdato)
 
         // Assert
         assertThat(statsborgerskapEtter).hasSize(2)
@@ -153,7 +153,7 @@ class PersongrunnlagFiltreringsTest {
         val eldsteBarnsFødselsdato = LocalDate.of(2019, 1, 1)
 
         // Act
-        val oppholdEtter = oppholdFør.filtrerBortOppholdFørEldsteBarn(eldsteBarnsFødselsdato, true)
+        val oppholdEtter = oppholdFør.filtrerBortOppholdFørEldsteBarn(eldsteBarnsFødselsdato)
         // Assert
         assertThat(oppholdEtter).hasSize(2)
         assertThat(oppholdEtter.first().oppholdFra).isEqualTo(LocalDate.of(2010, 1, 1))
@@ -178,7 +178,7 @@ class PersongrunnlagFiltreringsTest {
                 ),
             )
         // Act
-        val sivilstandBarnEtter = sivilstandBarnFør.filtrerBortIkkeRelevanteSivilstander(true, BehandlingKategori.NASJONAL, BehandlingUnderkategori.ORDINÆR, PersonType.BARN)
+        val sivilstandBarnEtter = sivilstandBarnFør.filtrerBortIkkeRelevanteSivilstander(BehandlingKategori.NASJONAL, BehandlingUnderkategori.ORDINÆR, PersonType.BARN)
 
         // Assert
         assertThat(sivilstandBarnEtter).hasSize(2)
@@ -206,7 +206,7 @@ class PersongrunnlagFiltreringsTest {
             )
 
         // Act
-        val sivilstandSøkerEtter = sivilstandSøkerFør.filtrerBortIkkeRelevanteSivilstander(true, BehandlingKategori.NASJONAL, BehandlingUnderkategori.ORDINÆR, PersonType.SØKER)
+        val sivilstandSøkerEtter = sivilstandSøkerFør.filtrerBortIkkeRelevanteSivilstander(BehandlingKategori.NASJONAL, BehandlingUnderkategori.ORDINÆR, PersonType.SØKER)
 
         // Assert
         assertThat(sivilstandSøkerEtter).hasSize(0)
@@ -232,7 +232,7 @@ class PersongrunnlagFiltreringsTest {
             )
 
         // Act
-        val sivilstandSøkerEtter = sivilstandSøkerFør.filtrerBortIkkeRelevanteSivilstander(true, BehandlingKategori.NASJONAL, BehandlingUnderkategori.UTVIDET, PersonType.SØKER)
+        val sivilstandSøkerEtter = sivilstandSøkerFør.filtrerBortIkkeRelevanteSivilstander(BehandlingKategori.NASJONAL, BehandlingUnderkategori.UTVIDET, PersonType.SØKER)
 
         // Assert
         assertThat(sivilstandSøkerEtter).hasSize(3)
@@ -258,7 +258,7 @@ class PersongrunnlagFiltreringsTest {
             )
 
         // Act
-        val sivilstandSøkerEtter = sivilstandSøkerFør.filtrerBortIkkeRelevanteSivilstander(true, BehandlingKategori.EØS, BehandlingUnderkategori.ORDINÆR, PersonType.SØKER)
+        val sivilstandSøkerEtter = sivilstandSøkerFør.filtrerBortIkkeRelevanteSivilstander(BehandlingKategori.EØS, BehandlingUnderkategori.ORDINÆR, PersonType.SØKER)
 
         // Assert
         assertThat(sivilstandSøkerEtter).hasSize(3)

@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.5</version>
+        <version>4.0.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -25,7 +25,7 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20260420122910_8bfca04</prosessering.version>
-        <felles.version>4.20260420125050_76c5fea</felles.version>
+        <felles.version>4.20260428145828_c16a1d8</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20260323170751_4c02e3c</eksterne-kontrakter-bisys.version>
         <familie.kontrakter.saksstatistikk>2.0_20260323170751_4c02e3c</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20260323170751_4c02e3c</familie.kontrakter.stønadsstatistikk>
@@ -33,7 +33,7 @@
         <utbetalingsgenerator.version>1.0_20251127080440_b935966</utbetalingsgenerator.version>
         <cucumber.version>7.34.3</cucumber.version>
         <mockk.version>1.14.9</mockk.version>
-        <token-validation-spring.version>6.0.5</token-validation-spring.version>
+        <token-validation-spring.version>6.0.6</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>3.0.3</springdoc.version>
         <sentry.version>8.40.0</sentry.version>
@@ -72,7 +72,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>4.0.5</version>
+                <version>4.0.6</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -295,6 +295,10 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>sikkerhet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.familie.felles</groupId>
+            <artifactId>sikkerhet-token-support</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.familie</groupId>
