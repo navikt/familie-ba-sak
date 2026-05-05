@@ -11,10 +11,9 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
@@ -63,8 +62,8 @@ class BehandlingsresultatStegValideringServiceTest {
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository = mockk()
     private val valutakursRepository: ValutakursRepository = mockk()
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService = mockk()
+    private val strengtFortroligService = mockk<no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService>(relaxed = true)
     private val clockProvider = lagClockProviderMedFastTidspunkt(LocalDate.of(2025, 10, 10))
-    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val behandlingsresultatStegValideringService =
         BehandlingsresultatStegValideringService(
@@ -76,6 +75,7 @@ class BehandlingsresultatStegValideringServiceTest {
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             valutakursRepository = valutakursRepository,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            strengtFortroligService = strengtFortroligService,
             clockProvider = clockProvider,
         )
 
@@ -1453,6 +1453,199 @@ class BehandlingsresultatStegValideringServiceTest {
 
             // Act
             assertDoesNotThrow { behandlingsresultatStegValideringService.validerFalskIdentitetBehandling(tilkjentYtelse) }
+        }
+    }
+
+    @Nested
+    inner class ValiderIngenEndringIUtbetalingIPerioderMedSkjermedeBarnTest {
+        private val skjermetBarnAktør = randomAktør()
+        private val annetBarnAktør = randomAktør()
+        private val søkerAktør = randomAktør()
+        private val fagsak = lagFagsak(aktør = søkerAktør)
+        private val nåværendeBehandling = lagBehandling(fagsak = fagsak)
+        private val forrigeBehandling = lagBehandling(fagsak = fagsak)
+        private val skjermetPeriodeFom = YearMonth.of(2023, 1)
+        private val skjermetPeriodeTom = YearMonth.of(2024, 6)
+
+        private val skjermetBarnsHistoriskeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = skjermetPeriodeFom,
+                    tom = skjermetPeriodeTom,
+                    behandling = forrigeBehandling,
+                    aktør = skjermetBarnAktør,
+                ),
+            )
+
+        private val skjermetBarnsAndelerINåværendeBehandling =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = skjermetPeriodeFom,
+                    tom = skjermetPeriodeTom,
+                    behandling = nåværendeBehandling,
+                    aktør = skjermetBarnAktør,
+                ),
+            )
+
+        @Test
+        fun `skal ikke kaste feil når det ikke finnes skjermede barn uten løpende andeler`() {
+            // Arrange
+            every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak) } returns emptySet()
+
+            // Act + Assert
+            assertDoesNotThrow {
+                behandlingsresultatStegValideringService.validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(nåværendeBehandling)
+            }
+        }
+
+        @Test
+        fun `skal ikke kaste feil når det ikke finnes en forrige vedtatt behandling`() {
+            // Arrange
+            every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak) } returns setOf(skjermetBarnAktør.aktivFødselsnummer())
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(nåværendeBehandling) } returns null
+
+            // Act + Assert
+            assertDoesNotThrow {
+                behandlingsresultatStegValideringService.validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(nåværendeBehandling)
+            }
+        }
+
+        @Test
+        fun `skal ikke kaste feil når andre barns andeler er uendret i skjermet periode`() {
+            // Arrange
+            mockSkjermetBarnFinnesOgForrigeBehandlingErVedtatt()
+            val annetBarnsAndel =
+                lagAndelTilkjentYtelse(
+                    fom = skjermetPeriodeFom,
+                    tom = skjermetPeriodeTom,
+                    behandling = forrigeBehandling,
+                    aktør = annetBarnAktør,
+                )
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns skjermetBarnsHistoriskeAndeler + annetBarnsAndel
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns
+                skjermetBarnsAndelerINåværendeBehandling + annetBarnsAndel.copy(id = 0, behandlingId = nåværendeBehandling.id)
+
+            // Act + Assert
+            assertDoesNotThrow {
+                behandlingsresultatStegValideringService.validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(nåværendeBehandling)
+            }
+        }
+
+        @Test
+        fun `skal ikke kaste feil når endring for andre barn er utenfor skjermet periode`() {
+            // Arrange
+            mockSkjermetBarnFinnesOgForrigeBehandlingErVedtatt()
+            val annetBarnsAndelFørSkjermetPeriode =
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2022, 1),
+                    tom = YearMonth.of(2022, 12),
+                    behandling = forrigeBehandling,
+                    aktør = annetBarnAktør,
+                    beløp = 1000,
+                )
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns skjermetBarnsHistoriskeAndeler + annetBarnsAndelFørSkjermetPeriode
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns
+                skjermetBarnsAndelerINåværendeBehandling +
+                annetBarnsAndelFørSkjermetPeriode.copy(id = 0, behandlingId = nåværendeBehandling.id, kalkulertUtbetalingsbeløp = 2000)
+
+            // Act + Assert
+            assertDoesNotThrow {
+                behandlingsresultatStegValideringService.validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(nåværendeBehandling)
+            }
+        }
+
+        @Test
+        fun `skal kaste Funksjonell feil når endring for annet barn er innenfor skjermet periode`() {
+            // Arrange
+            mockSkjermetBarnFinnesOgForrigeBehandlingErVedtatt()
+            val annetBarnsAndelForrige =
+                lagAndelTilkjentYtelse(
+                    fom = skjermetPeriodeFom,
+                    tom = skjermetPeriodeTom,
+                    behandling = forrigeBehandling,
+                    aktør = annetBarnAktør,
+                    beløp = 1000,
+                )
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns skjermetBarnsHistoriskeAndeler + annetBarnsAndelForrige
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns
+                skjermetBarnsAndelerINåværendeBehandling +
+                annetBarnsAndelForrige.copy(id = 0, behandlingId = nåværendeBehandling.id, kalkulertUtbetalingsbeløp = 2000)
+
+            // Act + Assert
+            val feil =
+                assertThrows<FunksjonellFeil> {
+                    behandlingsresultatStegValideringService.validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(nåværendeBehandling)
+                }
+
+            assertThat(feil.message).contains("Behandlingen må overføres til enhet 2103")
+        }
+
+        @Test
+        fun `skal kaste funksjonell feil ved endring i søkers utbetaling i skjermet periode`() {
+            // Arrange
+            mockSkjermetBarnFinnesOgForrigeBehandlingErVedtatt()
+            val søkerAndelForrige =
+                lagAndelTilkjentYtelse(
+                    fom = skjermetPeriodeFom,
+                    tom = skjermetPeriodeTom,
+                    behandling = forrigeBehandling,
+                    aktør = søkerAktør,
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                    beløp = 1000,
+                )
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns
+                skjermetBarnsHistoriskeAndeler + søkerAndelForrige
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns
+                skjermetBarnsAndelerINåværendeBehandling +
+                søkerAndelForrige.copy(id = 0, behandlingId = nåværendeBehandling.id, kalkulertUtbetalingsbeløp = 1500)
+
+            // Act + Assert
+            val feil =
+                assertThrows<FunksjonellFeil> {
+                    behandlingsresultatStegValideringService.validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(nåværendeBehandling)
+                }
+
+            assertThat(feil.message).contains("Behandlingen må overføres til enhet 2103")
+        }
+
+        @Test
+        fun `skal kaste feil ved endring i det skjermede barnets egne andeler`() {
+            // Arrange
+            mockSkjermetBarnFinnesOgForrigeBehandlingErVedtatt()
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = skjermetPeriodeFom,
+                        tom = skjermetPeriodeTom,
+                        behandling = nåværendeBehandling,
+                        aktør = skjermetBarnAktør,
+                        beløp = 9999,
+                    ),
+                )
+
+            // Act + Assert
+            assertThrows<FunksjonellFeil> {
+                behandlingsresultatStegValideringService.validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(nåværendeBehandling)
+            }
+        }
+
+        @Test
+        fun `skal kaste feil dersom skjermet barns andeler fjernes i ny behandling`() {
+            // Arrange
+            mockSkjermetBarnFinnesOgForrigeBehandlingErVedtatt()
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns emptyList()
+
+            // Act + Assert
+            assertThrows<FunksjonellFeil> {
+                behandlingsresultatStegValideringService.validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(nåværendeBehandling)
+            }
+        }
+
+        private fun mockSkjermetBarnFinnesOgForrigeBehandlingErVedtatt() {
+            every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak) } returns setOf(skjermetBarnAktør.aktivFødselsnummer())
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(nåværendeBehandling) } returns forrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns skjermetBarnsHistoriskeAndeler
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns skjermetBarnsAndelerINåværendeBehandling
         }
     }
 }

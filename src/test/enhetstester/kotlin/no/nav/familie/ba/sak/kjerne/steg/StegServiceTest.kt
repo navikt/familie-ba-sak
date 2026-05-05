@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
@@ -25,9 +26,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -49,6 +52,9 @@ class StegServiceTest {
     private val featureToggleService: FeatureToggleService = mockk()
     private val tilgangService: TilgangService = mockk()
     private val mocketRegistrerPersongrunnlag: RegistrerPersongrunnlag = mockk<RegistrerPersongrunnlag>(relaxed = true)
+    private val strengtFortroligService: StrengtFortroligService = mockk()
+    private val beregningService: BeregningService = mockk()
+    private val personopplysningerService: PersonopplysningerService = mockk()
 
     private val stegService =
         StegService(
@@ -56,23 +62,25 @@ class StegServiceTest {
             fagsakService = mockk(),
             behandlingService = behandlingService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            beregningService = mockk(),
+            beregningService = beregningService,
             søknadGrunnlagService = mockk(),
             tilgangService = tilgangService,
             infotrygdFeedService = mockk(),
             satsendringService = satsendringService,
-            personopplysningerService = mockk(),
+            personopplysningerService = personopplysningerService,
             automatiskBeslutningService = mockk(),
             opprettTaskService = opprettTaskService,
             satskjøringRepository = satskjøringRepository,
             featureToggleService = featureToggleService,
             automatiskRegistrerSøknadService = mockk(),
+            strengtFortroligService = strengtFortroligService,
         )
 
     @BeforeEach
     fun setup() {
         every { tilgangService.validerTilgangTilBehandling(any(), any()) } just runs
         every { tilgangService.verifiserHarTilgangTilHandling(any(), any()) } just runs
+        every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(any()) } returns emptySet()
     }
 
     @Nested
@@ -355,6 +363,113 @@ class StegServiceTest {
             // Act & assert
             val exception = assertThrows<FunksjonellFeil> { stegService.håndterPersongrunnlag(behandling, grunnlag) }
             assertThat(exception.message).isEqualTo("System prøver å utføre steg REGISTRERE_PERSONGRUNNLAG på behandling ${behandling.id} som er på vent.")
+        }
+    }
+
+    @Nested
+    inner class HentBarnFraForrigeAvsluttedeBehandlingTest {
+        @Test
+        fun `skal ikke kalle PDL for skjermede barn saksbehandler ikke har tilgang til men fortsatt inkludere dem i barnasIdenter`() {
+            // Arrange
+            val søker = randomAktør()
+            val skjermetBarn = randomAktør()
+            val vanligBarn = randomAktør()
+
+            val forrigeBehandling = lagBehandling()
+            val registrerPersongrunnlagDtoSlot = slot<RegistrerPersongrunnlagDTO>()
+
+            val nyBehandling =
+                NyBehandling(
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    behandlingType = BehandlingType.REVURDERING,
+                    behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                    barnasIdenter = emptyList(),
+                    fagsakId = 1L,
+                )
+
+            val opprettetBehandling =
+                lagBehandling(
+                    fagsak = lagFagsak(id = nyBehandling.fagsakId, aktør = søker),
+                    behandlingKategori = nyBehandling.kategori!!,
+                    underkategori = nyBehandling.underkategori!!,
+                    behandlingType = nyBehandling.behandlingType,
+                    årsak = nyBehandling.behandlingÅrsak,
+                )
+
+            every { behandlingHentOgPersisterService.hent(opprettetBehandling.id) } returns opprettetBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId) } returns forrigeBehandling
+            every { behandlingService.opprettBehandling(nyBehandling) } returns opprettetBehandling
+            every { opprettTaskService.opprettAktiverMinsideTask(opprettetBehandling.fagsak.aktør) } just runs
+            every { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(opprettetBehandling.id, any()) } returns opprettetBehandling
+            every { mocketRegistrerPersongrunnlag.stegType() } returns StegType.REGISTRERE_PERSONGRUNNLAG
+            every { mocketRegistrerPersongrunnlag.utførStegOgAngiNeste(opprettetBehandling, capture(registrerPersongrunnlagDtoSlot)) } returns StegType.VILKÅRSVURDERING
+
+            every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns listOf(skjermetBarn, vanligBarn)
+            every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(opprettetBehandling.fagsak) } returns setOf(skjermetBarn.aktivFødselsnummer())
+            every { personopplysningerService.hentPersoninfoEnkel(vanligBarn) } returns mockk()
+
+            // Act
+            stegService.håndterNyBehandling(nyBehandling)
+
+            // Assert
+            val barnasIdenter = registrerPersongrunnlagDtoSlot.captured.barnasIdenter
+            assertThat(barnasIdenter).containsExactlyInAnyOrder(skjermetBarn.aktivFødselsnummer(), vanligBarn.aktivFødselsnummer())
+
+            verify(exactly = 0) { personopplysningerService.hentPersoninfoEnkel(skjermetBarn) }
+            verify(exactly = 1) { personopplysningerService.hentPersoninfoEnkel(vanligBarn) }
+            verify(exactly = 1) { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(opprettetBehandling.fagsak) }
+        }
+
+        @Test
+        fun `skal kalle PDL for alle barn dersom saksbehandler har tilgang til alle`() {
+            // Arrange
+            val søker = randomAktør()
+            val barn1 = randomAktør()
+            val barn2 = randomAktør()
+
+            val forrigeBehandling = lagBehandling()
+            val registrerPersongrunnlagDtoSlot = slot<RegistrerPersongrunnlagDTO>()
+
+            val nyBehandling =
+                NyBehandling(
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    behandlingType = BehandlingType.REVURDERING,
+                    behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                    barnasIdenter = emptyList(),
+                    fagsakId = 1L,
+                )
+
+            val opprettetBehandling =
+                lagBehandling(
+                    fagsak = lagFagsak(id = nyBehandling.fagsakId, aktør = søker),
+                    behandlingKategori = nyBehandling.kategori!!,
+                    underkategori = nyBehandling.underkategori!!,
+                    behandlingType = nyBehandling.behandlingType,
+                    årsak = nyBehandling.behandlingÅrsak,
+                )
+
+            every { behandlingHentOgPersisterService.hent(opprettetBehandling.id) } returns opprettetBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId) } returns forrigeBehandling
+            every { behandlingService.opprettBehandling(nyBehandling) } returns opprettetBehandling
+            every { opprettTaskService.opprettAktiverMinsideTask(opprettetBehandling.fagsak.aktør) } just runs
+            every { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(opprettetBehandling.id, any()) } returns opprettetBehandling
+            every { mocketRegistrerPersongrunnlag.stegType() } returns StegType.REGISTRERE_PERSONGRUNNLAG
+            every { mocketRegistrerPersongrunnlag.utførStegOgAngiNeste(opprettetBehandling, capture(registrerPersongrunnlagDtoSlot)) } returns StegType.VILKÅRSVURDERING
+
+            every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns listOf(barn1, barn2)
+            every { personopplysningerService.hentPersoninfoEnkel(any()) } returns mockk()
+
+            // Act
+            stegService.håndterNyBehandling(nyBehandling)
+
+            // Assert
+            val barnasIdenter = registrerPersongrunnlagDtoSlot.captured.barnasIdenter
+            assertThat(barnasIdenter).containsExactlyInAnyOrder(barn1.aktivFødselsnummer(), barn2.aktivFødselsnummer())
+
+            verify(exactly = 1) { personopplysningerService.hentPersoninfoEnkel(barn1) }
+            verify(exactly = 1) { personopplysningerService.hentPersoninfoEnkel(barn2) }
         }
     }
 }

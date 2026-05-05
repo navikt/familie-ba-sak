@@ -130,7 +130,7 @@ enum class StegType(
     ),
     BESLUTTE_VEDTAK(
         rekkefølge = 7,
-        tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
+        tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER, BehandlerRolle.SAKSBEHANDLER),
         gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK),
     ),
     IVERKSETT_MOT_OPPDRAG(

@@ -65,6 +65,7 @@ class BehandlingsresultatSteg(
             behandlingsresultatstegValideringService.validerEndredeUtbetalingsandeler(tilkjentYtelse)
             behandlingsresultatstegValideringService.validerKompetanse(behandling.id)
             behandlingsresultatstegValideringService.validerSekundærlandKompetanse(behandling.id)
+            behandlingsresultatstegValideringService.validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(behandling)
         }
 
         if (behandling.erMånedligValutajustering()) {
@@ -129,6 +130,6 @@ class BehandlingsresultatSteg(
     override fun stegType(): StegType = StegType.BEHANDLINGSRESULTAT
 
     companion object {
-        val logger = LoggerFactory.getLogger(this::class.java)!!
+        val logger = LoggerFactory.getLogger(this::class.java)
     }
 }

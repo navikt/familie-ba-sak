@@ -30,6 +30,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortOppholdFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortOppholdsadresserFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortStatsborgerskapFørEldsteBarn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortUgyldigeStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.deltbosted.GrDeltBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse.GrOppholdsadresse
@@ -69,7 +70,6 @@ class PersongrunnlagService(
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val kodeverkService: KodeverkService,
-    private val falskIdentitetService: FalskIdentitetService,
     private val strengtFortroligService: StrengtFortroligService,
 ) {
     fun mapTilPersonDtoMedStatsborgerskapLand(
@@ -270,7 +270,7 @@ class PersongrunnlagService(
             }
 
         barnSomSkalKopieresFraForrigeGrunnlag.forEach { person ->
-            person.tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag)
+            nyttPersonopplysningGrunnlag.personer.add(person.tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag))
         }
 
         val barnSomSkalHentesFraPdl = alleBarna.filterNot { barn -> barn in skjermedeBarnSaksbehandlerManglerTilgangTil }
@@ -427,6 +427,7 @@ class PersongrunnlagService(
             person.statsborgerskap =
                 personInfo.statsborgerskap
                     ?.filtrerBortStatsborgerskapFørEldsteBarn(eldsteBarnsFødselsdato)
+                    ?.filtrerBortUgyldigeStatsborgerskap(aktør)
                     ?.flatMap {
                         statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                             statsborgerskap = it,

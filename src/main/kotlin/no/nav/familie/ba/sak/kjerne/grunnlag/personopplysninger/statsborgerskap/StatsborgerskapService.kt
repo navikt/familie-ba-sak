@@ -86,6 +86,12 @@ class StatsborgerskapService(
 
 fun Statsborgerskap.hentFom() = this.gyldigFraOgMed ?: this.bekreftelsesdato
 
+fun Statsborgerskap.erFomEtterTom(): Boolean {
+    val fom = this.hentFom()
+    val tom = this.gyldigTilOgMed
+    return fom != null && tom != null && fom.isAfter(tom)
+}
+
 fun Statsborgerskap.iNordiskLand() = Norden.entries.map { it.name }.contains(this.land)
 
 fun Statsborgerskap.iTredjeland() = this.land != StatsborgerskapService.LANDKODE_UKJENT
