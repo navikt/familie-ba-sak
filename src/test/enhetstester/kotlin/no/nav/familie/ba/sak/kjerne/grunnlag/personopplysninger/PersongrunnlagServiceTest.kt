@@ -24,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
-import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -47,7 +46,6 @@ class PersongrunnlagServiceTest {
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val kodeverkService = mockk<KodeverkService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val falskIdentitetService = mockk<FalskIdentitetService>()
 
     private val persongrunnlagService =
         spyk(
@@ -64,7 +62,6 @@ class PersongrunnlagServiceTest {
                 arbeidsforholdService = mockk(),
                 vilkårsvurderingService = vilkårsvurderingService,
                 kodeverkService = kodeverkService,
-                falskIdentitetService = falskIdentitetService,
                 strengtFortroligService = mockk(relaxed = true),
             ),
         )

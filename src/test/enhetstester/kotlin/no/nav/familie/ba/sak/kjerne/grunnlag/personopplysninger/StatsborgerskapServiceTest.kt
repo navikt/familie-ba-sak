@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.POL_EØS_FOM
 import no.nav.familie.ba.sak.datagenerator.lagKodeverkLand
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -29,13 +28,12 @@ import java.time.Month
 internal class StatsborgerskapServiceTest {
     private val integrasjonKlient = mockk<IntegrasjonKlient>()
     private val kodeverkService = KodeverkService(integrasjonKlient)
-    private val featureToggleService = mockk<FeatureToggleService>()
 
     private lateinit var statsborgerskapService: StatsborgerskapService
 
     @BeforeEach
     fun setUp() {
-        statsborgerskapService = StatsborgerskapService(kodeverkService, featureToggleService)
+        statsborgerskapService = StatsborgerskapService(kodeverkService)
         every { integrasjonKlient.hentAlleEØSLand() } returns lagKodeverkLand()
     }
 
