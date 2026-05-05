@@ -168,6 +168,13 @@ class FagsakService(
         fagsak: Fagsak,
         nyStatus: FagsakStatus,
     ): Fagsak {
+        if (fagsak.status == FagsakStatus.LÅST && nyStatus != FagsakStatus.LÅST) {
+            logger.warn(
+                "Forsøk på å endre status på låst fagsak ${fagsak.id} til $nyStatus ble blokkert. " +
+                    "Bruk ForvalterService.låsOppFagsak for å låse opp fagsaken først.",
+            )
+            return fagsak
+        }
         logger.info(
             "${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status}" +
                 " til $nyStatus",
@@ -175,6 +182,16 @@ class FagsakService(
         fagsak.status = nyStatus
 
         return lagre(fagsak)
+    }
+
+    fun kastFeilHvisFagsakErLåst(fagsakId: Long) {
+        val fagsak = hentPåFagsakId(fagsakId)
+        if (fagsak.status == FagsakStatus.LÅST) {
+            throw FunksjonellFeil(
+                melding = "Kan ikke utføre operasjonen. Fagsak $fagsakId er låst.",
+                frontendFeilmelding = "Fagsaken er låst og kan ikke endres.",
+            )
+        }
     }
 
     fun hentMinimalFagsakForPerson(
@@ -261,6 +278,7 @@ class FagsakService(
                     )
                 },
             finnesStrengtFortroligPersonIFagsak = strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak),
+            låstTidspunkt = fagsak.låstTidspunkt,
         )
     }
 

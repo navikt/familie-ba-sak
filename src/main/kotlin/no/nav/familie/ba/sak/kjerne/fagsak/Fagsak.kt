@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
+import java.time.LocalDateTime
 import java.util.Objects
 
 @Entity(name = "Fagsak")
@@ -54,6 +55,8 @@ data class Fagsak(
     val type: FagsakType = FagsakType.NORMAL,
     @Column(name = "arkivert", nullable = false)
     var arkivert: Boolean = false,
+    @Column(name = "laast_tidspunkt", nullable = true)
+    var låstTidspunkt: LocalDateTime? = null,
 ) : BaseEntitet() {
     override fun hashCode(): Int = Objects.hashCode(id)
 
@@ -75,6 +78,7 @@ enum class FagsakStatus {
     OPPRETTET,
     LØPENDE, // Har minst én behandling gjeldende for fremtidig utbetaling
     AVSLUTTET,
+    LÅST, // Fagsaken er låst for videre saksbehandling og er meldt til Joark for kassering iht. arkivloven
 }
 
 enum class FagsakType {

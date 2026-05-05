@@ -1,0 +1,1 @@
+ALTER TABLE fagsak ADD COLUMN laast_tidspunkt TIMESTAMP(3) NULL;

@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.EksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.logg.BehandlingLoggRequest
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
@@ -72,6 +73,13 @@ class BehandlingService(
                 melding = "Kan ikke lage behandling på person. Fant ikke fagsak ${nyBehandling.fagsakId}",
                 frontendFeilmelding = "Kan ikke lage behandling på person. Fant ikke fagsak.",
             )
+
+        if (fagsak.status == FagsakStatus.LÅST) {
+            throw FunksjonellFeil(
+                melding = "Kan ikke opprette behandling på låst fagsak ${fagsak.id}.",
+                frontendFeilmelding = "Fagsaken er låst og det er ikke mulig å opprette nye behandlinger.",
+            )
+        }
 
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.id)
         val sisteBehandlingSomErVedtatt =
