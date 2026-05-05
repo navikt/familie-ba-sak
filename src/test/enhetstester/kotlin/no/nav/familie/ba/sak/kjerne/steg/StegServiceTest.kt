@@ -80,7 +80,6 @@ class StegServiceTest {
     fun setup() {
         every { tilgangService.validerTilgangTilBehandling(any(), any()) } just runs
         every { tilgangService.verifiserHarTilgangTilHandling(any(), any()) } just runs
-        every { featureToggleService.isEnabled(FeatureToggle.AUTOMAITSK_REGISTRER_SØKNAD) } returns true
         every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(any()) } returns emptySet()
     }
 

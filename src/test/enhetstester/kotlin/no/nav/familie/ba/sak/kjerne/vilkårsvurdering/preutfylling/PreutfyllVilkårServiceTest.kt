@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
@@ -16,7 +15,6 @@ class PreutfyllVilkårServiceTest {
     private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService = mockk()
     private val preutfyllBosattIRiketForFødselshendelserService: PreutfyllBosattIRiketForFødselshendelserService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk()
 
     val preutfyllVilkårService =
         PreutfyllVilkårService(
@@ -25,7 +23,6 @@ class PreutfyllVilkårServiceTest {
             preutfyllBosattIRiketService,
             preutfyllBosattIRiketForFødselshendelserService,
             persongrunnlagService,
-            featureToggleService,
         )
 
     @Test

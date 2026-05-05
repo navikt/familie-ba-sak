@@ -597,7 +597,6 @@ class CucumberMock(
             preutfyllBosattIRiketService = preutfyllBosattIRiketService,
             preutfyllBorMedSøkerService = preutfyllBorMedSøkerService,
             preutfyllBosattIRiketForFødselshendelserService = preutfyllBosattIRiketForFødselshendelserService,
-            featureToggleService = featureToggleService,
             persongrunnlagService = persongrunnlagService,
         )
 

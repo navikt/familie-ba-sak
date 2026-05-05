@@ -33,16 +33,8 @@ enum class FeatureToggle(
 
     // Release
 
-    // Preutfylling
-    PREUTFYLLING_VILKÅR("familie-ba-sak.preutfylling-vilkaar"),
-    PREUTFYLLING_PERSONOPPLYSNIGSGRUNNLAG("familie-ba-sak.preutfylling-personopplysningsgrunnlag"),
-    AUTOMAITSK_REGISTRER_SØKNAD("familie-ba-sak.automatisk-registrer-soknad"),
-    FILTRERE_REGISTEROPPLYSNINGER("familie-ba-sak.filtrer-registeropplysninger"),
-
     // NAV-25256
     SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN("familie-ba-sak.skjermet-barn"),
-
-    HARDKODET_EEAFREG_STATSBORGERSKAP("familie-ba-sak.hardkodet-eeafreg-statsborgerskap"),
 
     SKAL_HÅNDTERE_FALSK_IDENTITET("familie-ba-sak.skal-handtere-falsk-identitet"),
 
