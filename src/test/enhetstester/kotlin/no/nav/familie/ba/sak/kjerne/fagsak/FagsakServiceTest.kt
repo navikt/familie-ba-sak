@@ -55,6 +55,7 @@ class FagsakServiceTest {
     private val featureToggleService = mockk<FeatureToggleService>()
     private val skjermetBarnSøkerRepository = mockk<SkjermetBarnSøkerRepository>()
     private val strengtFortroligService = mockk<StrengtFortroligService>(relaxed = true)
+    private val fagsakLåsingRepository = mockk<FagsakLåsingRepository>()
     private val fagsakService =
         FagsakService(
             fagsakRepository = fagsakRepository,
@@ -72,6 +73,7 @@ class FagsakServiceTest {
             skjermetBarnSøkerRepository = skjermetBarnSøkerRepository,
             featureToggleService = featureToggleService,
             strengtFortroligService = strengtFortroligService,
+            fagsakLåsingRepository = fagsakLåsingRepository,
         )
 
     @Nested
@@ -129,6 +131,7 @@ class FagsakServiceTest {
             every { vedtaksperiodeService.hentUtbetalingsperioder(sisteBehandlingSomErVedtatt) } returns listOf(utbetalingsperiode)
             every { behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsak.id) } returns listOf(visningsbehandling1, visningsbehandling2)
             every { behandlingService.hentMigreringsdatoPåFagsak(fagsak.id) } returns null
+            every { fagsakLåsingRepository.finnAktivFagsakLåsing(fagsak.id) } returns null
 
             // Act
             val restMinimalFagsak = fagsakService.lagMinimalFagsakDto(fagsak.id)
