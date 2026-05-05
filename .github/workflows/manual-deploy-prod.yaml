@@ -1,4 +1,4 @@
-name: Manual deploy to prod (from main)
+name: Manual deploy to prod
 on:
   workflow_dispatch:
     inputs:
