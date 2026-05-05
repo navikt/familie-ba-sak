@@ -1,1 +1,1 @@
-ALTER TABLE fagsak ADD COLUMN laast_tidspunkt TIMESTAMP(3) NULL;
+ALTER TABLE fagsak ADD COLUMN IF NOT EXISTS laast_tidspunkt TIMESTAMP(3) NULL;
