@@ -76,7 +76,7 @@ class BehandlingService(
 
         if (fagsak.status == FagsakStatus.LÅST) {
             throw FunksjonellFeil(
-                melding = "Kan ikke opprette behandling på låst fagsak ${fagsak.id}.",
+                melding = "Kan ikke opprette behandling på en låst fagsak ${fagsak.id}.",
                 frontendFeilmelding = "Fagsaken er låst og det er ikke mulig å opprette nye behandlinger.",
             )
         }

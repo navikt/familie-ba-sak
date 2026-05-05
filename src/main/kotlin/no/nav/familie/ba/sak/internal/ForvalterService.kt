@@ -36,7 +36,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 @Service
 class ForvalterService(
@@ -245,48 +244,6 @@ class ForvalterService(
         fagsakRepository.save(fagsak)
 
         logger.info("Endret status fra LØPENDE til OPPRETTET for fagsak $fagsakId.")
-    }
-
-    @Transactional
-    fun låsFagsak(fagsakId: Long) {
-        val fagsak =
-            fagsakRepository.finnFagsak(fagsakId)
-                ?: throw Feil("Finner ikke fagsak med id $fagsakId")
-
-        if (fagsak.status == FagsakStatus.LÅST) {
-            throw Feil("Fagsak $fagsakId er allerede låst.")
-        }
-
-        val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsak.id)
-        if (behandlinger.any { it.status != BehandlingStatus.AVSLUTTET }) {
-            throw Feil("Fagsak $fagsakId har behandlinger som ikke er avsluttet og kan ikke låses.")
-        }
-
-        fagsak.status = FagsakStatus.LÅST
-        fagsak.låstTidspunkt = LocalDateTime.now()
-        fagsakRepository.save(fagsak)
-
-        logger.info("Låste fagsak $fagsakId.")
-    }
-
-    @Transactional
-    fun låsOppFagsak(
-        fagsakId: Long,
-        begrunnelse: String,
-    ) {
-        val fagsak =
-            fagsakRepository.finnFagsak(fagsakId)
-                ?: throw Feil("Finner ikke fagsak med id $fagsakId")
-
-        if (fagsak.status != FagsakStatus.LÅST) {
-            throw Feil("Fagsak $fagsakId har status ${fagsak.status}. Kan bare låse opp fagsaker som er LÅST.")
-        }
-
-        fagsak.status = FagsakStatus.AVSLUTTET
-        fagsak.låstTidspunkt = null
-        fagsakRepository.save(fagsak)
-
-        logger.info("Låste opp fagsak $fagsakId. Begrunnelse: $begrunnelse")
     }
 }
 

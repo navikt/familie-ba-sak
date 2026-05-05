@@ -680,41 +680,6 @@ class ForvalterController(
         return ResponseEntity.ok("Endret status på fagsak $fagsakId fra løpende til opprettet.")
     }
 
-    @PatchMapping("/fagsak/{fagsakId}/laas")
-    @Operation(
-        summary = "Låser en fagsak. Brukes for testing av kasseringsregler.",
-        description = "Setter fagsakstatus til LÅST og setter låstTidspunkt til nåværende tidspunkt. Krever at alle behandlinger er avsluttet.",
-    )
-    fun låsFagsak(
-        @PathVariable fagsakId: Long,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Låse fagsak",
-        )
-
-        forvalterService.låsFagsak(fagsakId)
-        return ResponseEntity.ok("Låste fagsak $fagsakId.")
-    }
-
-    @PatchMapping("/fagsak/{fagsakId}/laas-opp")
-    @Operation(
-        summary = "Låser opp en låst fagsak.",
-        description = "Brukes for å reversere en utilsiktet låsing. Setter status tilbake til AVSLUTTET og fjerner låstTidspunkt.",
-    )
-    fun låsOppFagsak(
-        @PathVariable fagsakId: Long,
-        @RequestBody begrunnelse: String,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Låse opp fagsak",
-        )
-
-        forvalterService.låsOppFagsak(fagsakId, begrunnelse)
-        return ResponseEntity.ok("Låste opp fagsak $fagsakId.")
-    }
-
     @PostMapping("/opprett-ferdigstill-behandling-task")
     @Operation(
         summary = "Oppretter en ferdigstill behandling task for en behandling",
