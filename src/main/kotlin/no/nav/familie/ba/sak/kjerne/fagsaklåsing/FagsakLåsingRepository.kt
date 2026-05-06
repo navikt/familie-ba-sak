@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.fagsak
+package no.nav.familie.ba.sak.kjerne.fagsaklåsing
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -14,7 +14,7 @@ interface FagsakLåsingRepository : JpaRepository<FagsakLåsing, Long> {
           AND fl.aktiv = true
         """,
     )
-    fun finnAktivFagsakLåsing(
+    fun finnAktivLåsForFagsak(
         @Param("fagsakId") fagsakId: Long,
     ): FagsakLåsing?
 }

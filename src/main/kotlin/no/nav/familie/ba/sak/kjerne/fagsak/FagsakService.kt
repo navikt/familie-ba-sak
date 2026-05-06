@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsingRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -264,7 +265,7 @@ class FagsakService(
             finnesStrengtFortroligPersonIFagsak = strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak),
             låstTidspunkt =
                 if (fagsak.status == FagsakStatus.LÅST) {
-                    fagsakLåsingRepository.finnAktivFagsakLåsing(fagsak.id)?.tidspunkt
+                    fagsakLåsingRepository.finnAktivLåsForFagsak(fagsak.id)?.tidspunkt
                 } else {
                     null
                 },

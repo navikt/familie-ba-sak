@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.fagsak
+package no.nav.familie.ba.sak.kjerne.fagsaklåsing
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import java.time.LocalDateTime
 
 @Entity(name = "FagsakLaasing")

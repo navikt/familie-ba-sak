@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS fagsak_laasing
     id            BIGINT       NOT NULL PRIMARY KEY,
     fk_fagsak_id  BIGINT       NOT NULL REFERENCES fagsak (id),
     tidspunkt     TIMESTAMP(3) NOT NULL,
-    hendelse      VARCHAR      NOT NULL,
+    hendelse      VARCHAR      NOT NULL CHECK (hendelse IN ('LÅST', 'LÅST_OPP')),
     begrunnelse   TEXT         NOT NULL,
     aktiv         BOOLEAN      NOT NULL,
     versjon       BIGINT       NOT NULL DEFAULT 0,
