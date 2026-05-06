@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.ArbeidsfordelingPåBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.ekstern.restDomene.BaseFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.ekstern.restDomene.KompetanseDto
@@ -38,6 +39,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService.Companion.BEGRUNNELSE_STRENGT_FORTROLIG
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService.Companion.SKJERMET_BARN
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService.Companion.SKJERMET_BARN_FØDSELSDATO
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
@@ -103,7 +105,7 @@ class StrengtFortroligServiceTest {
                 )
 
             // Act
-            val resultat = strengtFortroligService.anonymiserStrengtFortroligBarn(utvidetBehandlingDto, fagsak)
+            val resultat = strengtFortroligService.anonymiserUtvidetBehandlingDto(utvidetBehandlingDto, fagsak)
 
             // Assert
             assertThat(resultat).isEqualTo(utvidetBehandlingDto)
@@ -145,7 +147,7 @@ class StrengtFortroligServiceTest {
                 )
 
             // Act
-            val resultat = strengtFortroligService.anonymiserStrengtFortroligBarn(utvidetBehandlingDto, fagsak)
+            val resultat = strengtFortroligService.anonymiserUtvidetBehandlingDto(utvidetBehandlingDto, fagsak)
 
             // Assert
             val skjermetBarn = resultat.personer.find { it.type == PersonType.BARN }!!
@@ -471,6 +473,163 @@ class StrengtFortroligServiceTest {
             // Assert
             assertThat(resultat).isEqualTo(perioder)
         }
+    }
+
+    @Nested
+    inner class AnonymiserFagsakDtoTest {
+        @Test
+        fun `skal anonymisere skjermet barn i utbetalingsperiodedetaljer`() {
+            // Arrange
+            mockSaksbehandlerHarTilgangTilSøkerMenIkkeBarn()
+            mockBarnUtenLøpendeAndeler()
+
+            val søkerIdent = søkerAktør.aktivFødselsnummer()
+            val barnIdent = barnAktør.aktivFødselsnummer()
+
+            val baseFagsakDto =
+                lagBaseFagsakDto(
+                    listOf(
+                        lagUtbetalingsperiode(
+                            listOf(
+                                lagUtbetalingsperiodeDetalj(barnIdent, PersonType.BARN, 2012),
+                                lagUtbetalingsperiodeDetalj(søkerIdent, PersonType.SØKER, 1740),
+                            ),
+                        ),
+                    ),
+                )
+
+            // Act
+            val resultat = strengtFortroligService.anonymiserFagsakDto(baseFagsakDto, fagsak)
+
+            // Assert
+            val anonymisertPeriode = resultat.gjeldendeUtbetalingsperioder.single()
+            assertThat(anonymisertPeriode.utbetalingsperiodeDetaljer).hasSize(2)
+
+            val anonymisertBarn = anonymisertPeriode.utbetalingsperiodeDetaljer.first()
+            assertThat(anonymisertBarn.person.personIdent).isEqualTo("$SKJERMET_BARN 1")
+            assertThat(anonymisertBarn.person.navn).isEqualTo("$SKJERMET_BARN 1")
+            assertThat(anonymisertBarn.person.fødselsdato).isEqualTo(SKJERMET_BARN_FØDSELSDATO)
+            assertThat(anonymisertBarn.person.skjermesForBruker).isTrue()
+            assertThat(anonymisertBarn.person.registerhistorikk).isNull()
+
+            val uendretSøker = anonymisertPeriode.utbetalingsperiodeDetaljer.last()
+            assertThat(uendretSøker.person.personIdent).isEqualTo(søkerIdent)
+        }
+
+        @Test
+        fun `skal anonymisere når perioden kun inneholder skjermet barn`() {
+            // Arrange
+            mockSaksbehandlerHarTilgangTilSøkerMenIkkeBarn()
+            mockBarnUtenLøpendeAndeler()
+
+            val barnIdent = barnAktør.aktivFødselsnummer()
+
+            val baseFagsakDto =
+                lagBaseFagsakDto(
+                    listOf(
+                        lagUtbetalingsperiode(
+                            listOf(lagUtbetalingsperiodeDetalj(barnIdent, PersonType.BARN, 2012)),
+                        ),
+                    ),
+                )
+
+            // Act
+            val resultat = strengtFortroligService.anonymiserFagsakDto(baseFagsakDto, fagsak)
+
+            // Assert
+            val anonymisertBarn =
+                resultat.gjeldendeUtbetalingsperioder
+                    .single()
+                    .utbetalingsperiodeDetaljer
+                    .single()
+            assertThat(anonymisertBarn.person.personIdent).isEqualTo("$SKJERMET_BARN 1")
+            assertThat(anonymisertBarn.person.skjermesForBruker).isTrue()
+        }
+
+        @Test
+        fun `skal ikke anonymisere noe når saksbehandler har tilgang til alle personer`() {
+            // Arrange
+            mockSaksbehandlerHarTilgangTilAllePersoner()
+
+            val barnIdent = barnAktør.aktivFødselsnummer()
+
+            val baseFagsakDto =
+                lagBaseFagsakDto(
+                    listOf(
+                        lagUtbetalingsperiode(
+                            listOf(lagUtbetalingsperiodeDetalj(barnIdent, PersonType.BARN, 2012)),
+                        ),
+                    ),
+                )
+
+            // Act
+            val resultat = strengtFortroligService.anonymiserFagsakDto(baseFagsakDto, fagsak)
+
+            // Assert
+            assertThat(resultat).isEqualTo(baseFagsakDto)
+        }
+
+        @Test
+        fun `skal ikke anonymisere noe for systemkontekst`() {
+            // Arrange
+            clearBrukerContext()
+            mockBrukerContext(SikkerhetContext.SYSTEM_FORKORTELSE)
+
+            val barnIdent = barnAktør.aktivFødselsnummer()
+
+            val baseFagsakDto =
+                lagBaseFagsakDto(
+                    listOf(
+                        lagUtbetalingsperiode(
+                            listOf(lagUtbetalingsperiodeDetalj(barnIdent, PersonType.BARN, 2012)),
+                        ),
+                    ),
+                )
+
+            // Act
+            val resultat = strengtFortroligService.anonymiserFagsakDto(baseFagsakDto, fagsak)
+
+            // Assert
+            assertThat(resultat).isEqualTo(baseFagsakDto)
+        }
+
+        private fun lagBaseFagsakDto(utbetalingsperioder: List<Utbetalingsperiode>) =
+            BaseFagsakDto(
+                opprettetTidspunkt = LocalDateTime.now(),
+                id = fagsak.id,
+                fagsakeier = søkerAktør.aktivFødselsnummer(),
+                søkerFødselsnummer = søkerAktør.aktivFødselsnummer(),
+                status = no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus.LØPENDE,
+                underBehandling = false,
+                løpendeKategori = null,
+                løpendeUnderkategori = null,
+                gjeldendeUtbetalingsperioder = utbetalingsperioder,
+                finnesStrengtFortroligPersonIFagsak = true,
+            )
+
+        private fun lagUtbetalingsperiode(detaljer: List<no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj>) =
+            Utbetalingsperiode(
+                periodeFom = LocalDate.of(2023, 6, 1),
+                periodeTom = LocalDate.of(2023, 6, 30),
+                vedtaksperiodetype = no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.UTBETALING,
+                utbetalingsperiodeDetaljer = detaljer,
+                ytelseTyper = listOf(no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD),
+                antallBarn = detaljer.count { it.person.type == PersonType.BARN },
+                utbetaltPerMnd = detaljer.sumOf { it.utbetaltPerMnd },
+            )
+
+        private fun lagUtbetalingsperiodeDetalj(
+            personIdent: String,
+            type: PersonType,
+            utbetalt: Int,
+        ) = no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj(
+            person = lagPersonDto(personIdent, type = type),
+            ytelseType = no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD,
+            utbetaltPerMnd = utbetalt,
+            erPåvirketAvEndring = false,
+            endringsårsak = null,
+            prosent = java.math.BigDecimal.valueOf(100),
+        )
     }
 
     private fun lagUtvidetVedtaksperiodeDto(

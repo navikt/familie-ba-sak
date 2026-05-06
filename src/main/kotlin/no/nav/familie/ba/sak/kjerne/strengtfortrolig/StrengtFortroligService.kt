@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.strengtfortrolig
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.ekstern.restDomene.BaseFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
@@ -13,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelserDto
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
@@ -31,7 +33,7 @@ class StrengtFortroligService(
      * Anonymiserer strengt fortrolige barn i UtvidetBehandlingDto dersom saksbehandler
      * mangler tilgang til kode6/7 men barn ikke lenger har løpende andeler.
      */
-    fun anonymiserStrengtFortroligBarn(
+    fun anonymiserUtvidetBehandlingDto(
         utvidetBehandlingDto: UtvidetBehandlingDto,
         fagsak: Fagsak,
     ): UtvidetBehandlingDto {
@@ -169,6 +171,53 @@ class StrengtFortroligService(
         return vedtaksperioder.filterNot { periode ->
             periode.utbetalingsperiodeDetaljer.any { it.person.personIdent in skjermedeIdenter }
         }
+    }
+
+    /**
+     * Anonymiserer skjermede barn i utbetalingsperioder for saksoversikten.
+     * Erstatter persondata med "SKJERMET BARN N" for barn med strengt fortrolig adressekode
+     * uten løpende andeler som saksbehandler ikke har tilgang til.
+     */
+    fun anonymiserFagsakDto(
+        baseFagsakDto: BaseFagsakDto,
+        fagsak: Fagsak,
+    ): BaseFagsakDto {
+        val skjermedeIdenter =
+            hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak).takeIf { it.isNotEmpty() } ?: return baseFagsakDto
+
+        val anonymiserteNavnForIdent =
+            skjermedeIdenter
+                .sorted()
+                .mapIndexed { index, ident ->
+                    ident to "$SKJERMET_BARN ${index + 1}"
+                }.toMap()
+
+        val anonymiserteUtbetalingsperioder =
+            baseFagsakDto.gjeldendeUtbetalingsperioder.map { periode ->
+                periode.copy(
+                    utbetalingsperiodeDetaljer =
+                        periode.utbetalingsperiodeDetaljer.map { detalj ->
+                            detalj.person.personIdent.anonymiserHvisSkjermet(anonymiserteNavnForIdent)?.let {
+                                detalj.copy(person = detalj.person.anonymiser(it))
+                            } ?: detalj
+                        },
+                )
+            }
+
+        return BaseFagsakDto(
+            opprettetTidspunkt = baseFagsakDto.opprettetTidspunkt,
+            id = baseFagsakDto.id,
+            fagsakeier = baseFagsakDto.fagsakeier,
+            søkerFødselsnummer = baseFagsakDto.søkerFødselsnummer,
+            status = baseFagsakDto.status,
+            underBehandling = baseFagsakDto.underBehandling,
+            løpendeKategori = baseFagsakDto.løpendeKategori,
+            løpendeUnderkategori = baseFagsakDto.løpendeUnderkategori,
+            gjeldendeUtbetalingsperioder = anonymiserteUtbetalingsperioder,
+            fagsakType = baseFagsakDto.fagsakType,
+            institusjon = baseFagsakDto.institusjon,
+            finnesStrengtFortroligPersonIFagsak = baseFagsakDto.finnesStrengtFortroligPersonIFagsak,
+        )
     }
 
     /**
