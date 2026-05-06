@@ -21,6 +21,7 @@ open class BaseFagsakDto(
     open val fagsakType: FagsakType = FagsakType.NORMAL,
     open val institusjon: InstitusjonDto? = null,
     open val finnesStrengtFortroligPersonIFagsak: Boolean,
+    open val låstTidspunkt: LocalDateTime? = null,
 )
 
 data class FagsakDto(
@@ -36,6 +37,7 @@ data class FagsakDto(
     val behandlinger: List<UtvidetBehandlingDto>,
     override val fagsakType: FagsakType = FagsakType.NORMAL,
     override val finnesStrengtFortroligPersonIFagsak: Boolean,
+    override val låstTidspunkt: LocalDateTime? = null,
 ) : BaseFagsakDto(
         opprettetTidspunkt = opprettetTidspunkt,
         id = id,
@@ -48,6 +50,7 @@ data class FagsakDto(
         gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
         fagsakType = fagsakType,
         finnesStrengtFortroligPersonIFagsak = finnesStrengtFortroligPersonIFagsak,
+        låstTidspunkt = låstTidspunkt,
     )
 
 fun BaseFagsakDto.tilFagsakDto(
@@ -65,6 +68,7 @@ fun BaseFagsakDto.tilFagsakDto(
     behandlinger = utvidetBehandlingerDto,
     fagsakType = this.fagsakType,
     finnesStrengtFortroligPersonIFagsak = this.finnesStrengtFortroligPersonIFagsak,
+    låstTidspunkt = this.låstTidspunkt,
 )
 
 data class MinimalFagsakDto(
@@ -82,6 +86,7 @@ data class MinimalFagsakDto(
     override val fagsakType: FagsakType,
     override val institusjon: InstitusjonDto?,
     override val finnesStrengtFortroligPersonIFagsak: Boolean,
+    override val låstTidspunkt: LocalDateTime? = null,
 ) : BaseFagsakDto(
         opprettetTidspunkt = opprettetTidspunkt,
         id = id,
@@ -95,6 +100,7 @@ data class MinimalFagsakDto(
         fagsakType = fagsakType,
         institusjon = institusjon,
         finnesStrengtFortroligPersonIFagsak = finnesStrengtFortroligPersonIFagsak,
+        låstTidspunkt = låstTidspunkt,
     )
 
 fun BaseFagsakDto.tilMinimalFagsakDto(
@@ -115,4 +121,5 @@ fun BaseFagsakDto.tilMinimalFagsakDto(
     fagsakType = this.fagsakType,
     institusjon = this.institusjon,
     finnesStrengtFortroligPersonIFagsak = this.finnesStrengtFortroligPersonIFagsak,
+    låstTidspunkt = this.låstTidspunkt,
 )
