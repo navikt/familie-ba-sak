@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelserDto
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
@@ -40,12 +39,7 @@ class StrengtFortroligService(
         val barnMedStrengtFortroligKodeSomSkalAnonymiseres =
             hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak).takeIf { it.isNotEmpty() } ?: return utvidetBehandlingDto
 
-        val anonymiserteNavnForIdent =
-            barnMedStrengtFortroligKodeSomSkalAnonymiseres
-                .sorted()
-                .mapIndexed { index, ident ->
-                    ident to "$SKJERMET_BARN ${index + 1}"
-                }.toMap()
+        val anonymiserteNavnForIdent = byggAnonymiserteNavn(barnMedStrengtFortroligKodeSomSkalAnonymiseres)
 
         return utvidetBehandlingDto.copy(
             personer =
@@ -173,11 +167,6 @@ class StrengtFortroligService(
         }
     }
 
-    /**
-     * Anonymiserer skjermede barn i utbetalingsperioder for saksoversikten.
-     * Erstatter persondata med "SKJERMET BARN N" for barn med strengt fortrolig adressekode
-     * uten løpende andeler som saksbehandler ikke har tilgang til.
-     */
     fun anonymiserFagsakDto(
         baseFagsakDto: BaseFagsakDto,
         fagsak: Fagsak,
@@ -185,12 +174,7 @@ class StrengtFortroligService(
         val skjermedeIdenter =
             hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak).takeIf { it.isNotEmpty() } ?: return baseFagsakDto
 
-        val anonymiserteNavnForIdent =
-            skjermedeIdenter
-                .sorted()
-                .mapIndexed { index, ident ->
-                    ident to "$SKJERMET_BARN ${index + 1}"
-                }.toMap()
+        val anonymiserteNavnForIdent = byggAnonymiserteNavn(skjermedeIdenter)
 
         val anonymiserteUtbetalingsperioder =
             baseFagsakDto.gjeldendeUtbetalingsperioder.map { periode ->
@@ -302,6 +286,13 @@ class StrengtFortroligService(
         familieIntegrasjonerTilgangskontrollService
             .sjekkTilgangTilPersoner(personIdenter)
             .map { it.value }
+
+    private fun byggAnonymiserteNavn(skjermedeIdenter: Set<String>): Map<String, String> =
+        skjermedeIdenter
+            .sorted()
+            .mapIndexed { index, ident ->
+                ident to "$SKJERMET_BARN ${index + 1}"
+            }.toMap()
 
     private fun PersonDto.anonymiser(anonymisertNavn: String) =
         copy(
