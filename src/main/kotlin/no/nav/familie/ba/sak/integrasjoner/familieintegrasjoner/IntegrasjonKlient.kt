@@ -488,7 +488,7 @@ class IntegrasjonKlient(
     }
 
     fun avsluttSak(request: AvsluttSakRequest) {
-        val uri = URI.create("$integrasjonUri/arkiv/v2/avsluttSak")
+        val uri = URI.create("$integrasjonUri/arkiv/avsluttSak")
 
         kallEksternTjenesteUtenRespons(
             tjeneste = "dokarkiv",
