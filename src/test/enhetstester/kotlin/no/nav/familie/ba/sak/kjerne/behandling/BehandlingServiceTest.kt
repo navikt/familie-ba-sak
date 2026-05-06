@@ -245,7 +245,7 @@ class BehandlingServiceTest {
         }
 
         @Test
-        fun `skal kaste FunksjonellFeil dersom fagsaken er LÅST`() {
+        fun `skal kaste FunksjonellFeil dersom fagsaken er LÅST ved opprettelse av ny behandling`() {
             // Arrange
             val fagsak = lagFagsak(status = FagsakStatus.LÅST)
 
