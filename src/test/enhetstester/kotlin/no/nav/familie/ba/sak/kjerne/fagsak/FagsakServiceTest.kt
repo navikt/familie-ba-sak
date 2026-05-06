@@ -229,6 +229,9 @@ class FagsakServiceTest {
             every { behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsak.id) } returns listOf(visningsbehandling)
             every { behandlingService.hentMigreringsdatoPåFagsak(fagsak.id) } returns null
             every { fagsakLåsingRepository.finnAktivLåsForFagsak(fagsak.id) } returns fagsakLåsing
+            every { strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak) } returns false
+            every { strengtFortroligService.anonymiserFagsakDto(any(), any()) } answers { firstArg() }
+            every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak) } returns emptySet()
 
             // Act
             val restMinimalFagsak = fagsakService.lagMinimalFagsakDto(fagsak.id)
