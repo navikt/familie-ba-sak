@@ -15,9 +15,9 @@ CREATE TABLE IF NOT EXISTS fagsak_laasing
 
 CREATE SEQUENCE IF NOT EXISTS fagsak_laasing_seq INCREMENT BY 50 START WITH 1000000 NO CYCLE;
 
-CREATE INDEX fagsak_laasing_fagsak_id_idx ON fagsak_laasing (fk_fagsak_id);
+CREATE INDEX IF NOT EXISTS fagsak_laasing_fagsak_id_idx ON fagsak_laasing (fk_fagsak_id);
 
 -- En fagsak kan kun ha én aktiv låsing om gangen
-CREATE UNIQUE INDEX fagsak_laasing_aktiv_unik_idx
+CREATE UNIQUE INDEX IF NOT EXISTS fagsak_laasing_aktiv_unik_idx
     ON fagsak_laasing (fk_fagsak_id)
     WHERE aktiv = true;
