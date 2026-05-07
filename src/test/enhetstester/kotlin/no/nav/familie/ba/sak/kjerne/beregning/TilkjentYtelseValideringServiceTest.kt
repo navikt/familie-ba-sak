@@ -207,7 +207,7 @@ class TilkjentYtelseValideringServiceTest {
                         lagAndelTilkjentYtelse(
                             fom = inneværendeMåned().minusYears(4),
                             tom = inneværendeMåned(),
-                            beløp = 2108,
+                            beløp = 1054,
                             person = person1,
                         ),
                         lagAndelTilkjentYtelse(
@@ -228,7 +228,8 @@ class TilkjentYtelseValideringServiceTest {
 
         val aktørerMedUgyldigEtterbetalingsperiode = tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id)
 
-        assertThat(aktørerMedUgyldigEtterbetalingsperiode).isEmpty()
+        assertThat(aktørerMedUgyldigEtterbetalingsperiode.size).isEqualTo(1)
+        assertThat(person1.aktør).isEqualTo(aktørerMedUgyldigEtterbetalingsperiode.single())
     }
 
     @Nested
