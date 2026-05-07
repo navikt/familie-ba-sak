@@ -255,6 +255,7 @@ class CucumberMock(
     val strengtFortroligService =
         mockk<StrengtFortroligService>().also {
             every { it.anonymiserSkjermetBarnIVedtaksperioder(any(), any()) } answers { firstArg() }
+            every { it.anonymiserFagsakDto(any(), any()) } answers { firstArg() }
         }
 
     val vedtaksperiodeService =

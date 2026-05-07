@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.strengtfortrolig
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.ekstern.restDomene.BaseFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
@@ -31,19 +32,14 @@ class StrengtFortroligService(
      * Anonymiserer strengt fortrolige barn i UtvidetBehandlingDto dersom saksbehandler
      * mangler tilgang til kode6/7 men barn ikke lenger har løpende andeler.
      */
-    fun anonymiserStrengtFortroligBarn(
+    fun anonymiserUtvidetBehandlingDto(
         utvidetBehandlingDto: UtvidetBehandlingDto,
         fagsak: Fagsak,
     ): UtvidetBehandlingDto {
         val barnMedStrengtFortroligKodeSomSkalAnonymiseres =
             hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak).takeIf { it.isNotEmpty() } ?: return utvidetBehandlingDto
 
-        val anonymiserteNavnForIdent =
-            barnMedStrengtFortroligKodeSomSkalAnonymiseres
-                .sorted()
-                .mapIndexed { index, ident ->
-                    ident to "$SKJERMET_BARN ${index + 1}"
-                }.toMap()
+        val anonymiserteNavnForIdent = byggAnonymiserteNavn(barnMedStrengtFortroligKodeSomSkalAnonymiseres)
 
         return utvidetBehandlingDto.copy(
             personer =
@@ -171,6 +167,43 @@ class StrengtFortroligService(
         }
     }
 
+    fun anonymiserFagsakDto(
+        baseFagsakDto: BaseFagsakDto,
+        fagsak: Fagsak,
+    ): BaseFagsakDto {
+        val skjermedeIdenter =
+            hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak).takeIf { it.isNotEmpty() } ?: return baseFagsakDto
+
+        val anonymiserteNavnForIdent = byggAnonymiserteNavn(skjermedeIdenter)
+
+        val anonymiserteUtbetalingsperioder =
+            baseFagsakDto.gjeldendeUtbetalingsperioder.map { periode ->
+                periode.copy(
+                    utbetalingsperiodeDetaljer =
+                        periode.utbetalingsperiodeDetaljer.map { detalj ->
+                            detalj.person.personIdent.anonymiserHvisSkjermet(anonymiserteNavnForIdent)?.let {
+                                detalj.copy(person = detalj.person.anonymiser(it))
+                            } ?: detalj
+                        },
+                )
+            }
+
+        return BaseFagsakDto(
+            opprettetTidspunkt = baseFagsakDto.opprettetTidspunkt,
+            id = baseFagsakDto.id,
+            fagsakeier = baseFagsakDto.fagsakeier,
+            søkerFødselsnummer = baseFagsakDto.søkerFødselsnummer,
+            status = baseFagsakDto.status,
+            underBehandling = baseFagsakDto.underBehandling,
+            løpendeKategori = baseFagsakDto.løpendeKategori,
+            løpendeUnderkategori = baseFagsakDto.løpendeUnderkategori,
+            gjeldendeUtbetalingsperioder = anonymiserteUtbetalingsperioder,
+            fagsakType = baseFagsakDto.fagsakType,
+            institusjon = baseFagsakDto.institusjon,
+            finnesStrengtFortroligPersonIFagsak = baseFagsakDto.finnesStrengtFortroligPersonIFagsak,
+        )
+    }
+
     /**
      * Sjekker om de eneste personene saksbehandler mangler tilgang til er skjermede barn uten
      * løpende andeler. Når dette er tilfelle, kan saksbehandler likevel slippe gjennom
@@ -253,6 +286,13 @@ class StrengtFortroligService(
         familieIntegrasjonerTilgangskontrollService
             .sjekkTilgangTilPersoner(personIdenter)
             .map { it.value }
+
+    private fun byggAnonymiserteNavn(skjermedeIdenter: Set<String>): Map<String, String> =
+        skjermedeIdenter
+            .sorted()
+            .mapIndexed { index, ident ->
+                ident to "$SKJERMET_BARN ${index + 1}"
+            }.toMap()
 
     private fun PersonDto.anonymiser(anonymisertNavn: String) =
         copy(

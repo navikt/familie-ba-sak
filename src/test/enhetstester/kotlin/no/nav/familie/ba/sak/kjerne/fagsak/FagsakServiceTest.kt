@@ -58,8 +58,8 @@ class FagsakServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val skjermetBarnSøkerRepository = mockk<SkjermetBarnSøkerRepository>()
-    private val strengtFortroligService = mockk<StrengtFortroligService>(relaxed = true)
     private val fagsakLåsingRepository = mockk<FagsakLåsingRepository>()
+    private val strengtFortroligService = mockk<StrengtFortroligService>()
     private val fagsakService =
         FagsakService(
             fagsakRepository = fagsakRepository,
@@ -135,6 +135,9 @@ class FagsakServiceTest {
             every { vedtaksperiodeService.hentUtbetalingsperioder(sisteBehandlingSomErVedtatt) } returns listOf(utbetalingsperiode)
             every { behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsak.id) } returns listOf(visningsbehandling1, visningsbehandling2)
             every { behandlingService.hentMigreringsdatoPåFagsak(fagsak.id) } returns null
+            every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak) } returns emptySet()
+            every { strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak) } returns false
+            every { strengtFortroligService.anonymiserFagsakDto(any(), any()) } answers { firstArg() }
             every { fagsakLåsingRepository.finnAktivLåsForFagsak(fagsak.id) } returns null
 
             // Act
@@ -226,6 +229,9 @@ class FagsakServiceTest {
             every { behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsak.id) } returns listOf(visningsbehandling)
             every { behandlingService.hentMigreringsdatoPåFagsak(fagsak.id) } returns null
             every { fagsakLåsingRepository.finnAktivLåsForFagsak(fagsak.id) } returns fagsakLåsing
+            every { strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak) } returns false
+            every { strengtFortroligService.anonymiserFagsakDto(any(), any()) } answers { firstArg() }
+            every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak) } returns emptySet()
 
             // Act
             val restMinimalFagsak = fagsakService.lagMinimalFagsakDto(fagsak.id)

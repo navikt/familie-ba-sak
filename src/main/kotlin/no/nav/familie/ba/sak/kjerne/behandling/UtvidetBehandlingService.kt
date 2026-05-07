@@ -197,6 +197,6 @@ class UtvidetBehandlingService(
                 manglendeFinnmarkmerking = samhandlerInfo?.tilManglendeFinnmarkmerkingPerioder(personResultater),
             )
 
-        return strengtFortroligService.anonymiserStrengtFortroligBarn(utvidetBehandlingDto, behandling.fagsak)
+        return strengtFortroligService.anonymiserUtvidetBehandlingDto(utvidetBehandlingDto, behandling.fagsak)
     }
 }
