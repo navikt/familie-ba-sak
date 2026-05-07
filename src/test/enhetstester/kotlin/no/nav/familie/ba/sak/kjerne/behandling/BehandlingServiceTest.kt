@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
@@ -27,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.EksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.logg.BehandlingLoggRequest
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
@@ -34,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -125,7 +128,6 @@ class BehandlingServiceTest {
             every { loggService.opprettBehandlingLogg(any()) } just runs
             every { taskRepository.save(any()) } returnsArgument 0
             every { featureToggleService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
-            every { featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR) } returns true
 
             // Act
             val opprettetBehandling = behandlingService.opprettBehandling(nyBehandling)
@@ -177,7 +179,6 @@ class BehandlingServiceTest {
             every { loggService.opprettBehandlingLogg(any()) } just runs
             every { taskRepository.save(any()) } returnsArgument 0
             every { featureToggleService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
-            every { featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR) } returns true
 
             // Act
             val opprettetBehandling = behandlingService.opprettBehandling(nyBehandling)
@@ -233,7 +234,6 @@ class BehandlingServiceTest {
             every { loggService.opprettBehandlingLogg(capture(behandlingLoggRequestSlot)) } just runs
             every { taskRepository.save(any()) } returnsArgument 0
             every { featureToggleService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
-            every { featureToggleService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR) } returns true
 
             // Act
             behandlingService.opprettBehandling(nyBehandling)
@@ -242,6 +242,26 @@ class BehandlingServiceTest {
             val opprettetLogg = behandlingLoggRequestSlot.captured
 
             assertThat(opprettetLogg.begrunnelse).isEqualTo("Opprettet behandling i test")
+        }
+
+        @Test
+        fun `skal kaste FunksjonellFeil dersom fagsaken er LÅST ved opprettelse av ny behandling`() {
+            // Arrange
+            val fagsak = lagFagsak(status = FagsakStatus.LÅST)
+
+            val nyBehandling =
+                lagNyBehandling(
+                    fagsakId = fagsak.id,
+                    behandlingType = BehandlingType.REVURDERING,
+                    behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+                )
+
+            every { fagsakRepository.finnFagsak(nyBehandling.fagsakId) } returns fagsak
+
+            // Act & Assert
+            assertThatThrownBy { behandlingService.opprettBehandling(nyBehandling) }
+                .isInstanceOf(FunksjonellFeil::class.java)
+                .hasMessageContaining("Kan ikke opprette behandling på en låst fagsak")
         }
 
         @Nested

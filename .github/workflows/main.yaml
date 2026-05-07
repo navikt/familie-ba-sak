@@ -59,6 +59,8 @@ jobs:
   varsle-slack:
     name: Slack-melding ved feil
     if: failure()
+    permissions: {}
     needs: [ build, deploy-dev, deploy-prod ]
-    uses: navikt/familie-baks-gha-workflows/.github/workflows/notify-slack.yaml@main # ratchet:exclude
-    secrets: inherit
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/notify-failed-workflow.yaml@main # ratchet:exclude
+    secrets:
+      BAKS_DEPLOYMENTS_SLACK_WEBHOOK: ${{ secrets.BAKS_DEPLOYMENTS_SLACK_WEBHOOK }}
