@@ -38,15 +38,7 @@ data class BegrunnelseData(
     override val apiNavn: String,
     val gjelderSoker: Boolean,
     val barnasFodselsdatoer: String,
-    @Deprecated("Brukes ikke. Kan slettes når vi har fjernet gammel begrunnelseskode.")
-    val fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling: String = "",
-    @Deprecated("Brukes ikke. Kan slettes når vi har fjernet gammel begrunnelseskode.")
-    val fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling: String = "",
     val antallBarn: Int,
-    @Deprecated("Brukes ikke. Kan slettes når vi har fjernet gammel begrunnelseskode.")
-    val antallBarnOppfyllerTriggereOgHarUtbetaling: Int = 0,
-    @Deprecated("Brukes ikke. Kan slettes når vi har fjernet gammel begrunnelseskode.")
-    val antallBarnOppfyllerTriggereOgHarNullutbetaling: Int = 0,
     val maanedOgAarBegrunnelsenGjelderFor: String?,
     val maalform: String,
     val belop: String,

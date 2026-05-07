@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -22,6 +23,7 @@ class TilkjentYtelseValideringService(
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
+    private val strengtFortroligService: StrengtFortroligService,
 ) {
     fun validerAtIngenUtbetalingerOverstiger100Prosent(behandling: Behandling) {
         if (behandling.erMigrering() || behandling.erTekniskEndring() || behandling.erSatsendring() || behandling.erMånedligValutajustering()) return
@@ -121,11 +123,18 @@ class TilkjentYtelseValideringService(
         val søknadsdato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id) ?: behandling.opprettetTidspunkt
         val gyldigEtterbetalingFom = hentGyldigEtterbetaling3MndFom(søknadsdato.toLocalDate())
 
-        return finnAktørIderMedUgyldigEtterbetalingsperiode(
-            forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse ?: emptyList(),
-            andelerTilkjentYtelse = tilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList(),
-            gyldigEtterbetalingFom = gyldigEtterbetalingFom,
-        )
+        val skjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil = strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(behandling.fagsak)
+
+        val aktørIderMedUgyldigEtterbetalingsperiode =
+            finnAktørIderMedUgyldigEtterbetalingsperiode(
+                forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse ?: emptyList(),
+                andelerTilkjentYtelse = tilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList(),
+                gyldigEtterbetalingFom = gyldigEtterbetalingFom,
+            )
+
+        return aktørIderMedUgyldigEtterbetalingsperiode.filterNot {
+            it.aktivFødselsnummer() in skjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil
+        }
     }
 
     companion object {
