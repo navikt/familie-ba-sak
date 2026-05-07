@@ -75,6 +75,7 @@ enum class FagsakStatus {
     OPPRETTET,
     LØPENDE, // Har minst én behandling gjeldende for fremtidig utbetaling
     AVSLUTTET,
+    LÅST, // Fagsaken er låst for videre saksbehandling og er meldt til Joark for kassering iht. arkivloven
 }
 
 enum class FagsakType {

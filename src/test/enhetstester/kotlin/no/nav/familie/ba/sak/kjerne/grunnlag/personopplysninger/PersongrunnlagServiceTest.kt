@@ -7,8 +7,6 @@ import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -26,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
-import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -48,9 +45,7 @@ class PersongrunnlagServiceTest {
     private val loggService = mockk<LoggService>()
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val kodeverkService = mockk<KodeverkService>()
-    private val featureToggleService = mockk<FeatureToggleService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val falskIdentitetService = mockk<FalskIdentitetService>()
 
     private val persongrunnlagService =
         spyk(
@@ -67,15 +62,12 @@ class PersongrunnlagServiceTest {
                 arbeidsforholdService = mockk(),
                 vilkårsvurderingService = vilkårsvurderingService,
                 kodeverkService = kodeverkService,
-                featureToggleService = featureToggleService,
-                falskIdentitetService = falskIdentitetService,
                 strengtFortroligService = mockk(relaxed = true),
             ),
         )
 
     @BeforeEach
     fun setup() {
-        every { featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER) } returns true
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns null
     }
 
@@ -158,9 +150,6 @@ class PersongrunnlagServiceTest {
                 every {
                     personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnet.aktør)
                 } returns PersonInfo(barnet.fødselsdato, barnet.navn, barnet.kjønn)
-
-                every { featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER) } returns true
-                every { featureToggleService.isEnabled(FeatureToggle.HARDKODET_EEAFREG_STATSBORGERSKAP) } returns true
 
                 persongrunnlagService
                     .hentOgLagreSøkerOgBarnINyttGrunnlag(
@@ -300,7 +289,6 @@ class PersongrunnlagServiceTest {
                 PersonInfo(mellomBarnForrigeBehandling.fødselsdato)
 
             every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER) } returns true
 
             // Act
             val personopplysningGrunnlag =
@@ -352,8 +340,6 @@ class PersongrunnlagServiceTest {
                 PersonInfo(mellomBarnInneværendeBehandling.fødselsdato)
 
             every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
-
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER) } returns true
 
             // Act
             val personopplysningGrunnlag =
@@ -422,7 +408,6 @@ class PersongrunnlagServiceTest {
 
             every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
             every { kodeverkService.hentPoststed(any()) } returns "Oslo"
-            every { featureToggleService.isEnabled(FeatureToggle.FILTRERE_REGISTEROPPLYSNINGER) } returns true
 
             // Act
             val personopplysningGrunnlag =

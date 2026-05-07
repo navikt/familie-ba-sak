@@ -26,3 +26,11 @@ jobs:
       cluster: ${{ inputs.environment }}-gcp
       resource: .nais/app-${{ inputs.environment }}.yaml
     secrets: inherit
+  notify-audit:
+    name: Notify if audited deploy
+    if: github.ref != 'refs/heads/main' && inputs.environment == 'prod'
+    permissions: {}
+    needs: deploy-with-existing-image
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/notify-audited-deploy.yaml@main # ratchet:exclude
+    secrets:
+      BAKS_AUDIT_ALERTS_SLACK_WEBHOOK: ${{ secrets.BAKS_AUDIT_ALERTS_SLACK_WEBHOOK }}

@@ -130,6 +130,6 @@ class BehandlingsresultatSteg(
     override fun stegType(): StegType = StegType.BEHANDLINGSRESULTAT
 
     companion object {
-        val logger = LoggerFactory.getLogger(this::class.java)!!
+        val logger = LoggerFactory.getLogger(this::class.java)
     }
 }

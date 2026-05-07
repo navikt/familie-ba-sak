@@ -24,6 +24,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsHendelse
+import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsing
+import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsingRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -38,6 +41,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class FagsakServiceTest {
     private val fagsakRepository = mockk<FagsakRepository>()
@@ -55,6 +59,7 @@ class FagsakServiceTest {
     private val featureToggleService = mockk<FeatureToggleService>()
     private val skjermetBarnSøkerRepository = mockk<SkjermetBarnSøkerRepository>()
     private val strengtFortroligService = mockk<StrengtFortroligService>(relaxed = true)
+    private val fagsakLåsingRepository = mockk<FagsakLåsingRepository>()
     private val fagsakService =
         FagsakService(
             fagsakRepository = fagsakRepository,
@@ -72,6 +77,7 @@ class FagsakServiceTest {
             skjermetBarnSøkerRepository = skjermetBarnSøkerRepository,
             featureToggleService = featureToggleService,
             strengtFortroligService = strengtFortroligService,
+            fagsakLåsingRepository = fagsakLåsingRepository,
         )
 
     @Nested
@@ -129,6 +135,7 @@ class FagsakServiceTest {
             every { vedtaksperiodeService.hentUtbetalingsperioder(sisteBehandlingSomErVedtatt) } returns listOf(utbetalingsperiode)
             every { behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsak.id) } returns listOf(visningsbehandling1, visningsbehandling2)
             every { behandlingService.hentMigreringsdatoPåFagsak(fagsak.id) } returns null
+            every { fagsakLåsingRepository.finnAktivLåsForFagsak(fagsak.id) } returns null
 
             // Act
             val restMinimalFagsak = fagsakService.lagMinimalFagsakDto(fagsak.id)
@@ -174,6 +181,57 @@ class FagsakServiceTest {
                 assertThat(it.resultat).isEqualTo(visningsbehandling2.resultat)
                 assertThat(it.vedtaksdato).isEqualTo(visningsbehandling2.vedtaksdato)
             }
+        }
+
+        @Test
+        fun `skal populere låstTidspunkt når fagsaken har en aktiv lås`() {
+            // Arrange
+            val fagsak = lagFagsak(status = FagsakStatus.LÅST)
+            val låstTidspunkt = LocalDateTime.of(2025, 6, 15, 10, 30, 0)
+            val fagsakLåsing =
+                FagsakLåsing(
+                    id = 1L,
+                    fagsak = fagsak,
+                    tidspunkt = låstTidspunkt,
+                    hendelse = FagsakLåsHendelse.LÅST,
+                    begrunnelse = "Kassering iht. arkivloven",
+                    aktiv = true,
+                )
+
+            val visningsbehandling =
+                lagVisningsbehandling(
+                    behandlingId = 1L,
+                    status = BehandlingStatus.AVSLUTTET,
+                    resultat = Behandlingsresultat.INNVILGET,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    opprettetÅrsak = BehandlingÅrsak.SØKNAD,
+                    aktiv = false,
+                )
+
+            val sisteBehandlingSomErVedtatt =
+                lagBehandling(
+                    fagsak = fagsak,
+                    id = visningsbehandling.behandlingId,
+                    status = BehandlingStatus.AVSLUTTET,
+                    resultat = Behandlingsresultat.INNVILGET,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    årsak = BehandlingÅrsak.SØKNAD,
+                    aktiv = false,
+                )
+
+            every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
+            every { behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id) } returns null
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteBehandlingSomErVedtatt
+            every { vedtaksperiodeService.hentUtbetalingsperioder(sisteBehandlingSomErVedtatt) } returns emptyList()
+            every { behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsak.id) } returns listOf(visningsbehandling)
+            every { behandlingService.hentMigreringsdatoPåFagsak(fagsak.id) } returns null
+            every { fagsakLåsingRepository.finnAktivLåsForFagsak(fagsak.id) } returns fagsakLåsing
+
+            // Act
+            val restMinimalFagsak = fagsakService.lagMinimalFagsakDto(fagsak.id)
+
+            // Assert
+            assertThat(restMinimalFagsak.låstTidspunkt).isEqualTo(låstTidspunkt)
         }
     }
 
