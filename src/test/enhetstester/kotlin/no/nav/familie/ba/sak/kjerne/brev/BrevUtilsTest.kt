@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.rangeTo
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅrMedium
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -22,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
@@ -35,8 +37,11 @@ import java.time.YearMonth
 internal class BrevUtilsTest {
     @Test
     fun `hent dokumenttittel dersom denne skal overstyres for behandlingen`() {
-        assertNull(hentOverstyrtDokumenttittel(lagBehandling().copy(type = BehandlingType.FØRSTEGANGSBEHANDLING)))
+        // Arrange
         val revurdering = lagBehandling().copy(type = BehandlingType.REVURDERING)
+
+        // Assert
+        assertNull(hentOverstyrtDokumenttittel(lagBehandling().copy(type = BehandlingType.FØRSTEGANGSBEHANDLING)))
         assertNull(hentOverstyrtDokumenttittel(revurdering))
 
         Assertions.assertEquals(
@@ -56,6 +61,7 @@ internal class BrevUtilsTest {
 
     @Test
     fun `Skal gi riktig dato for opphørstester`() {
+        // Arrange
         val sisteFom = LocalDate.now().minusMonths(2)
 
         val opphørsperioder =
@@ -77,13 +83,15 @@ internal class BrevUtilsTest {
                 ),
             )
 
+        // Act & Assert
         Assertions.assertEquals(sisteFom.tilMånedÅr(), hentVirkningstidspunktForDødsfallbrev(opphørsperioder, 0L))
     }
 
     @Test
     fun `hentUtbetalingerPerMndEøs - Skal gi utbetalingsinfo for alle måneder etter endringstidspunktet for ett barn hvor søker har utvidet og småbarnstillegg`() {
-        val søker = randomAktør()
-        val barn = randomAktør()
+        // Arrange
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 6, 15))
 
         val endringstidspunkt = LocalDate.now().minusMonths(7)
 
@@ -94,92 +102,93 @@ internal class BrevUtilsTest {
                     fom = LocalDate.now().minusMonths(12).toYearMonth(),
                     tom = LocalDate.now().toYearMonth(),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                    aktør = søker,
+                    aktør = søker.aktør,
                     kalkulertUtbetalingsbeløp = sats(YtelseType.UTVIDET_BARNETRYGD),
                 ),
                 lagAndelTilkjentYtelse(
                     fom = LocalDate.now().minusMonths(12).toYearMonth(),
                     tom = LocalDate.now().toYearMonth(),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
-                    aktør = søker,
+                    aktør = søker.aktør,
                     kalkulertUtbetalingsbeløp = sats(YtelseType.SMÅBARNSTILLEGG),
                 ),
                 // Barn har barnetrygd de siste 12 månedene, og fra og med 7 måneder siden har vi kjørt månedlig valutajustering.
                 lagAndelTilkjentYtelse(
                     fom = LocalDate.now().minusMonths(12).toYearMonth(),
                     tom = LocalDate.now().minusMonths(8).toYearMonth(),
-                    aktør = barn,
+                    aktør = barn.aktør,
                     kalkulertUtbetalingsbeløp = 1000,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = LocalDate.now().minusMonths(7).toYearMonth(),
                     tom = LocalDate.now().minusMonths(7).toYearMonth(),
-                    aktør = barn,
+                    aktør = barn.aktør,
                     kalkulertUtbetalingsbeløp = 900,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = LocalDate.now().minusMonths(6).toYearMonth(),
                     tom = LocalDate.now().minusMonths(6).toYearMonth(),
-                    aktør = barn,
+                    aktør = barn.aktør,
                     kalkulertUtbetalingsbeløp = 800,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = LocalDate.now().minusMonths(5).toYearMonth(),
                     tom = LocalDate.now().minusMonths(5).toYearMonth(),
-                    aktør = barn,
+                    aktør = barn.aktør,
                     kalkulertUtbetalingsbeløp = 700,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = LocalDate.now().minusMonths(4).toYearMonth(),
                     tom = LocalDate.now().minusMonths(4).toYearMonth(),
-                    aktør = barn,
+                    aktør = barn.aktør,
                     kalkulertUtbetalingsbeløp = 600,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = LocalDate.now().minusMonths(3).toYearMonth(),
                     tom = LocalDate.now().minusMonths(3).toYearMonth(),
-                    aktør = barn,
+                    aktør = barn.aktør,
                     kalkulertUtbetalingsbeløp = 500,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = LocalDate.now().minusMonths(2).toYearMonth(),
                     tom = LocalDate.now().minusMonths(2).toYearMonth(),
-                    aktør = barn,
+                    aktør = barn.aktør,
                     kalkulertUtbetalingsbeløp = 400,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = LocalDate.now().minusMonths(1).toYearMonth(),
                     tom = LocalDate.now().minusMonths(1).toYearMonth(),
-                    aktør = barn,
+                    aktør = barn.aktør,
                     kalkulertUtbetalingsbeløp = 300,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = LocalDate.now().toYearMonth(),
                     tom = LocalDate.now().toYearMonth(),
-                    aktør = barn,
+                    aktør = barn.aktør,
                     kalkulertUtbetalingsbeløp = 200,
                 ),
             )
         val utenlandskePeriodebeløp =
             listOf(
                 // Barnet mottar det samme beløpet fra det andre landet i hele perioden.
-                UtenlandskPeriodebeløp(fom = LocalDate.now().minusMonths(12).toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(barn), beløp = BigDecimal.valueOf(500), valutakode = "SEK", intervall = Intervall.MÅNEDLIG, kalkulertMånedligBeløp = BigDecimal.valueOf(500)),
+                UtenlandskPeriodebeløp(fom = LocalDate.now().minusMonths(12).toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(barn.aktør), beløp = BigDecimal.valueOf(500), valutakode = "SEK", intervall = Intervall.MÅNEDLIG, kalkulertMånedligBeløp = BigDecimal.valueOf(500)),
             )
 
         val valutakurser =
             listOf(
                 // Barnets valutakurser de siste månedene. Fra og med 7 måneder siden ble kursen endret hver måned.
-                lagValutakurs(fom = LocalDate.now().minusMonths(12).toYearMonth(), tom = LocalDate.now().minusMonths(8).toYearMonth(), barnAktører = setOf(barn), valutakursdato = LocalDate.now().minusMonths(7), valutakode = "SEK", kurs = BigDecimal.valueOf(1)),
-                lagValutakurs(fom = LocalDate.now().minusMonths(7).toYearMonth(), tom = LocalDate.now().minusMonths(7).toYearMonth(), barnAktører = setOf(barn), valutakursdato = LocalDate.now().minusMonths(7), valutakode = "SEK", kurs = BigDecimal.valueOf(1.2)),
-                lagValutakurs(fom = LocalDate.now().minusMonths(6).toYearMonth(), tom = LocalDate.now().minusMonths(6).toYearMonth(), barnAktører = setOf(barn), valutakursdato = LocalDate.now().minusMonths(6), valutakode = "SEK", kurs = BigDecimal.valueOf(1.3)),
-                lagValutakurs(fom = LocalDate.now().minusMonths(5).toYearMonth(), tom = LocalDate.now().minusMonths(5).toYearMonth(), barnAktører = setOf(barn), valutakursdato = LocalDate.now().minusMonths(5), valutakode = "SEK", kurs = BigDecimal.valueOf(1.2)),
-                lagValutakurs(fom = LocalDate.now().minusMonths(4).toYearMonth(), tom = LocalDate.now().minusMonths(4).toYearMonth(), barnAktører = setOf(barn), valutakursdato = LocalDate.now().minusMonths(4), valutakode = "SEK", kurs = BigDecimal.valueOf(1.3)),
-                lagValutakurs(fom = LocalDate.now().minusMonths(3).toYearMonth(), tom = LocalDate.now().minusMonths(3).toYearMonth(), barnAktører = setOf(barn), valutakursdato = LocalDate.now().minusMonths(3), valutakode = "SEK", kurs = BigDecimal.valueOf(1.2)),
-                lagValutakurs(fom = LocalDate.now().minusMonths(2).toYearMonth(), tom = LocalDate.now().minusMonths(2).toYearMonth(), barnAktører = setOf(barn), valutakursdato = LocalDate.now().minusMonths(2), valutakode = "SEK", kurs = BigDecimal.valueOf(1.3)),
-                lagValutakurs(fom = LocalDate.now().minusMonths(1).toYearMonth(), tom = LocalDate.now().minusMonths(1).toYearMonth(), barnAktører = setOf(barn), valutakursdato = LocalDate.now().minusMonths(1), valutakode = "SEK", kurs = BigDecimal.valueOf(1.2)),
-                lagValutakurs(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(barn), valutakursdato = LocalDate.now(), valutakode = "SEK", kurs = BigDecimal.valueOf(1)),
+                lagValutakurs(fom = LocalDate.now().minusMonths(12).toYearMonth(), tom = LocalDate.now().minusMonths(8).toYearMonth(), barnAktører = setOf(barn.aktør), valutakursdato = LocalDate.now().minusMonths(7), valutakode = "SEK", kurs = BigDecimal.valueOf(1)),
+                lagValutakurs(fom = LocalDate.now().minusMonths(7).toYearMonth(), tom = LocalDate.now().minusMonths(7).toYearMonth(), barnAktører = setOf(barn.aktør), valutakursdato = LocalDate.now().minusMonths(7), valutakode = "SEK", kurs = BigDecimal.valueOf(1.2)),
+                lagValutakurs(fom = LocalDate.now().minusMonths(6).toYearMonth(), tom = LocalDate.now().minusMonths(6).toYearMonth(), barnAktører = setOf(barn.aktør), valutakursdato = LocalDate.now().minusMonths(6), valutakode = "SEK", kurs = BigDecimal.valueOf(1.3)),
+                lagValutakurs(fom = LocalDate.now().minusMonths(5).toYearMonth(), tom = LocalDate.now().minusMonths(5).toYearMonth(), barnAktører = setOf(barn.aktør), valutakursdato = LocalDate.now().minusMonths(5), valutakode = "SEK", kurs = BigDecimal.valueOf(1.2)),
+                lagValutakurs(fom = LocalDate.now().minusMonths(4).toYearMonth(), tom = LocalDate.now().minusMonths(4).toYearMonth(), barnAktører = setOf(barn.aktør), valutakursdato = LocalDate.now().minusMonths(4), valutakode = "SEK", kurs = BigDecimal.valueOf(1.3)),
+                lagValutakurs(fom = LocalDate.now().minusMonths(3).toYearMonth(), tom = LocalDate.now().minusMonths(3).toYearMonth(), barnAktører = setOf(barn.aktør), valutakursdato = LocalDate.now().minusMonths(3), valutakode = "SEK", kurs = BigDecimal.valueOf(1.2)),
+                lagValutakurs(fom = LocalDate.now().minusMonths(2).toYearMonth(), tom = LocalDate.now().minusMonths(2).toYearMonth(), barnAktører = setOf(barn.aktør), valutakursdato = LocalDate.now().minusMonths(2), valutakode = "SEK", kurs = BigDecimal.valueOf(1.3)),
+                lagValutakurs(fom = LocalDate.now().minusMonths(1).toYearMonth(), tom = LocalDate.now().minusMonths(1).toYearMonth(), barnAktører = setOf(barn.aktør), valutakursdato = LocalDate.now().minusMonths(1), valutakode = "SEK", kurs = BigDecimal.valueOf(1.2)),
+                lagValutakurs(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(barn.aktør), valutakursdato = LocalDate.now(), valutakode = "SEK", kurs = BigDecimal.valueOf(1)),
             )
 
+        // Act
         val utbetalingerPerMndEøs =
             hentUtbetalingerPerMndEøs(
                 endringstidspunkt = endringstidspunkt,
@@ -187,8 +196,10 @@ internal class BrevUtilsTest {
                 utenlandskePeriodebeløp = utenlandskePeriodebeløp,
                 valutakurser = valutakurser,
                 endretutbetalingAndeler = emptyList(),
+                personerIBehandling = listOf(søker, barn),
             )
 
+        // Assert
         // Skal inneholde de siste 8 månedene.
         assertThat(utbetalingerPerMndEøs.size).isEqualTo(8)
         assertThat(utbetalingerPerMndEøs.keys).isEqualTo(setAvMånedÅrMediumForPeriode(7, 0))
@@ -199,6 +210,7 @@ internal class BrevUtilsTest {
 
     @Test
     fun `hentUtbetalingerPerMndEøs - Skal gi bare utbetalingsinfo for relevante andeler som ikke er satt til 0 pga endret utbetaling`() {
+        // Arrange
         val barn = lagPerson()
 
         val endringstidspunkt = LocalDate.now().minusMonths(7)
@@ -287,6 +299,7 @@ internal class BrevUtilsTest {
                 lagValutakurs(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(barn.aktør), valutakursdato = LocalDate.now(), valutakode = "SEK", kurs = BigDecimal.valueOf(1)),
             )
 
+        // Act
         val utbetalingerPerMndEøs =
             hentUtbetalingerPerMndEøs(
                 endringstidspunkt = endringstidspunkt,
@@ -294,8 +307,10 @@ internal class BrevUtilsTest {
                 utenlandskePeriodebeløp = utenlandskePeriodebeløp,
                 valutakurser = valutakurser,
                 endretutbetalingAndeler = endretUtbetalingAndeler,
+                personerIBehandling = listOf(barn),
             )
 
+        // Assert
         // Skal inneholde de de 3 første månedene.
         assertThat(utbetalingerPerMndEøs.size).isEqualTo(3)
         assertThat(utbetalingerPerMndEøs.keys).isEqualTo(setAvMånedÅrMediumForPeriode(7, 5))
@@ -306,8 +321,11 @@ internal class BrevUtilsTest {
 
     @Test
     fun `hentUtbetalingerPerMndEøs - Skal gi utbetalingsinfo for alle måneder etter endringstidspunktet for ett primærlandsbarn og ett sekundærlandsbarn`() {
-        val sekundærlandsbarn = randomAktør()
-        val primærlandsbarn = randomAktør()
+        // Arrange
+        val sekundærlandsbarnPerson = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2018, 3, 10))
+        val primærlandsbarnPerson = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 20))
+        val sekundærlandsbarn = sekundærlandsbarnPerson.aktør
+        val primærlandsbarn = primærlandsbarnPerson.aktør
 
         val endringstidspunkt = LocalDate.now().minusMonths(4)
 
@@ -375,6 +393,7 @@ internal class BrevUtilsTest {
                 lagValutakurs(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(sekundærlandsbarn), valutakursdato = LocalDate.now(), valutakode = "SEK", kurs = BigDecimal.valueOf(1)),
             )
 
+        // Act
         val utbetalingerPerMndEøs =
             hentUtbetalingerPerMndEøs(
                 endringstidspunkt = endringstidspunkt,
@@ -382,8 +401,10 @@ internal class BrevUtilsTest {
                 utenlandskePeriodebeløp = utenlandskePeriodebeløp,
                 valutakurser = valutakurser,
                 endretutbetalingAndeler = emptyList(),
+                personerIBehandling = listOf(sekundærlandsbarnPerson, primærlandsbarnPerson),
             )
 
+        // Assert
         // Skal inneholde de siste 8 månedene.
         assertThat(utbetalingerPerMndEøs.size).isEqualTo(5)
         assertThat(utbetalingerPerMndEøs.keys).isEqualTo(setAvMånedÅrMediumForPeriode(4, 0))
@@ -394,8 +415,11 @@ internal class BrevUtilsTest {
 
     @Test
     fun `hentUtbetalingerPerMndEøs - Skal gi utbetalingsinfo for alle måneder etter endringstidspunktet for to sekundærlandsbarn hvor det ene barnet mottar barnetrygd fra midt i endringsperioden`() {
-        val sekundærlandsbarn = randomAktør()
-        val sekundærlandsbarn2 = randomAktør()
+        // Arrange
+        val sekundærlandsbarnPerson1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2017, 5, 1))
+        val sekundærlandsbarnPerson2 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 11, 25))
+        val sekundærlandsbarn = sekundærlandsbarnPerson1.aktør
+        val sekundærlandsbarn2 = sekundærlandsbarnPerson2.aktør
 
         val endringstidspunkt = LocalDate.now().minusMonths(4)
 
@@ -476,6 +500,7 @@ internal class BrevUtilsTest {
                 lagValutakurs(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(sekundærlandsbarn, sekundærlandsbarn2), valutakursdato = LocalDate.now(), valutakode = "SEK", kurs = BigDecimal.valueOf(1)),
             )
 
+        // Act
         val utbetalingerPerMndEøs =
             hentUtbetalingerPerMndEøs(
                 endringstidspunkt = endringstidspunkt,
@@ -483,8 +508,10 @@ internal class BrevUtilsTest {
                 utenlandskePeriodebeløp = utenlandskePeriodebeløp,
                 valutakurser = valutakurser,
                 endretutbetalingAndeler = emptyList(),
+                personerIBehandling = listOf(sekundærlandsbarnPerson1, sekundærlandsbarnPerson2),
             )
 
+        // Assert
         // Skal inneholde de siste 8 månedene.
         assertThat(utbetalingerPerMndEøs.size).isEqualTo(5)
         assertThat(utbetalingerPerMndEøs.keys).isEqualTo(setAvMånedÅrMediumForPeriode(fraAntallMndSiden = 4, tilAndtalMndSiden = 0))
@@ -498,7 +525,9 @@ internal class BrevUtilsTest {
 
     @Test
     fun `hentUtbetalingerPerMndEøs - Skal kaste feil dersom utbetalt fra annet land, valutakode eller valutakurs er null`() {
-        val sekundærlandsbarn = randomAktør()
+        // Arrange
+        val sekundærlandsbarnPerson = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 2, 14))
+        val sekundærlandsbarn = sekundærlandsbarnPerson.aktør
 
         val endringstidspunkt = LocalDate.now().minusMonths(4)
 
@@ -559,6 +588,7 @@ internal class BrevUtilsTest {
                 lagValutakurs(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(sekundærlandsbarn)),
             )
 
+        // Act & Assert
         assertThrows<Feil> {
             hentUtbetalingerPerMndEøs(
                 endringstidspunkt = endringstidspunkt,
@@ -566,12 +596,14 @@ internal class BrevUtilsTest {
                 utenlandskePeriodebeløp = utenlandskePeriodebeløp,
                 valutakurser = valutakurser,
                 endretutbetalingAndeler = emptyList(),
+                personerIBehandling = listOf(sekundærlandsbarnPerson),
             )
         }
     }
 
     @Test
     fun `skalHenteUtbetalingerEøs - skal returne true når det finnes valutakurser etter endringstidspunktet`() {
+        // Arrange
         val endringstidspunkt = LocalDate.now().minusMonths(2)
         val barn = randomAktør()
 
@@ -584,11 +616,13 @@ internal class BrevUtilsTest {
                 lagValutakurs(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(barn), kurs = BigDecimal.valueOf(1.3)),
             )
 
+        // Act & Assert
         assertThat(skalHenteUtbetalingerEøs(endringstidspunkt = endringstidspunkt, valutakurser = valutakurser)).isTrue
     }
 
     @Test
     fun `skalHenteUtbetalingerEøs - skal returne false når det ikke finnes valutakurser etter endringstidspunktet`() {
+        // Arrange
         val endringstidspunkt = LocalDate.now().minusMonths(2)
         val barn = randomAktør()
 
@@ -598,11 +632,13 @@ internal class BrevUtilsTest {
                 lagValutakurs(fom = LocalDate.now().minusMonths(3).toYearMonth(), tom = LocalDate.now().minusMonths(3).toYearMonth(), barnAktører = setOf(barn), kurs = BigDecimal.valueOf(1.2)),
             )
 
+        // Act & Assert
         assertThat(skalHenteUtbetalingerEøs(endringstidspunkt = endringstidspunkt, valutakurser = valutakurser)).isFalse
     }
 
     @Test
     fun `skalHenteUtbetalingerEøs - skal returnere false uavhengig av valutakurs dersom endringstidspunktet er satt til tidenes ende`() {
+        // Arrange
         val endringstidspunkt = TIDENES_ENDE
         val barn = randomAktør()
 
@@ -615,11 +651,13 @@ internal class BrevUtilsTest {
                 lagValutakurs(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(barn), kurs = BigDecimal.valueOf(1.3)),
             )
 
+        // Act & Assert
         assertThat(skalHenteUtbetalingerEøs(endringstidspunkt = endringstidspunkt, valutakurser = valutakurser)).isFalse
     }
 
     @Test
     fun `hentLandOgStartdatoForUtbetalingstabell - skal finne alle utenlandsperiode beløp som gjelder etter endringstidspunktet`() {
+        // Arrange
         val endringstidspunkt = YearMonth.now()
 
         val utenlandskPeriodebeløp =
@@ -667,9 +705,114 @@ internal class BrevUtilsTest {
                 "DK" to "Danmark",
             )
 
+        // Act
         val utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt = endringstidspunkt, landkoder = landkoder, utenlandskPeriodebeløp = utenlandskPeriodebeløp)
+
+        // Assert
         assertThat(utbetalingstabellAutomatiskValutajustering).isNotNull
         assertThat(utbetalingstabellAutomatiskValutajustering.utbetalingerEosLand?.first()).isEqualTo("Sverige og Danmark")
+    }
+
+    @Test
+    fun `hentUtbetalingerPerMndEøs - Skal vise fødselsdato for barn`() {
+        // Arrange
+        val barnFødselsdato = LocalDate.of(2020, 6, 15)
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = barnFødselsdato)
+
+        val endringstidspunkt = LocalDate.now().minusMonths(1)
+
+        val andelerTilkjentYtelse =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(1).toYearMonth(),
+                    tom = LocalDate.now().toYearMonth(),
+                    aktør = barn.aktør,
+                    kalkulertUtbetalingsbeløp = 1000,
+                ),
+            )
+        val utenlandskePeriodebeløp =
+            listOf(
+                UtenlandskPeriodebeløp(fom = LocalDate.now().minusMonths(1).toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(barn.aktør), beløp = BigDecimal.valueOf(500), valutakode = "SEK", intervall = Intervall.MÅNEDLIG, kalkulertMånedligBeløp = BigDecimal.valueOf(500)),
+            )
+        val valutakurser =
+            listOf(
+                lagValutakurs(fom = LocalDate.now().minusMonths(1).toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(barn.aktør), valutakursdato = LocalDate.now(), valutakode = "SEK", kurs = BigDecimal.valueOf(1)),
+            )
+
+        // Act
+        val utbetalingerPerMndEøs =
+            hentUtbetalingerPerMndEøs(
+                endringstidspunkt = endringstidspunkt,
+                andelTilkjentYtelserForBehandling = andelerTilkjentYtelse,
+                utenlandskePeriodebeløp = utenlandskePeriodebeløp,
+                valutakurser = valutakurser,
+                endretutbetalingAndeler = emptyList(),
+                personerIBehandling = listOf(barn),
+            )
+
+        // Assert
+        assertThat(utbetalingerPerMndEøs).isNotEmpty
+        val førsteMåned = utbetalingerPerMndEøs.values.first()
+        assertThat(førsteMåned.utbetalinger).hasSize(1)
+        assertThat(førsteMåned.utbetalinger.first().fødselsdato).isEqualTo(barnFødselsdato.tilKortString())
+    }
+
+    @Test
+    fun `hentUtbetalingerPerMndEøs - Skal vise riktig fødselsdato for flere barn`() {
+        // Arrange
+        val barn1Fødselsdato = LocalDate.of(2018, 3, 10)
+        val barn2Fødselsdato = LocalDate.of(2021, 12, 25)
+        val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = barn1Fødselsdato)
+        val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = barn2Fødselsdato)
+
+        val endringstidspunkt = LocalDate.now().minusMonths(1)
+
+        val andelerTilkjentYtelse =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(1).toYearMonth(),
+                    tom = LocalDate.now().toYearMonth(),
+                    aktør = barn1.aktør,
+                    kalkulertUtbetalingsbeløp = 1000,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(1).toYearMonth(),
+                    tom = LocalDate.now().toYearMonth(),
+                    aktør = barn2.aktør,
+                    kalkulertUtbetalingsbeløp = 800,
+                ),
+            )
+        val utenlandskePeriodebeløp =
+            listOf(
+                UtenlandskPeriodebeløp(fom = LocalDate.now().minusMonths(1).toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(barn1.aktør), beløp = BigDecimal.valueOf(300), valutakode = "SEK", intervall = Intervall.MÅNEDLIG, kalkulertMånedligBeløp = BigDecimal.valueOf(300)),
+                UtenlandskPeriodebeløp(fom = LocalDate.now().minusMonths(1).toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(barn2.aktør), beløp = BigDecimal.valueOf(300), valutakode = "SEK", intervall = Intervall.MÅNEDLIG, kalkulertMånedligBeløp = BigDecimal.valueOf(300)),
+            )
+        val valutakurser =
+            listOf(
+                lagValutakurs(fom = LocalDate.now().minusMonths(1).toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(barn1.aktør, barn2.aktør), valutakursdato = LocalDate.now(), valutakode = "SEK", kurs = BigDecimal.valueOf(1)),
+            )
+
+        // Act
+        val utbetalingerPerMndEøs =
+            hentUtbetalingerPerMndEøs(
+                endringstidspunkt = endringstidspunkt,
+                andelTilkjentYtelserForBehandling = andelerTilkjentYtelse,
+                utenlandskePeriodebeløp = utenlandskePeriodebeløp,
+                valutakurser = valutakurser,
+                endretutbetalingAndeler = emptyList(),
+                personerIBehandling = listOf(barn1, barn2),
+            )
+
+        // Assert
+        assertThat(utbetalingerPerMndEøs).isNotEmpty
+        val førsteMåned = utbetalingerPerMndEøs.values.first()
+        assertThat(førsteMåned.utbetalinger).hasSize(2)
+
+        val fødselsdatoer = førsteMåned.utbetalinger.map { it.fødselsdato }.toSet()
+        assertThat(fødselsdatoer).containsExactlyInAnyOrder(
+            barn1Fødselsdato.tilKortString(),
+            barn2Fødselsdato.tilKortString(),
+        )
     }
 }
 

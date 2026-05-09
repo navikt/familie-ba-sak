@@ -23,7 +23,7 @@ class UtbetalingMndEøsOppsummering(
 )
 
 data class UtbetalingEøs(
-    val fnr: String,
+    val fødselsdato: String,
     val ytelseType: YtelseType,
     val satsINorge: Int,
     val utbetaltFraAnnetLand: UtbetaltFraAnnetLand?,
