@@ -22,7 +22,6 @@ import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -37,7 +36,6 @@ import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/behandlinger")
-@ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BehandlingController(
     private val stegService: StegService,

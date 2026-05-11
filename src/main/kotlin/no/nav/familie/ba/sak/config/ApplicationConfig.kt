@@ -11,7 +11,6 @@ import no.nav.security.token.support.client.core.http.OAuth2HttpClient
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
-import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringBootConfiguration
@@ -35,7 +34,6 @@ import java.time.temporal.ChronoUnit
 @ComponentScan("no.nav.familie.prosessering", "no.nav.familie.unleash", ApplicationConfig.PAKKENAVN, "no.nav.familie.metrikker")
 @EnableResilientMethods
 @ConfigurationPropertiesScan
-@EnableJwtTokenValidation(ignore = ["org.springdoc"])
 @EnableOAuth2Client(cacheEnabled = true)
 @Import(FamilieFellesSpringSecurityKonfigurasjon::class)
 class ApplicationConfig {

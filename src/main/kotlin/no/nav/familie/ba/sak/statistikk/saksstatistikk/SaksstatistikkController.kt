@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/saksstatistikk")
-@ProtectedWithClaims(issuer = "azuread")
 class SaksstatistikkController(
     private val saksstatistikkService: SaksstatistikkService,
 ) {

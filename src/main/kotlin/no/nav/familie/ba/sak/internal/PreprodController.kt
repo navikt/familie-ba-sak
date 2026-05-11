@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.featureToggle.miljø.Profil
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.CacheManager
 import org.springframework.context.annotation.Profile
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController
 @Profile("!prod")
 @RestController
 @RequestMapping("/api/preprod")
-@ProtectedWithClaims(issuer = "azuread")
 class PreprodController(
     private val testVerktøyService: TestVerktøyService,
     private val tilgangService: TilgangService,

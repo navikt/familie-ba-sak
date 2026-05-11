@@ -31,7 +31,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØ
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -44,7 +43,6 @@ import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/test/vilkaarsvurdering")
-@ProtectedWithClaims(issuer = "azuread")
 @Validated
 @Profile("!prod")
 class VilkårsvurderingTestController(

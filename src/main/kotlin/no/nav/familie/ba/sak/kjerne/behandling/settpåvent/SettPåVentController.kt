@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/sett-på-vent/")
-@ProtectedWithClaims(issuer = "azuread")
 class SettPåVentController(
     private val tilgangService: TilgangService,
     private val settPåVentService: SettPåVentService,
