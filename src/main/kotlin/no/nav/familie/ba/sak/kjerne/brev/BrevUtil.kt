@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅrMedium
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -32,14 +33,12 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingM
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilUtfylteKompetanserEtterEndringstidpunktPerAktør
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utbetalingsland
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilUtbetaltFraAnnetLand
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilUtfylteUtenlandskPeriodebeløpEtterEndringstidpunktPerAktør
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.erIkkeTom
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
@@ -163,7 +162,10 @@ fun hentUtbetalingerPerMndEøs(
     utenlandskePeriodebeløp: List<UtenlandskPeriodebeløp>,
     valutakurser: List<Valutakurs>,
     endretutbetalingAndeler: List<EndretUtbetalingAndel>,
+    personerIBehandling: List<Person>,
 ): Map<String, UtbetalingMndEøs> {
+    val aktørIdTilFødselsdato = personerIBehandling.associate { it.aktør.aktørId to it.fødselsdato }
+
     // Ønsker kun andeler som ikke er satt til 0 pga endret utbetaling andel med årsakene ALLEREDE_UTBETALT, ENDRE_MOTTAKER eller ETTERBETALING_3ÅR
     val filtrerteAndelTilkjentYtelser = andelTilkjentYtelserForBehandling.filtrerBortIrrelevanteAndeler(endretutbetalingAndeler)
     val andelerForVedtaksperioderPerAktørOgType = filtrerteAndelTilkjentYtelser.tilTidslinjerPerAktørOgType()
@@ -179,8 +181,18 @@ fun hentUtbetalingerPerMndEøs(
         // Kombinerer tidslinjene for andeler, utenlandskPeriodebeløp og valutakurser per aktørOgYtelse
         .outerJoin(utenlandskePeriodebeløpTidslinjerForBarna, valutakursTidslinjerForBarna) { andelForVedtaksperiode, utenlandsPeriodebeløp, valutakurs -> andelForVedtaksperiode?.let { AndelUpbOgValutakurs(andelTilkjentYtelse = andelForVedtaksperiode, utenlandskPeriodebeløp = utenlandsPeriodebeløp, valutakurs = valutakurs) } }
         .map { (aktørOgYtelseType, andelUpbOgValutakursTidslinje) ->
-            andelUpbOgValutakursTidslinje.mapIkkeNull { andelerUpbOgValutakurs ->
-                hentUtbetalingEøs(aktørOgYtelseType = aktørOgYtelseType, andelUpbOgValutakurs = andelerUpbOgValutakurs)
+            val fødselsdato =
+                aktørIdTilFødselsdato[aktørOgYtelseType.first.aktørId]
+                    ?: throw Feil("Fant ikke fødselsdato tilhørende aktør")
+
+            andelUpbOgValutakursTidslinje.mapIkkeNull { andelUpbOgValutakurs ->
+                UtbetalingEøs(
+                    fødselsdato = fødselsdato.tilKortString(),
+                    ytelseType = aktørOgYtelseType.second,
+                    satsINorge = andelUpbOgValutakurs.andelTilkjentYtelse.sats,
+                    utbetaltFraAnnetLand = andelUpbOgValutakurs.utenlandskPeriodebeløp?.tilUtbetaltFraAnnetLand(andelUpbOgValutakurs.valutakurs),
+                    utbetaltFraNorge = andelUpbOgValutakurs.andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
+                )
             }
         }
         // Kombinerer verdiene til alle tidslinjene slik at vi får en liste av UtbetalingEøs per periode, samt sørger for at vi får en periode per mnd.
@@ -195,18 +207,6 @@ fun hentUtbetalingerPerMndEøs(
             fraOgMedMåned to utbetalingMndEøs
         }.filter { it.value.utbetalinger.isNotEmpty() }
 }
-
-private fun hentUtbetalingEøs(
-    aktørOgYtelseType: Pair<Aktør, YtelseType>,
-    andelUpbOgValutakurs: AndelUpbOgValutakurs,
-): UtbetalingEøs =
-    UtbetalingEøs(
-        fnr = aktørOgYtelseType.first.aktivFødselsnummer(),
-        ytelseType = aktørOgYtelseType.second,
-        satsINorge = andelUpbOgValutakurs.andelTilkjentYtelse.sats,
-        utbetaltFraAnnetLand = andelUpbOgValutakurs.utenlandskPeriodebeløp?.tilUtbetaltFraAnnetLand(andelUpbOgValutakurs.valutakurs),
-        utbetaltFraNorge = andelUpbOgValutakurs.andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
-    )
 
 private fun hentUtbetalingMndEøs(utbetalingerEøs: List<UtbetalingEøs>): UtbetalingMndEøs {
     val summertUtbetaltFraAnnetLand = utbetalingerEøs.sumOf { utbetalingEøs -> utbetalingEøs.utbetaltFraAnnetLand?.beløpINok ?: 0 }

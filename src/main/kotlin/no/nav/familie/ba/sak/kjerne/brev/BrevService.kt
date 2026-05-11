@@ -675,6 +675,7 @@ class BrevService(
 
         val andelerTilkjentYtelseForBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandlingId).toList()
+        val personerIBehandling = hentAktivtPersonopplysningsgrunnlag(behandlingId).personer.toList()
 
         return hentUtbetalingerPerMndEøs(
             endringstidspunkt = endringstidspunkt,
@@ -682,6 +683,7 @@ class BrevService(
             utenlandskePeriodebeløp = utenlandskePeriodebeløp,
             valutakurser = valutakurser,
             endretutbetalingAndeler = endretutbetalingAndeler,
+            personerIBehandling = personerIBehandling,
         )
     }
 
