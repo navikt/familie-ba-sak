@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.sikkerhet
 
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.config.RolleConfig
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
@@ -19,7 +18,7 @@ object SikkerhetContext {
         return oid != null && oid == sub && roles.contains("access_as_application")
     }
 
-    fun harInnloggetBrukerForvalterRolle(rolleConfig: RolleConfig): Boolean = hentGrupper().contains(rolleConfig.FORVALTER_ROLLE)
+    fun harInnloggetBrukerForvalterRolle(): Boolean = harRolle(Rolle.FORVALTER)
 
     fun hentSaksbehandler(): String = hentClaimFraToken("NAVident") ?: SYSTEM_FORKORTELSE
 
@@ -37,20 +36,19 @@ object SikkerhetContext {
         }
     }
 
-    fun hentHøyesteRolletilgangForInnloggetBruker(rolleConfig: RolleConfig): BehandlerRolle {
-        if (hentSaksbehandler() == SYSTEM_FORKORTELSE) return BehandlerRolle.SYSTEM
-
-        val grupper = hentGrupper()
-        return when {
-            grupper.contains(rolleConfig.BESLUTTER_ROLLE) -> BehandlerRolle.BESLUTTER
-            grupper.contains(rolleConfig.SAKSBEHANDLER_ROLLE) -> BehandlerRolle.SAKSBEHANDLER
-            grupper.contains(rolleConfig.FORVALTER_ROLLE) -> BehandlerRolle.FORVALTER
-            grupper.contains(rolleConfig.VEILEDER_ROLLE) -> BehandlerRolle.VEILEDER
+    fun hentHøyesteRolletilgangForInnloggetBruker(): BehandlerRolle =
+        when {
+            erSystemKontekst() -> BehandlerRolle.SYSTEM
+            harRolle(Rolle.BESLUTTER) -> BehandlerRolle.BESLUTTER
+            harRolle(Rolle.SAKSBEHANDLER) -> BehandlerRolle.SAKSBEHANDLER
+            harRolle(Rolle.FORVALTER) -> BehandlerRolle.FORVALTER
+            harRolle(Rolle.VEILEDER) -> BehandlerRolle.VEILEDER
             else -> BehandlerRolle.UKJENT
         }
-    }
 
     fun hentGrupper(): List<String> = hentClaimFraToken("groups") ?: emptyList()
+
+    fun harRolle(rolle: Rolle): Boolean = hentJwtAuthenticationToken()?.authorities?.any { it.authority == rolle.authority() } == true
 
     fun <T> hentClaimFraToken(claim: String): T? = runCatching { hentJwt()?.getClaim<T>(claim) }.getOrNull()
 

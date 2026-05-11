@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -19,7 +18,6 @@ class TilgangService(
     private val fagsakService: FagsakService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val rolleConfig: RolleConfig,
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val auditLogger: AuditLogger,
     private val strengtFortroligService: StrengtFortroligService,
@@ -37,7 +35,7 @@ class TilgangService(
     ) {
         // Hvis minimumBehandlerRolle er forvalter, må innlogget bruker ha FORVALTER rolle
         if (minimumBehandlerRolle == BehandlerRolle.FORVALTER &&
-            !SikkerhetContext.harInnloggetBrukerForvalterRolle(rolleConfig)
+            !SikkerhetContext.harInnloggetBrukerForvalterRolle()
         ) {
             throw RolleTilgangskontrollFeil(
                 melding =
@@ -46,7 +44,7 @@ class TilgangService(
             )
         }
 
-        val høyesteRolletilgang = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig)
+        val høyesteRolletilgang = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker()
 
         if (minimumBehandlerRolle.nivå > høyesteRolletilgang.nivå) {
             throw RolleTilgangskontrollFeil(
