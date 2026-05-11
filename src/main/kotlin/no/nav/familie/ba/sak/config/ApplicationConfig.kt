@@ -4,15 +4,12 @@ import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.NavSystemtype
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
-import no.nav.familie.prosessering.config.ProsesseringInfoProvider
 import no.nav.familie.restklient.client.RetryOAuth2HttpClient
 import no.nav.familie.sikkerhet.context.FamilieFellesSpringSecurityKonfigurasjon
 import no.nav.security.token.support.client.core.http.OAuth2HttpClient
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
-import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringBootConfiguration
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.persistence.autoconfigure.EntityScan
@@ -84,31 +81,6 @@ class ApplicationConfig {
                     .build(),
             ),
         )
-
-    @Bean
-    fun prosesseringInfoProvider(
-        @Value("\${prosessering.rolle}") prosesseringRolle: String,
-    ) = object : ProsesseringInfoProvider {
-        override fun hentBrukernavn(): String =
-            try {
-                SpringTokenValidationContextHolder().getTokenValidationContext().getClaims("azuread").getStringClaim("preferred_username")
-            } catch (e: Exception) {
-                "VL"
-            }
-
-        override fun harTilgang(): Boolean = grupper().contains(prosesseringRolle)
-
-        @Suppress("UNCHECKED_CAST")
-        private fun grupper(): List<String> =
-            try {
-                SpringTokenValidationContextHolder()
-                    .getTokenValidationContext()
-                    .getClaims("azuread")
-                    ?.get("groups") as List<String>? ?: emptyList()
-            } catch (e: Exception) {
-                emptyList()
-            }
-    }
 
     companion object {
         private val log = LoggerFactory.getLogger(ApplicationConfig::class.java)
