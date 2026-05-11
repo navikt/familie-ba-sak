@@ -1,0 +1,221 @@
+package no.nav.familie.ba.sak.config
+
+import no.nav.familie.ba.sak.WebSpringAuthTestRunner
+import no.nav.familie.ba.sak.sikkerhet.Rolle
+import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.jsonMapper
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.EnumSource
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.web.client.HttpStatusCodeException
+import org.springframework.web.client.exchange
+import org.springframework.web.client.getForEntity
+import tools.jackson.module.kotlin.readValue
+
+@ActiveProfiles(
+    "postgres",
+    "integrasjonstest",
+    "testcontainers",
+)
+class SecurityConfigurationTest : WebSpringAuthTestRunner() {
+    @Nested
+    inner class PermitAll {
+        @Test
+        fun `internal endepunkt er tilgjengelig uten token`() {
+            val response = restTemplate.getForEntity<String>(hentUrl("/internal/health/liveness"))
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        }
+    }
+
+    @Nested
+    inner class UtenToken {
+        @Test
+        fun `api-kall uten token returnerer 401`() {
+            val feil =
+                assertThrows<HttpStatusCodeException> {
+                    restTemplate.getForEntity<String>(hentUrl("/api/fagsak/1"))
+                }
+
+            assertThat(feil.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
+            val body = jsonMapper.readValue<Ressurs<Any>>(feil.responseBodyAsString)
+            assertThat(body.status).isEqualTo(Ressurs.Status.FEILET)
+            assertThat(body.frontendFeilmelding).isEqualTo("En uventet feil oppstod: Kall ikke autorisert")
+        }
+    }
+
+    @Nested
+    inner class InternAppTilgang {
+        @ParameterizedTest
+        @EnumSource(value = Rolle::class, names = ["VEILEDER", "SAKSBEHANDLER", "BESLUTTER", "FORVALTER"])
+        fun `saksbehandlere har tilgang til interne endepunkter`(
+            rolle: Rolle,
+        ) {
+            val headers = hentHeaders(groups = listOf(rolle.name))
+
+            try {
+                restTemplate.exchange<String>(hentUrl("/api/fagsak/1"), HttpMethod.GET, HttpEntity<String>(headers))
+            } catch (e: HttpStatusCodeException) {
+                assertThat(e.statusCode).isNotIn(HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN)
+            }
+        }
+
+        @Test
+        fun `m2m-token fra teamfamilie-app har tilgang til interne endepunkter`() {
+            val headers =
+                HttpHeaders().apply {
+                    contentType = MediaType.APPLICATION_JSON
+                    setBearerAuth(token(mapOf("azp_name" to "dev-gcp:teamfamilie:tilfeldig-applikasjon")))
+                }
+
+            try {
+                restTemplate.exchange<String>(hentUrl("/api/fagsak/1"), HttpMethod.GET, HttpEntity<String>(headers))
+            } catch (e: HttpStatusCodeException) {
+                assertThat(e.statusCode).isNotIn(HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN)
+            }
+        }
+
+        @Test
+        fun `m2m-token uten teamfamilie-namespace har ikke tilgang til interne endepunkter`() {
+            val headers =
+                HttpHeaders().apply {
+                    contentType = MediaType.APPLICATION_JSON
+                    setBearerAuth(token(mapOf("azp_name" to "dev-gcp:ukjent-namespace:ukjent-applikasjon")))
+                }
+
+            val feil =
+                assertThrows<HttpStatusCodeException> {
+                    restTemplate.exchange<String>(hentUrl("/api/fagsak/1"), HttpMethod.GET, HttpEntity<String>(headers))
+                }
+
+            assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        }
+    }
+
+    @Nested
+    inner class EksternPensjonstilgang {
+        private fun pensjonToken(applikasjonNavn: String) = token(mapOf("azp_name" to "dev-gcp:pensjonopptjening:$applikasjonNavn"))
+
+        @Test
+        fun `pensjon-token har ikke tilgang til generelt api-endepunkt`() {
+            val headers =
+                HttpHeaders().apply {
+                    contentType = MediaType.APPLICATION_JSON
+                    setBearerAuth(pensjonToken("omsorgsopptjening-start-innlesning"))
+                }
+
+            val feil =
+                assertThrows<HttpStatusCodeException> {
+                    restTemplate.exchange<String>(hentUrl("/api/fagsak/1"), HttpMethod.GET, HttpEntity<String>(headers))
+                }
+
+            assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        }
+
+        @ParameterizedTest
+        @CsvSource(value = ["omsorgsopptjening-start-innlesning", "omsorgsopptjening-start-innlesning-q1"])
+        fun `pensjon-token har tilgang til pensjon-endepunkt`(
+            applikasjonNavn: String,
+        ) {
+            val headers =
+                HttpHeaders().apply {
+                    contentType = MediaType.APPLICATION_JSON
+                    setBearerAuth(pensjonToken(applikasjonNavn))
+                }
+
+            try {
+                restTemplate.exchange<String>(
+                    hentUrl("/api/ekstern/pensjon/bestill-personer-med-barnetrygd/2023"),
+                    HttpMethod.GET,
+                    HttpEntity<String>(headers),
+                )
+            } catch (e: HttpStatusCodeException) {
+                assertThat(e.statusCode).isNotIn(HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN)
+            }
+        }
+    }
+
+    @Nested
+    inner class EksternBisystilgang {
+        private fun bisysToken(applikasjonNavn: String) = token(mapOf("azp_name" to "dev-gcp:bidrag:$applikasjonNavn"))
+
+        @Test
+        fun `bisys-token har ikke tilgang til generelt api-endepunkt`() {
+            val headers =
+                HttpHeaders().apply {
+                    contentType = MediaType.APPLICATION_JSON
+                    setBearerAuth(bisysToken("bidrag-grunnlag"))
+                }
+
+            val feil =
+                assertThrows<HttpStatusCodeException> {
+                    restTemplate.exchange<String>(hentUrl("/api/fagsak/1"), HttpMethod.GET, HttpEntity<String>(headers))
+                }
+
+            assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        }
+
+        @ParameterizedTest
+        @CsvSource(value = ["bidrag-grunnlag", "bidrag-grunnlag-feature"])
+        fun `bisys-token har tilgang til bisys-endepunkt`(
+            applikasjonNavn: String,
+        ) {
+            val headers =
+                HttpHeaders().apply {
+                    contentType = MediaType.APPLICATION_JSON
+                    setBearerAuth(bisysToken(applikasjonNavn))
+                }
+
+            try {
+                restTemplate.exchange<String>(
+                    hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
+                    HttpMethod.POST,
+                    HttpEntity<String>(headers),
+                )
+            } catch (e: HttpStatusCodeException) {
+                assertThat(e.statusCode).isNotIn(HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN)
+            }
+        }
+    }
+
+    @Nested
+    inner class TokenXIsolasjon {
+        @Test
+        fun `tokenx-token blir avvist på azuread-endepunkt`() {
+            val headers =
+                HttpHeaders().apply {
+                    contentType = MediaType.APPLICATION_JSON
+                    setBearerAuth(hentTokenForTokenX("12345678910"))
+                }
+
+            val feil =
+                assertThrows<HttpStatusCodeException> {
+                    restTemplate.exchange<String>(hentUrl("/api/fagsak/1"), HttpMethod.GET, HttpEntity<String>(headers))
+                }
+
+            assertThat(feil.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
+        }
+
+        @Test
+        fun `azure-token blir avvist på tokenx-endepunkt`() {
+            val headers = hentHeaders()
+
+            val feil =
+                assertThrows<HttpStatusCodeException> {
+                    restTemplate.exchange<String>(hentUrl("/api/minside/barnetrygd"), HttpMethod.GET, HttpEntity<String>(headers))
+                }
+
+            assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        }
+    }
+}
