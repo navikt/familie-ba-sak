@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.ekstern.klage
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
@@ -41,10 +40,6 @@ class EksternKlageController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
         )
 
-        if (!SikkerhetContext.kallKommerFraKlage()) {
-            throw Feil("Kallet utføres ikke av en autorisert klient")
-        }
-
         return Ressurs.success(klageService.kanOppretteRevurdering(fagsakId))
     }
 
@@ -59,10 +54,6 @@ class EksternKlageController(
             event = AuditLoggerEvent.CREATE,
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
         )
-
-        if (!SikkerhetContext.kallKommerFraKlage()) {
-            throw Feil("Kallet utføres ikke av en autorisert klient")
-        }
 
         val opprettRevurderingResponse =
             klageService.validerOgOpprettRevurderingKlage(

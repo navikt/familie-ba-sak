@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.sikkerhet
 
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.RolleConfig
 import org.springframework.security.core.context.SecurityContextHolder
@@ -58,12 +57,4 @@ object SikkerhetContext {
     fun hentJwt(): Jwt? = hentJwtAuthenticationToken()?.token
 
     private fun hentJwtAuthenticationToken(): JwtAuthenticationToken? = SecurityContextHolder.getContext().authentication as? JwtAuthenticationToken
-
-    fun kallKommerFraKlage(): Boolean = kallKommerFra("teamfamilie:familie-klage")
-
-    private fun kallKommerFra(forventetApplikasjonsSuffix: String): Boolean {
-        val applikasjonsnavn = hentClaimFraToken<String>("azp_name") ?: "" // e.g. dev-gcp:some-team:application-name
-        secureLogger.info("Applikasjonsnavn: $applikasjonsnavn")
-        return applikasjonsnavn.endsWith(forventetApplikasjonsSuffix)
-    }
 }
