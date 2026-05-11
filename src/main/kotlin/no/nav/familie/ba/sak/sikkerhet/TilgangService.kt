@@ -10,6 +10,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.harInnloggetBrukerForvalterRolle
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.hentSaksbehandler
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.hentSaksbehandlerNavn
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.stereotype.Service
 
@@ -34,23 +38,14 @@ class TilgangService(
         handling: String,
     ) {
         // Hvis minimumBehandlerRolle er forvalter, må innlogget bruker ha FORVALTER rolle
-        if (minimumBehandlerRolle == BehandlerRolle.FORVALTER &&
-            !SikkerhetContext.harInnloggetBrukerForvalterRolle()
-        ) {
-            throw RolleTilgangskontrollFeil(
-                melding =
-                    "${SikkerhetContext.hentSaksbehandlerNavn()} " +
-                        "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle",
-            )
+        if (minimumBehandlerRolle == BehandlerRolle.FORVALTER && !harInnloggetBrukerForvalterRolle()) {
+            throw RolleTilgangskontrollFeil(melding = "${hentSaksbehandlerNavn()} har ikke tilgang til å $handling. Krever $minimumBehandlerRolle")
         }
 
-        val høyesteRolletilgang = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker()
-
+        val høyesteRolletilgang = hentHøyesteRolletilgangForInnloggetBruker()
         if (minimumBehandlerRolle.nivå > høyesteRolletilgang.nivå) {
             throw RolleTilgangskontrollFeil(
-                melding =
-                    "${SikkerhetContext.hentSaksbehandlerNavn()} med rolle $høyesteRolletilgang " +
-                        "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
+                melding = "${hentSaksbehandlerNavn()} med rolle $høyesteRolletilgang har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
                 frontendFeilmelding = "Du har ikke tilgang til å $handling.",
             )
         }
@@ -68,12 +63,8 @@ class TilgangService(
         if (!tilgangerTilPersoner.all { it.harTilgang }) {
             val adressebeskyttelsegraderingEllerNavAnsatt = tilgangerTilPersoner.tilBegrunnelserForManglendeTilgang()
             throw RolleTilgangskontrollFeil(
-                melding =
-                    "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                        "har ikke tilgang. $adressebeskyttelsegraderingEllerNavAnsatt.",
-                frontendFeilmelding =
-                    "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                        "har ikke tilgang. $adressebeskyttelsegraderingEllerNavAnsatt.",
+                melding = "Saksbehandler ${hentSaksbehandler()} har ikke tilgang. $adressebeskyttelsegraderingEllerNavAnsatt.",
+                frontendFeilmelding = "Saksbehandler ${hentSaksbehandler()} har ikke tilgang. $adressebeskyttelsegraderingEllerNavAnsatt.",
             )
         }
     }
@@ -111,13 +102,12 @@ class TilgangService(
         }
 
         val tilgangerTilPersoner = sjekkTilgangTilPersoner(personIdenter)
-
-        if (tilgangerTilPersoner.any { !it.harTilgang } && !strengtFortroligService.saksbehandlerManglerKunTilgangTilSkjermedeBarnUtenLøpendeAndeler(behandling.fagsak, tilgangerTilPersoner)) {
+        if (tilgangerTilPersoner.any { !it.harTilgang } &&
+            !strengtFortroligService.saksbehandlerManglerKunTilgangTilSkjermedeBarnUtenLøpendeAndeler(behandling.fagsak, tilgangerTilPersoner)
+        ) {
             val adressebeskyttelsegraderingEllerNavAnsatt = tilgangerTilPersoner.tilBegrunnelserForManglendeTilgang()
             throw RolleTilgangskontrollFeil(
-                melding =
-                    "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                        "har ikke tilgang til behandling=$behandlingId. $adressebeskyttelsegraderingEllerNavAnsatt.",
+                melding = "Saksbehandler ${hentSaksbehandler()} har ikke tilgang til behandling=$behandlingId. $adressebeskyttelsegraderingEllerNavAnsatt.",
                 frontendFeilmelding = "Behandlingen inneholder personer som krever ytterligere tilganger. $adressebeskyttelsegraderingEllerNavAnsatt.",
             )
         }
@@ -130,15 +120,13 @@ class TilgangService(
         val aktør = fagsakService.hentAktør(fagsakId)
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
 
-        val personerPåFagsak = persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId)
+        val personerPåFagsak = persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId).orEmpty()
         val personIdenterIFagsak =
-            (
-                personerPåFagsak
-                    ?.map { it.aktør.aktivFødselsnummer() }
-                    ?: emptyList()
-            ).ifEmpty {
-                listOfNotNull(aktør.aktivFødselsnummer(), fagsak.skjermetBarnSøker?.aktør?.aktivFødselsnummer())
-            }
+            personerPåFagsak
+                .map { it.aktør.aktivFødselsnummer() }
+                .ifEmpty {
+                    listOfNotNull(aktør.aktivFødselsnummer(), fagsak.skjermetBarnSøker?.aktør?.aktivFødselsnummer())
+                }
 
         personIdenterIFagsak.forEach { fnr ->
             auditLogger.log(
@@ -151,17 +139,13 @@ class TilgangService(
         }
 
         val tilgangerTilPersoner = sjekkTilgangTilPersoner(personIdenterIFagsak)
-
         if (tilgangerTilPersoner.any { !it.harTilgang } &&
             !strengtFortroligService.saksbehandlerManglerKunTilgangTilSkjermedeBarnUtenLøpendeAndeler(fagsak, tilgangerTilPersoner)
         ) {
             val adressebeskyttelsegraderingEllerNavAnsatt = tilgangerTilPersoner.tilBegrunnelserForManglendeTilgang()
             throw RolleTilgangskontrollFeil(
-                melding =
-                    "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                        "har ikke tilgang til fagsak=$fagsakId. $adressebeskyttelsegraderingEllerNavAnsatt.",
-                frontendFeilmelding =
-                    "Fagsaken inneholder personer som krever ytterligere tilganger. $adressebeskyttelsegraderingEllerNavAnsatt.",
+                melding = "Saksbehandler ${hentSaksbehandler()} har ikke tilgang til fagsak=$fagsakId. $adressebeskyttelsegraderingEllerNavAnsatt.",
+                frontendFeilmelding = "Fagsaken inneholder personer som krever ytterligere tilganger. $adressebeskyttelsegraderingEllerNavAnsatt.",
             )
         }
     }
