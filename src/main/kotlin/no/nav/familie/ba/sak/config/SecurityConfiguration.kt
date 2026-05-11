@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse
 import no.nav.familie.ba.sak.sikkerhet.AzureAdAuthenticationManager
 import no.nav.familie.ba.sak.sikkerhet.Rolle.BISYS_APPLIKASJON
 import no.nav.familie.ba.sak.sikkerhet.Rolle.Companion.rollerMedInternTilgang
+import no.nav.familie.ba.sak.sikkerhet.Rolle.KLAGE_APPLIKASJON
 import no.nav.familie.ba.sak.sikkerhet.Rolle.PENSJON_APPLIKASJON
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TokenXAuthenticationManager
@@ -78,6 +79,7 @@ class SecurityConfiguration(
             authorizeHttpRequests {
                 authorize("/api/ekstern/pensjon/**", hasRole(PENSJON_APPLIKASJON.name))
                 authorize("/api/bisys/**", hasRole(BISYS_APPLIKASJON.name))
+                authorize("/api/klage/**", hasRole(KLAGE_APPLIKASJON.name))
                 authorize(anyRequest, hasAnyRole(*rollerMedInternTilgang()))
             }
             oauth2ResourceServer {

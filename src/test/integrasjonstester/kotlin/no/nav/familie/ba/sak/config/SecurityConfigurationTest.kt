@@ -103,6 +103,50 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
     }
 
     @Nested
+    inner class EksternKlagetilgang {
+        private fun klageToken() = token(mapOf("azp_name" to "dev-gcp:teamfamilie:familie-klage"))
+
+        @Test
+        fun `token fra annen applikasjon enn klage har ikke tilgang til klage-endepunkt`() {
+            val headers =
+                HttpHeaders().apply {
+                    contentType = MediaType.APPLICATION_JSON
+                    setBearerAuth(token(mapOf("azp_name" to "dev-gcp:teamfamilie:ikke-klage")))
+                }
+
+            val feil =
+                assertThrows<HttpStatusCodeException> {
+                    restTemplate.exchange<String>(
+                        hentUrl("/api/klage/fagsaker/1/kan-opprette-revurdering-klage"),
+                        HttpMethod.GET,
+                        HttpEntity<String>(headers),
+                    )
+                }
+
+            assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        }
+
+        @Test
+        fun `klage-token har tilgang til klage-endepunkt`() {
+            val headers =
+                HttpHeaders().apply {
+                    contentType = MediaType.APPLICATION_JSON
+                    setBearerAuth(klageToken())
+                }
+
+            try {
+                restTemplate.exchange<String>(
+                    hentUrl("/api/klage/fagsaker/1/kan-opprette-revurdering-klage"),
+                    HttpMethod.GET,
+                    HttpEntity<String>(headers),
+                )
+            } catch (e: HttpStatusCodeException) {
+                assertThat(e.statusCode).isNotIn(HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN)
+            }
+        }
+    }
+
+    @Nested
     inner class EksternPensjonstilgang {
         private fun pensjonToken(applikasjonNavn: String) = token(mapOf("azp_name" to "dev-gcp:pensjonopptjening:$applikasjonNavn"))
 
@@ -215,7 +259,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
                     restTemplate.exchange<String>(hentUrl("/api/minside/barnetrygd"), HttpMethod.GET, HttpEntity<String>(headers))
                 }
 
-            assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+            assertThat(feil.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
         }
     }
 }

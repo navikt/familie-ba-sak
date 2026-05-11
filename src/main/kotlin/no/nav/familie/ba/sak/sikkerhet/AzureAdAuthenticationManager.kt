@@ -60,6 +60,7 @@ class AzureAdAuthenticationManager(
                 if (grupper.contains(prosesseringRolle)) add(Rolle.PROSESSERING)
 
                 if (applicationName.matches(Regex(".*:teamfamilie:.*"))) add(Rolle.TEAMFAMILIE_APPLIKASJON)
+                if (applicationName.matches(Regex(".*:teamfamilie:familie-klage"))) add(Rolle.KLAGE_APPLIKASJON)
                 if (applicationName.matches(Regex(".*:omsorgsopptjening-start-innlesning(-q1)?"))) add(Rolle.PENSJON_APPLIKASJON)
                 if (applicationName.matches(Regex(".*:bidrag-grunnlag(-feature)?"))) add(Rolle.BISYS_APPLIKASJON)
             }
