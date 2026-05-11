@@ -2,8 +2,13 @@ spring:
   flyway:
     locations: filesystem:./src/test/resources/db/migration-tests,filesystem:./src/main/resources/db/migration
 
-AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+AZURE_OPENID_CONFIG_ISSUER: dummy
+AZURE_OPENID_CONFIG_JWKS_URI: dummy
 AZURE_APP_CLIENT_ID: dummy
+
+TOKEN_X_ISSUER: dummy
+TOKEN_X_JWKS_URI: dummy
+TOKEN_X_CLIENT_ID: dummy
 
 # Kreves for at unleash mock skal fungere:
 UNLEASH_SERVER_API_URL: http://dummy/api/

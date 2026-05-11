@@ -52,7 +52,7 @@ class RolletilgangTest(
         header.setBearerAuth(
             token(
                 mapOf(
-                    "groups" to listOf("VEILDER"),
+                    "groups" to listOf("VEILEDER"),
                     "name" to "Mock McMockface",
                     "NAVident" to "Z0000",
                 ),
@@ -95,7 +95,7 @@ class RolletilgangTest(
         header.setBearerAuth(
             token(
                 mapOf(
-                    "groups" to listOf("VEILDER", "SAKSBEHANDLER"),
+                    "groups" to listOf("VEILEDER", "SAKSBEHANDLER"),
                     "name" to "Mock McMockface",
                     "NAVident" to "Z0000",
                 ),
@@ -129,7 +129,7 @@ class RolletilgangTest(
         header.setBearerAuth(
             token(
                 mapOf(
-                    "groups" to listOf("VEILDER"),
+                    "groups" to listOf("VEILEDER"),
                     "name" to "Mock McMockface",
                     "NAVident" to "Z0000",
                 ),

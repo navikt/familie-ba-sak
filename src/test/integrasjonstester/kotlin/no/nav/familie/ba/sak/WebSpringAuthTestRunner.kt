@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
-import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
@@ -15,6 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.RestTemplate
 
@@ -22,24 +23,18 @@ import org.springframework.web.client.RestTemplate
     classes = [ApplicationConfig::class],
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = [
-        "no.nav.security.jwt.issuer.azuread.discoveryUrl: http://localhost:\${mock-oauth2-server.port}/azuread/.well-known/openid-configuration",
-        "no.nav.security.jwt.issuer.azuread.accepted_audience: some-audience",
-        "rolle.veileder: VEILDER",
+        "rolle.veileder: VEILEDER",
         "rolle.saksbehandler: SAKSBEHANDLER",
         "rolle.beslutter: BESLUTTER",
         "rolle.forvalter: FORVALTER",
     ],
 )
 @ExtendWith(SpringExtension::class)
-@EnableMockOAuth2Server
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
     @Autowired
     lateinit var restTemplate: RestTemplate
-
-    @Autowired
-    lateinit var mockOAuth2Server: MockOAuth2Server
 
     @LocalServerPort
     private val port = 0
@@ -50,7 +45,7 @@ abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
         claims: Map<String, Any>,
         subject: String = DEFAULT_SUBJECT,
         audience: String = DEFAULT_AUDIENCE,
-        issuerId: String = DEFAULT_ISSUER_ID,
+        issuerId: String = AZUREAD_ISSUER_ID,
         clientId: String = DEFAULT_CLIENT_ID,
     ): String =
         mockOAuth2Server
@@ -89,7 +84,7 @@ abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
             token(
                 mapOf(
                     "groups" to (groups ?: listOf(BehandlerRolle.SYSTEM.name)),
-                    "azp" to "azp-test",
+                    "azp_name" to ":teamfamilie:azp-test",
                     "name" to SYSTEM_FORKORTELSE,
                     "preferred_username" to SYSTEM_FORKORTELSE,
                 ),
@@ -98,8 +93,43 @@ abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
         return httpHeaders
     }
 
+    /** Genererer et TokenX-token. [fnr] legges inn som `pid`-claim; null utelater claimet. */
+    fun hentTokenForTokenX(fnr: String? = null): String =
+        token(
+            claims =
+                mutableMapOf("acr" to "idporten-loa-high").apply {
+                    if (fnr != null) {
+                        this["pid"] = fnr
+                    }
+                },
+            subject = fnr ?: DEFAULT_SUBJECT,
+            audience = DEFAULT_AUDIENCE,
+            issuerId = TOKENX_ISSUER_ID,
+        )
+
     companion object {
-        const val DEFAULT_ISSUER_ID = "azuread"
+        val mockOAuth2Server by lazy {
+            MockOAuth2Server().also {
+                it.start()
+                Runtime.getRuntime().addShutdownHook(Thread { it.shutdown() })
+            }
+        }
+
+        @JvmStatic
+        @DynamicPropertySource
+        @Suppress("unused")
+        fun mockOAuth2ServerProperties(registry: DynamicPropertyRegistry) {
+            val port = mockOAuth2Server.config.httpServer.port()
+            registry.add("AZURE_OPENID_CONFIG_ISSUER") { "http://localhost:$port/$AZUREAD_ISSUER_ID" }
+            registry.add("AZURE_OPENID_CONFIG_JWKS_URI") { "http://localhost:$port/$AZUREAD_ISSUER_ID/jwks" }
+            registry.add("AZURE_APP_CLIENT_ID") { DEFAULT_AUDIENCE }
+            registry.add("TOKEN_X_ISSUER") { "http://localhost:$port/$TOKENX_ISSUER_ID" }
+            registry.add("TOKEN_X_JWKS_URI") { "http://localhost:$port/$TOKENX_ISSUER_ID/jwks" }
+            registry.add("TOKEN_X_CLIENT_ID") { DEFAULT_AUDIENCE }
+        }
+
+        const val AZUREAD_ISSUER_ID = "azuread"
+        const val TOKENX_ISSUER_ID = "tokenx"
         const val DEFAULT_SUBJECT = "subject"
         const val DEFAULT_AUDIENCE = "some-audience"
         const val DEFAULT_CLIENT_ID = "theclientid"
