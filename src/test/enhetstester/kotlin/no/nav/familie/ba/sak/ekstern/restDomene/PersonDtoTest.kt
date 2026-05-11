@@ -13,6 +13,39 @@ import java.time.LocalDateTime
 
 class PersonDtoTest {
     @Test
+    fun `tilRegisterhistorikkDto skal bruke endretTidspunkt som hentetTidspunkt`() {
+        // Arrange
+        val endret = LocalDateTime.of(2025, 6, 15, 10, 30, 0)
+
+        val personopplysningGrunnlag =
+            lagPersonopplysningGrunnlag(
+                id = 1L,
+                behandlingId = 1L,
+                lagPersoner = { grunnlag ->
+                    setOf(
+                        Person(
+                            aktør = Aktør(aktørId = "1234567891011"),
+                            type = PersonType.SØKER,
+                            fødselsdato = LocalDate.of(1980, 1, 1),
+                            navn = "Test Testesen",
+                            kjønn = Kjønn.KVINNE,
+                            personopplysningGrunnlag = grunnlag,
+                        ),
+                    )
+                },
+            )
+
+        personopplysningGrunnlag.endretTidspunkt = endret
+
+        // Act
+        val dto = personopplysningGrunnlag.søker.tilRegisterhistorikkDto(eldsteBarnsFødselsdato = null)
+
+        // Assert
+        assertThat(dto.hentetTidspunkt).isEqualTo(endret)
+        assertThat(dto.hentetTidspunkt).isNotEqualTo(personopplysningGrunnlag.opprettetTidspunkt)
+    }
+
+    @Test
     fun `historiskeIdenter skal kun inkludere inaktive identer med gjelderTil lik eller etter eldste barn sin fødselsdato`() {
         // Arrange
         val aktør = Aktør(aktørId = "1234567891011")

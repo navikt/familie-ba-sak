@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 class PersongrunnlagService(
@@ -345,7 +346,11 @@ class PersongrunnlagService(
                 saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
             }
         } else {
-            aktivtPersonopplysningGrunnlag
+            // Siden vi ikke har gjort noen endringer i det aktive personopplysningsgrunnlaget, trenger vi ikke å lagre det på nytt.
+            // Vi oppdaterer likevel endretTidspunkt for å reflektere at det er sjekket for oppdateringer i registeret.
+            aktivtPersonopplysningGrunnlag.apply {
+                endretTidspunkt = LocalDateTime.now()
+            }
         }
     }
 

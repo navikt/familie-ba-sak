@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 class PersongrunnlagServiceTest {
@@ -425,6 +426,45 @@ class PersongrunnlagServiceTest {
             val sorterteAdresser = bostedadresseSøker.sortedBy { it.periode?.fom }
             assertThat(sorterteAdresser.first().periode?.tom).isAfter(eldsteBarn.fødselsdato)
             assertThat(sorterteAdresser.last().periode?.fom).isAfter(eldsteBarn.fødselsdato)
+        }
+
+        @Test
+        fun `skal oppdatere endretTidspunkt på aktivt grunnlag når det ikke er relevante endringer`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER)
+            val barn = lagPerson(type = PersonType.BARN)
+            val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING)
+
+            val opprinneligEndretTidspunkt = LocalDateTime.of(2020, 1, 1, 12, 0, 0)
+            val aktivtGrunnlag =
+                lagTestPersonopplysningGrunnlag(
+                    behandlingId = behandling.id,
+                    personer = arrayOf(søker, barn),
+                ).apply {
+                    endretTidspunkt = opprinneligEndretTidspunkt
+                }
+
+            every { persongrunnlagService.hentAktiv(behandling.id) } returns aktivtGrunnlag
+
+            every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns
+                PersonInfo(søker.fødselsdato, søker.navn, søker.kjønn)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn.aktør) } returns
+                PersonInfo(barn.fødselsdato, barn.navn, barn.kjønn)
+
+            // Act
+            val oppdatertPersonopplysningGrunnlag =
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = søker.aktør,
+                    barnFraInneværendeBehandling = listOf(barn.aktør),
+                    behandling = behandling,
+                    målform = Målform.NB,
+                )
+
+            // Assert
+            assertThat(oppdatertPersonopplysningGrunnlag).isSameAs(aktivtGrunnlag)
+            assertThat(oppdatertPersonopplysningGrunnlag.endretTidspunkt).isAfter(opprinneligEndretTidspunkt)
+            verify(exactly = 0) { persongrunnlagService.lagreOgDeaktiverGammel(any()) }
         }
 
         @Nested
