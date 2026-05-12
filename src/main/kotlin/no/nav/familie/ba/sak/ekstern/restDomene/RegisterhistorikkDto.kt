@@ -20,7 +20,7 @@ data class RegisterhistorikkDto(
 
 fun Person.tilRegisterhistorikkDto(eldsteBarnsFødselsdato: LocalDate?) =
     RegisterhistorikkDto(
-        hentetTidspunkt = this.personopplysningGrunnlag.opprettetTidspunkt,
+        hentetTidspunkt = this.personopplysningGrunnlag.endretTidspunkt,
         oppholdstillatelse = opphold.map { it.tilRegisteropplysningDto() },
         statsborgerskap = statsborgerskap.map { it.tilRegisteropplysningDto() },
         bostedsadresse = this.bostedsadresser.map { it.tilRegisteropplysningDto() }.fyllInnTomDatoer(),
