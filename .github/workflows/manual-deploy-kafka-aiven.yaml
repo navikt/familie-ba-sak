@@ -14,52 +14,52 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v4
       - name: Deploy bisys-opphoer-av-barnetrygd-topic til dev
-        uses: nais/deploy/actions/deploy@823ec9b7e305ce7cf911d0f9a25f7da9d7486cf2 # ratchet:nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@a7f8690f9b367fcbf5348a0a1e21d44f1aae50eb # ratchet:nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/kafka/bisys-opphoer-av-barnetrygd-dev.yaml
       - name: Deploy bisys-opphoer-av-barnetrygd-topic til prod
-        uses: nais/deploy/actions/deploy@823ec9b7e305ce7cf911d0f9a25f7da9d7486cf2 # ratchet:nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@a7f8690f9b367fcbf5348a0a1e21d44f1aae50eb # ratchet:nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/kafka/bisys-opphoer-av-barnetrygd-prod.yaml
       - name: Deploy dvh-vedtak-topic til dev
-        uses: nais/deploy/actions/deploy@823ec9b7e305ce7cf911d0f9a25f7da9d7486cf2 # ratchet:nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@a7f8690f9b367fcbf5348a0a1e21d44f1aae50eb # ratchet:nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/kafka/dvh-vedtak-topic-dev.yaml
       - name: Deploy aapen-familie-ba-sak-identer-med-barnetrygd til dev
-        uses: nais/deploy/actions/deploy@823ec9b7e305ce7cf911d0f9a25f7da9d7486cf2 # ratchet:nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@a7f8690f9b367fcbf5348a0a1e21d44f1aae50eb # ratchet:nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/kafka/aapen-familie-ba-sak-identer-med-barnetrygd-dev.yaml
       - name: Deploy dvh-vedtak-topic til prod
-        uses: nais/deploy/actions/deploy@823ec9b7e305ce7cf911d0f9a25f7da9d7486cf2 # ratchet:nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@a7f8690f9b367fcbf5348a0a1e21d44f1aae50eb # ratchet:nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/kafka/dvh-vedtak-topic-prod.yaml
       - name: Deploy dvh-saksstatistikk-sak-v1-topic til dev
-        uses: nais/deploy/actions/deploy@823ec9b7e305ce7cf911d0f9a25f7da9d7486cf2 # ratchet:nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@a7f8690f9b367fcbf5348a0a1e21d44f1aae50eb # ratchet:nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/kafka/dvh-saksstatistikk-sak-v1-topic-dev.yaml
       - name: Deploy dvh-saksstatistikk-sak-v1-topic til prod
-        uses: nais/deploy/actions/deploy@823ec9b7e305ce7cf911d0f9a25f7da9d7486cf2 # ratchet:nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@a7f8690f9b367fcbf5348a0a1e21d44f1aae50eb # ratchet:nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/kafka/dvh-saksstatistikk-sak-v1-topic-prod.yaml
       - name: Deploy dvh-sakstatistikk-behandling-v1-topic til dev
-        uses: nais/deploy/actions/deploy@823ec9b7e305ce7cf911d0f9a25f7da9d7486cf2 # ratchet:nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@a7f8690f9b367fcbf5348a0a1e21d44f1aae50eb # ratchet:nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/kafka/dvh-sakstatistikk-behandling-v1-topic-dev.yaml
       - name: Deploy dvh-sakstatistikk-behandling-v1-topic til prod
-        uses: nais/deploy/actions/deploy@823ec9b7e305ce7cf911d0f9a25f7da9d7486cf2 # ratchet:nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@a7f8690f9b367fcbf5348a0a1e21d44f1aae50eb # ratchet:nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/kafka/dvh-sakstatistikk-behandling-v1-topic-prod.yaml
       - name: Deploy aapen-familie-ba-sak-identer-med-barnetrygd til prod
-        uses: nais/deploy/actions/deploy@823ec9b7e305ce7cf911d0f9a25f7da9d7486cf2 # ratchet:nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@a7f8690f9b367fcbf5348a0a1e21d44f1aae50eb # ratchet:nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/kafka/aapen-familie-ba-sak-identer-med-barnetrygd-prod.yaml
