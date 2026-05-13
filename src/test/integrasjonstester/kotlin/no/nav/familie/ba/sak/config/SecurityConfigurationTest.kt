@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -167,7 +167,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
         }
 
         @ParameterizedTest
-        @CsvSource(value = ["omsorgsopptjening-start-innlesning", "omsorgsopptjening-start-innlesning-q1"])
+        @ValueSource(strings = ["omsorgsopptjening-start-innlesning", "omsorgsopptjening-start-innlesning-q1"])
         fun `pensjon-token har tilgang til pensjon-endepunkt`(
             applikasjonNavn: String,
         ) {
@@ -210,7 +210,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
         }
 
         @ParameterizedTest
-        @CsvSource(value = ["bidrag-grunnlag", "bidrag-grunnlag-feature"])
+        @ValueSource(strings = ["bidrag-grunnlag", "bidrag-grunnlag-feature"])
         fun `bisys-token har tilgang til bisys-endepunkt`(
             applikasjonNavn: String,
         ) {
