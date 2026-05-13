@@ -125,7 +125,7 @@ class SecurityConfiguration(
                     writer,
                     failure<Nothing>(
                         errorMessage = "401 Unauthorized",
-                        frontendFeilmelding = "En uventet feil oppstod: Kall ikke autorisert",
+                        frontendFeilmelding = "Kall ikke autorisert",
                     ),
                 )
             }

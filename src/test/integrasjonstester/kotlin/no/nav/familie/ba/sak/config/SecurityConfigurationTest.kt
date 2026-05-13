@@ -50,7 +50,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
             assertThat(feil.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
             val body = jsonMapper.readValue<Ressurs<Any>>(feil.responseBodyAsString)
             assertThat(body.status).isEqualTo(Ressurs.Status.FEILET)
-            assertThat(body.frontendFeilmelding).isEqualTo("En uventet feil oppstod: Kall ikke autorisert")
+            assertThat(body.frontendFeilmelding).isEqualTo("Kall ikke autorisert")
         }
     }
 
