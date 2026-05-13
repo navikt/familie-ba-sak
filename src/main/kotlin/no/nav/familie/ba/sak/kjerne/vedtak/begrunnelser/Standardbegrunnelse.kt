@@ -521,6 +521,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetEnsligMindrearigFinnmarkstillegg"
     },
+    INNVILGET_SKJERMET_BARN_IGANGSETTE_I_NORMAL_FAGSAK {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetSkjermetBarnIgangsetteINormalFagsak"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
@@ -1352,6 +1356,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     OPPHØR_ENSLIG_MINDREÅRIG_UTVANDRET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorEnsligMindrearigUtvandret"
+    },
+    OPPHØR_SKJERMET_BARN_MIDLERTIDIG_OPPHØR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorSkjermetBarnMidlertidigOpphor"
     },
     FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
