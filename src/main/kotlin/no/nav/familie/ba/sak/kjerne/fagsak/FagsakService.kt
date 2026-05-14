@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsingRepository
+import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -56,6 +57,7 @@ class FagsakService(
     private val featureToggleService: FeatureToggleService,
     private val strengtFortroligService: StrengtFortroligService,
     private val fagsakLåsingRepository: FagsakLåsingRepository,
+    private val fagsakLåsingService: FagsakLåsingService,
 ) {
     private val antallFagsakerOpprettetFraManuell =
         Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "manuell")
@@ -356,6 +358,11 @@ class FagsakService(
     fun finnOrgnummerForLøpendeFagsaker(): List<String> = fagsakRepository.finnOrgnummerForLøpendeFagsaker()
 
     fun finnIdenterForLøpendeFagsaker(): List<String> = fagsakRepository.finnIdenterForLøpendeFagsaker()
+
+    fun låsOppFagsak(
+        fagsakId: Long,
+        begrunnelse: String,
+    ) = fagsakLåsingService.låsOppFagsak(fagsakId, begrunnelse)
 
     companion object {
         private val logger = LoggerFactory.getLogger(FagsakService::class.java)

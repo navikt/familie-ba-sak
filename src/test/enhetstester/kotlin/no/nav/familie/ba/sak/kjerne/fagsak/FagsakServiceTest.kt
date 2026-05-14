@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsHendelse
 import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsing
 import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsingRepository
+import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -60,6 +61,7 @@ class FagsakServiceTest {
     private val skjermetBarnSøkerRepository = mockk<SkjermetBarnSøkerRepository>()
     private val fagsakLåsingRepository = mockk<FagsakLåsingRepository>()
     private val strengtFortroligService = mockk<StrengtFortroligService>()
+    private val fagsakLåsingService = mockk<FagsakLåsingService>()
     private val fagsakService =
         FagsakService(
             fagsakRepository = fagsakRepository,
@@ -78,6 +80,7 @@ class FagsakServiceTest {
             featureToggleService = featureToggleService,
             strengtFortroligService = strengtFortroligService,
             fagsakLåsingRepository = fagsakLåsingRepository,
+            fagsakLåsingService = fagsakLåsingService,
         )
 
     @Nested
