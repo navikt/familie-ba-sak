@@ -28,6 +28,7 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsluttSakRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.GjenåpneSakRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokdist.AdresseType
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
@@ -494,6 +495,18 @@ class IntegrasjonKlient(
             tjeneste = "dokarkiv",
             uri = uri,
             formål = "Avslutt sak ${request.fagsakId} i fagsaksystem ${request.fagsaksystem}",
+        ) {
+            patchForEntity<Ressurs<Any>>(uri, request)
+        }
+    }
+
+    fun gjenaapneSak(request: GjenåpneSakRequest) {
+        val uri = URI.create("$integrasjonUri/arkiv/gjenaapneSak")
+
+        kallEksternTjenesteUtenRespons(
+            tjeneste = "dokarkiv",
+            uri = uri,
+            formål = "Gjenåpne sak ${request.fagsakId} i fagsaksystem ${request.fagsaksystem}",
         ) {
             patchForEntity<Ressurs<Any>>(uri, request)
         }
