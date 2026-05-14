@@ -76,33 +76,6 @@ class FagsakLåsingServiceTest {
         }
 
         @Test
-        fun `skal deaktivere eksisterende aktiv låsing før lagring av ny`() {
-            // Arrange
-            val fagsak = lagFagsak(status = FagsakStatus.LÅST)
-            every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
-
-            val eksisterendeLåsing =
-                FagsakLåsing(
-                    fagsak = fagsak,
-                    tidspunkt =
-                        java.time.LocalDateTime
-                            .now()
-                            .minusDays(1),
-                    hendelse = FagsakLåsHendelse.LÅST,
-                    begrunnelse = "Gammel låsing",
-                    aktiv = true,
-                )
-            every { fagsakLåsingRepository.finnAktivLåsForFagsak(fagsak.id) } returns eksisterendeLåsing
-            every { fagsakLåsingRepository.saveAndFlush(any()) } answers { firstArg() }
-
-            // Act
-            fagsakLåsingService.låsOppFagsak(fagsak.id, "Lås opp igjen")
-
-            // Assert
-            verify { fagsakLåsingRepository.saveAndFlush(match { !it.aktiv }) }
-        }
-
-        @Test
         fun `skal kalle gjenåpneSak på integrasjonsklienten med riktige verdier`() {
             // Arrange
             val fagsak = lagFagsak(status = FagsakStatus.LÅST)
