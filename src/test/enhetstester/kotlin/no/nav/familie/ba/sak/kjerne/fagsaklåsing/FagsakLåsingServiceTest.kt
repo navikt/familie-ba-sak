@@ -44,62 +44,77 @@ class FagsakLåsingServiceTest {
         }
 
         @Test
-        fun `skal låse opp fagsak, sette status til AVSLUTTET, og gjenåpne sak i Joark`() {
-            val fagsak = lagFagsak(status = FagsakStatus.LÅST)
-            every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
-
-            val resultat = fagsakLåsingService.låsOppFagsak(fagsak.id, "Test begrunnelse")
-
-            assertThat(resultat.status).isEqualTo(FagsakStatus.AVSLUTTET)
-        }
-
-        @Test
         fun `skal opprette FagsakLåsing med hendelse LÅST_OPP`() {
+            // Arrange
             val fagsak = lagFagsak(status = FagsakStatus.LÅST)
             every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
 
             val låsingSlot = slot<FagsakLåsing>()
             every { fagsakLåsingRepository.save(capture(låsingSlot)) } answers { firstArg() }
 
+            // Act
             fagsakLåsingService.låsOppFagsak(fagsak.id, "En god grunn")
 
+            // Assert
             assertThat(låsingSlot.captured.hendelse).isEqualTo(FagsakLåsHendelse.LÅST_OPP)
             assertThat(låsingSlot.captured.begrunnelse).isEqualTo("En god grunn")
             assertThat(låsingSlot.captured.fagsak.id).isEqualTo(fagsak.id)
         }
 
         @Test
-        fun `skal deaktivere gammel aktiv låsing før ny lagres`() {
+        fun `skal sette fagsak status til AVSLUTTET`() {
+            // Arrange
             val fagsak = lagFagsak(status = FagsakStatus.LÅST)
-            val gammelLåsing =
-                FagsakLåsing(
-                    id = 99,
-                    fagsak = fagsak,
-                    tidspunkt = java.time.LocalDateTime.now(),
-                    hendelse = FagsakLåsHendelse.LÅST,
-                    begrunnelse = "Gammel",
-                    aktiv = true,
-                )
-
             every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
-            every { fagsakLåsingRepository.finnAktivLåsForFagsak(fagsak.id) } returns gammelLåsing
-            every { fagsakLåsingRepository.saveAndFlush(any()) } answers { firstArg() }
 
-            fagsakLåsingService.låsOppFagsak(fagsak.id, "Begrunnelse")
+            // Act
+            val oppdatertFagsak = fagsakLåsingService.låsOppFagsak(fagsak.id, "En god grunn")
 
-            verify { fagsakLåsingRepository.saveAndFlush(match { !it.aktiv && it.id == 99L }) }
+            // Assert
+            assertThat(oppdatertFagsak.status).isEqualTo(FagsakStatus.AVSLUTTET)
+            verify { fagsakRepository.save(match { it.status == FagsakStatus.AVSLUTTET }) }
         }
 
         @Test
-        fun `skal kalle gjenaapneSak på integrasjonsklienten med riktige verdier`() {
+        fun `skal deaktivere eksisterende aktiv låsing før lagring av ny`() {
+            // Arrange
+            val fagsak = lagFagsak(status = FagsakStatus.LÅST)
+            every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
+
+            val eksisterendeLåsing =
+                FagsakLåsing(
+                    fagsak = fagsak,
+                    tidspunkt =
+                        java.time.LocalDateTime
+                            .now()
+                            .minusDays(1),
+                    hendelse = FagsakLåsHendelse.LÅST,
+                    begrunnelse = "Gammel låsing",
+                    aktiv = true,
+                )
+            every { fagsakLåsingRepository.finnAktivLåsForFagsak(fagsak.id) } returns eksisterendeLåsing
+            every { fagsakLåsingRepository.saveAndFlush(any()) } answers { firstArg() }
+
+            // Act
+            fagsakLåsingService.låsOppFagsak(fagsak.id, "Lås opp igjen")
+
+            // Assert
+            verify { fagsakLåsingRepository.saveAndFlush(match { !it.aktiv }) }
+        }
+
+        @Test
+        fun `skal kalle gjenåpneSak på integrasjonsklienten med riktige verdier`() {
+            // Arrange
             val fagsak = lagFagsak(status = FagsakStatus.LÅST)
             every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
 
             val requestSlot = slot<GjenåpneSakRequest>()
             every { integrasjonKlient.gjenåpneSakIDokarkiv(capture(requestSlot)) } just runs
 
+            // Act
             fagsakLåsingService.låsOppFagsak(fagsak.id, "Begrunnelse")
 
+            // Assert
             val request = requestSlot.captured
             assertThat(request.tema).isEqualTo(Tema.BAR)
             assertThat(request.fagsakId).isEqualTo(fagsak.id.toString())
@@ -110,9 +125,11 @@ class FagsakLåsingServiceTest {
 
         @Test
         fun `skal kaste FunksjonellFeil hvis fagsak ikke har status LÅST`() {
+            // Arrange
             val fagsak = lagFagsak(status = FagsakStatus.LØPENDE)
             every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
 
+            // Act & Assert
             val feil =
                 assertThrows<FunksjonellFeil> {
                     fagsakLåsingService.låsOppFagsak(fagsak.id, "Begrunnelse")
@@ -125,10 +142,12 @@ class FagsakLåsingServiceTest {
         }
 
         @Test
-        fun `skal kaste feil hvis begrunnelse er blank`() {
+        fun `skal kaste FunksjonellFeil hvis begrunnelse er blank`() {
+            // Arrange
             val fagsak = lagFagsak(status = FagsakStatus.LÅST)
             every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
 
+            // Act & Assert
             assertThrows<FunksjonellFeil> {
                 fagsakLåsingService.låsOppFagsak(fagsak.id, "   ")
             }
@@ -138,12 +157,18 @@ class FagsakLåsingServiceTest {
         }
 
         @Test
-        fun `skal kaste Feil hvis fagsak ikke finnes`() {
-            every { fagsakRepository.finnFagsak(any()) } returns null
+        fun `skal ikke kalle integrasjonsklienten hvis fagsak har feil status`() {
+            // Arrange
+            val fagsak = lagFagsak(status = FagsakStatus.OPPRETTET)
+            every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
 
-            assertThrows<no.nav.familie.ba.sak.common.Feil> {
-                fagsakLåsingService.låsOppFagsak(999L, "Begrunnelse")
+            // Act & Assert
+            assertThrows<FunksjonellFeil> {
+                fagsakLåsingService.låsOppFagsak(fagsak.id, "Begrunnelse")
             }
+
+            verify(exactly = 0) { integrasjonKlient.gjenåpneSakIDokarkiv(any()) }
+            verify(exactly = 0) { fagsakRepository.save(any()) }
         }
     }
 }
