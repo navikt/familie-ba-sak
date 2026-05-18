@@ -145,6 +145,29 @@ class EndretUtbetalingAndelService(
     }
 
     @Transactional
+    fun slettEndretUtbetalingAndelerForPersonerIkkeIPersonopplysningGrunnlag(behandling: Behandling) {
+        val personopplysningGrunnlag =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+                ?: return
+
+        val aktørerIBehandling = personopplysningGrunnlag.søkerOgBarn.map { it.aktør }.toSet()
+
+        endretUtbetalingAndelRepository.findByBehandlingId(behandling.id).forEach { endretUtbetalingAndel ->
+            val personerFortsattIBehandlingOgAndelen = endretUtbetalingAndel.personer.filter { it.aktør in aktørerIBehandling }.toMutableSet()
+            when {
+                personerFortsattIBehandlingOgAndelen.isEmpty() -> {
+                    endretUtbetalingAndelRepository.delete(endretUtbetalingAndel)
+                }
+
+                personerFortsattIBehandlingOgAndelen.size < endretUtbetalingAndel.personer.size -> {
+                    endretUtbetalingAndel.personer = personerFortsattIBehandlingOgAndelen
+                    endretUtbetalingAndelRepository.save(endretUtbetalingAndel)
+                }
+            }
+        }
+    }
+
+    @Transactional
     fun opprettTomEndretUtbetalingAndel(behandling: Behandling) =
         endretUtbetalingAndelRepository.save(
             EndretUtbetalingAndel(

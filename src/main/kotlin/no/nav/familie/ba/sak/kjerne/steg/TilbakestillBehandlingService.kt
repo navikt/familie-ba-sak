@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
@@ -27,6 +28,7 @@ class TilbakestillBehandlingService(
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
     private val avregningService: AvregningService,
     private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 ) {
     @Transactional
     fun initierOgSettBehandlingTilVilkårsvurdering(
@@ -44,14 +46,15 @@ class TilbakestillBehandlingService(
 
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
 
-        beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak = vedtak)
+        beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        endretUtbetalingAndelService.slettEndretUtbetalingAndelerForPersonerIkkeIPersonopplysningGrunnlag(behandling)
+        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id)
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandling.id,
             steg = StegType.VILKÅRSVURDERING,
         )
-        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id)
 
         vedtakRepository.saveAndFlush(vedtak)
     }
