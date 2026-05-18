@@ -59,7 +59,6 @@ class FagsakServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val skjermetBarnSøkerRepository = mockk<SkjermetBarnSøkerRepository>()
-    private val fagsakLåsingRepository = mockk<FagsakLåsingRepository>()
     private val strengtFortroligService = mockk<StrengtFortroligService>()
     private val fagsakLåsingService = mockk<FagsakLåsingService>()
     private val fagsakService =
@@ -79,7 +78,6 @@ class FagsakServiceTest {
             skjermetBarnSøkerRepository = skjermetBarnSøkerRepository,
             featureToggleService = featureToggleService,
             strengtFortroligService = strengtFortroligService,
-            fagsakLåsingRepository = fagsakLåsingRepository,
             fagsakLåsingService = fagsakLåsingService,
         )
 
@@ -141,7 +139,7 @@ class FagsakServiceTest {
             every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak) } returns emptySet()
             every { strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak) } returns false
             every { strengtFortroligService.anonymiserFagsakDto(any(), any()) } answers { firstArg() }
-            every { fagsakLåsingRepository.finnAktivLåsForFagsak(fagsak.id) } returns null
+            every { fagsakLåsingService.finnAktivLåsForFagsak(fagsak.id) } returns null
 
             // Act
             val restMinimalFagsak = fagsakService.lagMinimalFagsakDto(fagsak.id)
@@ -231,7 +229,7 @@ class FagsakServiceTest {
             every { vedtaksperiodeService.hentUtbetalingsperioder(sisteBehandlingSomErVedtatt) } returns emptyList()
             every { behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsak.id) } returns listOf(visningsbehandling)
             every { behandlingService.hentMigreringsdatoPåFagsak(fagsak.id) } returns null
-            every { fagsakLåsingRepository.finnAktivLåsForFagsak(fagsak.id) } returns fagsakLåsing
+            every { fagsakLåsingService.finnAktivLåsForFagsak(fagsak.id) } returns fagsakLåsing
             every { strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak) } returns false
             every { strengtFortroligService.anonymiserFagsakDto(any(), any()) } answers { firstArg() }
             every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak) } returns emptySet()

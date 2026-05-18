@@ -56,7 +56,6 @@ class FagsakService(
     private val skjermetBarnSøkerRepository: SkjermetBarnSøkerRepository,
     private val featureToggleService: FeatureToggleService,
     private val strengtFortroligService: StrengtFortroligService,
-    private val fagsakLåsingRepository: FagsakLåsingRepository,
     private val fagsakLåsingService: FagsakLåsingService,
 ) {
     private val antallFagsakerOpprettetFraManuell =
@@ -272,7 +271,7 @@ class FagsakService(
                 finnesStrengtFortroligPersonIFagsak = strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak),
                 låstTidspunkt =
                     if (fagsak.status == FagsakStatus.LÅST) {
-                        fagsakLåsingRepository.finnAktivLåsForFagsak(fagsak.id)?.tidspunkt
+                        fagsakLåsingService.finnAktivLåsForFagsak(fagsak.id)?.tidspunkt
                     } else {
                         null
                     },

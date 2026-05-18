@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.fagsaklåsing
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -64,6 +65,8 @@ class FagsakLåsingService(
 
         return fagsak
     }
+
+    fun finnAktivLåsForFagsak(fagsakId: Long) = fagsakLåsingRepository.finnAktivLåsForFagsak(fagsakId = fagsakId)
 
     fun lagreOgDeaktiverGammel(fagsakLåsing: FagsakLåsing): FagsakLåsing {
         val aktivFagsakLåsing = fagsakLåsingRepository.finnAktivLåsForFagsak(fagsakLåsing.fagsak.id)
