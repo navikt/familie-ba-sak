@@ -311,7 +311,13 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         )
     }
 
-    private fun hentTokenForBisys() = token(mapOf("azp_name" to "dev-gcp:bidrag:bidrag-grunnlag"))
+    private fun hentTokenForBisys() =
+        token(
+            mapOf(
+                "azp_name" to "dev-gcp:bidrag:bidrag-grunnlag",
+                "roles" to listOf("access_as_application"),
+            ),
+        )
 
     private fun gyldigOppgaveResponse(filnavn: String): String =
         Files.readString(
