@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse
 import no.nav.familie.ba.sak.sikkerhet.AzureAdAuthenticationManager
 import no.nav.familie.ba.sak.sikkerhet.Rolle.BISYS_APPLIKASJON
 import no.nav.familie.ba.sak.sikkerhet.Rolle.Companion.rollerMedInternTilgang
+import no.nav.familie.ba.sak.sikkerhet.Rolle.FORVALTER
 import no.nav.familie.ba.sak.sikkerhet.Rolle.KLAGE_APPLIKASJON
 import no.nav.familie.ba.sak.sikkerhet.Rolle.PENSJON_APPLIKASJON
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -77,9 +78,9 @@ class SecurityConfiguration(
         http {
             csrf { disable() }
             authorizeHttpRequests {
-                authorize("/api/ekstern/pensjon/**", hasRole(PENSJON_APPLIKASJON.name))
-                authorize("/api/bisys/**", hasRole(BISYS_APPLIKASJON.name))
-                authorize("/api/klage/**", hasRole(KLAGE_APPLIKASJON.name))
+                authorize("/api/ekstern/pensjon/**", hasAnyRole(PENSJON_APPLIKASJON.name, FORVALTER.name))
+                authorize("/api/bisys/**", hasAnyRole(BISYS_APPLIKASJON.name, FORVALTER.name))
+                authorize("/api/klage/**", hasAnyRole(KLAGE_APPLIKASJON.name, FORVALTER.name))
                 authorize(anyRequest, hasAnyRole(*rollerMedInternTilgang()))
             }
             oauth2ResourceServer {
