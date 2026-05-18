@@ -21,7 +21,7 @@ AZURE_VARIABLER="$(kubectl -n teamfamilie get secret "$AZURE_SECRET" -o json | j
 TOKEN_X_VARIABLER="$(kubectl -n teamfamilie get secret "$TOKEN_X_SECRET" -o json | jq '.data | map_values(@base64d)')"
 UNLEASH_VARIABLER="$(kubectl -n teamfamilie get secret familie-ba-sak-unleash-api-token -o json | jq '.data | map_values(@base64d)')"
 
-_jq() { echo "$1" | jq -r ".\"$2\""; }
+_jq() { echo "$2=$(echo "$1" | jq -r ".\"$2\"")"; }
 
 AZURE_APP_CLIENT_ID="$(_jq "$AZURE_VARIABLER" "AZURE_APP_CLIENT_ID")"
 AZURE_APP_CLIENT_SECRET="$(_jq "$AZURE_VARIABLER" "AZURE_APP_CLIENT_SECRET")"
