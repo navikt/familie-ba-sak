@@ -44,7 +44,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
         fun `api-kall uten token returnerer 401`() {
             val feil =
                 assertThrows<HttpStatusCodeException> {
-                    restTemplate.getForEntity<String>(hentUrl("/api/fagsak/1"))
+                    restTemplate.getForEntity<String>(hentUrl("/api/fagsaker/1"))
                 }
 
             assertThat(feil.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -64,7 +64,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
             val headers = hentHeaders(groups = listOf(rolle.name))
 
             try {
-                restTemplate.exchange<String>(hentUrl("/api/fagsak/1"), HttpMethod.GET, HttpEntity<String>(headers))
+                restTemplate.exchange<String>(hentUrl("/api/fagsaker/1"), HttpMethod.GET, HttpEntity<String>(headers))
             } catch (e: HttpStatusCodeException) {
                 assertThat(e.statusCode).isNotIn(HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN)
             }
@@ -75,11 +75,18 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
             val headers =
                 HttpHeaders().apply {
                     contentType = MediaType.APPLICATION_JSON
-                    setBearerAuth(token(mapOf("azp_name" to "dev-gcp:teamfamilie:tilfeldig-applikasjon")))
+                    setBearerAuth(
+                        token(
+                            mapOf(
+                                "azp_name" to "dev-gcp:teamfamilie:tilfeldig-applikasjon",
+                                "roles" to listOf("access_as_application"),
+                            ),
+                        ),
+                    )
                 }
 
             try {
-                restTemplate.exchange<String>(hentUrl("/api/fagsak/1"), HttpMethod.GET, HttpEntity<String>(headers))
+                restTemplate.exchange<String>(hentUrl("/api/fagsaker/1"), HttpMethod.GET, HttpEntity<String>(headers))
             } catch (e: HttpStatusCodeException) {
                 assertThat(e.statusCode).isNotIn(HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN)
             }
@@ -95,7 +102,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
             val feil =
                 assertThrows<HttpStatusCodeException> {
-                    restTemplate.exchange<String>(hentUrl("/api/fagsak/1"), HttpMethod.GET, HttpEntity<String>(headers))
+                    restTemplate.exchange<String>(hentUrl("/api/fagsaker/1"), HttpMethod.GET, HttpEntity<String>(headers))
                 }
 
             assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
@@ -104,7 +111,13 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
     @Nested
     inner class EksternKlagetilgang {
-        private fun klageToken() = token(mapOf("azp_name" to "dev-gcp:teamfamilie:familie-klage"))
+        private fun klageToken() =
+            token(
+                mapOf(
+                    "azp_name" to "dev-gcp:teamfamilie:familie-klage",
+                    "roles" to listOf("access_as_application"),
+                ),
+            )
 
         @Test
         fun `token fra annen applikasjon enn klage har ikke tilgang til klage-endepunkt`() {
@@ -148,7 +161,13 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
     @Nested
     inner class EksternPensjonstilgang {
-        private fun pensjonToken(applikasjonNavn: String) = token(mapOf("azp_name" to "dev-gcp:pensjonopptjening:$applikasjonNavn"))
+        private fun pensjonToken(applikasjonNavn: String) =
+            token(
+                mapOf(
+                    "azp_name" to "dev-gcp:pensjonopptjening:$applikasjonNavn",
+                    "roles" to listOf("access_as_application"),
+                ),
+            )
 
         @Test
         fun `pensjon-token har ikke tilgang til generelt api-endepunkt`() {
@@ -160,7 +179,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
             val feil =
                 assertThrows<HttpStatusCodeException> {
-                    restTemplate.exchange<String>(hentUrl("/api/fagsak/1"), HttpMethod.GET, HttpEntity<String>(headers))
+                    restTemplate.exchange<String>(hentUrl("/api/fagsaker/1"), HttpMethod.GET, HttpEntity<String>(headers))
                 }
 
             assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
@@ -191,7 +210,13 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
     @Nested
     inner class EksternBisystilgang {
-        private fun bisysToken(applikasjonNavn: String) = token(mapOf("azp_name" to "dev-gcp:bidrag:$applikasjonNavn"))
+        private fun bisysToken(applikasjonNavn: String) =
+            token(
+                mapOf(
+                    "azp_name" to "dev-gcp:bidrag:$applikasjonNavn",
+                    "roles" to listOf("access_as_application"),
+                ),
+            )
 
         @Test
         fun `bisys-token har ikke tilgang til generelt api-endepunkt`() {
@@ -203,7 +228,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
             val feil =
                 assertThrows<HttpStatusCodeException> {
-                    restTemplate.exchange<String>(hentUrl("/api/fagsak/1"), HttpMethod.GET, HttpEntity<String>(headers))
+                    restTemplate.exchange<String>(hentUrl("/api/fagsaker/1"), HttpMethod.GET, HttpEntity<String>(headers))
                 }
 
             assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
@@ -244,7 +269,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
             val feil =
                 assertThrows<HttpStatusCodeException> {
-                    restTemplate.exchange<String>(hentUrl("/api/fagsak/1"), HttpMethod.GET, HttpEntity<String>(headers))
+                    restTemplate.exchange<String>(hentUrl("/api/fagsaker/1"), HttpMethod.GET, HttpEntity<String>(headers))
                 }
 
             assertThat(feil.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)

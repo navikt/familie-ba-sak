@@ -50,11 +50,14 @@ class AzureAdAuthenticationManager(
     private fun convert(jwt: Jwt): JwtAuthenticationToken {
         val grupper = jwt.getClaimAsStringList("groups") ?: emptyList()
         val applicationName = jwt.getClaimAsString("azp_name") ?: ""
+        val roles = jwt.getClaimAsStringList("roles") ?: emptyList()
 
         val teamfamilieNamespaceRegex = Regex(".*:teamfamilie:.*")
         val familieKlageRegex = Regex(".*:teamfamilie:familie-klage")
         val pensjonRegex = Regex(".*:pensjonopptjening:omsorgsopptjening-start-innlesning(-q1)?")
         val bidragRegex = Regex(".*:bidrag:bidrag-grunnlag(-feature)?")
+
+        val erApplikasjon = roles.contains("access_as_application")
 
         val roller =
             buildSet {
@@ -64,10 +67,12 @@ class AzureAdAuthenticationManager(
                 if (grupper.contains(rolleConfig.BESLUTTER_ROLLE)) add(Rolle.BESLUTTER)
                 if (grupper.contains(prosesseringRolle)) add(Rolle.PROSESSERING)
 
-                if (applicationName.matches(teamfamilieNamespaceRegex)) add(Rolle.TEAMFAMILIE_APPLIKASJON)
-                if (applicationName.matches(familieKlageRegex)) add(Rolle.KLAGE_APPLIKASJON)
-                if (applicationName.matches(pensjonRegex)) add(Rolle.PENSJON_APPLIKASJON)
-                if (applicationName.matches(bidragRegex)) add(Rolle.BISYS_APPLIKASJON)
+                if (erApplikasjon) {
+                    if (applicationName.matches(teamfamilieNamespaceRegex)) add(Rolle.TEAMFAMILIE_APPLIKASJON)
+                    if (applicationName.matches(familieKlageRegex)) add(Rolle.KLAGE_APPLIKASJON)
+                    if (applicationName.matches(pensjonRegex)) add(Rolle.PENSJON_APPLIKASJON)
+                    if (applicationName.matches(bidragRegex)) add(Rolle.BISYS_APPLIKASJON)
+                }
             }
 
         if (roller.isEmpty()) {
