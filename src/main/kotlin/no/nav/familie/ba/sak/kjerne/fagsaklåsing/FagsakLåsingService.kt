@@ -87,7 +87,7 @@ class FagsakLåsingService(
         lagreOgDeaktiverGammel(
             FagsakLåsing(
                 fagsak = fagsak,
-                tidspunkt = LocalDateTime.now(),
+                tidspunkt = låsedato,
                 hendelse = FagsakLåsHendelse.LÅST,
                 begrunnelse = "Automatisk låst iht. arkivloven fordi yngste barn fylte 18 år ${yngsteBarnsFødselsdato.plusYears(18)}",
                 aktiv = true,

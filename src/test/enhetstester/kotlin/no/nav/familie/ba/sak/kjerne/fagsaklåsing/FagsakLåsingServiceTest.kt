@@ -114,6 +114,7 @@ class FagsakLåsingServiceTest {
             assertThat(lagretLåsSlot.captured.hendelse).isEqualTo(FagsakLåsHendelse.LÅST)
             assertThat(lagretLåsSlot.captured.aktiv).isTrue()
             assertThat(lagretLåsSlot.captured.begrunnelse).isEqualTo("Automatisk låst iht. arkivloven fordi yngste barn fylte 18 år ${yngsteBarnFødselsdato.plusYears(18)}")
+            assertThat(lagretLåsSlot.captured.tidspunkt).isEqualTo(yngsteBarnFødselsdato.plusYears(19).atStartOfDay())
             assertThat(joarkRequestSlot.captured.fagsakId).isEqualTo(fagsak.id.toString())
             assertThat(joarkRequestSlot.captured.administrativEnhet).isEqualTo(arbeidsfordelingsenhet.enhetId)
             verify { saksstatistikkEventPublisher.publiserSaksstatistikk(fagsak.id) }
