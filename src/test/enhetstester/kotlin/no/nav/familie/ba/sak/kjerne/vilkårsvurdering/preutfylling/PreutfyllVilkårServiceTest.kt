@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -24,6 +26,7 @@ class PreutfyllVilkårServiceTest {
     private val preutfyllBosattIRiketForFødselshendelserService: PreutfyllBosattIRiketForFødselshendelserService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
 
     val preutfyllVilkårService =
         PreutfyllVilkårService(
@@ -33,6 +36,7 @@ class PreutfyllVilkårServiceTest {
             preutfyllBosattIRiketForFødselshendelserService,
             persongrunnlagService,
             behandlingHentOgPersisterService,
+            featureToggleService = featureToggleService,
         )
 
     @Test
@@ -101,6 +105,7 @@ class PreutfyllVilkårServiceTest {
                 årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             )
         val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+        every { featureToggleService.isEnabled(FeatureToggle.PREUTFYLL_VILKÅR_REVURDERING_SØKNAD) } returns true
 
         // Act
         preutfyllVilkårService.preutfyllVilkår(vilkårsvurdering = vilkårsvurdering)
@@ -112,7 +117,7 @@ class PreutfyllVilkårServiceTest {
     }
 
     @Test
-    fun `Skal preutfylle bare for nye barn i revurdering med årsak søknad`() {
+    fun `Skal preutfylle bare for nye barn i revurdering med årsak søknad når toggle er på`() {
         // Arrange
         val fagsak = lagFagsak()
         val behandling = lagBehandling(fagsak = fagsak, behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.SØKNAD)
@@ -122,6 +127,7 @@ class PreutfyllVilkårServiceTest {
         val eksisterendeBarn = lagPerson(type = PersonType.BARN)
         val nyttBarn = lagPerson(type = PersonType.BARN)
 
+        every { featureToggleService.isEnabled(FeatureToggle.PREUTFYLL_VILKÅR_REVURDERING_SØKNAD) } returns true
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
             lagTestPersonopplysningGrunnlag(behandling.id, søker, eksisterendeBarn, nyttBarn)
         every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns
@@ -151,6 +157,7 @@ class PreutfyllVilkårServiceTest {
         val søker = lagPerson(type = PersonType.SØKER)
         val eksisterendeBarn = lagPerson(type = PersonType.BARN)
 
+        every { featureToggleService.isEnabled(FeatureToggle.PREUTFYLL_VILKÅR_REVURDERING_SØKNAD) } returns true
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
             lagTestPersonopplysningGrunnlag(behandling.id, søker, eksisterendeBarn)
         every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns
