@@ -75,14 +75,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
             val headers =
                 HttpHeaders().apply {
                     contentType = MediaType.APPLICATION_JSON
-                    setBearerAuth(
-                        token(
-                            mapOf(
-                                "azp_name" to "dev-gcp:teamfamilie:tilfeldig-applikasjon",
-                                "roles" to listOf("access_as_application"),
-                            ),
-                        ),
-                    )
+                    setBearerAuth(token(mapOf("azp_name" to "dev-gcp:teamfamilie:tilfeldig-applikasjon")))
                 }
 
             try {
@@ -111,13 +104,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
     @Nested
     inner class EksternKlagetilgang {
-        private fun klageToken() =
-            token(
-                mapOf(
-                    "azp_name" to "dev-gcp:teamfamilie:familie-klage",
-                    "roles" to listOf("access_as_application"),
-                ),
-            )
+        private fun klageToken() = token(mapOf("azp_name" to "dev-gcp:teamfamilie:familie-klage"))
 
         @Test
         fun `token fra annen applikasjon enn klage har ikke tilgang til klage-endepunkt`() {
@@ -161,13 +148,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
     @Nested
     inner class EksternPensjonstilgang {
-        private fun pensjonToken(applikasjonNavn: String) =
-            token(
-                mapOf(
-                    "azp_name" to "dev-gcp:pensjonopptjening:$applikasjonNavn",
-                    "roles" to listOf("access_as_application"),
-                ),
-            )
+        private fun pensjonToken(applikasjonNavn: String) = token(mapOf("azp_name" to "dev-gcp:pensjonopptjening:$applikasjonNavn"))
 
         @Test
         fun `pensjon-token har ikke tilgang til generelt api-endepunkt`() {
@@ -210,13 +191,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
     @Nested
     inner class EksternBisystilgang {
-        private fun bisysToken(applikasjonNavn: String) =
-            token(
-                mapOf(
-                    "azp_name" to "dev-gcp:bidrag:$applikasjonNavn",
-                    "roles" to listOf("access_as_application"),
-                ),
-            )
+        private fun bisysToken(applikasjonNavn: String) = token(mapOf("azp_name" to "dev-gcp:bidrag:$applikasjonNavn"))
 
         @Test
         fun `bisys-token har ikke tilgang til generelt api-endepunkt`() {

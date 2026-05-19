@@ -87,7 +87,6 @@ abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
                     "azp_name" to ":teamfamilie:azp-test",
                     "name" to SYSTEM_FORKORTELSE,
                     "preferred_username" to SYSTEM_FORKORTELSE,
-                    "roles" to listOf("access_as_application"),
                 ),
             ),
         )
