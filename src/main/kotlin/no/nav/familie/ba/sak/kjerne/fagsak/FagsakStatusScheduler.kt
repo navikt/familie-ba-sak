@@ -39,7 +39,7 @@ class FagsakStatusScheduler(
         }
     }
 
-    @Scheduled(cron = "\${CRON_FAGSAKSTATUS_SCHEDULER}")
+    @Scheduled(cron = "\${CRON_LÅS_FAGSAK_SCHEDULER}")
     fun startFagsakLåsing() {
         if (!featureToggleService.isEnabled(FeatureToggle.FAGSAKLÅSING_SCHEDULER)) {
             logger.info("Fagsaklåsing-scheduler-toggle er av, hopper over batch")
