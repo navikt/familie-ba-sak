@@ -28,7 +28,7 @@ import java.time.LocalDateTime
 @Service
 class FagsakLåsingService(
     private val fagsakRepository: FagsakRepository,
-    private val `fagsakLåsingRepository`: FagsakLåsingRepository,
+    private val fagsakLåsingRepository: FagsakLåsingRepository,
     private val integrasjonKlient: IntegrasjonKlient,
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,

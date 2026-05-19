@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.task.`FinnFagsakerSomSkalLåsesTask`
+import no.nav.familie.ba.sak.task.FinnFagsakerSomSkalLåsesTask
 import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
