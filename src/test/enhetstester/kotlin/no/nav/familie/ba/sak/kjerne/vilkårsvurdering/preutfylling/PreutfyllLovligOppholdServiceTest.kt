@@ -766,7 +766,7 @@ class PreutfyllLovligOppholdServiceTest {
         }
 
         @Test
-        fun `skal kun preutfylle lovlig opphold for personResultater hvis aktør er i aktørerVilkårSkalPreutfyllesFor`() {
+        fun `skal kun preutfylle lovlig opphold for aktører i aktørerVilkårSkalPreutfyllesFor`() {
             // Arrange
             val vilkårsvurdering =
                 lagVilkårsvurdering(

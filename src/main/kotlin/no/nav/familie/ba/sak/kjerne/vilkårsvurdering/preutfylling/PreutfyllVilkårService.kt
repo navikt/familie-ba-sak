@@ -54,8 +54,10 @@ class PreutfyllVilkårService(
     private fun finnNyeAktørerIBehandling(behandling: Behandling): List<Aktør> {
         val aktørerIInneværendeBehandling = hentSøkerOgBarnIBehandling(behandling)
 
-        val aktørerIForrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-                ?.let { hentSøkerOgBarnIBehandling (it) }
+        val aktørerIForrigeBehandling =
+            behandlingHentOgPersisterService
+                .hentForrigeBehandlingSomErVedtatt(behandling)
+                ?.let { hentSøkerOgBarnIBehandling(it) }
                 ?: emptyList()
 
         return aktørerIInneværendeBehandling - aktørerIForrigeBehandling.toSet()

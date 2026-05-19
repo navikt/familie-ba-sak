@@ -1644,7 +1644,7 @@ class PreutfyllBosattIRiketServiceTest {
     }
 
     @Test
-    fun `skal kun preutfylle bosatt i riket for personResultater med aktør i aktørerVilkårSkalPreutfyllesFor`() {
+    fun `skal kun preutfylle bosatt i riket for aktører i aktørerVilkårSkalPreutfyllesFor`() {
         // Arrange
         val behandling = lagBehandling()
         val søkerAktør = randomAktør()

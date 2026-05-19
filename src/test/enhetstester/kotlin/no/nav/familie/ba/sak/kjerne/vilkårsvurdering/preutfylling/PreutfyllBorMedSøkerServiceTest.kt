@@ -967,7 +967,7 @@ class PreutfyllBorMedSøkerServiceTest {
     }
 
     @Test
-    fun `skal kun preutfylle bor fast hos søker for barn med aktør i aktørerVilkårSkalPreutfyllesFor`() {
+    fun `skal kun preutfylle bor fast hos søker for barn i aktørerVilkårSkalPreutfyllesFor`() {
         // Arrange
         val nåDato = LocalDate.now()
 
