@@ -61,7 +61,7 @@ class PreutfyllLovligOppholdServiceTest {
                 }
 
             // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
             // Assert
             val lovligOppholdVilkår =
@@ -99,7 +99,7 @@ class PreutfyllLovligOppholdServiceTest {
                 }
 
             // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
             // Assert
             val lovligOppholdResultater =
@@ -139,7 +139,7 @@ class PreutfyllLovligOppholdServiceTest {
                 }
 
             // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
             // Assert
             val lovligOppholdResultater =
@@ -175,7 +175,7 @@ class PreutfyllLovligOppholdServiceTest {
                 }
 
             // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
             // Assert
             val lovligOppholdResultater =
@@ -209,7 +209,7 @@ class PreutfyllLovligOppholdServiceTest {
                 }
 
             // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
             // Assert
             val lovligOppholdResultater =
@@ -252,7 +252,7 @@ class PreutfyllLovligOppholdServiceTest {
                 }
 
             // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
             // Assert
             val lovligOppholdResultater =
@@ -304,7 +304,7 @@ class PreutfyllLovligOppholdServiceTest {
                 }
 
             // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
             // Assert
             val lovligOppholdResultater =
@@ -368,7 +368,7 @@ class PreutfyllLovligOppholdServiceTest {
                 }
 
             // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
             // Assert
             val lovligOppholdResultater =
@@ -401,7 +401,7 @@ class PreutfyllLovligOppholdServiceTest {
                 }
 
             // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
             // Assert
             val lovligOppholdResultater =
@@ -466,7 +466,7 @@ class PreutfyllLovligOppholdServiceTest {
             every { persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id) } returns persongrunnlag
 
             // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
             // Assert
             val lovligOppholdVilkårResultater =
@@ -506,7 +506,7 @@ class PreutfyllLovligOppholdServiceTest {
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningsgrunnlag
 
             // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
             // Assert
             val lovligOppholdResultater =
@@ -561,7 +561,7 @@ class PreutfyllLovligOppholdServiceTest {
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningsgrunnlag
 
             // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
             // Assert
             val lovligOppholdResultat =
@@ -606,7 +606,7 @@ class PreutfyllLovligOppholdServiceTest {
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningsgrunnlag
 
             // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
             // Assert
             val lovligOppholdResultater =
@@ -640,7 +640,7 @@ class PreutfyllLovligOppholdServiceTest {
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningsgrunnlag
 
             // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
             // Assert
             val lovligOppholdResultater =
@@ -681,7 +681,7 @@ class PreutfyllLovligOppholdServiceTest {
                 }
 
             // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
             // Assert
             val lovligOppholdResultater =
@@ -751,7 +751,7 @@ class PreutfyllLovligOppholdServiceTest {
                 }
 
             // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
             // Assert
             val lovligOppholdResultater =
@@ -763,6 +763,78 @@ class PreutfyllLovligOppholdServiceTest {
             assertThat(lovligOppholdResultater).hasSize(1)
             assertThat(lovligOppholdResultater.single().resultat).isEqualTo(Resultat.OPPFYLT)
             assertThat(lovligOppholdResultater.single().periodeFom).isEqualTo(innvandringstidspunkt)
+        }
+
+        @Test
+        fun `skal kun preutfylle lovlig opphold for personResultater hvis aktør er i aktørerVilkårSkalPreutfyllesFor`() {
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = behandling,
+                    lagPersonResultater = {
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                aktør = søkerAktør,
+                                lagVilkårResultater = { emptySet() },
+                                lagAnnenVurderinger = { emptySet() },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                aktør = barn.aktør,
+                                lagVilkårResultater = { emptySet() },
+                                lagAnnenVurderinger = { emptySet() },
+                            ),
+                        )
+                    },
+                )
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
+                lagPersonopplysningGrunnlag(behandlingId = behandling.id) { grunnlag ->
+                    val norskStatsborgerskap: (Person) -> GrStatsborgerskap = { person ->
+                        GrStatsborgerskap(
+                            landkode = "NOR",
+                            gyldigPeriode = sisteTiÅr,
+                            medlemskap = Medlemskap.NORDEN,
+                            person = person,
+                        )
+                    }
+                    setOf(
+                        lagPerson(aktør = søkerAktør, personopplysningGrunnlag = grunnlag).apply {
+                            statsborgerskap = mutableListOf(norskStatsborgerskap(this))
+                        },
+                        lagPerson(
+                            aktør = barn.aktør,
+                            type = PersonType.BARN,
+                            fødselsdato = barn.fødselsdato,
+                            personopplysningGrunnlag = grunnlag,
+                        ).apply {
+                            statsborgerskap = mutableListOf(norskStatsborgerskap(this))
+                        },
+                    )
+                }
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(
+                vilkårsvurdering = vilkårsvurdering,
+                aktørerVilkårSkalPreutfyllesFor = listOf(barn.aktør),
+            )
+
+            // Assert
+            val søkerLovligOpphold =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == søkerAktør }
+                    .vilkårResultater
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+            assertThat(søkerLovligOpphold).isEmpty()
+
+            val barnLovligOpphold =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == barn.aktør }
+                    .vilkårResultater
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+            assertThat(barnLovligOpphold).isNotEmpty
+            assertThat(barnLovligOpphold).allMatch { it.erAutomatiskVurdert }
         }
 
         private fun lagPersonopplysningGrunnlagMedSøkerOgBarn(

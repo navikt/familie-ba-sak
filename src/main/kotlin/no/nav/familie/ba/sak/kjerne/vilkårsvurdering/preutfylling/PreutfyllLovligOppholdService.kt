@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.iUkraina
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.lagErNordiskStatsborgerTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.LOVLIG_OPPHOLD
@@ -37,12 +38,16 @@ import java.time.LocalDate
 class PreutfyllLovligOppholdService(
     private val persongrunnlagService: PersongrunnlagService,
 ) {
-    fun preutfyllLovligOpphold(vilkårsvurdering: Vilkårsvurdering) {
+    fun preutfyllLovligOpphold(
+        vilkårsvurdering: Vilkårsvurdering,
+        aktørerVilkårSkalPreutfyllesFor: List<Aktør>,
+    ) {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id)
 
         val søkerErEøsBorgerOgHarArbeidsforholdTidslinje = lagErEøsBorgerOgHarArbeidsforholdTidslinje(personopplysningGrunnlag.søker)
 
         vilkårsvurdering.personResultater
+            .filter { it.aktør in aktørerVilkårSkalPreutfyllesFor }
             .forEach { personResultat ->
                 val person = personResultat.aktør.tilPerson(personopplysningGrunnlag)
                 if (person.statsborgerskap.iUkraina()) {
