@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsingRepository
 import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
@@ -271,7 +270,7 @@ class FagsakService(
                 finnesStrengtFortroligPersonIFagsak = strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak),
                 låstTidspunkt =
                     if (fagsak.status == FagsakStatus.LÅST) {
-                        fagsakLåsingService.finnAktivLåsForFagsak(fagsak.id)?.tidspunkt
+                        fagsakLåsingService.finnAktivLåsForFagsak(fagsak.id)?.opprettetTidspunkt
                     } else {
                         null
                     },
@@ -362,6 +361,9 @@ class FagsakService(
         fagsakId: Long,
         begrunnelse: String,
     ) = fagsakLåsingService.låsOppFagsak(fagsakId, begrunnelse)
+
+    @Transactional
+    fun låsFagsak(fagsakId: Long) = fagsakLåsingService.låsFagsak(fagsakId)
 
     companion object {
         private val logger = LoggerFactory.getLogger(FagsakService::class.java)

@@ -3,6 +3,9 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.task.FinnFagsakerSomSkalLåsesTask
 import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
@@ -14,6 +17,7 @@ class FagsakStatusScheduler(
     private val taskRepository: TaskRepositoryWrapper,
     private val envService: EnvService,
     private val leaderClientService: LeaderClientService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     /*
      * Siden barnetrygd er en månedsytelse vil en fagsak alltid løpe ut en måned
@@ -32,6 +36,18 @@ class FagsakStatusScheduler(
             false -> {
                 logger.info("Ikke opprettet oppdaterLøpendeFlaggTask på denne poden")
             }
+        }
+    }
+
+    @Scheduled(cron = "\${CRON_LÅS_FAGSAK_SCHEDULER}")
+    fun startFagsakLåsing() {
+        if (!featureToggleService.isEnabled(FeatureToggle.FAGSAKLÅSING_SCHEDULER)) {
+            logger.info("Fagsaklåsing-scheduler-toggle er av, hopper over batch")
+            return
+        }
+        if (leaderClientService.isLeader() || envService.erDev()) {
+            taskRepository.save(Task(type = FinnFagsakerSomSkalLåsesTask.TASK_STEP_TYPE, payload = ""))
+            logger.info("Opprettet FinnFagsakerForLåsingTask")
         }
     }
 
