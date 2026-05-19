@@ -603,6 +603,7 @@ class CucumberMock(
             preutfyllBosattIRiketForFødselshendelserService = preutfyllBosattIRiketForFødselshendelserService,
             persongrunnlagService = persongrunnlagService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            featureToggleService = featureToggleService,
         )
 
     val vilkårsvurderingForNyBehandlingService =

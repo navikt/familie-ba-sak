@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -20,6 +22,7 @@ class PreutfyllVilkårService(
     private val preutfyllBosattIRiketForFødselshendelserService: PreutfyllBosattIRiketForFødselshendelserService,
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun preutfyllVilkår(vilkårsvurdering: Vilkårsvurdering) {
         val behandling = vilkårsvurdering.behandling
@@ -27,13 +30,14 @@ class PreutfyllVilkårService(
         if (behandling.kategori == BehandlingKategori.EØS) return
         if (behandling.fagsak.type == FagsakType.SKJERMET_BARN) return
 
-        val aktørerSomViSkalPreutfylleFor =
+        val aktørerVilkårSkalPreutfyllesFor =
             when (behandling.type) {
                 FØRSTEGANGSBEHANDLING -> {
                     hentSøkerOgBarnIBehandling(behandling)
                 }
 
                 REVURDERING -> {
+                    if (!featureToggleService.isEnabled(FeatureToggle.PREUTFYLL_VILKÅR_REVURDERING_SØKNAD)) return
                     if (behandling.opprettetÅrsak != BehandlingÅrsak.SØKNAD) return
 
                     finnNyeAktørerIBehandling(behandling)
@@ -46,9 +50,9 @@ class PreutfyllVilkårService(
 
         persongrunnlagService.oppdaterRegisteropplysninger(behandling.id)
 
-        preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering, aktørerSomViSkalPreutfylleFor)
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, aktørerSomViSkalPreutfylleFor)
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, aktørerSomViSkalPreutfylleFor)
+        preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor)
     }
 
     private fun finnNyeAktørerIBehandling(behandling: Behandling): List<Aktør> {
