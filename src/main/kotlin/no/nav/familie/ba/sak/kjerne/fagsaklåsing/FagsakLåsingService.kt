@@ -178,7 +178,7 @@ class FagsakLåsingService(
     }
 
     private fun lagre(fagsak: Fagsak): Fagsak {
-        logger.info("${hentSaksbehandlerNavn()} oppretter fagsak $fagsak")
+        logger.info("${hentSaksbehandlerNavn()} oppdaterer fagsak $fagsak")
         return fagsakRepository.save(fagsak).also { saksstatistikkEventPublisher.publiserSaksstatistikk(it.id) }
     }
 }
