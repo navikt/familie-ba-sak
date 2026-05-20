@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.erSammeAdresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
@@ -27,12 +28,16 @@ import java.time.temporal.ChronoUnit
 class PreutfyllBorMedSøkerService(
     private val persongrunnlagService: PersongrunnlagService,
 ) {
-    fun preutfyllBorMedSøker(vilkårsvurdering: Vilkårsvurdering) {
+    fun preutfyllBorMedSøker(
+        vilkårsvurdering: Vilkårsvurdering,
+        aktørerVilkårSkalPreutfyllesFor: List<Aktør>,
+    ) {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id)
         val bostedsadresserSøker = Adresser.opprettFra(personopplysningGrunnlag.søker)
 
         vilkårsvurdering.personResultater
             .filterNot { it.erSøkersResultater() }
+            .filter { it.aktør in aktørerVilkårSkalPreutfyllesFor }
             .forEach { personResultat ->
                 val barn = personResultat.aktør.tilPerson(personopplysningGrunnlag)
                 val adresserForBarn = Adresser.opprettFra(barn)

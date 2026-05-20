@@ -103,7 +103,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -163,7 +163,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         vilkårsvurdering.personResultater.forEach { personResultat ->
@@ -213,7 +213,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -261,7 +261,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false)
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -308,7 +308,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = true)
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -369,7 +369,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false, barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnAktør.aktivFødselsnummer() to true))
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -430,7 +430,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { søknadService.finnDigitalSøknad(behandling.id) } returns null
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -497,7 +497,7 @@ class PreutfyllBosattIRiketServiceTest {
             }
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -566,7 +566,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad()
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater ?: emptyList()
@@ -636,7 +636,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad()
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -682,7 +682,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -741,7 +741,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -815,7 +815,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val søkerBosattIRiketVilkårResultat =
@@ -862,7 +862,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -915,7 +915,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -970,7 +970,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -1020,7 +1020,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -1075,7 +1075,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -1125,7 +1125,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -1174,7 +1174,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -1223,7 +1223,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -1272,7 +1272,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -1332,7 +1332,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -1389,7 +1389,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -1448,7 +1448,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -1511,7 +1511,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -1568,7 +1568,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val vilkårResultat =
@@ -1632,7 +1632,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering = vilkårsvurdering)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
 
         // Assert
         val bosattIRiketResultater =
@@ -1641,5 +1641,78 @@ class PreutfyllBosattIRiketServiceTest {
                 .vilkårResultater
 
         assertThat(bosattIRiketResultater).isEmpty()
+    }
+
+    @Test
+    fun `skal kun preutfylle bosatt i riket for aktører i aktørerVilkårSkalPreutfyllesFor`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val søkerAktør = randomAktør()
+        val barnAktør = randomAktør()
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
+                barnasIdenter = listOf(barnAktør.aktivFødselsnummer()),
+                søkerAktør = søkerAktør,
+                barnAktør = listOf(barnAktør),
+            ).also {
+                it.personer.forEach { person ->
+                    person.bostedsadresser =
+                        mutableListOf(
+                            lagGrVegadresseBostedsadresse(
+                                periode =
+                                    DatoIntervallEntitet(
+                                        fom = LocalDate.now().minusYears(5),
+                                        tom = null,
+                                    ),
+                                matrikkelId = 12345L,
+                            ),
+                        )
+                }
+            }
+
+        val vilkårsvurdering =
+            lagVilkårsvurdering(behandling = behandling).also {
+                it.personResultater =
+                    setOf(
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = søkerAktør,
+                            lagVilkårResultater = { emptySet() },
+                            lagAnnenVurderinger = { emptySet() },
+                        ),
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = barnAktør,
+                            lagVilkårResultater = { emptySet() },
+                            lagAnnenVurderinger = { emptySet() },
+                        ),
+                    )
+            }
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+        // Act
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(
+            vilkårsvurdering = vilkårsvurdering,
+            aktørerVilkårSkalPreutfyllesFor = listOf(barnAktør),
+        )
+
+        // Assert
+        val søkerBosattIRiket =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == søkerAktør }
+                .vilkårResultater
+                .filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+        assertThat(søkerBosattIRiket).isEmpty()
+
+        val barnBosattIRiket =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == barnAktør }
+                .vilkårResultater
+                .filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+        assertThat(barnBosattIRiket).isNotEmpty
+        assertThat(barnBosattIRiket).allMatch { it.erAutomatiskVurdert }
     }
 }
