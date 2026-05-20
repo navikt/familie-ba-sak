@@ -28,7 +28,7 @@ jobs:
     secrets: inherit
   notify-audit:
     name: Notify if audited deploy
-    if: github.ref != 'refs/heads/main' && inputs.environment == 'prod'
+    if: inputs.environment == 'prod'
     permissions: {}
     needs: deploy-with-existing-image
     uses: navikt/familie-baks-gha-workflows/.github/workflows/notify-audited-deploy.yaml@main # ratchet:exclude
