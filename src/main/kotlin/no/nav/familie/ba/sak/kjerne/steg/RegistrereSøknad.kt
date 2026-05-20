@@ -56,7 +56,6 @@ class RegistrereSøknad(
             søknadDTO = søknadDTO,
         )
 
-        // TODO: Fjern EndretUtbetalingAndel for personer som ikke lenger er relevant for behandlingen
         tilbakestillBehandlingService.initierOgSettBehandlingTilVilkårsvurdering(
             behandling = behandling,
             bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend,

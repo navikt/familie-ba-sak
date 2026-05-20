@@ -26,7 +26,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsHendelse
 import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsing
-import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsingRepository
+import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -58,8 +58,8 @@ class FagsakServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val skjermetBarnSøkerRepository = mockk<SkjermetBarnSøkerRepository>()
-    private val fagsakLåsingRepository = mockk<FagsakLåsingRepository>()
     private val strengtFortroligService = mockk<StrengtFortroligService>()
+    private val fagsakLåsingService = mockk<FagsakLåsingService>()
     private val fagsakService =
         FagsakService(
             fagsakRepository = fagsakRepository,
@@ -77,7 +77,7 @@ class FagsakServiceTest {
             skjermetBarnSøkerRepository = skjermetBarnSøkerRepository,
             featureToggleService = featureToggleService,
             strengtFortroligService = strengtFortroligService,
-            fagsakLåsingRepository = fagsakLåsingRepository,
+            fagsakLåsingService = fagsakLåsingService,
         )
 
     @Nested
@@ -138,7 +138,7 @@ class FagsakServiceTest {
             every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak) } returns emptySet()
             every { strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak) } returns false
             every { strengtFortroligService.anonymiserFagsakDto(any(), any()) } answers { firstArg() }
-            every { fagsakLåsingRepository.finnAktivLåsForFagsak(fagsak.id) } returns null
+            every { fagsakLåsingService.finnAktivLåsForFagsak(fagsak.id) } returns null
 
             // Act
             val restMinimalFagsak = fagsakService.lagMinimalFagsakDto(fagsak.id)
@@ -228,7 +228,7 @@ class FagsakServiceTest {
             every { vedtaksperiodeService.hentUtbetalingsperioder(sisteBehandlingSomErVedtatt) } returns emptyList()
             every { behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsak.id) } returns listOf(visningsbehandling)
             every { behandlingService.hentMigreringsdatoPåFagsak(fagsak.id) } returns null
-            every { fagsakLåsingRepository.finnAktivLåsForFagsak(fagsak.id) } returns fagsakLåsing
+            every { fagsakLåsingService.finnAktivLåsForFagsak(fagsak.id) } returns fagsakLåsing
             every { strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak) } returns false
             every { strengtFortroligService.anonymiserFagsakDto(any(), any()) } answers { firstArg() }
             every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak) } returns emptySet()
@@ -237,7 +237,7 @@ class FagsakServiceTest {
             val restMinimalFagsak = fagsakService.lagMinimalFagsakDto(fagsak.id)
 
             // Assert
-            assertThat(restMinimalFagsak.låstTidspunkt).isEqualTo(låstTidspunkt)
+            assertThat(restMinimalFagsak.låstTidspunkt).isEqualTo(fagsakLåsing.opprettetTidspunkt)
         }
     }
 

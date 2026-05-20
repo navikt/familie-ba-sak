@@ -49,4 +49,8 @@ enum class FeatureToggle(
     TILLAT_TILGANG_SKJERMET_BARN_UTEN_LØPENDE_ANDELER("familie-ba-sak.tillat-tilgang-skjermet-barn-uten-lopende-andeler"),
 
     UTLED_AVREGNING_PÅ_TVERS_AV_BEHANDLINGER("familie-ba-sak.utled-avregning-paa-tvers-av-behandlinger"),
+
+    // NAV-28902
+    FAGSAKLÅSING_SCHEDULER("familie-ba-sak.fagsaklaasing-scheduler"),
+    KAN_LÅSE_FAGSAK("familie-ba-sak.kan-laase-fagsak"),
 }

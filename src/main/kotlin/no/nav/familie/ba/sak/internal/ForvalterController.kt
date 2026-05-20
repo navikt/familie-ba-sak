@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatusScheduler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -93,6 +94,7 @@ class ForvalterController(
     private val taskService: TaskService,
     private val autovedtakMånedligValutajusteringService: AutovedtakMånedligValutajusteringService,
     private val månedligValutajusteringScheduler: MånedligValutajusteringScheduler,
+    private val fagsakStatusScheduler: FagsakStatusScheduler,
     private val fagsakService: FagsakService,
     private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
@@ -753,5 +755,29 @@ class ForvalterController(
             behandlingHentOgPersisterService.lagreEllerOppdater(this, sendTilDvh = false)
             secureLogger.info("Patchet ${behandling.fagsak.id} ved å deaktivere behandling ${behandling.id} og setter siste vedtatte behandling ($id) til aktiv")
         }
+    }
+
+    @PostMapping("/fagsaklåsing/start-batch")
+    @Operation(summary = "Start batch for å låse fagsaker iht. arkivloven")
+    fun startFagsakLåsingBatch(): ResponseEntity<Ressurs<String>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Start fagsaklåsing-batch",
+        )
+        fagsakStatusScheduler.startFagsakLåsing()
+        return ResponseEntity.ok(Ressurs.success("Fagsaklåsing-batch startet"))
+    }
+
+    @PostMapping("/fagsaklåsing/lås-fagsak/{fagsakId}")
+    @Operation(summary = "Lås én fagsak iht. arkivloven")
+    fun låsFagsak(
+        @PathVariable fagsakId: Long,
+    ): ResponseEntity<Ressurs<String>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Lås fagsak",
+        )
+        fagsakService.låsFagsak(fagsakId)
+        return ResponseEntity.ok(Ressurs.success("Fagsak $fagsakId er låst"))
     }
 }

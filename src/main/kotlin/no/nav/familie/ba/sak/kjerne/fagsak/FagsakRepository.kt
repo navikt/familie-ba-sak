@@ -273,4 +273,42 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         nativeQuery = true,
     )
     fun finnIdenterForLøpendeFagsaker(): List<String>
+
+    @Lock(LockModeType.NONE)
+    @Query(
+        value = """
+        WITH siste_vedtatte AS (
+            -- Siste vedtatte behandling per fagsak
+            SELECT DISTINCT ON (b.fk_fagsak_id) b.id, b.fk_fagsak_id
+            FROM behandling b
+            INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+            WHERE f.status   = 'AVSLUTTET'
+              AND f.arkivert  = FALSE
+              AND b.status   = 'AVSLUTTET'
+              AND b.resultat NOT LIKE 'HENLAGT%'
+            ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC
+        ),
+        yngste_barn AS (
+            SELECT sv.fk_fagsak_id,
+                   MAX(p.foedselsdato) AS yngste_foedselsdato
+            FROM   siste_vedtatte sv
+            INNER JOIN gr_personopplysninger gr
+                   ON  gr.fk_behandling_id = sv.id AND gr.aktiv = TRUE
+            INNER JOIN po_person p
+                   ON  p.fk_gr_personopplysninger_id = gr.id AND p.type = 'BARN'
+            GROUP BY sv.fk_fagsak_id
+        )
+        -- Fagsaker der yngste barn har fylt 18 år for mer enn 1 år siden,
+        -- og som ikke allerede er aktivt låst
+        SELECT yb.fk_fagsak_id
+        FROM   yngste_barn yb
+        WHERE  yb.yngste_foedselsdato + INTERVAL '19 years' <= CURRENT_DATE
+          AND  NOT EXISTS (
+                   SELECT 1 FROM fagsak_laasing fl
+                   WHERE  fl.fk_fagsak_id = yb.fk_fagsak_id AND fl.aktiv = TRUE
+               )
+        """,
+        nativeQuery = true,
+    )
+    fun finnAvsluttedeFagsakerSomSkalLåses(): List<Long>
 }

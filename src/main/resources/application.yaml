@@ -156,6 +156,7 @@ SANITY_FAMILIE_API_URL: https://xsrv1mh6.apicdn.sanity.io/v2021-06-07/data/query
 ECB_API_URL: https://data-api.ecb.europa.eu/service/data/EXR/
 NORGES_BANK_API_URL: https://data.norges-bank.no/api/data/EXR/
 CRON_FAGSAKSTATUS_SCHEDULER: "0 0 6 1 * *"
+CRON_LÅS_FAGSAK_SCHEDULER: "0 0 5 1 * *"
 
 # Swagger
 AUTHORIZATION_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/authorize
