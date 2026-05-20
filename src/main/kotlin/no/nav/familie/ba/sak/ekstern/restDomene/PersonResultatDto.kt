@@ -44,6 +44,7 @@ data class VilkårResultatDto(
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
     val resultatBegrunnelse: ResultatBegrunnelse? = null,
     val begrunnelseForManuellKontroll: String? = null,
+    val erOpprinneligPreutfyltIBehandling: Long? = null,
 ) {
     fun erAvslagUtenPeriode() = this.erEksplisittAvslagPåSøknad == true && this.periodeFom == null && this.periodeTom == null
 
@@ -73,6 +74,7 @@ fun PersonResultat.tilPersonResultatDto() =
                     vurderesEtter = vilkårResultat.vurderesEtter,
                     utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger,
                     begrunnelseForManuellKontroll = vilkårResultat.begrunnelseForManuellKontroll?.begrunnelse(vilkårResultat.vilkårType),
+                    erOpprinneligPreutfyltIBehandling = vilkårResultat.erOpprinneligPreutfyltIBehandling,
                 )
             },
         andreVurderinger =
