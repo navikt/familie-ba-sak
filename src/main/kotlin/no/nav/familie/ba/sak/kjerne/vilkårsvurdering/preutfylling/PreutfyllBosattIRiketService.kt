@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.iUkraina
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.lagErNordiskStatsborgerTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.søknad.Søknad
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
@@ -36,7 +37,7 @@ class PreutfyllBosattIRiketService(
 ) {
     fun preutfyllBosattIRiket(
         vilkårsvurdering: Vilkårsvurdering,
-        identerVilkårSkalPreutfyllesFor: List<String>? = null,
+        aktørerVilkårSkalPreutfyllesFor: List<Aktør>,
     ) {
         val behandling = vilkårsvurdering.behandling
 
@@ -44,14 +45,8 @@ class PreutfyllBosattIRiketService(
 
         val digitalSøknad = søknadService.finnDigitalSøknad(behandling.id)
 
-        val identer =
-            vilkårsvurdering
-                .personResultater
-                .map { it.aktør.aktivFødselsnummer() }
-                .filter { identerVilkårSkalPreutfyllesFor?.contains(it) ?: true }
-
         vilkårsvurdering.personResultater
-            .filter { it.aktør.aktivFødselsnummer() in identer }
+            .filter { it.aktør in aktørerVilkårSkalPreutfyllesFor }
             .forEach { personResultat ->
                 val person = personResultat.aktør.tilPerson(personopplysningGrunnlag)
                 if (person.statsborgerskap.iUkraina()) {

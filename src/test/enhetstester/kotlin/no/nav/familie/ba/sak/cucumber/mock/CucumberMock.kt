@@ -602,6 +602,8 @@ class CucumberMock(
             preutfyllBorMedSøkerService = preutfyllBorMedSøkerService,
             preutfyllBosattIRiketForFødselshendelserService = preutfyllBosattIRiketForFødselshendelserService,
             persongrunnlagService = persongrunnlagService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            featureToggleService = featureToggleService,
         )
 
     val vilkårsvurderingForNyBehandlingService =
