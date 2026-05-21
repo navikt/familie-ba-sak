@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagSystemÅrsak
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
@@ -17,13 +19,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.SKJERMET_BARN
-import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortBostedsadresserFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortDeltBostedForSøker
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortIkkeRelevanteSivilstander
@@ -72,6 +74,7 @@ class PersongrunnlagService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val kodeverkService: KodeverkService,
     private val strengtFortroligService: StrengtFortroligService,
+    private val beregningService: BeregningService,
 ) {
     fun mapTilPersonDtoMedStatsborgerskapLand(
         person: Person,
@@ -301,18 +304,30 @@ class PersongrunnlagService(
         nyttPersonopplysningGrunnlag.personer.add(søker)
 
         barnSomSkalHentesFraPdl.forEach { barnsAktør ->
-            nyttPersonopplysningGrunnlag.personer.add(
-                hentPerson(
-                    aktør = barnsAktør,
-                    personopplysningGrunnlag = nyttPersonopplysningGrunnlag,
-                    målform = målform,
-                    personType = PersonType.BARN,
-                    behandlingKategori = behandling.kategori,
-                    behandlingUnderkategori = behandling.underkategori,
-                    skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
-                    eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
-                ),
-            )
+            try {
+                nyttPersonopplysningGrunnlag.personer.add(
+                    hentPerson(
+                        aktør = barnsAktør,
+                        personopplysningGrunnlag = nyttPersonopplysningGrunnlag,
+                        målform = målform,
+                        personType = PersonType.BARN,
+                        behandlingKategori = behandling.kategori,
+                        behandlingUnderkategori = behandling.underkategori,
+                        skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
+                        eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
+                    ),
+                )
+            } catch (e: PdlPersonKanIkkeBehandlesIFagsystem) {
+                when (e.årsak) {
+                    PdlPersonKanIkkeBehandlesIFagSystemÅrsak.OPPHØRT -> {
+                        håndterBarnMedOpphørtIdent(barnsAktør, sisteBehandlingSomErVedtatt?.id, nyttPersonopplysningGrunnlag)
+                    }
+
+                    else -> {
+                        throw e
+                    }
+                }
+            }
         }
 
         if (søker.hentSterkesteMedlemskap() == Medlemskap.EØS && behandling.skalBehandlesAutomatisk) {
@@ -462,9 +477,36 @@ class PersongrunnlagService(
     }
 
     private fun finnEldstebarnsFødselsdato(alleBarn: List<Aktør>): LocalDate =
-        alleBarn.minOfOrNull {
-            personopplysningerService.hentPersoninfoEnkel(it).fødselsdato
-        } ?: PRAKTISK_TIDLIGSTE_DAG
+        alleBarn
+            .mapNotNull { barn ->
+                try {
+                    personopplysningerService.hentPersoninfoEnkel(barn).fødselsdato
+                } catch (e: PdlPersonKanIkkeBehandlesIFagsystem) {
+                    secureLogger.warn("Kan ikke hente fødselsdato for barn ${barn.aktivFødselsnummer()}: ${e.årsak}. Hopper over ved beregning av eldste barns fødselsdato.")
+                    null
+                }
+            }.minOrNull() ?: PRAKTISK_TIDLIGSTE_DAG
+
+    private fun håndterBarnMedOpphørtIdent(
+        barnAktør: Aktør,
+        sisteVedtatteBehandlingId: Long?,
+        nyttPersonopplysningGrunnlag: PersonopplysningGrunnlag,
+    ) {
+        val harLøpendeAndeler =
+            sisteVedtatteBehandlingId != null &&
+                beregningService.harBarnLøpendeAndelForBehandling(sisteVedtatteBehandlingId, barnAktør)
+
+        if (harLøpendeAndeler) {
+            val forrigeGrunnlag = hentAktivThrows(sisteVedtatteBehandlingId)
+            forrigeGrunnlag.personer
+                .firstOrNull { it.aktør == barnAktør }
+                ?.tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag)
+                ?.also { nyttPersonopplysningGrunnlag.personer.add(it) }
+            secureLogger.warn("Barn ${barnAktør.aktivFødselsnummer()} har opphørt ident med løpende andeler, og blir kopiert fra forrige personopplysningsgrunnlag.")
+        } else {
+            secureLogger.warn("Barn ${barnAktør.aktivFødselsnummer()} har opphørt ident og kun historiske andeler. Inkluderes ikke i ny behandling")
+        }
+    }
 
     private fun hentFarEllerMedmorAktør(barna: List<Aktør>): Aktør? {
         val barnasFarEllerMedmorAktører =
