@@ -41,7 +41,7 @@ class AutomatiskVilkårUtfyllingService(
 
         val barnVilkårSkalGenereresFor = hentBarnVilkårSkalAutomatiskUtfyllesFor(behandling)
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId)
-        val nyeVilkårResultaterTidslinje = genererVilkårResultatTidslinje(vilkårsvurdering, behandlingId)
+        val nyeVilkårResultaterTidslinje = genererSøkersVilkårResultatTidslinje(vilkårsvurdering)
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
 
         val vilkårTyperSomSkalErstattes = setOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER)
@@ -81,14 +81,11 @@ class AutomatiskVilkårUtfyllingService(
             }
     }
 
-    private fun genererVilkårResultatTidslinje(
-        vilkårsvurdering: Vilkårsvurdering,
-        behandlingId: Long,
-    ): Tidslinje<VilkårResultat> {
+    private fun genererSøkersVilkårResultatTidslinje(vilkårsvurdering: Vilkårsvurdering): Tidslinje<VilkårResultat> {
         val søkersPersonResultat =
             vilkårsvurdering.personResultater
                 .firstOrNull { it.erSøkersResultater() }
-                ?: throw Feil("Finner ikke søkers personresultat i vilkårsvurdering for behandling $behandlingId")
+                ?: throw Feil("Finner ikke søkers personresultat i vilkårsvurdering for behandling ${vilkårsvurdering.behandling.id}")
 
         val søkersBosattIRiketVilkårTidslinje =
             søkersPersonResultat
