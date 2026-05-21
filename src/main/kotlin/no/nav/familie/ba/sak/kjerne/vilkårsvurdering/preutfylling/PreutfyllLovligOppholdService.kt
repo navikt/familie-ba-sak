@@ -150,7 +150,7 @@ class PreutfyllLovligOppholdService(
                 Periode(
                     verdi = true,
                     fom = it.fom,
-                    tom = it.tom,
+                    tom = it.tom?.takeIf { it.isSameOrBefore(LocalDate.now()) },
                 ).tilTidslinje()
             }.kombiner { it.any() }
 
