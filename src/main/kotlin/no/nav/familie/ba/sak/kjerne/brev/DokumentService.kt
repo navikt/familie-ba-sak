@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.brev
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
@@ -53,7 +52,6 @@ class DokumentService(
     private val taskRepository: TaskRepositoryWrapper,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
-    private val rolleConfig: RolleConfig,
     private val settPåVentService: SettPåVentService,
     private val fagsakRepository: FagsakRepository,
     private val organisasjonService: OrganisasjonService,
@@ -70,7 +68,7 @@ class DokumentService(
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
-        val høyesteRolletilgangForInnloggetBruker = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig)
+        val høyesteRolletilgangForInnloggetBruker = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker()
 
         val funksjonelleRoller =
             listOf(

@@ -20,12 +20,13 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
-import org.springframework.web.client.getForEntity
+import org.springframework.web.client.exchange
 import org.springframework.web.client.postForEntity
 import org.wiremock.spring.ConfigureWireMock
 import org.wiremock.spring.EnableWireMock
@@ -286,13 +287,14 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         val error =
             assertThrows<HttpClientErrorException> {
-                restTemplate.getForEntity<String>(
+                restTemplate.exchange<String>(
                     hentUrl("/api/samhandler/orgnr/987654321"),
-                    header,
+                    HttpMethod.GET,
+                    HttpEntity<String>(header),
                 )
             }
 
-        assertThat(error.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
+        assertThat(error.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
     }
 
     private fun byggRequestEntity(request: BisysUtvidetBarnetrygdRequest): HttpEntity<String> {
@@ -309,15 +311,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         )
     }
 
-    private fun hentTokenForBisys() =
-        token(
-            mapOf(
-                "groups" to listOf("SAKSBEHANDLER"),
-                "name" to "Mock McMockface",
-                "NAVident" to "Z0000",
-            ),
-            clientId = "dummy",
-        )
+    private fun hentTokenForBisys() = token(mapOf("azp_name" to "dev-gcp:bidrag:bidrag-grunnlag"))
 
     private fun gyldigOppgaveResponse(filnavn: String): String =
         Files.readString(

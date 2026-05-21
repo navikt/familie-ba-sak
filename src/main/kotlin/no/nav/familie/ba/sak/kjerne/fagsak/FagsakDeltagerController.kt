@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøkParamDto
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/fagsaker/sok")
-@ProtectedWithClaims(issuer = "azuread")
 @Validated
 class FagsakDeltagerController(
     private val fagsakDeltagerService: FagsakDeltagerService,

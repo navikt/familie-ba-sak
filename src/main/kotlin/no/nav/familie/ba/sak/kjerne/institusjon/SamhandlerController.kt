@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.kontrakter.ba.tss.SamhandlerInfo
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.restklient.client.RessursException
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -18,7 +17,6 @@ import org.springframework.web.client.HttpClientErrorException
 
 @RestController
 @RequestMapping("/api/samhandler")
-@ProtectedWithClaims(issuer = "azuread")
 @Validated
 class SamhandlerController(
     private val institusjonService: InstitusjonService,

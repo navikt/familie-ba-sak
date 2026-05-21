@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.ekstern.klage
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
@@ -12,7 +11,6 @@ import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
 import no.nav.familie.kontrakter.felles.klage.KanOppretteRevurderingResponse
 import no.nav.familie.kontrakter.felles.klage.OpprettRevurderingResponse
 import no.nav.familie.kontrakter.felles.tilgangskontroll.FagsakTilgang
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -27,7 +25,6 @@ import java.util.UUID
     path = ["/api/klage/"],
     produces = [MediaType.APPLICATION_JSON_VALUE],
 )
-@ProtectedWithClaims(issuer = "azuread")
 class EksternKlageController(
     private val tilgangService: TilgangService,
     private val klageService: KlageService,
@@ -42,10 +39,6 @@ class EksternKlageController(
             event = AuditLoggerEvent.CREATE,
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
         )
-
-        if (!SikkerhetContext.kallKommerFraKlage()) {
-            throw Feil("Kallet utføres ikke av en autorisert klient")
-        }
 
         return Ressurs.success(klageService.kanOppretteRevurdering(fagsakId))
     }
@@ -62,10 +55,6 @@ class EksternKlageController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
         )
 
-        if (!SikkerhetContext.kallKommerFraKlage()) {
-            throw Feil("Kallet utføres ikke av en autorisert klient")
-        }
-
         val opprettRevurderingResponse =
             klageService.validerOgOpprettRevurderingKlage(
                 fagsakId = fagsakId,
@@ -76,7 +65,6 @@ class EksternKlageController(
     }
 
     @GetMapping("fagsaker/{fagsakId}/vedtak")
-    @ProtectedWithClaims(issuer = "azuread")
     fun hentVedtak(
         @PathVariable fagsakId: Long,
     ): Ressurs<List<FagsystemVedtak>> {

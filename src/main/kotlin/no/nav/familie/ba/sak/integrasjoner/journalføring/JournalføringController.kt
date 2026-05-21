@@ -9,7 +9,6 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.TilgangsstyrtJournalpost
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/journalpost")
-@ProtectedWithClaims(issuer = "azuread")
 @Validated
 class JournalføringController(
     private val innkommendeJournalføringService: InnkommendeJournalføringService,

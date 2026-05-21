@@ -97,7 +97,6 @@ internal class DokumentServiceTest {
                 taskRepository = taskRepository,
                 vilkårsvurderingService = vilkårsvurderingService,
                 vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
-                rolleConfig = mockk(relaxed = true),
                 settPåVentService = mockk(relaxed = true),
                 fagsakRepository = fagsakRepository,
                 organisasjonService = organisasjonService,
@@ -374,7 +373,7 @@ internal class DokumentServiceTest {
         @EnumSource(value = BehandlerRolle::class, names = ["FORVALTER", "VEILEDER"])
         fun `Skal kaste Funksjonell feil dersom vedtaksbrev ikke finnes og man er VEILEDER eller FORVALTER`(rolle: BehandlerRolle) {
             // Arrange
-            every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(any()) } returns rolle
+            every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker() } returns rolle
 
             val vedtakUtenStønadBrev = lagVedtak(stønadBrevPdF = null)
 
@@ -391,7 +390,7 @@ internal class DokumentServiceTest {
         @EnumSource(value = BehandlerRolle::class, names = ["SAKSBEHANDLER", "BESLUTTER"])
         fun `Skal kaste Feil dersom vedtaksbrev ikke finnes og man er SAKSBEHANDLER eller BESLUTTER`(rolle: BehandlerRolle) {
             // Arrange
-            every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(any()) } returns rolle
+            every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker() } returns rolle
 
             val vedtakUtenStønadBrev = lagVedtak(stønadBrevPdF = null)
 
@@ -407,7 +406,7 @@ internal class DokumentServiceTest {
         @Test
         fun `Skal returnere bytearray med pdf innhold dersom det finnes på vedtak`() {
             // Arrange
-            every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(any()) } returns BehandlerRolle.BESLUTTER
+            every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker() } returns BehandlerRolle.BESLUTTER
 
             val byteArray = ByteArray(0)
             val vedtakMedStønadBrev = lagVedtak(stønadBrevPdF = byteArray)

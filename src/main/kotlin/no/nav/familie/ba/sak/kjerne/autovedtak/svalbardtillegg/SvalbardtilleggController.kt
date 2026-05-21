@@ -12,7 +12,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Status.KLAR_TIL_PLUKK
 import no.nav.familie.prosessering.domene.Status.UBEHANDLET
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/svalbardtillegg")
-@ProtectedWithClaims(issuer = "azuread")
 class SvalbardtilleggController(
     private val tilgangService: TilgangService,
     private val opprettTaskService: OpprettTaskService,

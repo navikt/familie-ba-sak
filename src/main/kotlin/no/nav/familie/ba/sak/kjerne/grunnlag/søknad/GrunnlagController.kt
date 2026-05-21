@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/behandlinger")
-@ProtectedWithClaims(issuer = "azuread")
 class GrunnlagController(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val utvidetBehandlingService: UtvidetBehandlingService,

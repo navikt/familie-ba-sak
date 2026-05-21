@@ -10,7 +10,6 @@ import jakarta.validation.Valid
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -25,7 +24,6 @@ import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/ekstern/pensjon")
-@ProtectedWithClaims(issuer = "azuread")
 class PensjonController(
     private val pensjonService: PensjonService,
 ) {

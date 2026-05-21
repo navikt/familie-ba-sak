@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokdistkanal.Distribusjonskanal
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/dokument")
-@ProtectedWithClaims(issuer = "azuread")
 @Validated
 class DokumentController(
     private val fagsakService: FagsakService,

@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.util.tilEndreteUtebetalingAndeler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -27,7 +26,6 @@ import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/test/tilkjentytelse")
-@ProtectedWithClaims(issuer = "azuread")
 @Validated
 @Profile("!prod")
 class TilkjentYtelseTestController(
