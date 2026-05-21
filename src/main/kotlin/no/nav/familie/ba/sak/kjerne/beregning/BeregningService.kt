@@ -225,6 +225,14 @@ class BeregningService(
                 andelerTilkjentYtelse.any { aty -> aty.aktør == it }
             } ?: emptyList()
     }
+
+    fun harBarnLøpendeAndelForBehandling(
+        behandlingId: Long,
+        barnAktør: Aktør,
+    ): Boolean =
+        andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandlingOgBarn(behandlingId, barnAktør)
+            .any { it.erLøpende() }
 }
 
 interface TilkjentYtelseEndretAbonnent {
