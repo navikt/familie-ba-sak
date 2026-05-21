@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
@@ -74,7 +73,6 @@ class PersongrunnlagService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val kodeverkService: KodeverkService,
     private val strengtFortroligService: StrengtFortroligService,
-    private val beregningService: BeregningService,
 ) {
     fun mapTilPersonDtoMedStatsborgerskapLand(
         person: Person,
@@ -494,7 +492,9 @@ class PersongrunnlagService(
     ) {
         val harLøpendeAndeler =
             sisteVedtatteBehandlingId != null &&
-                beregningService.harBarnLøpendeAndelForBehandling(sisteVedtatteBehandlingId, barnAktør)
+                andelTilkjentYtelseRepository
+                    .finnAndelerTilkjentYtelseForBehandlingOgBarn(sisteVedtatteBehandlingId, barnAktør)
+                    .any { it.erLøpende() }
 
         if (harLøpendeAndeler) {
             val forrigeGrunnlag = hentAktivThrows(sisteVedtatteBehandlingId)

@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -50,7 +49,6 @@ class PersongrunnlagServiceTest {
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val kodeverkService = mockk<KodeverkService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val beregningService = mockk<BeregningService>()
 
     private val persongrunnlagService =
         spyk(
@@ -68,7 +66,6 @@ class PersongrunnlagServiceTest {
                 vilkårsvurderingService = vilkårsvurderingService,
                 kodeverkService = kodeverkService,
                 strengtFortroligService = mockk(relaxed = true),
-                beregningService = beregningService,
             ),
         )
 
@@ -495,7 +492,12 @@ class PersongrunnlagServiceTest {
             every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnMedOpphørtIdent.aktør) } throws
                 PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.OPPHØRT)
 
-            every { beregningService.harBarnLøpendeAndelForBehandling(sisteVedtatteBehandling.id, barnMedOpphørtIdent.aktør) } returns false
+            every {
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                    sisteVedtatteBehandling.id,
+                    barnMedOpphørtIdent.aktør,
+                )
+            } returns emptyList()
 
             // Act
             val grunnlag =
@@ -541,7 +543,12 @@ class PersongrunnlagServiceTest {
             every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnMedOpphørtIdent.aktør) } throws
                 PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.OPPHØRT)
 
-            every { beregningService.harBarnLøpendeAndelForBehandling(sisteVedtatteBehandling.id, barnMedOpphørtIdent.aktør) } returns true
+            every {
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                    sisteVedtatteBehandling.id,
+                    barnMedOpphørtIdent.aktør,
+                )
+            } returns listOf(lagAndelTilkjentYtelse(fom = YearMonth.now(), tom = YearMonth.now().plusMonths(3)))
 
             // Act
             val grunnlag =
