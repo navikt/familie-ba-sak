@@ -24,7 +24,6 @@ class AzureAdAuthenticationManager(
     @Value("\${AZURE_OPENID_CONFIG_JWKS_URI}") jwksUri: String,
     @Value("\${AZURE_OPENID_CONFIG_ISSUER}") issuer: String,
     @Value("\${AZURE_APP_CLIENT_ID}") audience: String,
-    @param:Value("\${prosessering.rolle}") private val prosesseringRolle: String,
     private val rolleConfig: RolleConfig,
 ) : AuthenticationManager {
     private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
@@ -50,7 +49,6 @@ class AzureAdAuthenticationManager(
     private fun convert(jwt: Jwt): JwtAuthenticationToken {
         val grupper = jwt.getClaimAsStringList("groups") ?: emptyList()
         val applicationName = jwt.getClaimAsString("azp_name") ?: ""
-        val roles = jwt.getClaimAsStringList("roles") ?: emptyList()
 
         val teamfamilieNamespaceRegex = Regex(".*:teamfamilie:.*")
         val familieKlageRegex = Regex(".*:teamfamilie:familie-klage")
@@ -63,7 +61,6 @@ class AzureAdAuthenticationManager(
                 if (grupper.contains(rolleConfig.FORVALTER_ROLLE)) add(Rolle.FORVALTER)
                 if (grupper.contains(rolleConfig.SAKSBEHANDLER_ROLLE)) add(Rolle.SAKSBEHANDLER)
                 if (grupper.contains(rolleConfig.BESLUTTER_ROLLE)) add(Rolle.BESLUTTER)
-                if (grupper.contains(prosesseringRolle)) add(Rolle.PROSESSERING)
 
                 if (applicationName.matches(teamfamilieNamespaceRegex)) add(Rolle.TEAMFAMILIE_APPLIKASJON)
                 if (applicationName.matches(familieKlageRegex)) add(Rolle.KLAGE_APPLIKASJON)
