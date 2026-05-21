@@ -225,7 +225,6 @@ class BeregningService(
                 andelerTilkjentYtelse.any { aty -> aty.aktør == it }
             } ?: emptyList()
     }
-
 }
 
 interface TilkjentYtelseEndretAbonnent {
