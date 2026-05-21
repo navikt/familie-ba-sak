@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.genererbarnasvilkår.AutomatiskVilkårUtfyllingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -37,6 +38,7 @@ class VilkårController(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
+    private val automatiskVilkårUtfyllingService: AutomatiskVilkårUtfyllingService,
 ) {
     @PutMapping(path = ["/{behandlingId}/{vilkaarId}"])
     fun endreVilkår(
@@ -153,4 +155,22 @@ class VilkårController(
 
     @GetMapping(path = ["/vilkaarsbegrunnelser"])
     fun hentTeksterForVilkårsbegrunnelser(): ResponseEntity<Ressurs<Map<VedtakBegrunnelseType, List<VedtakBegrunnelseTilknyttetVilkårDto>>>> = ResponseEntity.ok(Ressurs.success(vilkårsvurderingService.hentVilkårsbegrunnelser()))
+
+    @PostMapping(path = ["/{behandlingId}/automatisk-fyll-ut-barnas-vilkaar"])
+    fun genererBarnasVilkår(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "legge til vilkår",
+        )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
+
+        automatiskVilkårUtfyllingService.utfyllVilkårAutomatiskForNyeBarn(behandlingId)
+
+        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
+
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId)))
+    }
 }

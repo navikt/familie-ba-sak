@@ -56,4 +56,7 @@ enum class FeatureToggle(
 
     // NAV-29028
     PREUTFYLL_VILKÅR_REVURDERING_SØKNAD("familie-ba-sak.preutfyll-vilkar-revurdering-soknad"),
+
+    // NAV-29193
+    KAN_GENERERE_BARNAS_VILKÅR("familie-ba-sak.kan-generere-barnas-vilkar"),
 }
