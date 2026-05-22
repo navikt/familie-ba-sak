@@ -653,6 +653,90 @@ class PreutfyllLovligOppholdServiceTest {
         }
 
         @Test
+        fun `skal fjerne tom på arbeidsforhold hvis tom er frem i tid`() {
+            // Arrange
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
+                lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
+                    søker.apply {
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "BE",
+                                    gyldigPeriode = sisteTiÅr,
+                                    medlemskap = Medlemskap.EØS,
+                                    person = this,
+                                ),
+                            )
+                        arbeidsforhold =
+                            mutableListOf(
+                                GrArbeidsforhold(
+                                    arbeidsgiverId = null,
+                                    periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(1), tom = LocalDate.now().plusYears(1)),
+                                    person = this,
+                                    arbeidsgiverType = ArbeidsgiverType.Person.name,
+                                ),
+                            )
+                    }
+                }
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
+
+            // Assert
+            val lovligOppholdResultater =
+                vilkårsvurdering.personResultater
+                    .flatMap { it.vilkårResultater }
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+
+            val sisteOppfylteVilkår = lovligOppholdResultater.last { it.resultat == Resultat.OPPFYLT }
+            assertThat(sisteOppfylteVilkår.periodeTom).isNull()
+        }
+
+        @Test
+        fun `skal ikke fjerne tom på arbeidsforhold hvis tom er før dagens dato`() {
+            // Arrange
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
+                lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
+                    søker.apply {
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "BE",
+                                    gyldigPeriode = sisteTiÅr,
+                                    medlemskap = Medlemskap.EØS,
+                                    person = this,
+                                ),
+                            )
+                        arbeidsforhold =
+                            mutableListOf(
+                                GrArbeidsforhold(
+                                    arbeidsgiverId = null,
+                                    periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(2), tom = LocalDate.now().minusYears(1)),
+                                    person = this,
+                                    arbeidsgiverType = ArbeidsgiverType.Person.name,
+                                ),
+                            )
+                    }
+                }
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
+
+            // Assert
+            val lovligOppholdResultater =
+                vilkårsvurdering.personResultater
+                    .flatMap { it.vilkårResultater }
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+
+            val oppfyltPeriode = lovligOppholdResultater.single { it.resultat == Resultat.OPPFYLT }
+            assertThat(oppfyltPeriode.periodeTom).isEqualTo(LocalDate.now().minusYears(1))
+        }
+
+        @Test
         fun `skal ikke preutfylle perioder før oppholdstillatelse for søker som innvandret etter eldste barns fødselsdato`() {
             // Arrange
             val innvandringstidspunkt = LocalDate.now().minusYears(3)
