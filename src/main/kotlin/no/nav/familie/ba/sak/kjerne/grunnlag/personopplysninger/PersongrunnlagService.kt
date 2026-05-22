@@ -496,16 +496,22 @@ class PersongrunnlagService(
                     .finnAndelerTilkjentYtelseForBehandlingOgBarn(sisteVedtatteBehandlingId, barnAktør)
                     .any { it.erLøpende() }
 
-        if (harLøpendeAndeler) {
-            val forrigeGrunnlag = hentAktivThrows(sisteVedtatteBehandlingId)
-            forrigeGrunnlag.personer
-                .firstOrNull { it.aktør == barnAktør }
-                ?.tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag)
-                ?.also { nyttPersonopplysningGrunnlag.personer.add(it) }
-            secureLogger.warn("Barn ${barnAktør.aktivFødselsnummer()} har opphørt ident med løpende andeler, og blir kopiert fra forrige personopplysningsgrunnlag.")
-        } else {
+        if (!harLøpendeAndeler) {
             secureLogger.warn("Barn ${barnAktør.aktivFødselsnummer()} har opphørt ident og kun historiske andeler. Inkluderes ikke i ny behandling")
+            return
         }
+
+        val forrigeGrunnlag = hentAktivThrows(sisteVedtatteBehandlingId)
+        val barnFraForrigeGrunnlag = forrigeGrunnlag.personer.firstOrNull { it.aktør == barnAktør }
+        if (barnFraForrigeGrunnlag == null) {
+            secureLogger.warn(
+                "Barn ${barnAktør.aktivFødselsnummer()} har opphørt ident med løpende andeler, men finnes ikke i forrige personopplysningsgrunnlag. Inkluderes ikke i ny behandling.",
+            )
+            return
+        }
+
+        nyttPersonopplysningGrunnlag.personer.add(barnFraForrigeGrunnlag.tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag))
+        secureLogger.warn("Barn ${barnAktør.aktivFødselsnummer()} har opphørt ident med løpende andeler, og blir kopiert fra forrige personopplysningsgrunnlag.")
     }
 
     private fun hentFarEllerMedmorAktør(barna: List<Aktør>): Aktør? {
