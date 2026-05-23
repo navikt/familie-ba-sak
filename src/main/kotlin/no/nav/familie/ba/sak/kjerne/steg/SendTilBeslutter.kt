@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsakService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningBrevService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter
@@ -43,6 +44,7 @@ class SendTilBeslutter(
     private val avregningService: AvregningService,
     private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
     private val tilbakekrevingsvedtakMotregningBrevService: TilbakekrevingsvedtakMotregningBrevService,
+    private val sammensattKontrollsakService: SammensattKontrollsakService,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -76,6 +78,15 @@ class SendTilBeslutter(
             tilbakekrevingsvedtakMotregningService
                 .hentTilbakekrevingsvedtakMotregningEllerKastFunksjonellFeil(behandling.id)
                 .validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter()
+        }
+
+        sammensattKontrollsakService.finnSammensattKontrollsak(behandling.id)?.let {
+            if (it.fritekst.isBlank()) {
+                throw FunksjonellFeil(
+                    melding = "Fritekstfeltet i sammensatt kontrollsak kan ikke være tomt ved sending til beslutter.",
+                    frontendFeilmelding = "Fritekstfeltet i sammensatt kontrollsak kan ikke være tomt ved sending til beslutter.",
+                )
+            }
         }
     }
 
