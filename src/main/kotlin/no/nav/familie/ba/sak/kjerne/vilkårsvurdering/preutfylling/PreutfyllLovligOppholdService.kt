@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -159,11 +160,38 @@ class PreutfyllLovligOppholdService(
     ): Tidslinje<Boolean> =
         oppholdstillatelse
             .filter { it.type in setOf(PERMANENT, MIDLERTIDIG) }
-            .map { oppholdstillatelse ->
+            .map {
                 Periode(
                     verdi = true,
-                    fom = oppholdstillatelse.gyldigPeriode?.fom,
-                    tom = oppholdstillatelse.gyldigPeriode?.tom?.takeIf { it.isSameOrBefore(LocalDate.now()) },
-                ).tilTidslinje()
-            }.kombiner { it.any() }
+                    fom = it.gyldigPeriode?.fom,
+                    tom = it.gyldigPeriode?.tom?.takeIf { it.isSameOrBefore(LocalDate.now()) },
+                )
+            }.slåSammenPerioderInnenforSammeMåned()
+            .map { it.tilTidslinje() }
+            .kombiner { it.any() }
 }
+
+/**
+ * Slår sammen perioder som overlapper eller har gap innenfor samme eller påfølgende måned.
+ * F.eks. 14.des→19.des + 21.des→4.feb → 14.des→4.feb
+ */
+private fun List<Periode<Boolean>>.slåSammenPerioderInnenforSammeMåned(): List<Periode<Boolean>> =
+    sortedBy { it.fom }.fold(mutableListOf()) { acc, periode ->
+        val forrige = acc.lastOrNull()
+
+        if (forrige == null || !kanSlåsSammen(forrige.tom, periode.fom)) {
+            acc.add(periode)
+        } else {
+            val forrigeTom = forrige.tom
+            val periodeTom = periode.tom
+
+            val nyTom = if (forrigeTom == null || periodeTom == null) null else maxOf(forrigeTom, periodeTom)
+            acc[acc.lastIndex] = Periode(verdi = true, fom = forrige.fom, tom = nyTom)
+        }
+        acc
+    }
+
+private fun kanSlåsSammen(
+    tom: LocalDate?,
+    fom: LocalDate?,
+): Boolean = tom == null || fom == null || fom.toYearMonth() <= tom.toYearMonth().plusMonths(1)
