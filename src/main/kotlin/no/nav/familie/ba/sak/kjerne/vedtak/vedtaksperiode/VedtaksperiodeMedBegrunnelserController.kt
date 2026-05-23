@@ -44,7 +44,7 @@ class VedtaksperiodeMedBegrunnelserController(
     private val kodeverkService: KodeverkService,
     private val testVerktøyService: TestVerktøyService,
 ) {
-    @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")
+    @PutMapping(path = ["/standardbegrunnelser/{vedtaksperiodeId}", "/begrunnelser/{vedtaksperiodeId}"])
     fun oppdaterVedtaksperiodeStandardbegrunnelser(
         @PathVariable
         vedtaksperiodeId: Long,
