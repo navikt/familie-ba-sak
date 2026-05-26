@@ -23,6 +23,8 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
+import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsakService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregning
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningBrevService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
@@ -49,6 +51,7 @@ class SendTilBeslutterTest {
     private val mockAvregningService = mockk<AvregningService>()
     private val mockTilbakekrevingsvedtakMotregningService = mockk<TilbakekrevingsvedtakMotregningService>()
     private val mockTilbakekrevingsvedtakMotregningBrevService = mockk<TilbakekrevingsvedtakMotregningBrevService>()
+    private val mockSammensattKontrollsakService = mockk<SammensattKontrollsakService>()
 
     private val totrinnskontrollService = TotrinnskontrollService(mockBehandlingService, mockTotrinnskontrollRepository, mockSaksbehandlerContext)
 
@@ -66,6 +69,7 @@ class SendTilBeslutterTest {
             avregningService = mockAvregningService,
             tilbakekrevingsvedtakMotregningService = mockTilbakekrevingsvedtakMotregningService,
             tilbakekrevingsvedtakMotregningBrevService = mockTilbakekrevingsvedtakMotregningBrevService,
+            sammensattKontrollsakService = mockSammensattKontrollsakService,
         )
 
     @Nested
@@ -197,6 +201,95 @@ class SendTilBeslutterTest {
                 }
 
             assertThat(feil.message).isEqualTo("Kan ikke sende tilbakekrevingsvedtak ved motregning til beslutter hvis samtykke ikke er bekreftet.")
+        }
+
+        @Test
+        fun `skal kaste FunksjonellFeil hvis sammensatt kontrollsak finnes med tom fritekst`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val stegService = mockk<StegService>()
+            val behandlingsresultatSteg = mockk<BehandlingsresultatSteg>()
+
+            justRun {
+                mockValiderBrevmottakerService
+                    .validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+                        any(),
+                        any(),
+                        any(),
+                    )
+            }
+            every { mockVilkårsvurderingService.hentAktivForBehandling(any()) } returns null
+            every { stegService.hentBehandlingSteg(any()) } returns behandlingsresultatSteg
+            justRun { behandlingsresultatSteg.preValiderSteg(any()) }
+            every { mockVedtakService.hentAktivForBehandlingThrows(any()) } returns mockk()
+            every { mockVedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(any()) } returns emptyList()
+            every { mockAvregningService.behandlingHarPerioderSomAvregnes(any()) } returns false
+            every { mockSammensattKontrollsakService.finnSammensattKontrollsak(any()) } returns
+                SammensattKontrollsak(behandlingId = behandling.id, fritekst = "   ")
+
+            // Act
+            val feil =
+                assertThrows<FunksjonellFeil> {
+                    sendTilBeslutter.preValiderSteg(behandling, stegService)
+                }
+
+            // Assert
+            assertThat(feil.frontendFeilmelding).isEqualTo("Fritekstfeltet i sammensatt kontrollsak kan ikke være tomt ved sending til beslutter.")
+        }
+
+        @Test
+        fun `skal ikke kaste feil hvis sammensatt kontrollsak finnes med utfylt fritekst`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val stegService = mockk<StegService>()
+            val behandlingsresultatSteg = mockk<BehandlingsresultatSteg>()
+
+            justRun {
+                mockValiderBrevmottakerService
+                    .validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+                        any(),
+                        any(),
+                        any(),
+                    )
+            }
+            every { mockVilkårsvurderingService.hentAktivForBehandling(any()) } returns null
+            every { stegService.hentBehandlingSteg(any()) } returns behandlingsresultatSteg
+            justRun { behandlingsresultatSteg.preValiderSteg(any()) }
+            every { mockVedtakService.hentAktivForBehandlingThrows(any()) } returns mockk()
+            every { mockVedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(any()) } returns emptyList()
+            every { mockAvregningService.behandlingHarPerioderSomAvregnes(any()) } returns false
+            every { mockSammensattKontrollsakService.finnSammensattKontrollsak(any()) } returns
+                SammensattKontrollsak(behandlingId = behandling.id, fritekst = "En begrunnelse")
+
+            // Act & Assert - should not throw
+            sendTilBeslutter.preValiderSteg(behandling, stegService)
+        }
+
+        @Test
+        fun `skal ikke kaste feil hvis ingen sammensatt kontrollsak finnes`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val stegService = mockk<StegService>()
+            val behandlingsresultatSteg = mockk<BehandlingsresultatSteg>()
+
+            justRun {
+                mockValiderBrevmottakerService
+                    .validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+                        any(),
+                        any(),
+                        any(),
+                    )
+            }
+            every { mockVilkårsvurderingService.hentAktivForBehandling(any()) } returns null
+            every { stegService.hentBehandlingSteg(any()) } returns behandlingsresultatSteg
+            justRun { behandlingsresultatSteg.preValiderSteg(any()) }
+            every { mockVedtakService.hentAktivForBehandlingThrows(any()) } returns mockk()
+            every { mockVedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(any()) } returns emptyList()
+            every { mockAvregningService.behandlingHarPerioderSomAvregnes(any()) } returns false
+            every { mockSammensattKontrollsakService.finnSammensattKontrollsak(any()) } returns null
+
+            // Act & Assert - should not throw
+            sendTilBeslutter.preValiderSteg(behandling, stegService)
         }
     }
 
