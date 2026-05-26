@@ -31,7 +31,7 @@ Backend for saksbehandling av barnetrygd. Spring Boot 4 + Kotlin 2, Maven, Postg
 ./mvnw test -Dtest=MyTestClass#myMethod
 ```
 
-CI (pull requests) runs ktlint, enhetstest, integrasjonstest, and verdikjedetester (both toggle variants) in parallel. Sonar runs after enhetstest and integrasjonstest complete. All jobs must pass. Push to main skips tests and deploys directly.
+CI (pull requests) runs ktlint, enhetstest, integrasjonstest, and verdikjedetester (both toggle variants) in parallel. Sonar runs after enhetstest and integrasjonstest complete. All jobs must pass. Push to main (except changes in paths ignored by the workflow, e.g. `**.md`) builds with tests skipped and deploys dev-gcp → prod-gcp.
 
 ## Project layout
 
@@ -53,10 +53,10 @@ src/
     avro/               # Avro IDL for Kafka schemas
     application.yaml    # Main config (port 8089)
   test/
-    enhetstester/       # Unit tests (no Spring context, no DB)
-    integrasjonstester/ # Integration tests (@Tag("integration"), Testcontainers)
-    testdata/           # Shared data generators (datagenerator/*.kt)
-    resources/cucumber/ # Cucumber .feature files (BDD scenarios)
+    enhetstester/kotlin/       # Unit tests (no Spring context, no DB)
+    integrasjonstester/kotlin/ # Integration tests (@Tag("integration"), Testcontainers)
+    testdata/kotlin/           # Shared data generators (datagenerator/*.kt)
+    resources/cucumber/        # Cucumber .feature files (BDD scenarios)
 ```
 
 ## Test conventions
@@ -117,7 +117,7 @@ src/
 - Integration tests require Docker (Testcontainers). They will fail without a running Docker daemon.
 - JDK 25 required (set in pom.xml and CI workflows).
 - Use `secureLogger` when logging fødselsnummer or other PII — never the standard logger.
-- Don't commit changes unless the user explicitly asks you to.
+- If you're running as an automated agent, don't commit/push changes unless the user explicitly asks you to.
 
 ## Keeping this file current
 
