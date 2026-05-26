@@ -4,31 +4,33 @@ Backend for saksbehandling av barnetrygd. Spring Boot 4 + Kotlin 2, Maven, Postg
 
 ## Build & test
 
+Always include `-Dkotlin.compiler.daemon=false` in every `mvn` command. The Kotlin compiler daemon fails to start in this environment due to RMI registry permission restrictions (`Operation not permitted`), so the compiler must run in-process instead.
+
 ```bash
 # Build (skip tests)
-./mvnw package -DskipTests
+mvn package -DskipTests -Dkotlin.compiler.daemon=false
 
 # Run all tests (needs Docker for Testcontainers PostgreSQL)
-./mvnw test
+mvn test -Dkotlin.compiler.daemon=false
 
 # Unit tests only (no DB, no Spring context)
-./mvnw test -Penhetstest
+mvn test -Penhetstest -Dkotlin.compiler.daemon=false
 
 # Integration tests only (starts Testcontainers PostgreSQL + Spring context)
-./mvnw test -Pintegrasjonstest
+mvn test -Pintegrasjonstest -Dkotlin.compiler.daemon=false
 
 # Verdikjedetester (full flow with WireMock, two variants)
-./mvnw test -Pverdikjedetest-feature-toggle-paa
-./mvnw test -Pverdikjedetest-feature-toggle-av
+mvn test -Pverdikjedetest-feature-toggle-paa -Dkotlin.compiler.daemon=false
+mvn test -Pverdikjedetest-feature-toggle-av -Dkotlin.compiler.daemon=false
 
 # Format check / fix (ktlint via Maven Antrun)
-./mvnw antrun:run@ktlint-format
+mvn antrun:run@ktlint-format -Dkotlin.compiler.daemon=false
 
 # Run single test class
-./mvnw test -Dtest=MyTestClass
+mvn test -Dtest=MyTestClass -Dkotlin.compiler.daemon=false
 
 # Run single test method
-./mvnw test -Dtest=MyTestClass#myMethod
+mvn test -Dtest=MyTestClass#myMethod -Dkotlin.compiler.daemon=false
 ```
 
 CI (pull requests) runs ktlint, enhetstest, integrasjonstest, and verdikjedetester (both toggle variants) in parallel. Sonar runs after enhetstest and integrasjonstest complete. All jobs must pass. Push to main (except changes in paths ignored by the workflow, e.g. `**.md`) builds with tests skipped and deploys dev-gcp → prod-gcp.
@@ -97,7 +99,7 @@ src/
 ## Formatting
 
 - **ktlint** enforced in CI.
-- Run `./mvnw antrun:run@ktlint-format` before committing to auto-fix.
+- Run `mvn antrun:run@ktlint-format -Dkotlin.compiler.daemon=false` before committing to auto-fix.
 
 ## Deployment
 
