@@ -176,22 +176,17 @@ class PreutfyllLovligOppholdService(
  * F.eks. 14.feb→16.feb + 19.feb→28.feb → 14.feb→28.feb
  */
 private fun List<Periode<Boolean>>.slåSammenPerioderInnenforSammeMåned(): List<Periode<Boolean>> =
-    sortedBy { it.fom }.fold(mutableListOf()) { acc, periode ->
-        val forrige = acc.lastOrNull()
+    sortedBy { it.fom }.fold(emptyList()) { acc, periode ->
+        val forrigePeriode = acc.lastOrNull()
+        val forrigePeriodeTom = forrigePeriode?.tom
+        val dennePeriodeFom = periode.fom
+        val kanSlåsSammen = forrigePeriode != null && (forrigePeriodeTom == null || dennePeriodeFom == null || dennePeriodeFom.toYearMonth() <= forrigePeriodeTom.toYearMonth())
 
-        if (forrige == null || !oppholdstillatelsePerioderKanSlåsSammen(forrige.tom, periode.fom)) {
-            acc.add(periode)
+        if (kanSlåsSammen) {
+            val nyTom = forrigePeriode.tom?.let { forrigePeriodeTom -> periode.tom?.let { dennePeriodeTom -> maxOf(forrigePeriodeTom, dennePeriodeTom) } }
+
+            acc.dropLast(1) + Periode(verdi = true, fom = forrigePeriode.fom, tom = nyTom)
         } else {
-            val forrigeTom = forrige.tom
-            val periodeTom = periode.tom
-
-            val nyTom = if (forrigeTom == null || periodeTom == null) null else maxOf(forrigeTom, periodeTom)
-            acc[acc.lastIndex] = Periode(verdi = true, fom = forrige.fom, tom = nyTom)
+            acc + periode
         }
-        acc
     }
-
-private fun oppholdstillatelsePerioderKanSlåsSammen(
-    forrigePeriodeTom: LocalDate?,
-    dennePeriodeFom: LocalDate?,
-): Boolean = forrigePeriodeTom == null || dennePeriodeFom == null || dennePeriodeFom.toYearMonth() <= forrigePeriodeTom.toYearMonth()
