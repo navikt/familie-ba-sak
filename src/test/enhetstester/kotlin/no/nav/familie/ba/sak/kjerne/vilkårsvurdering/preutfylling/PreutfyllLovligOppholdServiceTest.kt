@@ -944,7 +944,7 @@ class PreutfyllLovligOppholdServiceTest {
                                 ),
                                 GrOpphold(
                                     type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
-                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.of(2025, 1, 5), tom = LocalDate.now().plusYears(1)),
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.of(2024, 12, 20), tom = null),
                                     person = this,
                                 ),
                             )
@@ -1025,7 +1025,7 @@ class PreutfyllLovligOppholdServiceTest {
         }
 
         @Test
-        fun `skal slå sammen oppholdstillatelser som går kant i kant over månedsskifte`() {
+        fun `skal ikke slå sammen oppholdstillatelser som går kant i kant over månedsskifte`() {
             // Arrange
             val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
             val personopplysningsgrunnlag =
@@ -1035,60 +1035,12 @@ class PreutfyllLovligOppholdServiceTest {
                             mutableListOf(
                                 GrOpphold(
                                     type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
-                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.of(2024, 1, 31)),
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.of(2024, 1, 15)),
                                     person = this,
                                 ),
                                 GrOpphold(
                                     type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
-                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.of(2024, 2, 1), tom = LocalDate.now().plusYears(1)),
-                                    person = this,
-                                ),
-                            )
-                        statsborgerskap =
-                            mutableListOf(
-                                GrStatsborgerskap(
-                                    landkode = "AFG",
-                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = null),
-                                    person = this,
-                                ),
-                            )
-                    }
-                }
-
-            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningsgrunnlag
-
-            // Act
-            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
-
-            // Assert
-            val lovligOppholdResultater =
-                vilkårsvurdering.personResultater
-                    .first { it.aktør == søkerAktør }
-                    .vilkårResultater
-                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
-
-            val oppfylteVilkår = lovligOppholdResultater.filter { it.resultat == Resultat.OPPFYLT }
-            assertThat(oppfylteVilkår).hasSize(1)
-            assertThat(oppfylteVilkår.single().periodeTom).isNull()
-        }
-
-        @Test
-        fun `skal ikke slå sammen oppholdstillatelser med gap på en hel måned uten dekning`() {
-            // Arrange - tom i januar, fom i mars = februar har ingen dekning
-            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
-            val personopplysningsgrunnlag =
-                lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
-                    søker.apply {
-                        opphold =
-                            mutableListOf(
-                                GrOpphold(
-                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
-                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.of(2024, 1, 31)),
-                                    person = this,
-                                ),
-                                GrOpphold(
-                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
-                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.of(2024, 3, 1), tom = LocalDate.now().minusMonths(1)),
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.of(2024, 2, 5), tom = LocalDate.now().minusMonths(1)),
                                     person = this,
                                 ),
                             )

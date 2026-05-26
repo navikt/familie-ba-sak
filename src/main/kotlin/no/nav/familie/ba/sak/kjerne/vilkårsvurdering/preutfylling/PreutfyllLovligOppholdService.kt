@@ -164,7 +164,7 @@ class PreutfyllLovligOppholdService(
                 Periode(
                     verdi = true,
                     fom = it.gyldigPeriode?.fom,
-                    tom = it.gyldigPeriode?.tom?.takeIf { it.isSameOrBefore(LocalDate.now()) },
+                    tom = it.gyldigPeriode?.tom?.takeIf { tom -> tom.isSameOrBefore(LocalDate.now()) },
                 )
             }.slåSammenPerioderInnenforSammeMåned()
             .map { it.tilTidslinje() }
@@ -172,14 +172,14 @@ class PreutfyllLovligOppholdService(
 }
 
 /**
- * Slår sammen perioder som overlapper eller har gap innenfor samme eller påfølgende måned.
- * F.eks. 14.des→19.des + 21.des→4.feb → 14.des→4.feb
+ * Slår sammen perioder som overlapper eller har mellomrom innenfor samme måned.
+ * F.eks. 14.feb→16.feb + 19.feb→28.feb → 14.feb→28.feb
  */
 private fun List<Periode<Boolean>>.slåSammenPerioderInnenforSammeMåned(): List<Periode<Boolean>> =
     sortedBy { it.fom }.fold(mutableListOf()) { acc, periode ->
         val forrige = acc.lastOrNull()
 
-        if (forrige == null || !kanSlåsSammen(forrige.tom, periode.fom)) {
+        if (forrige == null || !oppholdstillatelsePerioderKanSlåsSammen(forrige.tom, periode.fom)) {
             acc.add(periode)
         } else {
             val forrigeTom = forrige.tom
@@ -191,7 +191,7 @@ private fun List<Periode<Boolean>>.slåSammenPerioderInnenforSammeMåned(): List
         acc
     }
 
-private fun kanSlåsSammen(
-    tom: LocalDate?,
-    fom: LocalDate?,
-): Boolean = tom == null || fom == null || fom.toYearMonth() <= tom.toYearMonth().plusMonths(1)
+private fun oppholdstillatelsePerioderKanSlåsSammen(
+    forrigePeriodeTom: LocalDate?,
+    dennePeriodeFom: LocalDate?,
+): Boolean = forrigePeriodeTom == null || dennePeriodeFom == null || dennePeriodeFom.toYearMonth() <= forrigePeriodeTom.toYearMonth()
