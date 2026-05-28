@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
@@ -39,20 +40,27 @@ class PreutfyllBorMedSøkerService(
             .filterNot { it.erSøkersResultater() }
             .filter { it.aktør in aktørerVilkårSkalPreutfyllesFor }
             .forEach { personResultat ->
-                val barn = personResultat.aktør.tilPerson(personopplysningGrunnlag)
-                val adresserForBarn = Adresser.opprettFra(barn)
+                try {
+                    val barn = personResultat.aktør.tilPerson(personopplysningGrunnlag)
+                    val adresserForBarn = Adresser.opprettFra(barn)
 
-                val nyeBorMedSøkerVilkårResultat =
-                    genererBorMedSøkerVilkårResultat(
-                        personResultat = personResultat,
-                        bostedsadresserBarn = adresserForBarn,
-                        bostedsadresserSøker = bostedsadresserSøker,
-                        barnFødselsdato = barn.fødselsdato,
+                    val nyeBorMedSøkerVilkårResultat =
+                        genererBorMedSøkerVilkårResultat(
+                            personResultat = personResultat,
+                            bostedsadresserBarn = adresserForBarn,
+                            bostedsadresserSøker = bostedsadresserSøker,
+                            barnFødselsdato = barn.fødselsdato,
+                        )
+
+                    if (nyeBorMedSøkerVilkårResultat.isNotEmpty()) {
+                        personResultat.vilkårResultater.removeIf { it.vilkårType == BOR_MED_SØKER }
+                        personResultat.vilkårResultater.addAll(nyeBorMedSøkerVilkårResultat)
+                    }
+                } catch (exception: Exception) {
+                    secureLogger.warn(
+                        "Preutfylling av bor med søker feilet for aktør ${personResultat.aktør.aktørId} i behandling ${vilkårsvurdering.behandling.id}, fortsetter med neste person",
+                        exception,
                     )
-
-                if (nyeBorMedSøkerVilkårResultat.isNotEmpty()) {
-                    personResultat.vilkårResultater.removeIf { it.vilkårType == BOR_MED_SØKER }
-                    personResultat.vilkårResultater.addAll(nyeBorMedSøkerVilkårResultat)
                 }
             }
     }

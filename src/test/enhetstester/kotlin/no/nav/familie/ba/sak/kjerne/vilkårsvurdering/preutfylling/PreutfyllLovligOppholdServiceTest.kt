@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
@@ -26,6 +29,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class PreutfyllLovligOppholdServiceTest {
@@ -920,6 +924,101 @@ class PreutfyllLovligOppholdServiceTest {
                     .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
             assertThat(barnLovligOpphold).isNotEmpty
             assertThat(barnLovligOpphold).allMatch { it.erAutomatiskVurdert }
+        }
+
+        @Test
+        fun `Ved preutfylling feil skal preutfyllingen bare hoppe over personen og fortsette med neste`() {
+            // Arrange
+            val secureLogger = LoggerFactory.getLogger("secureLogger") as Logger
+            val listAppender = ListAppender<ILoggingEvent>().apply { start() }
+            secureLogger.addAppender(listAppender)
+
+            val barnSomMangler = lagPerson(aktør = randomAktør(), type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(5))
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = behandling,
+                    lagPersonResultater = {
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                aktør = søkerAktør,
+                                lagVilkårResultater = { emptySet() },
+                                lagAnnenVurderinger = { emptySet() },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                aktør = barnSomMangler.aktør,
+                                lagVilkårResultater = { emptySet() },
+                                lagAnnenVurderinger = { emptySet() },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                aktør = barn.aktør,
+                                lagVilkårResultater = { emptySet() },
+                                lagAnnenVurderinger = { emptySet() },
+                            ),
+                        )
+                    },
+                )
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
+                lagPersonopplysningGrunnlag(behandlingId = behandling.id) { grunnlag ->
+                    val norskStatsborgerskap: (Person) -> GrStatsborgerskap = { person ->
+                        GrStatsborgerskap(
+                            landkode = "NOR",
+                            gyldigPeriode = sisteTiÅr,
+                            medlemskap = Medlemskap.NORDEN,
+                            person = person,
+                        )
+                    }
+                    setOf(
+                        lagPerson(aktør = søkerAktør, personopplysningGrunnlag = grunnlag).apply {
+                            statsborgerskap = mutableListOf(norskStatsborgerskap(this))
+                        },
+                        lagPerson(
+                            aktør = barn.aktør,
+                            type = PersonType.BARN,
+                            fødselsdato = barn.fødselsdato,
+                            personopplysningGrunnlag = grunnlag,
+                        ).apply {
+                            statsborgerskap = mutableListOf(norskStatsborgerskap(this))
+                        },
+                    )
+                }
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(
+                vilkårsvurdering = vilkårsvurdering,
+                aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør },
+            )
+
+            // Assert
+            val søkerLovligOpphold =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == søkerAktør }
+                    .vilkårResultater
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+            assertThat(søkerLovligOpphold).isNotEmpty
+
+            val barnSomManglerLovligOpphold =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == barnSomMangler.aktør }
+                    .vilkårResultater
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+            assertThat(barnSomManglerLovligOpphold).isEmpty()
+
+            val barnLovligOpphold =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == barn.aktør }
+                    .vilkårResultater
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+            assertThat(barnLovligOpphold).isNotEmpty
+
+            assertThat(listAppender.list).anySatisfy {
+                assertThat(it.level.toString()).isEqualTo("WARN")
+                assertThat(it.formattedMessage).contains("Preutfylling av lovlig opphold feilet for aktør ${barnSomMangler.aktør.aktørId}")
+            }
         }
 
         @Test

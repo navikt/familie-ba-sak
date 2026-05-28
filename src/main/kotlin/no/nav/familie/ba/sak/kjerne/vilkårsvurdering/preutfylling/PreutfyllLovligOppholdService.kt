@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -50,24 +51,28 @@ class PreutfyllLovligOppholdService(
         vilkårsvurdering.personResultater
             .filter { it.aktør in aktørerVilkårSkalPreutfyllesFor }
             .forEach { personResultat ->
-                val person = personResultat.aktør.tilPerson(personopplysningGrunnlag)
-                if (person.statsborgerskap.iUkraina()) {
-                    return@forEach
-                }
+                try {
+                    val person = personResultat.aktør.tilPerson(personopplysningGrunnlag)
+                    if (person.statsborgerskap.iUkraina()) {
+                        return@forEach
+                    }
 
-                val datoForBeskjæringAvFom = finnDatoForBeskjæringAvFom(person, personopplysningGrunnlag)
+                    val datoForBeskjæringAvFom = finnDatoForBeskjæringAvFom(person, personopplysningGrunnlag)
 
-                val nyeLovligOppholdVilkårResultat =
-                    genererLovligOppholdVilkårResultat(
-                        personResultat = personResultat,
-                        person = person,
-                        søkerErEøsBorgerOgHarArbeidsforholdTidslinje = søkerErEøsBorgerOgHarArbeidsforholdTidslinje,
-                        datoForBeskjæringAvFom = datoForBeskjæringAvFom,
-                    )
+                    val nyeLovligOppholdVilkårResultat =
+                        genererLovligOppholdVilkårResultat(
+                            personResultat = personResultat,
+                            person = person,
+                            søkerErEøsBorgerOgHarArbeidsforholdTidslinje = søkerErEøsBorgerOgHarArbeidsforholdTidslinje,
+                            datoForBeskjæringAvFom = datoForBeskjæringAvFom,
+                        )
 
-                if (nyeLovligOppholdVilkårResultat.isNotEmpty()) {
-                    personResultat.vilkårResultater.removeIf { it.vilkårType == LOVLIG_OPPHOLD }
-                    personResultat.vilkårResultater.addAll(nyeLovligOppholdVilkårResultat)
+                    if (nyeLovligOppholdVilkårResultat.isNotEmpty()) {
+                        personResultat.vilkårResultater.removeIf { it.vilkårType == LOVLIG_OPPHOLD }
+                        personResultat.vilkårResultater.addAll(nyeLovligOppholdVilkårResultat)
+                    }
+                } catch (exception: Exception) {
+                    secureLogger.warn("Preutfylling av lovlig opphold feilet for aktør ${personResultat.aktør.aktørId} i behandling ${vilkårsvurdering.behandling.id}, fortsetter med neste person", exception)
                 }
             }
     }
