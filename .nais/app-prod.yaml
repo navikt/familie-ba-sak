@@ -37,13 +37,13 @@ spec:
       runtime: java
   gcp: # Database
     sqlInstances:
-      - type: POSTGRES_15 # Read nais doc and https://github.com/navikt/familie/blob/master/doc/Google%20cloud/oppgrader-database.md on how to upgrade
+      - type: POSTGRES_17 # Read nais doc and https://github.com/navikt/familie/blob/master/doc/Google%20cloud/oppgrader-database.md on how to upgrade
         tier: db-custom-4-3840
-        name: familie-ba-sak
+        name: familie-ba-sak-17
         autoBackupHour: 2
         diskAutoresize: true
-        highAvailability: false
-        pointInTimeRecovery: false
+        highAvailability: true
+        pointInTimeRecovery: true
         databases:
           - name: familie-ba-sak
             envVarPrefix: DB
