@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.simulering
 import io.micrometer.core.instrument.Metrics
 import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.tilUtbetalingsoppdragDto
@@ -178,19 +177,13 @@ class SimuleringService(
         behandling: Behandling,
         antallBarn: Int,
     ): Boolean {
-        val finnesEtterBetaling = hentTotalEtterbetalingFørMars2023(behandling.id) != BigDecimal.ZERO
+        val finnesEtterBetaling = hentEtterbetaling(behandling.id) != BigDecimal.ZERO
         if (!finnesEtterBetaling) return true
 
-        val simuleringsperioderFørMars2023 = hentSimuleringsperioderFørMars2023(behandling.id)
-        if (
-            simuleringsperioderFørMars2023.harKunPositiveResultater() &&
-            simuleringsperioderFørMars2023.harMaks1KroneIResultatPerBarn(antallBarn) &&
-            simuleringsperioderFørMars2023.harTotaltAvvikUnderBeløpsgrense()
-        ) {
-            return true
-        }
-
-        return false
+        val simuleringsperioder = hentAlleSimuleringsperioder(behandling.id)
+        return simuleringsperioder.harKunPositiveResultater() &&
+            simuleringsperioder.harMaks1KroneIResultatPerBarn(antallBarn) &&
+            simuleringsperioder.harTotaltAvvikUnderBeløpsgrense()
     }
 
     private fun sjekkOmBehandlingHarFeilutbetalingInnenforBeløpsgrenser(
@@ -200,29 +193,16 @@ class SimuleringService(
         val finnesFeilutbetaling = hentFeilutbetaling(behandling.id) != BigDecimal.ZERO
         if (!finnesFeilutbetaling) return true
 
-        val simuleringsperioderFørMars2023 = hentSimuleringsperioderFørMars2023(behandling.id)
-        if (
-            simuleringsperioderFørMars2023.harKunNegativeResultater() &&
-            simuleringsperioderFørMars2023.harMaks1KroneIResultatPerBarn(antallBarn) &&
-            simuleringsperioderFørMars2023.harTotaltAvvikUnderBeløpsgrense()
-        ) {
-            return true
-        }
-
-        return false
+        val simuleringsperioder = hentAlleSimuleringsperioder(behandling.id)
+        return simuleringsperioder.harKunNegativeResultater() &&
+            simuleringsperioder.harMaks1KroneIResultatPerBarn(antallBarn) &&
+            simuleringsperioder.harTotaltAvvikUnderBeløpsgrense()
     }
 
-    private fun hentSimuleringsperioderFørMars2023(behandlingId: Long): List<SimuleringsPeriode> {
-        val februar2023 = LocalDate.of(2023, 2, 1)
-
-        return vedtakSimuleringMottakereTilSimuleringPerioder(
+    private fun hentAlleSimuleringsperioder(behandlingId: Long): List<SimuleringsPeriode> =
+        vedtakSimuleringMottakereTilSimuleringPerioder(
             økonomiSimuleringMottakere = hentSimuleringPåBehandling(behandlingId),
-        ).filter {
-            it.fom.isSameOrBefore(februar2023)
-        }
-    }
-
-    private fun hentTotalEtterbetalingFørMars2023(behandlingId: Long) = hentTotalEtterbetaling(hentSimuleringsperioderFørMars2023(behandlingId), null)
+        )
 
     private fun List<SimuleringsPeriode>.harKunPositiveResultater() = all { it.resultat >= BigDecimal.ZERO }
 

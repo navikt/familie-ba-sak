@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
+import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -49,24 +51,28 @@ class PreutfyllLovligOppholdService(
         vilkårsvurdering.personResultater
             .filter { it.aktør in aktørerVilkårSkalPreutfyllesFor }
             .forEach { personResultat ->
-                val person = personResultat.aktør.tilPerson(personopplysningGrunnlag)
-                if (person.statsborgerskap.iUkraina()) {
-                    return@forEach
-                }
+                try {
+                    val person = personResultat.aktør.tilPerson(personopplysningGrunnlag)
+                    if (person.statsborgerskap.iUkraina()) {
+                        return@forEach
+                    }
 
-                val datoForBeskjæringAvFom = finnDatoForBeskjæringAvFom(person, personopplysningGrunnlag)
+                    val datoForBeskjæringAvFom = finnDatoForBeskjæringAvFom(person, personopplysningGrunnlag)
 
-                val nyeLovligOppholdVilkårResultat =
-                    genererLovligOppholdVilkårResultat(
-                        personResultat = personResultat,
-                        person = person,
-                        søkerErEøsBorgerOgHarArbeidsforholdTidslinje = søkerErEøsBorgerOgHarArbeidsforholdTidslinje,
-                        datoForBeskjæringAvFom = datoForBeskjæringAvFom,
-                    )
+                    val nyeLovligOppholdVilkårResultat =
+                        genererLovligOppholdVilkårResultat(
+                            personResultat = personResultat,
+                            person = person,
+                            søkerErEøsBorgerOgHarArbeidsforholdTidslinje = søkerErEøsBorgerOgHarArbeidsforholdTidslinje,
+                            datoForBeskjæringAvFom = datoForBeskjæringAvFom,
+                        )
 
-                if (nyeLovligOppholdVilkårResultat.isNotEmpty()) {
-                    personResultat.vilkårResultater.removeIf { it.vilkårType == LOVLIG_OPPHOLD }
-                    personResultat.vilkårResultater.addAll(nyeLovligOppholdVilkårResultat)
+                    if (nyeLovligOppholdVilkårResultat.isNotEmpty()) {
+                        personResultat.vilkårResultater.removeIf { it.vilkårType == LOVLIG_OPPHOLD }
+                        personResultat.vilkårResultater.addAll(nyeLovligOppholdVilkårResultat)
+                    }
+                } catch (exception: Exception) {
+                    secureLogger.warn("Preutfylling av lovlig opphold feilet for aktør ${personResultat.aktør.aktørId} i behandling ${vilkårsvurdering.behandling.id}, fortsetter med neste person", exception)
                 }
             }
     }
@@ -159,11 +165,33 @@ class PreutfyllLovligOppholdService(
     ): Tidslinje<Boolean> =
         oppholdstillatelse
             .filter { it.type in setOf(PERMANENT, MIDLERTIDIG) }
-            .map { oppholdstillatelse ->
+            .map {
                 Periode(
                     verdi = true,
-                    fom = oppholdstillatelse.gyldigPeriode?.fom,
-                    tom = oppholdstillatelse.gyldigPeriode?.tom?.takeIf { it.isSameOrBefore(LocalDate.now()) },
-                ).tilTidslinje()
-            }.kombiner { it.any() }
+                    fom = it.gyldigPeriode?.fom,
+                    tom = it.gyldigPeriode?.tom?.takeIf { tom -> tom.isSameOrBefore(LocalDate.now()) },
+                )
+            }.slåSammenPerioderInnenforSammeMåned()
+            .map { it.tilTidslinje() }
+            .kombiner { it.any() }
 }
+
+/**
+ * Slår sammen perioder som overlapper eller har mellomrom innenfor samme måned.
+ * F.eks. 14.feb→16.feb + 19.feb→28.feb → 14.feb→28.feb
+ */
+private fun List<Periode<Boolean>>.slåSammenPerioderInnenforSammeMåned(): List<Periode<Boolean>> =
+    sortedBy { it.fom }.fold(emptyList()) { acc, periode ->
+        val forrigePeriode = acc.lastOrNull()
+        val forrigePeriodeTom = forrigePeriode?.tom
+        val dennePeriodeFom = periode.fom
+        val kanSlåsSammen = forrigePeriode != null && (forrigePeriodeTom == null || dennePeriodeFom == null || dennePeriodeFom.toYearMonth() <= forrigePeriodeTom.toYearMonth())
+
+        if (kanSlåsSammen) {
+            val nyTom = forrigePeriode.tom?.let { forrigePeriodeTom -> periode.tom?.let { dennePeriodeTom -> maxOf(forrigePeriodeTom, dennePeriodeTom) } }
+
+            acc.dropLast(1) + Periode(verdi = true, fom = forrigePeriode.fom, tom = nyTom)
+        } else {
+            acc + periode
+        }
+    }

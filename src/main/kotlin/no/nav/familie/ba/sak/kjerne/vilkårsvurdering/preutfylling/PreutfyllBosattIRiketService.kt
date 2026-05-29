@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -48,29 +49,33 @@ class PreutfyllBosattIRiketService(
         vilkårsvurdering.personResultater
             .filter { it.aktør in aktørerVilkårSkalPreutfyllesFor }
             .forEach { personResultat ->
-                val person = personResultat.aktør.tilPerson(personopplysningGrunnlag)
-                if (person.statsborgerskap.iUkraina()) {
-                    return@forEach
-                }
-
-                val datoForBeskjæringAvFom =
-                    if (person.type == PersonType.SØKER) {
-                        personopplysningGrunnlag.eldsteBarnSinFødselsdato ?: person.fødselsdato
-                    } else {
-                        person.fødselsdato
+                try {
+                    val person = personResultat.aktør.tilPerson(personopplysningGrunnlag)
+                    if (person.statsborgerskap.iUkraina()) {
+                        return@forEach
                     }
 
-                val nyeBosattIRiketVilkårResultater =
-                    genererBosattIRiketVilkårResultat(
-                        personResultat = personResultat,
-                        datoForBeskjæringAvFom = datoForBeskjæringAvFom,
-                        person = person,
-                        digitalSøknad = digitalSøknad,
-                    )
+                    val datoForBeskjæringAvFom =
+                        if (person.type == PersonType.SØKER) {
+                            personopplysningGrunnlag.eldsteBarnSinFødselsdato ?: person.fødselsdato
+                        } else {
+                            person.fødselsdato
+                        }
 
-                if (nyeBosattIRiketVilkårResultater.isNotEmpty()) {
-                    personResultat.vilkårResultater.removeIf { it.vilkårType == BOSATT_I_RIKET }
-                    personResultat.vilkårResultater.addAll(nyeBosattIRiketVilkårResultater)
+                    val nyeBosattIRiketVilkårResultater =
+                        genererBosattIRiketVilkårResultat(
+                            personResultat = personResultat,
+                            datoForBeskjæringAvFom = datoForBeskjæringAvFom,
+                            person = person,
+                            digitalSøknad = digitalSøknad,
+                        )
+
+                    if (nyeBosattIRiketVilkårResultater.isNotEmpty()) {
+                        personResultat.vilkårResultater.removeIf { it.vilkårType == BOSATT_I_RIKET }
+                        personResultat.vilkårResultater.addAll(nyeBosattIRiketVilkårResultater)
+                    }
+                } catch (exception: Exception) {
+                    secureLogger.warn("Preutfylling av bosatt i riket feilet for aktør ${personResultat.aktør.aktørId} i behandling ${behandling.id}", exception)
                 }
             }
     }
