@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
@@ -36,6 +39,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilk
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class PreutfyllBosattIRiketServiceTest {
@@ -1714,5 +1718,101 @@ class PreutfyllBosattIRiketServiceTest {
                 .filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
         assertThat(barnBosattIRiket).isNotEmpty
         assertThat(barnBosattIRiket).allMatch { it.erAutomatiskVurdert }
+    }
+
+    @Test
+    fun `Ved preutfylling feil skal preutfyllingen bare hoppe over personen og fortsette med neste`() {
+        // Arrange
+        val secureLogger = LoggerFactory.getLogger("secureLogger") as Logger
+        val listAppender = ListAppender<ILoggingEvent>().apply { start() }
+        secureLogger.addAppender(listAppender)
+
+        val behandling = lagBehandling()
+        val søkerAktør = randomAktør()
+        val barnIGrunnlagAktør = randomAktør()
+        val barnSomManglerIGrunnlagAktør = randomAktør()
+
+        val persongrunnlagUtenDetEneBarnet =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
+                barnasIdenter = listOf(barnIGrunnlagAktør.aktivFødselsnummer()),
+                søkerAktør = søkerAktør,
+                barnAktør = listOf(barnIGrunnlagAktør),
+            ).also {
+                it.personer.forEach { person ->
+                    person.bostedsadresser =
+                        mutableListOf(
+                            lagGrVegadresseBostedsadresse(
+                                periode =
+                                    DatoIntervallEntitet(
+                                        fom = LocalDate.now().minusYears(5),
+                                        tom = null,
+                                    ),
+                                matrikkelId = 12345L,
+                            ),
+                        )
+                }
+            }
+
+        val vilkårsvurdering =
+            lagVilkårsvurdering(behandling = behandling).also {
+                it.personResultater =
+                    setOf(
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = søkerAktør,
+                            lagVilkårResultater = { emptySet() },
+                            lagAnnenVurderinger = { emptySet() },
+                        ),
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = barnSomManglerIGrunnlagAktør,
+                            lagVilkårResultater = { emptySet() },
+                            lagAnnenVurderinger = { emptySet() },
+                        ),
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            aktør = barnIGrunnlagAktør,
+                            lagVilkårResultater = { emptySet() },
+                            lagAnnenVurderinger = { emptySet() },
+                        ),
+                    )
+            }
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlagUtenDetEneBarnet
+
+        // Act
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(
+            vilkårsvurdering = vilkårsvurdering,
+            aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør },
+        )
+
+        // Assert
+        val søkerBosattIRiket =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == søkerAktør }
+                .vilkårResultater
+                .filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+        assertThat(søkerBosattIRiket).isNotEmpty
+
+        val barnSomManglerBosattIRiket =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == barnSomManglerIGrunnlagAktør }
+                .vilkårResultater
+                .filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+        assertThat(barnSomManglerBosattIRiket).isEmpty()
+
+        val barnIGrunnlagBosattIRiket =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == barnIGrunnlagAktør }
+                .vilkårResultater
+                .filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+        assertThat(barnIGrunnlagBosattIRiket).isNotEmpty
+
+        assertThat(listAppender.list).anySatisfy {
+            assertThat(it.level.toString()).isEqualTo("WARN")
+            assertThat(it.formattedMessage).contains("Preutfylling av bosatt i riket feilet for aktør ${barnSomManglerIGrunnlagAktør.aktørId}")
+        }
     }
 }
