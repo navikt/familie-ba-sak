@@ -7,7 +7,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -21,7 +20,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/konsistensavstemming")
-@ProtectedWithClaims(issuer = "azuread")
 @Validated
 class KonsistensavstemmingController(
     private val taskService: TaskService,

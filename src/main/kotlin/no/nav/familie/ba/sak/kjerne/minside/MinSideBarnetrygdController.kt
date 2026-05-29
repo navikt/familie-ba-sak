@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.kjerne.minside
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.sikkerhet.EksternBrukerUtils
-import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.security.token.support.core.api.RequiredIssuers
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -16,12 +14,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/minside/barnetrygd")
-@RequiredIssuers(
-    ProtectedWithClaims(
-        issuer = EksternBrukerUtils.ISSUER_TOKENX,
-        claimMap = ["acr=Level4"],
-    ),
-)
 @Validated
 class MinSideBarnetrygdController(
     private val minSideBarnetrygdService: MinSideBarnetrygdService,

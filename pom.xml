@@ -24,27 +24,27 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20260511102627_928cb38</prosessering.version>
+        <prosessering.version>2.20260518123445_a734e94</prosessering.version>
         <felles.version>4.20260520144147_4729200</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20260323170751_4c02e3c</eksterne-kontrakter-bisys.version>
         <familie.kontrakter.saksstatistikk>2.0_20260323170751_4c02e3c</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20260323170751_4c02e3c</familie.kontrakter.stønadsstatistikk>
-        <felles-kontrakter.version>4.0_20260514200726_bf1a1ee</felles-kontrakter.version>
-        <utbetalingsgenerator.version>1.0_20251127080440_b935966</utbetalingsgenerator.version>
+        <felles-kontrakter.version>4.0_20260525120347_db8fb90</felles-kontrakter.version>
+        <utbetalingsgenerator.version>1.0_20260518120101_5e9de19</utbetalingsgenerator.version>
         <cucumber.version>7.34.3</cucumber.version>
         <mockk.version>1.14.9</mockk.version>
-        <token-validation-spring.version>6.0.7</token-validation-spring.version>
+        <token-validation-spring.version>6.0.8</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>3.0.3</springdoc.version>
-        <sentry.version>8.41.0</sentry.version>
+        <sentry.version>8.42.0</sentry.version>
         <kotlinx.version>1.11.0</kotlinx.version>
         <kotlinx-kover.version>0.9.8</kotlinx-kover.version>
-        <mock-oauth2-server.version>3.0.3</mock-oauth2-server.version>
+        <mock-oauth2-server.version>4.0.0</mock-oauth2-server.version>
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <unleash.version>12.2.1</unleash.version>
         <testcontainers.postgresql.version>1.21.4</testcontainers.postgresql.version>
-        <maven.model.version>3.9.15</maven.model.version>
+        <maven.model.version>3.9.16</maven.model.version>
         <avro.version>1.12.1</avro.version>
         <confluent.version>8.2.1</confluent.version>
         <sonar.organization>navikt</sonar.organization>
@@ -65,7 +65,7 @@
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
                 <!-- Denne inkluderer junit-platform nyere enn 1.13.3 som kreves av cucumber 7.26, kan muligens fjernes når spring bumper til junit versjon 1.13.3 -->
-                <version>6.0.3</version>
+                <version>6.1.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -86,7 +86,7 @@
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
-                <version>2.2.49</version>
+                <version>2.2.50</version>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
@@ -144,6 +144,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
@@ -271,12 +275,6 @@
         </dependency>
         <dependency>
             <groupId>no.nav.security</groupId>
-            <artifactId>token-validation-spring-test</artifactId>
-            <version>${token-validation-spring.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.security</groupId>
             <artifactId>mock-oauth2-server</artifactId>
             <version>${mock-oauth2-server.version}</version>
             <scope>test</scope>
@@ -298,7 +296,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
-            <artifactId>sikkerhet-token-support</artifactId>
+            <artifactId>sikkerhet-spring-security</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.familie</groupId>
@@ -307,7 +305,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.familie</groupId>
-            <artifactId>prosessering-web-nav-token-support</artifactId>
+            <artifactId>prosessering-web-spring-security</artifactId>
             <version>${prosessering.version}</version>
         </dependency>
         <dependency>
@@ -598,7 +596,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.6.2</version>
+                <version>3.6.3</version>
                 <executions>
                     <execution>
                         <id>enforce-banned-dependencies</id>

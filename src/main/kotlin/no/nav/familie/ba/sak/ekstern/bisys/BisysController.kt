@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.PERSONIDENT_IKKE_GYLDIG_FEILMELDING
 import no.nav.familie.ba.sak.common.PERSONIDENT_REGEX
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -26,7 +25,6 @@ import java.time.YearMonth
 
 @RestController
 @RequestMapping("/api/bisys")
-@ProtectedWithClaims(issuer = "azuread")
 class BisysController(
     private val bisysService: BisysService,
 ) {

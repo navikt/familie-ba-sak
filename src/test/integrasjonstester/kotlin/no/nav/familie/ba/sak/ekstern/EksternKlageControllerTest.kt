@@ -3,9 +3,7 @@ package no.nav.familie.ba.sak.ekstern
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.runs
-import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
@@ -20,12 +18,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.EksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.klage.KlageService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilgangskontroll.FagsakTilgang
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -48,14 +44,7 @@ class EksternKlageControllerTest(
 
     @BeforeEach
     fun setup() {
-        mockkObject(SikkerhetContext)
         every { tilgangService.validerTilgangTilHandlingOgFagsak(any(), any(), any(), any()) } just runs
-        every { SikkerhetContext.kallKommerFraKlage() } returns true
-    }
-
-    @AfterEach
-    fun cleanup() {
-        unmockkObject(SikkerhetContext)
     }
 
     @Nested

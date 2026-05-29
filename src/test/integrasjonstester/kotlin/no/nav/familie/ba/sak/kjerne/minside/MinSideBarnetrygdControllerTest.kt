@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.minside
 
-import io.mockk.every
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
@@ -19,82 +16,97 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
-import no.nav.familie.sikkerhet.EksternBrukerUtils
-import no.nav.security.token.support.core.exceptions.JwtTokenValidatorException
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.exchange
 import java.time.YearMonth
 
+@ActiveProfiles(
+    "postgres",
+    "integrasjonstest",
+    "testcontainers",
+)
 class MinSideBarnetrygdControllerTest(
-    @Autowired private val minSideBarnetrygdService: MinSideBarnetrygdService,
     @Autowired private val aktørIdRepository: AktørIdRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-) : AbstractSpringIntegrationTest() {
-    private val fnr = randomFnr()
-
-    private val minSideBarnetrygdController = MinSideBarnetrygdController(minSideBarnetrygdService)
-
-    @BeforeEach
-    fun setup() {
-        mockkObject(EksternBrukerUtils)
-        every { EksternBrukerUtils.hentFnrFraToken() } returns fnr
-    }
-
-    @AfterEach
-    fun cleanup() {
-        unmockkObject(EksternBrukerUtils)
-    }
-
+) : WebSpringAuthTestRunner() {
     @Nested
     inner class HentMinSideBarnetrygd {
         @Test
-        fun `skal returnere response med feil hvis fnr ikke han bli hentet fra token`() {
-            // Arrange
-            every { EksternBrukerUtils.hentFnrFraToken() } throws JwtTokenValidatorException("Finner ikke token.")
+        fun `skal returnere UNAUTHORIZED når request mangler token`() {
+            val error =
+                assertThrows<HttpClientErrorException> {
+                    restTemplate.exchange<String>(
+                        hentUrl("/api/minside/barnetrygd"),
+                        HttpMethod.GET,
+                        HttpEntity<String>(HttpHeaders()),
+                    )
+                }
 
-            // Act
-            val response = minSideBarnetrygdController.hentMinSideBarnetrygd()
-
-            // Assert
-            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
-            assertThat(response.body).isInstanceOfSatisfying(HentMinSideBarnetrygdDto.Feil::class.java) {
-                assertThat(it.feilmelding).isEqualTo("Mangler tilgang.")
-            }
+            assertThat(error.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
         }
 
         @Test
-        fun `skal returnere response med feil hvis fnr fra token ikke kan konverteres til et fødselsnummer`() {
-            // Arrange
-            every { EksternBrukerUtils.hentFnrFraToken() } returns "12345678903"
+        fun `skal returnere FORBIDDEN når token mangler fødselsnummer`() {
+            val headers =
+                HttpHeaders().apply {
+                    contentType = MediaType.APPLICATION_JSON
+                    setBearerAuth(hentTokenForTokenX(null))
+                }
 
-            // Act
-            val response = minSideBarnetrygdController.hentMinSideBarnetrygd()
+            val error =
+                assertThrows<HttpClientErrorException> {
+                    restTemplate.exchange<String>(
+                        hentUrl("/api/minside/barnetrygd"),
+                        HttpMethod.GET,
+                        HttpEntity<String>(headers),
+                    )
+                }
 
-            // Assert
-            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
-            assertThat(response.body).isInstanceOfSatisfying(HentMinSideBarnetrygdDto.Feil::class.java) {
-                assertThat(it.feilmelding).isEqualTo("Ugydlig fødselsnummer.")
-            }
+            assertThat(error.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
         }
 
         @Test
-        fun `skal hente min side barnetrygd`() {
-            // Arrange
+        fun `skal returnere BAD_REQUEST når token inneholder ugyldig fødselsnummer`() {
+            val headers =
+                HttpHeaders().apply {
+                    contentType = MediaType.APPLICATION_JSON
+                    setBearerAuth(hentTokenForTokenX("12345678910"))
+                }
+
+            val error =
+                assertThrows<HttpClientErrorException> {
+                    restTemplate.exchange<String>(
+                        hentUrl("/api/minside/barnetrygd"),
+                        HttpMethod.GET,
+                        HttpEntity<String>(headers),
+                    )
+                }
+
+            assertThat(error.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        fun `skal hente min side barnetrygd med TokenX-token`() {
+            val fnr = randomFnr()
             val andelFom = YearMonth.now().minusMonths(5)
             val andelTom = YearMonth.now().plusMonths(5)
 
             val aktør = aktørIdRepository.save(randomAktør(fnr = fnr))
-
             val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
-
             val behandling =
                 behandlingRepository.save(
                     lagBehandlingUtenId(
@@ -102,15 +114,17 @@ class MinSideBarnetrygdControllerTest(
                         status = BehandlingStatus.AVSLUTTET,
                     ),
                 )
-
             val tilkjentYtelse =
                 tilkjentYtelseRepository.save(
                     lagInitiellTilkjentYtelse(
                         behandling = behandling,
-                        utbetalingsoppdrag = lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id, ytelseTypeBa = YtelsetypeBA.UTVIDET_BARNETRYGD),
+                        utbetalingsoppdrag =
+                            lagMinimalUtbetalingsoppdragString(
+                                behandlingId = behandling.id,
+                                ytelseTypeBa = YtelsetypeBA.UTVIDET_BARNETRYGD,
+                            ),
                     ),
                 )
-
             andelTilkjentYtelseRepository.save(
                 lagAndelTilkjentYtelse(
                     behandling = behandling,
@@ -122,15 +136,27 @@ class MinSideBarnetrygdControllerTest(
                 ),
             )
 
-            // Act
-            val response = minSideBarnetrygdController.hentMinSideBarnetrygd()
+            val headers =
+                HttpHeaders().apply {
+                    contentType = MediaType.APPLICATION_JSON
+                    setBearerAuth(hentTokenForTokenX(fnr))
+                }
 
-            // Assert
+            val response =
+                restTemplate.exchange<HentMinSideBarnetrygdDto.Suksess>(
+                    hentUrl("/api/minside/barnetrygd"),
+                    HttpMethod.GET,
+                    HttpEntity<String>(headers),
+                )
+
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-            assertThat(response.body).isInstanceOfSatisfying(HentMinSideBarnetrygdDto.Suksess::class.java) {
-                assertThat(it.barnetrygd?.ordinær?.startmåned).isEqualTo(andelFom)
-                assertThat(it.barnetrygd?.utvidet).isNull()
-            }
+            assertThat(
+                response.body
+                    ?.barnetrygd
+                    ?.ordinær
+                    ?.startmåned,
+            ).isEqualTo(andelFom)
+            assertThat(response.body?.barnetrygd?.utvidet).isNull()
         }
     }
 }

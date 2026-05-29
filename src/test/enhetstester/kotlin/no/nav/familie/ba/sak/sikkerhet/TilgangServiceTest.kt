@@ -5,7 +5,6 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.common.clearAllCaches
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
-import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
@@ -53,9 +52,6 @@ class TilgangServiceTest {
     private val featureToggleService: FeatureToggleService = mockk()
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
     private val cacheManager = ConcurrentMapCacheManager()
-    private val kode6Gruppe = "kode6"
-    private val kode7Gruppe = "kode7"
-    private val rolleConfig = RolleConfig("", "", "", FORVALTER_ROLLE = "", KODE6 = kode6Gruppe, KODE7 = kode7Gruppe)
     private val auditLogger = AuditLogger("familie-ba-sak")
     private val fakeFamilieIntegrasjonerTilgangskontrollKlient = FakeFamilieIntegrasjonerTilgangskontrollKlient(RestTemplate())
 
@@ -80,7 +76,6 @@ class TilgangServiceTest {
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             persongrunnlagService = persongrunnlagService,
             fagsakService = fagsakService,
-            rolleConfig = rolleConfig,
             auditLogger = auditLogger,
             strengtFortroligService = strengtFortroligService,
         )

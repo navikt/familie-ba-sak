@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/rolletilgang")
-@ProtectedWithClaims(issuer = "azuread")
 @Validated
 class RolletilgangDatabaseTestController(
     private val behandlingService: BehandlingService,

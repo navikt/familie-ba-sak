@@ -20,7 +20,6 @@ import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
-import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -44,7 +43,6 @@ class TestVerktøyController(
     private val behandlingRepository: BehandlingRepository,
 ) {
     @GetMapping(path = ["/autobrev"])
-    @Unprotected
     fun kjørSchedulerForAutobrev(): ResponseEntity<Ressurs<String>> =
         if (envService.erPreprod() || envService.erDev()) {
             scheduler.opprettTask()
@@ -54,7 +52,6 @@ class TestVerktøyController(
         }
 
     @GetMapping(path = ["/test-satsendring/{fagsakId}"])
-    @Unprotected
     fun utførSatsendringPåFagsak(
         @PathVariable fagsakId: Long,
     ): ResponseEntity<Ressurs<String>> =
@@ -66,7 +63,6 @@ class TestVerktøyController(
         }
 
     @PostMapping(path = ["/vedtak-om-overgangsstønad"])
-    @Unprotected
     fun mottaHendelseOmVedtakOmOvergangsstønad(
         @RequestBody personIdent: PersonIdent,
     ): ResponseEntity<Ressurs<String>> =
@@ -83,7 +79,6 @@ class TestVerktøyController(
         }
 
     @PostMapping(path = ["/foedselshendelse"])
-    @Unprotected
     fun mottaFødselshendelse(
         @RequestBody nyBehandlingHendelse: NyBehandlingHendelse,
     ): ResponseEntity<Ressurs<String>> =
@@ -96,7 +91,6 @@ class TestVerktøyController(
         }
 
     @GetMapping(path = ["/ta-behandlinger-etter-ventefrist-av-vent"])
-    @Unprotected
     fun taBehandlingerEtterVentefristAvVent(): ResponseEntity<Ressurs<String>> =
         if (envService.erPreprod() || envService.erDev()) {
             val taBehandlingerEtterVentefristAvVentTask =
@@ -117,7 +111,6 @@ class TestVerktøyController(
     }
 
     @GetMapping("/redirect/behandling/{behandlingId}")
-    @Unprotected
     fun redirectTilBarnetrygd(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Any> {
