@@ -36,6 +36,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDate.now
 
 internal class SimuleringServiceEnhetTest {
     private val økonomiKlient: ØkonomiKlient = mockk()
@@ -61,8 +62,6 @@ internal class SimuleringServiceEnhetTest {
             tilkjentYtelseRepository = tilkjentYtelseRepository,
         )
 
-    val februar2023 = LocalDate.of(2023, 2, 1)
-
     @ParameterizedTest
     @EnumSource(value = BehandlingÅrsak::class, names = ["HELMANUELL_MIGRERING", "ENDRE_MIGRERINGSDATO"])
     fun `harMigreringsbehandlingAvvikInnenforBeløpsgrenser skal returnere true dersom det finnes avvik i form av etterbetaling som er innenfor beløpsgrense`(
@@ -78,12 +77,12 @@ internal class SimuleringServiceEnhetTest {
         // etterbetaling 4 KR pga. avrundingsfeil. 1 KR per barn i hver periode.
         val posteringer =
             listOf(
-                mockVedtakSimuleringPostering(fom = februar2023, beløp = 2, betalingType = BetalingType.DEBIT),
-                mockVedtakSimuleringPostering(fom = februar2023, beløp = -2, betalingType = BetalingType.KREDIT),
-                mockVedtakSimuleringPostering(fom = februar2023, beløp = 2, betalingType = BetalingType.DEBIT),
-                mockVedtakSimuleringPostering(beløp = 2, betalingType = BetalingType.DEBIT),
-                mockVedtakSimuleringPostering(beløp = -2, betalingType = BetalingType.KREDIT),
-                mockVedtakSimuleringPostering(beløp = 2, betalingType = BetalingType.DEBIT),
+                mockVedtakSimuleringPostering(fom = now().minusMonths(4), tom = now().minusMonths(3), beløp = 2, betalingType = BetalingType.DEBIT),
+                mockVedtakSimuleringPostering(fom = now().minusMonths(4), tom = now().minusMonths(3), beløp = -2, betalingType = BetalingType.KREDIT),
+                mockVedtakSimuleringPostering(fom = now().minusMonths(4), tom = now().minusMonths(3), beløp = 2, betalingType = BetalingType.DEBIT),
+                mockVedtakSimuleringPostering(fom = now().minusMonths(2), tom = now().minusMonths(1), beløp = 2, betalingType = BetalingType.DEBIT),
+                mockVedtakSimuleringPostering(fom = now().minusMonths(2), tom = now().minusMonths(1), beløp = -2, betalingType = BetalingType.KREDIT),
+                mockVedtakSimuleringPostering(fom = now().minusMonths(2), tom = now().minusMonths(1), beløp = 2, betalingType = BetalingType.DEBIT),
             )
         val simuleringMottaker =
             listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
@@ -209,7 +208,7 @@ internal class SimuleringServiceEnhetTest {
 
     @ParameterizedTest
     @EnumSource(value = BehandlingÅrsak::class, names = ["HELMANUELL_MIGRERING", "ENDRE_MIGRERINGSDATO"])
-    fun `harMigreringsbehandlingManuellePosteringerFørMars2023 skal returnere true dersom det finnes manuelle posteringer i simuleringsresultat før mars 2023`(
+    fun `harMigreringsbehandlingManuellePosteringer skal returnere true dersom det finnes manuelle posteringer i simuleringsresultat`(
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
@@ -236,10 +235,10 @@ internal class SimuleringServiceEnhetTest {
 
         every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
 
-        val behandlingHarManuellePosteringerFørMars2023 =
+        val behandlingHarManuellePosteringer =
             simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
 
-        assertThat(behandlingHarManuellePosteringerFørMars2023).isTrue
+        assertThat(behandlingHarManuellePosteringer).isTrue
     }
 
     @ParameterizedTest
@@ -247,7 +246,7 @@ internal class SimuleringServiceEnhetTest {
         value = BehandlingÅrsak::class,
         names = ["HELMANUELL_MIGRERING", "ENDRE_MIGRERINGSDATO"],
     )
-    fun `harMigreringsbehandlingManuellePosteringerFørMars2023 skal returnere false dersom det ikke finnes manuelle posteringer i simuleringsresultat før mars 2023`(
+    fun `harMigreringsbehandlingManuellePosteringer skal returnere false dersom det ikke finnes manuelle posteringer i simuleringsresultat`(
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
@@ -270,10 +269,10 @@ internal class SimuleringServiceEnhetTest {
 
         every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
 
-        val behandlingHarManuellePosteringerFørMars2023 =
+        val behandlingHarManuellePosteringer =
             simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
 
-        assertThat(behandlingHarManuellePosteringerFørMars2023).isFalse
+        assertThat(behandlingHarManuellePosteringer).isFalse
     }
 
     @ParameterizedTest
@@ -282,7 +281,7 @@ internal class SimuleringServiceEnhetTest {
         mode = EnumSource.Mode.EXCLUDE,
         names = ["HELMANUELL_MIGRERING", "ENDRE_MIGRERINGSDATO"],
     )
-    fun `harMigreringsbehandlingManuellePosteringerFørMars2023 skal kaste feil dersom behandlingen ikke er en manuell migrering`(
+    fun `harMigreringsbehandlingManuellePosteringer skal kaste feil dersom behandlingen ikke er en manuell migrering`(
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
@@ -303,7 +302,7 @@ internal class SimuleringServiceEnhetTest {
                 simuleringService.simuleringErUtdatert(
                     lagForenkletSimulering(
                         tidSimuleringHentet = null,
-                        forfallsdatoNestePeriode = LocalDate.now(),
+                        forfallsdatoNestePeriode = now(),
                     ),
                 )
             assertThat(erUtdatert).isTrue()
@@ -314,8 +313,8 @@ internal class SimuleringServiceEnhetTest {
             val erUtdatert =
                 simuleringService.simuleringErUtdatert(
                     lagForenkletSimulering(
-                        tidSimuleringHentet = LocalDate.now().minusDays(10),
-                        forfallsdatoNestePeriode = LocalDate.now().minusDays(5),
+                        tidSimuleringHentet = now().minusDays(10),
+                        forfallsdatoNestePeriode = now().minusDays(5),
                     ),
                 )
             assertThat(erUtdatert).isTrue()
@@ -326,7 +325,7 @@ internal class SimuleringServiceEnhetTest {
             val erUtdatert =
                 simuleringService.simuleringErUtdatert(
                     lagForenkletSimulering(
-                        tidSimuleringHentet = LocalDate.now(),
+                        tidSimuleringHentet = now(),
                         forfallsdatoNestePeriode = null,
                     ),
                 )
@@ -338,8 +337,8 @@ internal class SimuleringServiceEnhetTest {
             val erUtdatert =
                 simuleringService.simuleringErUtdatert(
                     lagForenkletSimulering(
-                        tidSimuleringHentet = LocalDate.now(),
-                        forfallsdatoNestePeriode = LocalDate.now(),
+                        tidSimuleringHentet = now(),
+                        forfallsdatoNestePeriode = now(),
                     ),
                 )
             assertThat(erUtdatert).isFalse()
@@ -350,8 +349,8 @@ internal class SimuleringServiceEnhetTest {
             val erUtdatert =
                 simuleringService.simuleringErUtdatert(
                     lagForenkletSimulering(
-                        tidSimuleringHentet = LocalDate.now().minusDays(10),
-                        forfallsdatoNestePeriode = LocalDate.now().plusDays(5),
+                        tidSimuleringHentet = now().minusDays(10),
+                        forfallsdatoNestePeriode = now().plusDays(5),
                     ),
                 )
             assertThat(erUtdatert).isFalse()
@@ -362,8 +361,8 @@ internal class SimuleringServiceEnhetTest {
             val erUtdatert =
                 simuleringService.simuleringErUtdatert(
                     lagForenkletSimulering(
-                        tidSimuleringHentet = LocalDate.now().minusDays(5),
-                        forfallsdatoNestePeriode = LocalDate.now().minusDays(5),
+                        tidSimuleringHentet = now().minusDays(5),
+                        forfallsdatoNestePeriode = now().minusDays(5),
                     ),
                 )
             assertThat(erUtdatert).isFalse()
@@ -374,8 +373,8 @@ internal class SimuleringServiceEnhetTest {
             val erUtdatert =
                 simuleringService.simuleringErUtdatert(
                     lagForenkletSimulering(
-                        tidSimuleringHentet = LocalDate.now().minusDays(1),
-                        forfallsdatoNestePeriode = LocalDate.now().minusDays(5),
+                        tidSimuleringHentet = now().minusDays(1),
+                        forfallsdatoNestePeriode = now().minusDays(5),
                     ),
                 )
             assertThat(erUtdatert).isFalse()
@@ -410,11 +409,11 @@ internal class SimuleringServiceEnhetTest {
         økonomiSimuleringMottaker: ØkonomiSimuleringMottaker = mockk(relaxed = true),
         beløp: Int = 0,
         fagOmrådeKode: FagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-        fom: LocalDate = LocalDate.of(2023, 1, 1),
-        tom: LocalDate = LocalDate.of(2023, 1, 1),
+        fom: LocalDate = now().minusYears(1).minusMonths(1),
+        tom: LocalDate = now().minusYears(1),
         betalingType: BetalingType = BetalingType.DEBIT,
         posteringType: PosteringType = PosteringType.YTELSE,
-        forfallsdato: LocalDate = LocalDate.of(2023, 1, 1),
+        forfallsdato: LocalDate = now().minusYears(1),
         utenInntrekk: Boolean = false,
         fagsakId: Long = 0L,
     ) = ØkonomiSimuleringPostering(
