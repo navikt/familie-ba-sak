@@ -42,8 +42,8 @@ spec:
         name: familie-ba-sak-17
         autoBackupHour: 2
         diskAutoresize: true
-        highAvailability: false
-        pointInTimeRecovery: false
+        highAvailability: true
+        pointInTimeRecovery: true
         databases:
           - name: familie-ba-sak
             envVarPrefix: DB
