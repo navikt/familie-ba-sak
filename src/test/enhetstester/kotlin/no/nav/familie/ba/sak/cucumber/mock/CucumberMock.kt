@@ -709,6 +709,7 @@ class CucumberMock(
             opprettTaskService = opprettTaskService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
+            registrertSøknadstidspunktService = mockk(relaxed = true),
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
         )
 
