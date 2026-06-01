@@ -184,10 +184,10 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
         val perioderMedEndring =
             listOf(barn1, barn2)
-                .map {
+                .map { person ->
                     EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUbetalingAndelPerPersonTidslinje(
-                        forrigeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2).filter { endretAndel -> endretAndel.personer.contains(it) },
-                        nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2.copy(årsak = Årsak.ETTERBETALING_3MND)).filter { endretAndel -> endretAndel.personer.contains(it) },
+                        forrigeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2).filter { endretAndel -> endretAndel.personer.contains(person) },
+                        nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2.copy(årsak = Årsak.ETTERBETALING_3MND)).filter { endretAndel -> endretAndel.personer.contains(person) },
                     )
                 }.flatMap { it.tilPerioder() }
                 .filter { it.verdi == true }
