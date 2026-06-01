@@ -71,7 +71,7 @@ class AutomatiskVilkårUtfyllingService(
                                 resultat = vilkårResultatPeriode.verdi.resultat,
                                 periodeFom = vilkårResultatPeriode.fom,
                                 periodeTom = vilkårResultatPeriode.tom,
-                                begrunnelse = "Automatisk utfylt basert på søkers 'Bosatt i riket'-vilkår",
+                                begrunnelse = "Kopiert fra søkers 'Bosatt i riket'-vilkår",
                                 sistEndretIBehandlingId = behandlingId,
                             )
                         }
