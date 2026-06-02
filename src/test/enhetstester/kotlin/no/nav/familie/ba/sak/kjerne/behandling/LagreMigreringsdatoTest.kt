@@ -67,6 +67,7 @@ class LagreMigreringsdatoTest {
             vilkårsvurderingService = vilkårsvurderingService,
             featureToggleService = mockFeatureToggleService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
+            fagsakLåsingService = mockk(),
         )
 
     @Test

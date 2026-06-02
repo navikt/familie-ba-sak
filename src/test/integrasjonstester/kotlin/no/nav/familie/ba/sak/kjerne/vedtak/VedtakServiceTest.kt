@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -90,6 +91,8 @@ class VedtakServiceTest(
     private val featureToggleService: FeatureToggleService,
     @Autowired
     private val eksternBehandlingRelasjonService: EksternBehandlingRelasjonService,
+    @Autowired
+    private val fagsakLåsingService: FagsakLåsingService,
 ) : AbstractSpringIntegrationTest() {
     lateinit var behandlingService: BehandlingService
     lateinit var vilkårResultat1: VilkårResultat
@@ -122,6 +125,7 @@ class VedtakServiceTest(
                 vilkårsvurderingService,
                 featureToggleService,
                 eksternBehandlingRelasjonService,
+                fagsakLåsingService,
             )
 
         val personAktørId = randomAktør()
