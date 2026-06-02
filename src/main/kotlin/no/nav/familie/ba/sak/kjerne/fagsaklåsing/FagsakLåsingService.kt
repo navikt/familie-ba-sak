@@ -12,6 +12,8 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.klage.KlagebehandlingHenter
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.hentSaksbehandlerNavn
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.BrukerIdType
@@ -20,10 +22,12 @@ import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsluttSakRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.DokarkivBruker
 import no.nav.familie.kontrakter.felles.dokarkiv.GjenåpneSakRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import no.nav.familie.kontrakter.felles.klage.BehandlingStatus as KlageBehandlingStatus
 
 @Service
 class FagsakLåsingService(
@@ -35,6 +39,8 @@ class FagsakLåsingService(
     private val featureToggleService: FeatureToggleService,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val klagebehandlingHenter: KlagebehandlingHenter,
+    private val tilbakekrevingKlient: TilbakekrevingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -56,6 +62,33 @@ class FagsakLåsingService(
 
         if (behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(fagsakId)) {
             logger.info("Fagsak $fagsakId har åpen behandling, hopper ut")
+            return
+        }
+
+        val klagebehandlinger = klageService.hentKlagebehandlingerPåFagsak(fagsakId)
+        if (klagebehandlinger.any { it.status != KlageBehandlingStatus.FERDIGSTILT }) {
+            logger.info("Fagsak $fagsakId har åpen klagebehandling, hopper ut")
+            return
+        }
+
+        val tilbakekrevingsbehandlinger = tilbakekrevingService.hentTilbakekrevingbehandlingerPåFagsak(fagsakId)
+        if (tilbakekrevingsbehandlinger.any { it.status != Behandlingsstatus.AVSLUTTET }) {
+            logger.info("Fagsak $fagsakId har åpen tilbakekrevingsbehandling, hopper ut")
+            return
+        }
+
+        val sisteAvsluttetTidspunkt =
+            listOfNotNull(
+                behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId)?.endretTidspunkt,
+                klagebehandlinger.mapNotNull { it.vedtaksdato }.maxOrNull(),
+                tilbakekrevingsbehandlinger.mapNotNull { it.vedtaksdato }.maxOrNull(),
+            ).maxOrNull()
+
+        if (sisteAvsluttetTidspunkt != null && sisteAvsluttetTidspunkt.isAfter(LocalDateTime.now().minusYears(1))) {
+            logger.info(
+                "Fagsak $fagsakId hadde siste avsluttede behandling $sisteAvsluttetTidspunkt," +
+                    " som er for under 1 år siden. Hopper ut",
+            )
             return
         }
 
