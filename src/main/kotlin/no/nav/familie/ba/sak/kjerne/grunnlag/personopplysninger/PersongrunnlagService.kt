@@ -279,7 +279,7 @@ class PersongrunnlagService(
 
         val eldsteBarnsFødselsdato =
             listOfNotNull(
-                finnEldstebarnsFødselsdato(barnSomSkalHentesFraPdl),
+                finnEldstebarnsFødselsdato(barnSomSkalHentesFraPdl, sisteBehandlingSomErVedtatt?.id),
                 barnSomSkalKopieresFraForrigeGrunnlag.maxOfOrNull { person -> person.fødselsdato },
             ).max()
 
@@ -474,14 +474,33 @@ class PersongrunnlagService(
         }
     }
 
-    private fun finnEldstebarnsFødselsdato(alleBarn: List<Aktør>): LocalDate =
+    private fun finnEldstebarnsFødselsdato(
+        alleBarn: List<Aktør>,
+        sisteVedtatteBehandlingId: Long?,
+    ): LocalDate =
         alleBarn
             .mapNotNull { barn ->
                 try {
                     personopplysningerService.hentPersoninfoEnkel(barn).fødselsdato
                 } catch (e: PdlPersonKanIkkeBehandlesIFagsystem) {
-                    secureLogger.warn("Kan ikke hente fødselsdato for barn ${barn.aktivFødselsnummer()}: ${e.årsak}. Hopper over ved beregning av eldste barns fødselsdato.")
-                    null
+                    secureLogger.warn("Kan ikke hente fødselsdato for barn ${barn.aktivFødselsnummer()}: ${e.årsak}. Forsøker å hente fra forrige personopplysningsgrunnlag for beregning av eldste barns fødselsdato.")
+
+                    if (e.årsak != PdlPersonKanIkkeBehandlesIFagSystemÅrsak.OPPHØRT) {
+                        null
+                    } else {
+                        sisteVedtatteBehandlingId?.let { id ->
+                            val harLøpendeAndeler =
+                                andelTilkjentYtelseRepository
+                                    .finnAndelerTilkjentYtelseForBehandlingOgBarn(id, barn)
+                                    .any { it.erLøpende() }
+
+                            if (harLøpendeAndeler) {
+                                hentAktiv(id)?.personer?.firstOrNull { it.aktør == barn }?.fødselsdato
+                            } else {
+                                null
+                            }
+                        }
+                    }
                 }
             }.minOrNull() ?: PRAKTISK_TIDLIGSTE_DAG
 
@@ -552,7 +571,7 @@ class PersongrunnlagService(
     fun oppdaterAdresserPåPersoner(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) {
-        val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarn = personopplysningGrunnlag.barna.map { it.aktør })
+        val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarn = personopplysningGrunnlag.barna.map { it.aktør }, sisteVedtatteBehandlingId = null)
 
         val adresserForPersoner = personopplysningerService.hentAdresserForPersoner(personopplysningGrunnlag.personer.map { it.aktør.aktivFødselsnummer() })
 
