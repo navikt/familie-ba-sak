@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -26,7 +25,6 @@ const val SATSENDRING = "Satsendring"
 
 @RestController
 @RequestMapping("/api/satsendring")
-@ProtectedWithClaims(issuer = "azuread")
 class SatsendringController(
     private val startSatsendring: StartSatsendring,
     private val tilgangService: TilgangService,

@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingsbehandlingDto
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/tilbakekreving")
-@ProtectedWithClaims(issuer = "azuread")
 @Validated
 class TilbakekrevingController(
     private val tilgangService: TilgangService,

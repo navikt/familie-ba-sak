@@ -5,20 +5,15 @@ import jakarta.persistence.PreRemove
 import jakarta.persistence.PreUpdate
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.config.RolleConfig
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
 class RollestyringMotDatabase {
-    @Autowired
-    private lateinit var rolleConfig: RolleConfig
-
     @PrePersist
     @PreUpdate
     @PreRemove
     fun kontrollerSkrivetilgang(objekt: Any) {
-        val høyesteRolletilgang = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig)
+        val høyesteRolletilgang = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker()
 
         if (!harSkrivetilgang(høyesteRolletilgang)) {
             throw RolleTilgangskontrollFeil(

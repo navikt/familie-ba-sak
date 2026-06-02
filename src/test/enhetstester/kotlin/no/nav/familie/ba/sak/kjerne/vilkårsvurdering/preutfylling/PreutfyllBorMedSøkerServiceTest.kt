@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
@@ -18,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class PreutfyllBorMedSøkerServiceTest {
@@ -1030,5 +1034,78 @@ class PreutfyllBorMedSøkerServiceTest {
                 .vilkårResultater
                 .filter { it.vilkårType == Vilkår.BOR_MED_SØKER }
         assertThat(barn2BorMedSøker).allMatch { !it.erAutomatiskVurdert }
+    }
+
+    @Test
+    fun `Ved preutfylling feil skal preutfyllingen bare hoppe over personen og fortsette med neste`() {
+        // Arrange
+        val secureLogger = LoggerFactory.getLogger("secureLogger") as Logger
+        val listAppender = ListAppender<ILoggingEvent>().apply { start() }
+        secureLogger.addAppender(listAppender)
+
+        val nåDato = LocalDate.now()
+
+        val aktørSøker = randomAktør()
+        val aktørBarnIGrunnlag = randomAktør()
+        val aktørBarnSomManglerIGrunnlag = randomAktør()
+
+        val behandling = lagBehandling()
+
+        val persongrunnlagUtenDetEneBarnet =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = aktørSøker.aktivFødselsnummer(),
+                barnasIdenter = listOf(aktørBarnIGrunnlag.aktivFødselsnummer()),
+                søkerAktør = aktørSøker,
+                barnAktør = listOf(aktørBarnIGrunnlag),
+            ).also { persongrunnlag ->
+                persongrunnlag.personer.forEach { person ->
+                    person.bostedsadresser =
+                        mutableListOf(
+                            lagGrVegadresse(matrikkelId = 12345L).also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = nåDato.minusYears(10),
+                                        tom = null,
+                                    )
+                                it.person = person
+                            },
+                        )
+                }
+            }
+        every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagUtenDetEneBarnet
+
+        val vilkårsvurdering =
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                behandling = behandling,
+                søker = persongrunnlagUtenDetEneBarnet.søker,
+                barna = persongrunnlagUtenDetEneBarnet.barna + lagPerson(type = PersonType.BARN, aktør = aktørBarnSomManglerIGrunnlag),
+                overstyrendeVilkårResultater = emptyMap(),
+            )
+
+        // Act
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+
+        // Assert
+        val barnIGrunnlagBorMedSøker =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == aktørBarnIGrunnlag }
+                .vilkårResultater
+                .filter { it.vilkårType == Vilkår.BOR_MED_SØKER }
+        assertThat(barnIGrunnlagBorMedSøker).isNotEmpty
+        assertThat(barnIGrunnlagBorMedSøker).allMatch { it.erAutomatiskVurdert }
+
+        val barnSomManglerBorMedSøker =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == aktørBarnSomManglerIGrunnlag }
+                .vilkårResultater
+                .filter { it.vilkårType == Vilkår.BOR_MED_SØKER }
+        assertThat(barnSomManglerBorMedSøker).isNotEmpty
+        assertThat(barnSomManglerBorMedSøker).allMatch { !it.erAutomatiskVurdert }
+
+        assertThat(listAppender.list).anySatisfy {
+            assertThat(it.level.toString()).isEqualTo("WARN")
+            assertThat(it.formattedMessage).contains("Preutfylling av bor med søker feilet for aktør ${aktørBarnSomManglerIGrunnlag.aktørId}")
+        }
     }
 }

@@ -58,7 +58,6 @@ import no.nav.familie.kontrakter.ba.finnmarkstillegg.kommuneErIFinnmarkEllerNord
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -83,7 +82,6 @@ import kotlin.concurrent.thread
 
 @RestController
 @RequestMapping("/api/forvalter")
-@ProtectedWithClaims(issuer = "azuread")
 class ForvalterController(
     private val oppgaveRepository: OppgaveRepository,
     private val integrasjonKlient: IntegrasjonKlient,

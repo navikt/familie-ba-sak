@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
@@ -26,6 +29,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class PreutfyllLovligOppholdServiceTest {
@@ -615,8 +619,9 @@ class PreutfyllLovligOppholdServiceTest {
                     .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
                     .sortedBy { it.periodeFom }
 
-            val sisteOppfylteVilkår = lovligOppholdResultater.last { it.resultat == Resultat.OPPFYLT }
-            assertThat(sisteOppfylteVilkår.periodeTom).isNull()
+            val oppfylteVilkår = lovligOppholdResultater.filter { it.resultat == Resultat.OPPFYLT }
+            assertThat(oppfylteVilkår).hasSize(1)
+            assertThat(oppfylteVilkår.single().periodeTom).isNull()
         }
 
         @Test
@@ -650,6 +655,90 @@ class PreutfyllLovligOppholdServiceTest {
 
             val oppfyltPeriode = lovligOppholdResultater.single { it.resultat == Resultat.OPPFYLT }
             assertThat(oppfyltPeriode.periodeTom).isNotNull
+        }
+
+        @Test
+        fun `skal fjerne tom på arbeidsforhold hvis tom er frem i tid`() {
+            // Arrange
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
+                lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
+                    søker.apply {
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "BE",
+                                    gyldigPeriode = sisteTiÅr,
+                                    medlemskap = Medlemskap.EØS,
+                                    person = this,
+                                ),
+                            )
+                        arbeidsforhold =
+                            mutableListOf(
+                                GrArbeidsforhold(
+                                    arbeidsgiverId = null,
+                                    periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(1), tom = LocalDate.now().plusYears(1)),
+                                    person = this,
+                                    arbeidsgiverType = ArbeidsgiverType.Person.name,
+                                ),
+                            )
+                    }
+                }
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
+
+            // Assert
+            val lovligOppholdResultater =
+                vilkårsvurdering.personResultater
+                    .flatMap { it.vilkårResultater }
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+
+            val sisteOppfylteVilkår = lovligOppholdResultater.last { it.resultat == Resultat.OPPFYLT }
+            assertThat(sisteOppfylteVilkår.periodeTom).isNull()
+        }
+
+        @Test
+        fun `skal ikke fjerne tom på arbeidsforhold hvis tom er før dagens dato`() {
+            // Arrange
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
+                lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
+                    søker.apply {
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "BE",
+                                    gyldigPeriode = sisteTiÅr,
+                                    medlemskap = Medlemskap.EØS,
+                                    person = this,
+                                ),
+                            )
+                        arbeidsforhold =
+                            mutableListOf(
+                                GrArbeidsforhold(
+                                    arbeidsgiverId = null,
+                                    periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(2), tom = LocalDate.now().minusYears(1)),
+                                    person = this,
+                                    arbeidsgiverType = ArbeidsgiverType.Person.name,
+                                ),
+                            )
+                    }
+                }
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
+
+            // Assert
+            val lovligOppholdResultater =
+                vilkårsvurdering.personResultater
+                    .flatMap { it.vilkårResultater }
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+
+            val oppfyltPeriode = lovligOppholdResultater.single { it.resultat == Resultat.OPPFYLT }
+            assertThat(oppfyltPeriode.periodeTom).isEqualTo(LocalDate.now().minusYears(1))
         }
 
         @Test
@@ -835,6 +924,250 @@ class PreutfyllLovligOppholdServiceTest {
                     .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
             assertThat(barnLovligOpphold).isNotEmpty
             assertThat(barnLovligOpphold).allMatch { it.erAutomatiskVurdert }
+        }
+
+        @Test
+        fun `Ved preutfylling feil skal preutfyllingen bare hoppe over personen og fortsette med neste`() {
+            // Arrange
+            val secureLogger = LoggerFactory.getLogger("secureLogger") as Logger
+            val listAppender = ListAppender<ILoggingEvent>().apply { start() }
+            secureLogger.addAppender(listAppender)
+
+            val barnSomMangler = lagPerson(aktør = randomAktør(), type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(5))
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = behandling,
+                    lagPersonResultater = {
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                aktør = søkerAktør,
+                                lagVilkårResultater = { emptySet() },
+                                lagAnnenVurderinger = { emptySet() },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                aktør = barnSomMangler.aktør,
+                                lagVilkårResultater = { emptySet() },
+                                lagAnnenVurderinger = { emptySet() },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                aktør = barn.aktør,
+                                lagVilkårResultater = { emptySet() },
+                                lagAnnenVurderinger = { emptySet() },
+                            ),
+                        )
+                    },
+                )
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
+                lagPersonopplysningGrunnlag(behandlingId = behandling.id) { grunnlag ->
+                    val norskStatsborgerskap: (Person) -> GrStatsborgerskap = { person ->
+                        GrStatsborgerskap(
+                            landkode = "NOR",
+                            gyldigPeriode = sisteTiÅr,
+                            medlemskap = Medlemskap.NORDEN,
+                            person = person,
+                        )
+                    }
+                    setOf(
+                        lagPerson(aktør = søkerAktør, personopplysningGrunnlag = grunnlag).apply {
+                            statsborgerskap = mutableListOf(norskStatsborgerskap(this))
+                        },
+                        lagPerson(
+                            aktør = barn.aktør,
+                            type = PersonType.BARN,
+                            fødselsdato = barn.fødselsdato,
+                            personopplysningGrunnlag = grunnlag,
+                        ).apply {
+                            statsborgerskap = mutableListOf(norskStatsborgerskap(this))
+                        },
+                    )
+                }
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(
+                vilkårsvurdering = vilkårsvurdering,
+                aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør },
+            )
+
+            // Assert
+            val søkerLovligOpphold =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == søkerAktør }
+                    .vilkårResultater
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+            assertThat(søkerLovligOpphold).isNotEmpty
+
+            val barnSomManglerLovligOpphold =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == barnSomMangler.aktør }
+                    .vilkårResultater
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+            assertThat(barnSomManglerLovligOpphold).isEmpty()
+
+            val barnLovligOpphold =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == barn.aktør }
+                    .vilkårResultater
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+            assertThat(barnLovligOpphold).isNotEmpty
+
+            assertThat(listAppender.list).anySatisfy {
+                assertThat(it.level.toString()).isEqualTo("WARN")
+                assertThat(it.formattedMessage).contains("Preutfylling av lovlig opphold feilet for aktør ${barnSomMangler.aktør.aktørId}")
+            }
+        }
+
+        @Test
+        fun `skal slå sammen oppholdstillatelser med gap innenfor samme måned til én sammenhengende oppfylt periode`() {
+            // Arrange
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+            val førsteOppholdstillatelseFom = LocalDate.of(2022, 12, 1)
+            val personopplysningsgrunnlag =
+                lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
+                    søker.apply {
+                        opphold =
+                            mutableListOf(
+                                GrOpphold(
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    gyldigPeriode = DatoIntervallEntitet(fom = førsteOppholdstillatelseFom, tom = LocalDate.of(2023, 12, 15)),
+                                    person = this,
+                                ),
+                                GrOpphold(
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.of(2023, 12, 20), tom = LocalDate.of(2024, 12, 15)),
+                                    person = this,
+                                ),
+                                GrOpphold(
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.of(2024, 12, 20), tom = null),
+                                    person = this,
+                                ),
+                            )
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "AFG",
+                                    gyldigPeriode = DatoIntervallEntitet(fom = førsteOppholdstillatelseFom, tom = null),
+                                    person = this,
+                                ),
+                            )
+                    }
+                }
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningsgrunnlag
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
+
+            // Assert
+            val lovligOppholdResultater =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == søkerAktør }
+                    .vilkårResultater
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+
+            val oppfylteVilkår = lovligOppholdResultater.filter { it.resultat == Resultat.OPPFYLT }
+            assertThat(oppfylteVilkår).hasSize(1)
+            assertThat(oppfylteVilkår.single().periodeFom).isEqualTo(førsteOppholdstillatelseFom)
+            assertThat(oppfylteVilkår.single().periodeTom).isNull()
+        }
+
+        @Test
+        fun `skal ikke slå sammen oppholdstillatelser med gap på mer enn en måned`() {
+            // Arrange
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+            val personopplysningsgrunnlag =
+                lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
+                    søker.apply {
+                        opphold =
+                            mutableListOf(
+                                GrOpphold(
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusYears(3)),
+                                    person = this,
+                                ),
+                                GrOpphold(
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(3).plusMonths(2), tom = LocalDate.now().minusYears(1)),
+                                    person = this,
+                                ),
+                            )
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "AFG",
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = null),
+                                    person = this,
+                                ),
+                            )
+                    }
+                }
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningsgrunnlag
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
+
+            // Assert
+            val lovligOppholdResultater =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == søkerAktør }
+                    .vilkårResultater
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+
+            val oppfylteVilkår = lovligOppholdResultater.filter { it.resultat == Resultat.OPPFYLT }
+            assertThat(oppfylteVilkår).hasSize(2)
+        }
+
+        @Test
+        fun `skal ikke slå sammen oppholdstillatelser som går kant i kant over månedsskifte`() {
+            // Arrange
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+            val personopplysningsgrunnlag =
+                lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
+                    søker.apply {
+                        opphold =
+                            mutableListOf(
+                                GrOpphold(
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.of(2024, 1, 15)),
+                                    person = this,
+                                ),
+                                GrOpphold(
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.of(2024, 2, 5), tom = LocalDate.now().minusMonths(1)),
+                                    person = this,
+                                ),
+                            )
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "AFG",
+                                    gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = null),
+                                    person = this,
+                                ),
+                            )
+                    }
+                }
+
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningsgrunnlag
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor = vilkårsvurdering.personResultater.map { it.aktør })
+
+            // Assert
+            val lovligOppholdResultater =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == søkerAktør }
+                    .vilkårResultater
+                    .filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+
+            val oppfylteVilkår = lovligOppholdResultater.filter { it.resultat == Resultat.OPPFYLT }
+            assertThat(oppfylteVilkår).hasSize(2)
         }
 
         private fun lagPersonopplysningGrunnlagMedSøkerOgBarn(

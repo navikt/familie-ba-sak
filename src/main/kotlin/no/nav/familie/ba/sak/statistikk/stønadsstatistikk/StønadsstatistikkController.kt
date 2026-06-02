@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.task.PubliserVedtakV2Task
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/stonadsstatistikk")
-@ProtectedWithClaims(issuer = "azuread")
 class StønadsstatistikkController(
     private val stønadsstatistikkService: StønadsstatistikkService,
     private val taskRepository: TaskRepositoryWrapper,
