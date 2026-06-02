@@ -164,7 +164,7 @@ class FagsakLåsingServiceTest {
             // Assert
             assertThat(listAppender.list).anySatisfy {
                 assertThat(it.level.toString()).isEqualTo("INFO")
-                assertThat(it.formattedMessage).isEqualTo("Status for fagsak ${fagsak.id} er LØPENDE, hopper ut")
+                assertThat(it.formattedMessage).isEqualTo("Status for fagsak ${fagsak.id} er LØPENDE. Hopper ut av fagsaklåsing.")
             }
             verify(exactly = 0) { fagsakRepository.save(any()) }
             verify(exactly = 0) { fagsakLåsingRepository.save(any()) }
@@ -184,7 +184,7 @@ class FagsakLåsingServiceTest {
             // Assert
             assertThat(listAppender.list).anySatisfy {
                 assertThat(it.level.toString()).isEqualTo("INFO")
-                assertThat(it.formattedMessage).isEqualTo("Fagsak ${fagsak.id} har åpen klagebehandling, hopper ut")
+                assertThat(it.formattedMessage).isEqualTo("Fagsak ${fagsak.id} har åpen klagebehandling. Hopper ut av fagsaklåsing.")
             }
             verify(exactly = 0) { fagsakRepository.save(any()) }
             verify(exactly = 0) { saksstatistikkEventPublisher.publiserSaksstatistikk(any()) }
@@ -203,7 +203,7 @@ class FagsakLåsingServiceTest {
             // Assert
             assertThat(listAppender.list).anySatisfy {
                 assertThat(it.level.toString()).isEqualTo("INFO")
-                assertThat(it.formattedMessage).isEqualTo("Fagsak ${fagsak.id} har åpen tilbakekrevingsbehandling, hopper ut")
+                assertThat(it.formattedMessage).isEqualTo("Fagsak ${fagsak.id} har åpen tilbakekrevingsbehandling. Hopper ut av fagsaklåsing.")
             }
             verify(exactly = 0) { fagsakRepository.save(any()) }
             verify(exactly = 0) { saksstatistikkEventPublisher.publiserSaksstatistikk(any()) }
@@ -285,7 +285,7 @@ class FagsakLåsingServiceTest {
             // Assert
             assertThat(listAppender.list).anySatisfy {
                 assertThat(it.level.toString()).isEqualTo("INFO")
-                assertThat(it.formattedMessage).isEqualTo("Fagsak ${fagsak.id} har åpen behandling, hopper ut")
+                assertThat(it.formattedMessage).isEqualTo("Fagsak ${fagsak.id} har åpen behandling. Hopper ut av fagsaklåsing.")
             }
             verify(exactly = 0) { fagsakRepository.save(any()) }
             verify(exactly = 0) { saksstatistikkEventPublisher.publiserSaksstatistikk(any()) }
@@ -308,7 +308,7 @@ class FagsakLåsingServiceTest {
             val feil = assertThrows<Feil> { fagsakLåsingService.låsFagsak(fagsak.id) }
 
             // Assert
-            assertThat(feil.message).isEqualTo("Fagsak ${fagsak.id} har allerede aktiv låsing")
+            assertThat(feil.message).isEqualTo("Fagsak ${fagsak.id} med status AVSLUTTET har allerede en aktiv låsing.")
         }
 
         @Test
@@ -329,7 +329,7 @@ class FagsakLåsingServiceTest {
             // Assert
             assertThat(listAppender.list).anySatisfy {
                 assertThat(it.level.toString()).isEqualTo("INFO")
-                assertThat(it.formattedMessage).isEqualTo("Fagsak ${fagsak.id} ble låst opp for under 30 dager siden, hopper ut")
+                assertThat(it.formattedMessage).isEqualTo("Fagsak ${fagsak.id} ble låst opp for under 30 dager siden. Hopper ut av fagsaklåsing.")
             }
             verify(exactly = 0) { fagsakRepository.save(any()) }
             verify(exactly = 0) { saksstatistikkEventPublisher.publiserSaksstatistikk(any()) }
