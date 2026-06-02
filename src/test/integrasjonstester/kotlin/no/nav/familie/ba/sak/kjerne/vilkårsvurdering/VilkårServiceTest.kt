@@ -474,6 +474,62 @@ class VilkårServiceTest(
         }
 
         @Test
+        fun `skal ikke lagre logg når et preutfylt vilkår endres i en annen behandling enn den ble preutfylt i`() {
+            // Arrange
+            val tidligereBehandlingId = behandling.id + 1
+            val vilkårsvurdering =
+                vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+                    lagVilkårsvurdering(behandling = behandling) { vilkårsvurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = søkerAktør,
+                                lagVilkårResultater = {
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = it,
+                                            behandlingId = behandling.id,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                            resultat = Resultat.IKKE_OPPFYLT,
+                                            vurderesEtter = Regelverk.NASJONALE_REGLER,
+                                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
+                                        ).copy(erOpprinneligPreutfyltIBehandling = tidligereBehandlingId),
+                                    )
+                                },
+                            ),
+                        )
+                    },
+                )
+
+            val personResultatDto = vilkårsvurdering.personResultater.single().tilPersonResultatDto()
+            val vilkårResultatDto = personResultatDto.vilkårResultater.single()
+
+            val personResultatDtoMedEndring =
+                personResultatDto.copy(
+                    vilkårResultater =
+                        listOf(
+                            vilkårResultatDto.copy(
+                                periodeFom = LocalDate.of(2024, 1, 1),
+                                begrunnelse = "Ny begrunnelse",
+                                resultat = Resultat.OPPFYLT,
+                                vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
+                            ),
+                        ),
+                )
+
+            // Act
+            vilkårService.endreVilkår(
+                behandlingId = behandling.id,
+                vilkårId = vilkårResultatDto.id,
+                personResultatDto = personResultatDtoMedEndring,
+            )
+
+            // Assert
+            assertThat(endringIPreutfyltVilkårLoggRepository.findAll().filter { it.behandling.id == behandling.id }).isEmpty()
+        }
+
+        @Test
         fun `skal oppdatere eksisterende logg i stedet for å opprette ny ved gjentatt endring av preutfylt vilkår`() {
             // Arrange
             val vilkårsvurdering =
