@@ -7,6 +7,8 @@ import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagSystemÅrsak
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -465,6 +467,155 @@ class PersongrunnlagServiceTest {
             assertThat(oppdatertPersonopplysningGrunnlag).isSameAs(aktivtGrunnlag)
             assertThat(oppdatertPersonopplysningGrunnlag.endretTidspunkt).isAfter(opprinneligEndretTidspunkt)
             verify(exactly = 0) { persongrunnlagService.lagreOgDeaktiverGammel(any()) }
+        }
+
+        @Test
+        fun `skal hoppe over barn med opphørt ident og kun historiske andeler`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER)
+            val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 1, 1))
+            val barnMedOpphørtIdent = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2018, 1, 1))
+            val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING)
+            val sisteVedtatteBehandling = lagBehandling(behandlingType = BehandlingType.REVURDERING)
+
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns sisteVedtatteBehandling
+            every { persongrunnlagService.hentAktiv(behandling.id) } returns null
+            every { persongrunnlagService.hentAktiv(sisteVedtatteBehandling.id) } returns null
+            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
+
+            every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
+            every { personopplysningerService.hentPersoninfoEnkel(barnMedOpphørtIdent.aktør) } throws
+                PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.OPPHØRT)
+
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns PersonInfo(søker.fødselsdato)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn.aktør) } returns PersonInfo(barn.fødselsdato)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnMedOpphørtIdent.aktør) } throws
+                PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.OPPHØRT)
+
+            every {
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                    sisteVedtatteBehandling.id,
+                    barnMedOpphørtIdent.aktør,
+                )
+            } returns emptyList()
+
+            // Act
+            val grunnlag =
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = søker.aktør,
+                    barnFraInneværendeBehandling = listOf(barn.aktør, barnMedOpphørtIdent.aktør),
+                    barnFraForrigeBehandling = emptyList(),
+                    behandling = behandling,
+                    målform = Målform.NB,
+                )
+
+            assertThat(grunnlag.barna).hasSize(1)
+            assertThat(grunnlag.barna.map { it.aktør }).containsExactly(barn.aktør)
+        }
+
+        @Test
+        fun `skal kopiere barn med opphørt ident fra forrige grunnlag når det har løpende andeler`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER)
+            val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 1, 1))
+            val barnMedOpphørtIdent = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2018, 1, 1))
+            val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING)
+            val sisteVedtatteBehandling = lagBehandling(behandlingType = BehandlingType.REVURDERING)
+
+            val forrigeGrunnlag =
+                lagTestPersonopplysningGrunnlag(
+                    behandlingId = sisteVedtatteBehandling.id,
+                    personer = arrayOf(søker, barnMedOpphørtIdent),
+                )
+
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns sisteVedtatteBehandling
+            every { persongrunnlagService.hentAktiv(behandling.id) } returns null
+            every { persongrunnlagService.hentAktiv(sisteVedtatteBehandling.id) } returns forrigeGrunnlag
+            every { persongrunnlagService.hentAktivThrows(sisteVedtatteBehandling.id) } returns forrigeGrunnlag
+            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
+
+            every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
+            every { personopplysningerService.hentPersoninfoEnkel(barnMedOpphørtIdent.aktør) } throws
+                PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.OPPHØRT)
+
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns PersonInfo(søker.fødselsdato)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn.aktør) } returns PersonInfo(barn.fødselsdato)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnMedOpphørtIdent.aktør) } throws
+                PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.OPPHØRT)
+
+            every {
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                    sisteVedtatteBehandling.id,
+                    barnMedOpphørtIdent.aktør,
+                )
+            } returns listOf(lagAndelTilkjentYtelse(fom = YearMonth.now(), tom = YearMonth.now().plusMonths(3)))
+
+            // Act
+            val grunnlag =
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = søker.aktør,
+                    barnFraInneværendeBehandling = listOf(barn.aktør),
+                    barnFraForrigeBehandling = listOf(barnMedOpphørtIdent.aktør),
+                    behandling = behandling,
+                    målform = Målform.NB,
+                )
+
+            assertThat(grunnlag.barna).hasSize(2)
+            assertThat(grunnlag.barna.map { it.aktør }).contains(barnMedOpphørtIdent.aktør)
+        }
+
+        @Test
+        fun `eldsteBarnSinFødselsdato skal være fødselsdatoen til barn med opphørt ident når det er eldst og har løpende andeler`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER)
+            val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 1, 1))
+            val barnMedOpphørtIdent = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2018, 1, 1))
+            val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING)
+            val sisteVedtatteBehandling = lagBehandling(behandlingType = BehandlingType.REVURDERING)
+
+            val forrigeGrunnlag =
+                lagTestPersonopplysningGrunnlag(
+                    behandlingId = sisteVedtatteBehandling.id,
+                    personer = arrayOf(søker, barnMedOpphørtIdent),
+                )
+
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns sisteVedtatteBehandling
+            every { persongrunnlagService.hentAktiv(behandling.id) } returns null
+            every { persongrunnlagService.hentAktiv(sisteVedtatteBehandling.id) } returns forrigeGrunnlag
+            every { persongrunnlagService.hentAktivThrows(sisteVedtatteBehandling.id) } returns forrigeGrunnlag
+            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
+
+            every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
+            every { personopplysningerService.hentPersoninfoEnkel(barnMedOpphørtIdent.aktør) } throws
+                PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.OPPHØRT)
+
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns PersonInfo(søker.fødselsdato)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn.aktør) } returns PersonInfo(barn.fødselsdato)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnMedOpphørtIdent.aktør) } throws
+                PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.OPPHØRT)
+
+            every {
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                    sisteVedtatteBehandling.id,
+                    barnMedOpphørtIdent.aktør,
+                )
+            } returns listOf(lagAndelTilkjentYtelse(fom = YearMonth.now().minusYears(3), tom = YearMonth.now().plusMonths(3)))
+
+            // Act
+            val grunnlag =
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = søker.aktør,
+                    barnFraInneværendeBehandling = listOf(barn.aktør),
+                    barnFraForrigeBehandling = listOf(barnMedOpphørtIdent.aktør),
+                    behandling = behandling,
+                    målform = Målform.NB,
+                )
+
+            // Assert
+            assertThat(grunnlag.eldsteBarnSinFødselsdato).isEqualTo(barnMedOpphørtIdent.fødselsdato)
         }
 
         @Nested
