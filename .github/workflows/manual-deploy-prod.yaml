@@ -95,7 +95,7 @@ jobs:
     secrets: inherit
   notify-audit:
     name: Notify if audited deploy
-    if: github.ref != 'refs/heads/main'
+    if: always() && needs.deploy-with-new-image.result == 'success' && github.ref != 'refs/heads/main'
     permissions: {}
     needs: deploy-with-new-image
     uses: navikt/familie-baks-gha-workflows/.github/workflows/notify-audited-deploy.yaml@main # ratchet:exclude

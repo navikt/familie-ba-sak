@@ -44,7 +44,7 @@ class FakeConfig {
     @Bean
     @Primary
     @Profile("fake-ecb-valutakurs-rest-klient")
-    fun fakeECBValutakursRestKlient(restOperations: RestOperations): FakeECBValutakursRestKlient = FakeECBValutakursRestKlient(restOperations)
+    fun fakeECBValutakursRestKlient(): FakeECBValutakursRestKlient = FakeECBValutakursRestKlient()
 
     @Bean
     @Primary

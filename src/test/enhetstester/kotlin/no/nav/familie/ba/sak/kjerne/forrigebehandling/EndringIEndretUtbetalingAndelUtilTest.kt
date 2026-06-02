@@ -20,7 +20,33 @@ class EndringIEndretUtbetalingAndelUtilTest {
     val des22 = YearMonth.of(2022, 12)
 
     @Test
-    fun `Endring i endret utbetaling andel - skal ha endret periode hvis årsak er endret`() {
+    fun `Endring i endret utbetaling andel - skal ikke ha endret periode hvis årsak endres mellom etterbetaling 3 år og 3 mnd`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val forrigeEndretAndel =
+            lagEndretUtbetalingAndel(
+                personer = setOf(barn),
+                prosent = BigDecimal.ZERO,
+                fom = jan22,
+                tom = aug22,
+                årsak = Årsak.ETTERBETALING_3ÅR,
+                søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
+            )
+
+        val nåværendeEndretAndel = forrigeEndretAndel.copy(årsak = Årsak.ETTERBETALING_3MND)
+
+        val perioderMedEndring =
+            EndringIEndretUtbetalingAndelUtil
+                .lagEndringIEndretUbetalingAndelPerPersonTidslinje(
+                    forrigeEndretAndelerForPerson = listOf(forrigeEndretAndel),
+                    nåværendeEndretAndelerForPerson = listOf(nåværendeEndretAndel),
+                ).tilPerioder()
+                .filter { it.verdi == true }
+
+        assertTrue(perioderMedEndring.isEmpty())
+    }
+
+    @Test
+    fun `Endring i endret utbetaling andel - skal ha endret periode hvis årsak endres til noe annet enn etterbetaling`() {
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeEndretAndel =
             lagEndretUtbetalingAndel(
@@ -131,7 +157,46 @@ class EndringIEndretUtbetalingAndelUtilTest {
     }
 
     @Test
-    fun `Endring i endret utbetaling andel - skal returnere endret periode hvis et av to barn har endring på årsak`() {
+    fun `Endring i endret utbetaling andel - skal ikke returnere endret periode hvis et av to barn kun har endring mellom etterbetalingsårsaker`() {
+        val barn1 = lagPerson(type = PersonType.BARN)
+        val barn2 = lagPerson(type = PersonType.BARN)
+
+        val forrigeEndretAndelBarn1 =
+            lagEndretUtbetalingAndel(
+                personer = setOf(barn1),
+                prosent = BigDecimal.ZERO,
+                fom = jan22,
+                tom = aug22,
+                årsak = Årsak.DELT_BOSTED,
+                søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
+                avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned(),
+            )
+
+        val forrigeEndretAndelBarn2 =
+            lagEndretUtbetalingAndel(
+                personer = setOf(barn2),
+                prosent = BigDecimal.ZERO,
+                fom = jan22,
+                tom = aug22,
+                årsak = Årsak.ETTERBETALING_3ÅR,
+                søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
+            )
+
+        val perioderMedEndring =
+            listOf(barn1, barn2)
+                .map { person ->
+                    EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUbetalingAndelPerPersonTidslinje(
+                        forrigeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2).filter { endretAndel -> endretAndel.personer.contains(person) },
+                        nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2.copy(årsak = Årsak.ETTERBETALING_3MND)).filter { endretAndel -> endretAndel.personer.contains(person) },
+                    )
+                }.flatMap { it.tilPerioder() }
+                .filter { it.verdi == true }
+
+        assertTrue(perioderMedEndring.isEmpty())
+    }
+
+    @Test
+    fun `Endring i endret utbetaling andel - skal returnere endret periode hvis et barn har reell endring selv om et annet barn kun har endring mellom etterbetalingsårsaker`() {
         val barn1 = lagPerson(type = PersonType.BARN)
         val barn2 = lagPerson(type = PersonType.BARN)
 
@@ -161,7 +226,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 .map {
                     EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUbetalingAndelPerPersonTidslinje(
                         forrigeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2).filter { endretAndel -> endretAndel.personer.contains(it) },
-                        nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2.copy(årsak = Årsak.ALLEREDE_UTBETALT)).filter { endretAndel -> endretAndel.personer.contains(it) },
+                        nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1.copy(årsak = Årsak.ALLEREDE_UTBETALT), forrigeEndretAndelBarn2.copy(årsak = Årsak.ETTERBETALING_3MND)).filter { endretAndel -> endretAndel.personer.contains(it) },
                     )
                 }.flatMap { it.tilPerioder() }
                 .filter { it.verdi == true }
