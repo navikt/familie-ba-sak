@@ -17,13 +17,13 @@ import java.time.LocalDate
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "RegistrertSøknadstidspunktPåPerson")
-@Table(name = "REGISTRERT_SOKNADSTIDSPUNKT_PA_PERSON")
+@Table(name = "REGISTRERT_SOKNADSTIDSPUNKT_PAA_PERSON")
 data class RegistrertSøknadstidspunktPåPerson(
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "registrert_soknadstidspunkt_pa_person_seq_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "registrert_soknadstidspunkt_paa_person_seq_generator")
     @SequenceGenerator(
-        name = "registrert_soknadstidspunkt_pa_person_seq_generator",
-        sequenceName = "registrert_soknadstidspunkt_pa_person_seq",
+        name = "registrert_soknadstidspunkt_paa_person_seq_generator",
+        sequenceName = "registrert_soknadstidspunkt_paa_person_seq",
         allocationSize = 50,
     )
     val id: Long = 0,

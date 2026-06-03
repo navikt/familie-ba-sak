@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 class RegistrertSøknadstidspunktPåPersonServiceTest {
     private val mockRegistrertSøknadstidspunktPåPersonRepository = mockk<RegistrertSøknadstidspunktPåPersonRepository>()
@@ -60,7 +59,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
         every { mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(capture(lagretSlot)) } answers { firstArg() }
 
         // Act
-        registrertSøknadstidspunktService.lagre(
+        registrertSøknadstidspunktService.lagreSøknadtidspunkterPåBarn(
             behandling = behandling,
             søknadstidspunktPerPerson =
                 listOf(
@@ -86,7 +85,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
         // Act & assert
         val feil =
             assertThrows<FunksjonellFeil> {
-                registrertSøknadstidspunktService.lagre(
+                registrertSøknadstidspunktService.lagreSøknadtidspunkterPåBarn(
                     behandling = behandling,
                     søknadstidspunktPerPerson =
                         listOf(
@@ -107,7 +106,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
         // Act & assert
         val feil =
             assertThrows<FunksjonellFeil> {
-                registrertSøknadstidspunktService.lagre(
+                registrertSøknadstidspunktService.lagreSøknadtidspunkterPåBarn(
                     behandling = behandling,
                     søknadstidspunktPerPerson =
                         listOf(
@@ -163,7 +162,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
         every { mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(capture(lagretSlot)) } answers { firstArg() }
 
         // Act
-        registrertSøknadstidspunktService.settDefaultSøknadstidspunktForBarn(behandling)
+        registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling)
 
         // Assert – kun barnet uten eksisterende rad får default satt
         assertThat(lagretSlot.captured).containsExactly(
@@ -181,7 +180,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
 
         // Act
-        registrertSøknadstidspunktService.settDefaultSøknadstidspunktForBarn(behandling)
+        registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling)
 
         // Assert
         verify(exactly = 0) { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) }
@@ -203,7 +202,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
         every { mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(capture(lagretSlot)) } answers { firstArg() }
 
         // Act
-        registrertSøknadstidspunktService.settDefaultSøknadstidspunktForBarn(behandling)
+        registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling)
 
         // Assert
         assertThat(lagretSlot.captured).containsExactly(
@@ -227,7 +226,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
         every { mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(capture(lagretSlot)) } answers { firstArg() }
 
         // Act
-        registrertSøknadstidspunktService.settDefaultSøknadstidspunktForBarn(behandling)
+        registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling)
 
         // Assert – barnet det ikke er framstilt krav for får ikke default satt
         assertThat(lagretSlot.captured).containsExactly(
@@ -242,7 +241,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
         every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id) } returns null
 
         // Act
-        registrertSøknadstidspunktService.settDefaultSøknadstidspunktForBarn(behandling)
+        registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling)
 
         // Assert
         verify(exactly = 0) { mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(any<List<RegistrertSøknadstidspunktPåPerson>>()) }
@@ -255,7 +254,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
         every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT) } returns false
 
         // Act
-        registrertSøknadstidspunktService.settDefaultSøknadstidspunktForBarn(behandling)
+        registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling)
 
         // Assert
         verify(exactly = 0) { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) }
@@ -270,7 +269,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
         // Act & assert
         val feil =
             assertThrows<FunksjonellFeil> {
-                registrertSøknadstidspunktService.lagre(behandling = behandling, søknadstidspunktPerPerson = emptyList())
+                registrertSøknadstidspunktService.lagreSøknadtidspunkterPåBarn(behandling = behandling, søknadstidspunktPerPerson = emptyList())
             }
         assertThat(feil.message).isEqualTo("Må sette søknadstidspunkt for minst én person.")
         verify(exactly = 0) { mockRegistrertSøknadstidspunktPåPersonRepository.deleteByBehandlingId(any()) }

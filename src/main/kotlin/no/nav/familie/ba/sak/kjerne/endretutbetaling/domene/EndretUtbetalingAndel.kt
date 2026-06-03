@@ -70,9 +70,6 @@ data class EndretUtbetalingAndel(
     var søknadstidspunkt: LocalDate? = null,
     @Column(name = "begrunnelse")
     var begrunnelse: String? = null,
-    // Settes kun av generatoren når andelen genereres automatisk fra søknadstidspunkt. Saksbehandler kan opprette
-    // andeler med samme årsak manuelt – disse skal forbli redigerbare, derfor trengs et eget flagg (ikke kun årsak).
-    // null = eldre andel / ikke generert automatisk.
     @Column(name = "er_automatisk_generert")
     var erAutomatiskGenerert: Boolean? = null,
 ) : BaseEntitet() {

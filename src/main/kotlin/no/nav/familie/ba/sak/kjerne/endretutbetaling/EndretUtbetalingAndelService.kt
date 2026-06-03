@@ -52,7 +52,6 @@ class EndretUtbetalingAndelService(
     ) {
         val endretUtbetalingAndel = endretUtbetalingAndelRepository.getReferenceById(endretUtbetalingAndelId)
 
-        // Automatisk genererte andeler (fra søknadstidspunkt) kan ikke endres, kun fjernes.
         if (featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT) && endretUtbetalingAndel.erAutomatiskGenerert == true) {
             throw FunksjonellFeil("Automatisk genererte endrede utbetalingsperioder kan ikke endres, kun fjernes.")
         }
@@ -203,13 +202,12 @@ class EndretUtbetalingAndelService(
 
     @Transactional
     fun genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling: Behandling) {
-        val kanRegistrereSøknadstidspunkt = featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT)
+        val registrereSøknadstidspunktToggleErPå = featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT)
 
-        // Uten toggle: gammel oppførsel – EØS hopper over, og alle personer bruker behandlingens søknad mottatt-dato.
-        if (!kanRegistrereSøknadstidspunkt && behandling.kategori == BehandlingKategori.EØS) return
+        if (!registrereSøknadstidspunktToggleErPå && behandling.kategori == BehandlingKategori.EØS) return
 
         val lagretSøknadstidspunktPerIdent =
-            if (kanRegistrereSøknadstidspunkt) {
+            if (registrereSøknadstidspunktToggleErPå) {
                 registrertSøknadstidspunktService
                     .hentForBehandling(behandling.id)
                     .associate { it.personIdent to it.søknadstidspunkt }
@@ -217,11 +215,8 @@ class EndretUtbetalingAndelService(
                 emptyMap()
             }
 
-        // Med toggle styres genereringen utelukkende av registrerte søknadstidspunkt (kun barn det er framstilt
-        // krav for). Uten toggle finnes ingen registrerte tidspunkt, og alle personer bruker behandlingens
-        // søknad mottatt-dato.
         val behandlingSøknadMottattDato =
-            if (kanRegistrereSøknadstidspunkt) {
+            if (registrereSøknadstidspunktToggleErPå) {
                 null
             } else {
                 behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)?.toLocalDate()
@@ -229,10 +224,8 @@ class EndretUtbetalingAndelService(
 
         if (lagretSøknadstidspunktPerIdent.isEmpty() && behandlingSøknadMottattDato == null) return
 
-        if (kanRegistrereSøknadstidspunkt) {
-            // Behold etterbetaling for personer som IKKE er framstilt krav for (f.eks. kopiert fra forrige
-            // behandling på en revurdering) – kun framstilt-krav-personer regenereres. Ufullstendige andeler ryddes.
-            val framstiltKravForIdenter = lagretSøknadstidspunktPerIdent.keys
+        if (registrereSøknadstidspunktToggleErPå) {
+            val barnSomeErSøktFor = lagretSøknadstidspunktPerIdent.keys
             val andelerSomSkalRyddes =
                 endretUtbetalingAndelRepository
                     .findByBehandlingId(behandling.id)
@@ -240,12 +233,11 @@ class EndretUtbetalingAndelService(
                         it.manglerObligatoriskFelt() ||
                             (
                                 it.årsak in setOf(ETTERBETALING_3ÅR, ETTERBETALING_3MND) &&
-                                    it.personer.any { person -> person.aktør.aktivFødselsnummer() in framstiltKravForIdenter }
+                                    it.personer.any { person -> person.aktør.aktivFødselsnummer() in barnSomeErSøktFor }
                             )
                     }.map { it.id }
             fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(behandling, andelerSomSkalRyddes)
         } else {
-            // Uten toggle: gammel oppførsel – fjern alle automatisk genererte etterbetalingsandeler.
             fjernEndretUtbetalingAndelerMedÅrsak3MndEller3ÅrGenerertIDenneBehandlingen(behandling)
         }
 
@@ -255,9 +247,6 @@ class EndretUtbetalingAndelService(
         val personerPåBehandling = persongrunnlagService.hentPersonerPåBehandling(personIdenter, behandling)
         val nåværendeEndretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
 
-        // Per person: bruk registrert søknadstidspunkt hvis det er satt, ellers behandlingens søknad mottatt-dato
-        // (kun uten toggle). Med toggle får personer uten registrert tidspunkt ingen etterbetaling. Personer med
-        // samme søknadstidspunkt slås sammen i genereringen.
         val personerGruppertPåSøknadstidspunkt =
             personerPåBehandling
                 .mapNotNull { person ->
@@ -276,9 +265,7 @@ class EndretUtbetalingAndelService(
                     forrigeAndeler = forrigeAndeler.filter { it.aktør in aktuelleAktører },
                     nåværendeEndretUtbetalingAndeler = nåværendeEndretUtbetalingAndeler,
                     personerPåBehandling = personerMedDato,
-                    // Marker som automatisk generert kun når funksjonaliteten er påskrudd, slik at kun
-                    // disse vises i lesevisning. Uten toggle settes flagget ikke (gammel oppførsel).
-                    erAutomatiskGenerert = kanRegistrereSøknadstidspunkt,
+                    erAutomatiskGenerert = registrereSøknadstidspunktToggleErPå,
                 )
             }
 
@@ -291,7 +278,7 @@ class EndretUtbetalingAndelService(
         behandling: Behandling,
         søknadstidspunktPerPerson: List<RegistrertSøknadstidspunktPåPersonDto>,
     ) {
-        registrertSøknadstidspunktService.lagre(behandling, søknadstidspunktPerPerson)
+        registrertSøknadstidspunktService.lagreSøknadtidspunkterPåBarn(behandling, søknadstidspunktPerPerson)
         genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling)
     }
 

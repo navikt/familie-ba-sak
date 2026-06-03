@@ -27,30 +27,19 @@ class RegistrertSøknadstidspunktPåPersonService(
             .findByBehandlingId(behandlingId)
             .map { it.tilRegistrertSøknadstidspunktPåPersonDto() }
 
-    /**
-     * For søknadsbehandlinger settes søknad mottatt-dato som default registrert søknadstidspunkt per barn,
-     * slik at etterbetaling beregnes ut fra denne datoen. Saksbehandler kan korrigere via menyvalget
-     * «Endre søknadstidspunkt» (for EØS er søknad mottatt-dato dagens dato og må typisk korrigeres).
-     * Setter kun for barn det er framstilt krav for (krysset av i søknaden) og som ikke allerede har et
-     * registrert søknadstidspunkt, slik at korrigeringer består dersom steget kjøres på nytt.
-     */
     @Transactional
-    fun settDefaultSøknadstidspunktForBarn(behandling: Behandling) {
+    fun settSøknadstidspunktForBarn(behandling: Behandling) {
         if (!featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT)) return
         if (behandling.opprettetÅrsak != BehandlingÅrsak.SØKNAD) return
 
         val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)?.toLocalDate() ?: return
-
-        val aktørerFremstiltKravFor =
-            søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = null).toSet()
-
-        val aktørerMedRegistrertSøknadstidspunktPåPerson =
-            registrertSøknadstidspunktRepository.findByBehandlingId(behandling.id).map { it.aktør }.toSet()
+        val barnFremstiltKravFor = søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = null).toSet()
+        val aktørerMedRegistrertSøknadstidspunktPåPerson = registrertSøknadstidspunktRepository.findByBehandlingId(behandling.id).map { it.aktør }.toSet()
 
         val nyeRegistrerteSøknadstidspunkt =
             persongrunnlagService
                 .hentBarna(behandling)
-                .filter { it.aktør in aktørerFremstiltKravFor && it.aktør !in aktørerMedRegistrertSøknadstidspunktPåPerson }
+                .filter { it.aktør in barnFremstiltKravFor && it.aktør !in aktørerMedRegistrertSøknadstidspunktPåPerson }
                 .map {
                     RegistrertSøknadstidspunktPåPerson(
                         behandlingId = behandling.id,
@@ -62,24 +51,12 @@ class RegistrertSøknadstidspunktPåPersonService(
         registrertSøknadstidspunktRepository.saveAll(nyeRegistrerteSøknadstidspunkt)
     }
 
-    /**
-     * Lagrer søknadstidspunkt per person slik at det forhåndsutfylles ved gjenåpning av modalen,
-     * også for personer som ikke gir en etterbetalingsandel. Erstatter eksisterende rader for behandlingen.
-     */
     @Transactional
-    fun lagre(
+    fun lagreSøknadtidspunkterPåBarn(
         behandling: Behandling,
         søknadstidspunktPerPerson: List<RegistrertSøknadstidspunktPåPersonDto>,
     ) {
-        if (søknadstidspunktPerPerson.isEmpty()) {
-            throw FunksjonellFeil("Må sette søknadstidspunkt for minst én person.")
-        }
-        if (søknadstidspunktPerPerson.distinctBy { it.personIdent }.size != søknadstidspunktPerPerson.size) {
-            throw FunksjonellFeil("Kan ikke sette søknadstidspunkt flere ganger for samme person.")
-        }
-        if (søknadstidspunktPerPerson.any { it.søknadstidspunkt.isAfter(LocalDate.now()) }) {
-            throw FunksjonellFeil("Søknadstidspunkt kan ikke være frem i tid.")
-        }
+        validerSøknadtidspunktFørLagring(søknadstidspunktPerPerson)
 
         val aktørPerIdent =
             persongrunnlagService
@@ -99,5 +76,17 @@ class RegistrertSøknadstidspunktPåPersonService(
                 )
             },
         )
+    }
+}
+
+private fun validerSøknadtidspunktFørLagring(søknadstidspunktPerPerson: List<RegistrertSøknadstidspunktPåPersonDto>) {
+    if (søknadstidspunktPerPerson.isEmpty()) {
+        throw FunksjonellFeil("Må sette søknadstidspunkt for minst én person.")
+    }
+    if (søknadstidspunktPerPerson.distinctBy { it.personIdent }.size != søknadstidspunktPerPerson.size) {
+        throw FunksjonellFeil("Kan ikke sette søknadstidspunkt flere ganger for samme person.")
+    }
+    if (søknadstidspunktPerPerson.any { it.søknadstidspunkt.isAfter(LocalDate.now()) }) {
+        throw FunksjonellFeil("Søknadstidspunkt kan ikke være frem i tid.")
     }
 }

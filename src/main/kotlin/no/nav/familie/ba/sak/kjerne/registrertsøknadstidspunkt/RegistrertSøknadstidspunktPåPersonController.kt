@@ -37,7 +37,7 @@ class RegistrertSøknadstidspunktPåPersonController(
     private val featureToggleService: FeatureToggleService,
 ) {
     @GetMapping("/behandling/{behandlingId}")
-    fun hentRegistrertSøknadstidspunktPåPerson(
+    fun hentRegistrertSøknadstidspunktPåPersoner(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<List<RegistrertSøknadstidspunktPåPersonDto>>> {
         validerAtRegistreringAvSøknadstidspunktErAktivert()
@@ -53,7 +53,7 @@ class RegistrertSøknadstidspunktPåPersonController(
     }
 
     @PutMapping("/behandling/{behandlingId}")
-    fun endreSøknadstidspunkt(
+    fun endreSøknadstidspunkter(
         @PathVariable behandlingId: Long,
         @RequestBody request: EndreSøknadstidspunktRequestDto,
     ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
