@@ -725,14 +725,6 @@ class BehandlingsresultatEndringUtilsTest {
                 )
             }
 
-//        val erEndringIEndretAndeler =
-//            listOf(barn1, barn2).any {
-//                erEndringIEndretUtbetalingAndelerForPerson(
-//                    forrigeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2).filter { endretAndel -> endretAndel.personer.contains(it) },
-//                    nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2.copy(årsak = Årsak.ALLEREDE_UTBETALT)).filter { endretAndel -> endretAndel.personer.contains(it) },
-//                )
-//            }
-
         assertTrue(erEndringIEndretAndeler)
     }
 

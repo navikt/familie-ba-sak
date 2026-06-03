@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagSystemÅrsak
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
@@ -23,7 +25,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.SKJERMET_BARN
-import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortBostedsadresserFørEldsteBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortDeltBostedForSøker
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningsgrunnlagFiltreringUtils.filtrerBortIkkeRelevanteSivilstander
@@ -278,7 +279,7 @@ class PersongrunnlagService(
 
         val eldsteBarnsFødselsdato =
             listOfNotNull(
-                finnEldstebarnsFødselsdato(barnSomSkalHentesFraPdl),
+                finnEldstebarnsFødselsdato(barnSomSkalHentesFraPdl, sisteBehandlingSomErVedtatt?.id),
                 barnSomSkalKopieresFraForrigeGrunnlag.maxOfOrNull { person -> person.fødselsdato },
             ).max()
 
@@ -301,18 +302,30 @@ class PersongrunnlagService(
         nyttPersonopplysningGrunnlag.personer.add(søker)
 
         barnSomSkalHentesFraPdl.forEach { barnsAktør ->
-            nyttPersonopplysningGrunnlag.personer.add(
-                hentPerson(
-                    aktør = barnsAktør,
-                    personopplysningGrunnlag = nyttPersonopplysningGrunnlag,
-                    målform = målform,
-                    personType = PersonType.BARN,
-                    behandlingKategori = behandling.kategori,
-                    behandlingUnderkategori = behandling.underkategori,
-                    skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
-                    eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
-                ),
-            )
+            try {
+                nyttPersonopplysningGrunnlag.personer.add(
+                    hentPerson(
+                        aktør = barnsAktør,
+                        personopplysningGrunnlag = nyttPersonopplysningGrunnlag,
+                        målform = målform,
+                        personType = PersonType.BARN,
+                        behandlingKategori = behandling.kategori,
+                        behandlingUnderkategori = behandling.underkategori,
+                        skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
+                        eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
+                    ),
+                )
+            } catch (e: PdlPersonKanIkkeBehandlesIFagsystem) {
+                when (e.årsak) {
+                    PdlPersonKanIkkeBehandlesIFagSystemÅrsak.OPPHØRT -> {
+                        håndterBarnMedOpphørtIdent(barnsAktør, sisteBehandlingSomErVedtatt?.id, nyttPersonopplysningGrunnlag)
+                    }
+
+                    else -> {
+                        throw e
+                    }
+                }
+            }
         }
 
         if (søker.hentSterkesteMedlemskap() == Medlemskap.EØS && behandling.skalBehandlesAutomatisk) {
@@ -461,10 +474,64 @@ class PersongrunnlagService(
         }
     }
 
-    private fun finnEldstebarnsFødselsdato(alleBarn: List<Aktør>): LocalDate =
-        alleBarn.minOfOrNull {
-            personopplysningerService.hentPersoninfoEnkel(it).fødselsdato
-        } ?: PRAKTISK_TIDLIGSTE_DAG
+    private fun finnEldstebarnsFødselsdato(
+        alleBarn: List<Aktør>,
+        sisteVedtatteBehandlingId: Long?,
+    ): LocalDate =
+        alleBarn
+            .mapNotNull { barn ->
+                try {
+                    personopplysningerService.hentPersoninfoEnkel(barn).fødselsdato
+                } catch (e: PdlPersonKanIkkeBehandlesIFagsystem) {
+                    secureLogger.warn("Kan ikke hente fødselsdato for barn ${barn.aktivFødselsnummer()}: ${e.årsak}. Forsøker å hente fra forrige personopplysningsgrunnlag for beregning av eldste barns fødselsdato.")
+
+                    if (e.årsak != PdlPersonKanIkkeBehandlesIFagSystemÅrsak.OPPHØRT) {
+                        null
+                    } else {
+                        sisteVedtatteBehandlingId?.let { id ->
+                            val harLøpendeAndeler =
+                                andelTilkjentYtelseRepository
+                                    .finnAndelerTilkjentYtelseForBehandlingOgBarn(id, barn)
+                                    .any { it.erLøpende() }
+
+                            if (harLøpendeAndeler) {
+                                hentAktiv(id)?.personer?.firstOrNull { it.aktør == barn }?.fødselsdato
+                            } else {
+                                null
+                            }
+                        }
+                    }
+                }
+            }.minOrNull() ?: PRAKTISK_TIDLIGSTE_DAG
+
+    private fun håndterBarnMedOpphørtIdent(
+        barnAktør: Aktør,
+        sisteVedtatteBehandlingId: Long?,
+        nyttPersonopplysningGrunnlag: PersonopplysningGrunnlag,
+    ) {
+        val harLøpendeAndeler =
+            sisteVedtatteBehandlingId != null &&
+                andelTilkjentYtelseRepository
+                    .finnAndelerTilkjentYtelseForBehandlingOgBarn(sisteVedtatteBehandlingId, barnAktør)
+                    .any { it.erLøpende() }
+
+        if (!harLøpendeAndeler) {
+            secureLogger.warn("Barn ${barnAktør.aktivFødselsnummer()} har opphørt ident og kun historiske andeler. Inkluderes ikke i ny behandling")
+            return
+        }
+
+        val forrigeGrunnlag = hentAktivThrows(sisteVedtatteBehandlingId)
+        val barnFraForrigeGrunnlag = forrigeGrunnlag.personer.firstOrNull { it.aktør == barnAktør }
+        if (barnFraForrigeGrunnlag == null) {
+            secureLogger.warn(
+                "Barn ${barnAktør.aktivFødselsnummer()} har opphørt ident med løpende andeler, men finnes ikke i forrige personopplysningsgrunnlag. Inkluderes ikke i ny behandling.",
+            )
+            return
+        }
+
+        nyttPersonopplysningGrunnlag.personer.add(barnFraForrigeGrunnlag.tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag))
+        secureLogger.warn("Barn ${barnAktør.aktivFødselsnummer()} har opphørt ident med løpende andeler, og blir kopiert fra forrige personopplysningsgrunnlag.")
+    }
 
     private fun hentFarEllerMedmorAktør(barna: List<Aktør>): Aktør? {
         val barnasFarEllerMedmorAktører =
@@ -504,7 +571,7 @@ class PersongrunnlagService(
     fun oppdaterAdresserPåPersoner(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) {
-        val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarn = personopplysningGrunnlag.barna.map { it.aktør })
+        val eldsteBarnsFødselsdato = finnEldstebarnsFødselsdato(alleBarn = personopplysningGrunnlag.barna.map { it.aktør }, sisteVedtatteBehandlingId = null)
 
         val adresserForPersoner = personopplysningerService.hentAdresserForPersoner(personopplysningGrunnlag.personer.map { it.aktør.aktivFødselsnummer() })
 

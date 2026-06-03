@@ -300,6 +300,7 @@ class CucumberMock(
             vilkårsvurderingService = vilkårsvurderingService,
             featureToggleService = featureToggleService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
+            fagsakLåsingService = mockk(relaxed = true),
         )
 
     val tilbakestillBehandlingTilBehandlingsresultatService =

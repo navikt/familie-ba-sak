@@ -74,7 +74,7 @@ class VilkårService(
             personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
                 ?: throw Feil("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
 
-        if (eksisterendeVilkårResultat.erOpprinneligPreutfyltIBehandling != null) {
+        if (eksisterendeVilkårResultat.erOpprinneligPreutfyltIBehandling == behandlingId) {
             val erEndringIBegrunnelse = eksisterendeVilkårResultat.begrunnelse != vilkårResultatDto.begrunnelse
             val erEndringIAnnetFeltEnnBegrunnelse = erEndringIVilkår(eksisterendeVilkårResultat, vilkårResultatDto)
 
