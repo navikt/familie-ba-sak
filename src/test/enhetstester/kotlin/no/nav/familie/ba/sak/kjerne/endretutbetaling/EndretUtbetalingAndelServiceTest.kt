@@ -9,6 +9,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -17,7 +18,8 @@ import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTil
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.ekstern.restDomene.RegistrertSøknadstidspunktDto
+import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrertSøknadstidspunktPåPersonDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
@@ -31,7 +33,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktService
+import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktPåPersonService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -57,7 +59,7 @@ class EndretUtbetalingAndelServiceTest {
     private val mockEndretUtbetalingAndelHentOgPersisterService = mockk<EndretUtbetalingAndelHentOgPersisterService>()
     private val mockBeregningService = mockk<BeregningService>()
     private val mockBehandlingSøknadsinfoService = mockk<BehandlingSøknadsinfoService>()
-    private val mockRegistrertSøknadstidspunktService = mockk<RegistrertSøknadstidspunktService>()
+    private val mockRegistrertSøknadstidspunktPåPersonService = mockk<RegistrertSøknadstidspunktPåPersonService>()
     private val mockFeatureToggleService = mockk<FeatureToggleService>()
 
     private lateinit var endretUtbetalingAndelService: EndretUtbetalingAndelService
@@ -74,9 +76,10 @@ class EndretUtbetalingAndelServiceTest {
                 vilkårsvurderingService = mockVilkårsvurderingService,
                 endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService,
                 behandlingSøknadsinfoService = mockBehandlingSøknadsinfoService,
-                registrertSøknadstidspunktService = mockRegistrertSøknadstidspunktService,
+                registrertSøknadstidspunktService = mockRegistrertSøknadstidspunktPåPersonService,
                 featureToggleService = mockFeatureToggleService,
             )
+        every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT) } returns true
     }
 
     @Test
@@ -275,12 +278,69 @@ class EndretUtbetalingAndelServiceTest {
         assertThat(feilmelding).isEqualTo("Person med fødselsdato 1998-11-01 er ikke gyldig for denne endret utbetalingsperioden da den siste andelen personen har er i 2016-11 som er før 2025-11.")
     }
 
+    @Test
+    fun `Skal kaste funksjonell feil ved oppdatering av automatisk generert andel når toggle er på`() {
+        // Arrange
+        val behandling = lagBehandling()
+        every { mockEndretUtbetalingAndelRepository.getReferenceById(any()) } returns
+            EndretUtbetalingAndel(behandlingId = behandling.id, erAutomatiskGenerert = true)
+
+        // Act & assert
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+                    behandling = behandling,
+                    endretUtbetalingAndelId = 1L,
+                    endretUtbetalingAndelDto = lagEndretUtbetalingAndelDtoForOppdatering(),
+                )
+            }
+
+        assertThat(feil.message).isEqualTo("Automatisk genererte endrede utbetalingsperioder kan ikke endres, kun fjernes.")
+        // Sjekken skal kortslutte før øvrig behandling
+        verify(exactly = 0) { mockPersongrunnlagService.hentPersonerPåBehandling(any(), any()) }
+    }
+
+    @Test
+    fun `Skal ikke blokkere oppdatering av automatisk generert andel når toggle er av`() {
+        // Arrange
+        val behandling = lagBehandling()
+        every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT) } returns false
+        every { mockEndretUtbetalingAndelRepository.getReferenceById(any()) } returns
+            EndretUtbetalingAndel(behandlingId = behandling.id, erAutomatiskGenerert = true)
+
+        // Act & assert – kommer forbi auto-generert-sjekken og treffer ordinær validering
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+                    behandling = behandling,
+                    endretUtbetalingAndelId = 1L,
+                    endretUtbetalingAndelDto = lagEndretUtbetalingAndelDtoForOppdatering(personIdenter = null),
+                )
+            }
+
+        assertThat(feil.message).isEqualTo("Endret utbetalingsperiode må gjelde minst én person")
+    }
+
+    private fun lagEndretUtbetalingAndelDtoForOppdatering(personIdenter: List<String>? = listOf("12345678910")) =
+        EndretUtbetalingAndelDto(
+            id = 1L,
+            personIdenter = personIdenter,
+            prosent = null,
+            fom = null,
+            tom = null,
+            årsak = Årsak.ETTERBETALING_3MND,
+            avtaletidspunktDeltBosted = null,
+            søknadstidspunkt = null,
+            begrunnelse = null,
+            erTilknyttetAndeler = null,
+        )
+
     @Nested
     inner class GenererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd {
         private val behandling = lagBehandling()
 
         @Test
-        fun `Skal generere endret utbetaling andeler med årsak etterbetaling 3 måneder`() {
+        fun `Skal generere endret utbetaling andeler basert på behandlingens søknad mottatt-dato når toggle er av`() {
             // Arrange
             val søker = lagPerson(type = PersonType.SØKER)
             val barn = lagPerson(type = PersonType.BARN)
@@ -290,7 +350,7 @@ class EndretUtbetalingAndelServiceTest {
             val søknadMottattDato = LocalDateTime.of(2025, 4, 15, 0, 0)
             val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
 
-            every { mockRegistrertSøknadstidspunktService.hentForBehandling(any()) } returns emptyList()
+            every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT) } returns false
             every { mockEndretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
             every { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) } returnsArgument 0
             every { mockEndretUtbetalingAndelRepository.deleteAllById(any()) } just Runs
@@ -333,6 +393,8 @@ class EndretUtbetalingAndelServiceTest {
                     årsak = Årsak.ETTERBETALING_3MND,
                     søknadstidspunkt = søknadMottattDato.toLocalDate(),
                     begrunnelse = "Fylt ut automatisk fra søknadstidspunkt.",
+                    // Uten toggle skal andelene ikke markeres som automatisk generert (ingen lesevisning-låsing).
+                    erAutomatiskGenerert = false,
                 )
             verify(exactly = 1) { mockEndretUtbetalingAndelRepository.deleteAllById(emptyList()) }
             verify(exactly = 1) { mockEndretUtbetalingAndelRepository.saveAllAndFlush(listOf(forventetEndretUtbetalingAndel)) }
@@ -340,10 +402,9 @@ class EndretUtbetalingAndelServiceTest {
         }
 
         @Test
-        fun `Skal ikke generere endret utbetaling andeler når verken lagret søknadstidspunkt eller søknad mottatt-dato finnes`() {
+        fun `Skal ikke generere endret utbetaling andeler når ingen lagret søknadstidspunkt finnes og toggle er på`() {
             // Arrange
-            every { mockRegistrertSøknadstidspunktService.hentForBehandling(any()) } returns emptyList()
-            every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns null
+            every { mockRegistrertSøknadstidspunktPåPersonService.hentForBehandling(any()) } returns emptyList()
 
             // Act
             endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling = behandling)
@@ -352,6 +413,20 @@ class EndretUtbetalingAndelServiceTest {
             verify(exactly = 0) { mockEndretUtbetalingAndelRepository.deleteAllById(any()) }
             verify(exactly = 0) { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) }
             verify(exactly = 0) { mockBeregningService.oppdaterBehandlingMedBeregning(any(), any()) }
+        }
+
+        @Test
+        fun `Skal ikke generere for EØS og ikke lese registrert søknadstidspunkt når toggle er av`() {
+            // Arrange
+            val eøsBehandling = behandling.copy(kategori = BehandlingKategori.EØS)
+            every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT) } returns false
+
+            // Act
+            endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling = eøsBehandling)
+
+            // Assert – gammel oppførsel: EØS hoppes over og tabellen leses ikke
+            verify(exactly = 0) { mockRegistrertSøknadstidspunktPåPersonService.hentForBehandling(any()) }
+            verify(exactly = 0) { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) }
         }
 
         @Test
@@ -368,8 +443,8 @@ class EndretUtbetalingAndelServiceTest {
 
             // EØS har ingen reell søknad mottatt-dato å bruke (registreres som dagens dato), kun korrigert per person.
             every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns null
-            every { mockRegistrertSøknadstidspunktService.hentForBehandling(any()) } returns
-                listOf(RegistrertSøknadstidspunktDto(personIdent = barn.aktør.aktivFødselsnummer(), søknadstidspunkt = søknadstidspunkt))
+            every { mockRegistrertSøknadstidspunktPåPersonService.hentForBehandling(any()) } returns
+                listOf(RegistrertSøknadstidspunktPåPersonDto(personIdent = barn.aktør.aktivFødselsnummer(), søknadstidspunkt = søknadstidspunkt))
             every { mockEndretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
             every { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) } returnsArgument 0
             every { mockEndretUtbetalingAndelRepository.deleteAllById(any()) } just Runs
@@ -411,8 +486,172 @@ class EndretUtbetalingAndelServiceTest {
                     årsak = Årsak.ETTERBETALING_3MND,
                     søknadstidspunkt = søknadstidspunkt,
                     begrunnelse = "Fylt ut automatisk fra søknadstidspunkt.",
+                    erAutomatiskGenerert = true,
                 )
             verify(exactly = 1) { mockEndretUtbetalingAndelRepository.saveAllAndFlush(listOf(forventetEndretUtbetalingAndel)) }
+        }
+
+        @Test
+        fun `Skal kun generere for personer med registrert søknadstidspunkt og ikke falle tilbake til søknad mottatt-dato når toggle er på`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER)
+            val barnMedRegistrertTidspunkt = lagPerson(type = PersonType.BARN)
+            val barnUtenRegistrertTidspunkt = lagPerson(type = PersonType.BARN)
+
+            val fomAndelTilkjentYtelse = YearMonth.of(2020, 1)
+            val tomAndelTilkjentYtelse = YearMonth.of(2025, 12)
+            val søknadstidspunkt = LocalDate.of(2025, 4, 15)
+            val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, søker, barnMedRegistrertTidspunkt, barnUtenRegistrertTidspunkt)
+
+            // Søknad mottatt-dato finnes, men skal IKKE brukes som fallback når toggle er på.
+            every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns LocalDateTime.of(2025, 4, 15, 0, 0)
+            every { mockRegistrertSøknadstidspunktPåPersonService.hentForBehandling(any()) } returns
+                listOf(RegistrertSøknadstidspunktPåPersonDto(personIdent = barnMedRegistrertTidspunkt.aktør.aktivFødselsnummer(), søknadstidspunkt = søknadstidspunkt))
+            every { mockEndretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
+            every { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) } returnsArgument 0
+            every { mockEndretUtbetalingAndelRepository.deleteAllById(any()) } just Runs
+            every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) } returns personopplysningGrunnlag
+            every { mockBeregningService.oppdaterBehandlingMedBeregning(any(), any()) } returns mockk()
+            every { mockPersongrunnlagService.hentPersonerPåBehandling(any(), any()) } returns
+                listOf(søker, barnMedRegistrertTidspunkt, barnUtenRegistrertTidspunkt)
+            every { mockBeregningService.hentAndelerTilkjentYtelseForBehandling(any()) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(behandling = behandling, person = barnMedRegistrertTidspunkt, fom = fomAndelTilkjentYtelse, tom = tomAndelTilkjentYtelse, beløp = 2000),
+                    lagAndelTilkjentYtelse(behandling = behandling, person = barnUtenRegistrertTidspunkt, fom = fomAndelTilkjentYtelse, tom = tomAndelTilkjentYtelse, beløp = 2000),
+                )
+            every { mockBeregningService.hentAndelerFraForrigeIverksattebehandling(any()) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(behandling = behandling, person = barnMedRegistrertTidspunkt, fom = fomAndelTilkjentYtelse, tom = tomAndelTilkjentYtelse, beløp = 1000),
+                    lagAndelTilkjentYtelse(behandling = behandling, person = barnUtenRegistrertTidspunkt, fom = fomAndelTilkjentYtelse, tom = tomAndelTilkjentYtelse, beløp = 1000),
+                )
+
+            // Act
+            endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling = behandling)
+
+            // Assert – kun barnet med registrert søknadstidspunkt får generert etterbetaling
+            val forventetEndretUtbetalingAndel =
+                EndretUtbetalingAndel(
+                    behandlingId = behandling.id,
+                    personer = mutableSetOf(barnMedRegistrertTidspunkt),
+                    prosent = BigDecimal.ZERO,
+                    fom = fomAndelTilkjentYtelse,
+                    tom = søknadstidspunkt.minusMonths(4).toYearMonth(),
+                    årsak = Årsak.ETTERBETALING_3MND,
+                    søknadstidspunkt = søknadstidspunkt,
+                    begrunnelse = "Fylt ut automatisk fra søknadstidspunkt.",
+                    erAutomatiskGenerert = true,
+                )
+            verify(exactly = 1) { mockEndretUtbetalingAndelRepository.saveAllAndFlush(listOf(forventetEndretUtbetalingAndel)) }
+        }
+
+        @Test
+        fun `Skal beholde etterbetaling for personer som ikke er framstilt krav for ved regenerering (toggle på)`() {
+            // Arrange – en revurdering der barnFramstiltKravFor regenereres, mens barnIkkeFramstiltKravFor
+            // har en kopiert etterbetalingsandel fra forrige behandling som skal beholdes urørt.
+            val barnFramstiltKravFor = lagPerson(type = PersonType.BARN)
+            val barnIkkeFramstiltKravFor = lagPerson(type = PersonType.BARN)
+            val søknadstidspunkt = LocalDate.of(2025, 4, 15)
+            val fom = YearMonth.of(2020, 1)
+            val tom = YearMonth.of(2025, 12)
+            val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, barnFramstiltKravFor, barnIkkeFramstiltKravFor)
+
+            val kopiertAndelForIkkeFramstilt =
+                lagEndretUtbetalingAndel(
+                    id = 999,
+                    behandlingId = behandling.id,
+                    personer = setOf(barnIkkeFramstiltKravFor),
+                    årsak = Årsak.ETTERBETALING_3MND,
+                )
+
+            every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns null
+            every { mockRegistrertSøknadstidspunktPåPersonService.hentForBehandling(any()) } returns
+                listOf(RegistrertSøknadstidspunktPåPersonDto(barnFramstiltKravFor.aktør.aktivFødselsnummer(), søknadstidspunkt))
+            every { mockEndretUtbetalingAndelRepository.findByBehandlingId(any()) } returns listOf(kopiertAndelForIkkeFramstilt)
+            val slettedeIder = slot<List<Long>>()
+            every { mockEndretUtbetalingAndelRepository.deleteAllById(capture(slettedeIder)) } just Runs
+            every { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) } returnsArgument 0
+            every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) } returns personopplysningGrunnlag
+            every { mockBeregningService.oppdaterBehandlingMedBeregning(any(), any()) } returns mockk()
+            every { mockPersongrunnlagService.hentPersonerPåBehandling(any(), any()) } returns
+                listOf(barnFramstiltKravFor, barnIkkeFramstiltKravFor)
+            every { mockBeregningService.hentAndelerTilkjentYtelseForBehandling(any()) } returns
+                listOf(lagAndelTilkjentYtelse(behandling = behandling, person = barnFramstiltKravFor, fom = fom, tom = tom, beløp = 2000))
+            every { mockBeregningService.hentAndelerFraForrigeIverksattebehandling(any()) } returns
+                listOf(lagAndelTilkjentYtelse(behandling = behandling, person = barnFramstiltKravFor, fom = fom, tom = tom, beløp = 1000))
+
+            // Act
+            endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling = behandling)
+
+            // Assert – den kopierte andelen for barnet som ikke er framstilt krav for slettes IKKE,
+            // og etterbetaling regenereres for barnet som er framstilt krav for.
+            assertThat(slettedeIder.captured).doesNotContain(kopiertAndelForIkkeFramstilt.id)
+            verify(exactly = 1) {
+                mockEndretUtbetalingAndelRepository.saveAllAndFlush(
+                    match<List<EndretUtbetalingAndel>> { andeler -> andeler.all { it.personer == setOf(barnFramstiltKravFor) } },
+                )
+            }
+        }
+
+        @Test
+        fun `Skal generere separate andeler med ulik tom for barn med ulikt registrert søknadstidspunkt (toggle på)`() {
+            // Arrange – to barn med hvert sitt registrerte søknadstidspunkt
+            val barnA = lagPerson(type = PersonType.BARN)
+            val barnB = lagPerson(type = PersonType.BARN)
+            val søknadstidspunktA = LocalDate.of(2025, 4, 15)
+            val søknadstidspunktB = LocalDate.of(2025, 7, 15)
+            val fomAndelTilkjentYtelse = YearMonth.of(2020, 1)
+            val tomAndelTilkjentYtelse = YearMonth.of(2025, 12)
+            val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barnA, barnB)
+
+            every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns null
+            every { mockRegistrertSøknadstidspunktPåPersonService.hentForBehandling(any()) } returns
+                listOf(
+                    RegistrertSøknadstidspunktPåPersonDto(barnA.aktør.aktivFødselsnummer(), søknadstidspunktA),
+                    RegistrertSøknadstidspunktPåPersonDto(barnB.aktør.aktivFødselsnummer(), søknadstidspunktB),
+                )
+            every { mockEndretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
+            every { mockEndretUtbetalingAndelRepository.deleteAllById(any()) } just Runs
+            val lagretSlot = slot<List<EndretUtbetalingAndel>>()
+            every { mockEndretUtbetalingAndelRepository.saveAllAndFlush(capture(lagretSlot)) } answers { firstArg() }
+            every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) } returns personopplysningGrunnlag
+            every { mockBeregningService.oppdaterBehandlingMedBeregning(any(), any()) } returns mockk()
+            every { mockPersongrunnlagService.hentPersonerPåBehandling(any(), any()) } returns listOf(barnA, barnB)
+            every { mockBeregningService.hentAndelerTilkjentYtelseForBehandling(any()) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(behandling = behandling, person = barnA, fom = fomAndelTilkjentYtelse, tom = tomAndelTilkjentYtelse, beløp = 2000),
+                    lagAndelTilkjentYtelse(behandling = behandling, person = barnB, fom = fomAndelTilkjentYtelse, tom = tomAndelTilkjentYtelse, beløp = 2000),
+                )
+            every { mockBeregningService.hentAndelerFraForrigeIverksattebehandling(any()) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(behandling = behandling, person = barnA, fom = fomAndelTilkjentYtelse, tom = tomAndelTilkjentYtelse, beløp = 1000),
+                    lagAndelTilkjentYtelse(behandling = behandling, person = barnB, fom = fomAndelTilkjentYtelse, tom = tomAndelTilkjentYtelse, beløp = 1000),
+                )
+
+            // Act
+            endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling = behandling)
+
+            // Assert – én andel per barn, med tom utledet fra eget søknadstidspunkt (ikke slått sammen)
+            val forventetForBarnA =
+                EndretUtbetalingAndel(
+                    behandlingId = behandling.id,
+                    personer = mutableSetOf(barnA),
+                    prosent = BigDecimal.ZERO,
+                    fom = fomAndelTilkjentYtelse,
+                    tom = søknadstidspunktA.minusMonths(4).toYearMonth(),
+                    årsak = Årsak.ETTERBETALING_3MND,
+                    søknadstidspunkt = søknadstidspunktA,
+                    begrunnelse = "Fylt ut automatisk fra søknadstidspunkt.",
+                    erAutomatiskGenerert = true,
+                )
+            val forventetForBarnB =
+                forventetForBarnA.copy(
+                    personer = mutableSetOf(barnB),
+                    tom = søknadstidspunktB.minusMonths(4).toYearMonth(),
+                    søknadstidspunkt = søknadstidspunktB,
+                )
+            assertThat(lagretSlot.captured).containsExactlyInAnyOrder(forventetForBarnA, forventetForBarnB)
         }
     }
 
@@ -421,7 +660,7 @@ class EndretUtbetalingAndelServiceTest {
         private val behandling = lagBehandling()
 
         @Test
-        fun `Skal lagre søknadstidspunkt via RegistrertSøknadstidspunktService og generere etterbetalingsandeler`() {
+        fun `Skal lagre søknadstidspunkt via RegistrertSøknadstidspunktPåPersonService og generere etterbetalingsandeler`() {
             // Arrange
             val søker = lagPerson(type = PersonType.SØKER)
             val barnMedAndel = lagPerson(type = PersonType.BARN)
@@ -429,16 +668,16 @@ class EndretUtbetalingAndelServiceTest {
             val søknadstidspunkt = LocalDate.of(2025, 4, 15)
             val søknadstidspunktPerPerson =
                 listOf(
-                    RegistrertSøknadstidspunktDto(barnMedAndel.aktør.aktivFødselsnummer(), søknadstidspunkt),
-                    RegistrertSøknadstidspunktDto(barnUtenAndel.aktør.aktivFødselsnummer(), søknadstidspunkt),
+                    RegistrertSøknadstidspunktPåPersonDto(barnMedAndel.aktør.aktivFødselsnummer(), søknadstidspunkt),
+                    RegistrertSøknadstidspunktPåPersonDto(barnUtenAndel.aktør.aktivFødselsnummer(), søknadstidspunkt),
                 )
 
             val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, søker, barnMedAndel, barnUtenAndel)
 
-            every { mockRegistrertSøknadstidspunktService.lagre(any(), any()) } just Runs
+            every { mockRegistrertSøknadstidspunktPåPersonService.lagre(any(), any()) } just Runs
             // Genereringen leser de lagrede søknadstidspunktene tilbake.
-            every { mockRegistrertSøknadstidspunktService.hentForBehandling(any()) } returns søknadstidspunktPerPerson
+            every { mockRegistrertSøknadstidspunktPåPersonService.hentForBehandling(any()) } returns søknadstidspunktPerPerson
             every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns null
 
             every { mockEndretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
@@ -476,7 +715,7 @@ class EndretUtbetalingAndelServiceTest {
             )
 
             // Assert
-            verify(exactly = 1) { mockRegistrertSøknadstidspunktService.lagre(behandling, søknadstidspunktPerPerson) }
+            verify(exactly = 1) { mockRegistrertSøknadstidspunktPåPersonService.lagre(behandling, søknadstidspunktPerPerson) }
             verify(exactly = 1) { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) }
         }
     }

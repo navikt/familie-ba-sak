@@ -59,4 +59,7 @@ enum class FeatureToggle(
 
     // NAV-29193
     KAN_GENERERE_BARNAS_VILKÅR("familie-ba-sak.kan-generere-barnas-vilkar"),
+
+    // NAV-25661
+    KAN_REGISTRERE_SØKNADSTIDSPUNKT("familie-ba-sak.kan-registrere-soknadstidspunkt"),
 }

@@ -2,10 +2,12 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RegistrertSøknadstidspunktDto
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrertSøknadstidspunktPåPersonDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -21,7 +23,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktService
+import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktPåPersonService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.springframework.stereotype.Service
@@ -39,7 +41,7 @@ class EndretUtbetalingAndelService(
     private val endretUtbetalingAndelOppdatertAbonnementer: List<EndretUtbetalingAndelerOppdatertAbonnent> = emptyList(),
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
-    private val registrertSøknadstidspunktService: RegistrertSøknadstidspunktService,
+    private val registrertSøknadstidspunktService: RegistrertSøknadstidspunktPåPersonService,
     private val featureToggleService: FeatureToggleService,
 ) {
     @Transactional
@@ -49,6 +51,12 @@ class EndretUtbetalingAndelService(
         endretUtbetalingAndelDto: EndretUtbetalingAndelDto,
     ) {
         val endretUtbetalingAndel = endretUtbetalingAndelRepository.getReferenceById(endretUtbetalingAndelId)
+
+        // Automatisk genererte andeler (fra søknadstidspunkt) kan ikke endres, kun fjernes.
+        if (featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT) && endretUtbetalingAndel.erAutomatiskGenerert == true) {
+            throw FunksjonellFeil("Automatisk genererte endrede utbetalingsperioder kan ikke endres, kun fjernes.")
+        }
+
         val personerPåEndretUtbetalingAndel =
             endretUtbetalingAndelDto.personIdenter.takeUnless { it.isNullOrEmpty() }
                 ?: throw FunksjonellFeil("Endret utbetalingsperiode må gjelde minst én person")
@@ -195,15 +203,51 @@ class EndretUtbetalingAndelService(
 
     @Transactional
     fun genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling: Behandling) {
-        val behandlingSøknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)?.toLocalDate()
+        val kanRegistrereSøknadstidspunkt = featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT)
+
+        // Uten toggle: gammel oppførsel – EØS hopper over, og alle personer bruker behandlingens søknad mottatt-dato.
+        if (!kanRegistrereSøknadstidspunkt && behandling.kategori == BehandlingKategori.EØS) return
+
         val lagretSøknadstidspunktPerIdent =
-            registrertSøknadstidspunktService
-                .hentForBehandling(behandling.id)
-                .associate { it.personIdent to it.søknadstidspunkt }
+            if (kanRegistrereSøknadstidspunkt) {
+                registrertSøknadstidspunktService
+                    .hentForBehandling(behandling.id)
+                    .associate { it.personIdent to it.søknadstidspunkt }
+            } else {
+                emptyMap()
+            }
+
+        // Med toggle styres genereringen utelukkende av registrerte søknadstidspunkt (kun barn det er framstilt
+        // krav for). Uten toggle finnes ingen registrerte tidspunkt, og alle personer bruker behandlingens
+        // søknad mottatt-dato.
+        val behandlingSøknadMottattDato =
+            if (kanRegistrereSøknadstidspunkt) {
+                null
+            } else {
+                behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)?.toLocalDate()
+            }
 
         if (lagretSøknadstidspunktPerIdent.isEmpty() && behandlingSøknadMottattDato == null) return
 
-        fjernEndretUtbetalingAndelerMedÅrsak3MndEller3ÅrGenerertIDenneBehandlingen(behandling)
+        if (kanRegistrereSøknadstidspunkt) {
+            // Behold etterbetaling for personer som IKKE er framstilt krav for (f.eks. kopiert fra forrige
+            // behandling på en revurdering) – kun framstilt-krav-personer regenereres. Ufullstendige andeler ryddes.
+            val framstiltKravForIdenter = lagretSøknadstidspunktPerIdent.keys
+            val andelerSomSkalRyddes =
+                endretUtbetalingAndelRepository
+                    .findByBehandlingId(behandling.id)
+                    .filter {
+                        it.manglerObligatoriskFelt() ||
+                            (
+                                it.årsak in setOf(ETTERBETALING_3ÅR, ETTERBETALING_3MND) &&
+                                    it.personer.any { person -> person.aktør.aktivFødselsnummer() in framstiltKravForIdenter }
+                            )
+                    }.map { it.id }
+            fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(behandling, andelerSomSkalRyddes)
+        } else {
+            // Uten toggle: gammel oppførsel – fjern alle automatisk genererte etterbetalingsandeler.
+            fjernEndretUtbetalingAndelerMedÅrsak3MndEller3ÅrGenerertIDenneBehandlingen(behandling)
+        }
 
         val nåværendeAndeler = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
         val forrigeAndeler = beregningService.hentAndelerFraForrigeIverksattebehandling(behandling)
@@ -211,8 +255,9 @@ class EndretUtbetalingAndelService(
         val personerPåBehandling = persongrunnlagService.hentPersonerPåBehandling(personIdenter, behandling)
         val nåværendeEndretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
 
-        // Per person: bruk korrigert søknadstidspunkt hvis det er satt (f.eks. for EØS), ellers behandlingens
-        // søknad mottatt-dato. Personer med samme søknadstidspunkt slås sammen i genereringen.
+        // Per person: bruk registrert søknadstidspunkt hvis det er satt, ellers behandlingens søknad mottatt-dato
+        // (kun uten toggle). Med toggle får personer uten registrert tidspunkt ingen etterbetaling. Personer med
+        // samme søknadstidspunkt slås sammen i genereringen.
         val personerGruppertPåSøknadstidspunkt =
             personerPåBehandling
                 .mapNotNull { person ->
@@ -231,6 +276,9 @@ class EndretUtbetalingAndelService(
                     forrigeAndeler = forrigeAndeler.filter { it.aktør in aktuelleAktører },
                     nåværendeEndretUtbetalingAndeler = nåværendeEndretUtbetalingAndeler,
                     personerPåBehandling = personerMedDato,
+                    // Marker som automatisk generert kun når funksjonaliteten er påskrudd, slik at kun
+                    // disse vises i lesevisning. Uten toggle settes flagget ikke (gammel oppførsel).
+                    erAutomatiskGenerert = kanRegistrereSøknadstidspunkt,
                 )
             }
 
@@ -241,7 +289,7 @@ class EndretUtbetalingAndelService(
     @Transactional
     fun endreSøknadstidspunktOgGenererEtterbetalingsandeler(
         behandling: Behandling,
-        søknadstidspunktPerPerson: List<RegistrertSøknadstidspunktDto>,
+        søknadstidspunktPerPerson: List<RegistrertSøknadstidspunktPåPersonDto>,
     ) {
         registrertSøknadstidspunktService.lagre(behandling, søknadstidspunktPerPerson)
         genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling)

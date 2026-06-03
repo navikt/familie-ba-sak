@@ -15,11 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import java.time.LocalDate
 
-class RegistrertSøknadstidspunktRepositoryTest(
+class RegistrertSøknadstidspunktPåPersonRepositoryTest(
     @Autowired private val aktørIdRepository: AktørIdRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
-    @Autowired private val registrertSøknadstidspunktRepository: RegistrertSøknadstidspunktRepository,
+    @Autowired private val registrertSøknadstidspunktRepository: RegistrertSøknadstidspunktPåPersonRepository,
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `findByBehandlingId skal returnere lagrede rader for behandlingen med korrekt søknadstidspunkt og aktør`() {
@@ -29,7 +29,7 @@ class RegistrertSøknadstidspunktRepositoryTest(
         val søknadstidspunkt = LocalDate.of(2024, 3, 15)
 
         registrertSøknadstidspunktRepository.saveAndFlush(
-            RegistrertSøknadstidspunkt(behandlingId = behandling.id, aktør = barn, søknadstidspunkt = søknadstidspunkt),
+            RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = barn, søknadstidspunkt = søknadstidspunkt),
         )
 
         // Act
@@ -47,7 +47,7 @@ class RegistrertSøknadstidspunktRepositoryTest(
         val behandling = opprettBehandling()
         val annenBehandling = opprettBehandling()
         registrertSøknadstidspunktRepository.saveAndFlush(
-            RegistrertSøknadstidspunkt(
+            RegistrertSøknadstidspunktPåPerson(
                 behandlingId = annenBehandling.id,
                 aktør = aktørIdRepository.save(randomAktør()),
                 søknadstidspunkt = LocalDate.of(2024, 1, 1),
@@ -64,14 +64,14 @@ class RegistrertSøknadstidspunktRepositoryTest(
         val behandling = opprettBehandling()
         val annenBehandling = opprettBehandling()
         registrertSøknadstidspunktRepository.saveAndFlush(
-            RegistrertSøknadstidspunkt(
+            RegistrertSøknadstidspunktPåPerson(
                 behandlingId = behandling.id,
                 aktør = aktørIdRepository.save(randomAktør()),
                 søknadstidspunkt = LocalDate.of(2024, 2, 2),
             ),
         )
         registrertSøknadstidspunktRepository.saveAndFlush(
-            RegistrertSøknadstidspunkt(
+            RegistrertSøknadstidspunktPåPerson(
                 behandlingId = annenBehandling.id,
                 aktør = aktørIdRepository.save(randomAktør()),
                 søknadstidspunkt = LocalDate.of(2024, 3, 3),
@@ -92,13 +92,13 @@ class RegistrertSøknadstidspunktRepositoryTest(
         val behandling = opprettBehandling()
         val barn = aktørIdRepository.save(randomAktør())
         registrertSøknadstidspunktRepository.saveAndFlush(
-            RegistrertSøknadstidspunkt(behandlingId = behandling.id, aktør = barn, søknadstidspunkt = LocalDate.of(2024, 1, 1)),
+            RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = barn, søknadstidspunkt = LocalDate.of(2024, 1, 1)),
         )
 
         // Act & assert
         assertThrows<DataIntegrityViolationException> {
             registrertSøknadstidspunktRepository.saveAndFlush(
-                RegistrertSøknadstidspunkt(behandlingId = behandling.id, aktør = barn, søknadstidspunkt = LocalDate.of(2024, 5, 5)),
+                RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = barn, søknadstidspunkt = LocalDate.of(2024, 5, 5)),
             )
         }
     }

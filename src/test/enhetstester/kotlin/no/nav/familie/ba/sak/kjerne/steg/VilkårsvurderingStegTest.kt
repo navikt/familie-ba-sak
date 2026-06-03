@@ -46,7 +46,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktService
+import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktPåPersonService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
@@ -83,7 +83,7 @@ class VilkårsvurderingStegTest {
     private val opprettTaskService: OpprettTaskService = mockk()
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>(relaxed = true)
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService = mockk()
-    private val registrertSøknadstidspunktService: RegistrertSøknadstidspunktService = mockk()
+    private val registrertSøknadstidspunktService: RegistrertSøknadstidspunktPåPersonService = mockk()
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService = mockk()
 
     private val vilkårsvurderingSteg: VilkårsvurderingSteg =
