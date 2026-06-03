@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.config
 
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.familie.ba.sak.fake.FakeBrevKlient
 import no.nav.familie.ba.sak.fake.FakeECBValutakursRestKlient
 import no.nav.familie.ba.sak.fake.FakeEfSakRestKlient
@@ -25,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåB
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.felles.tokenklient.entraid.EntraIDClient
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.unleash.UnleashService
 import org.springframework.boot.test.context.TestConfiguration
@@ -32,14 +35,22 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.core.env.Environment
-import org.springframework.web.client.RestOperations
 
 @TestConfiguration
 class FakeConfig {
     @Bean
     @Primary
+    fun entraIDClientMock(): EntraIDClient {
+        val mock = mockk<EntraIDClient>(relaxed = true)
+        every { mock.hentMaskinTilMaskinToken(any()) } returns "mock-m2m-token"
+        every { mock.hentOboToken(any(), any()) } returns "mock-obo-token"
+        return mock
+    }
+
+    @Bean
+    @Primary
     @Profile("fake-integrasjon-klient")
-    fun fakeIntegrasjonKlient(restOperations: RestOperations): FakeIntegrasjonKlient = FakeIntegrasjonKlient(restOperations)
+    fun fakeIntegrasjonKlient(): FakeIntegrasjonKlient = FakeIntegrasjonKlient()
 
     @Bean
     @Primary
@@ -49,12 +60,12 @@ class FakeConfig {
     @Bean
     @Primary
     @Profile("fake-økonomi-klient")
-    fun fakeØkonomiKlient(restOperations: RestOperations): FakeØkonomiKlient = FakeØkonomiKlient(restOperations)
+    fun fakeØkonomiKlient(): FakeØkonomiKlient = FakeØkonomiKlient()
 
     @Bean
     @Primary
     @Profile("fake-tilbakekreving-klient")
-    fun fakeTilbakekrevingKlient(restOperations: RestOperations): FakeTilbakekrevingKlient = FakeTilbakekrevingKlient(restOperations)
+    fun fakeTilbakekrevingKlient(): FakeTilbakekrevingKlient = FakeTilbakekrevingKlient()
 
     @Bean
     @Primary
@@ -84,11 +95,9 @@ class FakeConfig {
     @Primary
     @Profile("mock-pdl-klient")
     fun fakePdlRestKlient(
-        restOperations: RestOperations,
         personidentService: PersonidentService,
     ): FakePdlRestKlient =
         FakePdlRestKlient(
-            restOperations = restOperations,
             personidentService = personidentService,
         )
 
@@ -100,7 +109,7 @@ class FakeConfig {
     @Bean
     @Primary
     @Profile("mock-ef-klient")
-    fun fakeEfSakRestKlient(restOperations: RestOperations): FakeEfSakRestKlient = FakeEfSakRestKlient(restOperations)
+    fun fakeEfSakRestKlient(): FakeEfSakRestKlient = FakeEfSakRestKlient()
 
     @Bean
     @Primary
@@ -110,7 +119,7 @@ class FakeConfig {
     @Bean
     @Primary
     @Profile("mock-ident-klient")
-    fun fakePdlIdentRestKlient(restOperations: RestOperations): FakePdlIdentRestKlient = FakePdlIdentRestKlient(restOperations)
+    fun fakePdlIdentRestKlient(): FakePdlIdentRestKlient = FakePdlIdentRestKlient()
 
     @Bean
     @Primary
@@ -143,5 +152,5 @@ class FakeConfig {
     @Bean
     @Primary
     @Profile("mock-infotrygd-barnetrygd")
-    fun fakeInfotrygdBarnetrygdKlient(restOperations: RestOperations): FakeInfotrygdBarnetrygdKlient = FakeInfotrygdBarnetrygdKlient(restOperations)
+    fun fakeInfotrygdBarnetrygdKlient(): FakeInfotrygdBarnetrygdKlient = FakeInfotrygdBarnetrygdKlient()
 }

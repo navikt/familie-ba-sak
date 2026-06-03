@@ -8,10 +8,11 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelseDto
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.SanityEØSBegrunnelseDto
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestTemplate
-import org.springframework.web.client.getForEntity
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import java.net.URI
 
 const val SANITY_BASE_URL = "https://xsrv1mh6.api.sanity.io/v2021-06-07/data/query"
@@ -19,7 +20,7 @@ const val SANITY_BASE_URL = "https://xsrv1mh6.api.sanity.io/v2021-06-07/data/que
 @Component
 class SanityKlient(
     @Value("\${SANITY_DATASET}") private val datasett: String,
-    private val restTemplate: RestTemplate,
+    @Qualifier("utenAuthRestClient") private val restClient: RestClient,
     @Value("$RETRY_BACKOFF_5000MS") private val retryBackoffDelay: Long,
 ) {
     fun hentBegrunnelser(): List<SanityBegrunnelse> {
@@ -35,7 +36,12 @@ class SanityKlient(
                 formål = "Henter begrunnelser fra sanity",
             ) {
                 retryVedException(retryBackoffDelay).execute {
-                    restTemplate.getForEntity<SanityBegrunnelserRespons>(uri).body?.result
+                    restClient
+                        .get()
+                        .uri(uri)
+                        .retrieve()
+                        .body<SanityBegrunnelserRespons>()
+                        ?.result
                         ?: throw Feil("Klarer ikke å hente begrunnelser fra sanity")
                 }
             }
@@ -55,9 +61,11 @@ class SanityKlient(
             formål = "Henter EØS-begrunnelser fra sanity",
         ) {
             retryVedException(retryBackoffDelay).execute {
-                restTemplate
-                    .getForEntity<SanityEØSBegrunnelserRespons>(uri)
-                    .body
+                restClient
+                    .get()
+                    .uri(uri)
+                    .retrieve()
+                    .body<SanityEØSBegrunnelserRespons>()
                     ?.result
                     ?.mapNotNull { it.tilSanityEØSBegrunnelse() }
                     ?: throw Feil("Klarer ikke å hente EØS-begrunnelser fra sanity")

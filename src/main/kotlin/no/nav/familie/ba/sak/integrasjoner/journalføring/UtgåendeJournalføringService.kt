@@ -13,10 +13,10 @@ import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.OverstyrInnsynsregel
-import no.nav.familie.restklient.client.RessursException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestClientResponseException
 
 @Service
 class UtgåendeJournalføringService(
@@ -62,8 +62,8 @@ class UtgåendeJournalføringService(
                 }
 
                 journalpost.journalpostId
-            } catch (ressursException: RessursException) {
-                when (ressursException.httpStatus) {
+            } catch (e: RestClientResponseException) {
+                when (e.statusCode) {
                     HttpStatus.CONFLICT -> {
                         logger.warn(
                             "Klarte ikke journalføre dokument på fagsak=$fagsakId fordi det allerede finnes en journalpost " +
@@ -74,7 +74,7 @@ class UtgåendeJournalføringService(
                     }
 
                     else -> {
-                        throw ressursException
+                        throw e
                     }
                 }
             }

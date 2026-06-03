@@ -14,10 +14,10 @@ import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
-import no.nav.familie.restklient.client.RessursException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestClientResponseException
 
 @Service
 class ØkonomiService(
@@ -76,8 +76,8 @@ class ØkonomiService(
         try {
             økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
         } catch (exception: Exception) {
-            if (exception is RessursException &&
-                exception.httpStatus == HttpStatus.CONFLICT
+            if (exception is RestClientResponseException &&
+                exception.statusCode == HttpStatus.CONFLICT
             ) {
                 sammeOppdragSendtKonflikt.increment()
                 logger.info("Bypasset feil med HttpKode 409 ved iverksetting mot økonomi for fagsak ${utbetalingsoppdrag.saksnummer}")

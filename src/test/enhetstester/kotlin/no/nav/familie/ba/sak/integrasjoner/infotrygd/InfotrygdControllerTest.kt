@@ -27,7 +27,7 @@ import org.springframework.web.client.RestTemplate
 class InfotrygdControllerTest {
     private val systemOnlyPdlRestKlient = mockk<SystemOnlyPdlRestKlient>()
     private val cacheManager = spyk(ConcurrentMapCacheManager())
-    private val familieIntegrasjonerTilgangskontrollKlient = FakeFamilieIntegrasjonerTilgangskontrollKlient(RestTemplate())
+    private val familieIntegrasjonerTilgangskontrollKlient = FakeFamilieIntegrasjonerTilgangskontrollKlient()
 
     private val familieIntegrasjonerTilgangskontrollService = FamilieIntegrasjonerTilgangskontrollService(familieIntegrasjonerTilgangskontrollKlient, cacheManager, systemOnlyPdlRestKlient)
 

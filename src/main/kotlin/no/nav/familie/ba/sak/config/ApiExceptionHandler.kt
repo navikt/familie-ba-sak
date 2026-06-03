@@ -13,11 +13,11 @@ import no.nav.familie.ba.sak.common.RessursUtils.funksjonellFeil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.rolleTilgangResponse
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
+import no.nav.familie.ba.sak.common.lesRessurs
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBServiceException
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.restklient.client.RessursException
 import org.slf4j.LoggerFactory
 import org.springframework.core.NestedExceptionUtils
 import org.springframework.http.HttpStatus
@@ -45,9 +45,6 @@ class ApiExceptionHandler {
 
         return illegalState(mostSpecificCause.message.toString(), mostSpecificCause)
     }
-
-    @ExceptionHandler(RessursException::class)
-    fun handleRessursException(ressursException: RessursException): ResponseEntity<Ressurs<Any>> = ResponseEntity.status(ressursException.httpStatus).body(ressursException.ressurs)
 
     @ExceptionHandler(MethodArgumentTypeMismatchException::class)
     fun handleMethodArgumentTypeMismatchException(e: MethodArgumentTypeMismatchException): ResponseEntity<Ressurs<Nothing>> {
@@ -84,10 +81,13 @@ class ApiExceptionHandler {
     }
 
     @ExceptionHandler(HttpClientErrorException.Forbidden::class)
-    fun handleForbidden(foriddenException: HttpClientErrorException.Forbidden): ResponseEntity<Ressurs<Nothing>> {
-        val mostSpecificCause = NestedExceptionUtils.getMostSpecificCause(foriddenException)
+    fun handleForbidden(forbiddenException: HttpClientErrorException.Forbidden): ResponseEntity<Ressurs<Nothing>> {
+        val melding =
+            lesRessurs(forbiddenException)?.melding
+                ?: NestedExceptionUtils.getMostSpecificCause(forbiddenException).message
+                ?: "Ikke tilgang"
 
-        return forbidden(mostSpecificCause.message ?: "Ikke tilgang")
+        return forbidden(melding)
     }
 
     @ExceptionHandler(IntegrasjonException::class)

@@ -8,23 +8,22 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlIdenter
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequestVariables
 import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.restklient.client.AbstractRestClient
-import no.nav.familie.restklient.util.UriUtil
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import java.net.URI
 
 @Component
 class PdlIdentRestKlient(
     @Value("\${PDL_URL}") pdlBaseUrl: URI,
-    @Qualifier("jwtBearer") val restTemplate: RestOperations,
-) : AbstractRestClient(restTemplate, "pdl.ident") {
-    protected val pdlUri = UriUtil.uri(pdlBaseUrl, PATH_GRAPHQL)
+    @Qualifier("pdlRestClient") private val restClient: RestClient,
+) {
+    protected val pdlUri = URI.create("$pdlBaseUrl/$PATH_GRAPHQL")
 
     private val hentIdenterQuery = hentGraphqlQuery("hentIdenter")
 
@@ -54,11 +53,13 @@ class PdlIdentRestKlient(
                 uri = pdlUri,
                 formål = "Hent identer",
             ) {
-                postForEntity(
-                    pdlUri,
-                    pdlPersonRequest,
-                    httpHeaders(),
-                )
+                restClient
+                    .post()
+                    .uri(pdlUri)
+                    .headers { it.addAll(httpHeaders()) }
+                    .body(pdlPersonRequest)
+                    .retrieve()
+                    .body()!!
             }
 
         return feilsjekkOgReturnerData(

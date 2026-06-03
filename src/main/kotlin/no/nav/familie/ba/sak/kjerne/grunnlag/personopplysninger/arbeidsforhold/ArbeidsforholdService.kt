@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
-import no.nav.familie.restklient.client.RessursException
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombiner
@@ -19,6 +18,7 @@ import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestClientResponseException
 import java.time.LocalDate
 
 @Service
@@ -99,12 +99,12 @@ class ArbeidsforholdService(
     private fun hentOrganisasjonMedFallback(organisasjonsnummer: String): Organisasjon =
         try {
             integrasjonKlient.hentOrganisasjon(organisasjonsnummer)
-        } catch (ressursException: RessursException) {
-            if (ressursException.httpStatus == HttpStatus.NOT_FOUND) {
+        } catch (e: RestClientResponseException) {
+            if (e.statusCode == HttpStatus.NOT_FOUND) {
                 logger.warn("Fant ikke organisasjon $organisasjonsnummer i EREG, bruker 'Ukjent navn' som fallback.")
                 Organisasjon(organisasjonsnummer = organisasjonsnummer, navn = "Ukjent navn")
             } else {
-                throw ressursException
+                throw e
             }
         }
 }

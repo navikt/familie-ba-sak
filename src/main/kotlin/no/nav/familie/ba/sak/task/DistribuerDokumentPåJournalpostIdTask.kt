@@ -15,11 +15,11 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.PropertiesWrapper
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.restklient.client.RessursException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestClientResponseException
 import java.time.LocalDateTime
 import java.util.Properties
 
@@ -64,7 +64,7 @@ class DistribuerDokumentPåJournalpostIdTask(
                     loggBehandlerRolle = BehandlerRolle.SYSTEM,
                 )
             } catch (e: Exception) {
-                if (e is RessursException && mottakerErDødUtenDødsboadresse(e)) {
+                if (e is RestClientResponseException && mottakerErDødUtenDødsboadresse(e)) {
                     logger.info(
                         "Klarte ikke å distribuere \"${brevmal.visningsTekst}\" på journalpost " +
                             "${taskData.journalpostId}. Prøver igjen om 7 dager.",

@@ -92,7 +92,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         assertThat(error.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         val errorObject = jsonMapper.readValue<EksternTjenesteFeil>(error.responseBodyAsByteArray)
-        assertThat(errorObject.melding).contains("Henting av utvidet barnetrygd feilet. Gav feil: 500 Server Error on POST request for")
+        assertThat(errorObject.melding).contains("Henting av utvidet barnetrygd feilet. Gav feil: 500 Server Error")
         assertThat(errorObject.melding).contains("foobar")
         assertThat(errorObject.path).isEqualTo("/api/bisys/hent-utvidet-barnetrygd")
         assertThat(errorObject.timestamp).isCloseTo(LocalDateTime.now(), within(10, ChronoUnit.SECONDS))

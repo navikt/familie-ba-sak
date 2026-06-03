@@ -21,14 +21,14 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 import java.time.LocalDate
 
 internal class PersonopplysningerServiceIntegrationTest(
     @Autowired
-    @Qualifier("jwtBearer")
-    private val restTemplate: RestOperations,
+    @Qualifier("utenAuthRestClient")
+    private val restClient: RestClient,
     @Autowired
     private val fakeFamilieIntegrasjonerTilgangskontrollKlient: FakeFamilieIntegrasjonerTilgangskontrollKlient,
     @Autowired
@@ -46,10 +46,10 @@ internal class PersonopplysningerServiceIntegrationTest(
     fun setUp() {
         personopplysningerService =
             PersonopplysningerService(
-                PdlRestKlient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate, mockPersonidentService),
+                PdlRestKlient(URI.create(wireMockServer.baseUrl() + "/api"), restClient, mockPersonidentService),
                 SystemOnlyPdlRestKlient(
                     URI.create(wireMockServer.baseUrl() + "/api"),
-                    restTemplate,
+                    restClient,
                     mockPersonidentService,
                 ),
                 familieIntegrasjonerTilgangskontrollService,

@@ -11,11 +11,11 @@ import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.PerioderForBehandling
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
-import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import java.net.URI
 import java.time.LocalDateTime
 import java.util.UUID
@@ -24,9 +24,9 @@ import java.util.UUID
 class ØkonomiKlient(
     @Value("\${FAMILIE_OPPDRAG_API_URL}")
     private val familieOppdragUri: String,
-    @Qualifier("jwtBearer") restOperations: RestOperations,
+    @Qualifier("økonomiRestClient") private val restClient: RestClient,
     @Value("$RETRY_BACKOFF_5000MS") private val retryBackoffDelay: Long,
-) : AbstractRestClient(restOperations, "økonomi_barnetrygd") {
+) {
     fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): String {
         val uri = URI.create("$familieOppdragUri/oppdrag")
         return kallEksternTjenesteRessurs(
@@ -34,7 +34,12 @@ class ØkonomiKlient(
             uri = uri,
             formål = "Iverksetter mot oppdrag",
         ) {
-            postForEntity(uri = uri, utbetalingsoppdrag)
+            restClient
+                .post()
+                .uri(uri)
+                .body(utbetalingsoppdrag)
+                .retrieve()
+                .body()!!
         }
     }
 
@@ -47,7 +52,12 @@ class ØkonomiKlient(
             formål = "Henter simulering på fagsak ${utbetalingsoppdrag.saksnummer} fra Økonomi",
         ) {
             retryVedException(retryBackoffDelay).execute {
-                postForEntity(uri = uri, utbetalingsoppdrag)
+                restClient
+                    .post()
+                    .uri(uri)
+                    .body(utbetalingsoppdrag)
+                    .retrieve()
+                    .body()!!
             }
         }
     }
@@ -59,7 +69,12 @@ class ØkonomiKlient(
             uri = uri,
             formål = "Henter oppdragstatus fra Økonomi",
         ) {
-            postForEntity(uri = uri, oppdragId)
+            restClient
+                .post()
+                .uri(uri)
+                .body(oppdragId)
+                .retrieve()
+                .body()!!
         }
     }
 
@@ -74,15 +89,18 @@ class ØkonomiKlient(
             uri = uri,
             formål = "Gjør grensesnittavstemming mot oppdrag",
         ) {
-            postForEntity(
-                uri = uri,
-                GrensesnittavstemmingRequest(
-                    fagsystem = FAGSYSTEM,
-                    fra = fraDato,
-                    til = tilDato,
-                    avstemmingId = avstemmingId,
-                ),
-            )
+            restClient
+                .post()
+                .uri(uri)
+                .body(
+                    GrensesnittavstemmingRequest(
+                        fagsystem = FAGSYSTEM,
+                        fra = fraDato,
+                        til = tilDato,
+                        avstemmingId = avstemmingId,
+                    ),
+                ).retrieve()
+                .body()!!
         }
     }
 
@@ -101,14 +119,17 @@ class ØkonomiKlient(
             uri = uri,
             formål = "Start konsistensavstemming mot oppdrag i batch",
         ) {
-            postForEntity(
-                uri = uri,
-                KonsistensavstemmingRequestV2(
-                    fagsystem = FAGSYSTEM,
-                    avstemmingstidspunkt = avstemmingsdato,
-                    perioderForBehandlinger = emptyList(),
-                ),
-            )
+            restClient
+                .post()
+                .uri(uri)
+                .body(
+                    KonsistensavstemmingRequestV2(
+                        fagsystem = FAGSYSTEM,
+                        avstemmingstidspunkt = avstemmingsdato,
+                        perioderForBehandlinger = emptyList(),
+                    ),
+                ).retrieve()
+                .body()!!
         }
     }
 
@@ -128,14 +149,17 @@ class ØkonomiKlient(
             uri = uri,
             formål = "Konsistenstavstemmer chunk mot oppdrag",
         ) {
-            postForEntity(
-                uri = uri,
-                KonsistensavstemmingRequestV2(
-                    fagsystem = FAGSYSTEM,
-                    avstemmingstidspunkt = avstemmingsdato,
-                    perioderForBehandlinger = perioderTilAvstemming,
-                ),
-            )
+            restClient
+                .post()
+                .uri(uri)
+                .body(
+                    KonsistensavstemmingRequestV2(
+                        fagsystem = FAGSYSTEM,
+                        avstemmingstidspunkt = avstemmingsdato,
+                        perioderForBehandlinger = perioderTilAvstemming,
+                    ),
+                ).retrieve()
+                .body()!!
         }
     }
 
@@ -153,14 +177,17 @@ class ØkonomiKlient(
             uri = uri,
             formål = "Avslutt konsistensavstemming mot oppdrag",
         ) {
-            postForEntity(
-                uri = uri,
-                KonsistensavstemmingRequestV2(
-                    fagsystem = FAGSYSTEM,
-                    avstemmingstidspunkt = avstemmingsdato,
-                    perioderForBehandlinger = emptyList(),
-                ),
-            )
+            restClient
+                .post()
+                .uri(uri)
+                .body(
+                    KonsistensavstemmingRequestV2(
+                        fagsystem = FAGSYSTEM,
+                        avstemmingstidspunkt = avstemmingsdato,
+                        perioderForBehandlinger = emptyList(),
+                    ),
+                ).retrieve()
+                .body()!!
         }
     }
 
@@ -173,7 +200,14 @@ class ØkonomiKlient(
             tjeneste = FAMILIE_OPPDRAG,
             uri = uri,
             formål = "Hent utbetalingsoppdrag for fagsaker",
-        ) { postForEntity(uri = uri, payload = fagsakIder) }
+        ) {
+            restClient
+                .post()
+                .uri(uri)
+                .body(fagsakIder)
+                .retrieve()
+                .body()!!
+        }
     }
 
     fun opprettManuellKvitteringPåOppdrag(oppdragId: OppdragId): OppdragStatus {
@@ -183,7 +217,12 @@ class ØkonomiKlient(
             uri = uri,
             formål = "Oppretter kvitteringsmelding på oppdrag og setter status til KVITTERT_OK",
         ) {
-            postForEntity(uri = uri, oppdragId)
+            restClient
+                .post()
+                .uri(uri)
+                .body(oppdragId)
+                .retrieve()
+                .body()!!
         }
     }
 

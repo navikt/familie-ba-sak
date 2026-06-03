@@ -179,6 +179,10 @@
             <artifactId>nv-i18n</artifactId>
             <version>1.29</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.papertrailapp</groupId>
@@ -265,16 +269,6 @@
         <!-- NAV-interne avhengigheter -->
         <dependency>
             <groupId>no.nav.security</groupId>
-            <artifactId>token-client-spring</artifactId>
-            <version>${token-validation-spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.security</groupId>
-            <artifactId>token-client-core</artifactId>
-            <version>${token-validation-spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.security</groupId>
             <artifactId>mock-oauth2-server</artifactId>
             <version>${mock-oauth2-server.version}</version>
             <scope>test</scope>
@@ -322,7 +316,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
-            <artifactId>rest-klient</artifactId>
+            <artifactId>token-klient</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>

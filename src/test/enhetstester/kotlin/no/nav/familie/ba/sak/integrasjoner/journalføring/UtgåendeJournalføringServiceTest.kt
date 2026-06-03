@@ -6,13 +6,11 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.OverstyrInnsynsregel
-import no.nav.familie.restklient.client.RessursException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -20,6 +18,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE
 import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpClientErrorException
 
 class UtgåendeJournalføringServiceTest {
     private val integrasjonKlient: IntegrasjonKlient = mockk()
@@ -85,7 +84,7 @@ class UtgåendeJournalføringServiceTest {
         @Test
         fun `skal kaste feil dersom journalpost med eksternReferanseId allerede finnes`() {
             // Arrange
-            every { integrasjonKlient.journalførDokument(any()) } throws RessursException(ressurs = mockk(), httpStatus = HttpStatus.CONFLICT, cause = mockk())
+            every { integrasjonKlient.journalførDokument(any()) } throws HttpClientErrorException("", HttpStatus.CONFLICT, "", null, null, null)
 
             val fagsak = lagFagsak()
 
