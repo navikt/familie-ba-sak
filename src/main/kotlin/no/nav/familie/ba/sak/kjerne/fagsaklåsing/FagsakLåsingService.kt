@@ -12,6 +12,8 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.klage.KlagebehandlingHenter
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.hentSaksbehandlerNavn
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.BrukerIdType
@@ -20,10 +22,12 @@ import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsluttSakRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.DokarkivBruker
 import no.nav.familie.kontrakter.felles.dokarkiv.GjenåpneSakRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import no.nav.familie.kontrakter.felles.klage.BehandlingStatus as KlageBehandlingStatus
 
 @Service
 class FagsakLåsingService(
@@ -35,6 +39,8 @@ class FagsakLåsingService(
     private val featureToggleService: FeatureToggleService,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val klagebehandlingHenter: KlagebehandlingHenter,
+    private val tilbakekrevingKlient: TilbakekrevingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -49,27 +55,6 @@ class FagsakLåsingService(
             fagsakRepository.finnFagsak(fagsakId)
                 ?: throw Feil("Fant ikke fagsak $fagsakId")
 
-        if (fagsak.status != FagsakStatus.AVSLUTTET) {
-            logger.info("Status for fagsak $fagsakId er ${fagsak.status}, hopper ut")
-            return
-        }
-
-        if (behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(fagsakId)) {
-            logger.info("Fagsak $fagsakId har åpen behandling, hopper ut")
-            return
-        }
-
-        val aktivLåsForFagsak = finnAktivLåsForFagsak(fagsak.id)
-        if (aktivLåsForFagsak?.hendelse == FagsakLåsHendelse.LÅST) {
-            throw Feil("Fagsak $fagsakId har allerede aktiv låsing")
-        }
-
-        val fagsakBleLåstOppForUnder30DagerSiden = aktivLåsForFagsak?.opprettetTidspunkt?.isAfter(LocalDateTime.now().minusDays(30)) == true
-        if (fagsakBleLåstOppForUnder30DagerSiden) {
-            logger.info("Fagsak $fagsakId ble låst opp for under 30 dager siden, hopper ut")
-            return
-        }
-
         val barnPåFagsak =
             persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId)?.filter { it.type == PersonType.BARN }
                 ?: throw Feil("Fant ingen barn på fagsak $fagsakId")
@@ -79,10 +64,8 @@ class FagsakLåsingService(
                 ?: throw Feil("Fant ikke yngste barns fødselsdato på fagsak $fagsakId")
 
         val låsedato = yngsteBarnsFødselsdato.plusYears(19).atStartOfDay()
-        if (LocalDateTime.now() < låsedato) {
-            logger.info("Fagsak skal ikke låses før $låsedato, hopper ut")
-            return
-        }
+
+        if (fagsakSkalIkkeLåses(fagsak, låsedato)) return
 
         lagreOgDeaktiverGammel(
             FagsakLåsing(
@@ -110,6 +93,62 @@ class FagsakLåsingService(
             ),
         )
         logger.info("Fagsak $fagsakId er låst og meldt til Joark")
+    }
+
+    private fun fagsakSkalIkkeLåses(
+        fagsak: Fagsak,
+        låsedato: LocalDateTime,
+    ): Boolean {
+        if (fagsak.status != FagsakStatus.AVSLUTTET) {
+            logger.info("Status for fagsak ${fagsak.id} er ${fagsak.status}. Hopper ut av fagsaklåsing.")
+            return true
+        }
+
+        val aktivLåsForFagsak = finnAktivLåsForFagsak(fagsak.id)
+        if (aktivLåsForFagsak?.hendelse == FagsakLåsHendelse.LÅST) {
+            throw Feil("Fagsak ${fagsak.id} med status ${fagsak.status} har allerede en aktiv låsing.")
+        }
+
+        if (aktivLåsForFagsak?.opprettetTidspunkt?.isAfter(LocalDateTime.now().minusDays(30)) == true) {
+            logger.info("Fagsak ${fagsak.id} ble låst opp for under 30 dager siden. Hopper ut av fagsaklåsing.")
+            return true
+        }
+
+        if (behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(fagsak.id)) {
+            logger.info("Fagsak ${fagsak.id} har åpen behandling. Hopper ut av fagsaklåsing.")
+            return true
+        }
+
+        val klagebehandlinger = klagebehandlingHenter.hentKlagebehandlingerPåFagsak(fagsak.id)
+        if (klagebehandlinger.any { it.status != KlageBehandlingStatus.FERDIGSTILT }) {
+            logger.info("Fagsak ${fagsak.id} har åpen klagebehandling. Hopper ut av fagsaklåsing.")
+            return true
+        }
+
+        val tilbakekrevingsbehandlinger = tilbakekrevingKlient.hentTilbakekrevingsbehandlinger(fagsak.id)
+        if (tilbakekrevingsbehandlinger.any { it.status != Behandlingsstatus.AVSLUTTET }) {
+            logger.info("Fagsak ${fagsak.id} har åpen tilbakekrevingsbehandling. Hopper ut av fagsaklåsing.")
+            return true
+        }
+
+        val sisteAvsluttetTidspunkt =
+            listOfNotNull(
+                behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id)?.endretTidspunkt,
+                klagebehandlinger.mapNotNull { it.vedtaksdato }.maxOrNull(),
+                tilbakekrevingsbehandlinger.mapNotNull { it.vedtaksdato }.maxOrNull(),
+            ).maxOrNull()
+
+        if (sisteAvsluttetTidspunkt != null && sisteAvsluttetTidspunkt.isAfter(LocalDateTime.now().minusYears(1))) {
+            logger.info("Fagsak ${fagsak.id} hadde siste avsluttede behandling $sisteAvsluttetTidspunkt, som er for under 1 år siden. Hopper ut av fagsaklåsing.")
+            return true
+        }
+
+        if (LocalDateTime.now() < låsedato) {
+            logger.info("Fagsak skal ikke låses før $låsedato. Hopper ut av fagsaklåsing.")
+            return true
+        }
+
+        return false
     }
 
     @Transactional
