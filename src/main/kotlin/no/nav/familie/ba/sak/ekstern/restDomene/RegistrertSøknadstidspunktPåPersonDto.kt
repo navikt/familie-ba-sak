@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunkt
 import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktPåPerson
 import java.time.LocalDate
 
@@ -15,5 +16,11 @@ data class RegistrertSøknadstidspunktPåPersonDto(
 fun RegistrertSøknadstidspunktPåPerson.tilRegistrertSøknadstidspunktPåPersonDto() =
     RegistrertSøknadstidspunktPåPersonDto(
         personIdent = aktør.aktivFødselsnummer(),
+        søknadstidspunkt = søknadstidspunkt,
+    )
+
+fun RegistrertSøknadstidspunktPåPersonDto.tilRegistrertSøknadstidspunkt() =
+    RegistrertSøknadstidspunkt(
+        personIdent = personIdent,
         søknadstidspunkt = søknadstidspunkt,
     )

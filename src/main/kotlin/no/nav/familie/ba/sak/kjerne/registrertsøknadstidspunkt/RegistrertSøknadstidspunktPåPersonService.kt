@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RegistrertSøknadstidspunktPåPersonDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRegistrertSøknadstidspunktPåPersonDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -22,10 +20,7 @@ class RegistrertSøknadstidspunktPåPersonService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val featureToggleService: FeatureToggleService,
 ) {
-    fun hentForBehandling(behandlingId: Long): List<RegistrertSøknadstidspunktPåPersonDto> =
-        registrertSøknadstidspunktRepository
-            .findByBehandlingId(behandlingId)
-            .map { it.tilRegistrertSøknadstidspunktPåPersonDto() }
+    fun hentForBehandling(behandlingId: Long): List<RegistrertSøknadstidspunktPåPerson> = registrertSøknadstidspunktRepository.findByBehandlingId(behandlingId)
 
     @Transactional
     fun settSøknadstidspunktForBarn(behandling: Behandling) {
@@ -54,7 +49,7 @@ class RegistrertSøknadstidspunktPåPersonService(
     @Transactional
     fun lagreSøknadtidspunkterPåBarn(
         behandling: Behandling,
-        søknadstidspunktPerPerson: List<RegistrertSøknadstidspunktPåPersonDto>,
+        søknadstidspunktPerPerson: List<RegistrertSøknadstidspunkt>,
     ) {
         validerSøknadtidspunktFørLagring(søknadstidspunktPerPerson)
 
@@ -66,20 +61,20 @@ class RegistrertSøknadstidspunktPåPersonService(
         registrertSøknadstidspunktRepository.deleteByBehandlingId(behandling.id)
 
         registrertSøknadstidspunktRepository.saveAll(
-            søknadstidspunktPerPerson.map { dto ->
+            søknadstidspunktPerPerson.map { registrertSøknadstidspunkt ->
                 RegistrertSøknadstidspunktPåPerson(
                     behandlingId = behandling.id,
                     aktør =
-                        aktørPerIdent[dto.personIdent]
+                        aktørPerIdent[registrertSøknadstidspunkt.personIdent]
                             ?: throw FunksjonellFeil("Fant ikke en av de oppgitte personene på behandling ${behandling.id}"),
-                    søknadstidspunkt = dto.søknadstidspunkt,
+                    søknadstidspunkt = registrertSøknadstidspunkt.søknadstidspunkt,
                 )
             },
         )
     }
 }
 
-private fun validerSøknadtidspunktFørLagring(søknadstidspunktPerPerson: List<RegistrertSøknadstidspunktPåPersonDto>) {
+private fun validerSøknadtidspunktFørLagring(søknadstidspunktPerPerson: List<RegistrertSøknadstidspunkt>) {
     if (søknadstidspunktPerPerson.isEmpty()) {
         throw FunksjonellFeil("Må sette søknadstidspunkt for minst én person.")
     }

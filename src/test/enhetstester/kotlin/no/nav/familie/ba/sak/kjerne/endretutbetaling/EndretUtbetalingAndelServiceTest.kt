@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RegistrertSøknadstidspunktPåPersonDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
@@ -33,6 +32,8 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunkt
+import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktPåPerson
 import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktPåPersonService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -441,7 +442,7 @@ class EndretUtbetalingAndelServiceTest {
 
             every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns null
             every { mockRegistrertSøknadstidspunktPåPersonService.hentForBehandling(any()) } returns
-                listOf(RegistrertSøknadstidspunktPåPersonDto(personIdent = barn.aktør.aktivFødselsnummer(), søknadstidspunkt = søknadstidspunkt))
+                listOf(RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = barn.aktør, søknadstidspunkt = søknadstidspunkt))
             every { mockEndretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
             every { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) } returnsArgument 0
             every { mockEndretUtbetalingAndelRepository.deleteAllById(any()) } just Runs
@@ -503,7 +504,7 @@ class EndretUtbetalingAndelServiceTest {
 
             every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns LocalDateTime.of(2025, 4, 15, 0, 0)
             every { mockRegistrertSøknadstidspunktPåPersonService.hentForBehandling(any()) } returns
-                listOf(RegistrertSøknadstidspunktPåPersonDto(personIdent = barnMedRegistrertTidspunkt.aktør.aktivFødselsnummer(), søknadstidspunkt = søknadstidspunkt))
+                listOf(RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = barnMedRegistrertTidspunkt.aktør, søknadstidspunkt = søknadstidspunkt))
             every { mockEndretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
             every { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) } returnsArgument 0
             every { mockEndretUtbetalingAndelRepository.deleteAllById(any()) } just Runs
@@ -562,7 +563,7 @@ class EndretUtbetalingAndelServiceTest {
 
             every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns null
             every { mockRegistrertSøknadstidspunktPåPersonService.hentForBehandling(any()) } returns
-                listOf(RegistrertSøknadstidspunktPåPersonDto(barnFramstiltKravFor.aktør.aktivFødselsnummer(), søknadstidspunkt))
+                listOf(RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = barnFramstiltKravFor.aktør, søknadstidspunkt = søknadstidspunkt))
             every { mockEndretUtbetalingAndelRepository.findByBehandlingId(any()) } returns listOf(kopiertAndelForIkkeFramstilt)
             val slettedeIder = slot<List<Long>>()
             every { mockEndretUtbetalingAndelRepository.deleteAllById(capture(slettedeIder)) } just Runs
@@ -601,8 +602,8 @@ class EndretUtbetalingAndelServiceTest {
                 val søknadstidspunkt = LocalDate.of(2025, 4, 15)
                 val søknadstidspunktPerPerson =
                     listOf(
-                        RegistrertSøknadstidspunktPåPersonDto(barnMedAndel.aktør.aktivFødselsnummer(), søknadstidspunkt),
-                        RegistrertSøknadstidspunktPåPersonDto(barnUtenAndel.aktør.aktivFødselsnummer(), søknadstidspunkt),
+                        RegistrertSøknadstidspunkt(barnMedAndel.aktør.aktivFødselsnummer(), søknadstidspunkt),
+                        RegistrertSøknadstidspunkt(barnUtenAndel.aktør.aktivFødselsnummer(), søknadstidspunkt),
                     )
 
                 val personopplysningGrunnlag =
@@ -610,7 +611,11 @@ class EndretUtbetalingAndelServiceTest {
 
                 every { mockRegistrertSøknadstidspunktPåPersonService.lagreSøknadtidspunkterPåBarn(any(), any()) } just Runs
                 // Genereringen leser de lagrede søknadstidspunktene tilbake.
-                every { mockRegistrertSøknadstidspunktPåPersonService.hentForBehandling(any()) } returns søknadstidspunktPerPerson
+                every { mockRegistrertSøknadstidspunktPåPersonService.hentForBehandling(any()) } returns
+                    listOf(
+                        RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = barnMedAndel.aktør, søknadstidspunkt = søknadstidspunkt),
+                        RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = barnUtenAndel.aktør, søknadstidspunkt = søknadstidspunkt),
+                    )
                 every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns null
 
                 every { mockEndretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()

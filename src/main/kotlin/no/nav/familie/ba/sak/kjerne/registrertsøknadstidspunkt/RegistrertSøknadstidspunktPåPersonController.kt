@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.EndreSøknadstidspunktRequestDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RegistrertSøknadstidspunktPåPersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRegistrertSøknadstidspunkt
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRegistrertSøknadstidspunktPåPersonDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -49,7 +51,12 @@ class RegistrertSøknadstidspunktPåPersonController(
 
         validerAtBehandlingErSøknadsbehandling(behandlingHentOgPersisterService.hent(behandlingId))
 
-        return ResponseEntity.ok(Ressurs.success(registrertSøknadstidspunktService.hentForBehandling(behandlingId)))
+        val registrerteSøknadstidspunkt =
+            registrertSøknadstidspunktService
+                .hentForBehandling(behandlingId)
+                .map { it.tilRegistrertSøknadstidspunktPåPersonDto() }
+
+        return ResponseEntity.ok(Ressurs.success(registrerteSøknadstidspunkt))
     }
 
     @PutMapping("/behandling/{behandlingId}")
@@ -70,7 +77,7 @@ class RegistrertSøknadstidspunktPåPersonController(
 
         endretUtbetalingAndelService.endreSøknadstidspunktOgGenererEtterbetalingsandeler(
             behandling = behandling,
-            søknadstidspunktPerPerson = request.søknadstidspunktPerPerson,
+            søknadstidspunktPerPerson = request.søknadstidspunktPerPerson.map { it.tilRegistrertSøknadstidspunkt() },
         )
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId)))

@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
-import no.nav.familie.ba.sak.ekstern.restDomene.RegistrertSøknadstidspunktPåPersonDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
@@ -23,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunkt
 import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktPåPersonService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -210,7 +210,7 @@ class EndretUtbetalingAndelService(
             if (registrereSøknadstidspunktToggleErPå) {
                 registrertSøknadstidspunktService
                     .hentForBehandling(behandling.id)
-                    .associate { it.personIdent to it.søknadstidspunkt }
+                    .associate { it.aktør.aktivFødselsnummer() to it.søknadstidspunkt }
             } else {
                 emptyMap()
             }
@@ -276,7 +276,7 @@ class EndretUtbetalingAndelService(
     @Transactional
     fun endreSøknadstidspunktOgGenererEtterbetalingsandeler(
         behandling: Behandling,
-        søknadstidspunktPerPerson: List<RegistrertSøknadstidspunktPåPersonDto>,
+        søknadstidspunktPerPerson: List<RegistrertSøknadstidspunkt>,
     ) {
         registrertSøknadstidspunktService.lagreSøknadtidspunkterPåBarn(behandling, søknadstidspunktPerPerson)
         genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling)
