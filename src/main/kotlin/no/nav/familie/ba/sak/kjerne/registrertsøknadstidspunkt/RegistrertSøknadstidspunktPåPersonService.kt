@@ -24,17 +24,17 @@ class RegistrertSøknadstidspunktPåPersonService(
 
     @Transactional
     fun settSøknadstidspunktForBarn(behandling: Behandling) {
-        if (!featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT)) return
+        if (!featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON)) return
         if (behandling.opprettetÅrsak != BehandlingÅrsak.SØKNAD) return
 
         val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)?.toLocalDate() ?: return
         val barnFremstiltKravFor = søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = null).toSet()
-        val aktørerMedRegistrertSøknadstidspunktPåPerson = registrertSøknadstidspunktRepository.findByBehandlingId(behandling.id).map { it.aktør }.toSet()
+        val aktørerMedRegistrertSøknadstidspunkt = registrertSøknadstidspunktRepository.findByBehandlingId(behandling.id).map { it.aktør }.toSet()
 
         val nyeRegistrerteSøknadstidspunkt =
             persongrunnlagService
                 .hentBarna(behandling)
-                .filter { it.aktør in barnFremstiltKravFor && it.aktør !in aktørerMedRegistrertSøknadstidspunktPåPerson }
+                .filter { it.aktør in barnFremstiltKravFor && it.aktør !in aktørerMedRegistrertSøknadstidspunkt }
                 .map {
                     RegistrertSøknadstidspunktPåPerson(
                         behandlingId = behandling.id,
@@ -47,7 +47,7 @@ class RegistrertSøknadstidspunktPåPersonService(
     }
 
     @Transactional
-    fun lagreSøknadstidspunkterPåBarn(
+    fun lagreSøknadstidspunkterPåPersoner(
         behandling: Behandling,
         søknadstidspunktPerPerson: List<RegistrertSøknadstidspunkt>,
     ) {

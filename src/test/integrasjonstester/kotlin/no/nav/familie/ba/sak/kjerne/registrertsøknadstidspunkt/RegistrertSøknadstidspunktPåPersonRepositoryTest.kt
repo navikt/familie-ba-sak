@@ -23,7 +23,7 @@ class RegistrertSøknadstidspunktPåPersonRepositoryTest(
     @Autowired private val registrertSøknadstidspunktRepository: RegistrertSøknadstidspunktPåPersonRepository,
 ) : AbstractSpringIntegrationTest() {
     @Nested
-    inner class FindByBehandlingId {
+    inner class FindByBehandlingIdTest {
         @Test
         fun `skal returnere lagrede rader for behandlingen med korrekt søknadstidspunkt og aktør`() {
             // Arrange
@@ -63,7 +63,7 @@ class RegistrertSøknadstidspunktPåPersonRepositoryTest(
     }
 
     @Nested
-    inner class DeleteByBehandlingId {
+    inner class DeleteByBehandlingIdTest {
         @Test
         fun `skal kun slette rader for angitt behandling`() {
             // Arrange
@@ -94,7 +94,7 @@ class RegistrertSøknadstidspunktPåPersonRepositoryTest(
     }
 
     @Nested
-    inner class UnikConstraint {
+    inner class UnikConstraintTest {
         @Test
         fun `skal kaste DataIntegrityViolationException ved to rader for samme behandling og aktør`() {
             // Arrange

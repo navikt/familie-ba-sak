@@ -53,7 +53,7 @@ class EndretUtbetalingAndelService(
     ) {
         val endretUtbetalingAndel = endretUtbetalingAndelRepository.getReferenceById(endretUtbetalingAndelId)
 
-        if (featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT) && endretUtbetalingAndel.erAutomatiskGenerert == true) {
+        if (featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON) && endretUtbetalingAndel.erAutomatiskGenerert == true) {
             throw FunksjonellFeil("Automatisk genererte endrede utbetalingsperioder kan ikke endres, kun fjernes.")
         }
 
@@ -203,7 +203,7 @@ class EndretUtbetalingAndelService(
 
     @Transactional
     fun genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling: Behandling) {
-        val registrereSøknadstidspunktToggleErPå = featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT)
+        val registrereSøknadstidspunktToggleErPå = featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON)
 
         if (!registrereSøknadstidspunktToggleErPå && behandling.kategori == BehandlingKategori.EØS) return
 
@@ -268,7 +268,7 @@ class EndretUtbetalingAndelService(
         behandling: Behandling,
         søknadstidspunktPerPerson: List<RegistrertSøknadstidspunkt>,
     ) {
-        registrertSøknadstidspunktService.lagreSøknadstidspunkterPåBarn(behandling, søknadstidspunktPerPerson)
+        registrertSøknadstidspunktService.lagreSøknadstidspunkterPåPersoner(behandling, søknadstidspunktPerPerson)
         genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling)
     }
 

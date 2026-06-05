@@ -42,11 +42,11 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
 
     @BeforeEach
     fun setup() {
-        every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT) } returns true
+        every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON) } returns true
     }
 
     @Nested
-    inner class LagreSøknadstidspunkterPåBarn {
+    inner class LagreSøknadstidspunkterPåPersonerTest {
         @Test
         fun `skal erstatte eksisterende rader og lagre én rad per person, også for person uten andel`() {
             // Arrange
@@ -61,7 +61,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             every { mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(capture(lagretSlot)) } answers { firstArg() }
 
             // Act
-            registrertSøknadstidspunktService.lagreSøknadstidspunkterPåBarn(
+            registrertSøknadstidspunktService.lagreSøknadstidspunkterPåPersoner(
                 behandling = behandling,
                 søknadstidspunktPerPerson =
                     listOf(
@@ -87,7 +87,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             // Act & assert
             val feil =
                 assertThrows<FunksjonellFeil> {
-                    registrertSøknadstidspunktService.lagreSøknadstidspunkterPåBarn(
+                    registrertSøknadstidspunktService.lagreSøknadstidspunkterPåPersoner(
                         behandling = behandling,
                         søknadstidspunktPerPerson =
                             listOf(
@@ -108,7 +108,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             // Act & assert
             val feil =
                 assertThrows<FunksjonellFeil> {
-                    registrertSøknadstidspunktService.lagreSøknadstidspunkterPåBarn(
+                    registrertSøknadstidspunktService.lagreSøknadstidspunkterPåPersoner(
                         behandling = behandling,
                         søknadstidspunktPerPerson =
                             listOf(
@@ -129,7 +129,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             // Act & assert
             val feil =
                 assertThrows<FunksjonellFeil> {
-                    registrertSøknadstidspunktService.lagreSøknadstidspunkterPåBarn(behandling = behandling, søknadstidspunktPerPerson = emptyList())
+                    registrertSøknadstidspunktService.lagreSøknadstidspunkterPåPersoner(behandling = behandling, søknadstidspunktPerPerson = emptyList())
                 }
             assertThat(feil.message).isEqualTo("Må sette søknadstidspunkt for minst én person.")
             verify(exactly = 0) { mockRegistrertSøknadstidspunktPåPersonRepository.deleteByBehandlingId(any()) }
@@ -137,7 +137,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
     }
 
     @Nested
-    inner class HentForBehandling {
+    inner class HentForBehandlingTest {
         @Test
         fun `skal returnere lagrede rader for behandlingen`() {
             // Arrange
@@ -157,7 +157,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
     }
 
     @Nested
-    inner class SettSøknadstidspunktForBarn {
+    inner class SettSøknadstidspunktForBarnTest {
         @Test
         fun `skal sette søknad mottatt-dato for barn som mangler, men ikke overskrive eksisterende`() {
             // Arrange
@@ -271,7 +271,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
         fun `skal ikke gjøre noe når feature toggle er av`() {
             // Arrange
             val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
-            every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT) } returns false
+            every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON) } returns false
 
             // Act
             registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling)

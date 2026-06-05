@@ -84,7 +84,7 @@ class RegistrertSøknadstidspunktPåPersonController(
     }
 
     private fun validerAtRegistreringAvSøknadstidspunktErAktivert() {
-        if (!featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT)) {
+        if (!featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON)) {
             throw FunksjonellFeil("Registrering av søknadstidspunkt er ikke aktivert.")
         }
     }

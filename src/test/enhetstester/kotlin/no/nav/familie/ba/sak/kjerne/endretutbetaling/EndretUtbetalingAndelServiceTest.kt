@@ -80,7 +80,7 @@ class EndretUtbetalingAndelServiceTest {
                 registrertSøknadstidspunktService = mockRegistrertSøknadstidspunktPåPersonService,
                 featureToggleService = mockFeatureToggleService,
             )
-        every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT) } returns true
+        every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON) } returns true
     }
 
     @Test
@@ -304,7 +304,7 @@ class EndretUtbetalingAndelServiceTest {
     fun `Skal ikke blokkere oppdatering av automatisk generert andel når toggle er av`() {
         // Arrange
         val behandling = lagBehandling()
-        every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT) } returns false
+        every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON) } returns false
         every { mockEndretUtbetalingAndelRepository.getReferenceById(any()) } returns
             EndretUtbetalingAndel(behandlingId = behandling.id, erAutomatiskGenerert = true)
 
@@ -350,7 +350,7 @@ class EndretUtbetalingAndelServiceTest {
             val søknadMottattDato = LocalDateTime.of(2025, 4, 15, 0, 0)
             val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
 
-            every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT) } returns false
+            every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON) } returns false
             every { mockEndretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
             every { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) } returnsArgument 0
             every { mockEndretUtbetalingAndelRepository.deleteAllById(any()) } just Runs
@@ -418,7 +418,7 @@ class EndretUtbetalingAndelServiceTest {
         fun `Skal ikke generere for EØS og ikke lese registrert søknadstidspunkt når toggle er av`() {
             // Arrange
             val eøsBehandling = behandling.copy(kategori = BehandlingKategori.EØS)
-            every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT) } returns false
+            every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON) } returns false
 
             // Act
             endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling = eøsBehandling)
@@ -609,7 +609,7 @@ class EndretUtbetalingAndelServiceTest {
                 val personopplysningGrunnlag =
                     lagTestPersonopplysningGrunnlag(behandling.id, søker, barnMedAndel, barnUtenAndel)
 
-                every { mockRegistrertSøknadstidspunktPåPersonService.lagreSøknadstidspunkterPåBarn(any(), any()) } just Runs
+                every { mockRegistrertSøknadstidspunktPåPersonService.lagreSøknadstidspunkterPåPersoner(any(), any()) } just Runs
                 // Genereringen leser de lagrede søknadstidspunktene tilbake.
                 every { mockRegistrertSøknadstidspunktPåPersonService.hentForBehandling(any()) } returns
                     listOf(
@@ -653,7 +653,7 @@ class EndretUtbetalingAndelServiceTest {
                 )
 
                 // Assert
-                verify(exactly = 1) { mockRegistrertSøknadstidspunktPåPersonService.lagreSøknadstidspunkterPåBarn(behandling, søknadstidspunktPerPerson) }
+                verify(exactly = 1) { mockRegistrertSøknadstidspunktPåPersonService.lagreSøknadstidspunkterPåPersoner(behandling, søknadstidspunktPerPerson) }
                 verify(exactly = 1) { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) }
             }
         }
