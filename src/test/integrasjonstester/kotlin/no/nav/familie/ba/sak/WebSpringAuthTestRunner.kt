@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
-import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
@@ -14,8 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.test.context.DynamicPropertyRegistry
-import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.RestTemplate
 
@@ -108,26 +105,6 @@ abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
         )
 
     companion object {
-        val mockOAuth2Server by lazy {
-            MockOAuth2Server().also {
-                it.start()
-                Runtime.getRuntime().addShutdownHook(Thread { it.shutdown() })
-            }
-        }
-
-        @JvmStatic
-        @DynamicPropertySource
-        @Suppress("unused")
-        fun mockOAuth2ServerProperties(registry: DynamicPropertyRegistry) {
-            val port = mockOAuth2Server.config.httpServer.port()
-            registry.add("AZURE_OPENID_CONFIG_ISSUER") { "http://localhost:$port/$AZUREAD_ISSUER_ID" }
-            registry.add("AZURE_OPENID_CONFIG_JWKS_URI") { "http://localhost:$port/$AZUREAD_ISSUER_ID/jwks" }
-            registry.add("AZURE_APP_CLIENT_ID") { DEFAULT_AUDIENCE }
-            registry.add("TOKEN_X_ISSUER") { "http://localhost:$port/$TOKENX_ISSUER_ID" }
-            registry.add("TOKEN_X_JWKS_URI") { "http://localhost:$port/$TOKENX_ISSUER_ID/jwks" }
-            registry.add("TOKEN_X_CLIENT_ID") { DEFAULT_AUDIENCE }
-        }
-
         const val AZUREAD_ISSUER_ID = "azuread"
         const val TOKENX_ISSUER_ID = "tokenx"
         const val DEFAULT_SUBJECT = "subject"
