@@ -47,11 +47,11 @@ class RegistrertSøknadstidspunktPåPersonService(
     }
 
     @Transactional
-    fun lagreSøknadtidspunkterPåBarn(
+    fun lagreSøknadstidspunkterPåBarn(
         behandling: Behandling,
         søknadstidspunktPerPerson: List<RegistrertSøknadstidspunkt>,
     ) {
-        validerSøknadtidspunktFørLagring(søknadstidspunktPerPerson)
+        validerSøknadstidspunktFørLagring(søknadstidspunktPerPerson)
 
         val aktørPerIdent =
             persongrunnlagService
@@ -74,7 +74,7 @@ class RegistrertSøknadstidspunktPåPersonService(
     }
 }
 
-private fun validerSøknadtidspunktFørLagring(søknadstidspunktPerPerson: List<RegistrertSøknadstidspunkt>) {
+private fun validerSøknadstidspunktFørLagring(søknadstidspunktPerPerson: List<RegistrertSøknadstidspunkt>) {
     if (søknadstidspunktPerPerson.isEmpty()) {
         throw FunksjonellFeil("Må sette søknadstidspunkt for minst én person.")
     }

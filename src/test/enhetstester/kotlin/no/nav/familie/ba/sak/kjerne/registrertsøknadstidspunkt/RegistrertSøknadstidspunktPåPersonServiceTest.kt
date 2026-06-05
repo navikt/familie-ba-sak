@@ -46,7 +46,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
     }
 
     @Nested
-    inner class LagreSøknadtidspunkterPåBarn {
+    inner class LagreSøknadstidspunkterPåBarn {
         @Test
         fun `skal erstatte eksisterende rader og lagre én rad per person, også for person uten andel`() {
             // Arrange
@@ -61,7 +61,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             every { mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(capture(lagretSlot)) } answers { firstArg() }
 
             // Act
-            registrertSøknadstidspunktService.lagreSøknadtidspunkterPåBarn(
+            registrertSøknadstidspunktService.lagreSøknadstidspunkterPåBarn(
                 behandling = behandling,
                 søknadstidspunktPerPerson =
                     listOf(
@@ -87,7 +87,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             // Act & assert
             val feil =
                 assertThrows<FunksjonellFeil> {
-                    registrertSøknadstidspunktService.lagreSøknadtidspunkterPåBarn(
+                    registrertSøknadstidspunktService.lagreSøknadstidspunkterPåBarn(
                         behandling = behandling,
                         søknadstidspunktPerPerson =
                             listOf(
@@ -108,7 +108,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             // Act & assert
             val feil =
                 assertThrows<FunksjonellFeil> {
-                    registrertSøknadstidspunktService.lagreSøknadtidspunkterPåBarn(
+                    registrertSøknadstidspunktService.lagreSøknadstidspunkterPåBarn(
                         behandling = behandling,
                         søknadstidspunktPerPerson =
                             listOf(
@@ -129,7 +129,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             // Act & assert
             val feil =
                 assertThrows<FunksjonellFeil> {
-                    registrertSøknadstidspunktService.lagreSøknadtidspunkterPåBarn(behandling = behandling, søknadstidspunktPerPerson = emptyList())
+                    registrertSøknadstidspunktService.lagreSøknadstidspunkterPåBarn(behandling = behandling, søknadstidspunktPerPerson = emptyList())
                 }
             assertThat(feil.message).isEqualTo("Må sette søknadstidspunkt for minst én person.")
             verify(exactly = 0) { mockRegistrertSøknadstidspunktPåPersonRepository.deleteByBehandlingId(any()) }

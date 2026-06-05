@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -225,17 +226,7 @@ class EndretUtbetalingAndelService(
         if (lagretSøknadstidspunktPerIdent.isEmpty() && behandlingSøknadMottattDato == null) return
 
         if (registrereSøknadstidspunktToggleErPå) {
-            val barnSomeErSøktFor = lagretSøknadstidspunktPerIdent.keys
-            val andelerSomSkalRyddes =
-                endretUtbetalingAndelRepository
-                    .findByBehandlingId(behandling.id)
-                    .filter {
-                        it.manglerObligatoriskFelt() ||
-                            (
-                                it.årsak in setOf(ETTERBETALING_3ÅR, ETTERBETALING_3MND) &&
-                                    it.personer.any { person -> person.aktør.aktivFødselsnummer() in barnSomeErSøktFor }
-                            )
-                    }.map { it.id }
+            val andelerSomSkalRyddes = finnAndelerSomSkalRyddes(behandling, barnSomErSøktFor = lagretSøknadstidspunktPerIdent.keys)
             fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(behandling, andelerSomSkalRyddes)
         } else {
             fjernEndretUtbetalingAndelerMedÅrsak3MndEller3ÅrGenerertIDenneBehandlingen(behandling)
@@ -248,12 +239,11 @@ class EndretUtbetalingAndelService(
         val nåværendeEndretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
 
         val personerGruppertPåSøknadstidspunkt =
-            personerPåBehandling
-                .mapNotNull { person ->
-                    val søknadstidspunkt =
-                        lagretSøknadstidspunktPerIdent[person.aktør.aktivFødselsnummer()] ?: behandlingSøknadMottattDato
-                    søknadstidspunkt?.let { person to it }
-                }.groupBy({ it.second }, { it.first })
+            grupperPersonerPåSøknadstidspunkt(
+                personerPåBehandling = personerPåBehandling,
+                lagretSøknadstidspunktPerIdent = lagretSøknadstidspunktPerIdent,
+                behandlingSøknadMottattDato = behandlingSøknadMottattDato,
+            )
 
         val genererteAndeler =
             personerGruppertPåSøknadstidspunkt.flatMap { (søknadstidspunkt, personerMedDato) ->
@@ -278,9 +268,35 @@ class EndretUtbetalingAndelService(
         behandling: Behandling,
         søknadstidspunktPerPerson: List<RegistrertSøknadstidspunkt>,
     ) {
-        registrertSøknadstidspunktService.lagreSøknadtidspunkterPåBarn(behandling, søknadstidspunktPerPerson)
+        registrertSøknadstidspunktService.lagreSøknadstidspunkterPåBarn(behandling, søknadstidspunktPerPerson)
         genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling)
     }
+
+    private fun finnAndelerSomSkalRyddes(
+        behandling: Behandling,
+        barnSomErSøktFor: Set<String>,
+    ): List<Long> =
+        endretUtbetalingAndelRepository
+            .findByBehandlingId(behandling.id)
+            .filter {
+                it.manglerObligatoriskFelt() ||
+                    (
+                        it.årsak in setOf(ETTERBETALING_3ÅR, ETTERBETALING_3MND) &&
+                            it.personer.any { person -> person.aktør.aktivFødselsnummer() in barnSomErSøktFor }
+                    )
+            }.map { it.id }
+
+    private fun grupperPersonerPåSøknadstidspunkt(
+        personerPåBehandling: List<Person>,
+        lagretSøknadstidspunktPerIdent: Map<String, LocalDate>,
+        behandlingSøknadMottattDato: LocalDate?,
+    ): Map<LocalDate, List<Person>> =
+        personerPåBehandling
+            .mapNotNull { person ->
+                val søknadstidspunkt =
+                    lagretSøknadstidspunktPerIdent[person.aktør.aktivFødselsnummer()] ?: behandlingSøknadMottattDato
+                søknadstidspunkt?.let { person to it }
+            }.groupBy({ it.second }, { it.first })
 
     private fun oppdaterBehandlingMedBeregningOgVarsleAbonnenter(behandling: Behandling) {
         val personopplysningGrunnlag =

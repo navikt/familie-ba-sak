@@ -609,7 +609,7 @@ class EndretUtbetalingAndelServiceTest {
                 val personopplysningGrunnlag =
                     lagTestPersonopplysningGrunnlag(behandling.id, søker, barnMedAndel, barnUtenAndel)
 
-                every { mockRegistrertSøknadstidspunktPåPersonService.lagreSøknadtidspunkterPåBarn(any(), any()) } just Runs
+                every { mockRegistrertSøknadstidspunktPåPersonService.lagreSøknadstidspunkterPåBarn(any(), any()) } just Runs
                 // Genereringen leser de lagrede søknadstidspunktene tilbake.
                 every { mockRegistrertSøknadstidspunktPåPersonService.hentForBehandling(any()) } returns
                     listOf(
@@ -653,7 +653,7 @@ class EndretUtbetalingAndelServiceTest {
                 )
 
                 // Assert
-                verify(exactly = 1) { mockRegistrertSøknadstidspunktPåPersonService.lagreSøknadtidspunkterPåBarn(behandling, søknadstidspunktPerPerson) }
+                verify(exactly = 1) { mockRegistrertSøknadstidspunktPåPersonService.lagreSøknadstidspunkterPåBarn(behandling, søknadstidspunktPerPerson) }
                 verify(exactly = 1) { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) }
             }
         }
