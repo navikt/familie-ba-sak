@@ -29,6 +29,7 @@ fun genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
     forrigeAndeler: List<AndelTilkjentYtelse>,
     nåværendeEndretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     personerPåBehandling: List<Person>,
+    erAutomatiskGenerert: Boolean,
 ): List<EndretUtbetalingAndel> {
     val (datoForGyldigEtterbetaling, årsak) =
         if (søknadMottattDato.isBefore(DATO_FOR_OVERGANG_TIL_ETTERBETALING_3MND)) {
@@ -75,6 +76,7 @@ fun genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
                 avtaletidspunktDeltBosted = null,
                 søknadstidspunkt = søknadMottattDato,
                 begrunnelse = "Fylt ut automatisk fra søknadstidspunkt.",
+                erAutomatiskGenerert = erAutomatiskGenerert,
             )
         }.slåSammenLikeEndretUtbetalingAndeler()
 }

@@ -571,6 +571,7 @@ class CucumberMock(
             endretUtbetalingAndelOppdatertAbonnementer = emptyList(),
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             behandlingSøknadsinfoService = behandlingSøknadsinfoService,
+            registrertSøknadstidspunktService = mockk(relaxed = true),
             featureToggleService = featureToggleService,
         )
 
@@ -709,6 +710,7 @@ class CucumberMock(
             opprettTaskService = opprettTaskService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
+            registrertSøknadstidspunktService = mockk(relaxed = true),
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
         )
 

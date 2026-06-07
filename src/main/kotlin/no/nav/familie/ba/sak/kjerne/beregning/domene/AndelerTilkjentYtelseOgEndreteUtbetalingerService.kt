@@ -154,6 +154,7 @@ data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
     val id get() = endretUtbetalingAndel.id
     val fom get() = endretUtbetalingAndel.fom
     val tom get() = endretUtbetalingAndel.tom
+    val erAutomatiskGenerert get() = endretUtbetalingAndel.erAutomatiskGenerert
     val andelerTilkjentYtelse = andeler
 }
 

@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -21,10 +22,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunkt
+import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktPåPersonService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -38,6 +42,7 @@ class EndretUtbetalingAndelService(
     private val endretUtbetalingAndelOppdatertAbonnementer: List<EndretUtbetalingAndelerOppdatertAbonnent> = emptyList(),
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
+    private val registrertSøknadstidspunktService: RegistrertSøknadstidspunktPåPersonService,
     private val featureToggleService: FeatureToggleService,
 ) {
     @Transactional
@@ -47,6 +52,11 @@ class EndretUtbetalingAndelService(
         endretUtbetalingAndelDto: EndretUtbetalingAndelDto,
     ) {
         val endretUtbetalingAndel = endretUtbetalingAndelRepository.getReferenceById(endretUtbetalingAndelId)
+
+        if (featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON) && endretUtbetalingAndel.erAutomatiskGenerert == true) {
+            throw FunksjonellFeil("Automatisk genererte endrede utbetalingsperioder kan ikke endres, kun fjernes.")
+        }
+
         val personerPåEndretUtbetalingAndel =
             endretUtbetalingAndelDto.personIdenter.takeUnless { it.isNullOrEmpty() }
                 ?: throw FunksjonellFeil("Endret utbetalingsperiode må gjelde minst én person")
@@ -193,11 +203,34 @@ class EndretUtbetalingAndelService(
 
     @Transactional
     fun genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling: Behandling) {
-        if (behandling.kategori == BehandlingKategori.EØS) return
+        val registrereSøknadstidspunktToggleErPå = featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON)
 
-        val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)?.toLocalDate() ?: return
+        if (!registrereSøknadstidspunktToggleErPå && behandling.kategori == BehandlingKategori.EØS) return
 
-        fjernEndretUtbetalingAndelerMedÅrsak3MndEller3ÅrGenerertIDenneBehandlingen(behandling)
+        val lagretSøknadstidspunktPerIdent =
+            if (registrereSøknadstidspunktToggleErPå) {
+                registrertSøknadstidspunktService
+                    .hentForBehandling(behandling.id)
+                    .associate { it.aktør.aktivFødselsnummer() to it.søknadstidspunkt }
+            } else {
+                emptyMap()
+            }
+
+        val behandlingSøknadMottattDato =
+            if (registrereSøknadstidspunktToggleErPå) {
+                null
+            } else {
+                behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)?.toLocalDate()
+            }
+
+        if (lagretSøknadstidspunktPerIdent.isEmpty() && behandlingSøknadMottattDato == null) return
+
+        if (registrereSøknadstidspunktToggleErPå) {
+            val andelerSomSkalRyddes = finnAndelerSomSkalRyddes(behandling, barnSomErSøktFor = lagretSøknadstidspunktPerIdent.keys)
+            fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(behandling, andelerSomSkalRyddes)
+        } else {
+            fjernEndretUtbetalingAndelerMedÅrsak3MndEller3ÅrGenerertIDenneBehandlingen(behandling)
+        }
 
         val nåværendeAndeler = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
         val forrigeAndeler = beregningService.hentAndelerFraForrigeIverksattebehandling(behandling)
@@ -205,20 +238,65 @@ class EndretUtbetalingAndelService(
         val personerPåBehandling = persongrunnlagService.hentPersonerPåBehandling(personIdenter, behandling)
         val nåværendeEndretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
 
-        val endretUtbetalingAndeler =
-            genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
-                behandling = behandling,
-                søknadMottattDato = søknadMottattDato,
-                nåværendeAndeler = nåværendeAndeler,
-                forrigeAndeler = forrigeAndeler,
+        val personerGruppertPåSøknadstidspunkt =
+            grupperPersonerPåSøknadstidspunkt(
                 personerPåBehandling = personerPåBehandling,
-                nåværendeEndretUtbetalingAndeler = nåværendeEndretUtbetalingAndeler,
+                lagretSøknadstidspunktPerIdent = lagretSøknadstidspunktPerIdent,
+                behandlingSøknadMottattDato = behandlingSøknadMottattDato,
             )
 
-        endretUtbetalingAndelRepository.saveAllAndFlush(endretUtbetalingAndeler)
+        val genererteAndeler =
+            personerGruppertPåSøknadstidspunkt.flatMap { (søknadstidspunkt, personerMedDato) ->
+                val aktuelleAktører = personerMedDato.map { it.aktør }.toSet()
+                genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
+                    behandling = behandling,
+                    søknadMottattDato = søknadstidspunkt,
+                    nåværendeAndeler = nåværendeAndeler.filter { it.aktør in aktuelleAktører },
+                    forrigeAndeler = forrigeAndeler.filter { it.aktør in aktuelleAktører },
+                    nåværendeEndretUtbetalingAndeler = nåværendeEndretUtbetalingAndeler,
+                    personerPåBehandling = personerMedDato,
+                    erAutomatiskGenerert = registrereSøknadstidspunktToggleErPå,
+                )
+            }
 
+        endretUtbetalingAndelRepository.saveAllAndFlush(genererteAndeler)
         oppdaterBehandlingMedBeregningOgVarsleAbonnenter(behandling)
     }
+
+    @Transactional
+    fun endreSøknadstidspunktOgGenererEtterbetalingsandeler(
+        behandling: Behandling,
+        søknadstidspunktPerPerson: List<RegistrertSøknadstidspunkt>,
+    ) {
+        registrertSøknadstidspunktService.lagreSøknadstidspunkterPåPersoner(behandling, søknadstidspunktPerPerson)
+        genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling)
+    }
+
+    private fun finnAndelerSomSkalRyddes(
+        behandling: Behandling,
+        barnSomErSøktFor: Set<String>,
+    ): List<Long> =
+        endretUtbetalingAndelRepository
+            .findByBehandlingId(behandling.id)
+            .filter {
+                it.manglerObligatoriskFelt() ||
+                    (
+                        it.årsak in setOf(ETTERBETALING_3ÅR, ETTERBETALING_3MND) &&
+                            it.personer.any { person -> person.aktør.aktivFødselsnummer() in barnSomErSøktFor }
+                    )
+            }.map { it.id }
+
+    private fun grupperPersonerPåSøknadstidspunkt(
+        personerPåBehandling: List<Person>,
+        lagretSøknadstidspunktPerIdent: Map<String, LocalDate>,
+        behandlingSøknadMottattDato: LocalDate?,
+    ): Map<LocalDate, List<Person>> =
+        personerPåBehandling
+            .mapNotNull { person ->
+                val søknadstidspunkt =
+                    lagretSøknadstidspunktPerIdent[person.aktør.aktivFødselsnummer()] ?: behandlingSøknadMottattDato
+                søknadstidspunkt?.let { person to it }
+            }.groupBy({ it.second }, { it.first })
 
     private fun oppdaterBehandlingMedBeregningOgVarsleAbonnenter(behandling: Behandling) {
         val personopplysningGrunnlag =

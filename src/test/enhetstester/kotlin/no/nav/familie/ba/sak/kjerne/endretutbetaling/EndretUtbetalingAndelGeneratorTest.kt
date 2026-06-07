@@ -42,6 +42,7 @@ class EndretUtbetalingAndelGeneratorTest {
                 forrigeAndeler = forrigeAndeler,
                 personerPåBehandling = listOf(søker, barn),
                 nåværendeEndretUtbetalingAndeler = emptyList(),
+                erAutomatiskGenerert = true,
             )
 
         // Assert
@@ -66,6 +67,7 @@ class EndretUtbetalingAndelGeneratorTest {
                 forrigeAndeler = forrigeAndeler,
                 personerPåBehandling = listOf(søker, barn),
                 nåværendeEndretUtbetalingAndeler = emptyList(),
+                erAutomatiskGenerert = true,
             )
 
         // Assert
@@ -124,6 +126,7 @@ class EndretUtbetalingAndelGeneratorTest {
                 forrigeAndeler = forrigeAndeler,
                 personerPåBehandling = listOf(søker, barn, barn2),
                 nåværendeEndretUtbetalingAndeler = emptyList(),
+                erAutomatiskGenerert = true,
             )
 
         // Assert
@@ -203,6 +206,7 @@ class EndretUtbetalingAndelGeneratorTest {
                 forrigeAndeler = forrigeAndeler,
                 personerPåBehandling = listOf(søker, barn, barn2),
                 nåværendeEndretUtbetalingAndeler = listOf(nåværendeEndretUtbetalingAndeler),
+                erAutomatiskGenerert = true,
             )
 
         // Assert
@@ -241,6 +245,7 @@ class EndretUtbetalingAndelGeneratorTest {
                 forrigeAndeler = forrigeAndeler,
                 personerPåBehandling = listOf(søker, barn),
                 nåværendeEndretUtbetalingAndeler = emptyList(),
+                erAutomatiskGenerert = true,
             )
 
         // Assert
@@ -263,6 +268,7 @@ class EndretUtbetalingAndelGeneratorTest {
                 forrigeAndeler = emptyList(),
                 personerPåBehandling = listOf(søker, barn),
                 nåværendeEndretUtbetalingAndeler = emptyList(),
+                erAutomatiskGenerert = true,
             )
 
         // Assert
@@ -319,5 +325,6 @@ class EndretUtbetalingAndelGeneratorTest {
         )
         assertThat(endretUtbetalingAndel.avtaletidspunktDeltBosted).isNull()
         assertThat(endretUtbetalingAndel.begrunnelse).isEqualTo("Fylt ut automatisk fra søknadstidspunkt.")
+        assertThat(endretUtbetalingAndel.erAutomatiskGenerert).isTrue()
     }
 }

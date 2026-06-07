@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
+import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktPåPersonService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -46,6 +47,7 @@ class VilkårsvurderingSteg(
     private val opprettTaskService: OpprettTaskService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    private val registrertSøknadstidspunktService: RegistrertSøknadstidspunktPåPersonService,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
 ) : BehandlingSteg<List<String>?> {
     override fun preValiderSteg(
@@ -108,6 +110,8 @@ class VilkårsvurderingSteg(
         tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling)
 
         beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling, personopplysningGrunnlag)
+
+        registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling)
 
         endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling)
 
