@@ -41,7 +41,7 @@ class SammensattKontrollsakController(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<SammensattKontrollsakDto?>> {
         tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "Hent SammensattKontrollsak",
         )
         val sammensattKontrollsak = sammensattKontrollsakService.finnSammensattKontrollsak(behandlingId = behandlingId)
