@@ -144,7 +144,10 @@ private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling() 
 
 fun erNullPgaDifferanseberegningEllerDeltBosted(grunnlag: IBegrunnelseGrunnlagForPeriode): Boolean =
     grunnlag.dennePerioden.andeler.any { it.differanseberegnetPeriodebeløp != null && it.differanseberegnetPeriodebeløp < 0 } ||
-        grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
+        (
+            grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED &&
+                grunnlag.forrigePeriode?.endretUtbetalingAndel?.årsak != Årsak.DELT_BOSTED
+        )
 
 fun Map<Person, IBegrunnelseGrunnlagForPeriode>.erBetaltUtvidetIPeriode(): Boolean =
     this.any {
