@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.config
 
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.felles.tokenklient.entraid.EntraIDRestClientFactory
-import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.interceptor.ConsumerIdClientInterceptor
 import no.nav.familie.log.interceptor.MdcValuesPropagatingClientInterceptor
 import org.springframework.beans.factory.annotation.Value
@@ -10,7 +9,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.http.client.SimpleClientHttpRequestFactory
-import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.web.client.RestClient
 import java.time.Duration
 
@@ -24,75 +22,82 @@ class RestClientConfig(
     fun integrasjonerRestClient(
         @Value("\${FAMILIE_INTEGRASJONER_SCOPE}") scope: String,
     ): RestClient =
-        entraIDRestClientFactory.lagHybridRestKlient(scope) {
-            SikkerhetContext.hentJwt()?.tokenValue
-        }
+        entraIDRestClientFactory
+            .lagHybridRestKlient(scope) { SikkerhetContext.hentJwt()?.tokenValue }
+            .medJsonContentType()
 
     @Bean("integrasjonerM2mRestClient")
     fun integrasjonerM2mRestClient(
         @Value("\${FAMILIE_INTEGRASJONER_SCOPE}") scope: String,
-    ): RestClient = entraIDRestClientFactory.lagMaskinTilMaskinRestKlient(scope)
+    ): RestClient =
+        entraIDRestClientFactory
+            .lagMaskinTilMaskinRestKlient(scope)
+            .medJsonContentType()
 
     @Bean("pdlRestClient")
     fun pdlRestClient(
         @Value("\${PDL_SCOPE}") scope: String,
     ): RestClient =
-        entraIDRestClientFactory.lagHybridRestKlient(scope) {
-            SikkerhetContext.hentJwt()?.tokenValue
-        }
+        entraIDRestClientFactory
+            .lagHybridRestKlient(scope) { SikkerhetContext.hentJwt()?.tokenValue }
+            .medJsonContentType()
 
     @Bean("økonomiRestClient")
     fun økonomiRestClient(
         @Value("\${FAMILIE_OPPDRAG_SCOPE}") scope: String,
     ): RestClient =
-        entraIDRestClientFactory.lagHybridRestKlient(scope) {
-            SikkerhetContext.hentJwt()?.tokenValue
-        }
+        entraIDRestClientFactory
+            .lagHybridRestKlient(scope) { SikkerhetContext.hentJwt()?.tokenValue }
+            .medJsonContentType()
 
     @Bean("infotrygdBarnetrygdRestClient")
     fun infotrygdBarnetrygdRestClient(
         @Value("\${FAMILIE_BA_INFOTRYGD_SCOPE}") scope: String,
     ): RestClient {
-        val base =
-            entraIDRestClientFactory.lagHybridRestKlient(scope) {
-                SikkerhetContext.hentJwt()?.tokenValue
-            }
         val factory =
             SimpleClientHttpRequestFactory().apply {
                 setConnectTimeout(Duration.ofMinutes(12))
                 setReadTimeout(Duration.ofMinutes(12))
             }
-        return base.mutate().requestFactory(factory).build()
+        return entraIDRestClientFactory
+            .lagHybridRestKlient(scope) { SikkerhetContext.hentJwt()?.tokenValue }
+            .mutate()
+            .requestFactory(factory)
+            .build()
+            .medJsonContentType()
     }
 
     @Bean("infotrygdFeedRestClient")
     fun infotrygdFeedRestClient(
         @Value("\${FAMILIE_BA_INFOTRYGD_FEED_SCOPE}") scope: String,
-    ): RestClient = entraIDRestClientFactory.lagMaskinTilMaskinRestKlient(scope)
+    ): RestClient =
+        entraIDRestClientFactory
+            .lagMaskinTilMaskinRestKlient(scope)
+            .medJsonContentType()
 
     @Bean("efSakRestClient")
     fun efSakRestClient(
         @Value("\${FAMILIE_EF_SAK_SCOPE}") scope: String,
     ): RestClient =
-        entraIDRestClientFactory.lagHybridRestKlient(scope) {
-            SikkerhetContext.hentJwt()?.tokenValue
-        }
+        entraIDRestClientFactory
+            .lagHybridRestKlient(scope) { SikkerhetContext.hentJwt()?.tokenValue }
+            .medJsonContentType()
 
     @Bean("tilbakekrevingRestClient")
     fun tilbakekrevingRestClient(
         @Value("\${FAMILIE_TILBAKE_SCOPE}") scope: String,
     ): RestClient =
-        entraIDRestClientFactory.lagHybridRestKlient(scope) {
-            SikkerhetContext.hentJwt()?.tokenValue
-        }
+        entraIDRestClientFactory
+            .lagHybridRestKlient(scope) { SikkerhetContext.hentJwt()?.tokenValue }
+            .medJsonContentType()
 
     @Bean("klageRestClient")
     fun klageRestClient(
         @Value("\${FAMILIE_KLAGE_SCOPE}") scope: String,
     ): RestClient =
-        entraIDRestClientFactory.lagHybridRestKlient(scope) {
-            SikkerhetContext.hentJwt()?.tokenValue
-        }
+        entraIDRestClientFactory
+            .lagHybridRestKlient(scope) { SikkerhetContext.hentJwt()?.tokenValue }
+            .medJsonContentType()
 
     @Bean("utenAuthRestClient")
     fun utenAuthRestClient(): RestClient =
@@ -100,9 +105,12 @@ class RestClientConfig(
             .builder()
             .requestInterceptor(consumerIdClientInterceptor)
             .requestInterceptor(mdcValuesPropagatingClientInterceptor)
-            .messageConverters { converters ->
-                converters.removeIf { it is JacksonJsonHttpMessageConverter }
-                converters.add(JacksonJsonHttpMessageConverter(jsonMapper))
-            }.defaultRequest { it.accept(MediaType.APPLICATION_JSON) }
+            .defaultRequest { it.accept(MediaType.APPLICATION_JSON) }
+            .defaultHeaders { it.contentType = MediaType.APPLICATION_JSON }
+            .build()
+
+    private fun RestClient.medJsonContentType(): RestClient =
+        mutate()
+            .defaultHeaders { it.contentType = MediaType.APPLICATION_JSON }
             .build()
 }
