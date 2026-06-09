@@ -20,14 +20,12 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
-import org.springframework.web.client.exchange
-import org.springframework.web.client.postForEntity
+import org.springframework.web.client.toEntity
 import org.wiremock.spring.ConfigureWireMock
 import org.wiremock.spring.EnableWireMock
 import org.wiremock.spring.InjectWireMock
@@ -44,7 +42,6 @@ import java.time.temporal.ChronoUnit
     "integrasjonstest",
     "testcontainers",
     "mock-pdl",
-    "mock-rest-template-config",
     "mock-ident-klient",
     "mock-brev-klient",
 )
@@ -84,10 +81,13 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         val error =
             assertThrows<HttpServerErrorException> {
-                restTemplate.postForEntity<Any>(
-                    hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
-                    requestEntity,
-                )
+                restClient
+                    .post()
+                    .uri(hentUrl("/api/bisys/hent-utvidet-barnetrygd"))
+                    .headers { h -> h.addAll(requestEntity.headers) }
+                    .body(requestEntity.body!!)
+                    .retrieve()
+                    .toEntity(Any::class.java)
             }
 
         assertThat(error.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -123,10 +123,13 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
             )
 
         val responseEntity =
-            restTemplate.postForEntity<BisysUtvidetBarnetrygdResponse>(
-                hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
-                requestEntity,
-            )
+            restClient
+                .post()
+                .uri(hentUrl("/api/bisys/hent-utvidet-barnetrygd"))
+                .headers { h -> h.addAll(requestEntity.headers) }
+                .body(requestEntity.body!!)
+                .retrieve()
+                .toEntity<BisysUtvidetBarnetrygdResponse>()
         verify(
             postRequestedFor(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .withRequestBody(
@@ -182,10 +185,13 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
             )
 
         val responseEntity =
-            restTemplate.postForEntity<BisysUtvidetBarnetrygdResponse>(
-                hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
-                requestEntity,
-            )
+            restClient
+                .post()
+                .uri(hentUrl("/api/bisys/hent-utvidet-barnetrygd"))
+                .headers { h -> h.addAll(requestEntity.headers) }
+                .body(requestEntity.body!!)
+                .retrieve()
+                .toEntity<BisysUtvidetBarnetrygdResponse>()
 
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(responseEntity.body).isNotNull
@@ -244,10 +250,13 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
             )
 
         val responseEntity =
-            restTemplate.postForEntity<BisysUtvidetBarnetrygdResponse>(
-                hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
-                requestEntity,
-            )
+            restClient
+                .post()
+                .uri(hentUrl("/api/bisys/hent-utvidet-barnetrygd"))
+                .headers { h -> h.addAll(requestEntity.headers) }
+                .body(requestEntity.body!!)
+                .retrieve()
+                .toEntity<BisysUtvidetBarnetrygdResponse>()
 
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(responseEntity.body).isNotNull
@@ -287,11 +296,12 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         val error =
             assertThrows<HttpClientErrorException> {
-                restTemplate.exchange<String>(
-                    hentUrl("/api/samhandler/orgnr/987654321"),
-                    HttpMethod.GET,
-                    HttpEntity<String>(header),
-                )
+                restClient
+                    .get()
+                    .uri(hentUrl("/api/samhandler/orgnr/987654321"))
+                    .headers { h -> h.addAll(HttpEntity<String>(header).headers) }
+                    .retrieve()
+                    .toEntity(String::class.java)
             }
 
         assertThat(error.statusCode).isEqualTo(HttpStatus.FORBIDDEN)

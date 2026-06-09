@@ -10,13 +10,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.http.client.SimpleClientHttpRequestFactory
-import org.springframework.http.converter.ByteArrayHttpMessageConverter
-import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.web.client.RestClient
-import org.springframework.web.client.RestOperations
-import org.springframework.web.client.RestTemplate
-import java.nio.charset.StandardCharsets
 import java.time.Duration
 
 @Configuration
@@ -105,18 +100,9 @@ class RestClientConfig(
             .builder()
             .requestInterceptor(consumerIdClientInterceptor)
             .requestInterceptor(mdcValuesPropagatingClientInterceptor)
-            .defaultRequest { it.accept(MediaType.APPLICATION_JSON) }
+            .messageConverters { converters ->
+                converters.removeIf { it is JacksonJsonHttpMessageConverter }
+                converters.add(JacksonJsonHttpMessageConverter(jsonMapper))
+            }.defaultRequest { it.accept(MediaType.APPLICATION_JSON) }
             .build()
-
-    @Bean
-    fun restOperations(): RestOperations =
-        RestTemplate(
-            listOf(
-                StringHttpMessageConverter(StandardCharsets.UTF_8),
-                ByteArrayHttpMessageConverter(),
-                JacksonJsonHttpMessageConverter(jsonMapper),
-            ),
-        ).apply {
-            interceptors = listOf(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
-        }
 }

@@ -21,14 +21,12 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.exchange
+import org.springframework.web.client.toEntity
 import java.time.YearMonth
 
 @ActiveProfiles(
@@ -49,11 +47,12 @@ class MinSideBarnetrygdControllerTest(
         fun `skal returnere UNAUTHORIZED når request mangler token`() {
             val error =
                 assertThrows<HttpClientErrorException> {
-                    restTemplate.exchange<String>(
-                        hentUrl("/api/minside/barnetrygd"),
-                        HttpMethod.GET,
-                        HttpEntity<String>(HttpHeaders()),
-                    )
+                    restClient
+                        .get()
+                        .uri(hentUrl("/api/minside/barnetrygd"))
+                        .headers { h -> h.addAll(HttpHeaders()) }
+                        .retrieve()
+                        .toEntity(String::class.java)
                 }
 
             assertThat(error.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -69,11 +68,12 @@ class MinSideBarnetrygdControllerTest(
 
             val error =
                 assertThrows<HttpClientErrorException> {
-                    restTemplate.exchange<String>(
-                        hentUrl("/api/minside/barnetrygd"),
-                        HttpMethod.GET,
-                        HttpEntity<String>(headers),
-                    )
+                    restClient
+                        .get()
+                        .uri(hentUrl("/api/minside/barnetrygd"))
+                        .headers { h -> h.addAll(headers) }
+                        .retrieve()
+                        .toEntity(String::class.java)
                 }
 
             assertThat(error.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
@@ -89,11 +89,12 @@ class MinSideBarnetrygdControllerTest(
 
             val error =
                 assertThrows<HttpClientErrorException> {
-                    restTemplate.exchange<String>(
-                        hentUrl("/api/minside/barnetrygd"),
-                        HttpMethod.GET,
-                        HttpEntity<String>(headers),
-                    )
+                    restClient
+                        .get()
+                        .uri(hentUrl("/api/minside/barnetrygd"))
+                        .headers { h -> h.addAll(headers) }
+                        .retrieve()
+                        .toEntity(String::class.java)
                 }
 
             assertThat(error.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
@@ -143,11 +144,12 @@ class MinSideBarnetrygdControllerTest(
                 }
 
             val response =
-                restTemplate.exchange<HentMinSideBarnetrygdDto.Suksess>(
-                    hentUrl("/api/minside/barnetrygd"),
-                    HttpMethod.GET,
-                    HttpEntity<String>(headers),
-                )
+                restClient
+                    .get()
+                    .uri(hentUrl("/api/minside/barnetrygd"))
+                    .headers { h -> h.addAll(headers) }
+                    .retrieve()
+                    .toEntity<HentMinSideBarnetrygdDto.Suksess>()
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(
