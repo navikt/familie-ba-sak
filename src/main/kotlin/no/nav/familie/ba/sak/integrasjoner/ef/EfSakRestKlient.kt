@@ -14,7 +14,7 @@ import java.net.URI
 
 @Component
 class EfSakRestKlient(
-    @Value("\${FAMILIE_EF_SAK_API_URL}") private val efSakBaseUrl: URI,
+    @Value("\${FAMILIE_EF_SAK_URL}") private val efSakBaseUrl: URI,
     @Qualifier("efSakRestClient") private val restClient: RestClient,
 ) {
     fun hentPerioderMedFullOvergangsstønad(personIdent: String): EksternePerioderResponse {

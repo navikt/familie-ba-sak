@@ -46,14 +46,15 @@ PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
 FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.dev.intern.nav.no/api
 FAMILIE_OPPDRAG_SCOPE: api://dev-fss.teamfamilie.familie-oppdrag/.default
 FAMILIE_BREV_API_URL: https://familie-brev.intern.dev.nav.no
-FAMILIE_TILBAKE_API_URL: https://tilbakekreving-backend.intern.dev.nav.no
-FAMILIE_TILBAKE_API_URL_SCOPE: api://dev-gcp.tilbake.tilbakekreving-backend/.default
+FAMILIE_TILBAKE_URL: https://tilbakekreving-backend.intern.dev.nav.no
+FAMILIE_TILBAKE_SCOPE: api://dev-gcp.tilbake.tilbakekreving-backend/.default
 FAMILIE_KLAGE_URL: https://familie-klage-backend.intern.dev.nav.no
+FAMILIE_KLAGE_SCOPE: api://dev-gcp.teamfamilie.familie-klage/.default
 FAMILIE_BA_SAK_API_URL: http://localhost:8086/api
 FAMILIE_BA_INFOTRYGD_API_URL: https://familie-ba-infotrygd.intern.dev.nav.no
 FAMILIE_BA_INFOTRYGD_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd/.default
-FAMILIE_EF_SAK_API_URL: https://familie-ef-sak.intern.dev.nav.no
-FAMILIE_EF_SAK_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
+FAMILIE_EF_SAK_URL: https://familie-ef-sak.intern.dev.nav.no
+FAMILIE_EF_SAK_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.intern.dev,nav.no
 FAMILIE_BA_INFOTRYGD_FEED_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd.feed/.default
 

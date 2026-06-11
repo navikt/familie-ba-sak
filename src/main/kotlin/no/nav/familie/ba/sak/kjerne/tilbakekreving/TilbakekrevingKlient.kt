@@ -27,7 +27,7 @@ data class FinnesBehandlingsresponsDto(
 
 @Component
 class TilbakekrevingKlient(
-    @Value("\${FAMILIE_TILBAKE_API_URL}") private val familieTilbakeUri: URI,
+    @Value("\${FAMILIE_TILBAKE_URL}") private val familieTilbakeUri: URI,
     @Qualifier("tilbakekrevingRestClient") private val restClient: RestClient,
 ) {
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
