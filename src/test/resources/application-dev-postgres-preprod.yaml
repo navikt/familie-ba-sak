@@ -65,7 +65,11 @@ CREDENTIAL_PASSWORD: not-a-real-pw
 KAFKA_BROKERS: http://localhost:9092
 
 retry.backoff.delay: 5
+
 NAIS_APP_NAME: familie-ba-sak
+NAIS_TOKEN_EXCHANGE_ENDPOINT: http://localhost:6767/api/v1/token/exchange
+NAIS_TOKEN_ENDPOINT: http://localhost:6767/api/v1/token
 
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 DEPLOY_ENV: dev
+
