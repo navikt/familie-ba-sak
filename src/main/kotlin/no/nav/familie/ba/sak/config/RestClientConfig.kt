@@ -42,6 +42,14 @@ class RestClientConfig(
             .lagHybridRestKlient(scope) { SikkerhetContext.hentJwt()?.tokenValue }
             .medJsonContentType()
 
+    @Bean("pdlRestM2mClient")
+    fun pdlRestM2mClient(
+        @Value("\${PDL_SCOPE}") scope: String,
+    ): RestClient =
+        entraIDRestClientFactory
+            .lagMaskinTilMaskinRestKlient(scope)
+            .medJsonContentType()
+
     @Bean("økonomiRestClient")
     fun økonomiRestClient(
         @Value("\${FAMILIE_OPPDRAG_SCOPE}") scope: String,

@@ -24,7 +24,7 @@ import java.net.URI
 @Service
 class SystemOnlyPdlRestKlient(
     @Value("\${PDL_URL}") pdlBaseUrl: URI,
-    @Qualifier("pdlRestClient") restClient: RestClient,
+    @Qualifier("pdlRestM2mClient") restClient: RestClient,
     personidentService: PersonidentService,
 ) : PdlRestKlient(pdlBaseUrl, restClient, personidentService) {
     @Cacheable("adressebeskyttelse", cacheManager = "shortCache")
