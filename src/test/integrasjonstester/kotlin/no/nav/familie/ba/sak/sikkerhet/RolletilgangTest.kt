@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.sikkerhet
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
@@ -19,7 +20,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.postForEntity
+import org.springframework.web.client.body
+import org.springframework.web.client.toEntity
 import tools.jackson.module.kotlin.readValue
 
 @ActiveProfiles(
@@ -34,7 +36,6 @@ import tools.jackson.module.kotlin.readValue
     "mock-brev-klient",
     "fake-økonomi-klient",
     "mock-infotrygd-feed",
-    "mock-rest-template-config",
     "mock-task-repository",
     "mock-task-service",
     "mock-unleash",
@@ -59,7 +60,7 @@ class RolletilgangTest(
             ),
         )
         val requestEntity =
-            HttpEntity<String>(
+            HttpEntity(
                 jsonMapper.writeValueAsString(
                     FagsakRequest(
                         personIdent = fnr,
@@ -70,13 +71,16 @@ class RolletilgangTest(
 
         val error =
             assertThrows<HttpClientErrorException> {
-                restTemplate.postForEntity<Ressurs<Fagsak>>(
-                    hentUrl("/api/fagsaker"),
-                    requestEntity,
-                )
+                restClient
+                    .post()
+                    .uri(hentUrl("/api/fagsaker"))
+                    .headers { h -> h.addAll(requestEntity.headers) }
+                    .body(requestEntity.body!!)
+                    .retrieve()
+                    .body<Ressurs<MinimalFagsakDto>>()
             }
 
-        val ressurs: Ressurs<Fagsak> = jsonMapper.readValue(error.responseBodyAsString)
+        val ressurs: Ressurs<MinimalFagsakDto> = jsonMapper.readValue(error.responseBodyAsString)
 
         assertEquals(HttpStatus.FORBIDDEN, error.statusCode)
         assertEquals(Ressurs.Status.IKKE_TILGANG, ressurs.status)
@@ -101,21 +105,23 @@ class RolletilgangTest(
                 ),
             ),
         )
-        val requestEntity =
-            HttpEntity<String>(
-                jsonMapper.writeValueAsString(
-                    FagsakRequest(
-                        personIdent = fnr,
-                    ),
-                ),
-                header,
-            )
 
-        val response = restTemplate.postForEntity<Ressurs<Fagsak>>(hentUrl("/api/fagsaker"), requestEntity)
-        val ressurs = response.body
+        val response =
+            restClient
+                .post()
+                .uri(hentUrl("/api/fagsaker"))
+                .headers { it.addAll(header) }
+                .body(
+                    jsonMapper.writeValueAsString(
+                        FagsakRequest(
+                            personIdent = fnr,
+                        ),
+                    ),
+                ).retrieve()
+                .toEntity<Ressurs<MinimalFagsakDto>>()
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
-        assertEquals(Ressurs.Status.SUKSESS, ressurs?.status)
+        assertEquals(Ressurs.Status.SUKSESS, response.body!!.status)
     }
 
     @Test
@@ -136,17 +142,20 @@ class RolletilgangTest(
             ),
         )
         val requestEntity =
-            HttpEntity<String>(
+            HttpEntity(
                 jsonMapper.writeValueAsString(nyOrdinærBehandling(fagsakId = fagsak.data!!.id)),
                 header,
             )
 
         val error =
             assertThrows<HttpClientErrorException> {
-                restTemplate.postForEntity<Ressurs<Behandling>>(
-                    hentUrl("/rolletilgang/test-behandlinger"),
-                    requestEntity,
-                )
+                restClient
+                    .post()
+                    .uri(hentUrl("/rolletilgang/test-behandlinger"))
+                    .headers { h -> h.addAll(requestEntity.headers) }
+                    .body(requestEntity.body!!)
+                    .retrieve()
+                    .body<Ressurs<MinimalFagsakDto>>()
             }
 
         val ressurs: Ressurs<Behandling> = jsonMapper.readValue(error.responseBodyAsString)
@@ -173,7 +182,7 @@ class RolletilgangTest(
             ),
         )
         val requestEntity =
-            HttpEntity<String>(
+            HttpEntity(
                 jsonMapper.writeValueAsString(
                     listOf(1L, 2L),
                 ),
@@ -182,10 +191,13 @@ class RolletilgangTest(
 
         val error =
             assertThrows<HttpClientErrorException> {
-                restTemplate.postForEntity<Ressurs<Fagsak>>(
-                    hentUrl("/api/forvalter/ferdigstill-oppgaver"),
-                    requestEntity,
-                )
+                restClient
+                    .post()
+                    .uri(hentUrl("/api/forvalter/ferdigstill-oppgaver"))
+                    .headers { h -> h.addAll(requestEntity.headers) }
+                    .body(requestEntity.body!!)
+                    .retrieve()
+                    .body<Ressurs<MinimalFagsakDto>>()
             }
 
         val ressurs: Ressurs<Fagsak> = jsonMapper.readValue(error.responseBodyAsString)
@@ -213,14 +225,21 @@ class RolletilgangTest(
             ),
         )
         val requestEntity =
-            HttpEntity<String>(
+            HttpEntity(
                 jsonMapper.writeValueAsString(
                     emptyList<Long>(),
                 ),
                 header,
             )
 
-        val response = restTemplate.postForEntity<String>(hentUrl("/api/forvalter/ferdigstill-oppgaver"), requestEntity)
+        val response =
+            restClient
+                .post()
+                .uri(hentUrl("/api/forvalter/ferdigstill-oppgaver"))
+                .headers { h -> h.addAll(requestEntity.headers) }
+                .body(requestEntity.body!!)
+                .retrieve()
+                .toEntity(String::class.java)
 
         assertEquals(HttpStatus.OK, response.statusCode)
     }

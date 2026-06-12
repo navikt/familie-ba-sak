@@ -21,22 +21,22 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 
 class InfotrygdFeedKlientTest : AbstractSpringIntegrationTest() {
     lateinit var klient: InfotrygdFeedKlient
 
     @Autowired
-    @Qualifier("jwtBearer")
-    lateinit var restOperations: RestOperations
+    @Qualifier("utenAuthRestClient")
+    lateinit var restClient: RestClient
 
     @BeforeEach
     fun setUp() {
         klient =
             InfotrygdFeedKlient(
                 URI.create(wireMockServer.baseUrl() + "/api"),
-                restOperations,
+                restClient,
                 1L,
             )
     }

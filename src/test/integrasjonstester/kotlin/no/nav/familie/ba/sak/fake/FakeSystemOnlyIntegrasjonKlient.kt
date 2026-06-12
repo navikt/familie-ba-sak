@@ -1,18 +1,19 @@
 package no.nav.familie.ba.sak.fake
 
+import io.mockk.mockk
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Ansettelsesperiode
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsgiver
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.RestClient
 import java.net.URI
 import java.time.LocalDate
 
 class FakeSystemOnlyIntegrasjonKlient :
     SystemOnlyIntegrasjonKlient(
         integrasjonUri = URI("http://dummy-uri"),
-        restOperations = RestTemplate(),
+        restClient = mockk<RestClient>(relaxed = true),
         retryBackoffDelay = 1L,
     ) {
     override fun hentArbeidsforholdMedSystembruker(

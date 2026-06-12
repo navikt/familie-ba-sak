@@ -1,15 +1,14 @@
 package no.nav.familie.ba.sak.fake
 
+import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.lang.Integer.min
 import java.net.URI
 
-class FakePdlIdentRestKlient(
-    restOperations: RestOperations,
-) : PdlIdentRestKlient(URI("dummy_uri"), restOperations) {
+class FakePdlIdentRestKlient : PdlIdentRestKlient(URI("dummy_uri"), mockk<RestClient>(relaxed = true)) {
     private val identMap = mutableMapOf<String, List<IdentInformasjon>>()
 
     override fun hentIdenter(

@@ -67,7 +67,6 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.log.NavHttpHeaders
-import no.nav.familie.restklient.client.RessursException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -81,26 +80,27 @@ import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 import java.time.LocalDate
 
 class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
-    @Autowired
-    @Qualifier("jwtBearer")
-    lateinit var restOperations: RestOperations
-
     lateinit var integrasjonKlient: IntegrasjonKlient
     lateinit var utgåendeJournalføringService: UtgåendeJournalføringService
     private val featureToggleService = mockk<FeatureToggleService>()
+
+    @Autowired
+    @Qualifier("utenAuthRestClient")
+    lateinit var restClient: RestClient
 
     @BeforeEach
     fun setUp() {
         integrasjonKlient =
             IntegrasjonKlient(
                 URI.create(wireMockServer.baseUrl() + "/api"),
-                restOperations,
+                restClient,
                 featureToggleService,
                 1L,
             )
@@ -150,8 +150,8 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
             ),
         )
 
-        val feil = assertThrows<RessursException> { integrasjonKlient.opprettOppgave(lagTestOppgave()) }
-        assertEquals("test", feil.ressurs.melding)
+        val feil = assertThrows<IntegrasjonException> { integrasjonKlient.opprettOppgave(lagTestOppgave()) }
+        assertTrue(feil.message?.contains("test") == true)
     }
 
     @Test
@@ -340,8 +340,8 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
         )
 
         val feil =
-            assertThrows<RessursException> { integrasjonKlient.ferdigstillOppgave(123) }
-        assertEquals("test", feil.ressurs.melding)
+            assertThrows<HttpClientErrorException> { integrasjonKlient.ferdigstillOppgave(123) }
+        assertTrue(feil.responseBodyAsString.contains("test"))
     }
 
     @Test
@@ -585,7 +585,7 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
 
     @Test
     @Tag("integration")
-    fun `skal kaste RessursException ved henting av ModiaContext`() {
+    fun `skal kaste IntegrasjonException ved henting av ModiaContext`() {
         wireMockServer
             .stubFor(
                 get("/api/modia-context-holder")
@@ -596,16 +596,15 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
                     ),
             )
 
-        val exception = assertThrows<RessursException> { integrasjonKlient.hentModiaContext() }
+        val exception = assertThrows<IntegrasjonException> { integrasjonKlient.hentModiaContext() }
 
         assertThat(exception.message).contains("modia-context-holder")
-        assertThat(exception.httpStatus).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-        assertThat(exception.ressurs.melding).isEqualTo("Noe gikk galt")
+        assertThat(exception.message).contains("Noe gikk galt")
     }
 
     @Test
     @Tag("integration")
-    fun `skal kaste RessursException ved oppdatering av ModiaContext`() {
+    fun `skal kaste IntegrasjonException ved oppdatering av ModiaContext`() {
         wireMockServer
             .stubFor(
                 post("/api/modia-context-holder/sett-aktiv-bruker")
@@ -618,13 +617,12 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
             )
 
         val exception =
-            assertThrows<RessursException> {
+            assertThrows<IntegrasjonException> {
                 integrasjonKlient.settNyAktivBrukerIModiaContext(NyAktivBrukerIModiaContextDto(personIdent = "13025514402"))
             }
 
         assertThat(exception.message).contains("modia-context-holder")
-        assertThat(exception.httpStatus).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-        assertThat(exception.ressurs.melding).isEqualTo("Noe gikk galt")
+        assertThat(exception.message).contains("Noe gikk galt")
     }
 
     @Test

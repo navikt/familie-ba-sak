@@ -5,22 +5,23 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhend
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.StartBehandlingDto
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.restklient.client.AbstractRestClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import java.net.URI
 
 @Component
 class InfotrygdFeedKlient(
     @Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") private val klientUri: URI,
-    @Qualifier("jwtBearer") restOperations: RestOperations,
+    @Qualifier("infotrygdFeedRestClient") private val restClient: RestClient,
     @Value("$RETRY_BACKOFF_5000MS") private val retryBackoffDelay: Long,
-) : AbstractRestClient(restOperations, "infotrygd_feed") {
+) {
     fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) =
         try {
             sendFeedTilInfotrygd(
@@ -64,7 +65,13 @@ class InfotrygdFeedKlient(
         endpoint: URI,
         feed: Any,
     ) {
-        postForEntity<Ressurs<String>>(endpoint, feed)
+        restClient
+            .post()
+            .uri(endpoint)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(feed)
+            .retrieve()
+            .body<Ressurs<String>>()!!
     }
 
     companion object {
