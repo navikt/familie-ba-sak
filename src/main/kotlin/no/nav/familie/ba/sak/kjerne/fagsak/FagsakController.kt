@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
@@ -37,6 +39,41 @@ class FagsakController(
     private val tilgangService: TilgangService,
     private val tilbakekrevingService: TilbakekrevingService,
 ) {
+    @GetMapping(path = ["/test/{id}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun test(@PathVariable id: Long): ResponseEntity<Ressurs<*>> {
+        val feilmelding = "Feilmelding"
+
+        val statuses = listOf(
+            HttpStatus.OK,
+            HttpStatus.BAD_REQUEST,
+            HttpStatus.INTERNAL_SERVER_ERROR
+        )
+
+        val status = statuses[((id / 3) % statuses.size).toInt()]
+
+        when ((id % 3).toInt()) {
+            0 -> throw FunksjonellFeil(
+                melding = feilmelding,
+                frontendFeilmelding = feilmelding,
+                httpStatus = status,
+                throwable = null,
+                cause = null,
+                callId = null
+            )
+
+            1 -> throw Feil(
+                message = feilmelding,
+                frontendFeilmelding = null,
+                httpStatus = status,
+                throwable = null,
+                cause = null,
+                callId = null
+            )
+
+            else -> throw IllegalStateException(feilmelding)
+        }
+    }
+
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentEllerOpprettFagsak(
         @RequestBody fagsakRequest: FagsakRequest,
