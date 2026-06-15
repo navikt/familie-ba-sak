@@ -40,6 +40,7 @@ import org.springframework.core.env.Environment
 class FakeConfig {
     @Bean
     @Primary
+    @Profile("integrasjonstest", "postgres")
     fun entraIDClientMock(): EntraIDClient {
         val mock = mockk<EntraIDClient>(relaxed = true)
         every { mock.hentMaskinTilMaskinToken(any()) } returns "mock-m2m-token"
