@@ -37,13 +37,8 @@ class FamilieIntegrasjonerTilgangskontrollKlient(
             restClient
                 .post()
                 .uri(tilgangPersonUri)
-                .headers {
-                    it.addAll(
-                        HttpHeaders().also { headers ->
-                            headers.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BAR)
-                        },
-                    )
-                }.body(personIdenter)
+                .header(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BAR)
+                .body(personIdenter)
                 .retrieve()
                 .body()!!
         }

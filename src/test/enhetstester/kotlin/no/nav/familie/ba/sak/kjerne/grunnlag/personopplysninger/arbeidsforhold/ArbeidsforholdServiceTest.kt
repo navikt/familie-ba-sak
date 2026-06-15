@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.RestClientResponseException
 import java.time.LocalDate
 
 class ArbeidsforholdServiceTest {
@@ -326,7 +327,7 @@ class ArbeidsforholdServiceTest {
         every {
             systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(person.aktør.aktivFødselsnummer(), any(), any())
         } returns listOf(nåværendeArbeidsforhold)
-        every { integrasjonKlient.hentOrganisasjon(nåværendeArbeidsforhold.arbeidsgiver!!.organisasjonsnummer!!) } throws HttpClientErrorException("", HttpStatus.INTERNAL_SERVER_ERROR, "", null, null, null)
+        every { integrasjonKlient.hentOrganisasjon(nåværendeArbeidsforhold.arbeidsgiver!!.organisasjonsnummer!!) } throws RestClientResponseException("", HttpStatus.INTERNAL_SERVER_ERROR, "", null, null, null)
 
         val statsborgerskap =
             listOf(
@@ -340,7 +341,7 @@ class ArbeidsforholdServiceTest {
             )
 
         // Act & Assert
-        assertThrows<HttpClientErrorException> {
+        assertThrows<RestClientResponseException> {
             arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
                 statsborgerskap,
                 person,
