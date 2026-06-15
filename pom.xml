@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.6</version>
+        <version>4.1.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -33,13 +33,13 @@
         <utbetalingsgenerator.version>1.0_20260527092003_ed16208</utbetalingsgenerator.version>
         <cucumber.version>7.34.3</cucumber.version>
         <mockk.version>1.14.11</mockk.version>
-        <token-validation-spring.version>6.0.8</token-validation-spring.version>
+        <token-validation-spring.version>6.0.10</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>3.0.3</springdoc.version>
         <sentry.version>8.43.0</sentry.version>
         <kotlinx.version>1.11.0</kotlinx.version>
         <kotlinx-kover.version>0.9.8</kotlinx-kover.version>
-        <mock-oauth2-server.version>4.0.0</mock-oauth2-server.version>
+        <mock-oauth2-server.version>4.0.1</mock-oauth2-server.version>
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <unleash.version>12.2.2</unleash.version>
@@ -72,7 +72,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>4.0.6</version>
+                <version>4.1.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
