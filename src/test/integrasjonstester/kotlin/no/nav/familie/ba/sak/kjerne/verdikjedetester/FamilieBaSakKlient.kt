@@ -23,18 +23,72 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelserDto
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.restklient.client.AbstractRestClient
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.springframework.http.HttpHeaders
-import org.springframework.web.client.RestOperations
+import org.springframework.http.HttpMethod
+import org.springframework.web.client.RestClient
 import org.springframework.web.util.UriUtils.encodePath
+import tools.jackson.module.kotlin.readValue
 import java.net.URI
 import java.time.LocalDate
 
 class FamilieBaSakKlient(
     private val baSakUrl: String,
-    restOperations: RestOperations,
+    private val restClient: RestClient,
     private val headers: HttpHeaders,
-) : AbstractRestClient(restOperations, "familie-ba-sak") {
+) {
+    private inline fun <reified T> postForEntity(
+        uri: URI,
+        body: Any,
+        headers: HttpHeaders,
+    ): T =
+        restClient
+            .post()
+            .uri(uri)
+            .headers { it.addAll(headers) }
+            .body(body)
+            .retrieve()
+            .body(String::class.java)!!
+            .let { jsonMapper.readValue(it) }
+
+    private inline fun <reified T> getForEntity(
+        uri: URI,
+        headers: HttpHeaders,
+    ): T =
+        restClient
+            .get()
+            .uri(uri)
+            .headers { it.addAll(headers) }
+            .retrieve()
+            .body(String::class.java)!!
+            .let { jsonMapper.readValue(it) }
+
+    private inline fun <reified T> putForEntity(
+        uri: URI,
+        body: Any,
+        headers: HttpHeaders,
+    ): T =
+        restClient
+            .put()
+            .uri(uri)
+            .headers { it.addAll(headers) }
+            .body(body)
+            .retrieve()
+            .body(String::class.java)!!
+            .let { jsonMapper.readValue(it) }
+
+    private inline fun <reified T> deleteForEntity(
+        uri: URI,
+        headers: HttpHeaders,
+    ): T =
+        restClient
+            .method(HttpMethod.DELETE)
+            .uri(uri)
+            .headers { it.addAll(headers) }
+            .retrieve()
+            .body(String::class.java)!!
+            .let { jsonMapper.readValue(it) }
+
     fun opprettFagsak(søkersIdent: String): Ressurs<MinimalFagsakDto> {
         val uri = URI.create("$baSakUrl/api/fagsaker")
 
@@ -195,7 +249,7 @@ class FamilieBaSakKlient(
     ): Ressurs<UtvidetBehandlingDto> {
         val uri = URI.create("$baSakUrl/api/endretutbetalingandel/$behandlingId/$endretUtbetalingAndelId")
 
-        return deleteForEntity(uri, "", headers)
+        return deleteForEntity(uri, headers)
     }
 
     fun iverksettVedtak(

@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.kontrakter.ba.tss.SamhandlerInfo
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.restklient.client.RessursException
 import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.RestClientResponseException
 
 @RestController
 @RequestMapping("/api/samhandler")
@@ -57,7 +57,7 @@ class SamhandlerController(
         }
 
     fun Exception.erNotFound() =
-        (this is RessursException && httpStatus == HttpStatus.NOT_FOUND) ||
+        (this is RestClientResponseException && statusCode == HttpStatus.NOT_FOUND) ||
             (this is HttpClientErrorException && statusCode == HttpStatus.NOT_FOUND)
 
     @PostMapping(path = ["/navn"])

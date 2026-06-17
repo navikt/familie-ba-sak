@@ -13,12 +13,13 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsgi
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
-import no.nav.familie.restklient.client.RessursException
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.RestClientResponseException
 import java.time.LocalDate
 
 class ArbeidsforholdServiceTest {
@@ -291,7 +292,7 @@ class ArbeidsforholdServiceTest {
             systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(person.aktør.aktivFødselsnummer(), any(), any())
         } returns listOf(nåværendeArbeidsforhold, ukjentOrgArbeidsforhold)
         every { integrasjonKlient.hentOrganisasjon(ukjentOrgArbeidsforhold.arbeidsgiver!!.organisasjonsnummer!!) } throws
-            RessursException(ressurs = mockk(relaxed = true), httpStatus = HttpStatus.NOT_FOUND, cause = mockk(relaxed = true))
+            HttpClientErrorException("", HttpStatus.NOT_FOUND, "", null, null, null)
 
         val statsborgerskap =
             listOf(
@@ -326,8 +327,7 @@ class ArbeidsforholdServiceTest {
         every {
             systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(person.aktør.aktivFødselsnummer(), any(), any())
         } returns listOf(nåværendeArbeidsforhold)
-        every { integrasjonKlient.hentOrganisasjon(nåværendeArbeidsforhold.arbeidsgiver!!.organisasjonsnummer!!) } throws
-            RessursException(ressurs = mockk(relaxed = true), httpStatus = HttpStatus.INTERNAL_SERVER_ERROR, cause = mockk(relaxed = true))
+        every { integrasjonKlient.hentOrganisasjon(nåværendeArbeidsforhold.arbeidsgiver!!.organisasjonsnummer!!) } throws RestClientResponseException("", HttpStatus.INTERNAL_SERVER_ERROR, "", null, null, null)
 
         val statsborgerskap =
             listOf(
@@ -341,12 +341,12 @@ class ArbeidsforholdServiceTest {
             )
 
         // Act & Assert
-        assertThatThrownBy {
+        assertThrows<RestClientResponseException> {
             arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
                 statsborgerskap,
                 person,
                 LocalDate.now().minusYears(20),
             )
-        }.isInstanceOf(RessursException::class.java)
+        }
     }
 }

@@ -1,19 +1,18 @@
 package no.nav.familie.ba.sak.mock
 
+import io.mockk.mockk
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollKlient
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 
 @TestConfiguration
 @Primary
 @Profile("dev", "postgres")
-class FakeFamilieIntegrasjonerTilgangskontrollKlient(
-    restOperations: RestOperations,
-) : FamilieIntegrasjonerTilgangskontrollKlient(URI("dummyURI"), restOperations) {
+class FakeFamilieIntegrasjonerTilgangskontrollKlient : FamilieIntegrasjonerTilgangskontrollKlient(URI("dummyURI"), mockk<RestClient>(relaxed = true)) {
     private val personIdentTilTilgang = mutableMapOf<String, Tilgang>()
 
     private val kallMotSjekkTilgangTilPersoner: MutableList<List<String>> = mutableListOf()

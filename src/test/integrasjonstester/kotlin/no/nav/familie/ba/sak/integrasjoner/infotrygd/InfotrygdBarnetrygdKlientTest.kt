@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.env.Environment
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 
 class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
@@ -36,8 +36,8 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
     private val barnasIdenter = listOf(randomBarnFnr(), randomBarnFnr())
 
     @Autowired
-    @Qualifier("jwtBearer")
-    lateinit var restOperations: RestOperations
+    @Qualifier("utenAuthRestClient")
+    lateinit var restClient: RestClient
 
     @Autowired
     lateinit var environment: Environment
@@ -49,7 +49,7 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
         klient =
             InfotrygdBarnetrygdKlient(
                 URI.create(wireMockServer.baseUrl() + "/api"),
-                restOperations,
+                restClient,
                 1L,
             )
     }

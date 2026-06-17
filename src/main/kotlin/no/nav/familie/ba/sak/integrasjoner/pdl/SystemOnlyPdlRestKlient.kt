@@ -17,15 +17,16 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import java.net.URI
 
 @Service
 class SystemOnlyPdlRestKlient(
     @Value("\${PDL_URL}") pdlBaseUrl: URI,
-    @Qualifier("jwtBearerClientCredentials") override val restTemplate: RestOperations,
-    override val personidentService: PersonidentService,
-) : PdlRestKlient(pdlBaseUrl, restTemplate, personidentService) {
+    @Qualifier("pdlRestM2mClient") restClient: RestClient,
+    personidentService: PersonidentService,
+) : PdlRestKlient(pdlBaseUrl, restClient, personidentService) {
     @Cacheable("adressebeskyttelse", cacheManager = "shortCache")
     fun hentAdressebeskyttelse(aktør: Aktør): List<Adressebeskyttelse> {
         val pdlPersonRequest =
@@ -40,7 +41,13 @@ class SystemOnlyPdlRestKlient(
                 uri = pdlUri,
                 formål = "Hent adressebeskyttelse",
             ) {
-                postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+                restClient
+                    .post()
+                    .uri(pdlUri)
+                    .headers { it.addAll(httpHeaders()) }
+                    .body(pdlPersonRequest)
+                    .retrieve()
+                    .body()!!
             }
 
         return feilsjekkOgReturnerData(
@@ -65,7 +72,13 @@ class SystemOnlyPdlRestKlient(
                 uri = pdlUri,
                 formål = "Hent adressebeskyttelse i bolk",
             ) {
-                postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+                restClient
+                    .post()
+                    .uri(pdlUri)
+                    .headers { it.addAll(httpHeaders()) }
+                    .body(pdlPersonRequest)
+                    .retrieve()
+                    .body()!!
             }
 
         return feilsjekkOgReturnerData(
@@ -86,7 +99,13 @@ class SystemOnlyPdlRestKlient(
                 uri = pdlUri,
                 formål = "Hent bostedsadresse og delt bosted for personer",
             ) {
-                postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+                restClient
+                    .post()
+                    .uri(pdlUri)
+                    .headers { it.addAll(httpHeaders()) }
+                    .body(pdlPersonRequest)
+                    .retrieve()
+                    .body()!!
             }
 
         return feilsjekkOgReturnerData(pdlResponse = pdlResponse)
@@ -105,7 +124,13 @@ class SystemOnlyPdlRestKlient(
                 uri = pdlUri,
                 formål = "Hent bostedsadresse, delt bosted og oppholdsadresse for personer",
             ) {
-                postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+                restClient
+                    .post()
+                    .uri(pdlUri)
+                    .headers { it.addAll(httpHeaders()) }
+                    .body(pdlPersonRequest)
+                    .retrieve()
+                    .body()!!
             }
 
         return feilsjekkOgReturnerData(pdlResponse = pdlResponse)

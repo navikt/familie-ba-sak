@@ -1,0 +1,23 @@
+services:
+    texas:
+        image: ghcr.io/nais/texas:latest
+        container_name: familie-ba-sak-texas-1
+        profiles: ["dev"]
+        ports:
+            - "6767:7575"
+        environment:
+            BIND_ADDRESS: "0.0.0.0:7575"
+            AZURE_ENABLED: "true"
+            TEXAS_HTTP_CONNECT_TIMEOUT_MILLIS: "10000"
+            TEXAS_HTTP_READ_TIMEOUT_MILLIS: "10000"
+            TEXAS_HTTP_OVERALL_TIMEOUT_MILLIS: "10000"
+            AZURE_APP_CLIENT_ID: ${AZURE_APP_CLIENT_ID}
+            AZURE_APP_CLIENT_SECRET: ${AZURE_APP_CLIENT_SECRET}
+            AZURE_APP_TENANT_ID: ${AZURE_APP_TENANT_ID}
+            AZURE_APP_JWK: ${AZURE_APP_JWK}
+            AZURE_OPENID_CONFIG_ISSUER: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
+            AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/oauth2/v2.0/token
+            AZURE_OPENID_CONFIG_JWKS_URI: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/discovery/v2.0/keys
+        restart: on-failure
+        labels:
+            - "com.docker.compose.project=familie-ba-sak"

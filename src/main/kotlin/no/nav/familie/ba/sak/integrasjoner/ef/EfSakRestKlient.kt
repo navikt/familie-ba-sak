@@ -5,26 +5,32 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
-import no.nav.familie.restklient.client.AbstractRestClient
-import no.nav.familie.restklient.util.UriUtil
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import java.net.URI
 
 @Component
 class EfSakRestKlient(
-    @Value("\${FAMILIE_EF_SAK_API_URL}") private val efSakBaseUrl: URI,
-    @Qualifier("jwtBearer") restTemplate: RestOperations,
-) : AbstractRestClient(restTemplate, "ef-sak") {
+    @Value("\${FAMILIE_EF_SAK_URL}") private val efSakBaseUrl: URI,
+    @Qualifier("efSakRestClient") private val restClient: RestClient,
+) {
     fun hentPerioderMedFullOvergangsstønad(personIdent: String): EksternePerioderResponse {
-        val uri = UriUtil.uri(efSakBaseUrl, "ekstern/perioder/full-overgangsstonad")
+        val uri = URI.create("$efSakBaseUrl/ekstern/perioder/full-overgangsstonad")
 
         return kallEksternTjeneste<Ressurs<EksternePerioderResponse>>(
             tjeneste = "ef-sak overgangsstønad",
             uri = uri,
             formål = "Hente perioder med full overgangsstønad",
-        ) { postForEntity(uri, PersonIdent(personIdent)) }.getDataOrThrow()
+        ) {
+            restClient
+                .post()
+                .uri(uri)
+                .body(PersonIdent(personIdent))
+                .retrieve()
+                .body()!!
+        }.getDataOrThrow()
     }
 }

@@ -9,12 +9,13 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.RestClient
 
 @SpringBootTest(
     classes = [ApplicationConfig::class],
@@ -31,7 +32,8 @@ import org.springframework.web.client.RestTemplate
 @Tag("integration")
 abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
     @Autowired
-    lateinit var restTemplate: RestTemplate
+    @Qualifier("utenAuthRestClient")
+    lateinit var restClient: RestClient
 
     @LocalServerPort
     private val port = 0
