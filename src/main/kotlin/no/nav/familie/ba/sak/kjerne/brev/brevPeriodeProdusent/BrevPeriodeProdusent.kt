@@ -83,9 +83,9 @@ private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
         begrunnelseGrunnlagPerPerson
             .finnBarnMedUtbetaling()
             .ifEmpty {
-                val erBetaltUtvidetIPeriode = begrunnelseGrunnlagPerPerson.erBetaltUtvidetIPeriode()
+                val erRettPåUtvidetIPeriode = begrunnelseGrunnlagPerPerson.erRettPåUtvidetIPeriode()
                 when {
-                    erBetaltUtvidetIPeriode -> begrunnelseGrunnlagPerPerson.finnBarnMedAlleredeUtbetalt()
+                    erRettPåUtvidetIPeriode -> begrunnelseGrunnlagPerPerson.finnBarnMedAlleredeUtbetaltEllerDeltBostedIngenUtbetaling()
                     else -> emptySet()
                 }
             }
@@ -149,10 +149,10 @@ fun erNullPgaDifferanseberegningEllerDeltBosted(grunnlag: IBegrunnelseGrunnlagFo
                 grunnlag.forrigePeriode?.endretUtbetalingAndel?.årsak != Årsak.DELT_BOSTED
         )
 
-fun Map<Person, IBegrunnelseGrunnlagForPeriode>.erBetaltUtvidetIPeriode(): Boolean =
+fun Map<Person, IBegrunnelseGrunnlagForPeriode>.erRettPåUtvidetIPeriode(): Boolean =
     this.any {
         it.value.dennePerioden.andeler.any { andel ->
-            andel.type == YtelseType.UTVIDET_BARNETRYGD && andel.kalkulertUtbetalingsbeløp > 0
+            andel.type == YtelseType.UTVIDET_BARNETRYGD
         }
     }
 
@@ -170,10 +170,10 @@ fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnUtvidetAndelerIDennePerioden
         }
     }
 
-fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedAlleredeUtbetalt(): Set<Person> =
+fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedAlleredeUtbetaltEllerDeltBostedIngenUtbetaling(): Set<Person> =
     this
         .filterKeys { it.type == PersonType.BARN }
-        .filterValues { it.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.ALLEREDE_UTBETALT }
+        .filterValues { it.dennePerioden.endretUtbetalingAndel?.run { årsak == Årsak.ALLEREDE_UTBETALT || (årsak == Årsak.DELT_BOSTED && prosent == BigDecimal.ZERO) } ?: false }
         .keys
 
 fun Set<Person>.tilBarnasFødselsdatoer(): String {

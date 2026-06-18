@@ -11,9 +11,9 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.integrasjoner.pdl.logger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.erBetaltUtvidetIPeriode
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.erNullPgaDifferanseberegningEllerDeltBosted
-import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.finnBarnMedAlleredeUtbetalt
+import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.erRettPåUtvidetIPeriode
+import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.finnBarnMedAlleredeUtbetaltEllerDeltBostedIngenUtbetaling
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.finnUtvidetAndelerIDennePerioden
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.finnUtvidetAndelerIForrigePeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
@@ -317,9 +317,9 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
         begrunnelsesGrunnlagPerPerson
             .finnBarnMedUtbetaling()
             .ifEmpty {
-                val erBetaltUtvidetIPeriode = begrunnelsesGrunnlagPerPerson.erBetaltUtvidetIPeriode()
+                val erRettPåUtvidetIPeriode = begrunnelsesGrunnlagPerPerson.erRettPåUtvidetIPeriode()
                 when {
-                    erBetaltUtvidetIPeriode -> begrunnelsesGrunnlagPerPerson.finnBarnMedAlleredeUtbetalt()
+                    erRettPåUtvidetIPeriode -> begrunnelsesGrunnlagPerPerson.finnBarnMedAlleredeUtbetaltEllerDeltBostedIngenUtbetaling()
                     else -> emptySet()
                 }
             }
