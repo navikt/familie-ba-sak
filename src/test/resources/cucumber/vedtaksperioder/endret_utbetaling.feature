@@ -236,7 +236,7 @@ Egenskap: Vedtaksperioder med endret utbetaling der endringstidspunkt påvirker 
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.12.2024 til 31.03.2025
       | Begrunnelse                                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
-      | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_KUN_UTVIDET_DEL | STANDARD | Ja            |                      | 0           | november 2024                        |         | 1 258 | 26.03.25         | SØKER_FÅR_UTVIDET       |                             |
+      | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_KUN_UTVIDET_DEL | STANDARD | Ja            | 17.08.07 og 26.07.09 | 2           | november 2024                        |         | 1 258 | 26.03.25         | SØKER_FÅR_UTVIDET       |                             |
       | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING           | STANDARD | Nei           | 17.08.07 og 26.07.09 | 2           | november 2024                        |         | 0     | 26.03.25         | SØKER_FÅR_UTVIDET       | 01.08.23                    |
       | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY         | STANDARD | Nei           | 17.08.07 og 26.07.09 | 2           | november 2024                        |         | 0     | 26.03.25         | SØKER_FÅR_UTVIDET       |                             |
 
