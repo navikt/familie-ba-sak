@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.genererbarnasvilkår
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -36,11 +38,11 @@ class AutomatiskVilkårUtfyllingService(
     @Transactional
     fun utfyllVilkårAutomatiskForNyeBarn(behandlingId: Long) {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId)
 
-        validerAtBarnasVilkårKanAutomatiskUtfylles(behandling)
+        validerAtBarnasVilkårKanAutomatiskUtfylles(behandling, vilkårsvurdering)
 
         val barnVilkårSkalGenereresFor = hentBarnVilkårSkalAutomatiskUtfyllesFor(behandling)
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId)
         val nyeVilkårResultaterTidslinje = genererSøkersVilkårResultatTidslinje(vilkårsvurdering)
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
 
@@ -110,7 +112,17 @@ class AutomatiskVilkårUtfyllingService(
         return barnVilkårSkalGenereresFor
     }
 
-    private fun validerAtBarnasVilkårKanAutomatiskUtfylles(behandling: Behandling) {
+    private fun validerAtBarnasVilkårKanAutomatiskUtfylles(
+        behandling: Behandling,
+        vilkårsvurdering: Vilkårsvurdering,
+    ) {
+        val søkersPersonResultat = vilkårsvurdering.personResultater.firstOrNull { it.erSøkersResultater() }
+        if (søkersPersonResultat == null) {
+            throw Feil("Finner ikke søkers personresultat i vilkårsvurdering for behandling ${vilkårsvurdering.behandling.id}")
+        }
+        if (søkersPersonResultat.vilkårResultater.any { it.resultat == Resultat.IKKE_VURDERT }) {
+            throw FunksjonellFeil("Du må vurdere alle søkers vilkår før de kan kopieres til barna.")
+        }
         if (!featureToggleService.isEnabled(FeatureToggle.KAN_GENERERE_BARNAS_VILKÅR)) {
             throw Feil("Toggle for å generere barnas vilkår er skrudd av")
         }
