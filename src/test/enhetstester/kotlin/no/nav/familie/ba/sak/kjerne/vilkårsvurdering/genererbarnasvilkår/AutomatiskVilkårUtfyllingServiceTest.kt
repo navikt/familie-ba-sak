@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.genererbarnasvilkår
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -656,7 +657,10 @@ class AutomatiskVilkårUtfyllingServiceTest {
                     behandlingType = BehandlingType.REVURDERING,
                     årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
                 )
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+
             every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
+            every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandling.id) } returns vilkårsvurdering
 
             // Act & Assert
             assertThrows<Feil> { automatiskVilkårUtfyllingService.utfyllVilkårAutomatiskForNyeBarn(behandling.id) }
@@ -666,7 +670,10 @@ class AutomatiskVilkårUtfyllingServiceTest {
         fun `kaster Feil når behandlingskategori er NASJONAL`() {
             // Arrange
             val behandling = lagBehandling(behandlingKategori = BehandlingKategori.NASJONAL)
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+
             every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
+            every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandling.id) } returns vilkårsvurdering
 
             // Act & Assert
             assertThrows<Feil> { automatiskVilkårUtfyllingService.utfyllVilkårAutomatiskForNyeBarn(behandling.id) }
@@ -676,12 +683,69 @@ class AutomatiskVilkårUtfyllingServiceTest {
         fun `kaster Feil når det ikke finnes nye barn i behandlingen`() {
             // Arrange
             val behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS)
+            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+
             every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns null
             every { persongrunnlagService.finnNyeBarn(behandling, null) } returns emptyList()
+            every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandling.id) } returns vilkårsvurdering
 
             // Act & Assert
             assertThrows<Feil> { automatiskVilkårUtfyllingService.utfyllVilkårAutomatiskForNyeBarn(behandling.id) }
+        }
+
+        @Test
+        fun `kaster FunksjonellFeil når søkers person resultat inneholder vilkår som er ikke vurdert`() {
+            // Arrange
+            val behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS)
+            val søkerAktør = randomAktør()
+            val barnAktør = randomAktør()
+            val barnFødselsdato = LocalDate.of(2020, 1, 1)
+            val søkerVilkårFom = LocalDate.of(2020, 1, 1)
+            val søkerVilkårTom = LocalDate.of(2025, 12, 31)
+
+            val søker = lagPerson(aktør = søkerAktør, type = PersonType.SØKER)
+            val barn = lagPerson(aktør = barnAktør, type = PersonType.BARN, fødselsdato = barnFødselsdato)
+            val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = behandling,
+                    lagPersonResultater = { vv ->
+                        val søkerPersonResultat =
+                            lagPersonResultat(
+                                vilkårsvurdering = vv,
+                                aktør = søkerAktør,
+                                lagVilkårResultater = { pr ->
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = pr,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                            resultat = Resultat.IKKE_VURDERT,
+                                            periodeFom = søkerVilkårFom,
+                                            periodeTom = søkerVilkårTom,
+                                            behandlingId = behandling.id,
+                                        ),
+                                    )
+                                },
+                                lagAnnenVurderinger = { emptySet() },
+                            )
+                        setOf(søkerPersonResultat)
+                    },
+                )
+
+            every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns null
+            every { persongrunnlagService.finnNyeBarn(behandling, null) } returns listOf(barn)
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+            every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandling.id) } returns vilkårsvurdering
+
+            // Act & assert
+            val exception =
+                assertThrows<FunksjonellFeil> {
+                    automatiskVilkårUtfyllingService.utfyllVilkårAutomatiskForNyeBarn(behandling.id)
+                }
+            assertEquals("Du må vurdere alle søkers vilkår før de kan kopieres til barna.", exception.message)
         }
 
         @Test
