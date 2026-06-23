@@ -168,6 +168,7 @@ data class Behandling(
             skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID && this.resultat == FORTSATT_INNVILGET -> true
             skalBehandlesAutomatisk && erMånedligValutajustering() -> true
             skalBehandlesAutomatisk && erFinnmarksEllerSvalbardtillegg() -> true
+            skalBehandlesAutomatisk && erSatsendringEøs() -> true
             else -> false
         }
 
@@ -236,13 +237,15 @@ data class Behandling(
 
     fun erFinnmarksEllerSvalbardtillegg() = erFinnmarkstillegg() || erSvalbardtillegg()
 
+    fun erSatsendringEøs() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING_EØS
+
     fun erSatsendringEllerMånedligValutajustering() = erSatsendring() || erMånedligValutajustering()
 
-    fun erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() = erFinnmarksEllerSvalbardtillegg() || erSatsendringEllerMånedligValutajustering()
+    fun erSatsEllerTilleggEndring() = erFinnmarksEllerSvalbardtillegg() || erSatsendringEllerMånedligValutajustering() || erSatsendringEøs()
 
     fun erOppdaterUtvidetKlassekode() = this.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE
 
-    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() || erSmåbarnstillegg() || erOmregning()
+    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsEllerTilleggEndring() || erSmåbarnstillegg() || erOmregning()
 
     fun erManuellMigreringForEndreMigreringsdato() =
         erMigrering() &&
@@ -373,6 +376,7 @@ enum class BehandlingÅrsak(
     FINNMARKSTILLEGG("Finnmarkstillegg"),
     SVALBARDTILLEGG("Svalbardtillegg"),
     FALSK_IDENTITET("Falsk identitet"),
+    SATSENDRING_EØS("Satsendring EØS"),
     ;
 
     fun erOmregningsårsak(): Boolean = this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG

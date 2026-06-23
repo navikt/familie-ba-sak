@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FØDSELSH
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.HELMANUELL_MIGRERING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SATSENDRING
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SATSENDRING_EØS
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SVALBARDTILLEGG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SØKNAD
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -77,6 +78,7 @@ class VilkårsvurderingForNyBehandlingService(
             MÅNEDLIG_VALUTAJUSTERING,
             FINNMARKSTILLEGG,
             SVALBARDTILLEGG,
+            SATSENDRING_EØS,
             -> {
                 if (forrigeBehandlingSomErVedtatt == null) {
                     throw Feil("Kan ikke opprette behandling med årsak ${behandling.opprettetÅrsak} hvis det ikke finnes en tidligere behandling")

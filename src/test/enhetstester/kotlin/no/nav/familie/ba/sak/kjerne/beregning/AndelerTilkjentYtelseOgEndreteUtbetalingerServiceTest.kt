@@ -45,8 +45,8 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest {
     @Nested
     inner class FinnEndreteUtbetalingerMedAndelerTilkjentYtelse {
         @ParameterizedTest
-        @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG"])
-        fun `For behandling med årsak satsendring, månedlig valutajustering finnmarkstillegg og svalbardtillegg blir ikke endrete utbetalinger filtrert bort`(
+        @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG", "SATSENDRING_EØS"])
+        fun `For behandling med årsak satsendring, månedlig valutajustering, finnmarkstillegg, svalbardtillegg og satsendring EØS blir ikke endrete utbetalinger filtrert bort`(
             årsak: BehandlingÅrsak,
         ) {
             val behandling =

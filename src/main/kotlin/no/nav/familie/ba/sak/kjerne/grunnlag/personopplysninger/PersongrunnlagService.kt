@@ -251,7 +251,7 @@ class PersongrunnlagService(
     ): PersonopplysningGrunnlag {
         val nyttPersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
         val alleBarna = barnFraInneværendeBehandling.union(barnFraForrigeBehandling).toList()
-        val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering()
+        val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering() || behandling.erSatsendringEøs()
 
         val sisteBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
 

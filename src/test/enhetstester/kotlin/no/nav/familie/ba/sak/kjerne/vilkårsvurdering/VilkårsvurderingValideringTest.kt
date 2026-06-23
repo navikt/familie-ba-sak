@@ -71,7 +71,7 @@ class VilkårsvurderingValideringTest {
         }
 
         @ParameterizedTest(name = "skal ikke kaste feil hvis søker vurderes etter nasjonal og minst ett barn etter EØS om det er av årsak {0}")
-        @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG"])
+        @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG", "SATSENDRING_EØS"])
         fun `skal ikke kaste feil hvis søker vurderes etter nasjonal og minst ett barn etter EØS om årsak er en av typene`(
             behandlingÅrsak: BehandlingÅrsak,
         ) {
@@ -243,7 +243,7 @@ class VilkårsvurderingValideringTest {
         }
 
         @ParameterizedTest
-        @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG"])
+        @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG", "SATSENDRING_EØS"])
         fun `skal ikke kaste feil for gitte behandlingsårsaker selv om barn ikke har 18-års vilkår vurdert fra fødselsdato`(
             årsak: BehandlingÅrsak,
         ) {

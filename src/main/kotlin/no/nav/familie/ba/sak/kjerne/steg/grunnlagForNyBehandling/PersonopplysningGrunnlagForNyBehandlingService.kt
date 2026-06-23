@@ -25,7 +25,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
         søkerIdent: String,
         barnasIdenter: List<String>,
     ) {
-        if (behandling.erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() || behandling.erTekniskEndring() || behandling.erFalskIdentitet()) {
+        if (behandling.erSatsEllerTilleggEndring() || behandling.erTekniskEndring() || behandling.erFalskIdentitet()) {
             if (forrigeBehandlingSomErVedtatt == null) {
                 if (behandling.erTekniskEndring()) {
                     opprettPersonopplysningGrunnlag(behandling, null, søkerIdent, barnasIdenter)

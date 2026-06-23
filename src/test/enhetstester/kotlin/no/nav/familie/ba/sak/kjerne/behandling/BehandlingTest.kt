@@ -237,6 +237,18 @@ class BehandlingTest {
             assertThat(erBehandlingMedVedtaksbrevutsending).isFalse()
         }
 
+        @Test
+        fun `kan sende vedtaksbrev for revurdering med årsak satsendring EØS`() {
+            // Arrange
+            val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.SATSENDRING_EØS)
+
+            // Act
+            val erBehandlingMedVedtaksbrevutsending = behandling.erBehandlingMedVedtaksbrevutsending()
+
+            // Assert
+            assertThat(erBehandlingMedVedtaksbrevutsending).isTrue()
+        }
+
         @ParameterizedTest
         @EnumSource(value = Behandlingsresultat::class, names = ["FORTSATT_INNVILGET", "FORTSATT_OPPHØRT"])
         fun `skal returnere false om behandlingsårsak er svalbardtillegg og behandlingsresultatet er FORTSATT_INNVILGET eller FORTSATT_OPPHØRT`(
@@ -271,8 +283,8 @@ class BehandlingTest {
     @Nested
     inner class SkalRettFraBehandlingsresultatTilIverksetting {
         @ParameterizedTest
-        @EnumSource(value = BehandlingÅrsak::class, names = ["FINNMARKSTILLEGG", "SVALBARDTILLEGG"])
-        fun `skal returnere true om behandlingen skal behandles automatisk og behandlingsårsak er finnmarkstillegg eller svalbardstillegg`(
+        @EnumSource(value = BehandlingÅrsak::class, names = ["FINNMARKSTILLEGG", "SVALBARDTILLEGG", "SATSENDRING_EØS"])
+        fun `skal returnere true om behandlingen skal behandles automatisk og behandlingsårsak er finnmarkstillegg, svalbardtillegg eller satsendring EØS`(
             behandlingÅrsak: BehandlingÅrsak,
         ) {
             // Arrange
@@ -291,7 +303,7 @@ class BehandlingTest {
         @ParameterizedTest
         @EnumSource(
             value = BehandlingÅrsak::class,
-            names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG", "FINNMARKSTILLEGG", "SVALBARDTILLEGG"],
+            names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG", "FINNMARKSTILLEGG", "SVALBARDTILLEGG", "SATSENDRING_EØS"],
             mode = EnumSource.Mode.INCLUDE,
         )
         fun `skal returnere true for gitte behandlingsårsaker`(behandlingÅrsak: BehandlingÅrsak) {
@@ -308,7 +320,7 @@ class BehandlingTest {
         @ParameterizedTest
         @EnumSource(
             value = BehandlingÅrsak::class,
-            names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG", "FINNMARKSTILLEGG", "SVALBARDTILLEGG"],
+            names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG", "FINNMARKSTILLEGG", "SVALBARDTILLEGG", "SATSENDRING_EØS"],
             mode = EnumSource.Mode.EXCLUDE,
         )
         fun `skal returnere false for gitte behandlingsårsaker`(behandlingÅrsak: BehandlingÅrsak) {

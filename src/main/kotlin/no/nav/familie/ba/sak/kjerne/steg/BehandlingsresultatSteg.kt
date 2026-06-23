@@ -35,7 +35,7 @@ class BehandlingsresultatSteg(
         behandling: Behandling,
         stegService: StegService?,
     ) {
-        if (!behandling.erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() && behandling.skalBehandlesAutomatisk) {
+        if (!behandling.erSatsEllerTilleggEndring() && behandling.skalBehandlesAutomatisk) {
             return
         }
 
@@ -61,7 +61,7 @@ class BehandlingsresultatSteg(
             behandlingsresultatstegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse)
         }
 
-        if (!behandling.erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg()) {
+        if (!behandling.erSatsEllerTilleggEndring()) {
             behandlingsresultatstegValideringService.validerEndredeUtbetalingsandeler(tilkjentYtelse)
             behandlingsresultatstegValideringService.validerKompetanse(behandling.id)
             behandlingsresultatstegValideringService.validerSekundærlandKompetanse(behandling.id)
