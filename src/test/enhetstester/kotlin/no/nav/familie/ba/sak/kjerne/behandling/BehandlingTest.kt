@@ -126,7 +126,7 @@ class BehandlingTest {
             val behandling = lagBehandling(årsak = BehandlingÅrsak.FINNMARKSTILLEGG)
 
             // Act
-            val erFinnmarksEllerSvalbardtillegg = behandling.erFinnmarksEllerSvalbardtillegg()
+            val erFinnmarksEllerSvalbardtillegg = behandling.erRegionstillegg()
 
             // Assert
             assertThat(erFinnmarksEllerSvalbardtillegg).isTrue()
@@ -138,7 +138,7 @@ class BehandlingTest {
             val behandling = lagBehandling(årsak = BehandlingÅrsak.SVALBARDTILLEGG)
 
             // Act
-            val erFinnmarksEllerSvalbardtillegg = behandling.erFinnmarksEllerSvalbardtillegg()
+            val erFinnmarksEllerSvalbardtillegg = behandling.erRegionstillegg()
 
             // Assert
             assertThat(erFinnmarksEllerSvalbardtillegg).isTrue()
@@ -150,7 +150,7 @@ class BehandlingTest {
             val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
 
             // Act
-            val erFinnmarksEllerSvalbardtillegg = behandling.erFinnmarksEllerSvalbardtillegg()
+            val erFinnmarksEllerSvalbardtillegg = behandling.erRegionstillegg()
 
             // Assert
             assertThat(erFinnmarksEllerSvalbardtillegg).isFalse()

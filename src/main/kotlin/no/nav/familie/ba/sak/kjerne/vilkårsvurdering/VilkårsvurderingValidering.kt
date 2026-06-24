@@ -81,7 +81,7 @@ fun validerIkkeBlandetRegelverk(
     if (vilkårsvurderingTidslinjer.harBlandetRegelverk()) {
         val feilmelding = "Det er forskjellig regelverk for en eller flere perioder for søker eller barna."
 
-        if (behandling.erSatsEllerTilleggEndring()) {
+        if (behandling.erSatsendringMånedligValutajusteringEllerRegionstillegg()) {
             logger.warn("$feilmelding Gjelder $behandling")
         } else {
             throw FunksjonellFeil(melding = feilmelding)
@@ -97,7 +97,7 @@ fun valider18ÅrsVilkårEksistererFraFødselsdato(
     vilkårsvurdering.personResultater.forEach { personResultat ->
         val person = søkerOgBarn.find { it.aktør == personResultat.aktør }
         if (person?.type == PersonType.BARN && !personResultat.vilkårResultater.finnesUnder18VilkårFraFødselsdato(person.fødselsdato)) {
-            if (behandling.erSatsEllerTilleggEndring() || behandling.opprettetÅrsak.erOmregningsårsak()) {
+            if (behandling.erSatsendringMånedligValutajusteringEllerRegionstillegg() || behandling.opprettetÅrsak.erOmregningsårsak()) {
                 secureLogger.warn(
                     "Fødselsdato ${person.fødselsdato} ulik fom ${
                         personResultat.vilkårResultater.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }

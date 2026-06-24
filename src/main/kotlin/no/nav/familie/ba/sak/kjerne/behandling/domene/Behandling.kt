@@ -118,11 +118,11 @@ data class Behandling(
         when {
             type == BehandlingType.TEKNISK_ENDRING -> false
             opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID -> false
-            erSatsendringEllerMånedligValutajustering() -> false
+            erSatsendringNasjonalEllerMånedligValutajustering() -> false
             erManuellMigrering() -> false
             erMigrering() -> false
             erIverksetteKAVedtak() -> false
-            erFinnmarksEllerSvalbardtillegg() && resultat in setOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT) -> false
+            erRegionstillegg() && resultat in setOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT) -> false
             erFalskIdentitet() -> false
             else -> true
         }
@@ -164,10 +164,10 @@ data class Behandling(
             skalBehandlesAutomatisk && erOmregning() && resultat in listOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT) -> true
             skalBehandlesAutomatisk && erMigrering() && !erManuellMigreringForEndreMigreringsdato() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() -> true
-            skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
+            skalBehandlesAutomatisk && erSatsendringNasjonal() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
             skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID && this.resultat == FORTSATT_INNVILGET -> true
             skalBehandlesAutomatisk && erMånedligValutajustering() -> true
-            skalBehandlesAutomatisk && erFinnmarksEllerSvalbardtillegg() -> true
+            skalBehandlesAutomatisk && erRegionstillegg() -> true
             skalBehandlesAutomatisk && erSatsendringEøs() -> true
             else -> false
         }
@@ -227,7 +227,7 @@ data class Behandling(
 
     fun erMigrering() = type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
 
-    fun erSatsendring() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
+    fun erSatsendringNasjonal() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
 
     fun erMånedligValutajustering() = this.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING
 
@@ -235,17 +235,17 @@ data class Behandling(
 
     fun erSvalbardtillegg() = this.opprettetÅrsak == BehandlingÅrsak.SVALBARDTILLEGG
 
-    fun erFinnmarksEllerSvalbardtillegg() = erFinnmarkstillegg() || erSvalbardtillegg()
+    fun erRegionstillegg() = erFinnmarkstillegg() || erSvalbardtillegg()
 
     fun erSatsendringEøs() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING_EØS
 
-    fun erSatsendringEllerMånedligValutajustering() = erSatsendring() || erMånedligValutajustering()
+    fun erSatsendringNasjonalEllerMånedligValutajustering() = erSatsendringNasjonal() || erMånedligValutajustering()
 
-    fun erSatsEllerTilleggEndring() = erFinnmarksEllerSvalbardtillegg() || erSatsendringEllerMånedligValutajustering() || erSatsendringEøs()
+    fun erSatsendringMånedligValutajusteringEllerRegionstillegg() = erRegionstillegg() || erSatsendringNasjonalEllerMånedligValutajustering() || erSatsendringEøs()
 
     fun erOppdaterUtvidetKlassekode() = this.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE
 
-    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsEllerTilleggEndring() || erSmåbarnstillegg() || erOmregning()
+    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsendringMånedligValutajusteringEllerRegionstillegg() || erSmåbarnstillegg() || erOmregning()
 
     fun erManuellMigreringForEndreMigreringsdato() =
         erMigrering() &&

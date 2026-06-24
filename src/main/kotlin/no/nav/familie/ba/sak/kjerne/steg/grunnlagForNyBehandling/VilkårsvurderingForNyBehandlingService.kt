@@ -165,7 +165,7 @@ class VilkårsvurderingForNyBehandlingService(
                     nyBehandling = inneværendeBehandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                 ).also {
-                    if (inneværendeBehandling.erFinnmarksEllerSvalbardtillegg()) {
+                    if (inneværendeBehandling.erRegionstillegg()) {
                         oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService.oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbard(vilkårsvurdering = it)
                     }
                 }
