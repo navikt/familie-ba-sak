@@ -25,7 +25,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
         søkerIdent: String,
         barnasIdenter: List<String>,
     ) {
-        if (behandling.erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg() || behandling.erTekniskEndring() || behandling.erFalskIdentitet()) {
+        if (behandling.erSatsendringMånedligValutajusteringEllerRegionstillegg() || behandling.erTekniskEndring() || behandling.erFalskIdentitet()) {
             if (forrigeBehandlingSomErVedtatt == null) {
                 if (behandling.erTekniskEndring()) {
                     opprettPersonopplysningGrunnlag(behandling, null, søkerIdent, barnasIdenter)
@@ -37,7 +37,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
                 )
             }
 
-            if (behandling.erFinnmarksEllerSvalbardtillegg()) {
+            if (behandling.erRegionstillegg()) {
                 opprettKopiAvPersonopplysningGrunnlagMedNyAdresse(behandling, forrigeBehandlingSomErVedtatt, søkerIdent)
             } else if (behandling.erFalskIdentitet()) {
                 opprettKopiAvPersonopplysningGrunnlagMedFalskIdentitet(behandling, forrigeBehandlingSomErVedtatt, søkerIdent)

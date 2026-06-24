@@ -26,7 +26,7 @@ class TilkjentYtelseValideringService(
     private val strengtFortroligService: StrengtFortroligService,
 ) {
     fun validerAtIngenUtbetalingerOverstiger100Prosent(behandling: Behandling) {
-        if (behandling.erMigrering() || behandling.erTekniskEndring() || behandling.erSatsendring() || behandling.erMånedligValutajustering()) return
+        if (behandling.erMigrering() || behandling.erTekniskEndring() || behandling.erSatsendringNasjonal() || behandling.erMånedligValutajustering() || behandling.erSatsendringEøs()) return
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
 
         if (totrinnskontroll?.godkjent == true) {

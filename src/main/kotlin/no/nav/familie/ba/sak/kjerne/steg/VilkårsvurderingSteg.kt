@@ -82,7 +82,7 @@ class VilkårsvurderingSteg(
                 vilkårsvurdering = this,
             )
 
-            if (behandling.erFinnmarksEllerSvalbardtillegg()) {
+            if (behandling.erRegionstillegg()) {
                 validerFinnmarkOgSvalbardBehandling(behandling = behandling, vilkårsvurdering = this)
             }
         }
@@ -123,7 +123,7 @@ class VilkårsvurderingSteg(
             utenlandskPeriodebeløpService.oppdaterBulgarskUtenlandskPeriodebeløpVedBehov(BehandlingId(behandling.id))
         }
 
-        if (!behandling.erSatsendring()) {
+        if (!behandling.erSatsendringNasjonal()) {
             tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
         }
 

@@ -34,7 +34,7 @@ class OvergangsstønadService(
         søkerAktør: Aktør,
         behandling: Behandling,
     ) {
-        if (behandling.erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg()) {
+        if (behandling.erSatsendringMånedligValutajusteringEllerRegionstillegg()) {
             kopierPerioderMedOvergangsstønadFraForrigeBehandling(behandling)
         } else {
             hentOgLagrePerioderMedFullOvergangsstønadFraEf(
