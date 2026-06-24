@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -153,7 +154,11 @@ class AutomatiskVilkårUtfyllingServiceTest {
             automatiskVilkårUtfyllingService.utfyllVilkårAutomatiskForNyeBarn(behandling.id)
 
             // Assert
+            val søkerResultat = vilkårsvurdering.personResultater.first { it.erSøkersResultater() }
             val barnResultat = vilkårsvurdering.personResultater.first { it.aktør == barnAktør }
+
+            val søkersBosattIRiketVilkårResultat = søkerResultat.vilkårResultater.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }.map { it.id }
+
             val vilkårSomSkalHaSøkersPeriode = setOf(Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER)
 
             vilkårSomSkalHaSøkersPeriode.forEach { vilkår ->
@@ -162,6 +167,8 @@ class AutomatiskVilkårUtfyllingServiceTest {
                 assertEquals(søkerVilkårFom, vilkårForBarn.single().periodeFom, "Feil fom for $vilkår")
                 assertEquals(søkerVilkårTom, vilkårForBarn.single().periodeTom, "Feil tom for $vilkår")
                 assertEquals(Resultat.OPPFYLT, vilkårForBarn.single().resultat, "Feil resultat for $vilkår")
+                assertThat(søkersBosattIRiketVilkårResultat).hasSize(1)
+                assertThat(søkersBosattIRiketVilkårResultat).contains(vilkårForBarn.single().opprinneligKopiertFraVilkårResultat)
             }
         }
 
