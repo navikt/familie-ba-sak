@@ -103,6 +103,7 @@ class VilkårsvurderingStegTest {
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             registrertSøknadstidspunktService = registrertSøknadstidspunktService,
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
+            satsendringEøsService = mockk(relaxed = true),
         )
 
     val behandling =
@@ -646,6 +647,7 @@ class VilkårsvurderingStegTest {
                     endretUtbetalingAndelService = endretUtbetalingAndelService,
                     registrertSøknadstidspunktService = registrertSøknadstidspunktService,
                     utenlandskPeriodebeløpService = realUtenlandskPeriodebeløpService,
+                    satsendringEøsService = mockk(relaxed = true),
                 )
 
             // Act/Assert

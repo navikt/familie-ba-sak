@@ -4,13 +4,10 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import io.mockk.unmockkObject
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
-import no.nav.familie.ba.sak.kjerne.eøs.sats.EøsSatsService.finnGjeldendeSatsForLand
-import no.nav.familie.ba.sak.kjerne.eøs.sats.EøsSatsService.hentSisteSatsForLand
+import no.nav.familie.ba.sak.kjerne.eøs.sats.EøsSatsService.finnSatsForLandIMåned
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -92,16 +89,16 @@ class EøsSatsServiceTest {
     }
 
     @Nested
-    inner class FinnGjeldendeSatsForLand {
+    inner class FinnSatsForLandIMåned {
         @Test
         fun `Returnerer korrekt sats for måned inni gyldig periode`() {
-            assertThat(finnGjeldendeSatsForLand("PL", YearMonth.of(2024, 6))).isEqualTo(polskSats2024)
+            assertThat(finnSatsForLandIMåned("PL", YearMonth.of(2024, 6))).isEqualTo(polskSats2024)
         }
 
         @Test
         fun `Returnerer løpende sats for måned etter siste fom`() {
             // Act
-            val resultat = finnGjeldendeSatsForLand("PL", YearMonth.of(2025, 6))
+            val resultat = finnSatsForLandIMåned("PL", YearMonth.of(2025, 6))
 
             // Assert
             assertThat(resultat).isEqualTo(polskSats2025)
@@ -110,7 +107,7 @@ class EøsSatsServiceTest {
 
         @Test
         fun `Returnerer null for måned før noen satser`() {
-            assertThat(finnGjeldendeSatsForLand("PL", YearMonth.of(2023, 12))).isNull()
+            assertThat(finnSatsForLandIMåned("PL", YearMonth.of(2023, 12))).isNull()
         }
 
         @Test
@@ -119,43 +116,12 @@ class EøsSatsServiceTest {
             every { EøsSatserPolen.satser } returns emptyList()
 
             // Act & Assert
-            assertThat(finnGjeldendeSatsForLand("PL")).isNull()
+            assertThat(finnSatsForLandIMåned("PL", YearMonth.now())).isNull()
         }
     }
 
     @Nested
-    inner class HentSisteSatsForLand {
-        @Test
-        fun `Returnerer satsen med høyest fom for landet`() {
-            // Act
-            val resultat = hentSisteSatsForLand("PL")
-
-            // Assert
-            assertThat(resultat.beløp).isEqualTo(BigDecimal("900"))
-            assertThat(resultat.fom).isEqualTo(YearMonth.of(2025, 1))
-        }
-
-        @Test
-        fun `Returnerer eneste sats dersom kun én er registrert for landet`() {
-            // Arrange
-            every { EøsSatserPolen.satser } returns listOf(polskSats2024)
-
-            // Act & Assert
-            assertThat(hentSisteSatsForLand("PL")).isEqualTo(polskSats2024)
-        }
-
-        @Test
-        fun `Kaster Feil dersom ingen sats er registrert for landet`() {
-            // Arrange
-            every { EøsSatserPolen.satser } returns emptyList()
-
-            // Act & Assert
-            assertThatThrownBy { hentSisteSatsForLand("PL") }.isInstanceOf(Feil::class.java)
-        }
-    }
-
-    @Nested
-    inner class ProduksjonsSatserErKonsistente {
+    inner class ProduksjonsatserErKonsistente {
         @BeforeEach
         fun setup() {
             unmockkObject(EøsSatsService)

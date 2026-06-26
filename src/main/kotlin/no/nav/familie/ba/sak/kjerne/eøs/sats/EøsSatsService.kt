@@ -23,9 +23,9 @@ object EøsSatsService {
     /**
      * @return gjeldende sats for et land i en gitt måned eller null dersom ingen sats er registrert for landet i den aktuelle måneden.
      */
-    fun finnGjeldendeSatsForLand(
+    fun finnSatsForLandIMåned(
         land: String,
-        måned: YearMonth = YearMonth.now(),
+        måned: YearMonth,
     ): EøsSats? =
         satser
             .find { it.land == land }
@@ -33,10 +33,13 @@ object EøsSatsService {
             ?.find { it.erGyldigForMåned(måned) }
 
     /**
-     * @return den nyeste satsen for et land.
-     * @throws [Feil] dersom ingen sats er registrert for landet.
+     * @return gjeldende sats for et land i en gitt måned
+     * @throws [Feil] hvis ingen sats er registrert for landet i den aktuelle måneden.
      */
-    fun hentSisteSatsForLand(land: String): EøsSats =
-        satser.find { it.land == land }?.satser?.maxByOrNull { it.fom }
-            ?: throw Feil("Ingen EØS-sats registrert for land: $land")
+    fun hentSatsForLandIMåned(
+        land: String,
+        måned: YearMonth,
+    ): EøsSats =
+        finnSatsForLandIMåned(land, måned)
+            ?: throw Feil("Ingen EØS-sats registrert for land $land i måned $måned.")
 }
