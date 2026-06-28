@@ -48,7 +48,6 @@ class DokumentGenereringService(
                 when {
                     sammensattKontrollsak != null -> brevService.hentSammensattKontrollsakBrevdata(vedtak, sammensattKontrollsak)
                     vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER -> brevService.hentDødsfallbrevData(vedtak)
-                    vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV -> brevService.hentKorreksjonbrevData(vedtak)
                     else -> brevService.hentVedtaksbrevData(vedtak)
                 }
             return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)

@@ -38,13 +38,6 @@ internal class BrevmalServiceTest {
     }
 
     @Test
-    fun `hentBrevmal skal returnere VEDTAK_KORREKSJON_VEDTAKSBREV dersom behandlingårsak er KORREKSJON_VEDTAKSBREV`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
-
-        assertThat(brevmalService.hentBrevmal(behandling), Is(Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV))
-    }
-
-    @Test
     fun `hentVedtaksbrevmal skal kaste feil dersom behandling har status IKKE_VURDERT`() {
         val behandling =
             lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV, resultat = Behandlingsresultat.IKKE_VURDERT)

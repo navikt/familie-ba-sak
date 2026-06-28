@@ -44,8 +44,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.FeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForsattInnvilget
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Førstegangsvedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Hjemmeltekst
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.KorreksjonVedtaksbrev
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.KorreksjonVedtaksbrevData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.KorrigertVedtakData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.OpphørMedEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.OpphørMedEndringSammensattKontrollsak
@@ -401,31 +399,6 @@ class BrevService(
                                         opphørsperioder = vedtaksperiodeService.finnVedtaksperioderForBehandling(vedtak).filter { it.type == Vedtaksperiodetype.OPPHØR },
                                         behandlingId = vedtak.behandling.id,
                                     ),
-                            ),
-                    ),
-            )
-        }
-
-    fun hentKorreksjonbrevData(vedtak: Vedtak): Brev =
-        hentGrunnlagOgSignaturData(vedtak.behandling).let { data ->
-            KorreksjonVedtaksbrev(
-                data =
-                    KorreksjonVedtaksbrevData(
-                        delmalData =
-                            KorreksjonVedtaksbrevData.DelmalData(
-                                signaturVedtak =
-                                    SignaturVedtak(
-                                        enhet = data.enhet,
-                                        saksbehandler = data.saksbehandler,
-                                        beslutter = data.beslutter,
-                                    ),
-                            ),
-                        flettefelter =
-                            KorreksjonVedtaksbrevData.Flettefelter(
-                                navn = data.grunnlag.søker.navn,
-                                fodselsnummer =
-                                    data.grunnlag.søker.aktør
-                                        .aktivFødselsnummer(),
                             ),
                     ),
             )

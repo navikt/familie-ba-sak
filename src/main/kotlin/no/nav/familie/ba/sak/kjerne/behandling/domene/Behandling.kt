@@ -263,9 +263,7 @@ data class Behandling(
 
     fun erRevurderingEllerTekniskEndring() = type == BehandlingType.REVURDERING || type == BehandlingType.TEKNISK_ENDRING
 
-    fun erKorrigereVedtak() = opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV
-
-    fun kanLeggeTilOgFjerneUtvidetVilkår() = erManuellMigrering() || erTekniskEndring() || erKorrigereVedtak() || erKlage() || erIverksetteKAVedtak()
+    fun kanLeggeTilOgFjerneUtvidetVilkår() = erManuellMigrering() || erTekniskEndring() || erKlage() || erIverksetteKAVedtak()
 
     fun erOmregning() = this.opprettetÅrsak.erOmregningsårsak()
 
