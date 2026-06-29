@@ -73,6 +73,11 @@ class BehandlingsresultatSteg(
             behandlingsresultatstegValideringService.validerSatsErUendret(tilkjentYtelse)
         }
 
+        if (behandling.erSatsendringEøs()) {
+            behandlingsresultatstegValideringService.validerAtMinstEttUtenlandskPeriodebeløpErEndret(behandling)
+            behandlingsresultatstegValideringService.validerIngenEndringIAndelerFørSatsendringstidspunkt(tilkjentYtelse)
+        }
+
         if (behandling.erEndreMigreringsdato()) {
             behandlingsresultatstegValideringService
                 .validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling)

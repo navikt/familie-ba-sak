@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsKjøringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -37,12 +38,12 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -52,6 +53,8 @@ import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
+import no.nav.familie.tidslinje.verdier
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 
@@ -67,6 +70,7 @@ class BehandlingsresultatStegValideringService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val strengtFortroligService: StrengtFortroligService,
     private val clockProvider: ClockProvider,
+    private val satsendringEøsKjøringService: SatsendringEøsKjøringService,
 ) {
     fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {
         if (behandling.status == BehandlingStatus.AVSLUTTET) return
@@ -247,6 +251,49 @@ class BehandlingsresultatStegValideringService(
             andelerDenneBehandlingen = andelerDenneBehandlingen,
             andelerForrigeBehandling = andelerForrigeBehandling,
         )
+    }
+
+    fun validerAtMinstEttUtenlandskPeriodebeløpErEndret(behandling: Behandling) {
+        val utbetalingsland = satsendringEøsKjøringService.hentSatsendringEøsKjøring(behandling.id).utbetalingsland
+        if (finnEndredeUtenlandskePeriodebeløp(behandling, utbetalingsland).isEmpty()) {
+            throw Feil("Forventet endring i minst ett utenlandsk periodebeløp for satsendring EØS i behandling ${behandling.id} i fagsak ${behandling.fagsak.id}.")
+        }
+    }
+
+    fun validerIngenEndringIAndelerFørSatsendringstidspunkt(tilkjentYtelse: TilkjentYtelse) {
+        val satsTidspunkt = satsendringEøsKjøringService.hentSatsendringEøsKjøring(tilkjentYtelse.behandling.id).satsTidspunkt
+        val andelerForrigeBehandling = beregningService.hentAndelerFraForrigeVedtatteBehandling(tilkjentYtelse.behandling)
+        BehandlingsresultatValideringUtils.validerIngenEndringFørMåned(
+            andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse,
+            andelerForrigeBehandling = andelerForrigeBehandling,
+            grensemåned = satsTidspunkt,
+        )
+    }
+
+    private fun finnEndredeUtenlandskePeriodebeløp(
+        behandling: Behandling,
+        utbetalingsland: String,
+    ): List<UtenlandskPeriodebeløp> {
+        val forrigeBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+                ?: throw Feil("Kan ikke kjøre EØS-satsendring uten en tidligere vedtatt behandling.")
+
+        val upbPerBarnInneværendeBehandling =
+            utenlandskPeriodebeløpRepository
+                .finnFraBehandlingId(behandling.id)
+                .filter { it.utbetalingsland == utbetalingsland }
+                .tilSeparateTidslinjerForBarna()
+
+        val upbPerBarnForrigeBehandling =
+            utenlandskPeriodebeløpRepository
+                .finnFraBehandlingId(forrigeBehandling.id)
+                .filter { it.utbetalingsland == utbetalingsland }
+                .tilSeparateTidslinjerForBarna()
+
+        return upbPerBarnInneværendeBehandling
+            .outerJoin(upbPerBarnForrigeBehandling) { nyUpb, gammelUpb ->
+                nyUpb.takeIf { compareValues(nyUpb?.kalkulertMånedligBeløp, gammelUpb?.kalkulertMånedligBeløp) != 0 }
+            }.flatMap { it.value.tilPerioderIkkeNull().verdier() }
     }
 
     fun validerSekundærlandKompetanse(
