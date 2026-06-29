@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.RessursUtils.frontendFeil
 import no.nav.familie.ba.sak.common.RessursUtils.funksjonellFeil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.rolleTilgangResponse
+import no.nav.familie.ba.sak.common.RessursUtils.unauthorized
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.common.lesRessurs
 import no.nav.familie.ba.sak.common.secureLogger
@@ -100,6 +101,12 @@ class ApiExceptionHandler {
                 ?: "Ikke tilgang"
 
         return forbidden(melding)
+    }
+
+    @ExceptionHandler(HttpClientErrorException.Unauthorized::class)
+    fun handleUnauhtorized(): ResponseEntity<Ressurs<Nothing>> {
+        logger.info("Fikk 401 Unauthorized")
+        return unauthorized("Unauthorized")
     }
 
     @ExceptionHandler(IntegrasjonException::class)
