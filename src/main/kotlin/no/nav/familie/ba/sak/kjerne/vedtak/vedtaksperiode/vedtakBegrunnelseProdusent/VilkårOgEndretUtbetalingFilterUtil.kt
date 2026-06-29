@@ -236,10 +236,10 @@ fun ISanityBegrunnelse.matcherEtterEndretUtbetaling(
     endretUtbetalingForrigePeriode: IEndretUtbetalingAndelForVedtaksperiode?,
 ): Boolean {
     val begrunnelseMatcherEndretUtbetalingIForrigePeriode =
-        this.endringsaarsaker.all { it == endretUtbetalingForrigePeriode?.årsak }
+        this.endringsaarsaker.any { it == endretUtbetalingForrigePeriode?.årsak }
 
     val begrunnelseMatcherEndretUtbetalingIDennePerioden =
-        this.endringsaarsaker.all { it == endretUtbetalingDennePerioden?.årsak }
+        this.endringsaarsaker.any { it == endretUtbetalingDennePerioden?.årsak }
 
     if (!begrunnelseMatcherEndretUtbetalingIForrigePeriode || begrunnelseMatcherEndretUtbetalingIDennePerioden) return false
 
