@@ -12,10 +12,11 @@ import no.nav.familie.ba.sak.common.YearMonthConverter
 import org.hibernate.Hibernate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.util.Objects
 
 @Entity(name = "SatsendringEøsKjøring")
 @Table(name = "satsendring_eos_kjoering")
-data class SatsendringEøsKjøring(
+class SatsendringEøsKjøring(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "satsendring_eos_kjoering_seq_generator")
     @SequenceGenerator(
@@ -23,20 +24,20 @@ data class SatsendringEøsKjøring(
         sequenceName = "satsendring_eos_kjoering_seq",
         allocationSize = 50,
     )
-    val id: Long = 0,
+    var id: Long = 0,
     @Column(name = "fk_fagsak_id", nullable = false, updatable = false)
-    val fagsakId: Long,
+    var fagsakId: Long,
     @Column(name = "fk_behandling_id")
     var behandlingId: Long? = null,
     @Column(name = "utbetalingsland", nullable = false, updatable = false)
-    val utbetalingsland: String,
+    var utbetalingsland: String,
     @Column(name = "sats_tid", nullable = false, updatable = false, columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    val satsTidspunkt: YearMonth,
+    var satsTidspunkt: YearMonth,
     @Column(name = "feiltype")
     var feiltype: String? = null,
     @Column(name = "start_tid", nullable = false, updatable = false)
-    val startTidspunkt: LocalDateTime = LocalDateTime.now(),
+    var startTidspunkt: LocalDateTime = LocalDateTime.now(),
     @Column(name = "ferdig_tid")
     var ferdigTidspunkt: LocalDateTime? = null,
 ) {
@@ -47,7 +48,7 @@ data class SatsendringEøsKjøring(
         return id == other.id
     }
 
-    override fun hashCode(): Int = javaClass.hashCode()
+    override fun hashCode(): Int = Objects.hashCode(id)
 
     override fun toString(): String = this::class.simpleName + "(id = $id , fagsakId = $fagsakId )"
 }
