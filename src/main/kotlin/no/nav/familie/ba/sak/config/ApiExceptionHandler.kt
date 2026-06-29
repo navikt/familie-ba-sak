@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
+import org.springframework.web.servlet.resource.NoResourceFoundException
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.time.format.DateTimeParseException
@@ -38,6 +39,17 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(RolleTilgangskontrollFeil::class)
     fun handleRolleTilgangskontrollFeil(rolleTilgangskontrollFeil: RolleTilgangskontrollFeil): ResponseEntity<Ressurs<Nothing>> = rolleTilgangResponse(rolleTilgangskontrollFeil)
+
+    @ExceptionHandler(NoResourceFoundException::class)
+    fun handleNoResourceFoundException(exception: NoResourceFoundException): ResponseEntity<Ressurs<Nothing>> {
+        logger.info("Fant ikke ressurs for request=${exception.resourcePath}", exception.resourcePath)
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+            Ressurs.failure(
+                frontendFeilmelding = "Fant ikke ressurs for request=${exception.resourcePath}",
+            ),
+        )
+    }
 
     @ExceptionHandler(Exception::class)
     fun handleException(exception: Exception): ResponseEntity<Ressurs<Nothing>> {
