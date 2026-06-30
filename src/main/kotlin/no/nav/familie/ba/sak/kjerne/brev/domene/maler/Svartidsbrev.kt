@@ -37,7 +37,7 @@ data class Svartidsbrev(
                             ),
                         kontonummer = erEøsBehandling,
                         // Settes kun når SED er sendt til andre EØS-land, slik at delmalen utelates ellers.
-                        sedErSendtTil = mottakerlandSed?.let { SedErSendtTilDelmal(it) },
+                        sedErSendtTil = if (erEøsBehandling) mottakerlandSed?.let { SedErSendtTilDelmal(it) } else null,
                     ),
             ),
     )
