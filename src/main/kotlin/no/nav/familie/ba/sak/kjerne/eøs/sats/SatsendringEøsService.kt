@@ -6,11 +6,12 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsKjøringService
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.konverterBeløpTilMånedlig
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
-import no.nav.familie.ba.sak.kjerne.eøs.sats.EøsSatsService.hentSatsForLandIMåned
+import no.nav.familie.ba.sak.kjerne.eøs.sats.EøsSatserRegister.hentSatsForLandIMåned
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtfyltUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.filtrerErUtfylt
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -65,8 +66,14 @@ class SatsendringEøsService(
         forrigeSats: EøsSats,
         nySats: EøsSats,
     ): Boolean {
-        if (!utenlandskPeriodebeløp.overlapper(nySats)) return false
-        if (nySats.beløp.compareTo(utenlandskPeriodebeløp.beløp) == 0) return false
+        if (!utenlandskPeriodebeløp.overlapper(nySats)) {
+            logger.info("UtenlandskPeriodebeløp ${utenlandskPeriodebeløp.id} overlapper ikke ny sats $nySats.")
+            return false
+        }
+        if (nySats.beløp.compareTo(utenlandskPeriodebeløp.beløp) == 0) {
+            logger.info("UtenlandskPeriodebeløp ${utenlandskPeriodebeløp.id} er allerede oppdatert med ny sats $nySats.")
+            return false
+        }
 
         validerAtUtenlandskPeriodebeløpKanOppdateresAutomatisk(utenlandskPeriodebeløp, forrigeSats, nySats)
 
@@ -127,8 +134,12 @@ class SatsendringEøsService(
             )
         }
     }
-}
 
-private fun UtfyltUtenlandskPeriodebeløp.overlapper(eøsSats: EøsSats): Boolean =
-    (this.tom == null || eøsSats.fom <= this.tom) &&
-        (eøsSats.tom == null || this.fom <= eøsSats.tom)
+    private fun UtfyltUtenlandskPeriodebeløp.overlapper(eøsSats: EøsSats): Boolean =
+        (this.tom == null || eøsSats.fom <= this.tom) &&
+            (eøsSats.tom == null || this.fom <= eøsSats.tom)
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(this::class.java)
+    }
+}

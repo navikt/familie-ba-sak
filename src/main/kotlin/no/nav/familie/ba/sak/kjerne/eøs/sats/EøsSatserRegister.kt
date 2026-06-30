@@ -1,24 +1,22 @@
 package no.nav.familie.ba.sak.kjerne.eøs.sats
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.eøs.sats.EøsSatsService.satser
 import java.time.YearMonth
 
 /**
- * Hardkodet register over EØS-satser per land, analogt med [no.nav.familie.ba.sak.kjerne.beregning.SatsService].
+ * Hardkodet register over satser per EØS-land.
  *
- * Nye land legges til i [satser] som egne [EøsSatser]-objekter.
- * Satser innen hvert land vedlikeholdes i den tilhørende filen (f.eks. [EøsSatserPolen]).
+ * Satser for hvert land legges til i [hei](./EøsSatser.kt) vedlikeholdes i den tilhørende filen (f.eks. [EøsSatserPolen]).
+ *
  */
-object EøsSatsService {
+object EøsSatserRegister {
     /**
      * Register over alle land med EØS-satser.
-     * Nye land registreres her når de legges til i systemet.
      */
     internal val satser: List<EøsSatser> =
-        listOf(
-            EøsSatserPolen,
-        )
+        EøsSatser::class
+            .sealedSubclasses
+            .map { it.objectInstance ?: error("${it.simpleName} må være object") }
 
     /**
      * @return gjeldende sats for et land i en gitt måned eller null dersom ingen sats er registrert for landet i den aktuelle måneden.

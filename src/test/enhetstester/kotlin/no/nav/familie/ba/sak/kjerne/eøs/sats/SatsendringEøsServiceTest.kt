@@ -59,13 +59,13 @@ class SatsendringEøsServiceTest {
         mockkObject(EøsSatserPolen)
         every { EøsSatserPolen.satser } returns listOf(forrigeSats, nySats)
 
-        mockkObject(EøsSatsService)
-        every { EøsSatsService.satser } returns listOf(EøsSatserPolen)
+        mockkObject(EøsSatserRegister)
+        every { EøsSatserRegister.satser } returns listOf(EøsSatserPolen)
 
         every { satsendringEøsKjøringService.hentSatsendringEøsKjøring(behandlingId.id) } returns
             SatsendringEøsKjøring(fagsakId = 1L, utbetalingsland = "PL", satsTidspunkt = YearMonth.of(2025, 1))
 
-        every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId) } returns listOf(lagUPB())
+        every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId) } returns listOf(lagUtenlandskPeriodebeløp())
     }
 
     @AfterEach
@@ -76,7 +76,7 @@ class SatsendringEøsServiceTest {
     @Nested
     inner class OppdaterUtenlandskPeriodebeløpMedSisteSats {
         @Test
-        fun `UPB oppdateres til ny sats`() {
+        fun `Utenlandsk periodebeløp oppdateres til ny sats`() {
             // Arrange
             val lagretSkjema = slot<UtenlandskPeriodebeløp>()
             justRun { utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(any(), capture(lagretSkjema)) }
@@ -96,10 +96,10 @@ class SatsendringEøsServiceTest {
         }
 
         @Test
-        fun `sats-fom midt i UPB-periode gir ny fom lik sats-fom`() {
+        fun `sats-fom midt i utenlandsk periodebeløp-periode gir ny fom lik sats-fom`() {
             // Arrange
             every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId) } returns
-                listOf(lagUPB(fom = YearMonth.of(2024, 6)))
+                listOf(lagUtenlandskPeriodebeløp(fom = YearMonth.of(2024, 6)))
 
             val lagretSkjema = slot<UtenlandskPeriodebeløp>()
             justRun { utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(any(), capture(lagretSkjema)) }
@@ -112,10 +112,10 @@ class SatsendringEøsServiceTest {
         }
 
         @Test
-        fun `UPB-fom etter sats-fom gir ny fom lik UPB-fom`() {
+        fun `Utenlandsk periodebeløp-fom etter sats-fom gir ny fom lik utenlandsk periodebeløp-fom`() {
             // Arrange
             every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId) } returns
-                listOf(lagUPB(fom = YearMonth.of(2025, 6)))
+                listOf(lagUtenlandskPeriodebeløp(fom = YearMonth.of(2025, 6)))
 
             val lagretSkjema = slot<UtenlandskPeriodebeløp>()
             justRun { utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(any(), capture(lagretSkjema)) }
@@ -128,13 +128,13 @@ class SatsendringEøsServiceTest {
         }
 
         @Test
-        fun `Kun UPB for gjeldende utbetalingsland oppdateres`() {
+        fun `Kun utenlandsk periodebeløp for gjeldende utbetalingsland oppdateres`() {
             // Arrange
-            val upbForLandUtenSats = lagUPB(utbetalingsland = "DE", barnAktører = setOf(randomAktør()))
-            val upbForLandMedSats = lagUPB()
+            val utenlandskPeriodebeløpForLandUtenSats = lagUtenlandskPeriodebeløp(utbetalingsland = "DE", barnAktører = setOf(randomAktør()))
+            val utenlandskPeriodebeløpForLandMedSats = lagUtenlandskPeriodebeløp()
 
             every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId) } returns
-                listOf(upbForLandUtenSats, upbForLandMedSats)
+                listOf(utenlandskPeriodebeløpForLandUtenSats, utenlandskPeriodebeløpForLandMedSats)
 
             justRun { utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(any(), any()) }
 
@@ -146,10 +146,10 @@ class SatsendringEøsServiceTest {
         }
 
         @Test
-        fun `Flere UPB for samme land oppdateres`() {
+        fun `Flere utenlandsk periodebeløp for samme land oppdateres`() {
             // Arrange
             every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId) } returns
-                listOf(lagUPB(), lagUPB(fom = YearMonth.of(2024, 1), barnAktører = setOf(randomAktør())))
+                listOf(lagUtenlandskPeriodebeløp(), lagUtenlandskPeriodebeløp(fom = YearMonth.of(2024, 1), barnAktører = setOf(randomAktør())))
             justRun { utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(any(), any()) }
 
             // Act
@@ -187,10 +187,10 @@ class SatsendringEøsServiceTest {
         @Nested
         inner class KasterAutovedtakSkalIkkeGjennomføresFeil {
             @Test
-            fun `UPB som ikke er utfylt filtreres bort`() {
+            fun `Utenlandsk periodebeløp som ikke er utfylt filtreres bort`() {
                 // Arrange
                 every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId) } returns
-                    listOf(lagUPB(fom = null, beløp = null, utbetalingsland = null))
+                    listOf(lagUtenlandskPeriodebeløp(fom = null, beløp = null, utbetalingsland = null))
 
                 // Act & Assert
                 assertThatThrownBy { satsendringEøsService.oppdaterUtenlandskPeriodebeløpMedSisteSats(behandlingId) }
@@ -199,10 +199,10 @@ class SatsendringEøsServiceTest {
             }
 
             @Test
-            fun `UPB som allerede har ny sats oppdateres ikke`() {
+            fun `Utenlandsk periodebeløp som allerede har ny sats oppdateres ikke`() {
                 // Arrange
                 every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId) } returns
-                    listOf(lagUPB(fom = YearMonth.of(2025, 1), beløp = nySats.beløp))
+                    listOf(lagUtenlandskPeriodebeløp(fom = YearMonth.of(2025, 1), beløp = nySats.beløp))
 
                 // Act & Assert
                 assertThatThrownBy { satsendringEøsService.oppdaterUtenlandskPeriodebeløpMedSisteSats(behandlingId) }
@@ -213,10 +213,10 @@ class SatsendringEøsServiceTest {
             }
 
             @Test
-            fun `UPB som ikke overlapper sats oppdateres ikke`() {
+            fun `Utenlandsk periodebeløp som ikke overlapper sats oppdateres ikke`() {
                 // Arrange
                 every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId) } returns
-                    listOf(lagUPB(tom = YearMonth.of(2024, 6)))
+                    listOf(lagUtenlandskPeriodebeløp(tom = YearMonth.of(2024, 6)))
 
                 // Act & Assert
                 assertThatThrownBy { satsendringEøsService.oppdaterUtenlandskPeriodebeløpMedSisteSats(behandlingId) }
@@ -225,7 +225,7 @@ class SatsendringEøsServiceTest {
             }
 
             @Test
-            fun `Tom liste med UPB`() {
+            fun `Tom liste med utenlandsk periodebeløp`() {
                 // Arrange
                 every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId) } returns emptyList()
 
@@ -242,7 +242,7 @@ class SatsendringEøsServiceTest {
             fun `Beløp-mismatch mot sats`() {
                 // Arrange
                 every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId) } returns
-                    listOf(lagUPB(beløp = BigDecimal("500")))
+                    listOf(lagUtenlandskPeriodebeløp(beløp = BigDecimal("500")))
 
                 // Act & Assert
                 assertThatThrownBy { satsendringEøsService.oppdaterUtenlandskPeriodebeløpMedSisteSats(behandlingId) }
@@ -254,7 +254,7 @@ class SatsendringEøsServiceTest {
             fun `Valutakode-mismatch mot sats`() {
                 // Arrange
                 every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId) } returns
-                    listOf(lagUPB(valutakode = "EUR"))
+                    listOf(lagUtenlandskPeriodebeløp(valutakode = "EUR"))
 
                 // Act & Assert
                 assertThatThrownBy { satsendringEøsService.oppdaterUtenlandskPeriodebeløpMedSisteSats(behandlingId) }
@@ -266,7 +266,7 @@ class SatsendringEøsServiceTest {
             fun `Intervall-mismatch mot sats`() {
                 // Arrange
                 every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId) } returns
-                    listOf(lagUPB(intervall = Intervall.ÅRLIG))
+                    listOf(lagUtenlandskPeriodebeløp(intervall = Intervall.ÅRLIG))
 
                 // Act & Assert
                 assertThatThrownBy { satsendringEøsService.oppdaterUtenlandskPeriodebeløpMedSisteSats(behandlingId) }
@@ -276,7 +276,7 @@ class SatsendringEøsServiceTest {
         }
     }
 
-    private fun lagUPB(
+    private fun lagUtenlandskPeriodebeløp(
         fom: YearMonth? = YearMonth.of(2023, 1),
         tom: YearMonth? = null,
         beløp: BigDecimal? = forrigeSats.beløp,
