@@ -56,15 +56,20 @@ data class JournalføringDto(
         val avsenderMottakerIdType =
             when {
                 journalpost.kanal == "EESSI" -> journalpost.avsenderMottaker?.type
-                this.avsender.id.length == 9 && this.avsender.id.all { it.isDigit() } -> AvsenderMottakerIdType.ORGNR
+
+                this.avsender.id
+                    .trim()
+                    .length == 9 && this.avsender.id.all { it.isDigit() } -> AvsenderMottakerIdType.ORGNR
+
                 this.avsender.id != "" -> AvsenderMottakerIdType.FNR
+
                 else -> null
             }
 
         return OppdaterJournalpostRequest(
             avsenderMottaker =
                 AvsenderMottaker(
-                    id = this.avsender.id,
+                    id = this.avsender.id.trim(),
                     idType = avsenderMottakerIdType,
                     navn = this.avsender.navn,
                 ),
