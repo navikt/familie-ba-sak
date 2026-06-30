@@ -1,11 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.eøs.sats
 
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import java.math.BigDecimal
 import java.time.YearMonth
 
 /**
- * Representerer en EØS-sats fra et bestemt land i landets valuta og utbetalingsintervall.
+ * Representerer en sats fra et bestemt EØS-land i landets valuta og utbetalingsintervall.
  *
  * Beløpet angir det utenlandske periodebeløpet som utbetales fra [land],
  * i valutaen [valuta] og med hyppigheten [intervall].
@@ -22,4 +23,6 @@ data class EøsSats(
     val intervall: Intervall = Intervall.MÅNEDLIG,
 ) {
     fun erGyldigForMåned(måned: YearMonth): Boolean = måned >= fom && (tom == null || måned <= tom)
+
+    override fun toString() = "${javaClass.simpleName}(land='$land', valuta='$valuta', beløp=$beløp, fom=${fom.tilKortString()}, tom=${tom?.tilKortString()}, intervall=$intervall)"
 }

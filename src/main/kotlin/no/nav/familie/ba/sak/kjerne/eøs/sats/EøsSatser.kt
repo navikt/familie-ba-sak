@@ -1,25 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.eøs.sats
 
 /**
- * Abstrakt klasse som representerer alle registrerte EØS-satser for ett bestemt land.
+ * Sealed klasse som representerer alle registrerte satser for ett bestemt EØS-land.
  *
- * Hvert land som har EØS-satser i systemet oppretter et eget `object` som arver fra denne klassen,
+ * Hvert land som har satser i systemet oppretter et eget `object` som arver fra denne klassen,
  * og legger inn sine satser i [satser]-listen.
  *
- * Eksempel på bruk:
- * ```kotlin
- * object EøsSatserPolen : EøsSatser() {
- *     override val land = "PL"
- *     override val satser = listOf(
- *         EøsSats(land = "PL", valuta = "PLN", intervall = Intervall.MÅNEDLIG,
- *                 beløp = BigDecimal("800"), fom = YearMonth.of(2025, 1)),
- *     )
- * }
- * ```
- *
- * Nye land registreres i [EøsSatsService.satser].
+ * @sample EøsSatserPolen
  */
-abstract class EøsSatser {
+sealed class EøsSatser {
     abstract val land: String
     abstract val satser: List<EøsSats>
 
@@ -29,7 +18,7 @@ abstract class EøsSatser {
 }
 
 /**
- * EØS-satser for Polen (PL) i polske zloty (PLN).
+ * Satser for Polen (PL).
  */
 object EøsSatserPolen : EøsSatser() {
     override val land = "PL"

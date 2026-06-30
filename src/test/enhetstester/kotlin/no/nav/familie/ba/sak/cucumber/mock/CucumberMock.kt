@@ -712,6 +712,7 @@ class CucumberMock(
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             registrertSøknadstidspunktService = mockk(relaxed = true),
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
+            satsendringEøsService = mockk(relaxed = true),
         )
 
     val stegService =

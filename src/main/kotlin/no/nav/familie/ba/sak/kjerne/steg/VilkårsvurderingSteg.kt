@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.sats.SatsendringEøsService
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -49,6 +50,7 @@ class VilkårsvurderingSteg(
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val registrertSøknadstidspunktService: RegistrertSøknadstidspunktPåPersonService,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
+    private val satsendringEøsService: SatsendringEøsService,
 ) : BehandlingSteg<List<String>?> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -133,6 +135,10 @@ class VilkårsvurderingSteg(
 
         if (behandling.erMånedligValutajustering()) {
             månedligValutajusteringService.oppdaterValutakurserFraOgMedInneværendeMåned(BehandlingId(behandling.id))
+        }
+
+        if (behandling.erSatsendringEøs()) {
+            satsendringEøsService.oppdaterUtenlandskPeriodebeløpMedSisteSats(BehandlingId(behandling.id))
         }
 
         automatiskOppdaterValutakursService.oppdaterAndelerMedValutakurser(BehandlingId(behandling.id))
