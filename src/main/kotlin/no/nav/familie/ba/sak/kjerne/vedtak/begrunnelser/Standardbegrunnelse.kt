@@ -53,6 +53,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetFastOmsorgForBarn"
     },
+    INNVILGET_BOR_FAST_MED_BARN_I_NORGE_UTEN_DATO {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetBorFastMedBarnINorgeUtenDato"
+    },
     INNVILGET_NYFØDT_BARN_FØRSTE {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetNyfodtBarnForste"
