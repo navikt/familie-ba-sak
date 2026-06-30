@@ -105,6 +105,7 @@ data class VilkårResultat(
         periodeFom = null
         periodeTom = null
         begrunnelse = ""
+        utdypendeVilkårsvurderinger = emptyList()
         resultat = Resultat.IKKE_VURDERT
     }
 
