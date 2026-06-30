@@ -102,15 +102,18 @@ data class ManueltBrevRequest(
 
     fun enhetNavn(): String = this.enhet?.enhetNavn ?: throw Feil("Finner ikke enhetsnavn på manuell brevrequest")
 
-    fun mottakerlandSED(): List<String> {
+    fun mottakerlandSED(): List<String> =
+        mottakerlandSedEllerNull()
+            ?: throw Feil("Finner ikke noen mottakerland for SED på manuell brevrequest")
+
+    fun mottakerlandSedEllerNull(): List<String>? {
         if (this.mottakerlandSed.contains("NO")) {
             throw FunksjonellFeil(
                 frontendFeilmelding = "Norge kan ikke velges som mottakerland.",
-                melding = "Ugyldig mottakerland for brevtype 'varsel om årlig revurdering EØS'",
+                melding = "Ugyldig mottakerland for SED på manuell brevrequest",
             )
         }
         return this.mottakerlandSed.takeIf { it.isNotEmpty() }
-            ?: throw Feil("Finner ikke noen mottakerland for SED på manuell brevrequest")
     }
 }
 
@@ -415,6 +418,11 @@ fun ManueltBrevRequest.tilBrev(
                 enhet = this.enhetNavn(),
                 mal = Brevmal.SVARTIDSBREV,
                 erEøsBehandling = erEøsBehandling(behandlingKategori),
+                mottakerlandSed =
+                    this
+                        .mottakerlandSedEllerNull()
+                        ?.map { tilLandNavn(hentLandkoder(), it) }
+                        ?.slåSammen(),
                 saksbehandlerNavn = saksbehandlerNavn,
             )
         }

@@ -13,6 +13,7 @@ data class Svartidsbrev(
         enhet: String,
         mal: Brevmal,
         erEøsBehandling: Boolean,
+        mottakerlandSed: String? = null,
         organisasjonsnummer: String? = null,
         gjelder: String? = null,
         saksbehandlerNavn: String,
@@ -35,6 +36,8 @@ data class Svartidsbrev(
                                 saksbehandlerNavn = saksbehandlerNavn,
                             ),
                         kontonummer = erEøsBehandling,
+                        // Settes kun når SED er sendt til andre EØS-land, slik at delmalen utelates ellers.
+                        sedErSendtTil = if (erEøsBehandling) mottakerlandSed?.let { SedErSendtTilDelmal(it) } else null,
                     ),
             ),
     )
@@ -67,5 +70,14 @@ data class SvartidsbrevData(
     data class DelmalData(
         val signatur: SignaturDelmal,
         val kontonummer: Boolean,
+        val sedErSendtTil: SedErSendtTilDelmal? = null,
+    )
+}
+
+data class SedErSendtTilDelmal(
+    val mottakerlandSed: Flettefelt,
+) {
+    constructor(mottakerlandSed: String) : this(
+        mottakerlandSed = flettefelt(mottakerlandSed),
     )
 }
