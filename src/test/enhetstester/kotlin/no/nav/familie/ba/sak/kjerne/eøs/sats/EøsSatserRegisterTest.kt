@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.eøs.sats
 
 import io.mockk.every
 import io.mockk.mockkObject
-import io.mockk.unmockkAll
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
@@ -38,16 +37,13 @@ class EøsSatserRegisterTest {
 
     @BeforeEach
     fun setup() {
-        mockkObject(EøsSatserPolen)
-        every { EøsSatserPolen.satser } returns listOf(forrigeSats, nySats)
-
         mockkObject(EøsSatserRegister)
-        every { EøsSatserRegister.satser } returns listOf(EøsSatserPolen)
+        every { EøsSatserRegister.satser } returns listOf(forrigeSats, nySats)
     }
 
     @AfterEach
     fun teardown() {
-        unmockkAll()
+        unmockkObject(EøsSatserRegister)
     }
 
     @Nested
@@ -97,12 +93,7 @@ class EøsSatserRegisterTest {
 
         @Test
         fun `Returnerer løpende sats for måned etter siste fom`() {
-            // Act
-            val resultat = finnSatsForLandIMåned("PL", YearMonth.of(2025, 6))
-
-            // Assert
-            assertThat(resultat).isEqualTo(nySats)
-            assertThat(resultat?.tom).isNull()
+            assertThat(finnSatsForLandIMåned("PL", YearMonth.of(2025, 6))).isEqualTo(nySats)
         }
 
         @Test
@@ -113,7 +104,7 @@ class EøsSatserRegisterTest {
         @Test
         fun `Returnerer null når registeret er tomt`() {
             // Arrange
-            every { EøsSatserPolen.satser } returns emptyList()
+            every { EøsSatserRegister.satser } returns emptyList()
 
             // Act & Assert
             assertThat(finnSatsForLandIMåned("PL", YearMonth.now())).isNull()
@@ -125,12 +116,11 @@ class EøsSatserRegisterTest {
         @BeforeEach
         fun setup() {
             unmockkObject(EøsSatserRegister)
-            unmockkObject(EøsSatserPolen)
         }
 
         @Test
         fun `Ingen land har overlappende gyldighetsperioder`() {
-            EøsSatserRegister.satser.forEach { (land, satser) ->
+            EøsSatserRegister.satser.groupBy { it.land }.forEach { (land, satser) ->
                 satser.sortedBy { it.fom }.zipWithNext { nåværende, neste ->
                     assertThat(nåværende.tom != null && nåværende.tom < neste.fom)
                         .withFailMessage(
@@ -143,29 +133,25 @@ class EøsSatserRegisterTest {
 
         @Test
         fun `Alle satser har positivt beløp`() {
-            EøsSatserRegister.satser.forEach { (land, satser) ->
-                satser.forEach { sats ->
-                    assertThat(sats.beløp)
-                        .withFailMessage("Sats for $land har ikke-positivt beløp: ${sats.beløp}")
-                        .isGreaterThan(BigDecimal.ZERO)
-                }
+            EøsSatserRegister.satser.forEach { sats ->
+                assertThat(sats.beløp)
+                    .withFailMessage("Sats for ${sats.land} har ikke-positivt beløp: ${sats.beløp}")
+                    .isGreaterThan(BigDecimal.ZERO)
             }
         }
 
         @Test
         fun `Alle satser har tom etter eller lik fom`() {
-            EøsSatserRegister.satser.forEach { (land, satser) ->
-                satser.forEach { sats ->
-                    assertThat(sats.tom == null || sats.tom >= sats.fom)
-                        .withFailMessage("Sats for $land har tom ${sats.tom?.tilKortString()} før fom ${sats.fom.tilKortString()}")
-                        .isTrue()
-                }
+            EøsSatserRegister.satser.forEach { sats ->
+                assertThat(sats.tom == null || sats.tom >= sats.fom)
+                    .withFailMessage("Sats for ${sats.land} har tom ${sats.tom?.tilKortString()} før fom ${sats.fom.tilKortString()}")
+                    .isTrue()
             }
         }
 
         @Test
         fun `EøsSats-land matcher land-objektets land-felt`() {
-            EøsSatserRegister.satser.forEach { (land, satser) ->
+            EøsSatserRegister.satser.groupBy { it.land }.forEach { (land, satser) ->
                 satser.forEach { sats ->
                     assertThat(sats.land)
                         .withFailMessage("Sats med land '${sats.land}' ligger i listen med satser for '$land'")

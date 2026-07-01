@@ -56,11 +56,8 @@ class SatsendringEøsServiceTest {
 
     @BeforeEach
     fun setup() {
-        mockkObject(EøsSatserPolen)
-        every { EøsSatserPolen.satser } returns listOf(forrigeSats, nySats)
-
         mockkObject(EøsSatserRegister)
-        every { EøsSatserRegister.satser } returns listOf(EøsSatserPolen)
+        every { EøsSatserRegister.satser } returns listOf(forrigeSats, nySats)
 
         every { satsendringEøsKjøringService.hentSatsendringEøsKjøring(behandlingId.id) } returns
             SatsendringEøsKjøring(fagsakId = 1L, utbetalingsland = "PL", satsTidspunkt = YearMonth.of(2025, 1))
@@ -164,7 +161,7 @@ class SatsendringEøsServiceTest {
             @Test
             fun `Ingen sats registrert for landet`() {
                 // Arrange
-                every { EøsSatserPolen.satser } returns emptyList()
+                every { EøsSatserRegister.satser } returns emptyList()
 
                 // Act & Assert
                 assertThatThrownBy { satsendringEøsService.oppdaterUtenlandskPeriodebeløpMedSisteSats(behandlingId) }
@@ -175,7 +172,7 @@ class SatsendringEøsServiceTest {
             @Test
             fun `Ingen forrige sats registrert for landet`() {
                 // Arrange
-                every { EøsSatserPolen.satser } returns listOf(nySats)
+                every { EøsSatserRegister.satser } returns listOf(nySats)
 
                 // Act & Assert
                 assertThatThrownBy { satsendringEøsService.oppdaterUtenlandskPeriodebeløpMedSisteSats(behandlingId) }
