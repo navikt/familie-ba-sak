@@ -194,4 +194,17 @@ internal class BrevmalServiceTest {
 
         assertThat(brevmalService.hentVedtaksbrevmal(behandling), Is(Brevmal.AUTOVEDTAK_ENDRING))
     }
+
+    @Test
+    fun `hentVedtaksbrevmal skal returnere AUTOVEDTAK_SATSENDRING_EØS for automatisk behandling med årsak SATSENDRING_EØS`() {
+        val behandling =
+            lagBehandling(
+                årsak = BehandlingÅrsak.SATSENDRING_EØS,
+                skalBehandlesAutomatisk = true,
+                behandlingType = BehandlingType.REVURDERING,
+                resultat = Behandlingsresultat.ENDRET_UTBETALING,
+            )
+
+        assertThat(brevmalService.hentVedtaksbrevmal(behandling), Is(Brevmal.AUTOVEDTAK_SATSENDRING_EØS))
+    }
 }
