@@ -2,6 +2,9 @@ package no.nav.familie.ba.sak.kjerne.eøs.sats
 
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtfyltUtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.filtrerErUtfylt
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -26,3 +29,13 @@ data class EøsSats(
 
     override fun toString() = "${javaClass.simpleName}(land='$land', valuta='$valuta', beløp=$beløp, fom=${fom.tilKortString()}, tom=${tom?.tilKortString()}, intervall=$intervall)"
 }
+
+fun UtfyltUtenlandskPeriodebeløp.overlapper(eøsSats: EøsSats): Boolean =
+    (this.tom == null || eøsSats.fom <= this.tom) &&
+        (eøsSats.tom == null || this.fom <= eøsSats.tom)
+
+/**
+ * Filtrerer ut [UtenlandskPeriodebeløp] som er relevante for [eøsSats] — dvs. er utfylt,
+ * gjelder samme utbetalingsland som [eøsSats], og overlapper perioden [eøsSats] gjelder for.
+ */
+fun Collection<UtenlandskPeriodebeløp>.filtrerErRelevantForSats(eøsSats: EøsSats): List<UtfyltUtenlandskPeriodebeløp> = this.filtrerErUtfylt().filter { it.utbetalingsland == eøsSats.land && it.overlapper(eøsSats) }
