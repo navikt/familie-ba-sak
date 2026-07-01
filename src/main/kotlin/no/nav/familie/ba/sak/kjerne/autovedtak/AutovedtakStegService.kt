@@ -4,11 +4,13 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødselshendelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.AutovedtakSatsendringEøsService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -29,6 +31,7 @@ import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 interface AutovedtakBehandlingService<Behandlingsdata : AutomatiskBehandlingData> {
@@ -45,6 +48,7 @@ enum class Autovedtaktype(
     OMREGNING_BREV("Omregning"),
     FINNMARKSTILLEGG("Finnmarkstillegg"),
     SVALBARDTILLEGG("Svalbardtillegg"),
+    SATSENDRING_EØS("Satsendring EØS"),
 }
 
 sealed interface AutomatiskBehandlingData {
@@ -84,6 +88,14 @@ data class SvalbardtilleggData(
     override val type = Autovedtaktype.SVALBARDTILLEGG
 }
 
+data class SatsendringEøsData(
+    val fagsakId: Long,
+    val utbetalingsland: String,
+    val satsTidspunkt: YearMonth,
+) : AutomatiskBehandlingData {
+    override val type = Autovedtaktype.SATSENDRING_EØS
+}
+
 @Service
 class AutovedtakStegService(
     private val fagsakService: FagsakService,
@@ -94,6 +106,7 @@ class AutovedtakStegService(
     private val autovedtakSmåbarnstilleggService: AutovedtakSmåbarnstilleggService,
     private val autovedtakFinnmarkstilleggService: AutovedtakFinnmarkstilleggService,
     private val autovedtakSvalbardtilleggService: AutovedtakSvalbardtilleggService,
+    private val autovedtakSatsendringEøsService: AutovedtakSatsendringEøsService,
     private val snikeIKøenService: SnikeIKøenService,
     private val featureToggleService: FeatureToggleService,
 ) {
@@ -164,6 +177,24 @@ class AutovedtakStegService(
             førstegangKjørt = førstegangKjørt,
         )
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun kjørBehandlingSatsendringEøs(
+        mottakersAktør: Aktør,
+        fagsakId: Long,
+        utbetalingsland: String,
+        satsTidspunkt: YearMonth,
+        førstegangKjørt: LocalDateTime = LocalDateTime.now(),
+    ): String {
+        if (!featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_SATSENDRING_EØS)) {
+            throw Feil("Toggle KAN_KJØRE_SATSENDRING_EØS er skrudd av")
+        }
+        return kjørBehandling(
+            mottakersAktør = mottakersAktør,
+            automatiskBehandlingData = SatsendringEøsData(fagsakId, utbetalingsland, satsTidspunkt),
+            førstegangKjørt = førstegangKjørt,
+        )
+    }
+
     private fun kjørBehandling(
         automatiskBehandlingData: AutomatiskBehandlingData,
         mottakersAktør: Aktør,
@@ -179,6 +210,7 @@ class AutovedtakStegService(
                 is SmåbarnstilleggData -> autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(automatiskBehandlingData)
                 is FinnmarkstilleggData -> autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(automatiskBehandlingData)
                 is SvalbardtilleggData -> autovedtakSvalbardtilleggService.skalAutovedtakBehandles(automatiskBehandlingData)
+                is SatsendringEøsData -> autovedtakSatsendringEøsService.skalAutovedtakBehandles(automatiskBehandlingData)
             }
 
         if (!skalAutovedtakBehandles) {
@@ -212,6 +244,7 @@ class AutovedtakStegService(
                 is SmåbarnstilleggData -> autovedtakSmåbarnstilleggService.kjørBehandling(automatiskBehandlingData)
                 is FinnmarkstilleggData -> autovedtakFinnmarkstilleggService.kjørBehandling(automatiskBehandlingData)
                 is SvalbardtilleggData -> autovedtakSvalbardtilleggService.kjørBehandling(automatiskBehandlingData)
+                is SatsendringEøsData -> autovedtakSatsendringEøsService.kjørBehandling(automatiskBehandlingData)
             }
 
         secureLoggAutovedtakBehandling(
@@ -232,6 +265,8 @@ class AutovedtakStegService(
             is FinnmarkstilleggData -> behandlingsdata.fagsakId
 
             is SvalbardtilleggData -> behandlingsdata.fagsakId
+
+            is SatsendringEøsData -> behandlingsdata.fagsakId
 
             is FødselshendelseData,
             is SmåbarnstilleggData,
@@ -266,7 +301,7 @@ class AutovedtakStegService(
                         årsak = autovedtaktype.tilMaskinellVentÅrsak(),
                     )
                     return false
-                } else if (autovedtaktype == Autovedtaktype.FINNMARKSTILLEGG) {
+                } else if (skalRekjøresSenere(autovedtaktype)) {
                     throw RekjørSenereException(
                         årsak = "Åpen behandling med status ${åpenBehandling.status} ble endret for under fire timer siden. Prøver igjen klokken 06.00 neste virkedag",
                         triggerTid = nesteVirkedag(LocalDate.now()).atTime(6, 0),
@@ -306,6 +341,14 @@ class AutovedtakStegService(
         return true
     }
 
+    private fun skalRekjøresSenere(autovedtakType: Autovedtaktype): Boolean =
+        autovedtakType in
+            setOf(
+                Autovedtaktype.FINNMARKSTILLEGG,
+                Autovedtaktype.SVALBARDTILLEGG,
+                Autovedtaktype.SATSENDRING_EØS,
+            )
+
     private fun begrunnelseForÅpenBehandling(automatiskBehandlingData: AutomatiskBehandlingData) =
         when {
             automatiskBehandlingData is OmregningBrevData &&
@@ -335,4 +378,5 @@ private fun Autovedtaktype.tilMaskinellVentÅrsak() =
         Autovedtaktype.SMÅBARNSTILLEGG -> SettPåMaskinellVentÅrsak.SMÅBARNSTILLEGG
         Autovedtaktype.FINNMARKSTILLEGG -> SettPåMaskinellVentÅrsak.FINNMARKSTILLEGG
         Autovedtaktype.SVALBARDTILLEGG -> SettPåMaskinellVentÅrsak.SVALBARDTILLEGG
+        Autovedtaktype.SATSENDRING_EØS -> SettPåMaskinellVentÅrsak.SATSENDRING_EØS
     }

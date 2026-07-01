@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsKj
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.konverterBeløpTilMånedlig
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.sats.EøsSatserRegister.hentSatsForLandIMåned
+import no.nav.familie.ba.sak.kjerne.eøs.sats.SatsendringEøsValidering.validerAtUtenlandskPeriodebeløpKanOppdateresAutomatisk
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtfyltUtenlandskPeriodebeløp
@@ -86,47 +87,6 @@ class SatsendringEøsService(
         utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(BehandlingId(utenlandskPeriodebeløp.behandlingId), nyttUtenlandskPeriodebeløp)
 
         return true
-    }
-
-    /**
-     * Validerer at [utenlandskPeriodebeløp] kan oppdateres automatisk til [nySats].
-     *
-     * @throws [AutovedtakMåBehandlesManueltFeil] hvis ett av følgende krav ikke er oppfylt:
-     * - Beløp i [utenlandskPeriodebeløp] er lik beløp i [forrigeSats] (uendret siden forrige satsendring)
-     * - Valuta i [utenlandskPeriodebeløp] er lik valuta i [nySats]
-     * - Intervall i [utenlandskPeriodebeløp] er lik intervall i [nySats]
-     */
-    private fun validerAtUtenlandskPeriodebeløpKanOppdateresAutomatisk(
-        utenlandskPeriodebeløp: UtfyltUtenlandskPeriodebeløp,
-        forrigeSats: EøsSats,
-        nySats: EøsSats,
-    ) {
-        val behandlingId = utenlandskPeriodebeløp.behandlingId
-        val utbetalingsland = utenlandskPeriodebeløp.utbetalingsland
-        val valutakode = utenlandskPeriodebeløp.valutakode
-        val beløp = utenlandskPeriodebeløp.beløp
-        val intervall = utenlandskPeriodebeløp.intervall
-
-        if (forrigeSats.beløp.compareTo(beløp) != 0) {
-            throw AutovedtakMåBehandlesManueltFeil(
-                "UtenlandskPeriodebeløp for behandling $behandlingId og land $utbetalingsland " +
-                    "har beløp $beløp $valutakode, mens forrige EØS-sats har beløp ${forrigeSats.beløp} ${forrigeSats.valuta}.",
-            )
-        }
-
-        if (nySats.valuta != valutakode) {
-            throw AutovedtakMåBehandlesManueltFeil(
-                "UtenlandskPeriodebeløp for behandling $behandlingId og land $utbetalingsland " +
-                    "har valuta $valutakode, mens ny EØS-sats har valuta ${nySats.valuta}.",
-            )
-        }
-
-        if (nySats.intervall != intervall) {
-            throw AutovedtakMåBehandlesManueltFeil(
-                "UtenlandskPeriodebeløp for behandling $behandlingId og land $utbetalingsland " +
-                    "har intervall $intervall, mens ny EØS-sats har intervall ${nySats.intervall}.",
-            )
-        }
     }
 
     companion object {

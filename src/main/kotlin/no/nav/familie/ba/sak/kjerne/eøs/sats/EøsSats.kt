@@ -38,4 +38,4 @@ fun UtfyltUtenlandskPeriodebeløp.overlapper(eøsSats: EøsSats): Boolean =
  * Filtrerer ut [UtenlandskPeriodebeløp] som er relevante for [eøsSats] — dvs. er utfylt,
  * gjelder samme utbetalingsland som [eøsSats], og overlapper perioden [eøsSats] gjelder for.
  */
-fun Collection<UtenlandskPeriodebeløp>.filtrerErRelevantForSats(eøsSats: EøsSats): List<UtfyltUtenlandskPeriodebeløp> = this.filtrerErUtfylt().filter { it.utbetalingsland == eøsSats.land && it.overlapper(eøsSats) }
+fun Collection<UtenlandskPeriodebeløp>.filtrerErRelevantForSats(eøsSats: EøsSats) = filtrerErUtfylt().filter { it.utbetalingsland == eøsSats.land && it.overlapper(eøsSats) }
