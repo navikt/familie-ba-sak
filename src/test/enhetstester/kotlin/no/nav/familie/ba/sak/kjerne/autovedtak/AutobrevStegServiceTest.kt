@@ -43,6 +43,7 @@ class AutobrevStegServiceTest {
             snikeIKøenService = snikeIKøenService,
             autovedtakFinnmarkstilleggService = autovedtakFinnmarkstilleggService,
             autovedtakSvalbardtilleggService = autovedtakSvalbardtilleggService,
+            autovedtakSatsendringEøsService = mockk(),
             featureToggleService = mockk(),
         )
 
