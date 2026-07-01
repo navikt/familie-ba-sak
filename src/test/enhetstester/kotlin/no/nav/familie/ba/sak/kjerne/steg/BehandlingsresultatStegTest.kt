@@ -112,6 +112,7 @@ class BehandlingsresultatStegTest {
             justRun { behandlingsresultatstegValideringService.validerSatsErUendret(any()) }
             justRun { behandlingsresultatstegValideringService.validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(any()) }
             justRun { behandlingsresultatstegValideringService.validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(any()) }
+            justRun { behandlingsresultatstegValideringService.validerAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed(any()) }
         }
 
         @ParameterizedTest
@@ -141,6 +142,20 @@ class BehandlingsresultatStegTest {
             // Assert
             verify(exactly = 1) {
                 behandlingsresultatstegValideringService.validerAtUtenlandskPeriodebeløpOgValutakursErUtfylt(behandling)
+            }
+        }
+
+        @Test
+        fun `skal validere at alle barn med andeler fra forrige iverksatte behandling er med`() {
+            // Arrange
+            val behandling = lagBehandling()
+
+            // Act
+            behandlingsresultatSteg.preValiderSteg(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatstegValideringService.validerAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed(behandling)
             }
         }
 
