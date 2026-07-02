@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.config
 
+import io.micrometer.core.instrument.Metrics
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.Feil
@@ -30,13 +32,40 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.servlet.resource.NoResourceFoundException
+import java.io.EOFException
+import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.net.SocketException
+import java.nio.channels.ClosedChannelException
 import java.time.format.DateTimeParseException
 
 @ControllerAdvice
 class ApiExceptionHandler {
     private val logger = LoggerFactory.getLogger(ApiExceptionHandler::class.java)
+
+    private val nettverksfeilTeller =
+        NettverksfeilType.entries.associateWith {
+            Metrics.counter("nettverksfeil.klientavbrudd", "type", it.metrikknavn)
+        }
+
+    @ExceptionHandler(IOException::class, ClosedChannelException::class, EOFException::class)
+    fun handleNettverksfeil(
+        e: Exception,
+        request: HttpServletRequest,
+    ): ResponseEntity<Ressurs<Nothing>> {
+        val cause = NestedExceptionUtils.getMostSpecificCause(e)
+        val type = NettverksfeilType.fraException(cause)
+
+        nettverksfeilTeller[type]?.increment()
+        logger.info(
+            "Nettverksfeil av type=${type.metrikknavn} url=${request.method} ${request.requestURI} melding=${cause.message}",
+        )
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(
+            Ressurs.failure(frontendFeilmelding = "Tilkoblingen ble brutt"),
+        )
+    }
 
     @ExceptionHandler(RolleTilgangskontrollFeil::class)
     fun handleRolleTilgangskontrollFeil(rolleTilgangskontrollFeil: RolleTilgangskontrollFeil): ResponseEntity<Ressurs<Nothing>> = rolleTilgangResponse(rolleTilgangskontrollFeil)
@@ -185,4 +214,26 @@ class ApiExceptionHandler {
                         .joinToString(" ,"),
                 ),
             )
+}
+
+enum class NettverksfeilType(
+    val metrikknavn: String,
+) {
+    BROKEN_PIPE("broken_pipe"),
+    CLOSED_CHANNEL("closed_channel"),
+    CONNECTION_RESET("connection_reset"),
+    EOF("eof"),
+    UKJENT("ukjent"),
+    ;
+
+    companion object {
+        fun fraException(e: Throwable): NettverksfeilType =
+            when {
+                e is ClosedChannelException -> CLOSED_CHANNEL
+                e is EOFException -> EOF
+                e is IOException && e.message?.lowercase()?.contains("broken pipe") == true -> BROKEN_PIPE
+                e is SocketException && e.message?.lowercase()?.contains("connection reset") == true -> CONNECTION_RESET
+                else -> UKJENT
+            }
+    }
 }
