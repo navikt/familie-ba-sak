@@ -91,7 +91,7 @@ class AutovedtakSatsendringEøsService(
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.SATSENDRING_EØS,
                 fagsakId = fagsakId,
-                førVilkårsvurdering = { behandling ->
+                kjørFørVilkårsvurdering = { behandling ->
                     satsendringEøsKjøringService.settBehandlingId(fagsakId, utbetalingsland, satsTidspunkt, behandling.id)
                 },
             )

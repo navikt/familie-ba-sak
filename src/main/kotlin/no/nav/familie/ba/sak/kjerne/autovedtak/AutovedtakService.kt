@@ -29,7 +29,7 @@ class AutovedtakService(
     /**
      * Oppretter en ny, automatisk behandling med gitt type og årsak, og kjører den til behandlingsresultat.
      *
-     * [førVilkårsvurdering] kalles med den nyopprettede behandlingen etter at den har fått en id,
+     * [kjørFørVilkårsvurdering] kalles med den nyopprettede behandlingen etter at den har fått en id,
      * men før vilkårsvurderingssteget kjøres. Nyttig for kallere som trenger å koble noe til
      * `behandlingId` før vilkårsvurderingssteget og behandlingsresultatsteget kjører.
      */
@@ -37,7 +37,7 @@ class AutovedtakService(
         behandlingType: BehandlingType,
         behandlingÅrsak: BehandlingÅrsak,
         fagsakId: Long,
-        førVilkårsvurdering: (Behandling) -> Unit = {},
+        kjørFørVilkårsvurdering: (Behandling) -> Unit = {},
     ): Behandling {
         val nyBehandling =
             stegService.håndterNyBehandling(
@@ -49,7 +49,7 @@ class AutovedtakService(
                 ),
             )
 
-        førVilkårsvurdering(nyBehandling)
+        kjørFørVilkårsvurdering(nyBehandling)
 
         val behandlingEtterBehandlingsresultat = stegService.håndterVilkårsvurdering(nyBehandling)
         return behandlingEtterBehandlingsresultat

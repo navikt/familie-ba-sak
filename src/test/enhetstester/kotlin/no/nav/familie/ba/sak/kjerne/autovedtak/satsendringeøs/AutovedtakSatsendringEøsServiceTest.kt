@@ -210,7 +210,7 @@ class AutovedtakSatsendringEøsServiceTest {
                     behandlingType = any(),
                     behandlingÅrsak = any(),
                     fagsakId = any(),
-                    førVilkårsvurdering = capture(førVilkårsvurderingSlot),
+                    kjørFørVilkårsvurdering = capture(førVilkårsvurderingSlot),
                 )
             } answers {
                 førVilkårsvurderingSlot.captured.invoke(behandlingEtterResultat)
