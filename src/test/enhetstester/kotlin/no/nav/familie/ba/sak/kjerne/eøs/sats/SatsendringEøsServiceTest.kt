@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.AutovedtakSkalIkkeGjennomføresFeil
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsKjøringService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsSvar
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.domene.SatsendringEøsKjøring
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -56,11 +57,8 @@ class SatsendringEøsServiceTest {
 
     @BeforeEach
     fun setup() {
-        mockkObject(EøsSatserPolen)
-        every { EøsSatserPolen.satser } returns listOf(forrigeSats, nySats)
-
         mockkObject(EøsSatserRegister)
-        every { EøsSatserRegister.satser } returns listOf(EøsSatserPolen)
+        every { EøsSatserRegister.satser } returns listOf(forrigeSats, nySats)
 
         every { satsendringEøsKjøringService.hentSatsendringEøsKjøring(behandlingId.id) } returns
             SatsendringEøsKjøring(fagsakId = 1L, utbetalingsland = "PL", satsTidspunkt = YearMonth.of(2025, 1))
@@ -164,7 +162,7 @@ class SatsendringEøsServiceTest {
             @Test
             fun `Ingen sats registrert for landet`() {
                 // Arrange
-                every { EøsSatserPolen.satser } returns emptyList()
+                every { EøsSatserRegister.satser } returns emptyList()
 
                 // Act & Assert
                 assertThatThrownBy { satsendringEøsService.oppdaterUtenlandskPeriodebeløpMedSisteSats(behandlingId) }
@@ -175,7 +173,7 @@ class SatsendringEøsServiceTest {
             @Test
             fun `Ingen forrige sats registrert for landet`() {
                 // Arrange
-                every { EøsSatserPolen.satser } returns listOf(nySats)
+                every { EøsSatserRegister.satser } returns listOf(nySats)
 
                 // Act & Assert
                 assertThatThrownBy { satsendringEøsService.oppdaterUtenlandskPeriodebeløpMedSisteSats(behandlingId) }
@@ -247,7 +245,7 @@ class SatsendringEøsServiceTest {
                 // Act & Assert
                 assertThatThrownBy { satsendringEøsService.oppdaterUtenlandskPeriodebeløpMedSisteSats(behandlingId) }
                     .isInstanceOf(AutovedtakMåBehandlesManueltFeil::class.java)
-                    .hasMessageContaining("UtenlandskPeriodebeløp for behandling ${behandlingId.id} og land PL har beløp 500 PLN")
+                    .hasMessage(SatsendringEøsSvar.SATSENDRING_EØS_MÅ_BEHANDLES_MANUELT.melding)
             }
 
             @Test
@@ -259,7 +257,7 @@ class SatsendringEøsServiceTest {
                 // Act & Assert
                 assertThatThrownBy { satsendringEøsService.oppdaterUtenlandskPeriodebeløpMedSisteSats(behandlingId) }
                     .isInstanceOf(AutovedtakMåBehandlesManueltFeil::class.java)
-                    .hasMessageContaining("UtenlandskPeriodebeløp for behandling ${behandlingId.id} og land PL har valuta EUR")
+                    .hasMessage(SatsendringEøsSvar.SATSENDRING_EØS_MÅ_BEHANDLES_MANUELT.melding)
             }
 
             @Test
@@ -271,7 +269,7 @@ class SatsendringEøsServiceTest {
                 // Act & Assert
                 assertThatThrownBy { satsendringEøsService.oppdaterUtenlandskPeriodebeløpMedSisteSats(behandlingId) }
                     .isInstanceOf(AutovedtakMåBehandlesManueltFeil::class.java)
-                    .hasMessageContaining("UtenlandskPeriodebeløp for behandling ${behandlingId.id} og land PL har intervall ÅRLIG")
+                    .hasMessage(SatsendringEøsSvar.SATSENDRING_EØS_MÅ_BEHANDLES_MANUELT.melding)
             }
         }
     }

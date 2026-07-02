@@ -694,6 +694,7 @@ class CucumberMock(
             taskRepository = taskRepository,
             satskjøringRepository = mockk(),
             envService = mockk(),
+            satsendringEøsKjøringRepository = mockk(),
         )
 
     val vilkårsvurderingSteg =
