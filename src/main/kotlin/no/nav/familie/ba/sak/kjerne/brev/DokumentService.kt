@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
@@ -36,9 +37,15 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.leggTilBlankAnnenVurdering
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.JournalførManueltBrevTask
+import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
+import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
+import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -46,6 +53,7 @@ import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import no.nav.familie.kontrakter.felles.journalpost.Bruker as JournalpostBruker
 
 @Service
 class DokumentService(
@@ -77,20 +85,70 @@ class DokumentService(
                 BehandlerRolle.SAKSBEHANDLER,
                 BehandlerRolle.BESLUTTER,
             )
-        if (høyesteRolletilgangForInnloggetBruker in funksjonelleRoller && vedtak.stønadBrevPdF == null) {
+        val skalHenteVedtaksbrevFraJoark =
+            featureToggleService.isEnabled(FeatureToggle.HENT_VEDTAKSBREV_FRA_JOARK) &&
+                vedtak.behandling.status == BehandlingStatus.AVSLUTTET &&
+                vedtak.behandling.erBehandlingMedVedtaksbrevutsending()
+
+        if (skalHenteVedtaksbrevFraJoark) {
+            val pdf =
+                hentVedtaksbrevFraJoark(vedtak)
+                    ?: throw FunksjonellFeil(
+                        melding = "Fant ikke vedtaksbrev for behandling med id ${vedtak.behandling.id} i Joark.",
+                        frontendFeilmelding = "Fant ikke vedtaksbrevet i arkivet. Du kan finne brevet i dokumentoversikten.",
+                    )
+            return Ressurs.success(pdf)
+        }
+
+        val pdf = vedtak.stønadBrevPdF
+
+        if (høyesteRolletilgangForInnloggetBruker in funksjonelleRoller && pdf == null) {
             throw FunksjonellFeil(
                 melding =
                     "Klarte ikke finne vedtaksbrev for vedtak med id ${vedtak.id}. Innlogget bruker har rolle: $høyesteRolletilgangForInnloggetBruker",
                 frontendFeilmelding = "Det finnes ikke noe vedtaksbrev.",
             )
         } else {
-            val pdf =
-                vedtak.stønadBrevPdF ?: throw Feil(
+            return Ressurs.success(
+                pdf ?: throw Feil(
                     "Klarte ikke finne vedtaksbrev for vedtak med id ${vedtak.id}. " +
                         "Innlogget bruker har rolle: $høyesteRolletilgangForInnloggetBruker",
-                )
-            return Ressurs.success(pdf)
+                ),
+            )
         }
+    }
+
+    private fun hentVedtaksbrevFraJoark(vedtak: Vedtak): ByteArray? {
+        val behandling = vedtak.behandling
+        // Må matche formatet i genererEksternReferanseIdForJournalpost
+        val eksternReferanseIdPrefiks = "${behandling.fagsak.id}_${behandling.id}_"
+
+        val journalposterForVedtaksbrev =
+            integrasjonKlient
+                .hentJournalposterForBruker(
+                    JournalposterForBrukerRequest(
+                        brukerId =
+                            JournalpostBruker(
+                                id = behandling.fagsak.aktør.aktivFødselsnummer(),
+                                type = BrukerIdType.FNR,
+                            ),
+                        antall = 1000,
+                        tema = listOf(Tema.BAR),
+                        journalposttype = listOf(Journalposttype.U),
+                    ),
+                ).filter { it.eksternReferanseId?.startsWith(eksternReferanseIdPrefiks) == true }
+                .filter { it.journalstatus == Journalstatus.FERDIGSTILT || it.journalstatus == Journalstatus.EKSPEDERT }
+                .filter { it.hoveddokumentErVedtaksbrev() }
+
+        val journalpost = journalposterForVedtaksbrev.firstOrNull() ?: return null
+        val dokumentInfoId = journalpost.dokumenter?.firstOrNull()?.dokumentInfoId ?: return null
+
+        return integrasjonKlient.hentDokument(dokumentInfoId = dokumentInfoId, journalpostId = journalpost.journalpostId)
+    }
+
+    private fun Journalpost.hoveddokumentErVedtaksbrev(): Boolean {
+        val tittel = dokumenter?.firstOrNull()?.tittel?.lowercase() ?: return false
+        return tittel.contains("vedtak")
     }
 
     @Transactional
