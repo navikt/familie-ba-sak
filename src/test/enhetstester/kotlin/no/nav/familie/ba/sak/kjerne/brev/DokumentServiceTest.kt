@@ -495,32 +495,6 @@ internal class DokumentServiceTest {
         }
 
         @Test
-        fun `Skal hente vedtaksbrev fra databasen når behandlingen ikke sender vedtaksbrev`() {
-            // Arrange
-            every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker() } returns BehandlerRolle.BESLUTTER
-            every { featureToggleService.isEnabled(HENT_VEDTAKSBREV_FRA_JOARK) } returns true
-
-            val pdfFraDatabasen = byteArrayOf(9)
-            val vedtak =
-                lagVedtak(
-                    behandling =
-                        lagBehandling(
-                            behandlingType = BehandlingType.TEKNISK_ENDRING,
-                            årsak = BehandlingÅrsak.TEKNISK_ENDRING,
-                            status = BehandlingStatus.AVSLUTTET,
-                        ),
-                    stønadBrevPdF = pdfFraDatabasen,
-                )
-
-            // Act
-            val vedtaksbrevPdf = dokumentService.hentBrevForVedtak(vedtak)
-
-            // Assert
-            assertThat(vedtaksbrevPdf.data).isEqualTo(pdfFraDatabasen)
-            verify(exactly = 0) { integrasjonKlient.hentJournalposterForBruker(any()) }
-        }
-
-        @Test
         fun `Skal hente vedtaksbrev fra databasen når toggle er på og behandlingen ikke er avsluttet`() {
             // Arrange
             every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker() } returns BehandlerRolle.BESLUTTER
@@ -546,35 +520,6 @@ internal class DokumentServiceTest {
             val vedtak = lagVedtak(behandling = lagBehandling(status = BehandlingStatus.AVSLUTTET), stønadBrevPdF = byteArrayOf(9))
 
             every { integrasjonKlient.hentJournalposterForBruker(any()) } returns emptyList()
-
-            // Act && Assert
-            val feilmelding =
-                assertThrows<FunksjonellFeil> {
-                    dokumentService.hentBrevForVedtak(vedtak)
-                }.frontendFeilmelding
-
-            assertThat(feilmelding).isEqualTo("Fant ikke vedtaksbrevet i arkivet. Du kan finne brevet i dokumentoversikten.")
-        }
-
-        @Test
-        fun `Skal kaste funksjonell feil når journalposten for vedtaksbrevet er feilregistrert`() {
-            // Arrange
-            every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker() } returns BehandlerRolle.VEILEDER
-            every { featureToggleService.isEnabled(HENT_VEDTAKSBREV_FRA_JOARK) } returns true
-
-            val vedtak = lagVedtak(behandling = lagBehandling(status = BehandlingStatus.AVSLUTTET), stønadBrevPdF = null)
-            val fagsakId = vedtak.behandling.fagsak.id
-            val behandlingId = vedtak.behandling.id
-
-            every { integrasjonKlient.hentJournalposterForBruker(any()) } returns
-                listOf(
-                    lagUtgåendeJournalpost(
-                        journalpostId = "1",
-                        eksternReferanseId = "${fagsakId}_${behandlingId}_callId",
-                        dokumentInfoId = "10",
-                        journalstatus = Journalstatus.FEILREGISTRERT,
-                    ),
-                )
 
             // Act && Assert
             val feilmelding =

@@ -90,17 +90,16 @@ class DokumentService(
                 vedtak.behandling.status == BehandlingStatus.AVSLUTTET &&
                 vedtak.behandling.erBehandlingMedVedtaksbrevutsending()
 
-        if (skalHenteVedtaksbrevFraJoark) {
-            val pdf =
+        val pdf =
+            if (skalHenteVedtaksbrevFraJoark) {
                 hentVedtaksbrevFraJoark(vedtak)
                     ?: throw FunksjonellFeil(
                         melding = "Fant ikke vedtaksbrev for behandling med id ${vedtak.behandling.id} i Joark.",
                         frontendFeilmelding = "Fant ikke vedtaksbrevet i arkivet. Du kan finne brevet i dokumentoversikten.",
                     )
-            return Ressurs.success(pdf)
-        }
-
-        val pdf = vedtak.stønadBrevPdF
+            } else {
+                vedtak.stønadBrevPdF
+            }
 
         if (høyesteRolletilgangForInnloggetBruker in funksjonelleRoller && pdf == null) {
             throw FunksjonellFeil(
@@ -120,7 +119,6 @@ class DokumentService(
 
     private fun hentVedtaksbrevFraJoark(vedtak: Vedtak): ByteArray? {
         val behandling = vedtak.behandling
-        // Må matche formatet i genererEksternReferanseIdForJournalpost
         val eksternReferanseIdPrefiks = "${behandling.fagsak.id}_${behandling.id}_"
 
         val journalposterForVedtaksbrev =
