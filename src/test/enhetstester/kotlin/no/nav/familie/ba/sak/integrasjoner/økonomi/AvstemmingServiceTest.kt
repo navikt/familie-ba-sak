@@ -114,6 +114,10 @@ class AvstemmingServiceTest {
                 mapOf(
                     1L to tssIdentPerson1,
                 )
+
+            every { behandlingHentOgPersisterService.hentMottakerForskjermetBarnSaker(behandlingIder = relevanteBehandlinger) } returns
+                emptyMap()
+
             // Act
             val perioderTilAvstemming =
                 avstemmingService.hentDataForKonsistensavstemmingVedHjelpAvUtbetalingstidslinjer(
@@ -317,6 +321,10 @@ class AvstemmingServiceTest {
                     1L to tssIdentPerson1,
                     2L to tssIdentPerson2,
                 )
+
+            every { behandlingHentOgPersisterService.hentMottakerForskjermetBarnSaker(behandlingIder = relevanteBehandlinger) } returns
+                emptyMap()
+
             // Act & Assert
             assertThrows<Feil> {
                 avstemmingService.hentDataForKonsistensavstemmingVedHjelpAvUtbetalingstidslinjer(
