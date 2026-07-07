@@ -142,6 +142,109 @@ class AvstemmingServiceTest {
         }
 
         @Test
+        fun `skal sette utbetales til skjermetBarnSøker dersom fagsak er skjermet barn`() {
+            // Arrange
+            val avstemmingstidspunkt = LocalDateTime.of(2025, 2, 15, 0, 0, 0)
+            val relevanteBehandlinger = listOf<Long>(1, 2)
+
+            val person1 = lagPerson()
+            val person2 = lagPerson()
+
+            val skjermetBarnSøker = lagPerson()
+
+            val utbetalingsperioder =
+                listOf(
+                    Periode(
+                        verdi =
+                            Utbetalingsperiode(
+                                erEndringPåEksisterendePeriode = false,
+                                opphør = null,
+                                periodeId = 1,
+                                forrigePeriodeId = 0,
+                                datoForVedtak = LocalDate.now(),
+                                klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                                vedtakdatoFom = LocalDate.of(2024, 2, 1),
+                                vedtakdatoTom = LocalDate.of(2026, 10, 31),
+                                sats = BigDecimal.valueOf(800),
+                                satsType = Utbetalingsperiode.SatsType.MND,
+                                utbetalesTil = person1.aktør.aktivFødselsnummer(),
+                                behandlingId = 1,
+                                utbetalingsgrad = null,
+                            ),
+                        fom = avstemmingstidspunkt.toLocalDate().førsteDagIInneværendeMåned(),
+                        tom = LocalDate.of(2026, 10, 31),
+                    ),
+                    Periode(
+                        verdi =
+                            Utbetalingsperiode(
+                                erEndringPåEksisterendePeriode = false,
+                                opphør = null,
+                                periodeId = 2,
+                                forrigePeriodeId = null,
+                                datoForVedtak = LocalDate.now(),
+                                klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                                vedtakdatoFom = LocalDate.of(2024, 2, 1),
+                                vedtakdatoTom = LocalDate.of(2026, 10, 31),
+                                sats = BigDecimal.valueOf(800),
+                                satsType = Utbetalingsperiode.SatsType.MND,
+                                utbetalesTil = person2.aktør.aktivFødselsnummer(),
+                                behandlingId = 2,
+                                utbetalingsgrad = null,
+                            ),
+                        fom = avstemmingstidspunkt.toLocalDate().førsteDagIInneværendeMåned(),
+                        tom = LocalDate.of(2026, 10, 31),
+                    ),
+                )
+
+            every {
+                utbetalingsTidslinjeService.genererUtbetalingsperioderForBehandlingerEtterDato(
+                    behandlinger = relevanteBehandlinger,
+                    dato = avstemmingstidspunkt.toLocalDate(),
+                )
+            } returns utbetalingsperioder
+
+            every { behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(behandlingIder = relevanteBehandlinger) } returns
+                mapOf(
+                    1L to person1.aktør.aktivFødselsnummer(),
+                    2L to person2.aktør.aktivFødselsnummer(),
+                )
+
+            every { behandlingHentOgPersisterService.hentTssEksternIdForBehandlinger(behandlingIder = relevanteBehandlinger) } returns
+                emptyMap()
+
+            every { behandlingHentOgPersisterService.hentMottakerForskjermetBarnSaker(behandlingIder = relevanteBehandlinger) } returns
+                mapOf(
+                    1L to skjermetBarnSøker.aktør.aktivFødselsnummer(),
+                )
+
+            // Act
+            val perioderTilAvstemming =
+                avstemmingService.hentDataForKonsistensavstemmingVedHjelpAvUtbetalingstidslinjer(
+                    avstemmingstidspunkt = avstemmingstidspunkt,
+                    relevanteBehandlinger = relevanteBehandlinger,
+                )
+
+            val forventedePerioderForBehandling1 =
+                PerioderForBehandling(
+                    behandlingId = "1",
+                    perioder = setOf(1),
+                    aktivFødselsnummer = person1.aktør.aktivFødselsnummer(),
+                    utebetalesTil = skjermetBarnSøker.aktør.aktivFødselsnummer(),
+                )
+
+            val forventedePerioderForBehandling2 =
+                PerioderForBehandling(
+                    behandlingId = "2",
+                    perioder = setOf(2),
+                    aktivFødselsnummer = person2.aktør.aktivFødselsnummer(),
+                )
+
+            // Assert
+            assertThat(perioderTilAvstemming).hasSize(2)
+            assertThat(perioderTilAvstemming).containsExactlyInAnyOrder(forventedePerioderForBehandling1, forventedePerioderForBehandling2)
+        }
+
+        @Test
         fun `skal kaste feil dersom vi ikke finner et aktivt fødselsnummer knyttet til behandling`() {
             // Arrange
             val avstemmingstidspunkt = LocalDateTime.of(2025, 2, 15, 0, 0, 0)

@@ -172,15 +172,14 @@ class AvstemmingService(
             .map { chunk ->
                 val relevantePerioder = utbetalingsTidslinjeService.genererUtbetalingsperioderForBehandlingerEtterDato(chunk, avstemmingstidspunkt.toLocalDate())
 
+                val relevanteBehandlingIder = relevantePerioder.map { it.verdi.behandlingId }
                 val aktiveFødselsnummere =
-                    behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(
-                        relevantePerioder.map { it.verdi.behandlingId },
-                    )
+                    behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(relevanteBehandlingIder)
 
                 val tssEksternIdForBehandlinger =
-                    behandlingHentOgPersisterService.hentTssEksternIdForBehandlinger(
-                        relevantePerioder.map { it.verdi.behandlingId },
-                    )
+                    behandlingHentOgPersisterService.hentTssEksternIdForBehandlinger(relevanteBehandlingIder)
+
+                val skjermetBarnMottakere = behandlingHentOgPersisterService.hentMottakerForskjermetBarnSaker(relevanteBehandlingIder)
 
                 relevantePerioder
                     .groupBy { it.verdi.behandlingId }
@@ -195,7 +194,7 @@ class AvstemmingService(
                                     .map {
                                         it.verdi.periodeId
                                     }.toSet(),
-                            utebetalesTil = tssEksternIdForBehandlinger[behandlingId],
+                            utebetalesTil = tssEksternIdForBehandlinger[behandlingId] ?: skjermetBarnMottakere[behandlingId],
                         )
                     }
             }.flatten()
