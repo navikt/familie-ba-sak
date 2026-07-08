@@ -614,6 +614,7 @@ fun ManueltBrevRequest.tilBrev(
         Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
         Brevmal.AUTOVEDTAK_FINNMARKSTILLEGG,
         Brevmal.AUTOVEDTAK_SVALBARDTILLEGG,
+        Brevmal.AUTOVEDTAK_SATSENDRING_EØS,
         Brevmal.TILBAKEKREVINGSVEDTAK_MOTREGNING,
         -> {
             throw Feil("Kan ikke mappe fra manuel brevrequest til ${this.brevmal}.")

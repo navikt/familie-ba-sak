@@ -75,6 +75,10 @@ fun hentAutomatiskVedtaksbrevtype(
             Brevmal.AUTOVEDTAK_ENDRING
         }
 
+        BehandlingÅrsak.SATSENDRING_EØS -> {
+            Brevmal.AUTOVEDTAK_SATSENDRING_EØS
+        }
+
         else -> {
             throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
         }

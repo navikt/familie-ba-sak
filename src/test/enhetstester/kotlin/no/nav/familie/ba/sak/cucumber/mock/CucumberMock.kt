@@ -444,6 +444,7 @@ class CucumberMock(
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             strengtFortroligService = mockk(relaxed = true),
             persongrunnlagService = persongrunnlagService,
+            satsendringEøsKjøringService = mockk(relaxed = true),
         )
 
     val behandlingsresultatSteg =
@@ -694,6 +695,7 @@ class CucumberMock(
             taskRepository = taskRepository,
             satskjøringRepository = mockk(),
             envService = mockk(),
+            satsendringEøsKjøringRepository = mockk(),
         )
 
     val vilkårsvurderingSteg =

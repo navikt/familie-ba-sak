@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakFinnmarkstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtFørsteBarn
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakSatsendringEøs
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakSvalbardtillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Avslag
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
@@ -282,6 +283,12 @@ class BrevService(
 
             Brevmal.AUTOVEDTAK_SVALBARDTILLEGG -> {
                 AutovedtakSvalbardtillegg(
+                    vedtakFellesfelter = vedtakFellesfelter,
+                )
+            }
+
+            Brevmal.AUTOVEDTAK_SATSENDRING_EØS -> {
+                AutovedtakSatsendringEøs(
                     vedtakFellesfelter = vedtakFellesfelter,
                 )
             }

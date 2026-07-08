@@ -20,6 +20,8 @@ import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.datagenerator.lagValutakurs
 import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsKjøringService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.domene.SatsendringEøsKjøring
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -27,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.FØRSTEGANG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.REVURDERING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SATSENDRING
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SATSENDRING_EØS
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SVALBARDTILLEGG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SØKNAD
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -67,6 +70,7 @@ class BehandlingsresultatStegValideringServiceTest {
     private val strengtFortroligService = mockk<no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService>(relaxed = true)
     private val persongrunnlagService = mockk<no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService>()
     private val clockProvider = lagClockProviderMedFastTidspunkt(LocalDate.of(2025, 10, 10))
+    private val satsendringEøsKjøringService: SatsendringEøsKjøringService = mockk()
 
     private val behandlingsresultatStegValideringService =
         BehandlingsresultatStegValideringService(
@@ -81,6 +85,7 @@ class BehandlingsresultatStegValideringServiceTest {
             strengtFortroligService = strengtFortroligService,
             persongrunnlagService = persongrunnlagService,
             clockProvider = clockProvider,
+            satsendringEøsKjøringService = satsendringEøsKjøringService,
         )
 
     private val barn = lagPerson(type = PersonType.BARN)
@@ -1650,6 +1655,248 @@ class BehandlingsresultatStegValideringServiceTest {
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(nåværendeBehandling) } returns forrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns skjermetBarnsHistoriskeAndeler
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns skjermetBarnsAndelerINåværendeBehandling
+        }
+    }
+
+    @Nested
+    inner class ValiderAtMinstEttUtenlandskPeriodebeløpErEndret {
+        private val barn = lagPerson(type = PersonType.BARN)
+        private val forrigeBehandling = lagBehandling(årsak = SØKNAD)
+        private val nåværendeBehandling = lagBehandling(årsak = SATSENDRING_EØS)
+        private val satsendringstidspunkt = YearMonth.of(2025, 5)
+        private val kjøring =
+            SatsendringEøsKjøring(
+                fagsakId = nåværendeBehandling.fagsak.id,
+                behandlingId = nåværendeBehandling.id,
+                utbetalingsland = "PL",
+                satsTidspunkt = satsendringstidspunkt,
+            )
+
+        @Test
+        fun `skal ikke kaste feil når minst ett UPB har endret beløp`() {
+            // Arrange
+            val forrigeUpb =
+                lagUtenlandskPeriodebeløp(
+                    behandlingId = forrigeBehandling.id,
+                    fom = satsendringstidspunkt,
+                    beløp = BigDecimal("1000"),
+                    intervall = Intervall.MÅNEDLIG,
+                    valutakode = "PLN",
+                    utbetalingsland = "PL",
+                    barnAktører = setOf(barn.aktør),
+                )
+            val nyUpb =
+                lagUtenlandskPeriodebeløp(
+                    behandlingId = nåværendeBehandling.id,
+                    fom = satsendringstidspunkt,
+                    beløp = BigDecimal("1200"),
+                    intervall = Intervall.MÅNEDLIG,
+                    valutakode = "PLN",
+                    utbetalingsland = "PL",
+                    barnAktører = setOf(barn.aktør),
+                )
+            every { satsendringEøsKjøringService.hentSatsendringEøsKjøring(nåværendeBehandling.id) } returns kjøring
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(nåværendeBehandling) } returns forrigeBehandling
+            every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(nåværendeBehandling.id) } returns listOf(nyUpb)
+            every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(forrigeBehandling.id) } returns listOf(forrigeUpb)
+
+            // Act & Assert
+            assertDoesNotThrow {
+                behandlingsresultatStegValideringService.validerAtMinstEttUtenlandskPeriodebeløpErEndret(nåværendeBehandling)
+            }
+        }
+
+        @Test
+        fun `skal kaste feil når beløp er identisk med forrige behandling`() {
+            // Arrange
+            val forrigeUpb =
+                lagUtenlandskPeriodebeløp(
+                    behandlingId = forrigeBehandling.id,
+                    fom = satsendringstidspunkt,
+                    beløp = BigDecimal("1000"),
+                    intervall = Intervall.MÅNEDLIG,
+                    valutakode = "PLN",
+                    utbetalingsland = "PL",
+                    barnAktører = setOf(barn.aktør),
+                )
+            val nyUpb =
+                lagUtenlandskPeriodebeløp(
+                    behandlingId = nåværendeBehandling.id,
+                    fom = satsendringstidspunkt,
+                    beløp = BigDecimal("1000"),
+                    intervall = Intervall.MÅNEDLIG,
+                    valutakode = "PLN",
+                    utbetalingsland = "PL",
+                    barnAktører = setOf(barn.aktør),
+                )
+            every { satsendringEøsKjøringService.hentSatsendringEøsKjøring(nåværendeBehandling.id) } returns kjøring
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(nåværendeBehandling) } returns forrigeBehandling
+            every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(nåværendeBehandling.id) } returns listOf(nyUpb)
+            every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(forrigeBehandling.id) } returns listOf(forrigeUpb)
+
+            // Act & Assert
+            assertThrows<Feil> {
+                behandlingsresultatStegValideringService.validerAtMinstEttUtenlandskPeriodebeløpErEndret(nåværendeBehandling)
+            }
+        }
+
+        @Test
+        fun `skal kaste feil når UPB-endring er for et annet land enn det kjøringen gjelder`() {
+            // Arrange
+            val forrigeUpb =
+                lagUtenlandskPeriodebeløp(
+                    behandlingId = forrigeBehandling.id,
+                    fom = satsendringstidspunkt,
+                    beløp = BigDecimal("1000"),
+                    intervall = Intervall.MÅNEDLIG,
+                    valutakode = "SEK",
+                    utbetalingsland = "SE",
+                    barnAktører = setOf(barn.aktør),
+                )
+            val nyUpb =
+                lagUtenlandskPeriodebeløp(
+                    behandlingId = nåværendeBehandling.id,
+                    fom = satsendringstidspunkt,
+                    beløp = BigDecimal("1200"),
+                    intervall = Intervall.MÅNEDLIG,
+                    valutakode = "SEK",
+                    utbetalingsland = "SE",
+                    barnAktører = setOf(barn.aktør),
+                )
+            every { satsendringEøsKjøringService.hentSatsendringEøsKjøring(nåværendeBehandling.id) } returns kjøring
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(nåværendeBehandling) } returns forrigeBehandling
+            every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(nåværendeBehandling.id) } returns listOf(nyUpb)
+            every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(forrigeBehandling.id) } returns listOf(forrigeUpb)
+
+            // Act & Assert
+            assertThrows<Feil> {
+                behandlingsresultatStegValideringService.validerAtMinstEttUtenlandskPeriodebeløpErEndret(nåværendeBehandling)
+            }
+        }
+
+        @Test
+        fun `skal kaste feil når det ikke finnes SatsendringEøsKjøring for behandlingen`() {
+            every { satsendringEøsKjøringService.hentSatsendringEøsKjøring(nåværendeBehandling.id) } throws Feil("Fant ikke")
+
+            assertThrows<Feil> {
+                behandlingsresultatStegValideringService.validerAtMinstEttUtenlandskPeriodebeløpErEndret(nåværendeBehandling)
+            }
+        }
+    }
+
+    @Nested
+    inner class ValiderIngenEndringFørSatsendringstidspunkt {
+        private val barn = lagPerson(type = PersonType.BARN)
+        private val forrigeBehandling = lagBehandling(årsak = SØKNAD)
+        private val nåværendeBehandling = lagBehandling(årsak = SATSENDRING_EØS)
+        private val satsendringstidspunkt = YearMonth.of(2025, 5)
+        private val kjøring =
+            SatsendringEøsKjøring(
+                fagsakId = nåværendeBehandling.fagsak.id,
+                behandlingId = nåværendeBehandling.id,
+                utbetalingsland = "PL",
+                satsTidspunkt = satsendringstidspunkt,
+            )
+
+        @Test
+        fun `skal ikke kaste feil når andeler er uendret før satsendringstidspunktet`() {
+            // Arrange
+            val tilkjentYtelse =
+                lagTilkjentYtelse(
+                    behandling = nåværendeBehandling,
+                    lagAndelerTilkjentYtelse = { ty ->
+                        setOf(
+                            lagAndelTilkjentYtelse(
+                                fom = YearMonth.of(2025, 1),
+                                tom = satsendringstidspunkt.minusMonths(1),
+                                aktør = barn.aktør,
+                                kalkulertUtbetalingsbeløp = 500,
+                                tilkjentYtelse = ty,
+                            ),
+                            lagAndelTilkjentYtelse(
+                                fom = satsendringstidspunkt,
+                                tom = YearMonth.of(2025, 12),
+                                aktør = barn.aktør,
+                                kalkulertUtbetalingsbeløp = 400,
+                                tilkjentYtelse = ty,
+                            ),
+                        )
+                    },
+                )
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2025, 1),
+                        tom = satsendringstidspunkt.minusMonths(1),
+                        aktør = barn.aktør,
+                        kalkulertUtbetalingsbeløp = 500,
+                        behandling = forrigeBehandling,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = satsendringstidspunkt,
+                        tom = YearMonth.of(2025, 12),
+                        aktør = barn.aktør,
+                        kalkulertUtbetalingsbeløp = 500,
+                        behandling = forrigeBehandling,
+                    ),
+                )
+
+            every { satsendringEøsKjøringService.hentSatsendringEøsKjøring(nåværendeBehandling.id) } returns kjøring
+            every { beregningService.hentAndelerFraForrigeVedtatteBehandling(nåværendeBehandling) } returns forrigeAndeler
+
+            // Act & Assert
+            assertDoesNotThrow {
+                behandlingsresultatStegValideringService.validerIngenEndringIAndelerFørSatsendringstidspunkt(tilkjentYtelse)
+            }
+        }
+
+        @Test
+        fun `skal kaste feil når kalkulert utbetalingsbeløp er endret i en måned før satsendringstidspunktet`() {
+            // Arrange
+            val tilkjentYtelse =
+                lagTilkjentYtelse(
+                    behandling = nåværendeBehandling,
+                    lagAndelerTilkjentYtelse = { ty ->
+                        setOf(
+                            lagAndelTilkjentYtelse(
+                                fom = YearMonth.of(2025, 1),
+                                tom = YearMonth.of(2025, 12),
+                                aktør = barn.aktør,
+                                kalkulertUtbetalingsbeløp = 400,
+                                tilkjentYtelse = ty,
+                            ),
+                        )
+                    },
+                )
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2025, 1),
+                        tom = YearMonth.of(2025, 12),
+                        aktør = barn.aktør,
+                        kalkulertUtbetalingsbeløp = 500,
+                        behandling = forrigeBehandling,
+                    ),
+                )
+
+            every { satsendringEøsKjøringService.hentSatsendringEøsKjøring(nåværendeBehandling.id) } returns kjøring
+            every { beregningService.hentAndelerFraForrigeVedtatteBehandling(nåværendeBehandling) } returns forrigeAndeler
+
+            // Act & Assert
+            assertThrows<Feil> {
+                behandlingsresultatStegValideringService.validerIngenEndringIAndelerFørSatsendringstidspunkt(tilkjentYtelse)
+            }
+        }
+
+        @Test
+        fun `skal kaste feil når det ikke finnes SatsendringEøsKjøring for behandlingen`() {
+            val tilkjentYtelse = lagTilkjentYtelse(behandling = nåværendeBehandling)
+
+            every { satsendringEøsKjøringService.hentSatsendringEøsKjøring(nåværendeBehandling.id) } throws Feil("Fant ikke")
+
+            assertThrows<Feil> {
+                behandlingsresultatStegValideringService.validerIngenEndringIAndelerFørSatsendringstidspunkt(tilkjentYtelse)
+            }
         }
     }
 

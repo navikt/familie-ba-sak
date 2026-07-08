@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT_OG_ENDRET
@@ -22,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSA
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.IKKE_VURDERT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.OPPHØRT
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils.validerIngenEndringTilbakeITid
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
@@ -123,13 +123,30 @@ object BehandlingsresultatValideringUtils {
         andelerDenneBehandlingen: Collection<AndelTilkjentYtelse>,
         andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
         nåMåned: YearMonth,
-    ) {
-        val forrigeMåned = nåMåned.minusMonths(1)
-        val andelerIFortidenTidslinje = andelerDenneBehandlingen.tilTidslinjerPerAktørOgType().beskjærTilOgMed(forrigeMåned.sisteDagIInneværendeMåned())
-        val andelerIFortidenForrigeBehanldingTidslinje = andelerForrigeBehandling.tilTidslinjerPerAktørOgType().beskjærTilOgMed(forrigeMåned.sisteDagIInneværendeMåned())
+    ) = validerIngenEndringFørMåned(
+        andelerDenneBehandlingen = andelerDenneBehandlingen,
+        andelerForrigeBehandling = andelerForrigeBehandling,
+        grensemåned = nåMåned,
+    )
 
-        val endringerIAndelerTilbakeITidTidslinjer =
-            andelerIFortidenTidslinje.outerJoin(andelerIFortidenForrigeBehanldingTidslinje) { nyAndel, gammelAndel ->
+    /**
+     * Validerer at det ikke finnes endringer i kalkulert utbetalingsbeløp på andeler
+     * i måneder som er tidligere enn [grensemåned].
+     *
+     * Brukes av månedlig valutajustering (via [validerIngenEndringTilbakeITid]) og
+     * EØS-satsendring, der grensen er satsens fom-dato.
+     */
+    fun validerIngenEndringFørMåned(
+        andelerDenneBehandlingen: Collection<AndelTilkjentYtelse>,
+        andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
+        grensemåned: YearMonth,
+    ) {
+        val sisteMånedUtenEndring = grensemåned.minusMonths(1)
+        val andelerIFortidenTidslinje = andelerDenneBehandlingen.tilTidslinjerPerAktørOgType().beskjærTilOgMed(sisteMånedUtenEndring.sisteDagIInneværendeMåned())
+        val andelerIFortidenForrigeBehandlingTidslinje = andelerForrigeBehandling.tilTidslinjerPerAktørOgType().beskjærTilOgMed(sisteMånedUtenEndring.sisteDagIInneværendeMåned())
+
+        val endringerIAndelerTidslinje =
+            andelerIFortidenTidslinje.outerJoin(andelerIFortidenForrigeBehandlingTidslinje) { nyAndel, gammelAndel ->
                 if (nyAndel?.kalkulertUtbetalingsbeløp != gammelAndel?.kalkulertUtbetalingsbeløp) {
                     ErEndringIAndel(andelForrigeBehandling = gammelAndel, andelDenneBehandlingen = nyAndel)
                 } else {
@@ -137,7 +154,7 @@ object BehandlingsresultatValideringUtils {
                 }
             }
 
-        endringerIAndelerTilbakeITidTidslinjer.kastFeilOgLoggVedEndringerIAndeler()
+        endringerIAndelerTidslinje.kastFeilOgLoggVedEndringerIAndeler()
     }
 
     fun validerSatsErUendret(
