@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -467,7 +468,7 @@ internal class DokumentServiceTest {
         }
 
         @Test
-        fun `Skal ikke bruke journalpost der hoveddokumentet mangler tittel`() {
+        fun `Skal ikke bruke journalpost der hoveddokumentet ikke er et vedtaksbrev selv om tittelen inneholder vedtak`() {
             // Arrange
             every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker() } returns BehandlerRolle.BESLUTTER
             every { featureToggleService.isEnabled(HENT_VEDTAKSBREV_FRA_JOARK) } returns true
@@ -480,8 +481,8 @@ internal class DokumentServiceTest {
                         journalpostId = "1",
                         eksternReferanseId = "${vedtak.behandling.fagsak.id}_${vedtak.behandling.id}_callId",
                         dokumentInfoId = "10",
-                        tittel = null,
-                        brevkode = "BAA1",
+                        tittel = "Vedtak om tilbakekreving ved motregning",
+                        brevkode = "Vedtak om tilbakekreving ved motregning",
                     ),
                 )
 
@@ -492,6 +493,88 @@ internal class DokumentServiceTest {
                 }.frontendFeilmelding
 
             assertThat(feilmelding).isEqualTo("Fant ikke vedtaksbrevet i arkivet. Du kan finne brevet i dokumentoversikten.")
+        }
+
+        @Test
+        fun `Skal bruke første journalpost når vedtaksbrevet er journalført for flere mottakere`() {
+            // Arrange
+            every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker() } returns BehandlerRolle.BESLUTTER
+            every { featureToggleService.isEnabled(HENT_VEDTAKSBREV_FRA_JOARK) } returns true
+
+            val vedtak = lagVedtak(behandling = lagBehandling(status = BehandlingStatus.AVSLUTTET), stønadBrevPdF = null)
+            val fagsakId = vedtak.behandling.fagsak.id
+            val behandlingId = vedtak.behandling.id
+            val pdfFraJoark = byteArrayOf(1, 2, 3)
+
+            every { integrasjonKlient.hentJournalposterForBruker(any()) } returns
+                listOf(
+                    lagUtgåendeJournalpost(
+                        journalpostId = "1",
+                        eksternReferanseId = "${fagsakId}_${behandlingId}_callId1",
+                        dokumentInfoId = "10",
+                    ),
+                    lagUtgåendeJournalpost(
+                        journalpostId = "2",
+                        eksternReferanseId = "${fagsakId}_${behandlingId}_verge_callId1",
+                        dokumentInfoId = "20",
+                    ),
+                )
+            every { integrasjonKlient.hentDokument(dokumentInfoId = "10", journalpostId = "1") } returns pdfFraJoark
+
+            // Act
+            val vedtaksbrevPdf = dokumentService.hentBrevForVedtak(vedtak)
+
+            // Assert
+            assertThat(vedtaksbrevPdf.data).isEqualTo(pdfFraJoark)
+        }
+
+        @Test
+        fun `Skal hente vedtaksbrev med brevkode for opphør fra Joark`() {
+            // Arrange
+            every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker() } returns BehandlerRolle.BESLUTTER
+            every { featureToggleService.isEnabled(HENT_VEDTAKSBREV_FRA_JOARK) } returns true
+
+            val vedtak = lagVedtak(behandling = lagBehandling(status = BehandlingStatus.AVSLUTTET), stønadBrevPdF = null)
+            val pdfFraJoark = byteArrayOf(1, 2, 3)
+
+            every { integrasjonKlient.hentJournalposterForBruker(any()) } returns
+                listOf(
+                    lagUtgåendeJournalpost(
+                        journalpostId = "1",
+                        eksternReferanseId = "${vedtak.behandling.fagsak.id}_${vedtak.behandling.id}_callId",
+                        dokumentInfoId = "10",
+                        tittel = "Vedtak om opphørt barnetrygd",
+                        brevkode = "opphor",
+                    ),
+                )
+            every { integrasjonKlient.hentDokument(dokumentInfoId = "10", journalpostId = "1") } returns pdfFraJoark
+
+            // Act
+            val vedtaksbrevPdf = dokumentService.hentBrevForVedtak(vedtak)
+
+            // Assert
+            assertThat(vedtaksbrevPdf.data).isEqualTo(pdfFraJoark)
+        }
+
+        @Test
+        fun `Skal hente vedtaksbrev fra databasen når toggle er på og behandlingen er henlagt`() {
+            // Arrange
+            every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker() } returns BehandlerRolle.BESLUTTER
+            every { featureToggleService.isEnabled(HENT_VEDTAKSBREV_FRA_JOARK) } returns true
+
+            val pdfFraDatabasen = byteArrayOf(9)
+            val vedtak =
+                lagVedtak(
+                    behandling = lagBehandling(status = BehandlingStatus.AVSLUTTET, resultat = Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET),
+                    stønadBrevPdF = pdfFraDatabasen,
+                )
+
+            // Act
+            val vedtaksbrevPdf = dokumentService.hentBrevForVedtak(vedtak)
+
+            // Assert
+            assertThat(vedtaksbrevPdf.data).isEqualTo(pdfFraDatabasen)
+            verify(exactly = 0) { integrasjonKlient.hentJournalposterForBruker(any()) }
         }
 
         @Test
@@ -536,13 +619,17 @@ internal class DokumentServiceTest {
             dokumentInfoId: String,
             journalstatus: Journalstatus = Journalstatus.FERDIGSTILT,
             tittel: String? = "Vedtak om barnetrygd",
-            brevkode: String? = null,
+            brevkode: String? = "BAA1",
         ) = Journalpost(
             journalpostId = journalpostId,
             journalposttype = Journalposttype.U,
             journalstatus = journalstatus,
             eksternReferanseId = eksternReferanseId,
-            dokumenter = listOf(DokumentInfo(dokumentInfoId = dokumentInfoId, tittel = tittel, brevkode = brevkode)),
+            dokumenter =
+                listOf(
+                    DokumentInfo(dokumentInfoId = dokumentInfoId, tittel = tittel, brevkode = brevkode),
+                    DokumentInfo(dokumentInfoId = "vedlegg-$dokumentInfoId", tittel = "Stønadsmottakerens rettigheter og plikter", brevkode = null),
+                ),
         )
     }
 

@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
@@ -42,6 +41,7 @@ import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
+import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
@@ -87,7 +87,7 @@ class DokumentService(
             )
         val skalHenteVedtaksbrevFraJoark =
             featureToggleService.isEnabled(FeatureToggle.HENT_VEDTAKSBREV_FRA_JOARK) &&
-                vedtak.behandling.status == BehandlingStatus.AVSLUTTET &&
+                vedtak.behandling.erVedtatt() &&
                 vedtak.behandling.erBehandlingMedVedtaksbrevutsending()
 
         val pdf =
@@ -138,15 +138,30 @@ class DokumentService(
                 .filter { it.journalstatus == Journalstatus.FERDIGSTILT || it.journalstatus == Journalstatus.EKSPEDERT }
                 .filter { it.hoveddokumentErVedtaksbrev() }
 
-        val journalpost = journalposterForVedtaksbrev.firstOrNull() ?: return null
-        val dokumentInfoId = journalpost.dokumenter?.firstOrNull()?.dokumentInfoId ?: return null
+        if (journalposterForVedtaksbrev.isEmpty()) {
+            logger.warn("Fant ingen journalpost med vedtaksbrev i Joark for behandling ${behandling.id}")
+            return null
+        }
 
-        return integrasjonKlient.hentDokument(dokumentInfoId = dokumentInfoId, journalpostId = journalpost.journalpostId)
+        if (journalposterForVedtaksbrev.size > 1) {
+            logger.info(
+                "Fant flere journalposter med vedtaksbrev i Joark for behandling ${behandling.id}: " +
+                    "${journalposterForVedtaksbrev.map { it.journalpostId }}. Brevet er likt for alle mottakere, bruker den første.",
+            )
+        }
+
+        val journalpost = journalposterForVedtaksbrev.first()
+        val hoveddokument = checkNotNull(journalpost.hentHoveddokument())
+
+        return integrasjonKlient.hentDokument(dokumentInfoId = hoveddokument.dokumentInfoId, journalpostId = journalpost.journalpostId)
     }
 
+    // Hoveddokumentet er det eneste dokumentet i journalposten med brevkode, vedlegg journalføres uten
+    private fun Journalpost.hentHoveddokument(): DokumentInfo? = dokumenter?.firstOrNull { it.brevkode != null }
+
     private fun Journalpost.hoveddokumentErVedtaksbrev(): Boolean {
-        val tittel = dokumenter?.firstOrNull()?.tittel?.lowercase() ?: return false
-        return tittel.contains("vedtak")
+        val brevkode = hentHoveddokument()?.brevkode ?: return false
+        return brevkode in BREVKODER_FOR_VEDTAKSBREV
     }
 
     @Transactional
@@ -357,6 +372,9 @@ class DokumentService(
     }
 
     companion object {
+        // Brevkodene vedtaksbrev journalføres med i familie-integrasjoner (BAA1 = innvilgelse/avslag, opphor = opphør)
+        private val BREVKODER_FOR_VEDTAKSBREV = setOf("BAA1", "opphor")
+
         fun genererEksternReferanseIdForJournalpost(
             fagsakId: Long,
             behandlingId: Long?,
