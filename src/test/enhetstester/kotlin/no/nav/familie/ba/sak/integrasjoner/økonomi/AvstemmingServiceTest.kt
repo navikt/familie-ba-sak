@@ -115,7 +115,7 @@ class AvstemmingServiceTest {
                     1L to tssIdentPerson1,
                 )
 
-            every { behandlingHentOgPersisterService.hentMottakerForskjermetBarnSaker(behandlingIder = relevanteBehandlinger) } returns
+            every { behandlingHentOgPersisterService.hentMottakerForSkjermetBarnSaker(behandlingIder = relevanteBehandlinger) } returns
                 emptyMap()
 
             // Act
@@ -216,7 +216,7 @@ class AvstemmingServiceTest {
             every { behandlingHentOgPersisterService.hentTssEksternIdForBehandlinger(behandlingIder = relevanteBehandlinger) } returns
                 emptyMap()
 
-            every { behandlingHentOgPersisterService.hentMottakerForskjermetBarnSaker(behandlingIder = relevanteBehandlinger) } returns
+            every { behandlingHentOgPersisterService.hentMottakerForSkjermetBarnSaker(behandlingIder = relevanteBehandlinger) } returns
                 mapOf(
                     1L to skjermetBarnSøker.aktør.aktivFødselsnummer(),
                 )
@@ -322,7 +322,7 @@ class AvstemmingServiceTest {
                     2L to tssIdentPerson2,
                 )
 
-            every { behandlingHentOgPersisterService.hentMottakerForskjermetBarnSaker(behandlingIder = relevanteBehandlinger) } returns
+            every { behandlingHentOgPersisterService.hentMottakerForSkjermetBarnSaker(behandlingIder = relevanteBehandlinger) } returns
                 emptyMap()
 
             // Act & Assert

@@ -179,7 +179,7 @@ class AvstemmingService(
                 val tssEksternIdForBehandlinger =
                     behandlingHentOgPersisterService.hentTssEksternIdForBehandlinger(relevanteBehandlingIder)
 
-                val skjermetBarnMottakere = behandlingHentOgPersisterService.hentMottakerForskjermetBarnSaker(relevanteBehandlingIder)
+                val skjermetBarnMottakere = behandlingHentOgPersisterService.hentMottakerForSkjermetBarnSaker(relevanteBehandlingIder)
 
                 relevantePerioder
                     .groupBy { it.verdi.behandlingId }

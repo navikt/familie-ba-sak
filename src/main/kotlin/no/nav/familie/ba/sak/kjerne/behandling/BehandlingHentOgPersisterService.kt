@@ -123,7 +123,7 @@ class BehandlingHentOgPersisterService(
 
     fun hentTssEksternIdForBehandlinger(behandlingIder: List<Long>): Map<Long, String> = behandlingRepository.finnTssEksternIdForBehandlinger(behandlingIder).associate { it.first to it.second }
 
-    fun hentMottakerForskjermetBarnSaker(behandlingIder: List<Long>): Map<Long, String> = behandlingRepository.finnMottakerForSkjermetBarnSaker(behandlingIder).associate { it.first to it.second }
+    fun hentMottakerForSkjermetBarnSaker(behandlingIder: List<Long>): Map<Long, String> = behandlingRepository.finnMottakerForSkjermetBarnSaker(behandlingIder).associate { it.first to it.second }
 
     fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> = behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsakId)
 }
