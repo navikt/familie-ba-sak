@@ -443,6 +443,7 @@ class CucumberMock(
             clockProvider = clockProvider,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             strengtFortroligService = mockk(relaxed = true),
+            persongrunnlagService = persongrunnlagService,
             satsendringEøsKjøringService = mockk(relaxed = true),
         )
 

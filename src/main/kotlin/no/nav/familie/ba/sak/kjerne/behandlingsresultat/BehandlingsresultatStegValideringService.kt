@@ -42,6 +42,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
@@ -69,6 +70,7 @@ class BehandlingsresultatStegValideringService(
     private val valutakursRepository: ValutakursRepository,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val strengtFortroligService: StrengtFortroligService,
+    private val persongrunnlagService: PersongrunnlagService,
     private val clockProvider: ClockProvider,
     private val satsendringEøsKjøringService: SatsendringEøsKjøringService,
 ) {
@@ -397,6 +399,41 @@ class BehandlingsresultatStegValideringService(
             if (andelDenneBehandling != null && andelForrigeBehandling == null) {
                 throw FunksjonellFeil("Det finnes nye andeler i behandling. Kan ikke innvilge nye andeler i 'Falsk identitet'-behandling.")
             }
+        }
+    }
+
+    fun validerAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed(behandling: Behandling) {
+        val forrigeIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) ?: return
+
+        val aktørerMedAndelerIForrigeIverksatteBehandling =
+            andelTilkjentYtelseRepository
+                .finnAndelerTilkjentYtelseForBehandling(forrigeIverksatteBehandling.id)
+                .map { it.aktør }
+                .toSet()
+
+        val aktørerIDenneBehandlingen =
+            persongrunnlagService
+                .hentSøkerOgBarnPåBehandlingThrows(behandling.id)
+                .map { it.aktør }
+                .toSet()
+
+        val barnMedAndelerSomManglerIBehandlingenFraForrigeBehandling =
+            aktørerMedAndelerIForrigeIverksatteBehandling - aktørerIDenneBehandlingen
+
+        if (barnMedAndelerSomManglerIBehandlingenFraForrigeBehandling.isNotEmpty()) {
+            secureLogger.warn(
+                "Behandling ${behandling.id} mangler ${barnMedAndelerSomManglerIBehandlingenFraForrigeBehandling.size} barn med barnetrygd " +
+                    "fra forrige iverksatte behandling ${forrigeIverksatteBehandling.id}: " +
+                    "${barnMedAndelerSomManglerIBehandlingenFraForrigeBehandling.map { it.aktivFødselsnummer() }}.",
+            )
+            throw FunksjonellFeil(
+                melding =
+                    "Behandlingen mangler barn som har barnetrygd i forrige iverksatte behandling. " +
+                        "Antall barn som mangler: ${barnMedAndelerSomManglerIBehandlingenFraForrigeBehandling.size}.",
+                frontendFeilmelding =
+                    "Det finnes barn med løpende barnetrygd som ikke er med i behandlingen. " +
+                        "Du må legge til alle brukers barn i behandlingen.",
+            )
         }
     }
 

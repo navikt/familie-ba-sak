@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.datagenerator.lagValutakurs
 import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsKjøringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.domene.SatsendringEøsKjøring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -45,6 +46,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.assertj.core.api.Assertions.assertThat
@@ -66,6 +68,7 @@ class BehandlingsresultatStegValideringServiceTest {
     private val valutakursRepository: ValutakursRepository = mockk()
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService = mockk()
     private val strengtFortroligService = mockk<no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService>(relaxed = true)
+    private val persongrunnlagService = mockk<no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService>()
     private val clockProvider = lagClockProviderMedFastTidspunkt(LocalDate.of(2025, 10, 10))
     private val satsendringEøsKjøringService: SatsendringEøsKjøringService = mockk()
 
@@ -80,6 +83,7 @@ class BehandlingsresultatStegValideringServiceTest {
             valutakursRepository = valutakursRepository,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             strengtFortroligService = strengtFortroligService,
+            persongrunnlagService = persongrunnlagService,
             clockProvider = clockProvider,
             satsendringEøsKjøringService = satsendringEøsKjøringService,
         )
@@ -1892,6 +1896,61 @@ class BehandlingsresultatStegValideringServiceTest {
 
             assertThrows<Feil> {
                 behandlingsresultatStegValideringService.validerIngenEndringIAndelerFørSatsendringstidspunkt(tilkjentYtelse)
+            }
+        }
+    }
+
+    @Nested
+    inner class ValiderAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed {
+        private val søker = lagPerson(type = PersonType.SØKER)
+        private val barn1 = lagPerson(type = PersonType.BARN)
+        private val barn2 = lagPerson(type = PersonType.BARN)
+        private val forrigeBehandling = lagBehandling()
+        private val nåværendeBehandling = lagBehandling()
+
+        private fun andelForBarn(
+            aktør: Aktør,
+            tom: YearMonth,
+            beløp: Int = 1000,
+        ) = lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 1), tom = tom, aktør = aktør, beløp = beløp)
+
+        @Test
+        fun `kaster FunksjonellFeil når et barn med andeler i forrige behandling mangler`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns
+                listOf(
+                    andelForBarn(barn1.aktør, tom = YearMonth.of(2030, 1)),
+                    andelForBarn(barn2.aktør, tom = YearMonth.of(2030, 1)),
+                )
+            every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(nåværendeBehandling.id) } returns
+                listOf(søker.tilPersonEnkel(), barn1.tilPersonEnkel())
+
+            // Act
+            val feil =
+                assertThrows<FunksjonellFeil> {
+                    behandlingsresultatStegValideringService.validerAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed(nåværendeBehandling)
+                }
+
+            // Assert
+            assertThat(feil.frontendFeilmelding).contains("Du må legge til alle brukers barn i behandlingen")
+        }
+
+        @Test
+        fun `kaster ikke feil når alle barn med andeler i forrige behandling er med`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns
+                listOf(
+                    andelForBarn(barn1.aktør, tom = YearMonth.of(2030, 1)),
+                    andelForBarn(barn2.aktør, tom = YearMonth.of(2030, 1)),
+                )
+            every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(nåværendeBehandling.id) } returns
+                listOf(søker.tilPersonEnkel(), barn1.tilPersonEnkel(), barn2.tilPersonEnkel())
+
+            // Act & Assert
+            assertDoesNotThrow {
+                behandlingsresultatStegValideringService.validerAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed(nåværendeBehandling)
             }
         }
     }

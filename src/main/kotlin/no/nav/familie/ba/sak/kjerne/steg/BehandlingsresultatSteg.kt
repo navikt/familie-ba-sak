@@ -66,6 +66,7 @@ class BehandlingsresultatSteg(
             behandlingsresultatstegValideringService.validerKompetanse(behandling.id)
             behandlingsresultatstegValideringService.validerSekundærlandKompetanse(behandling.id)
             behandlingsresultatstegValideringService.validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(behandling)
+            behandlingsresultatstegValideringService.validerAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed(behandling)
         }
 
         if (behandling.erMånedligValutajustering()) {
