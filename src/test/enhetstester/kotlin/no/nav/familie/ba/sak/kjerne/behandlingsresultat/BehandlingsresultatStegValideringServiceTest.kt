@@ -20,9 +20,9 @@ import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.datagenerator.lagValutakurs
 import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsKjøringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.domene.SatsendringEøsKjøring
-import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.FØRSTEGANGSBEHANDLING
