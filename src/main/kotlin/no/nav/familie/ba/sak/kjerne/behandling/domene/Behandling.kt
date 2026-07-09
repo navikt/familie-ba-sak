@@ -124,6 +124,7 @@ data class Behandling(
             erIverksetteKAVedtak() -> false
             erRegionstillegg() && resultat in setOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT) -> false
             erFalskIdentitet() -> false
+            erSatsendringEøs() -> false
             else -> true
         }
 

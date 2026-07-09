@@ -41,7 +41,7 @@ SANITY_DATASET: "ba-brev"
 
 FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner.intern.dev.nav.no/api
 FAMILIE_INTEGRASJONER_SCOPE: api://dev-fss.teamfamilie.familie-integrasjoner/.default
-PDL_URL: https://pdl-api.dev.intern.nav.no/
+PDL_URL: https://pdl-api.dev.intern.nav.no
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
 FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.dev.intern.nav.no/api
 FAMILIE_OPPDRAG_SCOPE: api://dev-fss.teamfamilie.familie-oppdrag/.default
