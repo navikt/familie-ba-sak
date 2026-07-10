@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -22,6 +23,7 @@ import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.BaseFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilFagsakDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -36,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstøn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -59,7 +62,9 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.assertj.core.api.Assertions.assertThat
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -1447,5 +1452,190 @@ class BeregningServiceTest {
         )
         verify(exactly = 1) { tilkjentYtelseRepository.saveAndFlush(capture(slot)) }
         return slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }
+    }
+
+    @Nested
+    inner class ByggEndringsbeskrivelser {
+        private val testAktør = randomAktør()
+        private val testBehandling = lagBehandling()
+
+        @Test
+        fun `skal returnere tom liste når andeler er like`() {
+            // Arrange
+            val andeler = listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2024, 1),
+                    tom = YearMonth.of(2024, 6),
+                    beløp = 1310,
+                    aktør = testAktør,
+                    behandling = testBehandling,
+                ),
+            )
+
+            // Act
+            val endringer = BeregningService.byggEndringsbeskrivelser(
+                nåværendeAndeler = andeler,
+                forrigeAndeler = andeler,
+            )
+
+            // Assert
+            assertThat(endringer).isEmpty()
+        }
+
+        @Test
+        fun `skal vise endring når beløp er forskjellig i samme periode`() {
+            // Arrange
+            val forrigeAndeler = listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2024, 1),
+                    tom = YearMonth.of(2024, 6),
+                    beløp = 1310,
+                    aktør = testAktør,
+                    behandling = testBehandling,
+                ),
+            )
+            val nåværendeAndeler = listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2024, 1),
+                    tom = YearMonth.of(2024, 6),
+                    beløp = 1510,
+                    aktør = testAktør,
+                    behandling = testBehandling,
+                ),
+            )
+
+            // Act
+            val endringer = BeregningService.byggEndringsbeskrivelser(
+                nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = forrigeAndeler,
+            )
+
+            // Assert
+            assertThat(endringer).hasSize(1)
+            assertThat(endringer.first()).contains("forrige=1310 -> nåværende=1510")
+        }
+
+        @Test
+        fun `skal vise ny andel som endring fra 0`() {
+            // Arrange
+            val nåværendeAndeler = listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2024, 3),
+                    tom = YearMonth.of(2024, 12),
+                    beløp = 660,
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
+                    aktør = testAktør,
+                    behandling = testBehandling,
+                ),
+            )
+
+            // Act
+            val endringer = BeregningService.byggEndringsbeskrivelser(
+                nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = emptyList(),
+            )
+
+            // Assert
+            assertThat(endringer).hasSize(1)
+            assertThat(endringer.first()).contains("forrige=0 -> nåværende=660")
+            assertThat(endringer.first()).contains("SMÅBARNSTILLEGG")
+        }
+
+        @Test
+        fun `skal vise fjernet andel som endring til 0`() {
+            // Arrange
+            val forrigeAndeler = listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2024, 1),
+                    tom = YearMonth.of(2024, 6),
+                    beløp = 660,
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
+                    aktør = testAktør,
+                    behandling = testBehandling,
+                ),
+            )
+
+            // Act
+            val endringer = BeregningService.byggEndringsbeskrivelser(
+                nåværendeAndeler = emptyList(),
+                forrigeAndeler = forrigeAndeler,
+            )
+
+            // Assert
+            assertThat(endringer).hasSize(1)
+            assertThat(endringer.first()).contains("forrige=660 -> nåværende=0")
+        }
+
+        @Test
+        fun `skal vise endringer for flere personer og ytelsetyper`() {
+            // Arrange
+            val aktør2 = randomAktør()
+            val forrigeAndeler = listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2024, 1),
+                    tom = YearMonth.of(2024, 6),
+                    beløp = 1310,
+                    aktør = testAktør,
+                    behandling = testBehandling,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2024, 1),
+                    tom = YearMonth.of(2024, 6),
+                    beløp = 1310,
+                    aktør = aktør2,
+                    behandling = testBehandling,
+                ),
+            )
+            val nåværendeAndeler = listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2024, 1),
+                    tom = YearMonth.of(2024, 6),
+                    beløp = 1510,
+                    aktør = testAktør,
+                    behandling = testBehandling,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2024, 1),
+                    tom = YearMonth.of(2024, 6),
+                    beløp = 1310,
+                    aktør = aktør2,
+                    behandling = testBehandling,
+                ),
+            )
+
+            // Act
+            val endringer = BeregningService.byggEndringsbeskrivelser(
+                nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = forrigeAndeler,
+            )
+
+            // Assert
+            assertThat(endringer).hasSize(1)
+            assertThat(endringer.first()).contains(testAktør.aktivFødselsnummer())
+            assertThat(endringer.first()).contains("forrige=1310 -> nåværende=1510")
+        }
+
+        @Test
+        fun `skal ikke vise endring når ny andel har 0 i beløp`() {
+            // Arrange
+            val nåværendeAndeler = listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2024, 1),
+                    tom = YearMonth.of(2024, 6),
+                    beløp = 0,
+                    aktør = testAktør,
+                    behandling = testBehandling,
+                ),
+            )
+
+            // Act
+            val endringer = BeregningService.byggEndringsbeskrivelser(
+                nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = emptyList(),
+            )
+
+            // Assert
+            assertThat(endringer).isEmpty()
+        }
     }
 }

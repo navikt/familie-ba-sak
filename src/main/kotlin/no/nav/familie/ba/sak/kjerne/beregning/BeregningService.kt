@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -19,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tomTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -117,6 +119,10 @@ class BeregningService(
                 .tilPerioder()
                 .any { it.verdi == true }
 
+        if (endringerIUtbetaling) {
+            loggEndringerIUtbetaling(behandling)
+        }
+
         return if (endringerIUtbetaling) EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING else EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
     }
 
@@ -136,6 +142,42 @@ class BeregningService(
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
         return forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
             ?: emptyList()
+    }
+
+    private fun loggEndringerIUtbetaling(behandling: Behandling) {
+        val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+        val forrigeAndeler = hentAndelerFraForrigeIverksattebehandling(behandling)
+
+        val endringer = byggEndringsbeskrivelser(nåværendeAndeler, forrigeAndeler)
+
+        secureLogger.info(
+            "Endringer i utbetaling for behandling ${behandling.id} (årsak=${behandling.opprettetÅrsak}): ${endringer.joinToString("; ")}",
+        )
+    }
+
+    internal companion object {
+        internal fun byggEndringsbeskrivelser(
+            nåværendeAndeler: List<AndelTilkjentYtelse>,
+            forrigeAndeler: List<AndelTilkjentYtelse>,
+        ): List<String> {
+            val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
+            val alleYtelsetyper = (nåværendeAndeler.map { it.type } + forrigeAndeler.map { it.type }).distinct()
+
+            return allePersonerMedAndeler.flatMap { aktør ->
+                alleYtelsetyper.flatMap { ytelseType ->
+                    val nåværendeTidslinje = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType }.tilTidslinje()
+                    val forrigeTidslinje = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType }.tilTidslinje()
+
+                    nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
+                        val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
+                        val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
+                        if (nåværendeBeløp != forrigeBeløp) "forrige=$forrigeBeløp -> nåværende=$nåværendeBeløp" else null
+                    }.tilPerioder().filter { it.verdi != null }.map { periode ->
+                        "${aktør.aktivFødselsnummer()} $ytelseType ${periode.fom}-${periode.tom}: ${periode.verdi}"
+                    }
+                }
+            }
+        }
     }
 
     fun hentAndelerFraForrigeVedtatteBehandling(behandling: Behandling): List<AndelTilkjentYtelse> {
