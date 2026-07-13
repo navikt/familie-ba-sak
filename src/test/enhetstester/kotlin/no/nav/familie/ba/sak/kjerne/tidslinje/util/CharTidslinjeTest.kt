@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
 import no.nav.familie.ba.sak.common.rangeTo
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMåned
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
+import no.nav.familie.tidslinje.utvidelser.tilMåned
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull

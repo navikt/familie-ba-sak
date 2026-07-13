@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifteIkkeNull
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.tilMånedFraMånedsskifteIkkeNull
 
 /**
  * Extension-funksjon som konverterer en dag-basert tidslinje til en måned-basert tidslinje med VilkårRegelverkResultat
