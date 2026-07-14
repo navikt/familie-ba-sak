@@ -13,7 +13,6 @@ import no.nav.familie.leader.LeaderClient
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.data.domain.Pageable
 import java.time.LocalDateTime
 
 class SlettGamleVedtaksbrevSchedulerTest {
@@ -123,6 +122,6 @@ class SlettGamleVedtaksbrevSchedulerTest {
         scheduler.slettGamleVedtaksbrev()
 
         // Assert
-        verify(exactly = 20) { vedtakRepository.slettStønadBrevPdfForVedtak(any()) }
+        verify(exactly = 60) { vedtakRepository.slettStønadBrevPdfForVedtak(any()) }
     }
 }

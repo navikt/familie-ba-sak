@@ -74,7 +74,8 @@ class SlettGamleVedtaksbrevSchedulerIntegrationTest(
         scheduler.slettGamleVedtaksbrev()
 
         // Assert
-        assertThat(vedtakRepository.findById(skalSlettes.id).get().stønadBrevPdF).isNull()
+        val slettetVedtak = vedtakRepository.findById(skalSlettes.id).get()
+        assertThat(slettetVedtak.stønadBrevPdF).isNull()
         assertThat(vedtakRepository.findById(avsluttetMenForNylig.id).get().stønadBrevPdF).isNotNull()
         assertThat(vedtakRepository.findById(ikkeAvsluttet.id).get().stønadBrevPdF).isNotNull()
     }

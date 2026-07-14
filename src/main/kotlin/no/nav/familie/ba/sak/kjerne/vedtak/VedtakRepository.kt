@@ -25,11 +25,14 @@ interface VedtakRepository : JpaRepository<Vedtak, Long> {
         pageable: Pageable,
     ): List<Long>
 
-    // Bulk-UPDATE (JPQL) går utenom JPA-livssyklusen: den bumper ikke @Version, oppdaterer ikke
-    // endret_av/endret_tid (@PreUpdate) og trigger ikke RollestyringMotDatabase-listeneren. Det er
-    // ønsket her – dette er en systemjobb uten innlogget saksbehandler, og vi nuller kun ut en pdf.
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("UPDATE Vedtak v SET v.stønadBrevPdF = null WHERE v.id IN :vedtakIder")
+    @Modifying(clearAutomatically = true)
+    @Query(
+        """
+        UPDATE Vedtak v
+        SET v.stønadBrevPdF = null
+        WHERE v.id IN :vedtakIder
+        """,
+    )
     fun slettStønadBrevPdfForVedtak(vedtakIder: List<Long>): Int
 
     @Query("SELECT v FROM Vedtak v WHERE v.behandling.id = :behandlingId AND v.aktiv = true")
