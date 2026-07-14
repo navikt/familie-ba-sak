@@ -64,4 +64,7 @@ enum class FeatureToggle(
 
     // NAV-29800
     KAN_KJØRE_SATSENDRING_EØS("familie-ba-sak.kan-kjore-satsendring-eos"),
+
+    // NAV-29936
+    SKAL_SLETTE_GAMLE_VEDTAKSBREV_FRA_DB("familie-ba-sak.skal-slette-gamle-vedtaksbrev-fra-db"),
 }
