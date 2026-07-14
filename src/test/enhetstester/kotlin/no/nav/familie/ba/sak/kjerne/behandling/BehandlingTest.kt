@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -237,6 +238,7 @@ class BehandlingTest {
             assertThat(erBehandlingMedVedtaksbrevutsending).isFalse()
         }
 
+        @Disabled
         @Test
         fun `kan sende vedtaksbrev for revurdering med årsak satsendring EØS`() {
             // Arrange

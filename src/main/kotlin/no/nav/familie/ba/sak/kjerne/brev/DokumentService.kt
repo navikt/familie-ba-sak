@@ -36,9 +36,16 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.leggTilBlankAnnenVurdering
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.JournalførManueltBrevTask
+import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
+import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
+import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
+import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -46,6 +53,7 @@ import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import no.nav.familie.kontrakter.felles.journalpost.Bruker as JournalpostBruker
 
 @Service
 class DokumentService(
@@ -77,20 +85,83 @@ class DokumentService(
                 BehandlerRolle.SAKSBEHANDLER,
                 BehandlerRolle.BESLUTTER,
             )
-        if (høyesteRolletilgangForInnloggetBruker in funksjonelleRoller && vedtak.stønadBrevPdF == null) {
+        val skalHenteVedtaksbrevFraJoark =
+            featureToggleService.isEnabled(FeatureToggle.HENT_VEDTAKSBREV_FRA_JOARK) &&
+                vedtak.behandling.erVedtatt() &&
+                vedtak.behandling.erBehandlingMedVedtaksbrevutsending()
+
+        val pdf =
+            if (skalHenteVedtaksbrevFraJoark) {
+                hentVedtaksbrevFraJoark(vedtak)
+                    ?: throw FunksjonellFeil(
+                        melding = "Fant ikke vedtaksbrev for behandling med id ${vedtak.behandling.id} i Joark.",
+                        frontendFeilmelding = "Fant ikke vedtaksbrevet i arkivet. Du kan finne brevet i dokumentoversikten.",
+                    )
+            } else {
+                vedtak.stønadBrevPdF
+            }
+
+        if (høyesteRolletilgangForInnloggetBruker in funksjonelleRoller && pdf == null) {
             throw FunksjonellFeil(
                 melding =
                     "Klarte ikke finne vedtaksbrev for vedtak med id ${vedtak.id}. Innlogget bruker har rolle: $høyesteRolletilgangForInnloggetBruker",
                 frontendFeilmelding = "Det finnes ikke noe vedtaksbrev.",
             )
         } else {
-            val pdf =
-                vedtak.stønadBrevPdF ?: throw Feil(
+            return Ressurs.success(
+                pdf ?: throw Feil(
                     "Klarte ikke finne vedtaksbrev for vedtak med id ${vedtak.id}. " +
                         "Innlogget bruker har rolle: $høyesteRolletilgangForInnloggetBruker",
-                )
-            return Ressurs.success(pdf)
+                ),
+            )
         }
+    }
+
+    private fun hentVedtaksbrevFraJoark(vedtak: Vedtak): ByteArray? {
+        val behandling = vedtak.behandling
+        val eksternReferanseIdPrefiks = "${behandling.fagsak.id}_${behandling.id}_"
+
+        val journalposterForVedtaksbrev =
+            integrasjonKlient
+                .hentJournalposterForBruker(
+                    JournalposterForBrukerRequest(
+                        brukerId =
+                            JournalpostBruker(
+                                id = behandling.fagsak.aktør.aktivFødselsnummer(),
+                                type = BrukerIdType.FNR,
+                            ),
+                        antall = 1000,
+                        tema = listOf(Tema.BAR),
+                        journalposttype = listOf(Journalposttype.U),
+                    ),
+                ).filter { it.eksternReferanseId?.startsWith(eksternReferanseIdPrefiks) == true }
+                .filter { it.journalstatus == Journalstatus.FERDIGSTILT || it.journalstatus == Journalstatus.EKSPEDERT }
+                .filter { it.hoveddokumentErVedtaksbrev() }
+
+        if (journalposterForVedtaksbrev.isEmpty()) {
+            logger.warn("Fant ingen journalpost med vedtaksbrev i Joark for behandling ${behandling.id}")
+            return null
+        }
+
+        if (journalposterForVedtaksbrev.size > 1) {
+            logger.info(
+                "Fant flere journalposter med vedtaksbrev i Joark for behandling ${behandling.id}: " +
+                    "${journalposterForVedtaksbrev.map { it.journalpostId }}. Brevet er likt for alle mottakere, bruker den første.",
+            )
+        }
+
+        val journalpost = journalposterForVedtaksbrev.first()
+        val hoveddokument = checkNotNull(journalpost.hentHoveddokument())
+
+        return integrasjonKlient.hentDokument(dokumentInfoId = hoveddokument.dokumentInfoId, journalpostId = journalpost.journalpostId)
+    }
+
+    // Hoveddokumentet er det eneste dokumentet i journalposten med brevkode, vedlegg journalføres uten
+    private fun Journalpost.hentHoveddokument(): DokumentInfo? = dokumenter?.firstOrNull { it.brevkode != null }
+
+    private fun Journalpost.hoveddokumentErVedtaksbrev(): Boolean {
+        val brevkode = hentHoveddokument()?.brevkode ?: return false
+        return brevkode in BREVKODER_FOR_VEDTAKSBREV
     }
 
     @Transactional
@@ -301,6 +372,9 @@ class DokumentService(
     }
 
     companion object {
+        // Brevkodene vedtaksbrev journalføres med i familie-integrasjoner (BAA1 = innvilgelse/avslag, opphor = opphør)
+        private val BREVKODER_FOR_VEDTAKSBREV = setOf("BAA1", "opphor")
+
         fun genererEksternReferanseIdForJournalpost(
             fagsakId: Long,
             behandlingId: Long?,

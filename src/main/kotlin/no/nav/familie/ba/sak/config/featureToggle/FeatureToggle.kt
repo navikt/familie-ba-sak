@@ -67,4 +67,7 @@ enum class FeatureToggle(
 
     // NAV-29936
     SKAL_SLETTE_GAMLE_VEDTAKSBREV_FRA_DB("familie-ba-sak.skal-slette-gamle-vedtaksbrev-fra-db"),
+
+    // NAV-29382
+    HENT_VEDTAKSBREV_FRA_JOARK("familie-ba-sak.hent-vedtaksbrev-fra-joark"),
 }
