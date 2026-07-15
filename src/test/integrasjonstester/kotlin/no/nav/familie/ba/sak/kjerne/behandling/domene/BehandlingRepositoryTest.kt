@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagMinimalUtbetalingsoppdragString
@@ -14,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.IVERKSETT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.UTREDES
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
@@ -42,6 +44,7 @@ class BehandlingRepositoryTest(
     @Autowired private val tilkjentRepository: TilkjentYtelseRepository,
     @Autowired private val valutakursRepository: ValutakursRepository,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    @Autowired private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
 ) : AbstractSpringIntegrationTest() {
     @Nested
     inner class FinnSisteIverksatteBehandling {
@@ -585,5 +588,243 @@ class BehandlingRepositoryTest(
         }
 
         return fagsak
+    }
+
+    @Nested
+    inner class FinnLøpendeEøsFagsakerMedUtenlandskPeriodebeløpSomOverlapperSats {
+        @Test
+        fun `skal finne løpende EØS-fagsak med utenlandsk periodebeløp som overlapper satsperioden`() {
+            // Arrange
+            val satsFom = LocalDate.of(2025, 3, 1)
+            val aktør = aktørIdRepository.save(randomAktør())
+            val fagsak =
+                opprettEøsFagsakMedUtenlandskPeriodebeløp(
+                    aktør = aktør,
+                    utbetalingsland = "PL",
+                    periodebeløpFom = YearMonth.of(2025, 1),
+                    periodebeløpTom = YearMonth.of(2025, 12),
+                )
+
+            // Act
+            val result = behandlingRepository.finnLøpendeEøsFagsakerMedUtenlandskPeriodebeløpSomOverlapperSats("PL", satsFom, null)
+
+            // Assert
+            assertThat(result).contains(fagsak.id)
+        }
+
+        @Test
+        fun `skal finne fagsak når utenlandsk periodebeløp er løpende uten tom`() {
+            // Arrange
+            val satsFom = LocalDate.of(2025, 3, 1)
+            val aktør = aktørIdRepository.save(randomAktør())
+            val fagsak =
+                opprettEøsFagsakMedUtenlandskPeriodebeløp(
+                    aktør = aktør,
+                    utbetalingsland = "PL",
+                    periodebeløpFom = YearMonth.of(2025, 1),
+                    periodebeløpTom = null,
+                )
+
+            // Act
+            val result = behandlingRepository.finnLøpendeEøsFagsakerMedUtenlandskPeriodebeløpSomOverlapperSats("PL", satsFom, null)
+
+            // Assert
+            assertThat(result).contains(fagsak.id)
+        }
+
+        @Test
+        fun `skal finne fagsak når utenlandsk periodebeløp starter etter satsens fom og satsen er løpende`() {
+            // Arrange
+            val satsFom = LocalDate.of(2025, 1, 1)
+            val aktør = aktørIdRepository.save(randomAktør())
+            val fagsak =
+                opprettEøsFagsakMedUtenlandskPeriodebeløp(
+                    aktør = aktør,
+                    utbetalingsland = "PL",
+                    periodebeløpFom = YearMonth.of(2025, 6),
+                    periodebeløpTom = null,
+                )
+
+            // Act
+            val result = behandlingRepository.finnLøpendeEøsFagsakerMedUtenlandskPeriodebeløpSomOverlapperSats("PL", satsFom, null)
+
+            // Assert
+            assertThat(result).contains(fagsak.id)
+        }
+
+        @Test
+        fun `skal ikke finne fagsak med annet utbetalingsland`() {
+            // Arrange
+            val satsFom = LocalDate.of(2025, 3, 1)
+            val aktør = aktørIdRepository.save(randomAktør())
+            val fagsak =
+                opprettEøsFagsakMedUtenlandskPeriodebeløp(
+                    aktør = aktør,
+                    utbetalingsland = "SE",
+                    periodebeløpFom = YearMonth.of(2025, 1),
+                    periodebeløpTom = YearMonth.of(2025, 12),
+                )
+
+            // Act
+            val result = behandlingRepository.finnLøpendeEøsFagsakerMedUtenlandskPeriodebeløpSomOverlapperSats("PL", satsFom, null)
+
+            // Assert
+            assertThat(result).doesNotContain(fagsak.id)
+        }
+
+        @Test
+        fun `skal ikke finne fagsak når behandlingen ikke er EØS`() {
+            // Arrange
+            val satsFom = LocalDate.of(2025, 3, 1)
+            val aktør = aktørIdRepository.save(randomAktør())
+            val fagsak =
+                opprettEøsFagsakMedUtenlandskPeriodebeløp(
+                    aktør = aktør,
+                    utbetalingsland = "PL",
+                    periodebeløpFom = YearMonth.of(2025, 1),
+                    periodebeløpTom = YearMonth.of(2025, 12),
+                    kategori = BehandlingKategori.NASJONAL,
+                )
+
+            // Act
+            val result = behandlingRepository.finnLøpendeEøsFagsakerMedUtenlandskPeriodebeløpSomOverlapperSats("PL", satsFom, null)
+
+            // Assert
+            assertThat(result).doesNotContain(fagsak.id)
+        }
+
+        @Test
+        fun `skal ikke finne fagsak når utenlandsk periodebeløp opphørte før satsperioden`() {
+            // Arrange
+            val satsFom = LocalDate.of(2025, 3, 1)
+            val aktør = aktørIdRepository.save(randomAktør())
+            val fagsak =
+                opprettEøsFagsakMedUtenlandskPeriodebeløp(
+                    aktør = aktør,
+                    utbetalingsland = "PL",
+                    periodebeløpFom = YearMonth.of(2025, 1),
+                    periodebeløpTom = YearMonth.of(2025, 2),
+                )
+
+            // Act
+            val result = behandlingRepository.finnLøpendeEøsFagsakerMedUtenlandskPeriodebeløpSomOverlapperSats("PL", satsFom, null)
+
+            // Assert
+            assertThat(result).doesNotContain(fagsak.id)
+        }
+
+        @Test
+        fun `skal ikke finne fagsak når utenlandsk periodebeløp starter etter en avgrenset satsperiode`() {
+            // Arrange
+            val satsFom = LocalDate.of(2025, 1, 1)
+            val satsTom = LocalDate.of(2025, 3, 1)
+            val aktør = aktørIdRepository.save(randomAktør())
+            val fagsak =
+                opprettEøsFagsakMedUtenlandskPeriodebeløp(
+                    aktør = aktør,
+                    utbetalingsland = "PL",
+                    periodebeløpFom = YearMonth.of(2025, 6),
+                    periodebeløpTom = null,
+                )
+
+            // Act
+            val result = behandlingRepository.finnLøpendeEøsFagsakerMedUtenlandskPeriodebeløpSomOverlapperSats("PL", satsFom, satsTom)
+
+            // Assert
+            assertThat(result).doesNotContain(fagsak.id)
+        }
+
+        @Test
+        fun `skal ikke finne arkivert eller ikke-løpende fagsak`() {
+            // Arrange
+            val satsFom = LocalDate.of(2025, 3, 1)
+            val aktør = aktørIdRepository.save(randomAktør())
+            val fagsak =
+                opprettEøsFagsakMedUtenlandskPeriodebeløp(
+                    aktør = aktør,
+                    utbetalingsland = "PL",
+                    periodebeløpFom = YearMonth.of(2025, 1),
+                    periodebeløpTom = YearMonth.of(2025, 12),
+                    fagsakStatus = FagsakStatus.AVSLUTTET,
+                )
+
+            // Act
+            val result = behandlingRepository.finnLøpendeEøsFagsakerMedUtenlandskPeriodebeløpSomOverlapperSats("PL", satsFom, null)
+
+            // Assert
+            assertThat(result).doesNotContain(fagsak.id)
+        }
+
+        @Test
+        fun `skal bare se på siste vedtatte behandling per fagsak`() {
+            // Arrange
+            val satsFom = LocalDate.of(2025, 3, 1)
+            val aktør = aktørIdRepository.save(randomAktør())
+            val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør, status = FagsakStatus.LØPENDE, arkivert = false))
+
+            val gammelBehandling =
+                behandlingRepository.save(
+                    lagBehandlingUtenId(
+                        fagsak = fagsak,
+                        behandlingKategori = BehandlingKategori.EØS,
+                        status = AVSLUTTET,
+                        aktivertTid = LocalDateTime.now().minusDays(10),
+                        aktiv = false,
+                    ),
+                )
+            utenlandskPeriodebeløpRepository.save(
+                lagUtenlandskPeriodebeløp(
+                    behandlingId = gammelBehandling.id,
+                    fom = YearMonth.of(2025, 1),
+                    tom = YearMonth.of(2025, 12),
+                    utbetalingsland = "PL",
+                ),
+            )
+
+            behandlingRepository.save(
+                lagBehandlingUtenId(
+                    fagsak = fagsak,
+                    behandlingKategori = BehandlingKategori.EØS,
+                    status = AVSLUTTET,
+                    aktivertTid = LocalDateTime.now().minusDays(1),
+                ),
+            )
+
+            // Act
+            val result = behandlingRepository.finnLøpendeEøsFagsakerMedUtenlandskPeriodebeløpSomOverlapperSats("PL", satsFom, null)
+
+            // Assert
+            assertThat(result).doesNotContain(fagsak.id)
+        }
+
+        private fun opprettEøsFagsakMedUtenlandskPeriodebeløp(
+            aktør: Aktør,
+            utbetalingsland: String,
+            periodebeløpFom: YearMonth?,
+            periodebeløpTom: YearMonth?,
+            kategori: BehandlingKategori = BehandlingKategori.EØS,
+            fagsakStatus: FagsakStatus = FagsakStatus.LØPENDE,
+            arkivert: Boolean = false,
+        ): Fagsak {
+            val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør, status = fagsakStatus, arkivert = arkivert))
+            val behandling =
+                behandlingRepository.save(
+                    lagBehandlingUtenId(
+                        fagsak = fagsak,
+                        behandlingKategori = kategori,
+                        status = AVSLUTTET,
+                        aktivertTid = LocalDateTime.now().minusDays(1),
+                    ),
+                )
+            utenlandskPeriodebeløpRepository.save(
+                lagUtenlandskPeriodebeløp(
+                    behandlingId = behandling.id,
+                    fom = periodebeløpFom,
+                    tom = periodebeløpTom,
+                    utbetalingsland = utbetalingsland,
+                ),
+            )
+            return fagsak
+        }
     }
 }

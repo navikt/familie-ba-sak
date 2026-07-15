@@ -141,6 +141,32 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun finnAlleFagsakerMedLøpendeValutakursIMåned(måned: LocalDate): List<Long>
 
     @Query(
+        value = """WITH siste_vedtatte_behandling_per_fagsak AS (
+                    SELECT DISTINCT ON (b.fk_fagsak_id) b.id, b.fk_fagsak_id, b.kategori
+                    FROM behandling b
+                        INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                    WHERE f.status = 'LØPENDE'
+                      AND f.arkivert = false
+                      AND b.status = 'AVSLUTTET'
+                      AND b.resultat NOT LIKE '%HENLAGT%'
+                    ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC
+                )
+                SELECT DISTINCT b.fk_fagsak_id
+                FROM siste_vedtatte_behandling_per_fagsak b
+                    INNER JOIN utenlandsk_periodebeloep upb ON upb.fk_behandling_id = b.id
+                WHERE b.kategori = 'EØS'
+                  AND upb.utbetalingsland = :utbetalingsland
+                  AND (upb.tom IS NULL OR upb.tom >= :satsFom)
+                  AND (CAST(:satsTom AS DATE) IS NULL OR upb.fom <= CAST(:satsTom AS DATE))""",
+        nativeQuery = true,
+    )
+    fun finnLøpendeEøsFagsakerMedUtenlandskPeriodebeløpSomOverlapperSats(
+        utbetalingsland: String,
+        satsFom: LocalDate,
+        satsTom: LocalDate?,
+    ): List<Long>
+
+    @Query(
         """select b from Behandling b
                            inner join TilkjentYtelse ty on b.id = ty.behandling.id
                         where b.fagsak.id = :fagsakId AND ty.utbetalingsoppdrag IS NOT NULL""",
