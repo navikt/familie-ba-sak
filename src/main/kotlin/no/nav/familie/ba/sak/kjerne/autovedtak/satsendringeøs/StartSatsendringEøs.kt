@@ -44,7 +44,6 @@ class StartSatsendringEøs(
         utbetalingsland: String,
         satsTidspunkt: YearMonth,
     ) {
-        EøsSatserRegister.hentSatsForLandIMåned(utbetalingsland, satsTidspunkt)
         opprettTaskService.opprettSatsendringEøsTask(
             fagsakId = fagsakId,
             utbetalingsland = utbetalingsland,
