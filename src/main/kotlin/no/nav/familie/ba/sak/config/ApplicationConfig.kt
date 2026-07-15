@@ -15,7 +15,14 @@ import org.springframework.resilience.annotation.EnableResilientMethods
 
 @SpringBootConfiguration
 @EntityScan("no.nav.familie.prosessering", ApplicationConfig.PAKKENAVN)
-@ComponentScan("no.nav.familie.prosessering", "no.nav.familie.unleash", ApplicationConfig.PAKKENAVN, "no.nav.familie.metrikker", "no.nav.familie.felles.tokenklient")
+@ComponentScan(
+    "no.nav.familie.prosessering",
+    "no.nav.familie.unleash",
+    ApplicationConfig.PAKKENAVN,
+    "no.nav.familie.metrikker",
+    "no.nav.familie.felles.tokenklient.entraid",
+    "no.nav.familie.felles.tokenklient.tokenx",
+)
 @EnableResilientMethods
 @ConfigurationPropertiesScan
 @Import(no.nav.familie.sikkerhet.context.FamilieFellesSpringSecurityKonfigurasjon::class)
