@@ -31,7 +31,7 @@
         <familie.kontrakter.stønadsstatistikk>2.0_20260623154817_f726581</familie.kontrakter.stønadsstatistikk>
         <felles-kontrakter.version>4.0_20260608075026_1c29629</felles-kontrakter.version>
         <utbetalingsgenerator.version>1.0_20260527092003_ed16208</utbetalingsgenerator.version>
-        <cucumber.version>7.34.3</cucumber.version>
+        <cucumber.version>7.34.4</cucumber.version>
         <mockk.version>1.14.11</mockk.version>
         <token-validation-spring.version>6.0.8</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
