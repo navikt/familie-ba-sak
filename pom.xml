@@ -18,7 +18,7 @@
     <properties>
 
         <java.version>25</java.version>
-        <kotlin.version>2.3.21</kotlin.version>
+        <kotlin.version>2.4.0</kotlin.version>
         <kotlin.compiler.languageVersion>2.3</kotlin.compiler.languageVersion>
         <kotlin.compiler.apiVersion>2.3</kotlin.compiler.apiVersion>
         <revision>1</revision>
@@ -36,7 +36,7 @@
         <token-validation-spring.version>6.0.8</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>3.0.3</springdoc.version>
-        <sentry.version>8.43.0</sentry.version>
+        <sentry.version>8.48.0</sentry.version>
         <kotlinx.version>1.11.0</kotlinx.version>
         <kotlinx-kover.version>0.9.8</kotlinx-kover.version>
         <mock-oauth2-server.version>4.0.0</mock-oauth2-server.version>
@@ -46,7 +46,7 @@
         <testcontainers.postgresql.version>1.21.4</testcontainers.postgresql.version>
         <maven.model.version>3.9.16</maven.model.version>
         <avro.version>1.12.1</avro.version>
-        <confluent.version>8.2.1</confluent.version>
+        <confluent.version>8.3.0</confluent.version>
         <sonar.organization>navikt</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.sources>src/main</sonar.sources>
@@ -65,7 +65,7 @@
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
                 <!-- Denne inkluderer junit-platform nyere enn 1.13.3 som kreves av cucumber 7.26, kan muligens fjernes når spring bumper til junit versjon 1.13.3 -->
-                <version>6.1.0</version>
+                <version>6.1.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -86,7 +86,7 @@
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
-                <version>2.2.50</version>
+                <version>2.2.52</version>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
@@ -193,7 +193,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.11</version>
+            <version>42.7.13</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
