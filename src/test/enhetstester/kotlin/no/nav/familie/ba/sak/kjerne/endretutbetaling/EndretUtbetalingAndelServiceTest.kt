@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
@@ -766,6 +767,108 @@ class EndretUtbetalingAndelServiceTest {
                 // Assert
                 assertThat(endretUtbetalingAndelIDer.captured).containsExactly(endretUtbetalingAndel.id)
             }
+        }
+    }
+
+    @Nested
+    inner class KopierEndretUtbetalingAndelFraForrigeBehandling {
+        @Test
+        fun `Skal repunkte personer til den nye behandlingens eget persongrunnlag, ikke forrige behandling sine Person-rader`() {
+            // Arrange
+            val forrigeBehandling = lagBehandling()
+            val behandling = lagBehandling()
+            val aktør = lagAktør()
+
+            val gammelPerson = lagPerson(id = 1L, type = PersonType.BARN, aktør = aktør)
+            val nyPerson = lagPerson(id = 2L, type = PersonType.BARN, aktør = aktør)
+            val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, nyPerson)
+
+            val forrigeEndretUtbetalingAndel =
+                lagEndretUtbetalingAndel(id = 100L, behandlingId = forrigeBehandling.id, personer = setOf(gammelPerson))
+            val lagretEndretUtbetalingAndelSlot = slot<EndretUtbetalingAndel>()
+
+            every { mockPersongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
+            every { mockEndretUtbetalingAndelHentOgPersisterService.hentForBehandling(forrigeBehandling.id) } returns
+                listOf(forrigeEndretUtbetalingAndel)
+            every { mockEndretUtbetalingAndelRepository.save(capture(lagretEndretUtbetalingAndelSlot)) } returnsArgument 0
+
+            // Act
+            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+                behandling = behandling,
+                forrigeBehandling = forrigeBehandling,
+            )
+
+            // Assert
+            val lagret = lagretEndretUtbetalingAndelSlot.captured
+            assertThat(lagret.behandlingId).isEqualTo(behandling.id)
+            assertThat(lagret.personer).extracting("id").containsExactly(2L)
+            assertThat(lagret.personer).extracting("id").doesNotContain(1L)
+        }
+
+        @Test
+        fun `Skal filtrere bort personer som ikke finnes i det nye persongrunnlaget`() {
+            // Arrange
+            val forrigeBehandling = lagBehandling()
+            val behandling = lagBehandling()
+
+            val aktørSomBlirMed = lagAktør()
+            val aktørSomFallerUt = lagAktør()
+
+            val gammelPersonSomBlirMed = lagPerson(id = 1L, type = PersonType.BARN, aktør = aktørSomBlirMed)
+            val gammelPersonSomFallerUt = lagPerson(id = 2L, type = PersonType.BARN, aktør = aktørSomFallerUt)
+            val nyPersonSomBlirMed = lagPerson(id = 3L, type = PersonType.BARN, aktør = aktørSomBlirMed)
+            // Merk: nytt grunnlag inneholder ikke aktørSomFallerUt, f.eks. fordi barnet har falt ut av saken.
+            val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, nyPersonSomBlirMed)
+
+            val forrigeEndretUtbetalingAndel =
+                lagEndretUtbetalingAndel(
+                    id = 100L,
+                    behandlingId = forrigeBehandling.id,
+                    personer = setOf(gammelPersonSomBlirMed, gammelPersonSomFallerUt),
+                )
+            val lagretEndretUtbetalingAndelSlot = slot<EndretUtbetalingAndel>()
+
+            every { mockPersongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
+            every { mockEndretUtbetalingAndelHentOgPersisterService.hentForBehandling(forrigeBehandling.id) } returns
+                listOf(forrigeEndretUtbetalingAndel)
+            every { mockEndretUtbetalingAndelRepository.save(capture(lagretEndretUtbetalingAndelSlot)) } returnsArgument 0
+
+            // Act
+            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+                behandling = behandling,
+                forrigeBehandling = forrigeBehandling,
+            )
+
+            // Assert
+            val lagret = lagretEndretUtbetalingAndelSlot.captured
+            assertThat(lagret.personer).extracting("id").containsExactly(3L)
+        }
+
+        @Test
+        fun `Skal ikke kopiere EndretUtbetalingAndel hvis ingen av personene finnes i det nye persongrunnlaget`() {
+            // Arrange
+            val forrigeBehandling = lagBehandling()
+            val behandling = lagBehandling()
+
+            val gammelPerson = lagPerson(id = 1L, type = PersonType.BARN)
+            // Nytt grunnlag inneholder en helt annen aktør enn den som var med i forrige EndretUtbetalingAndel.
+            val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, lagPerson(id = 2L, type = PersonType.BARN))
+
+            val forrigeEndretUtbetalingAndel =
+                lagEndretUtbetalingAndel(id = 100L, behandlingId = forrigeBehandling.id, personer = setOf(gammelPerson))
+
+            every { mockPersongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
+            every { mockEndretUtbetalingAndelHentOgPersisterService.hentForBehandling(forrigeBehandling.id) } returns
+                listOf(forrigeEndretUtbetalingAndel)
+
+            // Act
+            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+                behandling = behandling,
+                forrigeBehandling = forrigeBehandling,
+            )
+
+            // Assert
+            verify(exactly = 0) { mockEndretUtbetalingAndelRepository.save(any()) }
         }
     }
 }
