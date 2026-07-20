@@ -773,7 +773,7 @@ class EndretUtbetalingAndelServiceTest {
     @Nested
     inner class KopierEndretUtbetalingAndelFraForrigeBehandling {
         @Test
-        fun `Skal repunkte personer til den nye behandlingens eget persongrunnlag, ikke forrige behandling sine Person-rader`() {
+        fun `Skal bruke Personer fra inneværende behandlingen ved kopiering`() {
             // Arrange
             val forrigeBehandling = lagBehandling()
             val behandling = lagBehandling()
@@ -806,7 +806,7 @@ class EndretUtbetalingAndelServiceTest {
         }
 
         @Test
-        fun `Skal filtrere bort personer som ikke finnes i det nye persongrunnlaget`() {
+        fun `Skal filtrere bort personer som ikke finnes i inneværende behandling`() {
             // Arrange
             val forrigeBehandling = lagBehandling()
             val behandling = lagBehandling()
@@ -845,7 +845,7 @@ class EndretUtbetalingAndelServiceTest {
         }
 
         @Test
-        fun `Skal ikke kopiere EndretUtbetalingAndel hvis ingen av personene finnes i det nye persongrunnlaget`() {
+        fun `Skal filtrere bort EndretUtbetalingAndel hvis ingen av personene finnes i inneværende behandling`() {
             // Arrange
             val forrigeBehandling = lagBehandling()
             val behandling = lagBehandling()
