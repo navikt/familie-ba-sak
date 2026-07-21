@@ -578,12 +578,12 @@ fun ISanityBegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
     }
 
     this.gjelderEndretutbetaling -> {
-        val endringsperioderMedEndringDennePerioden =
+        val endretUtbetalingAndelerForPersonerMedEndringDennePerioden =
             grunnlagForPersonerIBegrunnelsen
                 .filter { it.value.forrigePeriode?.endretUtbetalingAndel != it.value.dennePerioden.endretUtbetalingAndel }
                 .mapNotNull { it.value.dennePerioden.endretUtbetalingAndel }
 
-        endringsperioderMedEndringDennePerioden.ifEmpty {
+        endretUtbetalingAndelerForPersonerMedEndringDennePerioden.ifEmpty {
             grunnlagForPersonerIBegrunnelsen.mapNotNull { it.value.dennePerioden.endretUtbetalingAndel }
         }
     }
