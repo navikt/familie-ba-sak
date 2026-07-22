@@ -461,6 +461,29 @@ class BehandlingRepositoryTest(
         }
 
         @Test
+        fun `skal inkludere fagsaker uten utbetalingsoppdrag når det finnes løpende valutakurs`() {
+            // Arrange
+            val måned = LocalDate.of(2025, 3, 1)
+            val aktør = aktørIdRepository.save(randomAktør())
+
+            val fagsak =
+                opprettFagsakMedBehandlingValutakursOgAndeler(
+                    aktør = aktør,
+                    medUtbetalingsoppdrag = false,
+                    andelFom = YearMonth.of(2025, 1),
+                    andelTom = YearMonth.of(2025, 12),
+                    valutakursFom = YearMonth.of(2025, 1),
+                    valutakursTom = YearMonth.of(2025, 12),
+                )
+
+            // Act
+            val result = behandlingRepository.finnAlleFagsakerMedLøpendeValutakursIMåned(måned)
+
+            // Assert
+            assertThat(result).contains(fagsak.id)
+        }
+
+        @Test
         fun `skal bruke nest siste vedtatte behandling hvis siste er henlagt`() {
             // Arrange
             val måned = LocalDate.of(2025, 3, 1)
