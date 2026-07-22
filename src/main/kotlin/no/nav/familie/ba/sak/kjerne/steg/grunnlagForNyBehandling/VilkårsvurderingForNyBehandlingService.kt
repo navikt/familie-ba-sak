@@ -349,8 +349,8 @@ class VilkårsvurderingForNyBehandlingService(
                 aktørerMedUtvidetAndelerIForrigeBehandling = finnAktørerMedUtvidetBarnetrygdIForrigeBehandling(forrigeBehandlingSomErVedtatt),
             )
         endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
-            behandling,
-            forrigeBehandlingSomErVedtatt,
+            behandling = behandling,
+            forrigeBehandling = forrigeBehandlingSomErVedtatt,
         )
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
     }

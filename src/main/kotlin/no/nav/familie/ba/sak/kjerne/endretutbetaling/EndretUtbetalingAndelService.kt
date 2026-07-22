@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøkna
 import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktPåPersonService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -45,6 +46,8 @@ class EndretUtbetalingAndelService(
     private val registrertSøknadstidspunktService: RegistrertSøknadstidspunktPåPersonService,
     private val featureToggleService: FeatureToggleService,
 ) {
+    private val logger = LoggerFactory.getLogger(EndretUtbetalingAndelService::class.java)
+
     @Transactional
     fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         behandling: Behandling,
@@ -190,15 +193,47 @@ class EndretUtbetalingAndelService(
         behandling: Behandling,
         forrigeBehandling: Behandling,
     ) {
-        endretUtbetalingAndelHentOgPersisterService.hentForBehandling(forrigeBehandling.id).forEach {
-            endretUtbetalingAndelRepository.save(
-                it.copy(
-                    id = 0,
-                    behandlingId = behandling.id,
-                    personer = it.personer.toMutableSet(),
-                ),
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
+        val nyPersonPerAktør = personopplysningGrunnlag.personer.associateBy { it.aktør }
+
+        endretUtbetalingAndelHentOgPersisterService.hentForBehandling(forrigeBehandling.id).forEach { forrigeEndretUtbetalingAndel ->
+            kopierEndretUtbetalingAndel(forrigeEndretUtbetalingAndel, behandling, forrigeBehandling, nyPersonPerAktør)
+        }
+    }
+
+    private fun kopierEndretUtbetalingAndel(
+        forrigeEndretUtbetalingAndel: EndretUtbetalingAndel,
+        behandling: Behandling,
+        forrigeBehandling: Behandling,
+        nyPersonPerAktør: Map<Aktør, Person>,
+    ) {
+        val nyePersoner = forrigeEndretUtbetalingAndel.personer.mapNotNull { nyPersonPerAktør[it.aktør] }
+        val droppedeAktørIder = forrigeEndretUtbetalingAndel.personer.map { it.aktør }.filterNot { it in nyPersonPerAktør }
+
+        if (droppedeAktørIder.isNotEmpty()) {
+            logger.warn(
+                "Dropper person(er) med aktørId ${droppedeAktørIder.joinToString(", ") { it.aktørId }} fra EndretUtbetalingAndel " +
+                    "${forrigeEndretUtbetalingAndel.id} ved kopiering fra behandling ${forrigeBehandling.id} " +
+                    "til behandling ${behandling.id}: finnes ikke i det nye persongrunnlaget",
             )
         }
+
+        if (nyePersoner.isEmpty()) {
+            logger.warn(
+                "Dropper EndretUtbetalingAndel ${forrigeEndretUtbetalingAndel.id} ved " +
+                    "kopiering fra behandling ${forrigeBehandling.id} til behandling " +
+                    "${behandling.id}: ingen av personene finnes i det nye persongrunnlaget",
+            )
+            return
+        }
+
+        endretUtbetalingAndelRepository.save(
+            forrigeEndretUtbetalingAndel.copy(
+                id = 0,
+                behandlingId = behandling.id,
+                personer = nyePersoner.toMutableSet(),
+            ),
+        )
     }
 
     @Transactional
