@@ -381,29 +381,6 @@ class BehandlingRepositoryTest(
         }
 
         @Test
-        fun `skal filtrere bort behandlinger uten utbetalingsoppdrag`() {
-            // Arrange
-            val måned = LocalDate.of(2025, 3, 1)
-            val aktør = aktørIdRepository.save(randomAktør())
-
-            val fagsak =
-                opprettFagsakMedBehandlingValutakursOgAndeler(
-                    aktør = aktør,
-                    medUtbetalingsoppdrag = false,
-                    andelFom = YearMonth.of(2025, 1),
-                    andelTom = YearMonth.of(2025, 12),
-                    valutakursFom = YearMonth.of(2025, 1),
-                    valutakursTom = YearMonth.of(2025, 12),
-                )
-
-            // Act
-            val result = behandlingRepository.finnAlleFagsakerMedLøpendeValutakursIMåned(måned)
-
-            // Assert
-            assertThat(result).doesNotContain(fagsak.id)
-        }
-
-        @Test
         fun `skal filtrere bort fagsaker der tilkjent ytelse er utløpt før gitt måned`() {
             // Arrange
             val måned = LocalDate.of(2025, 6, 1)
@@ -458,6 +435,118 @@ class BehandlingRepositoryTest(
 
             // Assert
             assertThat(result).contains(fagsak1.id, fagsak2.id)
+        }
+
+        @Test
+        fun `skal ekskludere fagsaker der eneste vedtatte behandling er henlagt`() {
+            // Arrange
+            val måned = LocalDate.of(2025, 3, 1)
+            val aktør = aktørIdRepository.save(randomAktør())
+
+            val fagsak =
+                opprettFagsakMedBehandlingValutakursOgAndeler(
+                    aktør = aktør,
+                    resultat = Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
+                    andelFom = YearMonth.of(2025, 1),
+                    andelTom = YearMonth.of(2025, 12),
+                    valutakursFom = YearMonth.of(2025, 1),
+                    valutakursTom = YearMonth.of(2025, 12),
+                )
+
+            // Act
+            val result = behandlingRepository.finnAlleFagsakerMedLøpendeValutakursIMåned(måned)
+
+            // Assert
+            assertThat(result).doesNotContain(fagsak.id)
+        }
+
+        @Test
+        fun `skal inkludere fagsaker uten utbetalingsoppdrag når det finnes løpende valutakurs`() {
+            // Arrange
+            val måned = LocalDate.of(2025, 3, 1)
+            val aktør = aktørIdRepository.save(randomAktør())
+
+            val fagsak =
+                opprettFagsakMedBehandlingValutakursOgAndeler(
+                    aktør = aktør,
+                    medUtbetalingsoppdrag = false,
+                    andelFom = YearMonth.of(2025, 1),
+                    andelTom = YearMonth.of(2025, 12),
+                    valutakursFom = YearMonth.of(2025, 1),
+                    valutakursTom = YearMonth.of(2025, 12),
+                )
+
+            // Act
+            val result = behandlingRepository.finnAlleFagsakerMedLøpendeValutakursIMåned(måned)
+
+            // Assert
+            assertThat(result).contains(fagsak.id)
+        }
+
+        @Test
+        fun `skal bruke nest siste vedtatte behandling hvis siste er henlagt`() {
+            // Arrange
+            val måned = LocalDate.of(2025, 3, 1)
+            val aktør = aktørIdRepository.save(randomAktør())
+
+            val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør, status = FagsakStatus.LØPENDE, arkivert = false))
+
+            val eldreBehandling =
+                behandlingRepository.save(
+                    lagBehandlingUtenId(
+                        fagsak = fagsak,
+                        status = AVSLUTTET,
+                        aktivertTid = LocalDateTime.now().minusDays(2),
+                        aktiv = false,
+                    ),
+                )
+
+            val eldreTilkjentYtelse =
+                tilkjentRepository.save(
+                    lagTilkjentYtelse(
+                        behandling = eldreBehandling,
+                        stønadFom = YearMonth.of(2025, 1),
+                        stønadTom = YearMonth.of(2025, 12),
+                        utbetalingsoppdrag = lagMinimalUtbetalingsoppdragString(behandlingId = eldreBehandling.id),
+                    ),
+                )
+
+            andelTilkjentYtelseRepository.save(
+                lagAndelTilkjentYtelse(
+                    aktør = aktør,
+                    fom = YearMonth.of(2025, 1),
+                    tom = YearMonth.of(2025, 12),
+                    behandling = eldreBehandling,
+                    tilkjentYtelse = eldreTilkjentYtelse,
+                ),
+            )
+
+            valutakursRepository.save(
+                Valutakurs(
+                    fom = YearMonth.of(2025, 1),
+                    tom = YearMonth.of(2025, 12),
+                    barnAktører = setOf(aktør),
+                    valutakursdato = LocalDate.of(2025, 1, 15),
+                    valutakode = "EUR",
+                    kurs = BigDecimal("10.5"),
+                    vurderingsform = Vurderingsform.AUTOMATISK,
+                ).apply { behandlingId = eldreBehandling.id },
+            )
+
+            behandlingRepository.save(
+                lagBehandlingUtenId(
+                    fagsak = fagsak,
+                    status = AVSLUTTET,
+                    resultat = Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
+                    aktivertTid = LocalDateTime.now().minusDays(1),
+                ),
+            )
+
+            // Act
+            val result = behandlingRepository.finnAlleFagsakerMedLøpendeValutakursIMåned(måned)
+
+            // Assert
+            assertThat(result).contains(fagsak.id)
         }
     }
 
@@ -522,6 +611,7 @@ class BehandlingRepositoryTest(
         fagsakStatus: FagsakStatus = FagsakStatus.LØPENDE,
         arkivert: Boolean = false,
         behandlingStatus: BehandlingStatus = AVSLUTTET,
+        resultat: Behandlingsresultat = Behandlingsresultat.INNVILGET,
         aktivertTid: LocalDateTime = LocalDateTime.now().minusDays(1),
         medUtbetalingsoppdrag: Boolean = true,
         andelFom: YearMonth? = null,
@@ -538,6 +628,7 @@ class BehandlingRepositoryTest(
                 lagBehandlingUtenId(
                     fagsak = fagsak,
                     status = behandlingStatus,
+                    resultat = resultat,
                     aktivertTid = aktivertTid,
                 ),
             )
