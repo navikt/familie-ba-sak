@@ -119,19 +119,18 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun finnSisteVedtatteBehandlingForLøpendeEøsFagsaker(page: Pageable): Page<FagsakIdBehandlingIdOgKategori>
 
     @Query(
-        value = """WITH siste_iverksatte_behandling_per_fagsak AS (
+        value = """WITH siste_vedtatte_behandling_per_fagsak AS (
                     SELECT DISTINCT ON (b.fk_fagsak_id) b.id, b.fk_fagsak_id
                     FROM behandling b
                         INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
-                        INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
                     WHERE f.status = 'LØPENDE'
                       AND f.arkivert = false
                       AND b.status = 'AVSLUTTET'
-                      AND ty.utbetalingsoppdrag IS NOT NULL
+                      AND b.resultat NOT LIKE '%HENLAGT%'
                     ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC
                 )
                 SELECT DISTINCT b.fk_fagsak_id
-                FROM siste_iverksatte_behandling_per_fagsak b
+                FROM siste_vedtatte_behandling_per_fagsak b
                     INNER JOIN valutakurs v ON v.fk_behandling_id = b.id
                     INNER JOIN tilkjent_ytelse ty ON ty.fk_behandling_id = b.id
                 WHERE ty.stonad_tom >= :måned
