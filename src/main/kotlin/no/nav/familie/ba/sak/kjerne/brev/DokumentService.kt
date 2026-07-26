@@ -50,8 +50,10 @@ import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
+import org.springframework.core.NestedExceptionUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
 import no.nav.familie.kontrakter.felles.journalpost.Bruker as JournalpostBruker
 
@@ -92,7 +94,7 @@ class DokumentService(
 
         val pdf =
             if (skalHenteVedtaksbrevFraJoark) {
-                hentVedtaksbrevFraJoark(vedtak)
+                hentVedtaksbrevFraJoarkOgHåndterManglendeTilgang(vedtak)
                     ?: throw FunksjonellFeil(
                         melding = "Fant ikke vedtaksbrev for behandling med id ${vedtak.behandling.id} i Joark.",
                         frontendFeilmelding = "Fant ikke vedtaksbrevet i arkivet. Du kan finne brevet i dokumentoversikten.",
@@ -116,6 +118,20 @@ class DokumentService(
             )
         }
     }
+
+    private fun hentVedtaksbrevFraJoarkOgHåndterManglendeTilgang(vedtak: Vedtak): ByteArray? =
+        try {
+            hentVedtaksbrevFraJoark(vedtak)
+        } catch (throwable: Throwable) {
+            if (NestedExceptionUtils.getMostSpecificCause(throwable) is HttpClientErrorException.Forbidden) {
+                throw FunksjonellFeil(
+                    melding = "Mangler tilgang til å hente vedtaksbrev for behandling med id ${vedtak.behandling.id} fra Joark.",
+                    frontendFeilmelding = "Du har ikke tilgang til å hente vedtaksbrevet.",
+                    throwable = throwable,
+                )
+            }
+            throw throwable
+        }
 
     private fun hentVedtaksbrevFraJoark(vedtak: Vedtak): ByteArray? {
         val behandling = vedtak.behandling
