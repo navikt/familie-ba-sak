@@ -75,6 +75,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
 
 internal class DokumentServiceTest {
@@ -612,6 +615,54 @@ internal class DokumentServiceTest {
 
             assertThat(feilmelding).isEqualTo("Fant ikke vedtaksbrevet i arkivet. Du kan finne brevet i dokumentoversikten.")
         }
+
+        @Test
+        fun `Skal kaste funksjonell feil når saksbehandler mangler tilgang til vedtaksbrev i Joark`() {
+            // Arrange
+            every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker() } returns BehandlerRolle.BESLUTTER
+            every { featureToggleService.isEnabled(HENT_VEDTAKSBREV_FRA_JOARK) } returns true
+
+            val vedtak = lagVedtak(behandling = lagBehandling(status = BehandlingStatus.AVSLUTTET), stønadBrevPdF = byteArrayOf(9))
+
+            every { integrasjonKlient.hentJournalposterForBruker(any()) } throws lagForbidden()
+
+            // Act && Assert
+            val feilmelding =
+                assertThrows<FunksjonellFeil> {
+                    dokumentService.hentBrevForVedtak(vedtak)
+                }.frontendFeilmelding
+
+            assertThat(feilmelding).isEqualTo("Du har ikke tilgang til å hente vedtaksbrevet.")
+        }
+
+        @Test
+        fun `Skal kaste funksjonell feil når manglende tilgang er pakket inn av retry`() {
+            // Arrange
+            every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker() } returns BehandlerRolle.BESLUTTER
+            every { featureToggleService.isEnabled(HENT_VEDTAKSBREV_FRA_JOARK) } returns true
+
+            val vedtak = lagVedtak(behandling = lagBehandling(status = BehandlingStatus.AVSLUTTET), stønadBrevPdF = byteArrayOf(9))
+
+            every { integrasjonKlient.hentJournalposterForBruker(any()) } throws
+                RuntimeException("Kall mot integrasjoner feilet", lagForbidden())
+
+            // Act && Assert
+            val feilmelding =
+                assertThrows<FunksjonellFeil> {
+                    dokumentService.hentBrevForVedtak(vedtak)
+                }.frontendFeilmelding
+
+            assertThat(feilmelding).isEqualTo("Du har ikke tilgang til å hente vedtaksbrevet.")
+        }
+
+        private fun lagForbidden(): HttpClientErrorException.Forbidden =
+            HttpClientErrorException.create(
+                HttpStatus.FORBIDDEN,
+                "Forbidden",
+                HttpHeaders.EMPTY,
+                ByteArray(0),
+                null,
+            ) as HttpClientErrorException.Forbidden
 
         private fun lagUtgåendeJournalpost(
             journalpostId: String,
