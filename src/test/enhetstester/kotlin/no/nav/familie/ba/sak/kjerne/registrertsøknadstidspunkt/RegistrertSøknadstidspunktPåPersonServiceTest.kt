@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -157,7 +158,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
     }
 
     @Nested
-    inner class SettSøknadstidspunktForBarnTest {
+    inner class SettSøknadstidspunktForPersonerFremstiltKravForTest {
         @Test
         fun `skal sette søknad mottatt-dato for barn som mangler, men ikke overskrive eksisterende`() {
             // Arrange
@@ -177,12 +178,12 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
                         søknadstidspunkt = LocalDate.of(2020, 1, 1),
                     ),
                 )
-            every { mockPersongrunnlagService.hentBarna(behandling) } returns listOf(barnMedEksisterende, barnUtenEksisterende)
+            every { mockPersongrunnlagService.hentAktivThrows(behandling.id) } returns lagTestPersonopplysningGrunnlag(behandling.id, barnMedEksisterende, barnUtenEksisterende)
             val lagretSlot = slot<List<RegistrertSøknadstidspunktPåPerson>>()
             every { mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(capture(lagretSlot)) } answers { firstArg() }
 
             // Act
-            registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling)
+            registrertSøknadstidspunktService.settSøknadstidspunktForPersonerFremstiltKravFor(behandling)
 
             // Assert – kun barnet uten eksisterende rad får default satt
             assertThat(lagretSlot.captured).containsExactly(
@@ -200,7 +201,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
 
             // Act
-            registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling)
+            registrertSøknadstidspunktService.settSøknadstidspunktForPersonerFremstiltKravFor(behandling)
 
             // Assert
             verify(exactly = 0) { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) }
@@ -217,12 +218,12 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id) } returns søknadMottattDato.atStartOfDay()
             every { mockSøknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = null) } returns listOf(barn.aktør)
             every { mockRegistrertSøknadstidspunktPåPersonRepository.findByBehandlingId(behandling.id) } returns emptyList()
-            every { mockPersongrunnlagService.hentBarna(behandling) } returns listOf(barn)
+            every { mockPersongrunnlagService.hentAktivThrows(behandling.id) } returns lagTestPersonopplysningGrunnlag(behandling.id, barn)
             val lagretSlot = slot<List<RegistrertSøknadstidspunktPåPerson>>()
             every { mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(capture(lagretSlot)) } answers { firstArg() }
 
             // Act
-            registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling)
+            registrertSøknadstidspunktService.settSøknadstidspunktForPersonerFremstiltKravFor(behandling)
 
             // Assert
             assertThat(lagretSlot.captured).containsExactly(
@@ -241,16 +242,41 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id) } returns søknadMottattDato.atStartOfDay()
             every { mockSøknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = null) } returns listOf(barnSøktFor.aktør)
             every { mockRegistrertSøknadstidspunktPåPersonRepository.findByBehandlingId(behandling.id) } returns emptyList()
-            every { mockPersongrunnlagService.hentBarna(behandling) } returns listOf(barnSøktFor, barnIkkeSøktFor)
+            every { mockPersongrunnlagService.hentAktivThrows(behandling.id) } returns lagTestPersonopplysningGrunnlag(behandling.id, barnSøktFor, barnIkkeSøktFor)
             val lagretSlot = slot<List<RegistrertSøknadstidspunktPåPerson>>()
             every { mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(capture(lagretSlot)) } answers { firstArg() }
 
             // Act
-            registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling)
+            registrertSøknadstidspunktService.settSøknadstidspunktForPersonerFremstiltKravFor(behandling)
 
             // Assert – barnet det ikke er framstilt krav for får ikke default satt
             assertThat(lagretSlot.captured).containsExactly(
                 RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = barnSøktFor.aktør, søknadstidspunkt = søknadMottattDato),
+            )
+        }
+
+        @Test
+        fun `skal sette søknadstidspunkt for søker når det er fremstilt krav om utvidet barnetrygd`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+            val søker = lagPerson(type = PersonType.SØKER)
+            val barn = lagPerson(type = PersonType.BARN)
+            val søknadMottattDato = LocalDate.of(2025, 4, 15)
+
+            every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id) } returns søknadMottattDato.atStartOfDay()
+            every { mockSøknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = null) } returns listOf(barn.aktør, søker.aktør)
+            every { mockRegistrertSøknadstidspunktPåPersonRepository.findByBehandlingId(behandling.id) } returns emptyList()
+            every { mockPersongrunnlagService.hentAktivThrows(behandling.id) } returns lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
+            val lagretSlot = slot<List<RegistrertSøknadstidspunktPåPerson>>()
+            every { mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(capture(lagretSlot)) } answers { firstArg() }
+
+            // Act
+            registrertSøknadstidspunktService.settSøknadstidspunktForPersonerFremstiltKravFor(behandling)
+
+            // Assert – søker får også søknadtidspunkt satt slik at endret utbetaling kan genereres for utvidet-andeler
+            assertThat(lagretSlot.captured).containsExactlyInAnyOrder(
+                RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = søker.aktør, søknadstidspunkt = søknadMottattDato),
+                RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = barn.aktør, søknadstidspunkt = søknadMottattDato),
             )
         }
 
@@ -261,7 +287,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id) } returns null
 
             // Act
-            registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling)
+            registrertSøknadstidspunktService.settSøknadstidspunktForPersonerFremstiltKravFor(behandling)
 
             // Assert
             verify(exactly = 0) { mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(any<List<RegistrertSøknadstidspunktPåPerson>>()) }
@@ -274,7 +300,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON) } returns false
 
             // Act
-            registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling)
+            registrertSøknadstidspunktService.settSøknadstidspunktForPersonerFremstiltKravFor(behandling)
 
             // Assert
             verify(exactly = 0) { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) }
