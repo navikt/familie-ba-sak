@@ -148,7 +148,7 @@ class PreutfyllBorMedSøkerService(
                     }
 
                     else -> {
-                        IkkeOppfyltDelvilkår(begrunnelse = "- Har ikke samme fast eller delt bostedsadresse som søker")
+                        IkkeOppfyltDelvilkår(begrunnelse = "- Har ikke hatt samme fast eller delt bostedsadresse som søker i minst 3 måneder")
                     }
                 }
             }.beskjærFraOgMed(datoForBeskjæringAvFom)
