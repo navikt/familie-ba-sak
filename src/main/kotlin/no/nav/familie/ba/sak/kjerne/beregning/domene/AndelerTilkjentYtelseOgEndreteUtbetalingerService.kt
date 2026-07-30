@@ -29,7 +29,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val endreteUtbetalingerMedAndeler = lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
 
-        return if (!behandling.erSatsendringMånedligValutajusteringFinnmarkstilleggEllerSvalbardtillegg()) {
+        return if (!behandling.erSatsendringMånedligValutajusteringEllerRegionstillegg()) {
             // Hvis noen valideringer feiler, så signalerer vi det til frontend ved å fjerne tilknyttede andeler
             // SB vil få en feilmelding og løsningen blir å slette eller oppdatere endringen
             // Da vil forhåpentligvis valideringen være ok, koblingene til andelene være beholdt
@@ -154,6 +154,7 @@ data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
     val id get() = endretUtbetalingAndel.id
     val fom get() = endretUtbetalingAndel.fom
     val tom get() = endretUtbetalingAndel.tom
+    val erAutomatiskGenerert get() = endretUtbetalingAndel.erAutomatiskGenerert
     val andelerTilkjentYtelse = andeler
 }
 

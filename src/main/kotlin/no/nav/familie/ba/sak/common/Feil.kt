@@ -13,8 +13,8 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
 class AutovedtakSkalIkkeGjennomføresFeil(
-    message: String,
-) : RuntimeException(message)
+    val beskrivelse: String,
+) : RuntimeException(beskrivelse)
 
 class AutovedtakMåBehandlesManueltFeil(
     val beskrivelse: String,

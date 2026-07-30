@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -392,5 +394,124 @@ internal class BehandlingsresultatValideringUtilsTest {
 
         // Act & Assert
         assertDoesNotThrow { BehandlingsresultatValideringUtils.validerBehandlingsresultat(behandling) }
+    }
+
+    @Nested
+    inner class ValiderIngenEndringFørMåned {
+        private val aktør = randomAktør()
+        private val grensemåned = YearMonth.of(2025, 5)
+
+        @Test
+        fun `skal ikke kaste feil når andeler er uendret før grensemåneden`() {
+            // Arrange
+            val andel =
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2025, 1),
+                    tom = YearMonth.of(2025, 4),
+                    aktør = aktør,
+                    kalkulertUtbetalingsbeløp = 1000,
+                )
+
+            // Act & Assert
+            assertDoesNotThrow {
+                BehandlingsresultatValideringUtils.validerIngenEndringFørMåned(
+                    andelerDenneBehandlingen = listOf(andel),
+                    andelerForrigeBehandling = listOf(andel.copy()),
+                    grensemåned = grensemåned,
+                )
+            }
+        }
+
+        @Test
+        fun `skal ikke kaste feil når endring kun skjer fra og med grensemåneden`() {
+            // Arrange
+            val andelFør =
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2025, 1),
+                    tom = YearMonth.of(2025, 4),
+                    aktør = aktør,
+                    kalkulertUtbetalingsbeløp = 1000,
+                )
+            val andelEtter =
+                lagAndelTilkjentYtelse(
+                    fom = grensemåned,
+                    tom = YearMonth.of(2025, 12),
+                    aktør = aktør,
+                    kalkulertUtbetalingsbeløp = 1200,
+                )
+            val forrigeAndelEtter =
+                lagAndelTilkjentYtelse(
+                    fom = grensemåned,
+                    tom = YearMonth.of(2025, 12),
+                    aktør = aktør,
+                    kalkulertUtbetalingsbeløp = 1000,
+                )
+
+            // Act & Assert
+            assertDoesNotThrow {
+                BehandlingsresultatValideringUtils.validerIngenEndringFørMåned(
+                    andelerDenneBehandlingen = listOf(andelFør, andelEtter),
+                    andelerForrigeBehandling = listOf(andelFør.copy(), forrigeAndelEtter),
+                    grensemåned = grensemåned,
+                )
+            }
+        }
+
+        @Test
+        fun `skal kaste feil når kalkulert utbetalingsbeløp er endret i en måned før grensemåneden`() {
+            // Arrange
+            val andelDenneBehandlingen =
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2025, 1),
+                    tom = YearMonth.of(2025, 4),
+                    aktør = aktør,
+                    kalkulertUtbetalingsbeløp = 1200,
+                )
+            val andelForrigeBehandling =
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2025, 1),
+                    tom = YearMonth.of(2025, 4),
+                    aktør = aktør,
+                    kalkulertUtbetalingsbeløp = 1000,
+                )
+
+            // Act & Assert
+            assertThrows<Feil> {
+                BehandlingsresultatValideringUtils.validerIngenEndringFørMåned(
+                    andelerDenneBehandlingen = listOf(andelDenneBehandlingen),
+                    andelerForrigeBehandling = listOf(andelForrigeBehandling),
+                    grensemåned = grensemåned,
+                )
+            }
+        }
+
+        @Test
+        fun `validerIngenEndringTilbakeITid delegerer korrekt til validerIngenEndringFørMåned`() {
+            // Arrange – endring i forrige måned skal gi feil
+            val nåMåned = grensemåned
+            val andelDenneBehandlingen =
+                lagAndelTilkjentYtelse(
+                    fom = nåMåned.minusMonths(2),
+                    tom = nåMåned.minusMonths(1),
+                    aktør = aktør,
+                    kalkulertUtbetalingsbeløp = 1200,
+                )
+            val andelForrigeBehandling =
+                lagAndelTilkjentYtelse(
+                    fom = nåMåned.minusMonths(2),
+                    tom = nåMåned.minusMonths(1),
+                    aktør = aktør,
+                    kalkulertUtbetalingsbeløp = 1000,
+                )
+
+            // Act & Assert
+            assertThrows<Feil> {
+                BehandlingsresultatValideringUtils.validerIngenEndringTilbakeITid(
+                    andelerDenneBehandlingen = listOf(andelDenneBehandlingen),
+                    andelerForrigeBehandling = listOf(andelForrigeBehandling),
+                    nåMåned = nåMåned,
+                )
+            }
+        }
     }
 }

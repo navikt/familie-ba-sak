@@ -112,12 +112,13 @@ class BehandlingsresultatStegTest {
             justRun { behandlingsresultatstegValideringService.validerSatsErUendret(any()) }
             justRun { behandlingsresultatstegValideringService.validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(any()) }
             justRun { behandlingsresultatstegValideringService.validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(any()) }
+            justRun { behandlingsresultatstegValideringService.validerAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed(any()) }
         }
 
         @ParameterizedTest
         @EnumSource(
             value = BehandlingÅrsak::class,
-            names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG"],
+            names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG", "SATSENDRING_EØS"],
             mode = EXCLUDE,
         )
         fun `skal ikke valideres om behandlingen ikke har riktig årsak for behandling som skal automatisk behandles`(
@@ -141,6 +142,20 @@ class BehandlingsresultatStegTest {
             // Assert
             verify(exactly = 1) {
                 behandlingsresultatstegValideringService.validerAtUtenlandskPeriodebeløpOgValutakursErUtfylt(behandling)
+            }
+        }
+
+        @Test
+        fun `skal validere at alle barn med andeler fra forrige iverksatte behandling er med`() {
+            // Arrange
+            val behandling = lagBehandling()
+
+            // Act
+            behandlingsresultatSteg.preValiderSteg(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatstegValideringService.validerAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed(behandling)
             }
         }
 
@@ -189,7 +204,7 @@ class BehandlingsresultatStegTest {
         @ParameterizedTest
         @EnumSource(
             value = BehandlingÅrsak::class,
-            names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG"],
+            names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG", "SATSENDRING_EØS"],
             mode = EXCLUDE,
         )
         fun `skal validere endrede utbetalinger og kompetanse`(

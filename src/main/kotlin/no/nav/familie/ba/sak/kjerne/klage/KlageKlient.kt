@@ -4,20 +4,20 @@ import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
-import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.util.UUID
 
 @Component
 class KlageKlient(
-    @Qualifier("jwtBearer") restOperations: RestOperations,
+    @Qualifier("klageRestClient") private val restClient: RestClient,
     @Value("\${FAMILIE_KLAGE_URL}") private val familieKlageUri: URI,
-) : AbstractRestClient(restOperations, "integrasjon") {
+) {
     fun opprettKlage(opprettKlagebehandlingRequest: OpprettKlagebehandlingRequest): UUID {
         val uri =
             UriComponentsBuilder
@@ -31,7 +31,12 @@ class KlageKlient(
             uri = uri,
             formål = "Opprett klagebehandling",
         ) {
-            postForEntity(uri, opprettKlagebehandlingRequest)
+            restClient
+                .post()
+                .uri(uri)
+                .body(opprettKlagebehandlingRequest)
+                .retrieve()
+                .body()!!
         }
     }
 
@@ -49,7 +54,11 @@ class KlageKlient(
             uri = uri,
             formål = "Hent klagebehandlinger",
         ) {
-            getForEntity(uri)
+            restClient
+                .get()
+                .uri(uri)
+                .retrieve()
+                .body()!!
         }
     }
 }

@@ -454,6 +454,8 @@ class OppgaveService(
             }
     }
 
+    fun hentBehandlingForOppgave(gsakId: String): Behandling? = oppgaveRepository.findByGsakId(gsakId)?.behandling
+
     companion object {
         private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
         private val oppgavetyperSomBehandlesAvBaSak =

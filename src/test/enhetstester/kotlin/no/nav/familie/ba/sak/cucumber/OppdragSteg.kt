@@ -92,6 +92,7 @@ class OppdragSteg {
             vilkårsvurderingService = mockk(),
             featureToggleService = featureToggleService,
             eksternBehandlingRelasjonService = mockk(),
+            fagsakLåsingService = mockk(),
         )
 
     private val logger = LoggerFactory.getLogger(javaClass)

@@ -11,7 +11,6 @@ import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.ikkeTilgang
 import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
-import no.nav.familie.restklient.client.RessursException
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -23,13 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 
 class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
     @Autowired
-    @Qualifier("jwtBearer")
-    lateinit var restOperations: RestOperations
+    @Qualifier("utenAuthRestClient")
+    lateinit var restClient: RestClient
 
     lateinit var integrasjonKlient: IntegrasjonKlient
 
@@ -38,7 +37,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
         integrasjonKlient =
             IntegrasjonKlient(
                 URI.create(wireMockServer.baseUrl() + "/api"),
-                restOperations,
+                restClient,
                 mockk(),
                 1,
             )
@@ -92,9 +91,9 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
         )
 
         val feil =
-            assertThrows<RessursException> { integrasjonKlient.opprettOppgave(lagTestOppgave()) }
-        assertTrue(feil.httpStatus == HttpStatus.FORBIDDEN)
-        assertTrue(feil.message?.contains("Ikke tilgang til å opprett oppgave") == true)
+            assertThrows<HttpClientErrorException.Forbidden> { integrasjonKlient.opprettOppgave(lagTestOppgave()) }
+        assertTrue(feil.statusCode == HttpStatus.FORBIDDEN)
+        assertTrue(feil.responseBodyAsString.contains("Ikke tilgang til å opprett oppgave"))
     }
 
     @Test

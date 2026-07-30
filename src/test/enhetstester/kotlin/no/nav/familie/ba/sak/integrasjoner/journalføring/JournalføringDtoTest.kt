@@ -57,6 +57,28 @@ class JournalføringDtoTest {
         }
 
         @Test
+        fun `Skal sette AvsenderMottakerIdType i AvsenderMottaker til ORGNR dersom ident er 9 siffer`() {
+            // Arrange
+            val sak =
+                Sak(
+                    arkivsaksnummer = "arkivsaksnummer",
+                    arkivsaksystem = "arkivsaksystem",
+                    fagsakId = "1",
+                    sakstype = "sakstype",
+                    fagsaksystem = "BA",
+                )
+
+            val journalføringDto = lagMockJournalføringDto(NavnOgIdent("Organisasjon AS", "123456789"))
+            val journalpost = lagTestJournalpost("123456789", "1", null, "NAV_NO")
+
+            // Act
+            val oppdaterJournalpostRequest = journalføringDto.oppdaterMedDokumentOgSak(sak, journalpost)
+
+            // Assert
+            assertThat(oppdaterJournalpostRequest.avsenderMottaker?.idType).isEqualTo(AvsenderMottakerIdType.ORGNR)
+        }
+
+        @Test
         fun `Skal sette AvsenderMottakerIdType i AvsenderMottaker til null dersom ident er blank`() {
             // Arrange
             val sak =

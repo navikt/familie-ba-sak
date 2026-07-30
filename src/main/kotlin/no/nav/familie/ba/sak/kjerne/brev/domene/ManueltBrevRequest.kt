@@ -102,15 +102,18 @@ data class ManueltBrevRequest(
 
     fun enhetNavn(): String = this.enhet?.enhetNavn ?: throw Feil("Finner ikke enhetsnavn på manuell brevrequest")
 
-    fun mottakerlandSED(): List<String> {
+    fun mottakerlandSED(): List<String> =
+        mottakerlandSedEllerNull()
+            ?: throw Feil("Finner ikke noen mottakerland for SED på manuell brevrequest")
+
+    fun mottakerlandSedEllerNull(): List<String>? {
         if (this.mottakerlandSed.contains("NO")) {
             throw FunksjonellFeil(
                 frontendFeilmelding = "Norge kan ikke velges som mottakerland.",
-                melding = "Ugyldig mottakerland for brevtype 'varsel om årlig revurdering EØS'",
+                melding = "Ugyldig mottakerland for SED på manuell brevrequest",
             )
         }
         return this.mottakerlandSed.takeIf { it.isNotEmpty() }
-            ?: throw Feil("Finner ikke noen mottakerland for SED på manuell brevrequest")
     }
 }
 
@@ -415,6 +418,11 @@ fun ManueltBrevRequest.tilBrev(
                 enhet = this.enhetNavn(),
                 mal = Brevmal.SVARTIDSBREV,
                 erEøsBehandling = erEøsBehandling(behandlingKategori),
+                mottakerlandSed =
+                    this
+                        .mottakerlandSedEllerNull()
+                        ?.map { tilLandNavn(hentLandkoder(), it) }
+                        ?.slåSammen(),
                 saksbehandlerNavn = saksbehandlerNavn,
             )
         }
@@ -594,7 +602,6 @@ fun ManueltBrevRequest.tilBrev(
         Brevmal.VEDTAK_OPPHØR_MED_ENDRING,
         Brevmal.VEDTAK_AVSLAG,
         Brevmal.VEDTAK_FORTSATT_INNVILGET,
-        Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV,
         Brevmal.VEDTAK_OPPHØR_DØDSFALL,
         Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON,
         Brevmal.VEDTAK_AVSLAG_INSTITUSJON,
@@ -607,6 +614,7 @@ fun ManueltBrevRequest.tilBrev(
         Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
         Brevmal.AUTOVEDTAK_FINNMARKSTILLEGG,
         Brevmal.AUTOVEDTAK_SVALBARDTILLEGG,
+        Brevmal.AUTOVEDTAK_SATSENDRING_EØS,
         Brevmal.TILBAKEKREVINGSVEDTAK_MOTREGNING,
         -> {
             throw Feil("Kan ikke mappe fra manuel brevrequest til ${this.brevmal}.")

@@ -55,7 +55,7 @@ class OvergangsstønadServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING"])
+    @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SATSENDRING_EØS"])
     fun `Ved satsendring og månedlig valutajustering skal gamle perioder kopieres`(
         årsak: BehandlingÅrsak,
     ) {

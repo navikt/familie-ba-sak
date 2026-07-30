@@ -5,11 +5,11 @@ import no.nav.familie.ba.sak.integrasjoner.RETRY_BACKOFF_5000MS
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsforholdRequest
 import no.nav.familie.ba.sak.integrasjoner.retryVedException
-import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.time.LocalDate
@@ -17,9 +17,9 @@ import java.time.LocalDate
 @Component
 class SystemOnlyIntegrasjonKlient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
-    @Qualifier("jwtBearerClientCredentials") restOperations: RestOperations,
+    @Qualifier("integrasjonerM2mRestClient") private val restClient: RestClient,
     @Value("$RETRY_BACKOFF_5000MS") private val retryBackoffDelay: Long,
-) : AbstractRestClient(restOperations, "integrasjon") {
+) {
     fun hentArbeidsforholdMedSystembruker(
         ident: String,
         ansettelsesperiodeFom: LocalDate,
@@ -38,7 +38,12 @@ class SystemOnlyIntegrasjonKlient(
             formål = "Hent arbeidsforhold",
         ) {
             retryVedException(retryBackoffDelay).execute {
-                postForEntity(uri, ArbeidsforholdRequest(ident, ansettelsesperiodeFom, ansettelsesperiodeTom))
+                restClient
+                    .post()
+                    .uri(uri)
+                    .body(ArbeidsforholdRequest(ident, ansettelsesperiodeFom, ansettelsesperiodeTom))
+                    .retrieve()
+                    .body()!!
             }
         }
     }

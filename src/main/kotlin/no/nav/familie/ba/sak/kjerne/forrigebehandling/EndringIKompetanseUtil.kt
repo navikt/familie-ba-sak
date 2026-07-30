@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.kombinerUtenNullMed
 
 object EndringIKompetanseUtil {
     fun lagEndringIKompetanseForPersonTidslinje(

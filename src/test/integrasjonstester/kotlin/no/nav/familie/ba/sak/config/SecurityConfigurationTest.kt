@@ -11,15 +11,11 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.ValueSource
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.HttpStatusCodeException
-import org.springframework.web.client.exchange
-import org.springframework.web.client.getForEntity
 import tools.jackson.module.kotlin.readValue
 
 @ActiveProfiles(
@@ -32,7 +28,12 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
     inner class PermitAll {
         @Test
         fun `internal endepunkt er tilgjengelig uten token`() {
-            val response = restTemplate.getForEntity<String>(hentUrl("/internal/health/liveness"))
+            val response =
+                restClient
+                    .get()
+                    .uri(hentUrl("/internal/health/liveness"))
+                    .retrieve()
+                    .toEntity(String::class.java)
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         }
@@ -44,7 +45,11 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
         fun `api-kall uten token returnerer 401`() {
             val feil =
                 assertThrows<HttpStatusCodeException> {
-                    restTemplate.getForEntity<String>(hentUrl("/api/fagsaker/1"))
+                    restClient
+                        .get()
+                        .uri(hentUrl("/api/fagsaker/1"))
+                        .retrieve()
+                        .toEntity(String::class.java)
                 }
 
             assertThat(feil.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -64,7 +69,12 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
             val headers = hentHeaders(groups = listOf(rolle.name))
 
             try {
-                restTemplate.exchange<String>(hentUrl("/api/fagsaker/1"), HttpMethod.GET, HttpEntity<String>(headers))
+                restClient
+                    .get()
+                    .uri(hentUrl("/api/fagsaker/1"))
+                    .headers { h -> h.addAll(headers) }
+                    .retrieve()
+                    .toEntity(String::class.java)
             } catch (e: HttpStatusCodeException) {
                 assertThat(e.statusCode).isNotIn(HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN)
             }
@@ -79,7 +89,12 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
                 }
 
             try {
-                restTemplate.exchange<String>(hentUrl("/api/fagsaker/1"), HttpMethod.GET, HttpEntity<String>(headers))
+                restClient
+                    .get()
+                    .uri(hentUrl("/api/fagsaker/1"))
+                    .headers { h -> h.addAll(headers) }
+                    .retrieve()
+                    .toEntity(String::class.java)
             } catch (e: HttpStatusCodeException) {
                 assertThat(e.statusCode).isNotIn(HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN)
             }
@@ -95,7 +110,12 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
             val feil =
                 assertThrows<HttpStatusCodeException> {
-                    restTemplate.exchange<String>(hentUrl("/api/fagsaker/1"), HttpMethod.GET, HttpEntity<String>(headers))
+                    restClient
+                        .get()
+                        .uri(hentUrl("/api/fagsaker/1"))
+                        .headers { h -> h.addAll(headers) }
+                        .retrieve()
+                        .toEntity(String::class.java)
                 }
 
             assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
@@ -116,11 +136,12 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
             val feil =
                 assertThrows<HttpStatusCodeException> {
-                    restTemplate.exchange<String>(
-                        hentUrl("/api/klage/fagsaker/1/kan-opprette-revurdering-klage"),
-                        HttpMethod.GET,
-                        HttpEntity<String>(headers),
-                    )
+                    restClient
+                        .get()
+                        .uri(hentUrl("/api/klage/fagsaker/1/kan-opprette-revurdering-klage"))
+                        .headers { h -> h.addAll(headers) }
+                        .retrieve()
+                        .toEntity(String::class.java)
                 }
 
             assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
@@ -135,11 +156,12 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
                 }
 
             try {
-                restTemplate.exchange<String>(
-                    hentUrl("/api/klage/fagsaker/1/kan-opprette-revurdering-klage"),
-                    HttpMethod.GET,
-                    HttpEntity<String>(headers),
-                )
+                restClient
+                    .get()
+                    .uri(hentUrl("/api/klage/fagsaker/1/kan-opprette-revurdering-klage"))
+                    .headers { h -> h.addAll(headers) }
+                    .retrieve()
+                    .toEntity(String::class.java)
             } catch (e: HttpStatusCodeException) {
                 assertThat(e.statusCode).isNotIn(HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN)
             }
@@ -160,7 +182,12 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
             val feil =
                 assertThrows<HttpStatusCodeException> {
-                    restTemplate.exchange<String>(hentUrl("/api/fagsaker/1"), HttpMethod.GET, HttpEntity<String>(headers))
+                    restClient
+                        .get()
+                        .uri(hentUrl("/api/fagsaker/1"))
+                        .headers { h -> h.addAll(headers) }
+                        .retrieve()
+                        .toEntity(String::class.java)
                 }
 
             assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
@@ -178,11 +205,12 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
                 }
 
             try {
-                restTemplate.exchange<String>(
-                    hentUrl("/api/ekstern/pensjon/bestill-personer-med-barnetrygd/2023"),
-                    HttpMethod.GET,
-                    HttpEntity<String>(headers),
-                )
+                restClient
+                    .get()
+                    .uri(hentUrl("/api/ekstern/pensjon/bestill-personer-med-barnetrygd/2023"))
+                    .headers { h -> h.addAll(headers) }
+                    .retrieve()
+                    .toEntity(String::class.java)
             } catch (e: HttpStatusCodeException) {
                 assertThat(e.statusCode).isNotIn(HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN)
             }
@@ -203,7 +231,12 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
             val feil =
                 assertThrows<HttpStatusCodeException> {
-                    restTemplate.exchange<String>(hentUrl("/api/fagsaker/1"), HttpMethod.GET, HttpEntity<String>(headers))
+                    restClient
+                        .get()
+                        .uri(hentUrl("/api/fagsaker/1"))
+                        .headers { h -> h.addAll(headers) }
+                        .retrieve()
+                        .toEntity(String::class.java)
                 }
 
             assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
@@ -221,11 +254,12 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
                 }
 
             try {
-                restTemplate.exchange<String>(
-                    hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
-                    HttpMethod.POST,
-                    HttpEntity<String>(headers),
-                )
+                restClient
+                    .post()
+                    .uri(hentUrl("/api/bisys/hent-utvidet-barnetrygd"))
+                    .headers { h -> h.addAll(headers) }
+                    .retrieve()
+                    .toEntity(String::class.java)
             } catch (e: HttpStatusCodeException) {
                 assertThat(e.statusCode).isNotIn(HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN)
             }
@@ -244,7 +278,12 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
             val feil =
                 assertThrows<HttpStatusCodeException> {
-                    restTemplate.exchange<String>(hentUrl("/api/fagsaker/1"), HttpMethod.GET, HttpEntity<String>(headers))
+                    restClient
+                        .get()
+                        .uri(hentUrl("/api/fagsaker/1"))
+                        .headers { h -> h.addAll(headers) }
+                        .retrieve()
+                        .toEntity(String::class.java)
                 }
 
             assertThat(feil.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -256,7 +295,12 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
             val feil =
                 assertThrows<HttpStatusCodeException> {
-                    restTemplate.exchange<String>(hentUrl("/api/minside/barnetrygd"), HttpMethod.GET, HttpEntity<String>(headers))
+                    restClient
+                        .get()
+                        .uri(hentUrl("/api/minside/barnetrygd"))
+                        .headers { h -> h.addAll(headers) }
+                        .retrieve()
+                        .toEntity(String::class.java)
                 }
 
             assertThat(feil.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)

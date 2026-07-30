@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.ekstern.bisys.BisysUtvidetBarnetrygdResponse
 import no.nav.familie.ba.sak.ekstern.pensjon.BarnetrygdTilPensjonRequest
 import no.nav.familie.ba.sak.ekstern.pensjon.BarnetrygdTilPensjonResponse
@@ -10,7 +11,6 @@ import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
-import no.nav.familie.restklient.client.AbstractRestClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -19,7 +19,8 @@ import org.springframework.core.retry.RetryException
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import java.net.URI
 import java.time.Duration
 import java.time.LocalDate
@@ -28,9 +29,9 @@ import java.time.YearMonth
 @Component
 class InfotrygdBarnetrygdKlient(
     @Value("\${FAMILIE_BA_INFOTRYGD_API_URL}") private val klientUri: URI,
-    @Qualifier("jwtBearerMedLangTimeout") restOperations: RestOperations,
+    @Qualifier("infotrygdBarnetrygdRestClient") private val restClient: RestClient,
     @Value("$RETRY_BACKOFF_3_MIN") private val retryBackoffDelay: Long,
-) : AbstractRestClient(restOperations, "infotrygd") {
+) {
     fun harLøpendeSakIInfotrygd(
         søkersIdenter: List<String>,
         barnasIdenter: List<String> = emptyList(),
@@ -40,7 +41,13 @@ class InfotrygdBarnetrygdKlient(
         val request = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
 
         return try {
-            postForEntity<InfotrygdLøpendeBarnetrygdResponse>(uri, request).harLøpendeBarnetrygd
+            restClient
+                .post()
+                .uri(uri)
+                .body(request)
+                .retrieve()
+                .body<InfotrygdLøpendeBarnetrygdResponse>()!!
+                .harLøpendeBarnetrygd
         } catch (ex: Exception) {
             loggFeil(ex, uri)
             throw ex
@@ -56,7 +63,13 @@ class InfotrygdBarnetrygdKlient(
         val request = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
 
         return try {
-            postForEntity<InfotrygdÅpenSakResponse>(uri, request).harÅpenSak
+            restClient
+                .post()
+                .uri(uri)
+                .body(request)
+                .retrieve()
+                .body<InfotrygdÅpenSakResponse>()!!
+                .harÅpenSak
         } catch (ex: Exception) {
             loggFeil(ex, uri)
             throw ex
@@ -70,7 +83,12 @@ class InfotrygdBarnetrygdKlient(
         val uri = URI.create("$klientUri/infotrygd/barnetrygd/saker")
 
         return try {
-            postForEntity(uri, InfotrygdSøkRequest(søkersIdenter, barnasIdenter))
+            restClient
+                .post()
+                .uri(uri)
+                .body(InfotrygdSøkRequest(søkersIdenter, barnasIdenter))
+                .retrieve()
+                .body()!!
         } catch (ex: Exception) {
             loggFeil(ex, uri)
             throw Feil(
@@ -90,7 +108,12 @@ class InfotrygdBarnetrygdKlient(
         val uri = URI.create("$klientUri/infotrygd/barnetrygd/stonad?historikk=$historikk")
 
         return try {
-            postForEntity(uri, InfotrygdSøkRequest(søkersIdenter, barnasIdenter))
+            restClient
+                .post()
+                .uri(uri)
+                .body(InfotrygdSøkRequest(søkersIdenter, barnasIdenter))
+                .retrieve()
+                .body()!!
         } catch (ex: Exception) {
             loggFeil(ex, uri)
             throw Feil(
@@ -115,7 +138,12 @@ class InfotrygdBarnetrygdKlient(
         val body = HentUtvidetBarnetrygdRequest(personIdent, fraDato)
         return try {
             retryVedException(retryBackoffDelay).execute {
-                postForEntity(uri, body)
+                restClient
+                    .post()
+                    .uri(uri)
+                    .body(body)
+                    .retrieve()
+                    .body()!!
             }
         } catch (ex: Exception) {
             val lastException = if (ex is RetryException) ex.lastException else ex
@@ -132,7 +160,12 @@ class InfotrygdBarnetrygdKlient(
         val uri = URI.create("$klientUri/infotrygd/barnetrygd/pensjon")
         val body = BarnetrygdTilPensjonRequest(personIdent, fraDato)
         return try {
-            postForEntity(uri, body)
+            restClient
+                .post()
+                .uri(uri)
+                .body(body)
+                .retrieve()
+                .body()!!
         } catch (ex: Exception) {
             loggFeil(ex, uri)
             throw RuntimeException("Henting av barnetrygd til pensjon feilet. Gav feil: ${ex.message}", ex)
@@ -143,7 +176,11 @@ class InfotrygdBarnetrygdKlient(
         val uri = URI.create("$klientUri/infotrygd/barnetrygd/pensjon?aar=$år")
         return try {
             retryVedException(Duration.ofMinutes(3).toMillis()).execute {
-                getForEntity(uri)
+                restClient
+                    .get()
+                    .uri(uri)
+                    .retrieve()
+                    .body()!!
             }
         } catch (ex: Exception) {
             loggFeil(ex, uri)
@@ -157,10 +194,12 @@ class InfotrygdBarnetrygdKlient(
     ): SendtBrevResponse {
         val uri = URI.create("$klientUri/infotrygd/barnetrygd/brev")
         return try {
-            postForEntity(
-                uri,
-                SendtBrevRequest(søkersIdenter, brevkoder.map { it.kode }),
-            )
+            restClient
+                .post()
+                .uri(uri)
+                .body(SendtBrevRequest(søkersIdenter, brevkoder.map { it.kode }))
+                .retrieve()
+                .body()!!
         } catch (ex: Exception) {
             loggFeil(ex, uri)
             throw RuntimeException(

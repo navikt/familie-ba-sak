@@ -109,8 +109,8 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         }
 
         @ParameterizedTest
-        @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING"])
-        fun `skal kopiere persongrunnlaget fra forrige behandling ved satsendring og månedlig valutajustering`(
+        @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SATSENDRING_EØS"])
+        fun `skal kopiere persongrunnlaget fra forrige behandling ved satsendring, månedlig valutajustering og satsendring EØS`(
             årsak: BehandlingÅrsak,
         ) {
             val forrigeBehandling = lagBehandling()

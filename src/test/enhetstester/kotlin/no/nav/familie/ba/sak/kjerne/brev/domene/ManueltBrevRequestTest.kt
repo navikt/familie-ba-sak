@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForlengetSvartidsbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevInnhenteOpplysningerKlageData
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Svartidsbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.UtbetalingEtterKAVedtakData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevÅrlegKontrollEøs
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
@@ -327,6 +329,62 @@ class ManueltBrevRequestTest {
             val brevRequest =
                 baseRequest.copy(
                     brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS,
+                    mottakerlandSed = listOf("SE", "NO"),
+                )
+
+            assertThrows<FunksjonellFeil> {
+                brevRequest.tilBrev("12345678910", "mottakerNavn", "saksbehandlerNavn") {
+                    mapOf(Pair("SE", "Sverige"), Pair("NO", "Norge"))
+                }
+            }
+        }
+
+        @Test
+        fun `Svartidsbrev request med mottakerland skal gi svartidsbrev med SED-flettefelt`() {
+            val brev =
+                baseRequest
+                    .copy(
+                        brevmal = Brevmal.SVARTIDSBREV,
+                        behandlingKategori = BehandlingKategori.EØS,
+                        mottakerlandSed = listOf("SE", "DK"),
+                    ).tilBrev("12345678910", "mottakerNavn", "saksbehandlerNavn") {
+                        mapOf(Pair("SE", "Sverige"), Pair("DK", "Danmark"))
+                    }
+
+            assertThat(brev::class).isEqualTo(Svartidsbrev::class)
+            brev as Svartidsbrev
+
+            assertThat(brev.mal).isEqualTo(Brevmal.SVARTIDSBREV)
+            assertThat(
+                brev.data.delmalData.sedErSendtTil!!
+                    .mottakerlandSed!!
+                    .single(),
+            ).isEqualTo("Sverige og Danmark")
+        }
+
+        @Test
+        fun `Svartidsbrev request uten mottakerland skal gi svartidsbrev uten SED-flettefelt`() {
+            val brev =
+                baseRequest
+                    .copy(
+                        brevmal = Brevmal.SVARTIDSBREV,
+                        behandlingKategori = BehandlingKategori.NASJONAL,
+                        mottakerlandSed = emptyList(),
+                    ).tilBrev("12345678910", "mottakerNavn", "saksbehandlerNavn") { emptyMap() }
+
+            assertThat(brev::class).isEqualTo(Svartidsbrev::class)
+            brev as Svartidsbrev
+
+            assertThat(brev.mal).isEqualTo(Brevmal.SVARTIDSBREV)
+            assertThat(brev.data.delmalData.sedErSendtTil).isNull()
+        }
+
+        @Test
+        fun `Svartidsbrev request skal ikke tillate Norge som mottakerland for SED`() {
+            val brevRequest =
+                baseRequest.copy(
+                    brevmal = Brevmal.SVARTIDSBREV,
+                    behandlingKategori = BehandlingKategori.EØS,
                     mottakerlandSed = listOf("SE", "NO"),
                 )
 

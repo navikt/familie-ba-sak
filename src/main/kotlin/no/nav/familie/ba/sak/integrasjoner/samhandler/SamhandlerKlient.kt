@@ -4,20 +4,20 @@ import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
 import no.nav.familie.kontrakter.ba.tss.SamhandlerInfo
 import no.nav.familie.kontrakter.ba.tss.SøkSamhandlerInfo
 import no.nav.familie.kontrakter.ba.tss.SøkSamhandlerInfoRequest
-import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import java.net.URI
 
 @Service
 class SamhandlerKlient(
     @Value("\${FAMILIE_OPPDRAG_API_URL}")
     private val familieOppdragUri: String,
-    @Qualifier("jwtBearer") restOperations: RestOperations,
-) : AbstractRestClient(restOperations, "samhandler") {
+    @Qualifier("økonomiRestClient") private val restClient: RestClient,
+) {
     @Cacheable("hent-samhandler", cacheManager = "dailyCache")
     fun hentSamhandler(orgNummer: String): SamhandlerInfo {
         val uri = URI.create("$familieOppdragUri/tss/orgnr/$orgNummer")
@@ -27,7 +27,11 @@ class SamhandlerKlient(
             uri = uri,
             formål = "Henter samhandler fra TSS",
         ) {
-            getForEntity(uri = uri)
+            restClient
+                .get()
+                .uri(uri)
+                .retrieve()
+                .body()!!
         }
     }
 
@@ -44,7 +48,12 @@ class SamhandlerKlient(
             uri = uri,
             formål = "Søk samhandler fra TSS",
         ) {
-            postForEntity(uri = uri, SøkSamhandlerInfoRequest(navn, side, postnummer, område))
+            restClient
+                .post()
+                .uri(uri)
+                .body(SøkSamhandlerInfoRequest(navn, side, postnummer, område))
+                .retrieve()
+                .body()!!
         }
     }
 }

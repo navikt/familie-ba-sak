@@ -375,7 +375,7 @@ class RestartAvSmåbarnstilleggTest(
     ) {
         unmockkObject(SatsTidspunkt)
         autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(fagsakId, satsendringsTidspunkt))
-        val satsendring = behandlingHentOgPersisterService.hentBehandlinger(fagsakId).first { it.erSatsendring() }
+        val satsendring = behandlingHentOgPersisterService.hentBehandlinger(fagsakId).first { it.erSatsendringNasjonal() }
 
         val iverksattBehandling =
             håndterIverksettingAvBehandling(

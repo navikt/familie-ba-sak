@@ -4,7 +4,6 @@ enum class FeatureToggle(
     val navn: String,
 ) {
     // Operasjonelle
-    KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV("familie-ba-sak.behandling.korreksjon-vedtaksbrev"),
     TEKNISK_VEDLIKEHOLD_HENLEGGELSE("familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"),
     TEKNISK_ENDRING("familie-ba-sak.behandling.teknisk-endring"),
     HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD("familie-ba-sak.hent-identer-til-psys-fra-infotrygd"),
@@ -59,4 +58,16 @@ enum class FeatureToggle(
 
     // NAV-29193
     KAN_GENERERE_BARNAS_VILKÅR("familie-ba-sak.kan-generere-barnas-vilkar"),
+
+    // NAV-25661
+    KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON("familie-ba-sak.kan-registrere-soknadstidspunkt"),
+
+    // NAV-29800
+    KAN_KJØRE_SATSENDRING_EØS("familie-ba-sak.kan-kjore-satsendring-eos"),
+
+    // NAV-29936
+    SKAL_SLETTE_GAMLE_VEDTAKSBREV_FRA_DB("familie-ba-sak.skal-slette-gamle-vedtaksbrev-fra-db"),
+
+    // NAV-29382
+    HENT_VEDTAKSBREV_FRA_JOARK("familie-ba-sak.hent-vedtaksbrev-fra-joark"),
 }

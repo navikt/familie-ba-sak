@@ -53,7 +53,7 @@ class TilgangServiceTest {
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
     private val cacheManager = ConcurrentMapCacheManager()
     private val auditLogger = AuditLogger("familie-ba-sak")
-    private val fakeFamilieIntegrasjonerTilgangskontrollKlient = FakeFamilieIntegrasjonerTilgangskontrollKlient(RestTemplate())
+    private val fakeFamilieIntegrasjonerTilgangskontrollKlient = FakeFamilieIntegrasjonerTilgangskontrollKlient()
 
     private val familieIntegrasjonerTilgangskontrollService =
         FamilieIntegrasjonerTilgangskontrollService(

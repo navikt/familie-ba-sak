@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -1762,6 +1763,108 @@ class BehandlingStegTest {
             fun `skal kaste exception om stegtype ikke er støttet`() {
                 // Arrange
                 val behandling = lagBehandling(årsak = BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING)
+
+                // Act & assert
+                val exception =
+                    assertThrows<Feil> {
+                        hentNesteSteg(
+                            behandling = behandling,
+                            utførendeStegType = StegType.REGISTRERE_INSTITUSJON,
+                            endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
+                        )
+                    }
+                assertThat(exception.message).isEqualTo(
+                    "Stegtype ${StegType.REGISTRERE_INSTITUSJON.displayName()} er ikke implementert for behandling med årsak ${behandling.opprettetÅrsak} og type ${behandling.type}.",
+                )
+            }
+        }
+
+        @Nested
+        inner class SatsendringEøs {
+            @Disabled
+            @ParameterizedTest(name = "Henter neste steg for {0}")
+            @CsvSource(
+                "REGISTRERE_PERSONGRUNNLAG, VILKÅRSVURDERING",
+                "VILKÅRSVURDERING, BEHANDLINGSRESULTAT",
+                "BEHANDLINGSRESULTAT, IVERKSETT_MOT_OPPDRAG",
+                "IVERKSETT_MOT_OPPDRAG, VENTE_PÅ_STATUS_FRA_ØKONOMI",
+                "VENTE_PÅ_STATUS_FRA_ØKONOMI, JOURNALFØR_VEDTAKSBREV",
+                "JOURNALFØR_VEDTAKSBREV, DISTRIBUER_VEDTAKSBREV",
+                "DISTRIBUER_VEDTAKSBREV, FERDIGSTILLE_BEHANDLING",
+                "FERDIGSTILLE_BEHANDLING, BEHANDLING_AVSLUTTET",
+                "BEHANDLING_AVSLUTTET, BEHANDLING_AVSLUTTET",
+            )
+            fun `skal hente neste steg med endringer i utbetaling`(
+                nåværendeSteg: StegType,
+                forventetResultat: StegType,
+            ) {
+                // Arrange
+                val behandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING_EØS)
+
+                // Act
+                val nesteSteg =
+                    hentNesteSteg(
+                        behandling = behandling,
+                        utførendeStegType = nåværendeSteg,
+                        endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
+                    )
+
+                // Assert
+                assertThat(nesteSteg).isEqualTo(forventetResultat)
+            }
+
+            @Disabled
+            @ParameterizedTest(name = "Henter neste steg for {0}")
+            @CsvSource(
+                "REGISTRERE_PERSONGRUNNLAG, VILKÅRSVURDERING",
+                "VILKÅRSVURDERING, BEHANDLINGSRESULTAT",
+                "BEHANDLINGSRESULTAT, JOURNALFØR_VEDTAKSBREV",
+                "JOURNALFØR_VEDTAKSBREV, DISTRIBUER_VEDTAKSBREV",
+                "DISTRIBUER_VEDTAKSBREV, FERDIGSTILLE_BEHANDLING",
+                "FERDIGSTILLE_BEHANDLING, BEHANDLING_AVSLUTTET",
+                "BEHANDLING_AVSLUTTET, BEHANDLING_AVSLUTTET",
+            )
+            fun `skal hente neste steg uten endringer i utbetaling`(
+                nåværendeSteg: StegType,
+                forventetResultat: StegType,
+            ) {
+                // Arrange
+                val behandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING_EØS)
+
+                // Act
+                val nesteSteg =
+                    hentNesteSteg(
+                        behandling = behandling,
+                        utførendeStegType = nåværendeSteg,
+                        endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
+                    )
+
+                // Assert
+                assertThat(nesteSteg).isEqualTo(forventetResultat)
+            }
+
+            @Disabled
+            @Test
+            fun `skal kaste exception ved BEHANDLINGSRESULTAT når endringer i utbetaling ikke er utledet`() {
+                // Arrange
+                val behandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING_EØS)
+
+                // Act & assert
+                val exception =
+                    assertThrows<Feil> {
+                        hentNesteSteg(
+                            behandling = behandling,
+                            utførendeStegType = StegType.BEHANDLINGSRESULTAT,
+                            endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT,
+                        )
+                    }
+                assertThat(exception.message).isEqualTo("Endringer i utbetaling må utledes før man kan gå videre til neste steg.")
+            }
+
+            @Test
+            fun `skal kaste exception om stegtype ikke er støttet`() {
+                // Arrange
+                val behandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING_EØS)
 
                 // Act & assert
                 val exception =

@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.fake
 
-import no.nav.familie.ba.sak.config.restTemplate
+import io.mockk.mockk
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityKlient
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.sanity.SanityData
 
-class FakeSanityKlient : SanityKlient("ba-brev", restTemplate, 1) {
+class FakeSanityKlient : SanityKlient("ba-brev", mockk(relaxed = true), 1) {
     private val begrunnelser: List<SanityBegrunnelse> = SanityData.hentSanityBegrunnelser()
     private val eøsBegrunnelser: List<SanityEØSBegrunnelse> = SanityData.hentSanityEØSBegrunnelser()
 

@@ -19,7 +19,6 @@ class BrevmalService(
     fun hentBrevmal(behandling: Behandling): Brevmal =
         when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.DØDSFALL_BRUKER -> Brevmal.VEDTAK_OPPHØR_DØDSFALL
-            BehandlingÅrsak.KORREKSJON_VEDTAKSBREV -> Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV
             else -> hentVedtaksbrevmal(behandling)
         }
 

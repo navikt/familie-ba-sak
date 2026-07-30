@@ -13,7 +13,7 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.web.client.RestTemplate
 
 class FamilieIntegrasjonerTilgangskontrollServiceTest {
-    private val fakeFamilieIntegrasjonerTilgangskontrollKlient = FakeFamilieIntegrasjonerTilgangskontrollKlient(RestTemplate())
+    private val fakeFamilieIntegrasjonerTilgangskontrollKlient = FakeFamilieIntegrasjonerTilgangskontrollKlient()
 
     private val cacheManager = ConcurrentMapCacheManager()
 

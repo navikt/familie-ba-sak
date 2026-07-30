@@ -298,15 +298,10 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                    ON  p.fk_gr_personopplysninger_id = gr.id AND p.type = 'BARN'
             GROUP BY sv.fk_fagsak_id
         )
-        -- Fagsaker der yngste barn har fylt 18 år for mer enn 1 år siden,
-        -- og som ikke allerede er aktivt låst
+        -- Fagsaker der yngste barn har fylt 18 år for mer enn 1 år siden
         SELECT yb.fk_fagsak_id
         FROM   yngste_barn yb
         WHERE  yb.yngste_foedselsdato + INTERVAL '19 years' <= CURRENT_DATE
-          AND  NOT EXISTS (
-                   SELECT 1 FROM fagsak_laasing fl
-                   WHERE  fl.fk_fagsak_id = yb.fk_fagsak_id AND fl.aktiv = TRUE
-               )
         """,
         nativeQuery = true,
     )

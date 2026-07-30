@@ -14,11 +14,11 @@ import no.nav.familie.ba.sak.kjerne.beregning.satstypeTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.tilAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.tilTryggTidslinjeForSøkersYtelse
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.harIkkeOverlappMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.harOverlappMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.opprettBooleanTidslinje
+import no.nav.familie.tidslinje.harIkkeOverlappMed
+import no.nav.familie.tidslinje.harOverlappMed
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.kombinerUtenNullMed
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.YearMonth

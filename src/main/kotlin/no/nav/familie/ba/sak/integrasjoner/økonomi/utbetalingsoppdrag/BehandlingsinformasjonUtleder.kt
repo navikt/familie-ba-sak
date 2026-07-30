@@ -27,7 +27,7 @@ class BehandlingsinformasjonUtleder(
     ): Behandlingsinformasjon {
         val behandling = vedtak.behandling
         val fagsak = behandling.fagsak
-        val endretMigreringsdato = endretMigreringsdatoUtleder.utled(fagsak = fagsak, forrigeTilkjentYtelse = forrigeTilkjentYtelse, erSatsendring = behandling.erSatsendring())
+        val endretMigreringsdato = endretMigreringsdatoUtleder.utled(fagsak = fagsak, forrigeTilkjentYtelse = forrigeTilkjentYtelse, erSatsendring = behandling.erSatsendringNasjonal())
         return Behandlingsinformasjon(
             saksbehandlerId = saksbehandlerId,
             behandlingId = behandling.id.toString(),

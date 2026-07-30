@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.EksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsingService
 import no.nav.familie.ba.sak.kjerne.logg.BehandlingLoggRequest
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
@@ -60,6 +61,7 @@ class BehandlingServiceTest {
     private val vilkårsvurderingService: VilkårsvurderingService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
+    private val fagsakLåsingService: FagsakLåsingService = mockk()
 
     private val behandlingService: BehandlingService =
         BehandlingService(
@@ -80,6 +82,7 @@ class BehandlingServiceTest {
             vilkårsvurderingService = vilkårsvurderingService,
             featureToggleService = featureToggleService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
+            fagsakLåsingService = fagsakLåsingService,
         )
 
     @Nested
@@ -262,6 +265,49 @@ class BehandlingServiceTest {
             assertThatThrownBy { behandlingService.opprettBehandling(nyBehandling) }
                 .isInstanceOf(FunksjonellFeil::class.java)
                 .hasMessageContaining("Kan ikke opprette behandling på en låst fagsak")
+        }
+
+        @Test
+        fun `skal låse opp fagsak og opprette behandling dersom fagsaken er LÅST og behandlingen skal behandles automatisk`() {
+            // Arrange
+            val fagsak = lagFagsak(status = FagsakStatus.LÅST)
+
+            val nyBehandling =
+                lagNyBehandling(
+                    fagsakId = fagsak.id,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                    skalBehandlesAutomatisk = true,
+                )
+
+            val begrunnelseSlot = slot<String>()
+
+            every { fagsakRepository.finnFagsak(nyBehandling.fagsakId) } returns fagsak
+            every { fagsakLåsingService.låsOppFagsak(nyBehandling.fagsakId, capture(begrunnelseSlot)) } returns fagsak
+            every { behandlingHentOgPersisterService.finnAktivForFagsak(nyBehandling.fagsakId) } returns null
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId) } returns null
+            every { behandlingstemaService.finnBehandlingKategori(nyBehandling.fagsakId) } returns BehandlingKategori.NASJONAL
+            every { behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(nyBehandling.fagsakId) } returns BehandlingUnderkategori.ORDINÆR
+            every { behandlingstemaService.finnUnderkategoriFraAktivBehandling(nyBehandling.fagsakId) } returns BehandlingUnderkategori.ORDINÆR
+            every { behandlingHentOgPersisterService.lagreEllerOppdater(any(), any()) } returnsArgument 0
+            every { arbeidsfordelingService.fastsettBehandlendeEnhet(any(), any()) } just runs
+            every { behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(any()) } just runs
+            every { behandlingSøknadsinfoService.lagreSøknadsinfo(any(), any(), any()) } just runs
+            every { saksstatistikkEventPublisher.publiserBehandlingsstatistikk(any()) } just runs
+            every { vedtakRepository.findByBehandlingAndAktivOptional(any()) } returns null
+            every { vedtaksperiodeService.kopierOverVedtaksperioder(any(), any()) } just runs
+            every { vedtakRepository.save(any()) } returnsArgument 0
+            every { loggService.opprettBehandlingLogg(any()) } just runs
+            every { taskRepository.save(any()) } returnsArgument 0
+            every { featureToggleService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
+
+            // Act
+            val opprettetBehandling = behandlingService.opprettBehandling(nyBehandling)
+
+            // Assert
+            assertThat(opprettetBehandling.id).isEqualTo(0L)
+            verify(exactly = 1) { fagsakLåsingService.låsOppFagsak(nyBehandling.fagsakId, any()) }
+            assertThat(begrunnelseSlot.captured).isEqualTo("Låst opp grunnet automatisk behandling FØDSELSHENDELSE")
         }
 
         @Nested

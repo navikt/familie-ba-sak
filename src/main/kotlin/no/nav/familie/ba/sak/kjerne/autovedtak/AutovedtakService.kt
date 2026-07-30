@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilBehandlingsresultatService
@@ -27,10 +26,18 @@ class AutovedtakService(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService,
 ) {
+    /**
+     * Oppretter en ny, automatisk behandling med gitt type og årsak, og kjører den til behandlingsresultat.
+     *
+     * [kjørFørVilkårsvurdering] kalles med den nyopprettede behandlingen etter at den har fått en id,
+     * men før vilkårsvurderingssteget kjøres. Nyttig for kallere som trenger å koble noe til
+     * `behandlingId` før vilkårsvurderingssteget og behandlingsresultatsteget kjører.
+     */
     fun opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
         behandlingType: BehandlingType,
         behandlingÅrsak: BehandlingÅrsak,
         fagsakId: Long,
+        kjørFørVilkårsvurdering: (Behandling) -> Unit = {},
     ): Behandling {
         val nyBehandling =
             stegService.håndterNyBehandling(
@@ -41,6 +48,8 @@ class AutovedtakService(
                     fagsakId = fagsakId,
                 ),
             )
+
+        kjørFørVilkårsvurdering(nyBehandling)
 
         val behandlingEtterBehandlingsresultat = stegService.håndterVilkårsvurdering(nyBehandling)
         return behandlingEtterBehandlingsresultat

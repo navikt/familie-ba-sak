@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.genererbarnasvilkår
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -12,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SØKNAD
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
@@ -21,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.beskjærFraOgMed
 import no.nav.familie.tidslinje.utvidelser.slåSammenLikePerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.springframework.stereotype.Service
@@ -36,11 +38,11 @@ class AutomatiskVilkårUtfyllingService(
     @Transactional
     fun utfyllVilkårAutomatiskForNyeBarn(behandlingId: Long) {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId)
 
-        validerAtBarnasVilkårKanAutomatiskUtfylles(behandling)
+        validerAtBarnasVilkårKanAutomatiskUtfylles(behandling, vilkårsvurdering)
 
         val barnVilkårSkalGenereresFor = hentBarnVilkårSkalAutomatiskUtfyllesFor(behandling)
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId)
         val nyeVilkårResultaterTidslinje = genererSøkersVilkårResultatTidslinje(vilkårsvurdering)
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
 
@@ -73,6 +75,7 @@ class AutomatiskVilkårUtfyllingService(
                                 periodeTom = vilkårResultatPeriode.tom,
                                 begrunnelse = "Kopiert fra søkers 'Bosatt i riket'-vilkår",
                                 sistEndretIBehandlingId = behandlingId,
+                                opprinneligKopiertFraVilkårResultat = vilkårResultatPeriode.verdi.id,
                             )
                         }
                     }
@@ -110,7 +113,17 @@ class AutomatiskVilkårUtfyllingService(
         return barnVilkårSkalGenereresFor
     }
 
-    private fun validerAtBarnasVilkårKanAutomatiskUtfylles(behandling: Behandling) {
+    private fun validerAtBarnasVilkårKanAutomatiskUtfylles(
+        behandling: Behandling,
+        vilkårsvurdering: Vilkårsvurdering,
+    ) {
+        val søkersPersonResultat = vilkårsvurdering.personResultater.firstOrNull { it.erSøkersResultater() }
+        if (søkersPersonResultat == null) {
+            throw Feil("Finner ikke søkers personresultat i vilkårsvurdering for behandling ${vilkårsvurdering.behandling.id}")
+        }
+        if (søkersPersonResultat.vilkårResultater.any { it.resultat == Resultat.IKKE_VURDERT }) {
+            throw FunksjonellFeil("Du må vurdere alle søkers vilkår før de kan kopieres til barna.")
+        }
         if (!featureToggleService.isEnabled(FeatureToggle.KAN_GENERERE_BARNAS_VILKÅR)) {
             throw Feil("Toggle for å generere barnas vilkår er skrudd av")
         }

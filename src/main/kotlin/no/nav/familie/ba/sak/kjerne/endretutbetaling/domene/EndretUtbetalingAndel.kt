@@ -70,6 +70,8 @@ data class EndretUtbetalingAndel(
     var søknadstidspunkt: LocalDate? = null,
     @Column(name = "begrunnelse")
     var begrunnelse: String? = null,
+    @Column(name = "er_automatisk_generert")
+    var erAutomatiskGenerert: Boolean? = null,
 ) : BaseEntitet() {
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode)
 
@@ -152,6 +154,7 @@ fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilEndretUtbetalingAndelDto() 
         søknadstidspunkt = this.søknadstidspunkt,
         begrunnelse = this.begrunnelse,
         erTilknyttetAndeler = this.andelerTilkjentYtelse.isNotEmpty(),
+        erAutomatiskGenerert = this.erAutomatiskGenerert,
     )
 
 fun EndretUtbetalingAndel.fraEndretUtbetalingAndelDto(

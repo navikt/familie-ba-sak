@@ -19,4 +19,5 @@ data class EndretUtbetalingAndelDto(
     val begrunnelse: String?,
     val erTilknyttetAndeler: Boolean?,
     val inneholderBarnSomSkalSkjermes: Boolean = false,
+    val erAutomatiskGenerert: Boolean? = null,
 )

@@ -14,9 +14,9 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utbetalingsland
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forlengFremtidTilUendelig
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.utvidelser.filtrer
+import no.nav.familie.tidslinje.utvidelser.forlengFremtidTilUendelig
 import no.nav.familie.tidslinje.utvidelser.outerJoin
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

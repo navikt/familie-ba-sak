@@ -6,10 +6,10 @@ import no.nav.familie.ba.sak.common.multipliser
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.medPeriode
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.utvidelser.filtrer
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.mapIkkeNull
 import java.math.BigDecimal
 
 fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal): BigDecimal =

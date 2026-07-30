@@ -13,10 +13,10 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.dokdistkanal.Distribusjonskanal
 import no.nav.familie.kontrakter.felles.dokdistkanal.DokdistkanalRequest
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.familie.restklient.client.RessursException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestClientResponseException
 
 @Service
 class DokumentDistribueringService(
@@ -29,24 +29,24 @@ class DokumentDistribueringService(
         loggBehandlerRolle: BehandlerRolle,
     ) = try {
         distribuerBrevOgLoggHendelse(distribuerDokumentDTO, loggBehandlerRolle)
-    } catch (ressursException: RessursException) {
+    } catch (e: RestClientResponseException) {
         val journalpostId = distribuerDokumentDTO.journalpostId
         val behandlingId = distribuerDokumentDTO.behandlingId
 
         logger.info(
             "Klarte ikke å distribuere brev til journalpost $journalpostId på behandling $behandlingId. " +
-                "Httpstatus ${ressursException.httpStatus}",
+                "Httpstatus ${e.statusCode}",
         )
         secureLogger.info(
             "Klarte ikke å distribuere brev til journalpost $journalpostId på behandling $behandlingId.\n" +
-                "Httpstatus: ${ressursException.httpStatus}\n" +
-                "Melding: ${ressursException.cause?.message}",
+                "Httpstatus: ${e.statusCode}\n" +
+                "Melding: ${e.responseBodyAsString}",
         )
 
-        if (dokumentetErAlleredeDistribuert(ressursException)) {
+        if (dokumentetErAlleredeDistribuert(e)) {
             logger.warn(alleredeDistribuertMelding(journalpostId, behandlingId))
         } else {
-            throw ressursException
+            throw e
         }
     }
 
@@ -56,22 +56,22 @@ class DokumentDistribueringService(
     ) {
         try {
             prøvDistribuerBrevOgLoggHendelse(distribuerDokumentDTO, loggBehandlerRolle)
-        } catch (ressursException: RessursException) {
+        } catch (e: RestClientResponseException) {
             val journalpostId = distribuerDokumentDTO.journalpostId
             val behandlingId = distribuerDokumentDTO.behandlingId
             val brevmal = distribuerDokumentDTO.brevmal
 
             when {
-                mottakerErDødUtenDødsboadresse(ressursException) && behandlingId != null -> {
+                mottakerErDødUtenDødsboadresse(e) && behandlingId != null -> {
                     opprettLogginnslagPåBehandlingOgNyTaskSomDistribuererPåJournalpostId(distribuerDokumentDTO)
                 }
 
-                mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException) && behandlingId != null -> {
+                mottakerErIkkeDigitalOgHarUkjentAdresse(e) && behandlingId != null -> {
                     loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
                 }
 
                 else -> {
-                    throw ressursException
+                    throw e
                 }
             }
         }

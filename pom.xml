@@ -25,20 +25,20 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20260526102747_ed05f71</prosessering.version>
-        <felles.version>4.20260529121328_2754f7c</felles.version>
-        <eksterne-kontrakter-bisys.version>2.0_20260601102852_babc3cd</eksterne-kontrakter-bisys.version>
-        <familie.kontrakter.saksstatistikk>2.0_20260601102852_babc3cd</familie.kontrakter.saksstatistikk>
-        <familie.kontrakter.stønadsstatistikk>2.0_20260601102852_babc3cd</familie.kontrakter.stønadsstatistikk>
-        <felles-kontrakter.version>4.0_20260601102855_35c8aef</felles-kontrakter.version>
+        <felles.version>4.20260714100416_2aeb670</felles.version>
+        <eksterne-kontrakter-bisys.version>2.0_20260608094517_8c7d220</eksterne-kontrakter-bisys.version>
+        <familie.kontrakter.saksstatistikk>2.0_20260608094517_8c7d220</familie.kontrakter.saksstatistikk>
+        <familie.kontrakter.stønadsstatistikk>2.0_20260623154817_f726581</familie.kontrakter.stønadsstatistikk>
+        <felles-kontrakter.version>4.0_20260608075026_1c29629</felles-kontrakter.version>
         <utbetalingsgenerator.version>1.0_20260527092003_ed16208</utbetalingsgenerator.version>
-        <cucumber.version>7.34.3</cucumber.version>
-        <mockk.version>1.14.9</mockk.version>
+        <cucumber.version>7.34.4</cucumber.version>
+        <mockk.version>1.14.11</mockk.version>
         <token-validation-spring.version>6.0.8</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>3.0.3</springdoc.version>
-        <sentry.version>8.42.0</sentry.version>
+        <sentry.version>8.43.0</sentry.version>
         <kotlinx.version>1.11.0</kotlinx.version>
-        <kotlinx-kover.version>0.9.8</kotlinx-kover.version>
+        <kotlinx-kover.version>0.9.9</kotlinx-kover.version>
         <mock-oauth2-server.version>4.0.0</mock-oauth2-server.version>
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
@@ -52,7 +52,7 @@
         <sonar.sources>src/main</sonar.sources>
         <sonar.tests>src/test</sonar.tests>
         <sonar.projectKey>navikt_familie-ba-sak</sonar.projectKey>
-        <sonar-maven-plugin.version>5.6.0.6792</sonar-maven-plugin.version>
+        <sonar-maven-plugin.version>5.7.0.6970</sonar-maven-plugin.version>
         <argLine></argLine>
 
 
@@ -179,6 +179,10 @@
             <artifactId>nv-i18n</artifactId>
             <version>1.29</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.papertrailapp</groupId>
@@ -189,7 +193,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.11</version>
+            <version>42.7.12</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -265,16 +269,6 @@
         <!-- NAV-interne avhengigheter -->
         <dependency>
             <groupId>no.nav.security</groupId>
-            <artifactId>token-client-spring</artifactId>
-            <version>${token-validation-spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.security</groupId>
-            <artifactId>token-client-core</artifactId>
-            <version>${token-validation-spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.security</groupId>
             <artifactId>mock-oauth2-server</artifactId>
             <version>${mock-oauth2-server.version}</version>
             <scope>test</scope>
@@ -322,7 +316,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
-            <artifactId>rest-klient</artifactId>
+            <artifactId>token-klient</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
@@ -430,7 +424,7 @@
         <dependency>
             <groupId>org.wiremock.integrations</groupId>
             <artifactId>wiremock-spring-boot-standalone</artifactId>
-            <version>4.2.1</version>
+            <version>4.2.2</version>
             <scope>test</scope>
         </dependency>
 
@@ -620,7 +614,7 @@
                 <!-- For å få dependency graph i SLSA som pushes av docker-build-push parameter byosbom -->
                 <groupId>org.cyclonedx</groupId>
                 <artifactId>cyclonedx-maven-plugin</artifactId>
-                <version>2.9.1</version>
+                <version>2.9.2</version>
                 <executions>
                     <execution>
                         <phase>package</phase>

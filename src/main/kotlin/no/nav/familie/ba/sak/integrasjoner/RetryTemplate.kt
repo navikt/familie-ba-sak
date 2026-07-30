@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner
 
 import org.springframework.core.retry.RetryPolicy
 import org.springframework.core.retry.RetryTemplate
+import org.springframework.web.client.HttpClientErrorException
 import java.io.IOException
 import java.time.Duration
 
@@ -12,6 +13,7 @@ fun retryVedException(delayInMs: Long) =
         RetryPolicy
             .builder()
             .includes(Exception::class.java)
+            .excludes(HttpClientErrorException.Forbidden::class.java)
             .maxRetries(3)
             .delay(Duration.ofMillis(delayInMs))
             .build(),

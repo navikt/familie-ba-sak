@@ -51,16 +51,14 @@ import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.organisasjon.OrganisasjonAdresse
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.springframework.core.io.ClassPathResource
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import tools.jackson.module.kotlin.readValue
 import java.io.BufferedReader
 import java.net.URI
 import java.time.LocalDate
 import java.util.UUID
 
-class FakeIntegrasjonKlient(
-    restOperations: RestOperations,
-) : IntegrasjonKlient(URI("integrasjoner-url"), restOperations, mockk(), 1) {
+class FakeIntegrasjonKlient : IntegrasjonKlient(URI("integrasjoner-url"), mockk<RestClient>(relaxed = true), mockk(), 1) {
     private val egenansatt = mutableSetOf<String>()
     private val behandlendeEnhetForIdent = mutableMapOf<String, List<Arbeidsfordelingsenhet>>()
     private val versjonerteBarnetrygdSøknader = mutableMapOf<String, VersjonertBarnetrygdSøknad>()

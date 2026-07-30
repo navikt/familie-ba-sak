@@ -7,8 +7,9 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.domene.SatsendringEøsKjøring
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.domene.SatsendringEøsKjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggTask
-import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.dto.AutobrevOpphørSmåbarnstilleggDTO
 import no.nav.familie.ba.sak.task.dto.AutobrevPgaAlderDTO
@@ -33,6 +34,7 @@ import java.util.Properties
 class OpprettTaskService(
     private val taskRepository: TaskRepositoryWrapper,
     private val satskjøringRepository: SatskjøringRepository,
+    private val satsendringEøsKjøringRepository: SatsendringEøsKjøringRepository,
     private val envService: EnvService,
 ) {
     fun opprettOppgaveTask(
@@ -165,6 +167,31 @@ class OpprettTaskService(
                     properties =
                         Properties().apply {
                             this["fagsakId"] = fagsakId.toString()
+                        },
+                ),
+            )
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun opprettSatsendringEøsTask(
+        fagsakId: Long,
+        utbetalingsland: String,
+        satsTidspunkt: YearMonth,
+    ) {
+        if (satsendringEøsKjøringRepository.findByFagsakIdAndUtbetalingslandAndSatsTidspunkt(fagsakId, utbetalingsland, satsTidspunkt) == null) {
+            satsendringEøsKjøringRepository.save(SatsendringEøsKjøring(fagsakId = fagsakId, utbetalingsland = utbetalingsland, satsTidspunkt = satsTidspunkt))
+        }
+        overstyrTaskMedNyCallId(IdUtils.generateId()) {
+            taskRepository.save(
+                Task(
+                    type = SatsendringEøsTask.TASK_STEP_TYPE,
+                    payload = jsonMapper.writeValueAsString(SatsendringEøsTaskDto(fagsakId, utbetalingsland, satsTidspunkt)),
+                    properties =
+                        Properties().apply {
+                            this["fagsakId"] = fagsakId.toString()
+                            this["utbetalingsland"] = utbetalingsland
+                            this["satsTidspunkt"] = satsTidspunkt.toString()
                         },
                 ),
             )

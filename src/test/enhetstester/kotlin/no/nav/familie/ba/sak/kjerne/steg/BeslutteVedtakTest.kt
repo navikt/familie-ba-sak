@@ -292,30 +292,6 @@ class BeslutteVedtakTest {
         }
 
         @Test
-        fun `Skal kaste feil dersom toggle ikke er enabled og årsak er korreksjon vedtaksbrev`() {
-            every {
-                featureToggleService.isEnabled(
-                    FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV,
-                    any<Long>(),
-                )
-            } returns false
-
-            val behandling = lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
-            behandling.status = BehandlingStatus.FATTER_VEDTAK
-            behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
-
-            every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
-            mockkObject(FerdigstillOppgaver.Companion)
-            every { FerdigstillOppgaver.opprettTask(any(), any()) } returns
-                Task(
-                    type = FerdigstillOppgaver.TASK_STEP_TYPE,
-                    payload = "",
-                )
-
-            assertThrows<FunksjonellFeil> { beslutteVedtak.preValiderSteg(behandling) }
-        }
-
-        @Test
         fun `Skal kaste feil dersom saksbehandler uten tilgang til teknisk endring prøve å godkjenne en behandling med årsak=teknisk endring`() {
             every { featureToggleService.isEnabled(FeatureToggle.TEKNISK_ENDRING, any<Long>()) } returns false
 

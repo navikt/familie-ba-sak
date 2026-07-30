@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.fake
 
+import io.mockk.mockk
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
@@ -13,12 +14,10 @@ import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import no.nav.familie.kontrakter.felles.simulering.SimulertPostering
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.time.LocalDate
 
-class FakeØkonomiKlient(
-    restOperations: RestOperations,
-) : ØkonomiKlient(familieOppdragUri = "http://familie-oppdrag-fake-uri", restOperations = restOperations, retryBackoffDelay = 1L) {
+class FakeØkonomiKlient : ØkonomiKlient(familieOppdragUri = "http://familie-oppdrag-fake-uri", restClient = mockk<RestClient>(relaxed = true), retryBackoffDelay = 1L) {
     override fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): String = "Utbetalingsoppdrag iverksatt"
 
     override fun hentStatus(oppdragId: OppdragId): OppdragStatus = OppdragStatus.KVITTERT_OK

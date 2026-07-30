@@ -16,10 +16,10 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.simulering.domene.AvregningPeriode
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.beskjærTilOgMed
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull

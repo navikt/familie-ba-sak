@@ -1,0 +1,9 @@
+[propose]
+allow_docker = true
+allow_jvm_attach = true
+allow_localhost_any = true
+
+[propose.allow]
+ports = [5432]
+
+

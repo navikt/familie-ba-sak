@@ -42,7 +42,7 @@ class SecurityConfiguration(
     fun publicSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http {
             csrf { disable() }
-            securityMatcher("/internal/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+            securityMatcher("/internal/**", "/redirect/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
             authorizeHttpRequests {
                 authorize(anyRequest, permitAll)
             }

@@ -22,7 +22,6 @@ import org.springframework.test.context.ActiveProfiles
     "fake-tilbakekreving-klient",
     "mock-brev-klient",
     "mock-infotrygd-feed",
-    "mock-rest-template-config",
     "mock-localdate-service",
     "mock-sanity-klient",
     "mock-unleash",

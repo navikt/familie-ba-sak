@@ -1,14 +1,12 @@
 package no.nav.familie.ba.sak.internal
 
 import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
@@ -27,7 +25,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.net.URI
 
 @RestController
 @RequestMapping(value = ["/internal"])
@@ -40,7 +37,6 @@ class TestVerktøyController(
     private val tilgangService: TilgangService,
     private val simuleringService: SimuleringService,
     private val opprettTaskService: OpprettTaskService,
-    private val behandlingRepository: BehandlingRepository,
 ) {
     @GetMapping(path = ["/autobrev"])
     fun kjørSchedulerForAutobrev(): ResponseEntity<Ressurs<String>> =
@@ -108,31 +104,6 @@ class TestVerktøyController(
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
 
         return simuleringService.hentSimuleringPåBehandling(behandlingId)
-    }
-
-    @GetMapping("/redirect/behandling/{behandlingId}")
-    fun redirectTilBarnetrygd(
-        @PathVariable behandlingId: Long,
-    ): ResponseEntity<Any> {
-        val hostname =
-            if (envService.erDev()) {
-                "http://localhost:8000"
-            } else if (envService.erPreprod()) {
-                "https://barnetrygd.intern.dev.nav.no"
-            } else if (envService.erProd()) {
-                "https://barnetrygd.intern.nav.no"
-            } else {
-                throw Feil("Klarer ikke å utlede miljø for redirect til fagsak")
-            }
-        val behandling = behandlingRepository.finnBehandlingNullable(behandlingId)
-        return if (behandling == null) {
-            ResponseEntity.status(200).body("Fant ikke behandling med id $behandlingId")
-        } else {
-            ResponseEntity
-                .status(302)
-                .location(URI.create("$hostname/fagsak/${behandling.fagsak.id}/$behandlingId/"))
-                .build()
-        }
     }
 
     companion object {

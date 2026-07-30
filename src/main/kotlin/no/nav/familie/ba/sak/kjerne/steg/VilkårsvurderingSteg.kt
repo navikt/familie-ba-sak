@@ -12,10 +12,12 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.sats.SatsendringEøsService
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
+import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktPåPersonService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -46,7 +48,9 @@ class VilkårsvurderingSteg(
     private val opprettTaskService: OpprettTaskService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    private val registrertSøknadstidspunktService: RegistrertSøknadstidspunktPåPersonService,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
+    private val satsendringEøsService: SatsendringEøsService,
 ) : BehandlingSteg<List<String>?> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -80,7 +84,7 @@ class VilkårsvurderingSteg(
                 vilkårsvurdering = this,
             )
 
-            if (behandling.erFinnmarksEllerSvalbardtillegg()) {
+            if (behandling.erRegionstillegg()) {
                 validerFinnmarkOgSvalbardBehandling(behandling = behandling, vilkårsvurdering = this)
             }
         }
@@ -109,6 +113,8 @@ class VilkårsvurderingSteg(
 
         beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling, personopplysningGrunnlag)
 
+        registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling)
+
         endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling)
 
         val skalOppdatereBgnOgResetteValutakurser =
@@ -119,7 +125,7 @@ class VilkårsvurderingSteg(
             utenlandskPeriodebeløpService.oppdaterBulgarskUtenlandskPeriodebeløpVedBehov(BehandlingId(behandling.id))
         }
 
-        if (!behandling.erSatsendring()) {
+        if (!behandling.erSatsendringNasjonal()) {
             tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
         }
 
@@ -129,6 +135,10 @@ class VilkårsvurderingSteg(
 
         if (behandling.erMånedligValutajustering()) {
             månedligValutajusteringService.oppdaterValutakurserFraOgMedInneværendeMåned(BehandlingId(behandling.id))
+        }
+
+        if (behandling.erSatsendringEøs()) {
+            satsendringEøsService.oppdaterUtenlandskPeriodebeløpMedSisteSats(BehandlingId(behandling.id))
         }
 
         automatiskOppdaterValutakursService.oppdaterAndelerMedValutakurser(BehandlingId(behandling.id))

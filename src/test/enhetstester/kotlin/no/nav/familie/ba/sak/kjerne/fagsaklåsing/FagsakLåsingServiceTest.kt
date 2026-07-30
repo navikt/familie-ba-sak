@@ -20,16 +20,20 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlien
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.klage.KlagebehandlingHenter
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsluttSakRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.GjenåpneSakRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -38,6 +42,7 @@ import org.junit.jupiter.api.assertThrows
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.familie.kontrakter.felles.klage.BehandlingStatus as KlageBehandlingStatus
 
 class FagsakLåsingServiceTest {
     private val fagsakRepository = mockk<FagsakRepository>()
@@ -48,6 +53,8 @@ class FagsakLåsingServiceTest {
     private val featureToggleService = mockk<FeatureToggleService>()
     private val saksstatistikkEventPublisher = mockk<SaksstatistikkEventPublisher>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val klagebehandlingHenter = mockk<KlagebehandlingHenter>()
+    private val tilbakekrevingKlient = mockk<TilbakekrevingKlient>()
 
     private val fagsakLåsingService =
         FagsakLåsingService(
@@ -59,6 +66,8 @@ class FagsakLåsingServiceTest {
             featureToggleService = featureToggleService,
             saksstatistikkEventPublisher = saksstatistikkEventPublisher,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            klagebehandlingHenter = klagebehandlingHenter,
+            tilbakekrevingKlient = tilbakekrevingKlient,
         )
 
     @Nested
@@ -76,6 +85,9 @@ class FagsakLåsingServiceTest {
             every { fagsakLåsingRepository.finnAktivLåsForFagsak(fagsak.id) } returns null
             every { persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsak.id) } returns personer
             every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(fagsak.id) } returns false
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
+            every { klagebehandlingHenter.hentKlagebehandlingerPåFagsak(fagsak.id) } returns emptyList()
+            every { tilbakekrevingKlient.hentTilbakekrevingsbehandlinger(fagsak.id) } returns emptyList()
             every { fagsakLåsingRepository.save(any()) } answers { firstArg() }
             every { fagsakRepository.save(fagsak) } returns fagsak
             every { saksstatistikkEventPublisher.publiserSaksstatistikk(any()) } just runs
@@ -152,11 +164,113 @@ class FagsakLåsingServiceTest {
             // Assert
             assertThat(listAppender.list).anySatisfy {
                 assertThat(it.level.toString()).isEqualTo("INFO")
-                assertThat(it.formattedMessage).isEqualTo("Status for fagsak ${fagsak.id} er LØPENDE, hopper ut")
+                assertThat(it.formattedMessage).isEqualTo("Status for fagsak ${fagsak.id} er LØPENDE. Hopper ut av fagsaklåsing.")
             }
             verify(exactly = 0) { fagsakRepository.save(any()) }
             verify(exactly = 0) { fagsakLåsingRepository.save(any()) }
             verify(exactly = 0) { saksstatistikkEventPublisher.publiserSaksstatistikk(any()) }
+            verify(exactly = 0) { integrasjonKlient.avsluttSak(any()) }
+        }
+
+        @Test
+        fun `skal hoppe over fagsak som har åpen klagebehandling`() {
+            // Arrange
+            every { klagebehandlingHenter.hentKlagebehandlingerPåFagsak(fagsak.id) } returns
+                listOf(mockk { every { status } returns KlageBehandlingStatus.UTREDES })
+
+            // Act
+            fagsakLåsingService.låsFagsak(fagsak.id)
+
+            // Assert
+            assertThat(listAppender.list).anySatisfy {
+                assertThat(it.level.toString()).isEqualTo("INFO")
+                assertThat(it.formattedMessage).isEqualTo("Fagsak ${fagsak.id} har åpen klagebehandling. Hopper ut av fagsaklåsing.")
+            }
+            verify(exactly = 0) { fagsakRepository.save(any()) }
+            verify(exactly = 0) { saksstatistikkEventPublisher.publiserSaksstatistikk(any()) }
+            verify(exactly = 0) { integrasjonKlient.avsluttSak(any()) }
+        }
+
+        @Test
+        fun `skal hoppe over fagsak som har åpen tilbakekrevingsbehandling`() {
+            // Arrange
+            every { tilbakekrevingKlient.hentTilbakekrevingsbehandlinger(fagsak.id) } returns
+                listOf(mockk { every { status } returns Behandlingsstatus.UTREDES })
+
+            // Act
+            fagsakLåsingService.låsFagsak(fagsak.id)
+
+            // Assert
+            assertThat(listAppender.list).anySatisfy {
+                assertThat(it.level.toString()).isEqualTo("INFO")
+                assertThat(it.formattedMessage).isEqualTo("Fagsak ${fagsak.id} har åpen tilbakekrevingsbehandling. Hopper ut av fagsaklåsing.")
+            }
+            verify(exactly = 0) { fagsakRepository.save(any()) }
+            verify(exactly = 0) { saksstatistikkEventPublisher.publiserSaksstatistikk(any()) }
+            verify(exactly = 0) { integrasjonKlient.avsluttSak(any()) }
+        }
+
+        @Test
+        fun `skal hoppe over fagsak der siste BA-sak behandling ble avsluttet for under 1 år siden`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns
+                mockk<Behandling> { every { endretTidspunkt } returns LocalDateTime.now().minusMonths(6) }
+
+            // Act
+            fagsakLåsingService.låsFagsak(fagsak.id)
+
+            // Assert
+            assertThat(listAppender.list).anySatisfy {
+                assertThat(it.level.toString()).isEqualTo("INFO")
+                assertThat(it.formattedMessage).contains("som er for under 1 år siden. Hopper ut")
+            }
+            verify(exactly = 0) { fagsakRepository.save(any()) }
+            verify(exactly = 0) { integrasjonKlient.avsluttSak(any()) }
+        }
+
+        @Test
+        fun `skal hoppe over fagsak der siste klagebehandling ble avsluttet for under 1 år siden`() {
+            // Arrange
+            every { klagebehandlingHenter.hentKlagebehandlingerPåFagsak(fagsak.id) } returns
+                listOf(
+                    mockk {
+                        every { status } returns KlageBehandlingStatus.FERDIGSTILT
+                        every { vedtaksdato } returns LocalDateTime.now().minusMonths(6)
+                    },
+                )
+
+            // Act
+            fagsakLåsingService.låsFagsak(fagsak.id)
+
+            // Assert
+            assertThat(listAppender.list).anySatisfy {
+                assertThat(it.level.toString()).isEqualTo("INFO")
+                assertThat(it.formattedMessage).contains("som er for under 1 år siden. Hopper ut")
+            }
+            verify(exactly = 0) { fagsakRepository.save(any()) }
+            verify(exactly = 0) { integrasjonKlient.avsluttSak(any()) }
+        }
+
+        @Test
+        fun `skal hoppe over fagsak der siste tilbakekrevingsbehandling ble avsluttet for under 1 år siden`() {
+            // Arrange
+            every { tilbakekrevingKlient.hentTilbakekrevingsbehandlinger(fagsak.id) } returns
+                listOf(
+                    mockk {
+                        every { status } returns Behandlingsstatus.AVSLUTTET
+                        every { vedtaksdato } returns LocalDateTime.now().minusMonths(6)
+                    },
+                )
+
+            // Act
+            fagsakLåsingService.låsFagsak(fagsak.id)
+
+            // Assert
+            assertThat(listAppender.list).anySatisfy {
+                assertThat(it.level.toString()).isEqualTo("INFO")
+                assertThat(it.formattedMessage).contains("som er for under 1 år siden. Hopper ut")
+            }
+            verify(exactly = 0) { fagsakRepository.save(any()) }
             verify(exactly = 0) { integrasjonKlient.avsluttSak(any()) }
         }
 
@@ -171,7 +285,7 @@ class FagsakLåsingServiceTest {
             // Assert
             assertThat(listAppender.list).anySatisfy {
                 assertThat(it.level.toString()).isEqualTo("INFO")
-                assertThat(it.formattedMessage).isEqualTo("Fagsak ${fagsak.id} har åpen behandling, hopper ut")
+                assertThat(it.formattedMessage).isEqualTo("Fagsak ${fagsak.id} har åpen behandling. Hopper ut av fagsaklåsing.")
             }
             verify(exactly = 0) { fagsakRepository.save(any()) }
             verify(exactly = 0) { saksstatistikkEventPublisher.publiserSaksstatistikk(any()) }
@@ -194,7 +308,7 @@ class FagsakLåsingServiceTest {
             val feil = assertThrows<Feil> { fagsakLåsingService.låsFagsak(fagsak.id) }
 
             // Assert
-            assertThat(feil.message).isEqualTo("Fagsak ${fagsak.id} har allerede aktiv låsing")
+            assertThat(feil.message).isEqualTo("Fagsak ${fagsak.id} med status AVSLUTTET har allerede en aktiv låsing.")
         }
 
         @Test
@@ -215,7 +329,7 @@ class FagsakLåsingServiceTest {
             // Assert
             assertThat(listAppender.list).anySatisfy {
                 assertThat(it.level.toString()).isEqualTo("INFO")
-                assertThat(it.formattedMessage).isEqualTo("Fagsak ${fagsak.id} ble låst opp for under 30 dager siden, hopper ut")
+                assertThat(it.formattedMessage).isEqualTo("Fagsak ${fagsak.id} ble låst opp for under 30 dager siden. Hopper ut av fagsaklåsing.")
             }
             verify(exactly = 0) { fagsakRepository.save(any()) }
             verify(exactly = 0) { saksstatistikkEventPublisher.publiserSaksstatistikk(any()) }

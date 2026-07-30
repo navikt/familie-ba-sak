@@ -300,6 +300,7 @@ class CucumberMock(
             vilkårsvurderingService = vilkårsvurderingService,
             featureToggleService = featureToggleService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
+            fagsakLåsingService = mockk(relaxed = true),
         )
 
     val tilbakestillBehandlingTilBehandlingsresultatService =
@@ -442,6 +443,8 @@ class CucumberMock(
             clockProvider = clockProvider,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             strengtFortroligService = mockk(relaxed = true),
+            persongrunnlagService = persongrunnlagService,
+            satsendringEøsKjøringService = mockk(relaxed = true),
         )
 
     val behandlingsresultatSteg =
@@ -570,6 +573,7 @@ class CucumberMock(
             endretUtbetalingAndelOppdatertAbonnementer = emptyList(),
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             behandlingSøknadsinfoService = behandlingSøknadsinfoService,
+            registrertSøknadstidspunktService = mockk(relaxed = true),
             featureToggleService = featureToggleService,
         )
 
@@ -691,6 +695,7 @@ class CucumberMock(
             taskRepository = taskRepository,
             satskjøringRepository = mockk(),
             envService = mockk(),
+            satsendringEøsKjøringRepository = mockk(),
         )
 
     val vilkårsvurderingSteg =
@@ -708,7 +713,9 @@ class CucumberMock(
             opprettTaskService = opprettTaskService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
+            registrertSøknadstidspunktService = mockk(relaxed = true),
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
+            satsendringEøsService = mockk(relaxed = true),
         )
 
     val stegService =

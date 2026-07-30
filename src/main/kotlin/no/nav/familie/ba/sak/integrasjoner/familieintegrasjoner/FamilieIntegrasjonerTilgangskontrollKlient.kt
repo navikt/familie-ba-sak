@@ -4,20 +4,20 @@ import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
-import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
 class FamilieIntegrasjonerTilgangskontrollKlient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
-    @Qualifier("jwtBearer") restOperations: RestOperations,
-) : AbstractRestClient(restOperations, "integrasjon-tilgangskontroll") {
+    @Qualifier("integrasjonerRestClient") private val restClient: RestClient,
+) {
     private val tilgangPersonUri: URI =
         UriComponentsBuilder
             .fromUri(integrasjonUri)
@@ -34,13 +34,13 @@ class FamilieIntegrasjonerTilgangskontrollKlient(
             uri = tilgangPersonUri,
             formål = "Sjekk tilgang til personer",
         ) {
-            postForEntity(
-                tilgangPersonUri,
-                personIdenter,
-                HttpHeaders().also {
-                    it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BAR)
-                },
-            )
+            restClient
+                .post()
+                .uri(tilgangPersonUri)
+                .header(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BAR)
+                .body(personIdenter)
+                .retrieve()
+                .body()!!
         }
     }
 

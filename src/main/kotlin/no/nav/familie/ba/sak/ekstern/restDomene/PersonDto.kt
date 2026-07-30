@@ -22,6 +22,7 @@ data class PersonDto(
     val erManueltLagtTilISøknad: Boolean? = null,
     val harFalskIdentitet: Boolean? = false,
     val skjermesForBruker: Boolean = false,
+    val erNyttBarn: Boolean? = false,
 )
 
 fun Person.tilPersonDto(

@@ -7,13 +7,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.HttpStatusCodeException
-import org.springframework.web.client.exchange
 import java.util.Arrays
 import java.util.UUID
 
@@ -35,11 +33,12 @@ class PensjonControllerTest : WebSpringAuthTestRunner() {
         )
         val entity: HttpEntity<String> = HttpEntity<String>(headers)
         val responseEntity: ResponseEntity<String> =
-            restTemplate.exchange<String>(
-                hentUrl("/api/ekstern/pensjon/bestill-personer-med-barnetrygd/2023"),
-                HttpMethod.GET,
-                entity,
-            )
+            restClient
+                .get()
+                .uri(hentUrl("/api/ekstern/pensjon/bestill-personer-med-barnetrygd/2023"))
+                .headers { h -> h.addAll(entity.headers) }
+                .retrieve()
+                .toEntity(String::class.java)
         assertEquals(UUID.fromString(responseEntity.body.toString()).toString(), responseEntity.body.toString())
     }
 
@@ -53,11 +52,12 @@ class PensjonControllerTest : WebSpringAuthTestRunner() {
 
         val error =
             assertThrows<HttpStatusCodeException> {
-                restTemplate.exchange<String>(
-                    hentUrl("/api/samhandler/orgnr/987654321"),
-                    HttpMethod.GET,
-                    HttpEntity<String>(headers),
-                )
+                restClient
+                    .get()
+                    .uri(hentUrl("/api/samhandler/orgnr/987654321"))
+                    .headers { h -> h.addAll(HttpEntity<String>(headers).headers) }
+                    .retrieve()
+                    .toEntity(String::class.java)
             }
 
         assertThat(error.statusCode).isEqualTo(HttpStatus.FORBIDDEN)

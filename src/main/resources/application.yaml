@@ -7,28 +7,6 @@ server:
   port: 8089
   shutdown: graceful
 
-no.nav.security.jwt:
-  client:
-    registration:
-      familie-klage-onbehalfof:
-        resource-url: ${FAMILIE_KLAGE_URL}
-        token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
-        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${FAMILIE_KLAGE_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      familie-klage-clientcredentials:
-        resource-url: ${FAMILIE_KLAGE_URL}
-        token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
-        grant-type: client_credentials
-        scope: ${FAMILIE_KLAGE_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-
 spring:
   lifecycle:
     timeout-per-shutdown-phase: 20s
@@ -129,8 +107,8 @@ prosessering:
     after:
       weeks: 4
 
-FAMILIE_EF_SAK_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
-FAMILIE_EF_SAK_API_URL: http://familie-ef-sak/api
+FAMILIE_EF_SAK_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
+FAMILIE_EF_SAK_URL: http://familie-ef-sak/api
 
 FAMILIE_KLAGE_URL: http://familie-klage
 FAMILIE_KLAGE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-klage/.default
@@ -146,7 +124,7 @@ BA_SKATTEETATEN_CLIENT_ID: "dummy"
 FAMILIE_BREV_API_URL: http://familie-brev
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://familie-ba-infotrygd-feed/api
 FAMILIE_BA_INFOTRYGD_API_URL: http://familie-ba-infotrygd
-FAMILIE_TILBAKE_API_URL: http://familie-tilbake/api
+FAMILIE_TILBAKE_URL: http://familie-tilbake/api
 TILBAKEKREVING_REQUEST_TOPIC: teamfamilie.privat-tbk-hentfagsystemsbehandling-request-topic
 TILBAKEKREVING_RESPONSE_TOPIC: teamfamilie.privat-tbk-hentfagsystemsbehandling-respons-topic
 PDL_URL: http://pdl-api.default

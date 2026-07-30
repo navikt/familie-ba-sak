@@ -18,18 +18,18 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerKunVerdiMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullOgIkkeTom
-import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.minsteAvHver
-import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.minus
-import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.rundAvTilHeltall
-import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.sum
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.filtrerHverKunVerdi
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.filtrerHverKunVerdi
+import no.nav.familie.tidslinje.utvidelser.kombinerKunVerdiMed
+import no.nav.familie.tidslinje.utvidelser.kombinerUtenNullMed
+import no.nav.familie.tidslinje.utvidelser.kombinerUtenNullOgIkkeTom
 import no.nav.familie.tidslinje.utvidelser.leftJoin
+import no.nav.familie.tidslinje.utvidelser.minsteAvHver
+import no.nav.familie.tidslinje.utvidelser.minus
 import no.nav.familie.tidslinje.utvidelser.outerJoin
+import no.nav.familie.tidslinje.utvidelser.rundAvTilHeltall
+import no.nav.familie.tidslinje.utvidelser.sum
 import java.math.BigDecimal
 import java.math.MathContext
 

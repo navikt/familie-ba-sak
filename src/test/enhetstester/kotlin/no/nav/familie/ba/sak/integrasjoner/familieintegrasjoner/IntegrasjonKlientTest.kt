@@ -13,12 +13,10 @@ import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerReques
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.restclient.RestTemplateBuilder
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 
 class IntegrasjonKlientTest {
-    private val restOperations: RestOperations = RestTemplateBuilder().build()
     private lateinit var wiremockServerItem: WireMockServer
     private lateinit var integrasjonKlient: IntegrasjonKlient
 
@@ -26,7 +24,7 @@ class IntegrasjonKlientTest {
     fun initClass() {
         wiremockServerItem = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
         wiremockServerItem.start()
-        integrasjonKlient = IntegrasjonKlient(URI.create(wiremockServerItem.baseUrl()), restOperations, mockk(), 1)
+        integrasjonKlient = IntegrasjonKlient(URI.create(wiremockServerItem.baseUrl()), RestClient.create(), mockk(), 1)
     }
 
     @Test

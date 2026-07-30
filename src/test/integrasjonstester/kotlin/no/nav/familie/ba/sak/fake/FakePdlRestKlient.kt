@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.fake
 
+import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelsePerson
@@ -15,16 +16,15 @@ import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 import java.time.LocalDate
 
 class FakePdlRestKlient(
-    restOperations: RestOperations,
     personidentService: PersonidentService,
 ) : SystemOnlyPdlRestKlient(
         pdlBaseUrl = URI("dummy_uri"),
-        restTemplate = restOperations,
+        restClient = mockk<RestClient>(relaxed = true),
         personidentService = personidentService,
     ) {
     override fun hentBostedsadresseOgDeltBostedForPersoner(identer: List<String>): Map<String, PdlAdresserPerson> =

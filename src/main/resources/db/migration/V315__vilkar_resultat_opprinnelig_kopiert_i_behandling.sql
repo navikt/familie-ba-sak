@@ -1,0 +1,2 @@
+ALTER TABLE VILKAR_RESULTAT
+    ADD COLUMN IF NOT EXISTS opprinnelig_kopiert_fra_vilkar_resultat BIGINT DEFAULT NULL;

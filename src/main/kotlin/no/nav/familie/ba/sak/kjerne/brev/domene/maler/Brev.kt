@@ -154,7 +154,6 @@ enum class Brevmal(
     VEDTAK_OPPHØR_MED_ENDRING(true, "opphorMedEndring", "Opphør med endring"),
     VEDTAK_AVSLAG(true, "vedtakAvslag", "Avslag"),
     VEDTAK_FORTSATT_INNVILGET(true, "vedtakFortsattInnvilget", "Vedtak fortstatt innvilget"),
-    VEDTAK_KORREKSJON_VEDTAKSBREV(true, "korrigertVedtakEgenBrevmal", "Korrigere vedtak med egen brevmal"),
     VEDTAK_OPPHØR_DØDSFALL(true, "dodsfall", "Dødsfall"),
     VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON(true, "foerstegangsvedtakInstitusjon", "Førstegangsvedtak"),
     VEDTAK_ENDRING_INSTITUSJON(true, "vedtakEndringInstitusjon", "Vedtak endring"),
@@ -172,6 +171,7 @@ enum class Brevmal(
     AUTOVEDTAK_NYFØDT_BARN_FRA_FØR(true, "autovedtakNyfodtBarnFraFor", "Autovedtak nyfødt - barn fra før"),
     AUTOVEDTAK_FINNMARKSTILLEGG(true, "autovedtakFinnmarkstillegg", "Vedtak finnmarkstillegg innvilget"),
     AUTOVEDTAK_SVALBARDTILLEGG(true, "autovedtakSvalbardtillegg", "Vedtak svalbardtillegg innvilget"),
+    AUTOVEDTAK_SATSENDRING_EØS(true, "satsendringEos", "Vedtak EØS-satsendring"),
     ;
 
     fun skalGenerereForside(): Boolean =
@@ -222,7 +222,6 @@ enum class Brevmal(
             VEDTAK_OPPHØR_MED_ENDRING,
             VEDTAK_AVSLAG,
             VEDTAK_FORTSATT_INNVILGET,
-            VEDTAK_KORREKSJON_VEDTAKSBREV,
             VEDTAK_OPPHØR_DØDSFALL,
             VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON,
             VEDTAK_AVSLAG_INSTITUSJON,
@@ -235,6 +234,7 @@ enum class Brevmal(
             AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
             AUTOVEDTAK_FINNMARKSTILLEGG,
             AUTOVEDTAK_SVALBARDTILLEGG,
+            AUTOVEDTAK_SATSENDRING_EØS,
             -> throw Feil("$this støtter ikke generering av forside")
         }
 
@@ -318,7 +318,6 @@ enum class Brevmal(
             VEDTAK_FORTSATT_INNVILGET,
             VEDTAK_AVSLAG,
             VEDTAK_FØRSTEGANGSVEDTAK,
-            VEDTAK_KORREKSJON_VEDTAKSBREV,
             VEDTAK_OPPHØR_DØDSFALL,
             VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON,
             VEDTAK_AVSLAG_INSTITUSJON,
@@ -331,6 +330,7 @@ enum class Brevmal(
             AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
             AUTOVEDTAK_FINNMARKSTILLEGG,
             AUTOVEDTAK_SVALBARDTILLEGG,
+            AUTOVEDTAK_SATSENDRING_EØS,
             -> throw Feil("Ingen dokumenttype for $this")
         }
 
@@ -368,7 +368,6 @@ enum class Brevmal(
                 VEDTAK_OPPHØR_MED_ENDRING,
                 VEDTAK_AVSLAG,
                 VEDTAK_FORTSATT_INNVILGET,
-                VEDTAK_KORREKSJON_VEDTAKSBREV,
                 VEDTAK_OPPHØR_DØDSFALL,
                 VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON,
                 VEDTAK_AVSLAG_INSTITUSJON,
@@ -381,6 +380,7 @@ enum class Brevmal(
                 AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
                 AUTOVEDTAK_FINNMARKSTILLEGG,
                 AUTOVEDTAK_SVALBARDTILLEGG,
+                AUTOVEDTAK_SATSENDRING_EØS,
                 -> Distribusjonstype.VEDTAK
 
                 HENLEGGE_TRUKKET_SØKNAD,

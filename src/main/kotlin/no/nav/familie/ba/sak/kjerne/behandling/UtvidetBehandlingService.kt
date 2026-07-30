@@ -82,6 +82,7 @@ class UtvidetBehandlingService(
 ) {
     fun lagUtvidetBehandlingDto(behandlingId: Long): UtvidetBehandlingDto {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
+        val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
 
         val søknadsgrunnlag =
             søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.hentSøknadDto()?.let { søknadDTO ->
@@ -91,6 +92,8 @@ class UtvidetBehandlingService(
                     barnaMedOpplysninger = barnUtenIdenter + barnMedIdenter.filter { tilganger.getValue(it.ident).harTilgang },
                 )
             }
+
+        val nyeBarn = persongrunnlagService.finnNyeBarn(behandling, forrigeVedtatteBehandling).map { it.aktør.aktivFødselsnummer() }
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
         val personer = personopplysningGrunnlag?.søkerOgBarn
@@ -147,13 +150,14 @@ class UtvidetBehandlingService(
                 arbeidsfordelingPåBehandling = arbeidsfordeling.tilArbeidsfordelingPåBehandlingDto(),
                 søknadsgrunnlag = søknadsgrunnlag,
                 personer =
-                    personer?.map { person ->
-                        persongrunnlagService.mapTilPersonDtoMedStatsborgerskapLand(
-                            person = person,
-                            erManueltLagtTilISøknad = søknadsgrunnlag?.barnaMedOpplysninger?.find { it.ident == person.aktør.aktivFødselsnummer() }?.manueltRegistrert,
-                            eldsteBarnsFødselsdato = personopplysningGrunnlag.eldsteBarnSinFødselsdato,
-                        )
-                    }
+                    personer
+                        ?.map { person ->
+                            persongrunnlagService.mapTilPersonDtoMedStatsborgerskapLand(
+                                person = person,
+                                erManueltLagtTilISøknad = søknadsgrunnlag?.barnaMedOpplysninger?.find { it.ident == person.aktør.aktivFødselsnummer() }?.manueltRegistrert,
+                                eldsteBarnsFødselsdato = personopplysningGrunnlag.eldsteBarnSinFødselsdato,
+                            )
+                        }?.map { personDto -> personDto.copy(erNyttBarn = nyeBarn.contains(personDto.personIdent)) }
                         ?: emptyList(),
                 personResultater = personResultater?.map { it.tilPersonResultatDto() } ?: emptyList(),
                 fødselshendelsefiltreringResultater =
