@@ -572,9 +572,7 @@ class CucumberMock(
             vilkårsvurderingService = vilkårsvurderingService,
             endretUtbetalingAndelOppdatertAbonnementer = emptyList(),
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
-            behandlingSøknadsinfoService = behandlingSøknadsinfoService,
             registrertSøknadstidspunktService = mockk(relaxed = true),
-            featureToggleService = featureToggleService,
         )
 
     val preutfyllBosattIRiketService =

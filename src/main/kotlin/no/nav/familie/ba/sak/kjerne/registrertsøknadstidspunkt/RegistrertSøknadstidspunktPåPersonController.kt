@@ -4,8 +4,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.EndreSøknadstidspunktRequestDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RegistrertSøknadstidspunktPåPersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
@@ -36,13 +34,11 @@ class RegistrertSøknadstidspunktPåPersonController(
     private val registrertSøknadstidspunktService: RegistrertSøknadstidspunktPåPersonService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     @GetMapping("/behandling/{behandlingId}")
     fun hentRegistrertSøknadstidspunktPåPersoner(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<List<RegistrertSøknadstidspunktPåPersonDto>>> {
-        validerAtRegistreringAvSøknadstidspunktErAktivert()
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
@@ -64,7 +60,6 @@ class RegistrertSøknadstidspunktPåPersonController(
         @PathVariable behandlingId: Long,
         @RequestBody request: EndreSøknadstidspunktRequestDto,
     ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
-        validerAtRegistreringAvSøknadstidspunktErAktivert()
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -81,12 +76,6 @@ class RegistrertSøknadstidspunktPåPersonController(
         )
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId)))
-    }
-
-    private fun validerAtRegistreringAvSøknadstidspunktErAktivert() {
-        if (!featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON)) {
-            throw FunksjonellFeil("Registrering av søknadstidspunkt er ikke aktivert.")
-        }
     }
 
     private fun validerAtBehandlingErSøknadsbehandling(behandling: Behandling) {
