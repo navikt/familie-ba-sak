@@ -146,6 +146,10 @@ spec:
       value: preprod
     - name: JDK_JAVA_OPTIONS
       value: "-XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp"
+    - name: APP_VERSION
+      value: {{ VERSION }}
+    - name: APP_BRANCH
+      value: {{ BRANCH }}
   kafka:
     pool: nav-dev
   strategy:
