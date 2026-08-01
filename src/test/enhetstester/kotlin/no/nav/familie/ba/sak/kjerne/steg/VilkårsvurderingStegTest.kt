@@ -131,7 +131,7 @@ class VilkårsvurderingStegTest {
         every { tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id)) } just Runs
         justRun { automatiskOppdaterValutakursService.oppdaterAndelerMedValutakurser(any()) }
         every { endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(any()) } just runs
-        every { registrertSøknadstidspunktService.settSøknadstidspunktForBarn(any()) } just runs
+        every { registrertSøknadstidspunktService.settSøknadstidspunktForPersonerFremstiltKravFor(any()) } just runs
     }
 
     @Test
@@ -164,7 +164,7 @@ class VilkårsvurderingStegTest {
 
         assertDoesNotThrow { vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, null) }
 
-        verify(exactly = 1) { registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling) }
+        verify(exactly = 1) { registrertSøknadstidspunktService.settSøknadstidspunktForPersonerFremstiltKravFor(behandling) }
     }
 
     @Test

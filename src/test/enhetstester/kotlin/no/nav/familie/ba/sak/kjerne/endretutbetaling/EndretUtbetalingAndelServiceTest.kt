@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilEndretUtbetalingAndelDto
@@ -426,6 +427,60 @@ class EndretUtbetalingAndelServiceTest {
                 EndretUtbetalingAndel(
                     behandlingId = behandling.id,
                     personer = mutableSetOf(barnMedRegistrertTidspunkt),
+                    prosent = BigDecimal.ZERO,
+                    fom = fomAndelTilkjentYtelse,
+                    tom = søknadstidspunkt.minusMonths(4).toYearMonth(),
+                    årsak = Årsak.ETTERBETALING_3MND,
+                    søknadstidspunkt = søknadstidspunkt,
+                    begrunnelse = "Fylt ut automatisk fra søknadstidspunkt.",
+                    erAutomatiskGenerert = true,
+                )
+            verify(exactly = 1) { mockEndretUtbetalingAndelRepository.saveAllAndFlush(listOf(forventetEndretUtbetalingAndel)) }
+        }
+
+        @Test
+        fun `Skal generere endret utbetaling andel for søker med utvidet barnetrygd når søker har registrert søknadstidspunkt`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER)
+            val barn = lagPerson(type = PersonType.BARN)
+
+            val fomAndelTilkjentYtelse = YearMonth.of(2020, 1)
+            val tomAndelTilkjentYtelse = YearMonth.of(2025, 12)
+            val søknadstidspunkt = LocalDate.of(2025, 4, 15)
+            val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
+
+            every { mockRegistrertSøknadstidspunktPåPersonService.hentForBehandling(any()) } returns
+                listOf(
+                    RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = søker.aktør, søknadstidspunkt = søknadstidspunkt),
+                    RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = barn.aktør, søknadstidspunkt = søknadstidspunkt),
+                )
+            every { mockEndretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
+            every { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) } returnsArgument 0
+            every { mockEndretUtbetalingAndelRepository.deleteAllById(any()) } just Runs
+            every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) } returns personopplysningGrunnlag
+            every { mockBeregningService.oppdaterBehandlingMedBeregning(any(), any()) } returns mockk()
+            every { mockPersongrunnlagService.hentPersonerPåBehandling(any(), any()) } returns listOf(søker, barn)
+            every { mockBeregningService.hentAndelerTilkjentYtelseForBehandling(any()) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        behandling = behandling,
+                        person = søker,
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        fom = fomAndelTilkjentYtelse,
+                        tom = tomAndelTilkjentYtelse,
+                        beløp = 2000,
+                    ),
+                )
+            every { mockBeregningService.hentAndelerFraForrigeIverksattebehandling(any()) } returns emptyList()
+
+            // Act
+            endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling = behandling)
+
+            // Assert
+            val forventetEndretUtbetalingAndel =
+                EndretUtbetalingAndel(
+                    behandlingId = behandling.id,
+                    personer = mutableSetOf(søker),
                     prosent = BigDecimal.ZERO,
                     fom = fomAndelTilkjentYtelse,
                     tom = søknadstidspunkt.minusMonths(4).toYearMonth(),

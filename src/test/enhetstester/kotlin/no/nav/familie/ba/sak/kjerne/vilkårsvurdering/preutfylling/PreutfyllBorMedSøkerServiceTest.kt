@@ -150,7 +150,7 @@ class PreutfyllBorMedSøkerServiceTest {
                 .single { it.vilkårType == Vilkår.BOR_MED_SØKER }
 
         assertThat(borFastHosSøkerVilkår.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
-        assertThat(borFastHosSøkerVilkår.begrunnelse).isEqualTo("$PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT- Har ikke samme fast eller delt bostedsadresse som søker")
+        assertThat(borFastHosSøkerVilkår.begrunnelse).isEqualTo("$PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT- Har ikke hatt samme fast eller delt bostedsadresse som søker i minst 3 måneder")
     }
 
     @Test
@@ -967,7 +967,7 @@ class PreutfyllBorMedSøkerServiceTest {
         val periode2 = borFastHosSøkerVilkår.first { it.resultat == Resultat.IKKE_OPPFYLT }
         assertThat(periode2.periodeFom).isEqualTo(fødselsdatoBarn.plusMonths(2).plusDays(1))
         assertThat(periode2.periodeTom).isNull()
-        assertThat(periode2.begrunnelse).contains("Har ikke samme fast eller delt bostedsadresse som søker")
+        assertThat(periode2.begrunnelse).contains("Har ikke hatt samme fast eller delt bostedsadresse som søker i minst 3 måneder")
     }
 
     @Test

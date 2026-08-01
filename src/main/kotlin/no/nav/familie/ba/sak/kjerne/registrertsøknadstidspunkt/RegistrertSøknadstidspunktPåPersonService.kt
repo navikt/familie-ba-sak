@@ -20,17 +20,19 @@ class RegistrertSøknadstidspunktPåPersonService(
     fun hentForBehandling(behandlingId: Long): List<RegistrertSøknadstidspunktPåPerson> = registrertSøknadstidspunktRepository.findByBehandlingId(behandlingId)
 
     @Transactional
-    fun settSøknadstidspunktForBarn(behandling: Behandling) {
+    fun settSøknadstidspunktForPersonerFremstiltKravFor(behandling: Behandling) {
         if (behandling.opprettetÅrsak != BehandlingÅrsak.SØKNAD) return
 
         val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)?.toLocalDate() ?: return
-        val barnFremstiltKravFor = søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = null).toSet()
+        val personerFremstiltKravFor = søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = null).toSet()
         val aktørerMedRegistrertSøknadstidspunkt = registrertSøknadstidspunktRepository.findByBehandlingId(behandling.id).map { it.aktør }.toSet()
 
+        // Søker er blant personene det er fremstilt krav for når det er søkt om utvidet barnetrygd
         val nyeRegistrerteSøknadstidspunkt =
             persongrunnlagService
-                .hentBarna(behandling)
-                .filter { it.aktør in barnFremstiltKravFor && it.aktør !in aktørerMedRegistrertSøknadstidspunkt }
+                .hentAktivThrows(behandling.id)
+                .personer
+                .filter { it.aktør in personerFremstiltKravFor && it.aktør !in aktørerMedRegistrertSøknadstidspunkt }
                 .map {
                     RegistrertSøknadstidspunktPåPerson(
                         behandlingId = behandling.id,

@@ -113,7 +113,7 @@ class VilkårsvurderingSteg(
 
         beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling, personopplysningGrunnlag)
 
-        registrertSøknadstidspunktService.settSøknadstidspunktForBarn(behandling)
+        registrertSøknadstidspunktService.settSøknadstidspunktForPersonerFremstiltKravFor(behandling)
 
         endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling)
 

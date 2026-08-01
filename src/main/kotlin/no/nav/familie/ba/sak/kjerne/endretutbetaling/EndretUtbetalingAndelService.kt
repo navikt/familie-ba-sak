@@ -228,7 +228,7 @@ class EndretUtbetalingAndelService(
 
         if (lagretSøknadstidspunktPerIdent.isEmpty()) return
 
-        val andelerSomSkalRyddes = finnAndelerSomSkalRyddes(behandling, barnSomErSøktFor = lagretSøknadstidspunktPerIdent.keys)
+        val andelerSomSkalRyddes = finnAndelerSomSkalRyddes(behandling, personerSomErSøktFor = lagretSøknadstidspunktPerIdent.keys)
         fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(behandling, andelerSomSkalRyddes)
 
         val nåværendeAndeler = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
@@ -272,7 +272,7 @@ class EndretUtbetalingAndelService(
 
     private fun finnAndelerSomSkalRyddes(
         behandling: Behandling,
-        barnSomErSøktFor: Set<String>,
+        personerSomErSøktFor: Set<String>,
     ): List<Long> =
         endretUtbetalingAndelRepository
             .findByBehandlingId(behandling.id)
@@ -280,7 +280,7 @@ class EndretUtbetalingAndelService(
                 it.manglerObligatoriskFelt() ||
                     (
                         it.årsak in setOf(ETTERBETALING_3ÅR, ETTERBETALING_3MND) &&
-                            it.personer.any { person -> person.aktør.aktivFødselsnummer() in barnSomErSøktFor }
+                            it.personer.any { person -> person.aktør.aktivFødselsnummer() in personerSomErSøktFor }
                     )
             }.map { it.id }
 
