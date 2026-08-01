@@ -75,8 +75,11 @@ class KonsistensavstemmingTest {
 
     @Test
     fun `Første gangs kjøring av start task - Verifiser at konsistensavstemOppdragStart oppretter finn perioder for relevante behandlinger task- og avslutt task og sender start melding hvis transaksjon ikke allerede kjørt`() {
+        // Arrange
         val transaksjonsId = UUID.randomUUID()
         val avstemmingsdatoSlot = lagMockForStartTaskHappCase(transaksjonsId)
+
+        // Act
         konistensavstemmingStartTask.doTask(
             Task(
                 payload =
@@ -91,6 +94,7 @@ class KonsistensavstemmingTest {
             ),
         )
 
+        // Assert
         val taskSlots = mutableListOf<Task>()
         verify(atLeast = 1) { taskService.save(capture(taskSlots)) }
         // sjekk at KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask er opprettet
@@ -150,6 +154,7 @@ class KonsistensavstemmingTest {
 
     @Test
     fun `Rekjøring av start task - Verifiser at konsistensavstemming ikke kjører hvis alle datachunker allerede er sendt til økonomi for transaksjonId`() {
+        // Arrange
         every { batchRepository.getReferenceById(batchId) } returns
             Batch(
                 kjøreDato = LocalDate.now(),
@@ -157,6 +162,7 @@ class KonsistensavstemmingTest {
             )
         val transaksjonsId = UUID.randomUUID()
 
+        // Act
         konistensavstemmingStartTask.doTask(
             Task(
                 payload =
@@ -171,11 +177,13 @@ class KonsistensavstemmingTest {
             ),
         )
 
+        // Assert
         verify(exactly = 0) { avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker() }
     }
 
     @Test
     fun `Rekjøring av start task - Verifiser at konsistensavstemming kun rekjører chunker som ikke allerede er kjørt`() {
+        // Arrange
         val transaksjonsId = UUID.randomUUID()
         lagMockForStartTaskHappCase(transaksjonsId)
         val datachunks =
@@ -202,6 +210,7 @@ class KonsistensavstemmingTest {
                 .toList()
                 .map { it.toLong() }
 
+        // Act
         konistensavstemmingStartTask.doTask(
             Task(
                 payload =
@@ -216,6 +225,7 @@ class KonsistensavstemmingTest {
             ),
         )
 
+        // Assert
         verify(exactly = 1) { avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker() }
         val taskSlots = mutableListOf<Task>()
         verify(exactly = 2) { taskService.save(capture(taskSlots)) }
@@ -239,9 +249,11 @@ class KonsistensavstemmingTest {
 
     @Test
     fun `Verifiser at konsistensavstemPeriodeFinnPerioderForRelevanteBehandlingerTask finner perioder for behandlinger og oppretter data task`() {
+        // Arrange
         val transaksjonsId = UUID.randomUUID()
         lagMockFinnPerioderForRelevanteBehandlingerHappeCase()
 
+        // Act
         konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.doTask(
             Task(
                 payload =
@@ -258,6 +270,7 @@ class KonsistensavstemmingTest {
             ),
         )
 
+        // Assert
         val taskSlots = mutableListOf<Task>()
         verify(atLeast = 1) { taskService.save(capture(taskSlots)) }
         val konsistensavstemmingDataDto =
@@ -272,6 +285,7 @@ class KonsistensavstemmingTest {
 
     @Test
     fun `Verifiser at konsistensavstemOppdragData sender data og oppdatere datachunk tabellen`() {
+        // Arrange
         val transaksjonsId = UUID.randomUUID()
         lagMockOppdragDataHappeCase(transaksjonsId)
         every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, 1) } returns
@@ -288,6 +302,7 @@ class KonsistensavstemmingTest {
             )
         } returns ""
 
+        // Act
         konsistensavstemMotOppdragDataTask.doTask(
             Task(
                 payload =
@@ -304,6 +319,7 @@ class KonsistensavstemmingTest {
             ),
         )
 
+        // Assert
         val dataChunkSlot = slot<DataChunk>()
         verify(exactly = 1) { dataChunkRepository.save(capture(dataChunkSlot)) }
         assertThat(dataChunkSlot.captured.erSendt).isTrue()
@@ -323,8 +339,11 @@ class KonsistensavstemmingTest {
 
     @Test
     fun `Kjør alle tasker med input generert fra task som oppretter tasken`() {
+        // Arrange
         val transaksjonsId = UUID.randomUUID()
         lagMockForStartTaskHappCase(transaksjonsId)
+
+        // Act
         konistensavstemmingStartTask.doTask(
             Task(
                 payload =
@@ -407,8 +426,11 @@ class KonsistensavstemmingTest {
 
     @Test
     fun `Kjør alle tasker med input generert fra task som oppretter tasken og send til økonomi skrudd av`() {
+        // Arrange
         val transaksjonsId = UUID.randomUUID()
         lagMockForStartTaskHappCase(transaksjonsId)
+
+        // Act
         konistensavstemmingStartTask.doTask(
             Task(
                 payload =

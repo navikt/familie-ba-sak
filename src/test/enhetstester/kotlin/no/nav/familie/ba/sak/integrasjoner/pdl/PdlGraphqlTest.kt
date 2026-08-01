@@ -26,8 +26,11 @@ class PdlGraphqlTest {
 
     @Test
     fun testDeserialization() {
+        // Act
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlOkResponse.json")))
+
+        // Assert
         assertThat(
             resp.data.person!!
                 .foedselsdato
@@ -105,8 +108,11 @@ class PdlGraphqlTest {
 
     @Test
     fun testTomAdresse() {
+        // Act
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlTomAdresseOkResponse.json")))
+
+        // Assert
         assertTrue(
             resp.data.person!!
                 .bostedsadresse
@@ -116,10 +122,13 @@ class PdlGraphqlTest {
 
     @Test
     fun testForelderBarnRelasjon() {
+        // Act
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonRelasjonerResponse>>(
                 File(getFile("pdl/pdlForelderBarnRelasjonResponse.json")),
             )
+
+        // Assert
         assertThat(
             resp.data.person!!
                 .forelderBarnRelasjon
@@ -138,8 +147,11 @@ class PdlGraphqlTest {
 
     @Test
     fun testMatrikkelAdresse() {
+        // Act
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlMatrikkelAdresseOkResponse.json")))
+
+        // Assert
         assertThat(
             resp.data.person!!
                 .bostedsadresse
@@ -158,10 +170,13 @@ class PdlGraphqlTest {
 
     @Test
     fun testUkjentBostedAdresse() {
+        // Act
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(
                 File(getFile("pdl/pdlUkjentBostedAdresseOkResponse.json")),
             )
+
+        // Assert
         assertThat(
             resp.data.person!!
                 .bostedsadresse
@@ -173,10 +188,13 @@ class PdlGraphqlTest {
 
     @Test
     fun testDoedtfodtBarn() {
+        // Act
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(
                 File(getFile("pdl/pdlDoedfoedtBarnOkResponse.json")),
             )
+
+        // Assert
         assertThat(
             resp.data.person!!
                 .doedfoedtBarn
@@ -187,10 +205,13 @@ class PdlGraphqlTest {
 
     @Test
     fun testAdressebeskyttelse() {
+        // Act
         val resp =
             mapper.readValue<PdlBaseResponse<PdlAdressebeskyttelseResponse>>(
                 File(getFile("pdl/pdlAdressebeskyttelseResponse.json")),
             )
+
+        // Assert
         assertThat(
             resp.data.person!!
                 .adressebeskyttelse
@@ -201,8 +222,11 @@ class PdlGraphqlTest {
 
     @Test
     fun testDeserializationOfResponseWithErrors() {
+        // Act
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlPersonIkkeFunnetResponse.json")))
+
+        // Assert
         assertThat(resp.harFeil()).isTrue
         assertThat(resp.errorMessages()).contains("Fant ikke person", "Ikke tilgang")
         assertThat(resp.errors!!.any { it.extensions?.notFound() == true }).isTrue
@@ -210,8 +234,11 @@ class PdlGraphqlTest {
 
     @Test
     fun testDeserializationOfResponseWithoutFødselsdato() {
+        // Act
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlManglerFoedselResponse.json")))
+
+        // Assert
         assertThat(
             resp.data.person!!
                 .foedselsdato
@@ -241,8 +268,11 @@ class PdlGraphqlTest {
 
     @Test
     fun testDeserialiseringAvResponsMedToNavn() {
+        // Act
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlMedToNavnOgToKjonn.json")))
+
+        // Assert
         assertThat(
             resp.data.person!!
                 .navn
@@ -253,8 +283,11 @@ class PdlGraphqlTest {
 
     @Test
     fun testDeserialiseringAvResponsMedToKjønn() {
+        // Act
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlMedToNavnOgToKjonn.json")))
+
+        // Assert
         assertThat(
             resp.data.person!!
                 .kjoenn
@@ -265,8 +298,11 @@ class PdlGraphqlTest {
 
     @Test
     fun testDeserialiseringAvResponsMedUgyldigeKilder() {
+        // Act
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlMedToNavnOgToKjonn.json")))
+
+        // Assert
         assertThat(
             resp.data.person!!
                 .kjoenn

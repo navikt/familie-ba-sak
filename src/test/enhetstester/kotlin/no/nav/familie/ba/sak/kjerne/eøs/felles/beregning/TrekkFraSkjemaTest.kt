@@ -15,6 +15,7 @@ class TrekkFraSkjemaTest {
 
     @Test
     fun testRestSomIntrodusererHull() {
+        // Arrange
         val kompetanse =
             KompetanseBuilder(jan2020)
                 .medKompetanse("------", barn1, barn2, barn3)
@@ -33,14 +34,17 @@ class TrekkFraSkjemaTest {
                 .medKompetanse("--  --", barn1)
                 .byggKompetanser()
 
+        // Act
         val restKompetanser = kompetanse.trekkFra(oppdatertKompetanse)
 
+        // Assert
         Assertions.assertEquals(3, restKompetanser.size)
         assertEqualsUnordered(forventedeKompetanser, restKompetanser)
     }
 
     @Test
     fun testRestMedPeriodeOverEnEnkeltMåned() {
+        // Arrange
         val kompetanse =
             KompetanseBuilder(jan2020)
                 .medKompetanse("  --", barn1, barn2)
@@ -59,8 +63,10 @@ class TrekkFraSkjemaTest {
                 .medKompetanse("  --", barn2)
                 .byggKompetanser()
 
+        // Act
         val restKompetanser = kompetanse.trekkFra(fjernKompetanse)
 
+        // Assert
         assertEqualsUnordered(forventedeKompetanser, restKompetanser)
     }
 }

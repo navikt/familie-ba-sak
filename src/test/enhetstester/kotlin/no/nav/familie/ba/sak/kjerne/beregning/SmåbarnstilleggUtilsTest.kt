@@ -36,6 +36,7 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal generere tidslinje for barn med rett til småbarnstillegg kun hvor barn er under 3 år`() {
+        // Arrange
         val barn = lagPerson(fødselsdato = LocalDate.now().minusYears(4), type = PersonType.BARN)
 
         val barnasAndeler =
@@ -48,12 +49,14 @@ class SmåbarnstilleggUtilsTest {
                 ),
             )
 
+        // Act
         val generertePerioder =
             lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
                 barnasAndeler = barnasAndeler,
                 barnasAktørerOgFødselsdatoer = listOf(Pair(barn.aktør, barn.fødselsdato)),
             ).tilPerioder()
 
+        // Assert
         assertEquals(1, generertePerioder.size)
         assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), generertePerioder.single().fom?.toYearMonth())
         assertEquals(barn.fødselsdato.plusYears(3).toYearMonth(), generertePerioder.single().tom?.toYearMonth())
@@ -62,6 +65,7 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal generere tidslinje for barn med rett til småbarnstillegg med riktig utbetalings-info for ett barn`() {
+        // Arrange
         val barn = lagPerson(fødselsdato = LocalDate.now().minusYears(4), type = PersonType.BARN)
 
         val brytningstidspunkt = LocalDate.now().minusYears(3)
@@ -83,12 +87,14 @@ class SmåbarnstilleggUtilsTest {
                 ),
             )
 
+        // Act
         val generertePerioder =
             lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
                 barnasAndeler = barnasAndeler,
                 barnasAktørerOgFødselsdatoer = listOf(Pair(barn.aktør, barn.fødselsdato)),
             ).tilPerioder().sortedBy { it.fom }
 
+        // Assert
         assertEquals(2, generertePerioder.size)
         assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), generertePerioder.first().fom?.toYearMonth())
         assertEquals(brytningstidspunkt.toYearMonth(), generertePerioder.first().tom?.toYearMonth())
@@ -101,6 +107,7 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal bare ta hensyn til ordinære andeler ved generering av tidslinje for barn med rett`() {
+        // Arrange
         val barn = lagPerson(fødselsdato = LocalDate.now().minusYears(4), type = PersonType.BARN)
 
         val brytningstidspunkt = LocalDate.now().minusYears(3)
@@ -129,12 +136,14 @@ class SmåbarnstilleggUtilsTest {
                 ),
             )
 
+        // Act
         val generertePerioder =
             lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
                 barnasAndeler = barnasAndeler,
                 barnasAktørerOgFødselsdatoer = listOf(Pair(barn.aktør, barn.fødselsdato)),
             ).tilPerioder().sortedBy { it.fom }
 
+        // Assert
         assertEquals(2, generertePerioder.size)
         assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), generertePerioder.first().fom?.toYearMonth())
         assertEquals(brytningstidspunkt.toYearMonth(), generertePerioder.first().tom?.toYearMonth())
@@ -147,6 +156,7 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal generere tidslinje for barn med rett til småbarnstillegg med riktig utbetalings-info når det er flere barn`() {
+        // Arrange
         val barn1 = lagPerson(fødselsdato = LocalDate.now().minusYears(4), type = PersonType.BARN)
         val barn2 = lagPerson(fødselsdato = LocalDate.now().minusYears(6), type = PersonType.BARN)
         val barn3 = lagPerson(fødselsdato = LocalDate.now().minusYears(1), type = PersonType.BARN)
@@ -190,6 +200,7 @@ class SmåbarnstilleggUtilsTest {
                 ),
             )
 
+        // Act
         val generertePerioder =
             lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
                 barnasAndeler = barnasAndeler,
@@ -201,6 +212,7 @@ class SmåbarnstilleggUtilsTest {
                     ),
             ).tilPerioder().sortedBy { it.fom }
 
+        // Assert
         assertEquals(3, generertePerioder.size)
         assertEquals(barn2.fødselsdato.plusMonths(1).toYearMonth(), generertePerioder.first().fom?.toYearMonth())
         assertEquals(brytningstidspunkt2.toYearMonth(), generertePerioder.first().tom?.toYearMonth())
@@ -217,6 +229,7 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal kun få småbarnstillegg når alle tre tidslinjene har oppfylt kravene`() {
+        // Arrange
         val søker = lagPerson(type = PersonType.SØKER)
         val overgangsstønadPerioder =
             listOf(
@@ -246,6 +259,7 @@ class SmåbarnstilleggUtilsTest {
                 ),
             ).tilTidslinje()
 
+        // Act
         val kombinertTidslinje =
             kombinerAlleTidslinjerTilProsentTidslinje(
                 perioderMedFullOvergangsstønadTidslinje = overgangsstønadPerioder.tilTidslinje(),
@@ -253,6 +267,7 @@ class SmåbarnstilleggUtilsTest {
                 barnSomGirRettTilSmåbarnstilleggTidslinje = barnSomGirRettTilSmåbarnstilleggTidslinje,
             )
 
+        // Assert
         val perioderMedSmåbarnstillegg = kombinertTidslinje.tilPerioderIkkeNull()
 
         assertEquals(1, perioderMedSmåbarnstillegg.size)
@@ -263,6 +278,7 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal få småbarnstillegg med nullutbetaling når utvidet eller barn er overstyrt til 0kr`() {
+        // Arrange
         val søker = lagPerson(type = PersonType.SØKER)
         val brytningstidspunkt1 = YearMonth.now().minusYears(3)
         val brytningstidspunkt2 = YearMonth.now().minusYears(2)
@@ -307,6 +323,7 @@ class SmåbarnstilleggUtilsTest {
                 ),
             ).tilTidslinje()
 
+        // Act
         val kombinertTidslinje =
             kombinerAlleTidslinjerTilProsentTidslinje(
                 perioderMedFullOvergangsstønadTidslinje = overgangsstønadPerioder.tilTidslinje(),
@@ -314,6 +331,7 @@ class SmåbarnstilleggUtilsTest {
                 barnSomGirRettTilSmåbarnstilleggTidslinje = barnsSomGirRettTilSmåbarnstilleggTidslinje,
             )
 
+        // Assert
         val perioderMedSmåbarnstillegg = kombinertTidslinje.tilPerioderIkkeNull().toList()
 
         assertEquals(3, perioderMedSmåbarnstillegg.size)

@@ -19,12 +19,16 @@ class PreprodControllerIntegrasjonstest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `tømPersonopplysningerCache tømmer cache`() {
+        // Arrange
         val cache = cacheManager.getCacheOrThrow("personopplysninger")
 
         cache.put("personopplysninger", "verdi")
         assertThat(cache.get("personopplysninger")?.get()).isEqualTo("verdi")
 
+        // Act
         val response = preprodController.tømPersonopplysningerCache()
+
+        // Assert
         assertThat(response.body).isEqualTo("Personopplysninger-cache er tømt")
         assertThat(cache.get("personopplysninger")).isNull()
     }

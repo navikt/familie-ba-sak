@@ -23,6 +23,7 @@ class KorrigertVedtakRepositoryTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `finnAktivtKorrigertVedtakPåBehandling skal returnere null dersom det ikke eksisterer en aktiv korrigering av vedtak på behandling`() {
+        // Arrange
         val behandling = opprettBehandling()
 
         val inaktivKorrigertVedtak =
@@ -35,14 +36,17 @@ class KorrigertVedtakRepositoryTest(
 
         korrigertVedtakRepository.saveAndFlush(inaktivKorrigertVedtak)
 
+        // Act
         val ikkeEksisterendeKorrigertVedtak =
             korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.id)
 
+        // Assert
         Assertions.assertNull(ikkeEksisterendeKorrigertVedtak, "Skal ikke finnes aktiv korrigert vedtak på behandling")
     }
 
     @Test
     fun `finnAktivtKorrigertVedtakPåBehandling skal returnere aktiv korrigert vedtak når det eksisterer en aktiv korrigering av vedtak på behandling`() {
+        // Arrange
         val behandling = opprettBehandling()
 
         val aktivKorrigertVedtak =
@@ -55,9 +59,11 @@ class KorrigertVedtakRepositoryTest(
 
         korrigertVedtakRepository.saveAndFlush(aktivKorrigertVedtak)
 
+        // Act
         val eksisterendeKorrigertVedtak =
             korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.id)
 
+        // Assert
         Assertions.assertNotNull(
             eksisterendeKorrigertVedtak,
             "Skal finnes aktiv korrigert vedtak på behandling",
@@ -66,6 +72,7 @@ class KorrigertVedtakRepositoryTest(
 
     @Test
     fun `Det skal kastes DataIntegrityViolationException dersom det forsøkes å lagre aktivt korrigert vedtak når det allerede finnes en`() {
+        // Arrange
         val behandling = opprettBehandling()
 
         val aktivKorrigertVedtak1 =
@@ -86,6 +93,7 @@ class KorrigertVedtakRepositoryTest(
 
         korrigertVedtakRepository.saveAndFlush(aktivKorrigertVedtak1)
 
+        // Act & Assert
         assertThrows<DataIntegrityViolationException> {
             korrigertVedtakRepository.saveAndFlush(aktivKorrigertVedtak2)
         }

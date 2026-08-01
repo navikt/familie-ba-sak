@@ -68,6 +68,7 @@ class SaksstatistikkTest(
     @Test
     @Tag("integration")
     fun `Skal lagre saksstatistikk sak til repository, sende meldinger og slette melding fra mellomlagring etter sending`() {
+        // Arrange
         val fnr = randomFnr()
         val fagsakId =
             fagsakController
@@ -78,6 +79,7 @@ class SaksstatistikkTest(
 
         val mellomlagredeStatistikkHendelser = saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SAK, fagsakId)
 
+        // Assert
         assertEquals(1, mellomlagredeStatistikkHendelser.size)
         assertEquals(SAK, mellomlagredeStatistikkHendelser.first().type)
         assertNull(mellomlagredeStatistikkHendelser.first().konvertertTidspunkt)
@@ -90,8 +92,10 @@ class SaksstatistikkTest(
         val lagretJsonSomSakDVH: SakDVH =
             sakstatistikkObjectMapper.readValue(mellomlagredeStatistikkHendelser.first().json, SakDVH::class.java)
 
+        // Act
         saksstatistikkScheduler.sendSaksstatistikk()
 
+        // Assert
         assertNull(saksstatistikkMellomlagringRepository.findByIdOrNull(mellomlagredeStatistikkHendelser.first().id))
         assertEquals(lagretJsonSomSakDVH, sendteMeldinger["sak-$fagsakId"] as SakDVH)
     }
@@ -99,6 +103,7 @@ class SaksstatistikkTest(
     @Test
     @Tag("integration")
     fun `Skal lagre saksstatistikk behandling til repository, sende meldinger og slette melding fra mellomlagring etter sending`() {
+        // Arrange
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr, false)
@@ -113,6 +118,8 @@ class SaksstatistikkTest(
 
         val mellomlagretBehandling =
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(BEHANDLING, behandling.id)
+
+        // Assert
         assertEquals(2, mellomlagretBehandling.size)
         assertNull(mellomlagretBehandling.first().konvertertTidspunkt)
         assertNull(mellomlagretBehandling.first().sendtTidspunkt)
@@ -126,8 +133,10 @@ class SaksstatistikkTest(
         val lagretJsonSomSakDVH: BehandlingDVH =
             sakstatistikkObjectMapper.readValue(mellomlagretBehandling.last().json, BehandlingDVH::class.java)
 
+        // Act
         saksstatistikkScheduler.sendSaksstatistikk()
 
+        // Assert
         assertNull(saksstatistikkMellomlagringRepository.findByIdOrNull(mellomlagretBehandling.first().id))
         assertEquals(lagretJsonSomSakDVH, sendteMeldinger["behandling-${behandling.id}"] as BehandlingDVH)
     }

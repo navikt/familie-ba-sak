@@ -41,26 +41,35 @@ class DokumentControllerTest(
     @Test
     @Tag("integration")
     fun `Test generer vedtaksbrev`() {
+        // Arrange
         every { vedtakService.hent(any()) } returns lagVedtak()
         every { mockDokumentGenereringService.genererBrevForVedtak(any()) } returns "pdf".toByteArray()
 
+        // Act
         val response = mockDokumentController.genererVedtaksbrev(1)
+
+        // Assert
         assert(response.status == Ressurs.Status.SUKSESS)
     }
 
     @Test
     @Tag("integration")
     fun `Test hent pdf vedtak`() {
+        // Arrange
         every { vedtakService.hent(any()) } returns lagVedtak(stønadBrevPdF = "pdf".toByteArray())
         every { mockDokumentService.hentBrevForVedtak(any()) } returns Ressurs.success("pdf".toByteArray())
 
+        // Act
         val response = mockDokumentController.hentVedtaksbrev(1)
+
+        // Assert
         assert(response.status == Ressurs.Status.SUKSESS)
     }
 
     @Test
     @Tag("integration")
     fun `Kast feil ved hent av vedtaksbrev når det ikke er generert brev`() {
+        // Act & Assert
         assertThrows<Feil> {
             dokumentService.hentBrevForVedtak(lagVedtak())
         }

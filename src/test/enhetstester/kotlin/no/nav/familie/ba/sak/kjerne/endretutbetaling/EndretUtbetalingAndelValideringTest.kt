@@ -75,6 +75,7 @@ class EndretUtbetalingAndelValideringTest {
     fun `skal sjekke at en endret periode ikke overlapper med eksisterende endringsperioder`(
         årsak: Årsak,
     ) {
+        // Arrange
         val barn1 = tilfeldigPerson()
         val barn2 = tilfeldigPerson()
         val endretUtbetalingAndel =
@@ -90,6 +91,7 @@ class EndretUtbetalingAndelValideringTest {
                 avtaletidspunktDeltBosted = LocalDate.now(),
             )
 
+        // Act & Assert
         val feil =
             assertThrows<FunksjonellFeil> {
                 validerIngenOverlappendeEndring(
@@ -131,6 +133,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `skal sjekke at en endret periode ikke strekker seg utover ytterpunktene for tilkjent ytelse`() {
+        // Arrange
         val barn1 = tilfeldigPerson()
         val barn2 = tilfeldigPerson()
 
@@ -166,6 +169,7 @@ class EndretUtbetalingAndelValideringTest {
                 avtaletidspunktDeltBosted = LocalDate.now(),
             )
 
+        // Act & Assert
         var feil =
             assertThrows<FunksjonellFeil> {
                 validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, emptyList())
@@ -205,6 +209,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `skal sjekke at en endret periode ikke strekker seg utover ytterpunktene for tilkjent ytelse for flere barn`() {
+        // Arrange
         val barn1 = tilfeldigPerson()
         val barn2 = tilfeldigPerson()
 
@@ -234,6 +239,7 @@ class EndretUtbetalingAndelValideringTest {
                 søknadstidspunkt = LocalDate.now(),
             )
 
+        // Act & Assert
         assertDoesNotThrow {
             validerPeriodeInnenforTilkjentytelse(gyldigEndretUtbetalingAndel, andelTilkjentYtelser)
         }
@@ -265,6 +271,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal kaste feil hvis endringsperiode med årsak delt bosted ikke overlapper helt med delt bosted periode`() {
+        // Arrange
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
@@ -277,6 +284,8 @@ class EndretUtbetalingAndelValideringTest {
                 søknadstidspunkt = LocalDate.now(),
                 avtaletidspunktDeltBosted = LocalDate.now(),
             )
+
+        // Act & Assert
         assertThrows<FunksjonellFeil> {
             validerDeltBosted(
                 endretUtbetalingAndel = endretUtbetalingAndel,
@@ -306,6 +315,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal kaste feil hvis endringsårsak er delt bosted og det ikke eksisterer delt bosted perioder`() {
+        // Arrange
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
@@ -318,6 +328,8 @@ class EndretUtbetalingAndelValideringTest {
                 søknadstidspunkt = LocalDate.now(),
                 avtaletidspunktDeltBosted = LocalDate.now(),
             )
+
+        // Act & Assert
         assertThrows<FunksjonellFeil> {
             validerDeltBosted(
                 endretUtbetalingAndel = endretUtbetalingAndel,
@@ -328,6 +340,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal ikke kaste feil hvis endringsperiode med årsak delt bosted overlapper helt med delt bosted periode`() {
+        // Arrange
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
@@ -340,6 +353,8 @@ class EndretUtbetalingAndelValideringTest {
                 søknadstidspunkt = LocalDate.now(),
                 avtaletidspunktDeltBosted = LocalDate.now(),
             )
+
+        // Act & Assert
         assertDoesNotThrow {
             validerDeltBosted(
                 endretUtbetalingAndel = endretUtbetalingAndel,
@@ -368,10 +383,14 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `sjekk at alle endrede utbetalingsandeler validerer`() {
+        // Arrange
         val endretUtbetalingAndel1 = lagEndretUtbetalingAndel(personer = setOf(tilfeldigPerson()))
         val endretUtbetalingAndel2 = lagEndretUtbetalingAndel(personer = setOf(tilfeldigPerson()))
+
+        // Act
         validerAtAlleOpprettedeEndringerErUtfylt(listOf(endretUtbetalingAndel1, endretUtbetalingAndel2))
 
+        // Act & Assert
         val feil =
             assertThrows<FunksjonellFeil> {
                 validerAtAlleOpprettedeEndringerErUtfylt(
@@ -389,7 +408,10 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `sjekk at alle endrede utbetalingsandeler er tilknyttet andeltilkjentytelser`() {
+        // Arrange
         val endretUtbetalingAndel1 = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(personer = setOf(tilfeldigPerson()))
+
+        // Act & Assert
         val feil =
             assertThrows<FunksjonellFeil> {
                 validerAtEndringerErTilknyttetAndelTilkjentYtelse(listOf(endretUtbetalingAndel1))
@@ -412,6 +434,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal finne riktige delt bosted perioder for barn, og slå sammen de som er sammenhengende`() {
+        // Arrange
         val behandling = lagBehandling()
 
         val fom = LocalDate.now().minusMonths(5)
@@ -488,8 +511,10 @@ class EndretUtbetalingAndelValideringTest {
                 ),
             )
 
+        // Act
         val deltBostedPerioder = finnDeltBostedPerioderForPerson(person = barn, vilkårsvurdering = vilkårsvurdering)
 
+        // Assert
         assertTrue(deltBostedPerioder.size == 1)
         assertEquals(fom.plusMonths(1).førsteDagIInneværendeMåned().toYearMonth(), deltBostedPerioder.single().fom)
         assertEquals(tom.sisteDagIMåned().toYearMonth(), deltBostedPerioder.single().tom)
@@ -497,6 +522,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal finne riktige delt bosted perioder for barn og ikke slå de sammen når de ikke er sammenhengde`() {
+        // Arrange
         val behandling = lagBehandling()
         val barn = lagPerson(type = PersonType.BARN)
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
@@ -573,8 +599,10 @@ class EndretUtbetalingAndelValideringTest {
                 ),
             )
 
+        // Act
         val deltBostedPerioder = finnDeltBostedPerioderForPerson(person = barn, vilkårsvurdering = vilkårsvurdering)
 
+        // Assert
         assertTrue(deltBostedPerioder.size == 2)
 
         val førstePeriode = deltBostedPerioder.get(0)
@@ -588,6 +616,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal finne riktige delt bosted perioder for søker, og slå sammen de som er sammenhengende`() {
+        // Arrange
         val behandling = lagBehandling()
         val barn = lagPerson(type = PersonType.BARN)
         val søker = lagPerson(type = PersonType.SØKER)
@@ -664,8 +693,10 @@ class EndretUtbetalingAndelValideringTest {
                 ),
             )
 
+        // Act
         val deltBostedPerioder = finnDeltBostedPerioderForPerson(person = søker, vilkårsvurdering = vilkårsvurdering)
 
+        // Assert
         assertTrue(deltBostedPerioder.size == 1)
         assertEquals(fomBarn2.plusMonths(1).førsteDagIInneværendeMåned().toYearMonth(), deltBostedPerioder.single().fom)
         assertEquals(tomBarn1.sisteDagIMåned().toYearMonth(), deltBostedPerioder.single().tom)
@@ -673,6 +704,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal finne riktige delt bosted perioder for søker, og slå sammen de som overlapper`() {
+        // Arrange
         val behandling = lagBehandling()
         val barn = lagPerson(type = PersonType.BARN)
         val søker = lagPerson(type = PersonType.SØKER)
@@ -749,8 +781,10 @@ class EndretUtbetalingAndelValideringTest {
                 ),
             )
 
+        // Act
         val deltBostedPerioder = finnDeltBostedPerioderForPerson(person = søker, vilkårsvurdering = vilkårsvurdering)
 
+        // Assert
         assertTrue(deltBostedPerioder.size == 1)
         assertEquals(fomBarn2.plusMonths(1).førsteDagIInneværendeMåned().toYearMonth(), deltBostedPerioder.single().fom)
         assertEquals(tomBarn1.sisteDagIMåned().toYearMonth(), deltBostedPerioder.single().tom)
@@ -758,6 +792,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal returnere tom liste hvis det ikke finnes noen delt bosted perioder på person`() {
+        // Arrange
         val behandling = lagBehandling()
         val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(5))
         val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(4))
@@ -781,13 +816,16 @@ class EndretUtbetalingAndelValideringTest {
                 ),
             )
 
+        // Act
         val deltBostedPerioder = finnDeltBostedPerioderForPerson(person = barn1, vilkårsvurdering = vilkårsvurdering)
 
+        // Assert
         assertTrue(deltBostedPerioder.isEmpty())
     }
 
     @Test
     fun `skal ikke feile dersom det er en utvidet endring og delt bosted endring med samme periode og prosent`() {
+        // Act & Assert
         validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
             listOf(endretUtbetalingAndelUtvidetNullutbetaling, endretUtbetalingAndelDeltBostedNullutbetaling),
         )
@@ -800,6 +838,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `skal ikke feile dersom det er en delt bosted endring som inneholder barn og søker`() {
+        // Arrange
         val andeler =
             lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                 fom = inneværendeMåned().minusMonths(1),
@@ -821,6 +860,7 @@ class EndretUtbetalingAndelValideringTest {
                     ),
             )
 
+        // Act & Assert
         assertDoesNotThrow {
             validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(listOf(andeler))
         }
@@ -921,6 +961,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal kaste feil dersom endringsårsak er 'Allerede utbetalt' men tom dato er satt til etter inneværende måned`() {
+        // Arrange
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
@@ -934,6 +975,7 @@ class EndretUtbetalingAndelValideringTest {
                 avtaletidspunktDeltBosted = LocalDate.now(),
             )
 
+        // Act & Assert
         val feilmelding =
             assertThrows<FunksjonellFeil> {
                 validerÅrsak(
@@ -950,6 +992,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal kaste ikke feil dersom endringsårsak er 'Allerede utbetalt' og tom dato er satt til å være lik eller før inneværende måned`() {
+        // Arrange
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
@@ -963,6 +1006,7 @@ class EndretUtbetalingAndelValideringTest {
                 avtaletidspunktDeltBosted = LocalDate.now(),
             )
 
+        // Act & Assert
         assertDoesNotThrow {
             validerÅrsak(
                 endretUtbetalingAndel = endretUtbetalingAndel,
@@ -973,6 +1017,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal kaste feil dersom endringsårsak er 'Etterbetaling 3 år' og øker til hundre prosent utbetaling`() {
+        // Arrange
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
@@ -983,6 +1028,7 @@ class EndretUtbetalingAndelValideringTest {
                 søknadstidspunkt = LocalDate.now(),
             )
 
+        // Act & Assert
         val feil =
             assertThrows<FunksjonellFeil> {
                 validerÅrsak(
@@ -996,6 +1042,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal kaste feil dersom endringsårsak er 'Etterbetaling 3 år' og perioden er mindre er 3 år siden`() {
+        // Arrange
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
@@ -1006,6 +1053,7 @@ class EndretUtbetalingAndelValideringTest {
                 søknadstidspunkt = LocalDate.now(),
             )
 
+        // Act & Assert
         val feil =
             assertThrows<FunksjonellFeil> {
                 validerÅrsak(
@@ -1019,6 +1067,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal ikke kaste feil dersom endringsårsak er 'Etterbetaling 3 år' og perioden er mer enn 3 år siden`() {
+        // Arrange
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
@@ -1029,6 +1078,7 @@ class EndretUtbetalingAndelValideringTest {
                 søknadstidspunkt = LocalDate.now(),
             )
 
+        // Act & Assert
         assertDoesNotThrow {
             validerÅrsak(
                 endretUtbetalingAndel = endretUtbetalingAndel,
@@ -1039,6 +1089,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal kaste feil dersom endringsårsak er 'Etterbetaling 3 måneder' og perioden er mindre er 3 måneder siden`() {
+        // Arrange
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
@@ -1049,6 +1100,7 @@ class EndretUtbetalingAndelValideringTest {
                 søknadstidspunkt = LocalDate.now(),
             )
 
+        // Act & Assert
         val feil =
             assertThrows<FunksjonellFeil> {
                 validerÅrsak(
@@ -1062,6 +1114,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal ikke kaste feil dersom endringsårsak er 'Etterbetaling 3 måneder' og perioden er mer enn 3 måneder`() {
+        // Arrange
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
@@ -1072,6 +1125,7 @@ class EndretUtbetalingAndelValideringTest {
                 søknadstidspunkt = LocalDate.now(),
             )
 
+        // Act & Assert
         assertDoesNotThrow {
             validerÅrsak(
                 endretUtbetalingAndel = endretUtbetalingAndel,

@@ -17,12 +17,17 @@ internal class InfotrygdFeedServiceTest {
 
     @Test
     fun `Skal send riktig start behandling feed`() {
+        // Arrange
         val ident = "12345678900"
         val identSlot = slot<Aktør>()
         every { opprettTaskServiceMock.opprettSendStartBehandlingTilInfotrygdTask(capture(identSlot)) } just runs
 
         val infotrygdFeedService = InfotrygdFeedService(opprettTaskServiceMock)
+
+        // Act
         infotrygdFeedService.sendStartBehandlingTilInfotrygdFeed(lagAktør(ident))
+
+        // Assert
         verify(exactly = 1) {
             opprettTaskServiceMock.opprettSendStartBehandlingTilInfotrygdTask(any())
         }

@@ -47,13 +47,17 @@ internal class AuditLoggerTest {
 
     @Test
     internal fun `logger melding uten custom strings`() {
+        // Act
         auditLogger.log(Sporingsdata(AuditLoggerEvent.ACCESS, "12345678901"))
+
+        // Assert
         assertThat(listAppender.list).hasSize(1)
         assertThat(getMessage()).isEqualTo(expectedBaseLog)
     }
 
     @Test
     internal fun `logger melding med custom strings`() {
+        // Act
         auditLogger.log(
             Sporingsdata(
                 event = AuditLoggerEvent.ACCESS,
@@ -63,6 +67,8 @@ internal class AuditLoggerTest {
                 custom3 = CustomKeyValue("k3", "v3"),
             ),
         )
+
+        // Assert
         assertThat(listAppender.list).hasSize(1)
         assertThat(getMessage())
             .isEqualTo("${expectedBaseLog}cs3Label=k cs3=v cs5Label=k2 cs5=v2 cs6Label=k3 cs6=v3")

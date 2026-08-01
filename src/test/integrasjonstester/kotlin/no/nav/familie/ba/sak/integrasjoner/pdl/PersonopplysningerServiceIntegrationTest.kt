@@ -66,6 +66,7 @@ internal class PersonopplysningerServiceIntegrationTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
+        // Arrange
         fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             listOf(
                 Tilgang(ID_BARN_1, true),
@@ -74,8 +75,10 @@ internal class PersonopplysningerServiceIntegrationTest(
         )
         fakeIntegrasjonKlient.leggTilEgenansatt(ID_MOR)
 
+        // Act
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(lagAktør(ID_MOR))
 
+        // Assert
         assert(LocalDate.of(1955, 9, 13) == personInfo.fødselsdato)
         assertThat(personInfo.adressebeskyttelseGradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT)
         assertThat(personInfo.forelderBarnRelasjon.size).isEqualTo(1)
@@ -88,6 +91,7 @@ internal class PersonopplysningerServiceIntegrationTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal returnere riktig personinfo for død person`() {
+        // Arrange
         fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             listOf(
                 Tilgang(ID_BARN_1, true),
@@ -95,6 +99,7 @@ internal class PersonopplysningerServiceIntegrationTest(
             ),
         )
 
+        // Act
         val personInfo =
             personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
                 lagAktør(
@@ -102,6 +107,7 @@ internal class PersonopplysningerServiceIntegrationTest(
                 ),
             )
 
+        // Assert
         assertThat(personInfo.dødsfall?.erDød).isTrue
         assertThat(personInfo.dødsfall?.dødsdato).isEqualTo("2020-04-04")
         assertThat(personInfo.kontaktinformasjonForDoedsbo?.adresse?.postnummer).isEqualTo("1234")
@@ -109,11 +115,13 @@ internal class PersonopplysningerServiceIntegrationTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal filtrere bort relasjoner med opphørte folkreregisteridenter eller uten fødselsdato`() {
+        // Arrange
         fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
             emptyList(),
             godkjennDefault = true,
         )
 
+        // Act
         val personInfo =
             personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
                 lagAktør(
@@ -121,6 +129,7 @@ internal class PersonopplysningerServiceIntegrationTest(
                 ),
             )
 
+        // Assert
         assertEquals(1, personInfo.forelderBarnRelasjon.size)
         assertEquals(
             ID_BARN_1,
@@ -133,44 +142,65 @@ internal class PersonopplysningerServiceIntegrationTest(
 
     @Test
     fun `hentStatsborgerskap() skal return riktig statsborgerskap`() {
+        // Act
         val statsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(lagAktør(ID_MOR))
+
+        // Assert
         assert(statsborgerskap.land == "XXX")
     }
 
     @Test
     fun `hentOpphold() skal returnere riktig opphold`() {
+        // Act
         val opphold = personopplysningerService.hentGjeldendeOpphold(lagAktør(ID_MOR))
+
+        // Assert
         assert(opphold.type == OPPHOLDSTILLATELSE.MIDLERTIDIG)
     }
 
     @Test
     fun `hentLandkodeUtenlandskAdresse() skal returnere landkode `() {
+        // Act
         val landkode = personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(lagAktør(ID_MOR))
+
+        // Assert
         assertThat(landkode).isEqualTo("GB")
     }
 
     @Test
     fun `hentLandkodeUtenlandskAdresse() skal returnere ZZ hvis ingen landkode `() {
+        // Act
         val landkode = personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(lagAktør(ID_BARN_1))
+
+        // Assert
         assertThat(landkode).isEqualTo("ZZ")
     }
 
     @Test
     fun `hentLandkodeUtenlandskAdresse() skal returnere ZZ hvis ingen bostedsadresse `() {
+        // Act
         val landkode =
             personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(lagAktør(ID_MOR_MED_TOM_BOSTEDSADRESSE))
+
+        // Assert
         assertThat(landkode).isEqualTo("ZZ")
     }
 
     @Test
     fun `hentadressebeskyttelse skal returnere gradering`() {
+        // Act
         val gradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(lagAktør(ID_BARN_1))
+
+        // Assert
         assertThat(gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
     }
 
     @Test
     fun `hentadressebeskyttelse skal returnere ugradert ved tom liste fra pdl`() {
+        // Act
         val gradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(lagAktør(ID_UGRADERT_PERSON))
+
+        // Assert
         assertThat(gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT)
     }
 

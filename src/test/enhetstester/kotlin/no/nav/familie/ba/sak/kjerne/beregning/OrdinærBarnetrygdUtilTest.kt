@@ -29,6 +29,7 @@ import java.time.YearMonth
 class OrdinærBarnetrygdUtilTest {
     @Test
     fun `Skal lage riktig tidslinje med rett til prosent for person med start og stopp av delt bosted`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(9))
         val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
@@ -91,6 +92,7 @@ class OrdinærBarnetrygdUtilTest {
 
         personResultat.setSortedVilkårResultater(vilkårResulater + borMedSøkerVilkår)
 
+        // Act
         val tidslinje =
             personResultat.tilTidslinjeMedRettTilProsentForPerson(
                 person = barn,
@@ -99,6 +101,7 @@ class OrdinærBarnetrygdUtilTest {
 
         val perioder = tidslinje.tilPerioderIkkeNull().toList()
 
+        // Assert
         assertEquals(3, perioder.size)
 
         val periode1 = perioder[0]
@@ -127,6 +130,7 @@ class OrdinærBarnetrygdUtilTest {
 
     @Test
     fun `Skal returnere 50 prosent hvis vilkårsvurderingen har delt bosted i perioden`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         val personResultat =
             PersonResultat(
@@ -145,13 +149,16 @@ class OrdinærBarnetrygdUtilTest {
                 )
             }
 
+        // Act
         val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
 
+        // Assert
         assertEquals(BigDecimal(50), prosent)
     }
 
     @Test
     fun `Skal returnere 100 prosent hvis vilkårsvurderingen ikke har delt bosted i perioden`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         val personResultat =
             PersonResultat(
@@ -170,13 +177,16 @@ class OrdinærBarnetrygdUtilTest {
                 )
             }
 
+        // Act
         val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
 
+        // Assert
         assertEquals(BigDecimal(100), prosent)
     }
 
     @Test
     fun `Skal returnere null hvis ikke alle vilkår for barn er oppfylt`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         val personResultat =
             PersonResultat(
@@ -199,13 +209,16 @@ class OrdinærBarnetrygdUtilTest {
                 }
             }
 
+        // Act
         val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
 
+        // Assert
         assertEquals(null, prosent)
     }
 
     @Test
     fun `Skal returnere null hvis ikke alle vilkår for søker er oppfylt`() {
+        // Arrange
         val søker = lagPerson(type = PersonType.SØKER)
         val personResultat =
             PersonResultat(
@@ -228,8 +241,10 @@ class OrdinærBarnetrygdUtilTest {
                 }
             }
 
+        // Act
         val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL)
 
+        // Assert
         assertEquals(null, prosent)
     }
 

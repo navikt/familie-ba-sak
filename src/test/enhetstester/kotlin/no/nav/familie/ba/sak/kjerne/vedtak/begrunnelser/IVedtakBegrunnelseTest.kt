@@ -11,15 +11,21 @@ import org.junit.jupiter.params.provider.EnumSource
 internal class IVedtakBegrunnelseTest {
     @Test
     fun `Skal serialiseres med prefix`() {
+        // Act
         val serialisertStandardbegrunnelse =
             jsonMapper.writeValueAsString(Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER)
+
+        // Assert
         Assertions.assertEquals(
             jsonMapper.readValue(serialisertStandardbegrunnelse, Standardbegrunnelse::class.java),
             Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER,
         )
 
+        // Act
         val serialisertEØSStandardbegrunnelse =
             jsonMapper.writeValueAsString(EØSStandardbegrunnelse.AVSLAG_EØS_IKKE_EØS_BORGER)
+
+        // Assert
         Assertions.assertEquals(
             jsonMapper.readValue(serialisertEØSStandardbegrunnelse, EØSStandardbegrunnelse::class.java),
             EØSStandardbegrunnelse.AVSLAG_EØS_IKKE_EØS_BORGER,
@@ -45,6 +51,7 @@ internal class IVedtakBegrunnelseTest {
         mode = EnumSource.Mode.INCLUDE,
     )
     fun `Finnmark og Svalbard-begrunnelser blir sortert nederst`(standardbegrunnelse: Standardbegrunnelse) {
+        // Arrange
         val borHosSøker = lagBegrunnelseData(Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER)
         val avslagGift = lagBegrunnelseData(Standardbegrunnelse.AVSLAG_GIFT)
 
@@ -52,8 +59,11 @@ internal class IVedtakBegrunnelseTest {
             lagBegrunnelseData(standardbegrunnelse)
 
         val usortertListe = listOf(avslagGift, begrunnelseMedFinnmarkEllerSvalbard, borHosSøker)
+
+        // Act
         val sortertListe = usortertListe.sorted()
 
+        // Assert
         assertThat(sortertListe.last()).isEqualTo(begrunnelseMedFinnmarkEllerSvalbard)
     }
 }

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test
 class KompetanseTest {
     @Test
     fun `utbetalingsland - skal returnere landkode for utbetalingsland dersom kompetanse er utfylt`() {
+        // Arrange
         val kompetanse =
             lagKompetanse(
                 barnAktører = setOf(randomAktør()),
@@ -23,24 +24,30 @@ class KompetanseTest {
                 erAnnenForelderOmfattetAvNorskLovgivning = false,
             )
 
+        // Act
         val utbetalingsland = kompetanse.utbetalingsland()
 
+        // Assert
         assertThat(utbetalingsland).isNotNull
         assertThat(utbetalingsland).isEqualTo("SE")
     }
 
     @Test
     fun `utbetalingsland - skal returnere null for utbetalingsland dersom kompetanse ikke er utfylt`() {
+        // Arrange
         val kompetanse =
             lagKompetanse()
 
+        // Act
         val utbetalingsland = kompetanse.utbetalingsland()
 
+        // Assert
         assertThat(utbetalingsland).isNull()
     }
 
     @Test
     fun `utbetalingsland - skal returnere Norge for utbetalingsland dersom kompetanse er utfylt og resultatet er at norge er primærland`() {
+        // Arrange
         val kompetanse =
             lagKompetanse(
                 barnAktører = setOf(randomAktør()),
@@ -53,14 +60,17 @@ class KompetanseTest {
                 erAnnenForelderOmfattetAvNorskLovgivning = false,
             )
 
+        // Act
         val utbetalingsland = kompetanse.utbetalingsland()
 
+        // Assert
         assertThat(utbetalingsland).isNotNull
         assertThat(utbetalingsland).isEqualTo("NO")
     }
 
     @Test
     fun `utbetalingsland - skal returnere utbetalingsland ulikt Norge dersom kompetanse er utfylt og hovedregelen fortsatt gir Norge`() {
+        // Arrange
         val kompetanse =
             lagKompetanse(
                 barnAktører = setOf(randomAktør()),
@@ -73,8 +83,10 @@ class KompetanseTest {
                 erAnnenForelderOmfattetAvNorskLovgivning = false,
             )
 
+        // Act
         val utbetalingsland = kompetanse.utbetalingsland()
 
+        // Assert
         assertThat(utbetalingsland).isNotNull
         assertThat(utbetalingsland).isEqualTo("SE")
     }

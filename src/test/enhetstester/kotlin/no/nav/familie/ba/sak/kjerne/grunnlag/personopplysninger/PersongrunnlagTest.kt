@@ -14,6 +14,7 @@ class PersongrunnlagTest {
 
     @Test
     fun `Returnerer nytt barn fra personopplysningsgrunnlag`() {
+        // Arrange
         val søker = randomFnr()
         val barn = randomFnr()
         val nyttbarn = randomFnr()
@@ -38,14 +39,20 @@ class PersongrunnlagTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns grunnlag
         every { persongrunnlagService.finnNyeBarn(any(), any()) } answers { callOriginal() }
 
+        // Act
         val nye = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling, behandling = behandling)
+
+        // Assert
         Assertions.assertEquals(nyttbarn, nye.singleOrNull()!!.aktør.aktivFødselsnummer())
     }
 
     @Test
     fun `Returnerer barnet som 'søker' når grunnlag kun består av ett barn (enslig mindreårig eller institusjonsbarn)`() {
+        // Arrange
         val barnet = lagPerson(type = PersonType.BARN)
         val persongrunnlag = lagTestPersonopplysningGrunnlag(1L, barnet)
+
+        // Assert
         Assertions.assertEquals(barnet, persongrunnlag.søker)
     }
 }

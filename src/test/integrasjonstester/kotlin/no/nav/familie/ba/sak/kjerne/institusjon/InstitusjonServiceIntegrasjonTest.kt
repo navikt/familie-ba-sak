@@ -21,7 +21,7 @@ class InstitusjonServiceIntegrasjonTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `skal lagre og finne Institusjonsinfo for behandlingId`() {
-        // Given
+        // Arrange
         val orgNr = UUID.randomUUID().toString()
         val tssEksternId = UUID.randomUUID().toString()
         institusjonService.hentEllerOpprettInstitusjon(orgNr, tssEksternId)
@@ -33,10 +33,10 @@ class InstitusjonServiceIntegrasjonTest(
             )
         val behandling = lagBehandlingUtenId(fagsak).also { behandlingRepository.saveAndFlush(it) }
 
-        // When
+        // Act
         institusjonService.lagreInstitusjonsinfo(behandling.id)
 
-        // Then
+        // Assert
         institusjonsinfoRepository.findByBehandlingId(behandling.id)!!.also {
             assertThat(it.behandlingId).isEqualTo(behandling.id)
             assertThat(it.institusjon.orgNummer).isEqualTo(orgNr)
@@ -56,7 +56,7 @@ class InstitusjonServiceIntegrasjonTest(
 
     @Test
     fun `Hvis oppdatering av institusjonsinfo, så skal den gamle slettes og ny opprettes`() {
-        // Given
+        // Arrange
         val orgNr = UUID.randomUUID().toString()
         val tssEksternId = UUID.randomUUID().toString()
         institusjonService.hentEllerOpprettInstitusjon(orgNr, tssEksternId)
@@ -68,13 +68,13 @@ class InstitusjonServiceIntegrasjonTest(
             )
         val behandling = lagBehandlingUtenId(fagsak).also { behandlingRepository.saveAndFlush(it) }
 
-        // When
+        // Act
         institusjonService.lagreInstitusjonsinfo(behandling.id)
         val institusjonsinfo = institusjonsinfoRepository.findByBehandlingId(behandling.id)
         institusjonService.lagreInstitusjonsinfo(behandling.id)
         val enAnnenInstitusjonsinfo = institusjonsinfoRepository.findByBehandlingId(behandling.id)
 
-        // Then
+        // Assert
         assertThat(institusjonsinfo?.id).isNotNull()
         assertThat(enAnnenInstitusjonsinfo?.id).isNotNull()
         assertThat(institusjonsinfo!!.id).isNotEqualTo(enAnnenInstitusjonsinfo!!.id)

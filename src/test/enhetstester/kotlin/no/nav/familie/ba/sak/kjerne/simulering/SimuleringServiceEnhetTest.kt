@@ -67,6 +67,7 @@ internal class SimuleringServiceEnhetTest {
     fun `harMigreringsbehandlingAvvikInnenforBeløpsgrenser skal returnere true dersom det finnes avvik i form av etterbetaling som er innenfor beløpsgrense`(
         behandlingÅrsak: BehandlingÅrsak,
     ) {
+        // Arrange
         val behandling: Behandling =
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -94,9 +95,11 @@ internal class SimuleringServiceEnhetTest {
                 lagPerson(type = PersonType.BARN).tilPersonEnkel(),
             )
 
+        // Act
         val behandlingHarAvvikInnenforBeløpsgrenser =
             simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
 
+        // Assert
         assertThat(behandlingHarAvvikInnenforBeløpsgrenser).isTrue
     }
 
@@ -105,6 +108,7 @@ internal class SimuleringServiceEnhetTest {
     fun `harMigreringsbehandlingAvvikInnenforBeløpsgrenser skal returnere true dersom det finnes avvik i form av feilutbetaling som er innenfor beløpsgrense`(
         behandlingÅrsak: BehandlingÅrsak,
     ) {
+        // Arrange
         val behandling: Behandling =
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -145,9 +149,11 @@ internal class SimuleringServiceEnhetTest {
                 lagPerson(type = PersonType.BARN).tilPersonEnkel(),
             )
 
+        // Act
         val behandlingHarAvvikInnenforBeløpsgrenser =
             simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
 
+        // Assert
         assertThat(behandlingHarAvvikInnenforBeløpsgrenser).isTrue
     }
 
@@ -156,6 +162,7 @@ internal class SimuleringServiceEnhetTest {
     fun `harMigreringsbehandlingAvvikInnenforBeløpsgrenser skal returnere false dersom det finnes avvik i form av feilutbetaling som er utenfor beløpsgrense`(
         behandlingÅrsak: BehandlingÅrsak,
     ) {
+        // Arrange
         val behandling: Behandling =
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -181,9 +188,11 @@ internal class SimuleringServiceEnhetTest {
                 lagPerson(type = PersonType.BARN).tilPersonEnkel(),
             )
 
+        // Act
         val behandlingHarAvvikInnenforBeløpsgrenser =
             simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
 
+        // Assert
         assertThat(behandlingHarAvvikInnenforBeløpsgrenser).isFalse
     }
 
@@ -196,6 +205,7 @@ internal class SimuleringServiceEnhetTest {
     fun `harMigreringsbehandlingAvvikInnenforBeløpsgrenser skal kaste feil dersom behandlingen ikke er en manuell migrering`(
         behandlingÅrsak: BehandlingÅrsak,
     ) {
+        // Arrange
         val behandling: Behandling =
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -203,6 +213,7 @@ internal class SimuleringServiceEnhetTest {
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
             )
 
+        // Act & Assert
         assertThrows<Feil> { simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling) }
     }
 
@@ -211,6 +222,7 @@ internal class SimuleringServiceEnhetTest {
     fun `harMigreringsbehandlingManuellePosteringer skal returnere true dersom det finnes manuelle posteringer i simuleringsresultat`(
         behandlingÅrsak: BehandlingÅrsak,
     ) {
+        // Arrange
         val behandling: Behandling =
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -235,9 +247,11 @@ internal class SimuleringServiceEnhetTest {
 
         every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
 
+        // Act
         val behandlingHarManuellePosteringer =
             simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
 
+        // Assert
         assertThat(behandlingHarManuellePosteringer).isTrue
     }
 
@@ -249,6 +263,7 @@ internal class SimuleringServiceEnhetTest {
     fun `harMigreringsbehandlingManuellePosteringer skal returnere false dersom det ikke finnes manuelle posteringer i simuleringsresultat`(
         behandlingÅrsak: BehandlingÅrsak,
     ) {
+        // Arrange
         val behandling: Behandling =
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -269,9 +284,11 @@ internal class SimuleringServiceEnhetTest {
 
         every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
 
+        // Act
         val behandlingHarManuellePosteringer =
             simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
 
+        // Assert
         assertThat(behandlingHarManuellePosteringer).isFalse
     }
 
@@ -284,6 +301,7 @@ internal class SimuleringServiceEnhetTest {
     fun `harMigreringsbehandlingManuellePosteringer skal kaste feil dersom behandlingen ikke er en manuell migrering`(
         behandlingÅrsak: BehandlingÅrsak,
     ) {
+        // Arrange
         val behandling: Behandling =
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -291,6 +309,7 @@ internal class SimuleringServiceEnhetTest {
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
             )
 
+        // Act & Assert
         assertThrows<Feil> { simuleringService.harMigreringsbehandlingManuellePosteringer(behandling) }
     }
 
@@ -298,6 +317,7 @@ internal class SimuleringServiceEnhetTest {
     inner class SimuleringErUtdatert {
         @Test
         fun `simulering er utdatert når tidSimuleringHentet er null`() {
+            // Act
             val erUtdatert =
                 simuleringService.simuleringErUtdatert(
                     lagForenkletSimulering(
@@ -305,11 +325,14 @@ internal class SimuleringServiceEnhetTest {
                         forfallsdatoNestePeriode = now(),
                     ),
                 )
+
+            // Assert
             assertThat(erUtdatert).isTrue()
         }
 
         @Test
         fun `simulering er utdatert når forfallsdato har passert og simulering ble hentet før forfallsdato`() {
+            // Act
             val erUtdatert =
                 simuleringService.simuleringErUtdatert(
                     lagForenkletSimulering(
@@ -317,11 +340,14 @@ internal class SimuleringServiceEnhetTest {
                         forfallsdatoNestePeriode = now().minusDays(5),
                     ),
                 )
+
+            // Assert
             assertThat(erUtdatert).isTrue()
         }
 
         @Test
         fun `simulering er ikke utdatert når forfallsdatoNestePeriode er null`() {
+            // Act
             val erUtdatert =
                 simuleringService.simuleringErUtdatert(
                     lagForenkletSimulering(
@@ -329,11 +355,14 @@ internal class SimuleringServiceEnhetTest {
                         forfallsdatoNestePeriode = null,
                     ),
                 )
+
+            // Assert
             assertThat(erUtdatert).isFalse()
         }
 
         @Test
         fun `simulering er ikke utdatert når tidSimuleringHentet og forfallsdatoNestePeriode er nåværende dato`() {
+            // Act
             val erUtdatert =
                 simuleringService.simuleringErUtdatert(
                     lagForenkletSimulering(
@@ -341,11 +370,14 @@ internal class SimuleringServiceEnhetTest {
                         forfallsdatoNestePeriode = now(),
                     ),
                 )
+
+            // Assert
             assertThat(erUtdatert).isFalse()
         }
 
         @Test
         fun `simulering er ikke utdatert når forfallsdato ikke har passert enda`() {
+            // Act
             val erUtdatert =
                 simuleringService.simuleringErUtdatert(
                     lagForenkletSimulering(
@@ -353,11 +385,14 @@ internal class SimuleringServiceEnhetTest {
                         forfallsdatoNestePeriode = now().plusDays(5),
                     ),
                 )
+
+            // Assert
             assertThat(erUtdatert).isFalse()
         }
 
         @Test
         fun `simulering er ikke utdatert når tidSimuleringHentet er lik forfallsdatoNestePeriode og forfallsdato har passert`() {
+            // Act
             val erUtdatert =
                 simuleringService.simuleringErUtdatert(
                     lagForenkletSimulering(
@@ -365,11 +400,14 @@ internal class SimuleringServiceEnhetTest {
                         forfallsdatoNestePeriode = now().minusDays(5),
                     ),
                 )
+
+            // Assert
             assertThat(erUtdatert).isFalse()
         }
 
         @Test
         fun `simulering er ikke utdatert når simulering ble hentet etter forfallsdato`() {
+            // Act
             val erUtdatert =
                 simuleringService.simuleringErUtdatert(
                     lagForenkletSimulering(
@@ -377,6 +415,8 @@ internal class SimuleringServiceEnhetTest {
                         forfallsdatoNestePeriode = now().minusDays(5),
                     ),
                 )
+
+            // Assert
             assertThat(erUtdatert).isFalse()
         }
     }

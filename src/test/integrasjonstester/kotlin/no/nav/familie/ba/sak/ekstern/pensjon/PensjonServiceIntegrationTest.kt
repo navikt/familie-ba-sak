@@ -47,6 +47,7 @@ class PensjonServiceIntegrationTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `skal finne en relaterte fagsaker per barn`() {
+        // Arrange
         val søker = tilfeldigPerson()
         val barn1 = tilfeldigPerson()
         val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
@@ -58,12 +59,16 @@ class PensjonServiceIntegrationTest(
         val fagsak2 = fagsakService.hentEllerOpprettFagsakForPersonIdent(barn1.aktør.aktivFødselsnummer())
         leggTilAvsluttetBehandling(fagsak2, barn1, barnAktør)
 
+        // Act
         val barnetrygdTilPensjon = pensjonService.hentBarnetrygd(søkerAktør.aktivFødselsnummer(), LocalDate.of(2023, 1, 1))
+
+        // Assert
         assertThat(barnetrygdTilPensjon).hasSize(2)
     }
 
     @Test
     fun `skal inkludere periode fra Infotrygd sammen med perioden fra BA-sak på den samme identen`() {
+        // Arrange
         val søker = tilfeldigPerson()
         val barn1 = tilfeldigPerson()
         val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
@@ -77,7 +82,10 @@ class PensjonServiceIntegrationTest(
 
         mockInfotrygdBarnetrygdResponse(søkerAktør)
 
+        // Act
         val barnetrygdTilPensjon = pensjonService.hentBarnetrygd(søkerAktør.aktivFødselsnummer(), LocalDate.of(2023, 1, 1))
+
+        // Assert
         assertThat(barnetrygdTilPensjon).hasSize(2)
         assertThat(barnetrygdTilPensjon.filter { it.barnetrygdPerioder.any { it.kildesystem == "Infotrygd" } }).hasSize(1)
         assertThat(barnetrygdTilPensjon.filter { it.barnetrygdPerioder.all { it.kildesystem == "Infotrygd" } }).hasSize(0)
@@ -85,6 +93,7 @@ class PensjonServiceIntegrationTest(
 
     @Test
     fun `skal fjerne overlapp ved å kutte perioden fra Infotrygd til før perioden for den samme personen starter i BA-sak`() {
+        // Arrange
         val søker = tilfeldigPerson()
         val barn1 = tilfeldigPerson()
         val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
@@ -108,6 +117,7 @@ class PensjonServiceIntegrationTest(
             stønadTom = infotrygdStønadTom,
         )
 
+        // Act
         val (basakPeriode, infotrygdperiode) =
             pensjonService
                 .hentBarnetrygd(søkerAktør.aktivFødselsnummer(), LocalDate.of(2023, 1, 1))
@@ -116,30 +126,39 @@ class PensjonServiceIntegrationTest(
                 .partition { it.kildesystem == "BA" }
                 .run { first.single() to second.single() }
 
+        // Assert
         assertThat(infotrygdperiode.stønadFom).isEqualTo(infotrygdStønadFom)
         assertThat(infotrygdperiode.stønadTom).isEqualTo(basakPeriode.stønadFom.minusMonths(1))
     }
 
     @Test
     fun `skal finne og returnere perioder fra Infotrygd som har infotrygd sin definisjon på uendelighet`() {
+        // Arrange
         val søker = tilfeldigPerson()
         val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
 
         mockInfotrygdBarnetrygdResponse(søker = søkerAktør, stønadFom = YearMonth.now(), stønadTom = YearMonth.of(999999999, 12))
 
+        // Act
         val barnetrygdTilPensjon = pensjonService.hentBarnetrygd(søkerAktør.aktivFødselsnummer(), LocalDate.of(2023, 1, 1))
+
+        // Assert
         assertThat(barnetrygdTilPensjon).hasSize(1)
         assertThat(barnetrygdTilPensjon.filter { it.barnetrygdPerioder.all { it.kildesystem == "Infotrygd" } }).hasSize(1)
     }
 
     @Test
     fun `skal finne og returnere perioder fra Infotrygd`() {
+        // Arrange
         val søker = tilfeldigPerson()
         val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
 
         mockInfotrygdBarnetrygdResponse(søkerAktør)
 
+        // Act
         val barnetrygdTilPensjon = pensjonService.hentBarnetrygd(søkerAktør.aktivFødselsnummer(), LocalDate.of(2023, 1, 1))
+
+        // Assert
         assertThat(barnetrygdTilPensjon).hasSize(1)
         assertThat(barnetrygdTilPensjon.filter { it.barnetrygdPerioder.all { it.kildesystem == "Infotrygd" } }).hasSize(1)
     }

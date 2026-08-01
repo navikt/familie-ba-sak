@@ -14,6 +14,7 @@ import java.time.YearMonth
 internal class SkjemaTidslinjeTest {
     @Test
     fun `skal håndtere to påfølgende perioder i fremtiden`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         val kompetanse1 =
             Kompetanse(
@@ -28,7 +29,10 @@ internal class SkjemaTidslinjeTest {
                 barnAktører = setOf(barn.aktør),
             )
 
+        // Act
         val kompetanseTidslinje = listOf(kompetanse1, kompetanse2).tilTidslinje()
+
+        // Assert
         assertEquals(1, kompetanseTidslinje.tilPerioder().size)
         assertEquals(1.feb(2437), kompetanseTidslinje.startsTidspunkt)
         assertEquals(PRAKTISK_SENESTE_DAG, kompetanseTidslinje.kalkulerSluttTidspunkt())
@@ -36,6 +40,7 @@ internal class SkjemaTidslinjeTest {
 
     @Test
     fun `skal håndtere kompetanse som mangler både fom og tom`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         val kompetanse =
             Kompetanse(
@@ -44,7 +49,10 @@ internal class SkjemaTidslinjeTest {
                 barnAktører = setOf(barn.aktør),
             )
 
+        // Act
         val kompetanseTidslinje = kompetanse.tilTidslinje()
+
+        // Assert
         assertEquals(1, kompetanseTidslinje.tilPerioder().size)
         assertEquals(PRAKTISK_TIDLIGSTE_DAG, kompetanseTidslinje.startsTidspunkt)
         assertEquals(PRAKTISK_SENESTE_DAG, kompetanseTidslinje.kalkulerSluttTidspunkt())

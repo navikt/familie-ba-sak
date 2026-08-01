@@ -45,12 +45,14 @@ class FagsakDeltagerControllerTest(
 
     @Test
     fun `Skal oppgi person med fagsak som fagsakdeltaker`() {
+        // Arrange
         val personAktør = mockPersonidentService.hentAktør(randomFnr())
 
         fagsakService
             .hentEllerOpprettFagsak(personAktør.aktivFødselsnummer())
             .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
 
+        // Act & Assert
         fagsakDeltagerController.oppgiFagsakdeltagere(SøkParamDto(personAktør.aktivFødselsnummer(), emptyList())).apply {
             assertEquals(personAktør.aktivFødselsnummer(), body!!.data!!.first().ident)
             assertEquals(FagsakDeltagerRolle.FORELDER, body!!.data!!.first().rolle)
@@ -59,6 +61,7 @@ class FagsakDeltagerControllerTest(
 
     @Test
     fun `Skal oppgi det første barnet i listen som fagsakdeltaker`() {
+        // Arrange
         val personAktør = mockPersonidentService.hentOgLagreAktør(randomFnr(), true)
         val søkerFnr = randomFnr()
         val barnaFnr = listOf(randomBarnFnr())
@@ -83,6 +86,7 @@ class FagsakDeltagerControllerTest(
             Målform.NB,
         )
 
+        // Act & Assert
         fagsakDeltagerController
             .oppgiFagsakdeltagere(
                 SøkParamDto(

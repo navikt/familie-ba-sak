@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test
 class KompetanseUtfyltTest {
     @Test
     fun `Skal sette UtfyltStatus til OK når alle felter i skjema er fylt ut`() {
+        // Arrange
         val kompetanse =
             lagKompetanse(
                 annenForeldersAktivitet = KompetanseAktivitet.I_ARBEID,
@@ -22,13 +23,16 @@ class KompetanseUtfyltTest {
                 søkersAktivitetsland = "NO",
             )
 
+        // Act
         val kompetanseDto = kompetanse.tilKompetanseDto()
 
+        // Assert
         assertEquals(UtfyltStatus.OK, kompetanseDto.status)
     }
 
     @Test
     fun `Skal sette UtfyltStatus til OK dersom alle felter unntatt annenForeldersAktivitetsland er fylt ut og annenForeldersAktivitet er IKKE_AKTUELT eller INAKTIV`() {
+        // Arrange
         var kompetanse =
             lagKompetanse(
                 annenForeldersAktivitet = KompetanseAktivitet.IKKE_AKTUELT,
@@ -38,8 +42,10 @@ class KompetanseUtfyltTest {
                 søkersAktivitetsland = "NO",
             )
 
+        // Act
         var kompetanseDto = kompetanse.tilKompetanseDto()
 
+        // Assert
         assertEquals(UtfyltStatus.OK, kompetanseDto.status)
 
         kompetanse =
@@ -58,6 +64,7 @@ class KompetanseUtfyltTest {
 
     @Test
     fun `Skal sette UtfyltStatus til UFULLSTENDIG dersom alle felter unntatt annenForeldersAktivitetsland er fylt ut og annenForeldersAktivitet ikke er IKKE_AKTUELT eller INAKTIV`() {
+        // Arrange
         var kompetanse =
             lagKompetanse(
                 annenForeldersAktivitet = KompetanseAktivitet.I_ARBEID,
@@ -66,8 +73,10 @@ class KompetanseUtfyltTest {
                 søkersAktivitet = KompetanseAktivitet.ARBEIDER,
             )
 
+        // Act
         var kompetanseDto = kompetanse.tilKompetanseDto()
 
+        // Assert
         assertEquals(UtfyltStatus.UFULLSTENDIG, kompetanseDto.status)
 
         kompetanse =
@@ -109,13 +118,16 @@ class KompetanseUtfyltTest {
 
     @Test
     fun `Skal sette UtfyltStatus til UFULLSTENDIG dersom 1 til 4 felter er satt med unntak av regel om annenForeldersAktivitet`() {
+        // Arrange
         var kompetanse =
             lagKompetanse(
                 annenForeldersAktivitet = KompetanseAktivitet.IKKE_AKTUELT,
             )
 
+        // Act
         var kompetanseDto = kompetanse.tilKompetanseDto()
 
+        // Assert
         assertEquals(UtfyltStatus.UFULLSTENDIG, kompetanseDto.status)
 
         kompetanse =
@@ -154,15 +166,19 @@ class KompetanseUtfyltTest {
 
     @Test
     fun `Skal sette UtfyltStatus til IKKE_UTFYLT dersom ingen av feltene er utfylt`() {
+        // Arrange
         val kompetanse = lagKompetanse()
 
+        // Act
         val kompetanseDto = kompetanse.tilKompetanseDto()
 
+        // Assert
         assertEquals(UtfyltStatus.IKKE_UTFYLT, kompetanseDto.status)
     }
 
     @Test
     fun `Skal sette UtfyltStatus til UFULLSTENDIG dersom alle felter unntatt søkersAktivitetsland er fylt ut`() {
+        // Arrange
         val kompetanse =
             lagKompetanse(
                 annenForeldersAktivitet = KompetanseAktivitet.I_ARBEID,
@@ -172,8 +188,10 @@ class KompetanseUtfyltTest {
                 søkersAktivitet = KompetanseAktivitet.ARBEIDER,
             )
 
+        // Act
         val kompetanseDto = kompetanse.tilKompetanseDto()
 
+        // Assert
         assertEquals(UtfyltStatus.UFULLSTENDIG, kompetanseDto.status)
     }
 }

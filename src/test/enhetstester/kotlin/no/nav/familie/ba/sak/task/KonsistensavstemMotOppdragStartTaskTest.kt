@@ -18,6 +18,7 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
 
     @Test
     fun `Ved kjøring av task første gang, så skal den sende start til økonomi, opprette finn perioder til avstemming task og og sende avslutt til økonomi`() {
+        // Arrange
         val (transaksjonsId, task) = opprettStartTask()
 
         every { avstemmingService.harBatchStatusFerdig(123L) } returns false
@@ -41,8 +42,10 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         }
         justRun { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
 
+        // Act
         startTask.doTask(task)
 
+        // Assert
         verify(exactly = 1) { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
         verify(exactly = 3) {
             avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
@@ -55,12 +58,15 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
 
     @Test
     fun `Ved rekjøring av task som er alt kjørt, så skal den avslutte uten å sende meldinger eller generere perioder`() {
+        // Arrange
         val (transaksjonsId, task) = opprettStartTask()
 
         every { avstemmingService.harBatchStatusFerdig(123L) } returns true
 
+        // Act
         startTask.doTask(task)
 
+        // Assert
         verify(exactly = 0) { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
         verify(exactly = 0) {
             avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
@@ -73,6 +79,7 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
 
     @Test
     fun `Ved rekjøring av task som er delvis kjørt, så skal den ikke sende start melding, men opprette finn perioder til avstemminger som det ikke er sendt og sende avslutt melding til økonomi`() {
+        // Arrange
         val (transaksjonsId, task) = opprettStartTask()
 
         every { avstemmingService.harBatchStatusFerdig(123L) } returns false
@@ -97,8 +104,10 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         }
         justRun { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
 
+        // Act
         startTask.doTask(task)
 
+        // Assert
         verify(exactly = 0) { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
         verify(exactly = 1) {
             avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(

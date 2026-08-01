@@ -48,16 +48,21 @@ internal class SamhandlerControllerTest {
     inner class HentSamhandlerDataForOrganisasjonFraTssOgEreg {
         @Test
         fun `Skal hente samhandlerinformasjon med adresse fra TSS, hvis det ikke finnes adresse i ereg `() {
+            // Arrange
             every { samhandlerKlientMock.hentSamhandler(any()) } returns samhandlereInfoMock.first()
             every { organisasjonService.hentOrganisasjon(any()) } returns Organisasjon(samhandlereInfoMock.first().orgNummer!!, "Testinstitusjon")
 
+            // Act
             val samhandlerInfo = samhandlerController.hentSamhandlerDataForOrganisasjonFraTssOgEreg(samhandlereInfoMock.first().orgNummer!!)
+
+            // Assert
             assertThat(samhandlerInfo.data).isNotNull()
             assertThat(samhandlerInfo.data!!.tssEksternId).isEqualTo("80000999999")
         }
 
         @Test
         fun `Skal hente tss ekstern id fra samhandlerinformasjon til TSS, men bruke navn og adresse fra ereg `() {
+            // Arrange
             every { samhandlerKlientMock.hentSamhandler(any()) } returns samhandlereInfoMock.first()
             every { kodeverkService.hentPoststed(any()) } returns "Oslo"
             every { organisasjonService.hentOrganisasjon(any()) } returns
@@ -76,7 +81,10 @@ internal class SamhandlerControllerTest {
                         ),
                 )
 
+            // Act
             val samhandlerInfo = samhandlerController.hentSamhandlerDataForOrganisasjonFraTssOgEreg(samhandlereInfoMock.first().orgNummer!!)
+
+            // Assert
             assertThat(samhandlerInfo.data).isNotNull()
             assertThat(samhandlerInfo.data!!.tssEksternId).isEqualTo("80000999999")
             assertThat(samhandlerInfo.data!!.navn).isEqualTo("Et annet navn")
@@ -96,7 +104,10 @@ internal class SamhandlerControllerTest {
 
         @Test
         fun `Kaster feilmelding hvis det ikke fins organisasjon med gitt orgnr`() {
+            // Arrange
             every { samhandlerKlientMock.hentSamhandler(any()) } throws HttpClientErrorException(HttpStatus.NOT_FOUND)
+
+            // Act & Assert
             val feil =
                 assertThrows<FunksjonellFeil> {
                     samhandlerController.hentSamhandlerDataForOrganisasjonFraTssOgEreg("123456789")
@@ -109,14 +120,18 @@ internal class SamhandlerControllerTest {
     inner class SøkSamhandlerinfoFraNavn {
         @Test
         fun `Søk etter samhandlere skal returnere samhandlere på navn og ikke hente flere hvis det ikke finnes flere samhandlere`() {
+            // Arrange
             every { samhandlerKlientMock.søkSamhandlere("BUFETAT", null, null, 0) } returns
                 SøkSamhandlerInfo(
                     false,
                     samhandlereInfoMock,
                 )
 
+            // Act
             val samhandlerInfo =
                 samhandlerController.søkSamhandlerinfoFraNavn(SøkSamhandlerInfoRequest("Bufetat", null, null))
+
+            // Assert
             assertThat(samhandlerInfo.data).isNotNull()
             assertThat(samhandlerInfo.data).hasSize(2)
             assertThat(samhandlerInfo.data?.get(0)?.tssEksternId).isEqualTo("80000999999")
@@ -126,6 +141,7 @@ internal class SamhandlerControllerTest {
 
         @Test
         fun `Søk etter samhandlere skal returnere samhandlere på navn og slå sammen resultatene fra alle sidene ved mer enn 1 side`() {
+            // Arrange
             every { samhandlerKlientMock.søkSamhandlere("BUFETAT", null, null, 0) } returns
                 SøkSamhandlerInfo(
                     true,
@@ -138,8 +154,11 @@ internal class SamhandlerControllerTest {
                     listOf(samhandlereInfoMock.get(1)),
                 )
 
+            // Act
             val samhandlerInfo =
                 samhandlerController.søkSamhandlerinfoFraNavn(SøkSamhandlerInfoRequest("Bufetat", null, null))
+
+            // Assert
             assertThat(samhandlerInfo.data).isNotNull()
             assertThat(samhandlerInfo.data).hasSize(2)
             assertThat(samhandlerInfo.data?.get(0)?.tssEksternId).isEqualTo("80000999999")
@@ -152,6 +171,7 @@ internal class SamhandlerControllerTest {
     inner class HentSamhandlerDataForBehandling {
         @Test
         fun `skal returnere samhandlerdata fra institusjonsinfo for behandling`() {
+            // Arrange
             every { institusjonsinfoRepository.findByBehandlingId(any()) } returns
                 Institusjonsinfo(
                     id = 42,
@@ -167,7 +187,11 @@ internal class SamhandlerControllerTest {
                     kommunenummer = "0301",
                     gyldighetsperiode = DatoIntervallEntitet(LocalDate.now(), null),
                 )
+
+            // Act
             val samhandlerInfo = samhandlerController.hentSamhandlerDataForBehandling(42L)
+
+            // Assert
             assertThat(samhandlerInfo.data).isNotNull()
             assertThat(samhandlerInfo.data?.orgNummer).isEqualTo("123456789")
             assertThat(samhandlerInfo.data?.tssEksternId).isEqualTo("tssId")
@@ -183,21 +207,25 @@ internal class SamhandlerControllerTest {
 
         @Test
         fun `skal returnere samhandlerdata fra tss opg ereg hvis mangler for behandling`() {
+            // Arrange
             every { institusjonsinfoRepository.findByBehandlingId(any()) } returns null
             every { behandlingHentOgPersisterService.hent(42) } returns
                 lagBehandling(lagFagsak(institusjon = Institusjon(orgNummer = "123456789", tssEksternId = "tssIdFraFagsak")))
             every { samhandlerKlientMock.hentSamhandler(any()) } returns samhandlereInfoMock.first()
             every { organisasjonService.hentOrganisasjon(any()) } returns Organisasjon(samhandlereInfoMock.first().orgNummer!!, "Testinstitusjon")
 
+            // Act
             val samhandlerInfo = samhandlerController.hentSamhandlerDataForBehandling(42L)
         }
 
         @Test
         fun `skal kaste feil hvis ingen eksisterende institusjonsinfo og ingen institusjon fra fagsak`() {
+            // Arrange
             every { institusjonsinfoRepository.findByBehandlingId(any()) } returns null
             every { behandlingHentOgPersisterService.hent(42) } returns
                 lagBehandling(lagFagsak())
 
+            // Act & Assert
             assertThrows<FunksjonellFeil> { samhandlerController.hentSamhandlerDataForBehandling(42L) }
         }
     }

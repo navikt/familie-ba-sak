@@ -24,6 +24,7 @@ import java.time.YearMonth
 class VilkårsvurderingForNyBehandlingUtilsTest {
     @Test
     fun `Skal kun ta med aktører som hadde andeler med utvidet barnetrygd`() {
+        // Arrange
         val søker = lagPerson(type = PersonType.SØKER)
         val barn = lagPerson(type = PersonType.BARN)
 
@@ -43,16 +44,19 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
                 ),
             )
 
+        // Act
         val aktørerMedUtvidet =
             finnAktørerMedUtvidetFraAndeler(
                 andeler = andeler,
             )
 
+        // Assert
         Assertions.assertThat(aktørerMedUtvidet).containsExactly(søker.aktør)
     }
 
     @Test
     fun `Skal lage vilkårsvurdering med søkers vilkår satt med tom=dødsdato`() {
+        // Arrange
         val søker = lagPerson(type = PersonType.SØKER).also { it.dødsfall = Dødsfall(person = it, dødsfallDato = LocalDate.now(), dødsfallAdresse = "Adresse 1", dødsfallPostnummer = "1234", dødsfallPoststed = "Oslo") }
         val barn = lagPerson(type = PersonType.BARN)
         val behandling = lagBehandling()
@@ -100,10 +104,13 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
 
         vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
 
+        // Act
         val nyVilkårsvurdering =
             VilkårsvurderingForNyBehandlingUtils(personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(barn, søker))).hentVilkårsvurderingMedDødsdatoSomTomDato(
                 vilkårsvurdering = vilkårsvurdering,
             )
+
+        // Assert
         val søkersVilkårResultater = nyVilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater
         val søkersUtvidetVilkår = søkersVilkårResultater?.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 

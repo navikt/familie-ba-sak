@@ -13,6 +13,7 @@ class FagsakIntegrationTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `hentMinimalFagsakerForPerson() skal return begge fagsaker for en person`() {
+        // Arrange
         val personFnr = randomFnr()
         val fagsakOmsorgperson =
             fagsakService.hentEllerOpprettFagsak(
@@ -32,8 +33,10 @@ class FagsakIntegrationTest(
                 FagsakType.BARN_ENSLIG_MINDREÅRIG,
             )
 
+        // Act
         val minimalFagsakList = fagsakService.hentMinimalFagsakerForPerson(fagsakOmsorgperson.aktør)
 
+        // Assert
         assertThat(minimalFagsakList.data)
             .hasSize(3)
             .extracting("id")
@@ -42,6 +45,7 @@ class FagsakIntegrationTest(
 
     @Test
     fun `hentMinimalFagsakForPerson() skal return riktig fagsak for en person`() {
+        // Arrange
         val personFnr = randomFnr()
         val fagsakOmsorgperson =
             fagsakService.hentEllerOpprettFagsak(
@@ -61,19 +65,27 @@ class FagsakIntegrationTest(
                 FagsakType.BARN_ENSLIG_MINDREÅRIG,
             )
 
+        // Act
         val defaultMinimalFagsak = fagsakService.hentMinimalFagsakForPerson(fagsakOmsorgperson.aktør)
+        // Assert
         assertThat(defaultMinimalFagsak.data!!.id).isEqualTo(fagsakOmsorgperson.id)
 
+        // Act
         val omsorgpersonMinimalFagsak =
             fagsakService.hentMinimalFagsakForPerson(fagsakOmsorgperson.aktør, FagsakType.NORMAL)
+        // Assert
         assertThat(omsorgpersonMinimalFagsak.data!!.id).isEqualTo(fagsakOmsorgperson.id)
 
+        // Act
         val institusjonMinimalFagsak =
             fagsakService.hentMinimalFagsakForPerson(fagsakOmsorgperson.aktør, FagsakType.INSTITUSJON)
+        // Assert
         assertThat(institusjonMinimalFagsak.data!!.id).isEqualTo(fagsakInstitusjon.id)
 
+        // Act
         val ensligMindreÅrigMinimalFagsak =
             fagsakService.hentMinimalFagsakForPerson(fagsakOmsorgperson.aktør, FagsakType.BARN_ENSLIG_MINDREÅRIG)
+        // Assert
         assertThat(ensligMindreÅrigMinimalFagsak.data!!.id).isEqualTo(fagsakEnsligMindreÅrig.id)
     }
 }

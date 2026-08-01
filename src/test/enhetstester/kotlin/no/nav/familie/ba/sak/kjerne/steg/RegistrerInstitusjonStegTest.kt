@@ -109,6 +109,7 @@ class RegistrerInstitusjonStegTest {
 
     @Test
     fun `utførStegOgAngiNeste() skal lagre institusjon og verge`() {
+        // Arrange
         val behandling = lagBehandling(fagsak = defaultFagsak().copy(type = FagsakType.INSTITUSJON))
         val fagsakSlot = slot<Fagsak>()
         every { fagsakRepositoryMock.finnFagsak(any()) } returns behandling.fagsak
@@ -124,11 +125,13 @@ class RegistrerInstitusjonStegTest {
 
         val institusjon = Institusjon(orgNummer = "12345", tssEksternId = "cool tsr")
 
+        // Act
         registrerInstitusjon.utførStegOgAngiNeste(
             behandling,
             institusjon,
         )
 
+        // Assert
         assertThat(fagsakSlot.captured.institusjon!!.orgNummer).isEqualTo(institusjon.orgNummer)
         verify(exactly = 1) {
             loggServiceMock.opprettRegistrerInstitusjonLogg(any())
@@ -137,6 +140,7 @@ class RegistrerInstitusjonStegTest {
 
     @Test
     fun `utførStegOgAngiNeste() skal returnere REGISTRERE_SØKNAD som neste steg`() {
+        // Arrange
         val behandling =
             lagBehandling(
                 fagsak =
@@ -153,12 +157,14 @@ class RegistrerInstitusjonStegTest {
 
         val institusjon = Institusjon(orgNummer = "12345", tssEksternId = "cool tsr")
 
+        // Act
         val nesteSteg =
             registrerInstitusjon.utførStegOgAngiNeste(
                 behandling,
                 institusjon,
             )
 
+        // Assert
         assertThat(nesteSteg).isEqualTo(StegType.REGISTRERE_SØKNAD)
     }
 }

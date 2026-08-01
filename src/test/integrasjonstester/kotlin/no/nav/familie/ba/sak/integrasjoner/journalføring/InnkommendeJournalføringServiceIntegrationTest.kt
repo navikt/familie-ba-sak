@@ -34,10 +34,14 @@ class InnkommendeJournalføringServiceIntegrationTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `journalfør skal opprette en førstegangsbehandling fra journalføring og lagre ned søknadsinfo`() {
+        // Arrange
         val søkerFnr = randomFnr()
         val request = lagMockJournalføringDto(bruker = NavnOgIdent("Mock", søkerFnr))
+
+        // Act
         val fagsakId = innkommendeJournalføringService.journalfør(request, "123", "mockEnhet", "1")
 
+        // Assert
         val behandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId.toLong())
         assertNotNull(behandling)
         assertEquals(request.nyBehandlingstype.tilBehandingType(), behandling!!.type)
@@ -53,6 +57,7 @@ class InnkommendeJournalføringServiceIntegrationTest(
 
     @Test
     fun `journalfør skal lagre ned søknadsinfo tilknyttet en tidligere behandling`() {
+        // Arrange
         val søkerFnr = randomFnr()
         val førsteSøknad = lagMockJournalføringDto(bruker = NavnOgIdent("Mock", søkerFnr))
         val fagsakId = innkommendeJournalføringService.journalfør(førsteSøknad, "123", "mockEnhet", "1")
@@ -72,8 +77,10 @@ class InnkommendeJournalføringServiceIntegrationTest(
                     ),
             )
 
+        // Act
         innkommendeJournalføringService.journalfør(nySøknad2DagerSenere, "124", "mockEnhet", "2")
 
+        // Assert
         val søknadsinfo = behandlingSøknadsinfoRepository.findByBehandlingId(behandling.id)
         assertEquals(2, søknadsinfo.size)
 
@@ -83,6 +90,7 @@ class InnkommendeJournalføringServiceIntegrationTest(
 
     @Test
     fun `journalfør skal opprette behandling på fagsak som har BARN som eier hvis enslig mindreårig eller institusjon`() {
+        // Arrange
         val request =
             lagMockJournalføringDto(bruker = NavnOgIdent("Mock", randomFnr()))
                 .copy(fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG)
@@ -98,16 +106,24 @@ class InnkommendeJournalføringServiceIntegrationTest(
             ),
         )
 
+        // Act
         val fagsakId = innkommendeJournalføringService.journalfør(request, journalpostId, "mockEnhet", "1")
+
+        // Assert
         val behandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId.toLong())
 
         assertNotNull(behandling)
         assertEquals(FagsakType.BARN_ENSLIG_MINDREÅRIG, behandling!!.fagsak.type)
 
+        // Arrange
         val request2 =
             lagMockJournalføringDto(bruker = NavnOgIdent("Mock", randomFnr()))
                 .copy(fagsakType = FagsakType.INSTITUSJON, institusjon = InstitusjonDto("orgnr", tssEksternId = "tss"))
+
+        // Act
         val fagsakId2 = innkommendeJournalføringService.journalfør(request2, "1234", "mockEnhet", "2")
+
+        // Assert
         val behandling2 = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId2.toLong())
 
         assertNotNull(behandling2)
@@ -116,9 +132,11 @@ class InnkommendeJournalføringServiceIntegrationTest(
 
     @Test
     fun `journalfør skal ikke opprette en førstegangsbehandling fra journalføring med manglende mottatt dato`() {
+        // Arrange
         val søkerFnr = randomFnr()
         val request = lagMockJournalføringDto(bruker = NavnOgIdent("Mock", søkerFnr)).copy(datoMottatt = null)
 
+        // Act & Assert
         val exception =
             assertThrows<RuntimeException> {
                 innkommendeJournalføringService.journalfør(

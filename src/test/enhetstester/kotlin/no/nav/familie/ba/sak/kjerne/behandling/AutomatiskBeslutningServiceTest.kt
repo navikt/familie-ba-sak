@@ -17,6 +17,7 @@ class AutomatiskBeslutningServiceTest {
 
     @Test
     fun `behandlingSkalAutomatiskBesluttes - skal returnere true dersom behandling er helmanuell migrering med avvik innenfor beløpsgrenser og det ikke finnes manuelle posteringer`() {
+        // Arrange
         val behandling =
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -25,22 +26,26 @@ class AutomatiskBeslutningServiceTest {
         every { simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling) } returns true
         every { simuleringService.harMigreringsbehandlingManuellePosteringer(behandling) } returns false
 
+        // Act & Assert
         assertThat(automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)).isTrue
     }
 
     @Test
     fun `behandlingSkalAutomatiskBesluttes - skal returnere true dersom behandling er endre migreringsdato behandling`() {
+        // Arrange
         val behandling =
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
             )
 
+        // Act & Assert
         assertThat(automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)).isTrue
     }
 
     @Test
     fun `behandlingSkalAutomatiskBesluttes - skal returnere false dersom behandling er helmanuell migrering med avvik innenfor beløpsgrenser men det finnes manuelle posteringer`() {
+        // Arrange
         val behandling =
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -49,11 +54,13 @@ class AutomatiskBeslutningServiceTest {
         every { simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling) } returns true
         every { simuleringService.harMigreringsbehandlingManuellePosteringer(behandling) } returns true
 
+        // Act & Assert
         assertThat(automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)).isFalse
     }
 
     @Test
     fun `behandlingSkalAutomatiskBesluttes - skal returnere false dersom behandling er helmanuell migrering med avvik utenfor beløpsgrenser og det ikke finnes manuelle posteringer`() {
+        // Arrange
         val behandling =
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -62,11 +69,13 @@ class AutomatiskBeslutningServiceTest {
         every { simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling) } returns false
         every { simuleringService.harMigreringsbehandlingManuellePosteringer(behandling) } returns false
 
+        // Act & Assert
         assertThat(automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)).isFalse
     }
 
     @Test
     fun `behandlingSkalAutomatiskBesluttes - skal returnere false dersom behandling er helmanuell migrering med avvik utenfor beløpsgrenser og det finnes manuelle posteringer`() {
+        // Arrange
         val behandling =
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -75,6 +84,7 @@ class AutomatiskBeslutningServiceTest {
         every { simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling) } returns false
         every { simuleringService.harMigreringsbehandlingManuellePosteringer(behandling) } returns true
 
+        // Act & Assert
         assertThat(automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)).isFalse
     }
 
@@ -91,11 +101,14 @@ class AutomatiskBeslutningServiceTest {
                     BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
                 ).contains(it)
             }.forEach { behandlingType ->
+                // Arrange
                 val behandling =
                     lagBehandling(
                         behandlingType = behandlingType,
                         årsak = behandlingÅrsak,
                     )
+
+                // Act & Assert
                 assertThat(automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)).isFalse
             }
     }

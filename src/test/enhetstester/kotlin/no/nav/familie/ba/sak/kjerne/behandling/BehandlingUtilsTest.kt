@@ -119,11 +119,14 @@ class BehandlingUtilsTest {
 
     @Test
     fun `Skal finne ut at omregningsbehandling allerede har kjørt inneværende måned`() {
+        // Arrange
         val fgb = lagBehandling()
         val omregning6År =
             lagBehandling(
                 årsak = BehandlingÅrsak.OMREGNING_18ÅR,
             )
+
+        // Act
         val behandlingsårsakHarAlleredeKjørt =
             Behandlingutils.harBehandlingsårsakAlleredeKjørt(
                 behandlingÅrsak = BehandlingÅrsak.OMREGNING_18ÅR,
@@ -131,12 +134,16 @@ class BehandlingUtilsTest {
                 måned = YearMonth.now(),
             )
 
+        // Assert
         assertTrue(behandlingsårsakHarAlleredeKjørt)
     }
 
     @Test
     fun `Skal finne ut at omregningsbehandling ikke har kjørt inneværende måned`() {
+        // Arrange
         val fgb = lagBehandling()
+
+        // Act
         val behandlingsårsakHarAlleredeKjørt =
             Behandlingutils.harBehandlingsårsakAlleredeKjørt(
                 behandlingÅrsak = BehandlingÅrsak.OMREGNING_18ÅR,
@@ -144,11 +151,13 @@ class BehandlingUtilsTest {
                 måned = YearMonth.now(),
             )
 
+        // Assert
         assertFalse(behandlingsårsakHarAlleredeKjørt)
     }
 
     @Test
     fun `Skal kaste feil etter at vedtaksbrev er distribuert`() {
+        // Arrange
         val fgb = lagBehandling()
         fgb.behandlingStegTilstand.clear()
         fgb.behandlingStegTilstand.add(
@@ -159,11 +168,13 @@ class BehandlingUtilsTest {
             ),
         )
 
+        // Act & Assert
         assertThrows<FunksjonellFeil> { validerBehandlingIkkeSendtTilEksterneTjenester(fgb) }
     }
 
     @Test
     fun `Skal kaste feil etter iverksetting mot økonomi`() {
+        // Arrange
         val fgb = lagBehandling()
         fgb.behandlingStegTilstand.clear()
         fgb.behandlingStegTilstand.add(
@@ -174,11 +185,13 @@ class BehandlingUtilsTest {
             ),
         )
 
+        // Act & Assert
         assertThrows<FunksjonellFeil> { validerBehandlingIkkeSendtTilEksterneTjenester(fgb) }
     }
 
     @Test
     fun `Skal kaste feil etter at brev er journalført`() {
+        // Arrange
         val fgb = lagBehandling()
         fgb.behandlingStegTilstand.clear()
         fgb.behandlingStegTilstand.add(
@@ -189,6 +202,7 @@ class BehandlingUtilsTest {
             ),
         )
 
+        // Act & Assert
         assertThrows<FunksjonellFeil> { validerBehandlingIkkeSendtTilEksterneTjenester(fgb) }
     }
 

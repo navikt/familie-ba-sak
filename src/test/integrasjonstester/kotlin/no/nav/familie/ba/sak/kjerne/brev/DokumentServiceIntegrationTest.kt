@@ -102,6 +102,7 @@ class DokumentServiceIntegrationTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Hent vedtaksbrev`() {
+        // Arrange
         val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
 
         val behandlingEtterVilkårsvurderingSteg =
@@ -133,13 +134,17 @@ class DokumentServiceIntegrationTest(
 
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
 
+        // Act
         val pdfvedtaksbrevRess = dokumentService.hentBrevForVedtak(vedtak)
+
+        // Assert
         assertEquals(Ressurs.Status.SUKSESS, pdfvedtaksbrevRess.status)
         assert(pdfvedtaksbrevRess.data!!.contentEquals(TEST_PDF))
     }
 
     @Test
     fun `Skal generere vedtaksbrev`() {
+        // Arrange
         val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
 
         val behandlingEtterVilkårsvurderingSteg =
@@ -171,12 +176,16 @@ class DokumentServiceIntegrationTest(
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
 
+        // Act
         val pdfvedtaksbrev = dokumentGenereringService.genererBrevForVedtak(vedtak)
+
+        // Assert
         assert(pdfvedtaksbrev.contentEquals(TEST_PDF))
     }
 
     @Test
     fun `Skal verifisere at brev får riktig signatur ved alle steg i behandling`() {
+        // Arrange
         val mockSaksbehandler = "Mock Saksbehandler"
         val mockSaksbehandlerId = "mock.saksbehandler@nav.no"
         val mockBeslutter = "Mock Beslutter"
@@ -200,8 +209,10 @@ class DokumentServiceIntegrationTest(
             )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
 
+        // Act
         val vedtaksbrevFellesFelter = brevService.lagVedtaksbrevFellesfelter(vedtak)
 
+        // Assert
         assertEquals("Nav familie- og pensjonsytelser Oslo 1", vedtaksbrevFellesFelter.enhet)
         assertEquals("System", vedtaksbrevFellesFelter.saksbehandler)
         assertEquals("Beslutter", vedtaksbrevFellesFelter.beslutter)
@@ -218,9 +229,11 @@ class DokumentServiceIntegrationTest(
         val vedtakEtterSendTilBeslutter =
             vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterSendTilBeslutter.id)!!
 
+        // Act
         val vedtaksbrevFellesFelterEtterSendTilBeslutter =
             brevService.lagVedtaksbrevFellesfelter(vedtakEtterSendTilBeslutter)
 
+        // Assert
         assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterSendTilBeslutter.saksbehandler)
         assertEquals("System", vedtaksbrevFellesFelterEtterSendTilBeslutter.beslutter)
 
@@ -236,15 +249,18 @@ class DokumentServiceIntegrationTest(
         val vedtakEtterVedtakBesluttet =
             vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
 
+        // Act
         val vedtaksbrevFellesFelterEtterVedtakBesluttet =
             brevService.lagVedtaksbrevFellesfelter(vedtakEtterVedtakBesluttet)
 
+        // Assert
         assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterVedtakBesluttet.saksbehandler)
         assertEquals(mockBeslutter, vedtaksbrevFellesFelterEtterVedtakBesluttet.beslutter)
     }
 
     @Test
     fun `Skal ekskludere navn på enhet i signatur i brev for automatisk behandling`() {
+        // Arrange
         val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
         val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
 
@@ -277,8 +293,10 @@ class DokumentServiceIntegrationTest(
             simuleringResultat = DetaljertSimuleringResultat(simuleringMottaker = emptyList()),
         )
 
+        // Act
         autovedtakFinnmarkstilleggService.kjørBehandling(FinnmarkstilleggData(forrigeBehandling.fagsak.id))
 
+        // Assert
         val automatiskBehandlingMedVedtaksbrev = behandlingHentOgPersisterService.hentBehandlinger(forrigeBehandling.fagsak.id).first { it.aktiv }
 
         assertEquals(automatiskBehandlingMedVedtaksbrev.opprettetÅrsak, BehandlingÅrsak.FINNMARKSTILLEGG)
@@ -294,6 +312,7 @@ class DokumentServiceIntegrationTest(
 
     @Test
     fun `Skal verifisere at man ikke får generert brev etter at behandlingen er sendt fra beslutter`() {
+        // Arrange
         val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
 
         val behandlingEtterVedtakBesluttet =
@@ -311,6 +330,8 @@ class DokumentServiceIntegrationTest(
             )
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
+
+        // Act & Assert
         val feil =
             assertThrows<FunksjonellFeil> {
                 dokumentGenereringService.genererBrevForVedtak(vedtak)
@@ -323,6 +344,7 @@ class DokumentServiceIntegrationTest(
 
     @Test
     fun `Test sending varsel om revurdering til institusjon`() {
+        // Arrange
         val fnr = "09121079074"
         val orgNummer = "998765432"
 
@@ -349,6 +371,7 @@ class DokumentServiceIntegrationTest(
             ),
         )
 
+        // Act
         val manueltBrevRequest =
             dokumentService
                 .byggMottakerdataFraBehandling(
@@ -357,6 +380,7 @@ class DokumentServiceIntegrationTest(
                 )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
+        // Assert
         val lagretJournalførManueltBrevTaskPayloadForBehandling = fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(JournalførManueltBrevTask.TASK_STEP_TYPE).tilPayload<JournalførManueltBrevDTO>().single { it.behandlingId == behandling.id }
 
         assertThat(lagretJournalførManueltBrevTaskPayloadForBehandling).isNotNull
@@ -370,6 +394,7 @@ class DokumentServiceIntegrationTest(
 
     @Test
     fun `Test sending innhent dokumentasjon til institusjon`() {
+        // Arrange
         val fnr = randomFnr()
         val orgNummer = "998765432"
 
@@ -396,6 +421,7 @@ class DokumentServiceIntegrationTest(
             ),
         )
 
+        // Act
         val manueltBrevRequest =
             dokumentService.byggMottakerdataFraBehandling(
                 behandling,
@@ -403,6 +429,7 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
+        // Assert
         val lagretJournalførManueltBrevTaskPayloadForBehandling = fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(JournalførManueltBrevTask.TASK_STEP_TYPE).tilPayload<JournalførManueltBrevDTO>().single { it.behandlingId == behandling.id }
         assertThat(lagretJournalførManueltBrevTaskPayloadForBehandling).isNotNull
         val avsenderMottaker = lagretJournalførManueltBrevTaskPayloadForBehandling.mottaker.avsenderMottaker
@@ -415,6 +442,7 @@ class DokumentServiceIntegrationTest(
 
     @Test
     fun `Test sending svartidsbrev til institusjon`() {
+        // Arrange
         val fnr = "10121079074"
         val orgNummer = "998765432"
 
@@ -441,6 +469,7 @@ class DokumentServiceIntegrationTest(
             ),
         )
 
+        // Act
         val manueltBrevRequest =
             dokumentService.byggMottakerdataFraBehandling(
                 behandling,
@@ -448,6 +477,7 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
+        // Assert
         val lagretJournalførManueltBrevTaskPayloadForBehandling = fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(JournalførManueltBrevTask.TASK_STEP_TYPE).tilPayload<JournalførManueltBrevDTO>().single { it.behandlingId == behandling.id }
         assertThat(lagretJournalførManueltBrevTaskPayloadForBehandling).isNotNull
         val avsenderMottaker = lagretJournalførManueltBrevTaskPayloadForBehandling.mottaker.avsenderMottaker
@@ -460,6 +490,7 @@ class DokumentServiceIntegrationTest(
 
     @Test
     fun `Test sending forlenget svartidsbrev til institusjon`() {
+        // Arrange
         val fnr = randomFnr()
         val orgNummer = "998765432"
 
@@ -486,6 +517,7 @@ class DokumentServiceIntegrationTest(
             ),
         )
 
+        // Act
         val manueltBrevRequest =
             dokumentService.byggMottakerdataFraBehandling(
                 behandling,
@@ -496,6 +528,7 @@ class DokumentServiceIntegrationTest(
             )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
+        // Assert
         val lagretJournalførManueltBrevTaskPayloadForBehandling = fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(JournalførManueltBrevTask.TASK_STEP_TYPE).tilPayload<JournalførManueltBrevDTO>().single { it.behandlingId == behandling.id }
         assertThat(lagretJournalførManueltBrevTaskPayloadForBehandling).isNotNull
         val avsenderMottaker = lagretJournalførManueltBrevTaskPayloadForBehandling.mottaker.avsenderMottaker

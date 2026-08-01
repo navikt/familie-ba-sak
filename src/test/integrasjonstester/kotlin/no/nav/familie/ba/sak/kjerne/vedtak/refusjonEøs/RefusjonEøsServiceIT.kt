@@ -22,6 +22,7 @@ class RefusjonEøsServiceIT(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun kanLagreEndreOgSlette() {
+        // Arrange
         val fagsak =
             lagFagsakUtenId(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
         val behandling =
@@ -36,14 +37,17 @@ class RefusjonEøsServiceIT(
                 refusjonAvklart = true,
             )
 
+        // Act
         val id = refusjonEøsService.leggTilRefusjonEøsPeriode(refusjonEøs = refusjonEøs, behandlingId = behandling.id)
 
+        // Assert
         refusjonEøsService
             .hentRefusjonEøsPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it[0].id).isEqualTo(id) }
             .also { Assertions.assertThat(it[0].fom).isEqualTo("2020-01-01") }
             .also { Assertions.assertThat(it[0].tom).isEqualTo("2021-05-31") }
 
+        // Act
         refusjonEøsService.oppdaterRefusjonEøsPeriode(
             refusjonEøsDto =
                 RefusjonEøsDto(
@@ -57,6 +61,7 @@ class RefusjonEøsServiceIT(
             id = id,
         )
 
+        // Assert
         refusjonEøsService
             .hentRefusjonEøsPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it[0].id).isEqualTo(id) }
@@ -65,6 +70,7 @@ class RefusjonEøsServiceIT(
             .also { Assertions.assertThat(it[0].land).isEqualTo("NL") }
             .also { Assertions.assertThat(it[0].refusjonAvklart).isEqualTo(false) }
 
+        // Arrange
         val refusjonEøs2 =
             RefusjonEøsDto(
                 id = 0,
@@ -75,15 +81,19 @@ class RefusjonEøsServiceIT(
                 refusjonAvklart = false,
             )
 
+        // Act
         val id2 = refusjonEøsService.leggTilRefusjonEøsPeriode(refusjonEøs = refusjonEøs2, behandlingId = behandling.id)
 
+        // Assert
         refusjonEøsService
             .hentRefusjonEøsPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.size).isEqualTo(2) }
             .also { Assertions.assertThat(it[0].id).isEqualTo(id2) }
 
+        // Act
         refusjonEøsService.fjernRefusjonEøsPeriode(id = id)
 
+        // Assert
         refusjonEøsService
             .hentRefusjonEøsPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.size).isEqualTo(1) }

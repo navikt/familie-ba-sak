@@ -20,15 +20,18 @@ internal class KorrigertVedtakServiceTest {
 
     @Test
     fun `finnAktivtKorrigertVedtakPåBehandling skal hente aktivt korrigert vedtak fra repository hvis det finnes`() {
+        // Arrange
         val behandling = lagBehandling()
         val korrigertVedtak = lagKorrigertVedtak(behandling)
 
         every { korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.id) } returns korrigertVedtak
 
+        // Act
         val hentetKorrigertVedtak =
             korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandling.id)
                 ?: fail("korrigert vedtak ikke hentet riktig")
 
+        // Assert
         MatcherAssert.assertThat(hentetKorrigertVedtak.behandling.id, CoreMatchers.`is`(behandling.id))
         MatcherAssert.assertThat(hentetKorrigertVedtak.aktiv, CoreMatchers.`is`(true))
 
@@ -37,6 +40,7 @@ internal class KorrigertVedtakServiceTest {
 
     @Test
     fun `lagreKorrigertVedtak skal lagre korrigert vedtak på behandling og logg på dette`() {
+        // Arrange
         val behandling = lagBehandling()
         val korrigertVedtak = lagKorrigertVedtak(behandling)
 
@@ -44,9 +48,11 @@ internal class KorrigertVedtakServiceTest {
         every { korrigertVedtakRepository.save(korrigertVedtak) } returns korrigertVedtak
         every { loggService.opprettKorrigertVedtakLogg(behandling, any()) } returns Unit
 
+        // Act
         val lagretKorrigertVedtak =
             korrigertVedtakService.lagreKorrigertVedtak(korrigertVedtak)
 
+        // Assert
         MatcherAssert.assertThat(lagretKorrigertVedtak.behandling.id, CoreMatchers.`is`(behandling.id))
 
         verify(exactly = 1) { korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.id) }
@@ -61,6 +67,7 @@ internal class KorrigertVedtakServiceTest {
 
     @Test
     fun `lagreKorrigertVedtak skal sette og lagre forrige korrigert vedtak til inaktivt hvis det finnes tidligere korrigering`() {
+        // Arrange
         val behandling = lagBehandling()
         val forrigeKorrigering = mockk<KorrigertVedtak>(relaxed = true)
         val korrigertVedtak = lagKorrigertVedtak(behandling, vedtaksdato = LocalDate.now().minusDays(3))
@@ -70,8 +77,10 @@ internal class KorrigertVedtakServiceTest {
         every { korrigertVedtakRepository.save(korrigertVedtak) } returns korrigertVedtak
         every { loggService.opprettKorrigertVedtakLogg(any(), any()) } returns Unit
 
+        // Act
         korrigertVedtakService.lagreKorrigertVedtak(korrigertVedtak)
 
+        // Assert
         verify(exactly = 1) { korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(any()) }
         verify(exactly = 1) { forrigeKorrigering setProperty "aktiv" value false }
         verify(exactly = 1) { korrigertVedtakRepository.saveAndFlush(forrigeKorrigering) }
@@ -80,14 +89,17 @@ internal class KorrigertVedtakServiceTest {
 
     @Test
     fun `settKorrigertVedtakPåBehandlingTilInaktiv skal sette korrigert vedtak til inaktivt hvis det finnes`() {
+        // Arrange
         val behandling = lagBehandling()
         val korrigertVedtak = mockk<KorrigertVedtak>(relaxed = true)
 
         every { korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(any()) } returns korrigertVedtak
         every { loggService.opprettKorrigertVedtakLogg(any(), any()) } returns Unit
 
+        // Act
         korrigertVedtakService.settKorrigertVedtakPåBehandlingTilInaktiv(behandling)
 
+        // Assert
         verify(exactly = 1) { korrigertVedtak setProperty "aktiv" value false }
         verify(exactly = 1) {
             loggService.opprettKorrigertVedtakLogg(

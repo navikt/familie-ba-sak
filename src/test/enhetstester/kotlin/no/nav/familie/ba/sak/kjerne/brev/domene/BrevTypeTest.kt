@@ -40,11 +40,13 @@ class BrevTypeTest {
 
     @Test
     fun `Skal si om behandling settes på vent`() {
+        // Arrange
         val setterIkkeBehandlingPåVent =
             Brevmal
                 .entries
                 .filter { !førerTilAvventerDokumentasjon.contains(it) && it !in eøsDokumentMedAvventerDokumentasjon }
 
+        // Act & Assert
         setterIkkeBehandlingPåVent.forEach {
             Assertions.assertFalse(it.setterBehandlingPåVent())
         }

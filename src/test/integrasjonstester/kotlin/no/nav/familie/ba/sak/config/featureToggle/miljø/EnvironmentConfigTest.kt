@@ -9,13 +9,19 @@ import org.springframework.core.env.Environment
 class EnvironmentConfigTest {
     @Test
     fun `aktiv profil skal være aktiv`() {
+        // Arrange
         val env = mockk<Environment>().also { every { it.activeProfiles } returns arrayOf("dev") }
+
+        // Act & Assert
         assertThat(env.erAktiv(Profil.Dev)).isTrue
     }
 
     @Test
     fun `profil som ikke er lista som aktiv skal ikke være aktiv`() {
+        // Arrange
         val env = mockk<Environment>().also { every { it.activeProfiles } returns arrayOf("prod") }
+
+        // Act & Assert
         assertThat(env.erAktiv(Profil.Dev)).isFalse
     }
 }

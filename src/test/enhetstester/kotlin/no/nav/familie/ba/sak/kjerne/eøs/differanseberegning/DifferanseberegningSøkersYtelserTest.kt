@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test
 class DifferanseberegningSøkersYtelserTest {
     @Test
     fun `skal håndtere tre barn og utvidet barnetrygd og småbarnstillegg, der alle barna har underskudd i differanseberegning`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 13.des(2016)
         val barn2 = barn født 15.des(2017)
@@ -70,6 +71,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering()
                 .personResultater
 
+        // Act
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = barna,
@@ -110,11 +112,13 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("                        $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$>", 100, { 1000 }, { -700 }) { 0 }
                 .bygg()
 
+        // Assert
         assertEquals(forventet.andelerTilkjentYtelse.sortert(), nyeAndeler.sortert())
     }
 
     @Test
     fun `differanseberegnet ordinær barnetrygd uten at søker har ytelser, skal gi uendrete andeler for barna`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 13.des(2016)
         val barn2 = barn født 15.des(2017)
@@ -153,6 +157,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering()
                 .personResultater
 
+        // Act
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = barna,
@@ -160,11 +165,13 @@ class DifferanseberegningSøkersYtelserTest {
                 personResultater = personResultater,
             )
 
+        // Assert
         assertEquals(tilkjentYtelse.andelerTilkjentYtelse.sortert(), nyeAndeler.sortert())
     }
 
     @Test
     fun `Ingen differranseberegning skal gi uendrete andeler`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 13.des(2016)
         val barn2 = barn født 15.des(2017)
@@ -194,6 +201,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering()
                 .personResultater
 
+        // Act
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = barna,
@@ -201,13 +209,16 @@ class DifferanseberegningSøkersYtelserTest {
                 personResultater = personResultater,
             )
 
+        // Assert
         assertEquals(tilkjentYtelse.andelerTilkjentYtelse.sortert(), nyeAndeler.sortert())
     }
 
     @Test
     fun `Tom tilkjent ytelse og ingen barn skal ikke gi feil`() {
+        // Arrange
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
+        // Act
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse
                 .differanseberegnSøkersYtelser(
@@ -216,11 +227,13 @@ class DifferanseberegningSøkersYtelserTest {
                     personResultater = emptySet(),
                 )
 
+        // Assert
         assertEquals(emptyList<AndelTilkjentYtelse>(), nyeAndeler)
     }
 
     @Test
     fun `Søkers andel som har hatt differanseberegning, men ikke skal ha det lenger, skal fjerne differanseberegningen og slå sammen perioder som med sikkerhet kan slås sammen`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 13.des(2016)
         val barn2 = barn født 15.des(2017)
@@ -269,6 +282,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering()
                 .personResultater
 
+        // Act
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = barna,
@@ -303,11 +317,13 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("                        $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$>") { 1000 }
                 .bygg()
 
+        // Assert
         assertEquals(forventet.andelerTilkjentYtelse.sortert(), nyeAndeler.sortert())
     }
 
     @Test
     fun `Søkers andel som har differanseberegning, men underskuddet reduseres, skal få oppdatert differanseberegningen`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 13.des(2016)
         val barna = listOf(barn1)
@@ -334,6 +350,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering()
                 .personResultater
 
+        // Act
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = barna,
@@ -350,11 +367,13 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("$>", 100, { 1000 }, { -650 }) { 0 }
                 .bygg()
 
+        // Assert
         assertEquals(forventet.andelerTilkjentYtelse.sortert(), nyeAndeler.sortert())
     }
 
     @Test
     fun `Skal tåle perioder der underskuddet på differanseberegning er større enn alle tilkjente ytelser`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 13.des(2016)
         val barna = listOf(barn1)
@@ -381,6 +400,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering()
                 .personResultater
 
+        // Act
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = barna,
@@ -397,11 +417,13 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("$>", 100, { 1000 }, { -2650 }) { 0 }
                 .bygg()
 
+        // Assert
         assertEquals(forventet.andelerTilkjentYtelse.sortert(), nyeAndeler.sortert())
     }
 
     @Test
     fun `skal illustrere avrundingssproblematikk, der søker tjener`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 13.des(2016)
         val barn2 = barn født 15.des(2017)
@@ -435,6 +457,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering()
                 .personResultater
 
+        // Act
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = barna,
@@ -452,11 +475,13 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("$$$$$$", 100, { 1054 }, { 554 }) { 554 }
                 .bygg()
 
+        // Assert
         assertEquals(forventet.andelerTilkjentYtelse.sortert(), nyeAndeler.sortert())
     }
 
     @Test
     fun `skal illustrere avrundingssproblematikk, der søker taper`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 13.des(2016)
         val barn2 = barn født 15.des(2017)
@@ -490,6 +515,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering()
                 .personResultater
 
+        // Act
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = barna,
@@ -507,11 +533,13 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("$$$$$$", 100, { 1054 }, { 554 }) { 554 }
                 .bygg()
 
+        // Assert
         assertEquals(forventet.andelerTilkjentYtelse.sortert(), nyeAndeler.sortert())
     }
 
     @Test
     fun `skal differanseberegne utvidet i perioder med sekundærlandsbarn og primærlandsbarn som bor i EØS land med annen forelder`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 13.des(2016)
         val barn2 = barn født 15.des(2017)
@@ -549,6 +577,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering()
                 .personResultater
 
+        // Act
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
             tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = barna,
@@ -567,11 +596,13 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("            $$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
                 .bygg()
 
+        // Assert
         assertEquals(forventet.andelerTilkjentYtelse.sortert(), tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker.sortert())
     }
 
     @Test
     fun `skal differanseberegne utvidet i perioder med sekundærlandsbarn og primærlandsbarn som bor i Storbritannia med annen forelder`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 13.des(2016)
         val barn2 = barn født 15.des(2017)
@@ -609,6 +640,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering()
                 .personResultater
 
+        // Act
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
             tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = barna,
@@ -627,11 +659,13 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("            $$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
                 .bygg()
 
+        // Assert
         assertEquals(forventet.andelerTilkjentYtelse.sortert(), tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker.sortert())
     }
 
     @Test
     fun `skal ikke differanseberegne utvidet i perioder med sekundærlandsbarn og primærlandsbarn uten EØS og Storbritannia krav`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 13.des(2016)
         val barn2 = barn født 15.des(2017)
@@ -669,6 +703,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering()
                 .personResultater
 
+        // Act
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
             tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = barna,
@@ -688,11 +723,13 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("            $$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
                 .bygg()
 
+        // Assert
         assertEquals(forventet.andelerTilkjentYtelse.sortert(), tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker.sortert())
     }
 
     @Test
     fun `skal ikke differanseberegne utvidet i perioder med sekundærlandsbarn, primærlandsbarn med EØS eller Storbritannia krav og vanlig primærlandsbarn`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 13.des(2016)
         val barn2 = barn født 15.des(2017)
@@ -736,6 +773,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering()
                 .personResultater
 
+        // Act
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
             tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = barna,
@@ -756,11 +794,13 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
                 .bygg()
 
+        // Assert
         assertEquals(forventet.andelerTilkjentYtelse.sortert(), tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker.sortert())
     }
 
     @Test
     fun `skal kun differanseberegne utvidet i rene sekundærlandperioder eller i kombinasjon med primærlandsbarn med EØS eller Storbritannia krav`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 13.des(2016)
         val barn2 = barn født 15.des(2017)
@@ -808,6 +848,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering()
                 .personResultater
 
+        // Act
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
             tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = barna,
@@ -836,6 +877,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("                   $$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
                 .bygg()
 
+        // Assert
         assertThat(tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker.sortert()).containsExactlyInAnyOrderElementsOf(forventet.andelerTilkjentYtelse.sortert())
         assertEquals(forventet.andelerTilkjentYtelse.sortert(), tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker.sortert())
     }
@@ -843,6 +885,7 @@ class DifferanseberegningSøkersYtelserTest {
     // https://confluence.adeo.no/display/TFA/Differanseberegning
     @Test
     fun `eksempel-scenario fra confluence`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 1.jan(2016)
         val barn2 = barn født 1.jan(2019)
@@ -880,6 +923,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering()
                 .personResultater
 
+        // Act
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
             tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = barna,
@@ -899,6 +943,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("                                     $$$$$$$$$$$", nasjonalt = { 1676 }, differanse = { 400 }, kalkulert = { 400 })
                 .bygg()
 
+        // Assert
         assertEquals(forventet.andelerTilkjentYtelse.sortert(), tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker.sortert())
     }
 }

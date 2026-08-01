@@ -35,9 +35,11 @@ class OvergangsstønadUtilsTest {
 
     @Test
     fun `Skal svare true om at nye perioder med full OS påvirker behandling`() {
+        // Arrange
         val personIdent = randomFnr()
         val barnAktør = lagAktør(randomFnr())
 
+        // Act
         val påvirkerFagsak =
             vedtakOmOvergangsstønadPåvirkerFagsak(
                 småbarnstilleggGenerator =
@@ -76,14 +78,17 @@ class OvergangsstønadUtilsTest {
                 barnasAktørerOgFødselsdatoer = listOf(Pair(barnAktør, LocalDate.now().minusYears(2))),
             )
 
+        // Assert
         assertTrue(påvirkerFagsak)
     }
 
     @Test
     fun `Skal svare false om at nye perioder med full OS påvirker behandling`() {
+        // Arrange
         val personIdent = randomAktør()
         val barnIdent = randomAktør()
 
+        // Act
         val påvirkerFagsak =
             vedtakOmOvergangsstønadPåvirkerFagsak(
                 småbarnstilleggGenerator =
@@ -125,14 +130,17 @@ class OvergangsstønadUtilsTest {
                 barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
             )
 
+        // Assert
         assertFalse(påvirkerFagsak)
     }
 
     @Test
     fun `Skal svare false om at nye perioder med full OS påvirker behandling ved flere perioder`() {
+        // Arrange
         val personIdent = randomAktør()
         val barnIdent = randomAktør()
 
+        // Act
         val påvirkerFagsak =
             vedtakOmOvergangsstønadPåvirkerFagsak(
                 småbarnstilleggGenerator =
@@ -193,14 +201,17 @@ class OvergangsstønadUtilsTest {
                 barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
             )
 
+        // Assert
         assertFalse(påvirkerFagsak)
     }
 
     @Test
     fun `skal ikke behandle vedtak om overgangsstønad når vedtaket ikke fører til endring i utbetaling`() {
+        // Arrange
         val personIdent = randomAktør()
         val barnIdent = randomAktør()
 
+        // Act
         val påvirkerFagsak =
             vedtakOmOvergangsstønadPåvirkerFagsak(
                 småbarnstilleggGenerator =
@@ -247,14 +258,17 @@ class OvergangsstønadUtilsTest {
                 barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
             )
 
+        // Assert
         assertFalse(påvirkerFagsak)
     }
 
     @Test
     fun `skal behandle vedtak om overgangsstønad når vedtaket fører til endring i utbetaling`() {
+        // Arrange
         val personIdent = randomAktør()
         val barnIdent = randomAktør()
 
+        // Act
         val påvirkerFagsak =
             vedtakOmOvergangsstønadPåvirkerFagsak(
                 småbarnstilleggGenerator =
@@ -301,6 +315,7 @@ class OvergangsstønadUtilsTest {
                 barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
             )
 
+        // Assert
         assertTrue(påvirkerFagsak)
     }
 }

@@ -21,37 +21,55 @@ class GrArbeidsforholdTest {
     inner class Equals {
         @Test
         fun `skal returnere false hvis person er ulik`() {
+            // Arrange
             val annetArbeidsforhold = arbeidsforhold.copy(person = tilfeldigPerson())
+
+            // Act & Assert
             assert(arbeidsforhold != annetArbeidsforhold)
         }
 
         @Test
         fun `skal returnere false hvis periode er ulik`() {
+            // Arrange
             val annetArbeidsforhold = arbeidsforhold.copy(periode = DatoIntervallEntitet(fom = LocalDate.of(2001, 1, 1), tom = LocalDate.of(2001, 12, 31)))
+
+            // Act & Assert
             assert(arbeidsforhold != annetArbeidsforhold)
         }
 
         @Test
         fun `skal returnere false hvis arbeidsgiverId er ulik`() {
+            // Arrange
             val annetArbeidsforhold = arbeidsforhold.copy(arbeidsgiverId = "321321321")
+
+            // Act & Assert
             assert(arbeidsforhold != annetArbeidsforhold)
         }
 
         @Test
         fun `skal returnere false hvis arbeidsgiverType er ulik`() {
+            // Arrange
             val annetArbeidsforhold = arbeidsforhold.copy(arbeidsgiverType = "Person")
+
+            // Act & Assert
             assert(arbeidsforhold != annetArbeidsforhold)
         }
 
         @Test
         fun `skal returnere false hvis organisasjonNavn er ulik`() {
+            // Arrange
             val annetArbeidsforhold = arbeidsforhold.copy(organisasjonNavn = "Annet navn AS")
+
+            // Act & Assert
             assert(arbeidsforhold != annetArbeidsforhold)
         }
 
         @Test
         fun `skal returnere true hvis alle felter er like`() {
+            // Arrange
             val annetArbeidsforhold = arbeidsforhold.copy(id = 1)
+
+            // Act & Assert
             assert(arbeidsforhold == annetArbeidsforhold)
         }
     }

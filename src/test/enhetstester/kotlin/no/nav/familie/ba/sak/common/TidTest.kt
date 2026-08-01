@@ -92,6 +92,7 @@ internal class TidTest {
 
     @Test
     fun `skal bestemme om periode er etterfølgende periode`() {
+        // Arrange
         val personAktørId = randomAktør()
         val behandling = lagBehandling()
         val resultat: Resultat = mockk()
@@ -135,6 +136,7 @@ internal class TidTest {
                 sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
             )
 
+        // Act & Assert
         assertTrue(førsteVilkårResultat.erEtterfølgendePeriode(etterfølgendeVilkårResultat))
         assertFalse(førsteVilkårResultat.erEtterfølgendePeriode(ikkeEtterfølgendeVilkårResultat))
     }
@@ -149,6 +151,7 @@ internal class TidTest {
 
     @Test
     fun `sjekk for om to måned perioder helt eller delvis er overlappende`() {
+        // Arrange
         val jan2020Aug2020 = MånedPeriode(YearMonth.of(2020, 1), YearMonth.of(2020, 8))
         val jul2020Des2020 = MånedPeriode(YearMonth.of(2020, 7), YearMonth.of(2020, 12))
         val des2019Sep2021 = MånedPeriode(YearMonth.of(2019, 12), YearMonth.of(2020, 9))
@@ -157,6 +160,7 @@ internal class TidTest {
         val des2019 = MånedPeriode(YearMonth.of(2019, 12), YearMonth.of(2019, 12))
         val sep2021 = MånedPeriode(YearMonth.of(2021, 9), YearMonth.of(2021, 9))
 
+        // Act & Assert
         assertTrue(jan2020Aug2020.overlapperHeltEllerDelvisMed(jul2020Des2020))
         assertTrue(jul2020Des2020.overlapperHeltEllerDelvisMed(jan2020Aug2020))
         assertTrue(jan2020Aug2020.overlapperHeltEllerDelvisMed(des2019Sep2021))
@@ -173,6 +177,7 @@ internal class TidTest {
 
     @Test
     fun `sjekk for om to perioder helt eller delvis er overlappende`() {
+        // Arrange
         val jan2020Aug2020 = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 8, 1))
         val jul2020Des2020 = Periode(LocalDate.of(2020, 7, 1), LocalDate.of(2020, 12, 1))
         val des2019Sep2021 = Periode(LocalDate.of(2019, 12, 1), LocalDate.of(2020, 9, 1))
@@ -181,6 +186,7 @@ internal class TidTest {
         val des2019 = Periode(LocalDate.of(2019, 12, 1), LocalDate.of(2019, 12, 1))
         val sep2021 = Periode(LocalDate.of(2021, 9, 1), LocalDate.of(2021, 9, 1))
 
+        // Act & Assert
         assertTrue(jan2020Aug2020.overlapperHeltEllerDelvisMed(jul2020Des2020))
         assertTrue(jul2020Des2020.overlapperHeltEllerDelvisMed(jan2020Aug2020))
         assertTrue(jan2020Aug2020.overlapperHeltEllerDelvisMed(des2019Sep2021))

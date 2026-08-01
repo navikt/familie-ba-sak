@@ -44,6 +44,7 @@ class SmåbarnstilleggGeneratorTest {
 
     @Test
     fun `Skal kun få småbarnstillegg når alle tre krav er oppfylt i samme periode`() {
+        // Arrange
         val overgangsstønadPerioder =
             listOf(
                 InternPeriodeOvergangsstønad(
@@ -73,6 +74,7 @@ class SmåbarnstilleggGeneratorTest {
                 ),
             )
 
+        // Act
         val småbarnstilleggAndeler =
             SmåbarnstilleggGenerator(tilkjentYtelse = tilkjentYtelse)
                 .lagSmåbarnstilleggAndeler(
@@ -82,6 +84,7 @@ class SmåbarnstilleggGeneratorTest {
                     barnasAktørerOgFødselsdatoer = listOf(Pair(barn3.aktør, barn3.fødselsdato)),
                 )
 
+        // Assert
         Assertions.assertEquals(1, småbarnstilleggAndeler.size)
         Assertions.assertEquals(YearMonth.now().minusYears(2), småbarnstilleggAndeler.single().stønadFom)
         Assertions.assertEquals(barn3.fødselsdato.plusYears(3).toYearMonth(), småbarnstilleggAndeler.single().stønadTom)
@@ -90,6 +93,7 @@ class SmåbarnstilleggGeneratorTest {
 
     @Test
     fun `Skal lage småbarnstillegg-andeler med 0kr når enten utvidet eller barnet under 3 år er overstyrt til 0kr`() {
+        // Arrange
         val overgangsstønadPerioder =
             listOf(
                 InternPeriodeOvergangsstønad(
@@ -139,6 +143,7 @@ class SmåbarnstilleggGeneratorTest {
                 ),
             )
 
+        // Act
         val småbarnstilleggAndeler =
             SmåbarnstilleggGenerator(tilkjentYtelse = tilkjentYtelse)
                 .lagSmåbarnstilleggAndeler(
@@ -148,6 +153,7 @@ class SmåbarnstilleggGeneratorTest {
                     barnasAktørerOgFødselsdatoer = listOf(Pair(barn3.aktør, barn3.fødselsdato)),
                 )
 
+        // Assert
         Assertions.assertEquals(2, småbarnstilleggAndeler.size)
         Assertions.assertEquals(barn3.fødselsdato.plusMonths(1).toYearMonth(), småbarnstilleggAndeler.first().stønadFom)
         Assertions.assertEquals(YearMonth.now().minusYears(2), småbarnstilleggAndeler.first().stønadTom)
@@ -160,6 +166,7 @@ class SmåbarnstilleggGeneratorTest {
 
     @Test
     fun `Skal lage småbarnstillegg-andeler med riktig prosent når vi har to barn hvor 1 av de har nullutbetaling`() {
+        // Arrange
         val overgangsstønadPerioder =
             listOf(
                 InternPeriodeOvergangsstønad(
@@ -202,6 +209,7 @@ class SmåbarnstilleggGeneratorTest {
                 ),
             )
 
+        // Act
         val småbarnstilleggAndeler =
             SmåbarnstilleggGenerator(tilkjentYtelse = tilkjentYtelse)
                 .lagSmåbarnstilleggAndeler(
@@ -215,6 +223,7 @@ class SmåbarnstilleggGeneratorTest {
                         ),
                 )
 
+        // Assert
         Assertions.assertEquals(2, småbarnstilleggAndeler.size)
         Assertions.assertEquals(barn1.fødselsdato.plusMonths(1).toYearMonth(), småbarnstilleggAndeler.first().stønadFom)
         Assertions.assertEquals(barn2.fødselsdato.toYearMonth(), småbarnstilleggAndeler.first().stønadTom)
@@ -227,6 +236,7 @@ class SmåbarnstilleggGeneratorTest {
 
     @Test
     fun `Skal lage småbarnstillegg-andeler med 0kr for 2 barn når søker sin utvidet del er overstyrt til 0kr`() {
+        // Arrange
         val overgangsstønadPerioder =
             listOf(
                 InternPeriodeOvergangsstønad(
@@ -269,6 +279,7 @@ class SmåbarnstilleggGeneratorTest {
                 ),
             )
 
+        // Act
         val småbarnstilleggAndeler =
             SmåbarnstilleggGenerator(tilkjentYtelse = tilkjentYtelse)
                 .lagSmåbarnstilleggAndeler(
@@ -282,6 +293,7 @@ class SmåbarnstilleggGeneratorTest {
                         ),
                 )
 
+        // Assert
         Assertions.assertEquals(2, småbarnstilleggAndeler.size)
         Assertions.assertEquals(barn1.fødselsdato.plusMonths(1).toYearMonth(), småbarnstilleggAndeler.first().stønadFom)
         Assertions.assertEquals(YearMonth.now().minusYears(1), småbarnstilleggAndeler.first().stønadTom)

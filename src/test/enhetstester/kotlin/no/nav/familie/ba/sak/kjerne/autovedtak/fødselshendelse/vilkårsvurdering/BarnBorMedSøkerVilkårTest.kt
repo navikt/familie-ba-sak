@@ -14,41 +14,61 @@ import org.junit.jupiter.api.Test
 class BarnBorMedSøkerVilkårTest {
     @Test
     fun `Samme matrikkelId men ellers forskjellige adresser`() {
+        // Arrange
         val faktaPerson = opprettFaktaPerson(adresseMatrikkelId1barn, adresseMatrikkelId1SøkerBruksenhetsnummer)
 
+        // Act
         val evaluering = vilkår.vurderVilkår(faktaPerson)
+
+        // Assert
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test
     fun `Forskjellige matrikkelId`() {
+        // Arrange
         val faktaPerson = opprettFaktaPerson(adresseMatrikkelId1barn, adresseMatrikkelId2Søker)
 
+        // Act
         val evaluering = vilkår.vurderVilkår(faktaPerson)
+
+        // Assert
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
     fun `Address som mangler postnummer`() {
+        // Arrange
         val faktaPerson = opprettFaktaPerson(adresseIkkePostnummerBarn, adresseIkkePostnummerSøker)
 
+        // Act
         val evaluering = vilkår.vurderVilkår(faktaPerson)
+
+        // Assert
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
     fun `Address som mangler matrikkelid`() {
+        // Arrange
         val faktaPerson = opprettFaktaPerson(adresseAttrBarn, adresseAttrSøker)
 
+        // Act
         val evaluering = vilkår.vurderVilkår(faktaPerson)
+
+        // Assert
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test
     fun `To forskjellige address som begge mangler matrikkelid`() {
+        // Arrange
         val faktaPerson = opprettFaktaPerson(adresseAttrBarn, adresseAttr2Søker)
 
+        // Act
         val evaluering = vilkår.vurderVilkår(faktaPerson)
+
+        // Assert
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 

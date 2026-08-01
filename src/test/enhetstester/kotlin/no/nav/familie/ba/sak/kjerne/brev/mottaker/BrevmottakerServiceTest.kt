@@ -33,13 +33,17 @@ internal class BrevmottakerServiceTest {
 
     @Test
     fun `lagMottakereFraBrevMottakere skal lage mottakere når brevmottaker er FULLMEKTIG og bruker har norsk adresse`() {
+        // Arrange
         val brevmottakere = listOf(lagBrevMottakerDb(mottakerType = MottakerType.FULLMEKTIG))
         every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
 
+        // Act
         val mottakerInfo =
             brevmottakerService.lagMottakereFraBrevMottakere(
                 brevmottakere.map { ManuellBrevmottaker(it) },
             )
+
+        // Assert
         assertTrue { mottakerInfo.size == 2 }
 
         assertTrue { mottakerInfo.first().manuellAdresseInfo == null }
@@ -50,6 +54,7 @@ internal class BrevmottakerServiceTest {
 
     @Test
     fun `lagMottakereFraBrevMottakere skal lage mottakere når brevmottaker er FULLMEKTIG og bruker har utenlandsk adresse`() {
+        // Arrange
         val brevmottakere =
             listOf(
                 lagBrevMottakerDb(mottakerType = MottakerType.FULLMEKTIG),
@@ -61,10 +66,13 @@ internal class BrevmottakerServiceTest {
             )
         every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
 
+        // Act
         val mottakerInfo =
             brevmottakerService.lagMottakereFraBrevMottakere(
                 brevmottakere.map { ManuellBrevmottaker(it) },
             )
+
+        // Assert
         assertTrue { mottakerInfo.size == 2 }
 
         assertTrue { mottakerInfo.first().manuellAdresseInfo != null }

@@ -53,6 +53,7 @@ class ØkonomiIntegrasjonTest(
     @Test
     @Tag("integration")
     fun `Iverksett vedtak på aktiv behandling`() {
+        // Arrange
         val fnr = randomFnr()
         val barnFnr = randomFnr()
         val stønadFom = LocalDate.now()
@@ -88,6 +89,7 @@ class ØkonomiIntegrasjonTest(
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
+        // Act & Assert
         assertDoesNotThrow {
             økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
                 vedtak,
@@ -99,6 +101,7 @@ class ØkonomiIntegrasjonTest(
     @Test
     @Tag("integration")
     fun `Hent behandlinger for løpende fagsaker til konsistensavstemming mot økonomi`() {
+        // Arrange
         val fnr = randomFnr()
         val barnFnr = randomFnr()
         val stønadFom = LocalDate.now()
@@ -142,9 +145,11 @@ class ØkonomiIntegrasjonTest(
         fagsak.status = FagsakStatus.LØPENDE
         fagsakService.lagre(fagsak)
 
+        // Act
         val behandlingerMedAndelerTilAvstemming =
             behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
+        // Assert
         Assertions.assertTrue(behandlingerMedAndelerTilAvstemming.contains(behandling.id))
     }
 

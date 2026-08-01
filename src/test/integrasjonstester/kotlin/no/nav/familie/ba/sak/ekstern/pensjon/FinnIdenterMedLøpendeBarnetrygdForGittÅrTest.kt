@@ -46,6 +46,7 @@ class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest : AbstractSpringIntegration
 
     @Test
     fun `Skal plukke riktig identer som har hatt barnetryd i løpet av gitt år`() {
+        // Arrange
         val søker = tilfeldigPerson()
         val barn1 = tilfeldigPerson()
         personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
@@ -71,13 +72,18 @@ class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest : AbstractSpringIntegration
             }
             avsluttOgLagreBehandling(behandling)
         }
+
+        // Act
         val identer = andelTilkjentYtelseRepository.finnIdenterMedLøpendeBarnetrygdForGittÅr(2023)
+
+        // Assert
         Assertions.assertTrue(identer.isNotEmpty())
         Assertions.assertTrue(identer.contains(søker.aktør.aktivFødselsnummer()))
     }
 
     @Test
     fun `Verifiser at ingen har barnetrygd for angitt år `() {
+        // Arrange
         val søker = tilfeldigPerson()
         val barn1 = tilfeldigPerson()
         personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
@@ -104,7 +110,10 @@ class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest : AbstractSpringIntegration
             avsluttOgLagreBehandling(behandling)
         }
 
+        // Act
         val identer = andelTilkjentYtelseRepository.finnIdenterMedLøpendeBarnetrygdForGittÅr(2018)
+
+        // Assert
         Assertions.assertFalse(identer.contains(søker.aktør.aktivFødselsnummer()))
     }
 

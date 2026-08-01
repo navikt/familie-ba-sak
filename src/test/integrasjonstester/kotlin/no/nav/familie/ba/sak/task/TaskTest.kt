@@ -20,6 +20,7 @@ class TaskTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Tasker skal ha unikt navn`() {
+        // Act
         val taskTyper: List<String> =
             tasker
                 .stream()
@@ -30,6 +31,7 @@ class TaskTest : AbstractSpringIntegrationTest() {
                     Collectors.toList<String>(),
                 )
 
+        // Assert
         Assertions.assertEquals(tasker.size, taskTyper.distinct().size)
     }
 
@@ -47,6 +49,7 @@ class TaskTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `doTask skal ha annotasjon WithSpan for bedre tracing`() {
+        // Act
         val taskerUtenWithSpan =
             tasker.mapNotNull { task ->
                 val doTaskMethod =
@@ -60,6 +63,7 @@ class TaskTest : AbstractSpringIntegrationTest() {
                 }
             }
 
+        // Assert
         assertTrue(taskerUtenWithSpan.isEmpty(), taskerUtenWithSpan.joinToString("\n"))
     }
 

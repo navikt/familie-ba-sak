@@ -21,6 +21,7 @@ import java.time.LocalDate
 internal class VilkårsvurderingTidslinjerTest {
     @Test
     fun `et vilkår kan ha overlappende vilkårsresultater hvis bare ett er oppfylt`() {
+        // Arrange
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
         val barn2Fnr = randomFnr()
@@ -59,6 +60,7 @@ internal class VilkårsvurderingTidslinjerTest {
             )
         }
 
+        // Act & Assert
         assertDoesNotThrow {
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
@@ -71,6 +73,7 @@ internal class VilkårsvurderingTidslinjerTest {
 
     @Test
     fun `kan ikke ha to overlappende vilkårsresultater hvis begge er oppfylt`() {
+        // Arrange
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
         val barn2Fnr = randomFnr()
@@ -106,6 +109,7 @@ internal class VilkårsvurderingTidslinjerTest {
             )
         }
 
+        // Act & Assert
         assertThrows<IllegalStateException> {
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,

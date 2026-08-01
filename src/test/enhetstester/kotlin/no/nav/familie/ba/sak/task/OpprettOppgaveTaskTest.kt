@@ -23,7 +23,7 @@ class OpprettOppgaveTaskTest {
 
     @Test
     fun `oppretter oppgave når behandling har annen status enn iverksatt eller avsluttet`() {
-        // Given
+        // Arrange
         val behandling =
             mockk<Behandling> {
                 every { status } returns BehandlingStatus.UTREDES
@@ -43,10 +43,10 @@ class OpprettOppgaveTaskTest {
         every { behandlingHentOgPersisterService.hent(1L) } returns behandling
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns "12345"
 
-        // When
+        // Act
         opprettOppgaveTask.doTask(task)
 
-        // Then
+        // Assert
         verify(exactly = 1) {
             oppgaveService.opprettOppgave(
                 behandlingId = 1L,
@@ -62,7 +62,7 @@ class OpprettOppgaveTaskTest {
 
     @Test
     fun `oppretter ikke oppgave når behandling er iverksatt og oppgavetype er GodkjenneVedtak`() {
-        // Given
+        // Arrange
         val behandling =
             mockk<Behandling> {
                 every { status } returns BehandlingStatus.IVERKSETTER_VEDTAK
@@ -81,16 +81,16 @@ class OpprettOppgaveTaskTest {
 
         every { behandlingHentOgPersisterService.hent(2L) } returns behandling
 
-        // When
+        // Act
         opprettOppgaveTask.doTask(task)
 
-        // Then
+        // Assert
         verify(exactly = 0) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
     fun `oppretter ikke oppgave når behandling er avsluttet og oppgavetype er BehandleUnderkjentVedtak`() {
-        // Given
+        // Arrange
         val behandling =
             mockk<Behandling> {
                 every { status } returns BehandlingStatus.AVSLUTTET
@@ -109,16 +109,16 @@ class OpprettOppgaveTaskTest {
 
         every { behandlingHentOgPersisterService.hent(3L) } returns behandling
 
-        // When
+        // Act
         opprettOppgaveTask.doTask(task)
 
-        // Then
+        // Assert
         verify(exactly = 0) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
     fun `oppretter oppgave når behandling er iverksatt men oppgavetype er verken GodkjenneVedtak eller BehandleUnderkjentVedtak`() {
-        // Given
+        // Arrange
         val behandling =
             mockk<Behandling> {
                 every { status } returns BehandlingStatus.IVERKSETTER_VEDTAK
@@ -138,16 +138,16 @@ class OpprettOppgaveTaskTest {
         every { behandlingHentOgPersisterService.hent(4L) } returns behandling
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns "67890"
 
-        // When
+        // Act
         opprettOppgaveTask.doTask(task)
 
-        // Then
+        // Assert
         verify(exactly = 1) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
     fun `oppretter oppgave med alle parametere fylt ut`() {
-        // Given
+        // Arrange
         val behandling =
             mockk<Behandling> {
                 every { status } returns BehandlingStatus.UTREDES
@@ -167,10 +167,10 @@ class OpprettOppgaveTaskTest {
         every { behandlingHentOgPersisterService.hent(5L) } returns behandling
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns "11111"
 
-        // When
+        // Act
         opprettOppgaveTask.doTask(task)
 
-        // Then
+        // Assert
         verify(exactly = 1) {
             oppgaveService.opprettOppgave(
                 behandlingId = 5L,

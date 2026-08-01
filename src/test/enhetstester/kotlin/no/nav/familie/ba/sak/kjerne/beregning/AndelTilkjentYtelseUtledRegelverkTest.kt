@@ -37,28 +37,36 @@ class AndelTilkjentYtelseUtledRegelverkTest {
 
     @Test
     fun `EØS-forordning om alle relevante vilkår er satt til regelverk EØS forordning`() {
+        // Act
         val regelverk = andelTilkjentYtelse.vurdertEtter(setOf(genererPersonresultat()))
 
+        // Assert
         assertEquals(Regelverk.EØS_FORORDNINGEN, regelverk)
     }
 
     @Test
     fun `Nasjonale regler om alle relevante vilkår er satt til regelverk nasonale regler`() {
+        // Arrange
         val personResultat =
             genererPersonresultat(Regelverk.NASJONALE_REGLER, Regelverk.NASJONALE_REGLER, Regelverk.NASJONALE_REGLER)
 
+        // Act
         val regelverk = andelTilkjentYtelse.vurdertEtter(setOf(personResultat))
 
+        // Assert
         assertEquals(Regelverk.NASJONALE_REGLER, regelverk)
     }
 
     @Test
     fun `Default til nasjonale regler om relevante vilkår er satt til forskjellig regelverk`() {
+        // Arrange
         val personResultat =
             genererPersonresultat(Regelverk.EØS_FORORDNINGEN, Regelverk.NASJONALE_REGLER, Regelverk.NASJONALE_REGLER)
 
+        // Act
         val regelverk = andelTilkjentYtelse.vurdertEtter(setOf(personResultat))
 
+        // Assert
         assertEquals(Regelverk.NASJONALE_REGLER, regelverk)
     }
 

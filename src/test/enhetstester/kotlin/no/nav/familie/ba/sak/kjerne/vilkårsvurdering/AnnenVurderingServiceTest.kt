@@ -41,6 +41,7 @@ class AnnenVurderingServiceTest {
 
     @Test
     fun `Verifiser endreAnnenVurdering`() {
+        // Arrange
         every { annenVurderingRepository.findById(any()) } returns
             Optional.of(
                 AnnenVurdering(
@@ -60,6 +61,7 @@ class AnnenVurderingServiceTest {
 
         every { annenVurderingRepository.save(any()) } returns nyAnnenVurering
 
+        // Act
         annenVurderingService.endreAnnenVurdering(
             personResultat.vilkårsvurdering.behandling.id,
             123L,
@@ -71,6 +73,7 @@ class AnnenVurderingServiceTest {
             ),
         )
 
+        // Assert
         verify(exactly = 1) {
             annenVurderingRepository.save(any())
         }

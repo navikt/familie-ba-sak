@@ -15,6 +15,7 @@ class SlåSammenSkjemaTest {
 
     @Test
     fun testSlåSammenPåfølgendePerioder() {
+        // Arrange
         val kompetanser =
             KompetanseBuilder(jan2020)
                 .medKompetanse("SSS", barn1)
@@ -26,12 +27,16 @@ class SlåSammenSkjemaTest {
                 .medKompetanse("SSSSSS", barn1)
                 .byggKompetanser()
 
+        // Act
         val faktiskeKompetanser = kompetanser.slåSammen()
+
+        // Assert
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
     }
 
     @Test
     fun testSlåSammenForPerioderMedMellomrom() {
+        // Arrange
         val kompetanser =
             KompetanseBuilder(jan2020)
                 .medKompetanse("SSS", barn1, barn2, barn3)
@@ -43,12 +48,16 @@ class SlåSammenSkjemaTest {
                 .medKompetanse("SSS SSS", barn1, barn2, barn3)
                 .byggKompetanser()
 
+        // Act
         val faktiskeKompetanser = kompetanser.slåSammen()
+
+        // Assert
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
     @Test
     fun testSlåSammenForPerioderDerTidligstePeriodeHarÅpemTOM() {
+        // Arrange
         val kompetanser =
             KompetanseBuilder(jan2020)
                 .medKompetanse("->", barn1, barn2, barn3)
@@ -60,13 +69,17 @@ class SlåSammenSkjemaTest {
                 .medKompetanse("->", barn1, barn2, barn3)
                 .byggKompetanser()
 
+        // Act
         val faktiskeKompetanser = kompetanser.slåSammen()
+
+        // Assert
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
         Assertions.assertEquals(null, faktiskeKompetanser.first().tom)
     }
 
     @Test
     fun testSlåSammenForPerioderMedOverlapp() {
+        // Arrange
         val kompetanser =
             KompetanseBuilder(jan2020)
                 .medKompetanse("-----", barn1, barn2, barn3)
@@ -78,12 +91,16 @@ class SlåSammenSkjemaTest {
                 .medKompetanse("--------", barn1, barn2, barn3)
                 .byggKompetanser()
 
+        // Act
         val faktiskeKompetanser = kompetanser.slåSammen()
+
+        // Assert
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
     @Test
     fun testSlåSammneForPerioderDerSenestePeriodeHarÅpemTOM() {
+        // Arrange
         val kompetanser =
             KompetanseBuilder(jan2020)
                 .medKompetanse("------", barn1, barn2, barn3)
@@ -95,7 +112,10 @@ class SlåSammenSkjemaTest {
                 .medKompetanse("->", barn1, barn2, barn3)
                 .byggKompetanser()
 
+        // Act
         val faktiskeKompetanser = kompetanser.slåSammen()
+
+        // Assert
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
         Assertions.assertEquals(jan2020, faktiskeKompetanser.first().fom)
         Assertions.assertEquals(null, faktiskeKompetanser.first().tom)
@@ -103,6 +123,7 @@ class SlåSammenSkjemaTest {
 
     @Test
     fun komplekseSlåSammenKommpetanserTest() {
+        // Arrange
         val kompetanser =
             KompetanseBuilder(jan2020)
                 .medKompetanse("SSSSSSS", barn1)
@@ -121,13 +142,17 @@ class SlåSammenSkjemaTest {
                 .medKompetanse("-      ", barn3)
                 .byggKompetanser()
 
+        // Act
         val faktiskeKompetanser = kompetanser.slåSammen()
+
+        // Assert
         Assertions.assertEquals(6, faktiskeKompetanser.size)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
     @Test
     fun slåSammenEnkeltBarnSomSkillerSegHeltUt() {
+        // Arrange
         val kompetanser =
             KompetanseBuilder(jan2020)
                 .medKompetanse("SSS", barn1)
@@ -141,7 +166,10 @@ class SlåSammenSkjemaTest {
                 .medKompetanse("---------", barn2, barn3)
                 .byggKompetanser()
 
+        // Act
         val faktiskeKompetanser = kompetanser.slåSammen()
+
+        // Assert
         Assertions.assertEquals(2, faktiskeKompetanser.size)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }

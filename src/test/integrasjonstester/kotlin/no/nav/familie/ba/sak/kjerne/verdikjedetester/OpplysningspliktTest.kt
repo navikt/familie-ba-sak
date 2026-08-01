@@ -46,6 +46,7 @@ class OpplysningspliktTest(
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Skal opprette opplysningsplikt-vilkår på søker når 'innhente opplysninger'-brev sendes ut og ta med hjemmel 17 og 18 i vedtaksbrev når opplysningsplikt-vilkåret ikke er oppfylt`() {
+        // Arrange
         val scenario =
             ScenarioDto(
                 søker = ScenarioPersonDto(fødselsdato = "1990-04-20", fornavn = "Mor", etternavn = "Søker"),
@@ -74,6 +75,7 @@ class OpplysningspliktTest(
             )
 
         // Send "innhente opplysninger"-brev og sjekk at opplysningsplikt vilkåret dukker opp på _kun_ søker
+        // Act
         dokumentService.sendManueltBrev(
             fagsakId = behandling.fagsak.id,
             manueltBrevRequest =
@@ -101,6 +103,7 @@ class OpplysningspliktTest(
                 ?.filter { !it.erSøkersResultater() }
                 ?.flatMap { it.andreVurderinger.filter { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT } } ?: emptyList()
 
+        // Assert
         Assertions.assertTrue(opplysningspliktVilkårPåSøker != null)
         Assertions.assertTrue(opplysningspliktVilkårPåBarna.isEmpty())
 

@@ -8,6 +8,7 @@ import java.math.BigDecimal
 class AndelForVedtaksperiodeTest {
     @Test
     fun `equals blir true for like objekter`() {
+        // Arrange
         val andel1 =
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 1000,
@@ -28,12 +29,14 @@ class AndelForVedtaksperiodeTest {
                 sats = 100,
             )
 
+        // Assert
         assertThat(andel1).isEqualTo(andel2)
         assertThat(andel1.hashCode()).isEqualTo(andel2.hashCode())
     }
 
     @Test
     fun `equals skal bli false for andeler med forskjellig type`() {
+        // Arrange
         val andel1 =
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 1000,
@@ -54,11 +57,13 @@ class AndelForVedtaksperiodeTest {
                 sats = 100,
             )
 
+        // Assert
         assertThat(andel1).isNotEqualTo(andel2)
     }
 
     @Test
     fun `equals skal bli false for andeler med forskjellig prosent`() {
+        // Arrange
         val andel1 =
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 1000,
@@ -79,11 +84,13 @@ class AndelForVedtaksperiodeTest {
                 sats = 100,
             )
 
+        // Assert
         assertThat(andel1).isNotEqualTo(andel2)
     }
 
     @Test
     fun `equals skal bli true for nullutbetalinger når satsen endrer seg og differanseberegnet periodebeløp er større enn 0`() {
+        // Arrange
         val andel1 =
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 0,
@@ -104,12 +111,14 @@ class AndelForVedtaksperiodeTest {
                 sats = 200,
             )
 
+        // Assert
         assertThat(andel1).isEqualTo(andel2)
         assertThat(andel1.hashCode()).isEqualTo(andel2.hashCode())
     }
 
     @Test
     fun `equals skal bli false for nullutbetalinger når satsen endrer seg og differanseberegnet periodebeløp er mindre enn 0`() {
+        // Arrange
         val andel1 =
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 0,
@@ -130,11 +139,13 @@ class AndelForVedtaksperiodeTest {
                 sats = 200,
             )
 
+        // Assert
         assertThat(andel1).isNotEqualTo(andel2)
     }
 
     @Test
     fun `equals skal bli false dersom ene kalkulerte utbetalingsbeløpet er null, og det andre ikke er null`() {
+        // Arrange
         val andel1 =
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 0,
@@ -155,11 +166,13 @@ class AndelForVedtaksperiodeTest {
                 sats = 100,
             )
 
+        // Assert
         assertThat(andel1).isNotEqualTo(andel2)
     }
 
     @Test
     fun `equals skal bli false dersom ingen kalkulerte utbetalingsbeløp er null og satsene er ulike`() {
+        // Arrange
         val andel1 =
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 1000,
@@ -180,11 +193,13 @@ class AndelForVedtaksperiodeTest {
                 sats = 200,
             )
 
+        // Assert
         assertThat(andel1).isNotEqualTo(andel2)
     }
 
     @Test
     fun `equals skal bli true dersom ingen kalkulerte utbetalingsbeløp er null og satsene er like`() {
+        // Arrange
         val andel1 =
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 2000,
@@ -205,6 +220,7 @@ class AndelForVedtaksperiodeTest {
                 sats = 100,
             )
 
+        // Assert
         assertThat(andel1).isEqualTo(andel2)
         assertThat(andel1.hashCode()).isEqualTo(andel2.hashCode())
     }

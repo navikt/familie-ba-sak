@@ -16,6 +16,7 @@ class BehandlingHentOgPersisterServiceIntegrationTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `skal hente aktiv fødselsnummere`() {
+        // Arrange
         val fødselsnummere = listOf(randomFnr(), randomFnr())
         val fagsak1 = fagsakService.hentEllerOpprettFagsakForPersonIdent(fødselsnummere[0])
         fagsakService.oppdaterStatus(fagsak1, FagsakStatus.LØPENDE)
@@ -25,6 +26,7 @@ class BehandlingHentOgPersisterServiceIntegrationTest(
         fagsakService.oppdaterStatus(fagsak2, FagsakStatus.LØPENDE)
         val behandling2 = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandlingUtenId(fagsak2), false)
 
+        // Act
         val aktivFødselsnummere =
             behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(
                 listOf(
@@ -32,15 +34,20 @@ class BehandlingHentOgPersisterServiceIntegrationTest(
                     behandling2.id,
                 ),
             )
+
+        // Assert
         assertEquals(fødselsnummere[0], aktivFødselsnummere[behandling1.id])
         assertEquals(fødselsnummere[1], aktivFødselsnummere[behandling2.id])
     }
 
     @Test
     fun `skal hente status på behandling`() {
+        // Arrange
         val fnr = randomFnr()
         val fagsak1 = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling1 = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandlingUtenId(fagsak1), false)
+
+        // Act & Assert
         assertThat(behandlingHentOgPersisterService.hentStatus(behandling1.id)).isEqualTo(behandling1.status)
     }
 }

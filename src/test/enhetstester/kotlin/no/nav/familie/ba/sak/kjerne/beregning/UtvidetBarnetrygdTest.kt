@@ -64,6 +64,7 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andeler får høyeste beløp når det utbetales til flere barn med ulike beløp`() {
+        // Arrange
         val søker =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
         val barnA =
@@ -125,6 +126,7 @@ internal class UtvidetBarnetrygdTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
@@ -134,6 +136,7 @@ internal class UtvidetBarnetrygdTest {
                 .toList()
                 .sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
 
+        // Assert
         assertEquals(4, andeler.size)
 
         val andelBarnA = andeler[0]
@@ -164,6 +167,7 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andeler får høyeste ordinærsats når søker har tillegg for barn under 6 år`() {
+        // Arrange
         val søker =
             OppfyltPeriode(fom = fødselsdatoUnder6År, tom = LocalDate.of(2021, 6, 15))
         val oppfyltBarn =
@@ -219,6 +223,7 @@ internal class UtvidetBarnetrygdTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
@@ -228,6 +233,7 @@ internal class UtvidetBarnetrygdTest {
                 .toList()
                 .sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
 
+        // Assert
         assertEquals(2, andeler.size)
 
         val andelBarn = andeler[0]
@@ -246,6 +252,7 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andeler får største prosent funnet blant andelene til barna som bor med søker`() {
+        // Arrange
         val behandling = lagBehandling()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
         val søkerAktør = randomAktør()
@@ -287,6 +294,7 @@ internal class UtvidetBarnetrygdTest {
                 ),
             )
 
+        // Act
         val utvidetAndelerNårBarnMed100ProsentBorMedSøker =
             UtvidetBarnetrygdGenerator(
                 behandlingId = behandling.id,
@@ -313,12 +321,14 @@ internal class UtvidetBarnetrygdTest {
                         .mapValues { it.value.mapVerdi { andel -> andel?.prosent == BigDecimal(50) } },
             )
 
+        // Assert
         assertEquals(BigDecimal(100), utvidetAndelerNårBarnMed100ProsentBorMedSøker.minOf { it.prosent })
         assertEquals(BigDecimal(50), utvidetAndelerNårKunBarnMed50ProsentBorMedSøker.maxOf { it.prosent })
     }
 
     @Test
     fun `Utvidet andeler lages kun når vilkåret er innfridd`() {
+        // Arrange
         val søkerOrdinær =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
         val søkerUtvidet =
@@ -377,6 +387,7 @@ internal class UtvidetBarnetrygdTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
@@ -386,6 +397,7 @@ internal class UtvidetBarnetrygdTest {
                 .toList()
                 .sortedBy { it.type }
 
+        // Assert
         assertEquals(2, andeler.size)
 
         val andelBarn = andeler[0]
@@ -402,6 +414,7 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andeler lages kun når det finnes andel for barn`() {
+        // Arrange
         val søkerOrdinær =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
         val søkerUtvidet =
@@ -460,6 +473,7 @@ internal class UtvidetBarnetrygdTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
@@ -469,6 +483,7 @@ internal class UtvidetBarnetrygdTest {
                 .toList()
                 .sortedBy { it.type }
 
+        // Assert
         assertEquals(2, andeler.size)
 
         val andelBarn = andeler[0]
@@ -485,6 +500,7 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andeler slutter siste dag i  måneden som vilkår ikke er innfridd lenger`() {
+        // Arrange
         val søkerOrdinær =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
         val søkerUtvidet =
@@ -543,6 +559,7 @@ internal class UtvidetBarnetrygdTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
@@ -552,6 +569,7 @@ internal class UtvidetBarnetrygdTest {
                 .toList()
                 .sortedBy { it.type }
 
+        // Assert
         assertEquals(2, andeler.size)
 
         val andelBarn = andeler[0]
@@ -566,6 +584,7 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andel blir IKKE splittet opp på endring i utvidet vilkåret ved back-to-back, men utbetalingsperiodene blir det`() {
+        // Arrange
         val søkerOrdinær =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 10, 15))
         val barnOppfylt =
@@ -636,6 +655,7 @@ internal class UtvidetBarnetrygdTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
@@ -646,6 +666,7 @@ internal class UtvidetBarnetrygdTest {
                 .sortedBy { it.type }
 
         // Én  andel for barnet og én andel for utvidet barnetrygd. Utvidet-andelen splittes IKKE
+        // Assert
         assertEquals(2, andeler.size)
 
         val andelBarn = andeler[0]
@@ -662,6 +683,7 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andel blir ikke splittet opp på endring i barnas vilkår som ikke er delt bosted`() {
+        // Arrange
         val søkerOrdinær =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 10, 15))
         val barnOppfylt =
@@ -752,6 +774,7 @@ internal class UtvidetBarnetrygdTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
@@ -761,6 +784,7 @@ internal class UtvidetBarnetrygdTest {
                 .toList()
                 .sortedBy { it.type }
 
+        // Assert
         assertEquals(2, andeler.size)
 
         val andelBarn = andeler[0]
@@ -777,6 +801,7 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andel blir splittet opp på endring i barnas vilkår som er delt bosted`() {
+        // Arrange
         val søkerOrdinær =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 10, 15))
         val barnOppfylt =
@@ -866,6 +891,7 @@ internal class UtvidetBarnetrygdTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
@@ -875,6 +901,7 @@ internal class UtvidetBarnetrygdTest {
                 .toList()
                 .sortedBy { it.type }
 
+        // Assert
         assertEquals(4, andeler.size)
 
         val andelBarn1 = andeler[0]
@@ -905,6 +932,7 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andel starter og opphører riktig når det er to perioder som ikke er back2back`() {
+        // Arrange
         val søkerOrdinær =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 10, 15))
         val barnOppfylt =
@@ -979,6 +1007,7 @@ internal class UtvidetBarnetrygdTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
@@ -988,6 +1017,7 @@ internal class UtvidetBarnetrygdTest {
                 .toList()
                 .sortedBy { it.type }
 
+        // Assert
         assertEquals(3, andeler.size)
 
         val andelBarn = andeler[0]
@@ -1006,6 +1036,7 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Skal kaste feil hvis utvidet-andeler ikke overlapper med noen av barnas andeler`() {
+        // Arrange
         val behandling = lagBehandling()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
         val søkerAktør = randomAktør()
@@ -1047,6 +1078,7 @@ internal class UtvidetBarnetrygdTest {
                 ),
             )
 
+        // Act & Assert
         assertThrows<FunksjonellFeil> {
             UtvidetBarnetrygdGenerator(
                 behandlingId = behandling.id,
@@ -1062,6 +1094,7 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Skal dele opp utvidet-segment ved endring i sats`() {
+        // Arrange
         val behandling = lagBehandling()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
         val søkerAktør = randomAktør()
@@ -1095,6 +1128,7 @@ internal class UtvidetBarnetrygdTest {
                 ),
             )
 
+        // Act
         val utvidetAndeler =
             UtvidetBarnetrygdGenerator(
                 behandlingId = behandling.id,
@@ -1108,6 +1142,7 @@ internal class UtvidetBarnetrygdTest {
                         .mapValues { it.value.mapVerdi { true } },
             ).sortedBy { it.stønadFom }
 
+        // Assert
         assertEquals(2, utvidetAndeler.size)
 
         val andelFørSatsendring = utvidetAndeler[0]
@@ -1128,6 +1163,7 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Skal endre utbetaling for søker og barn på endret utbetaling andel`() {
+        // Arrange
         val søker = OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
         val barn = OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15), rolle = PersonType.BARN)
 
@@ -1189,6 +1225,7 @@ internal class UtvidetBarnetrygdTest {
                 ),
             )
 
+        // Act
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
@@ -1197,6 +1234,7 @@ internal class UtvidetBarnetrygdTest {
                     endretUtbetalingAndeler = endretUtbetalingAndeler,
                 ).andelerTilkjentYtelse
 
+        // Assert
         assertThat(andeler)
             .anySatisfy {
                 assertThat(it.aktør).isEqualTo(søker.aktør)

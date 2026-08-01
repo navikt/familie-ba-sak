@@ -52,6 +52,7 @@ class PeriodeOffsetIntegrasjonTest(
     @Test
     @Tag("integration")
     fun `Sjekk at offset settes på andel tilkjent ytelse når behandlingen iverksettes`() {
+        // Arrange
         val fnr = randomFnr()
         val barnFnr = randomFnr()
         val stønadFom = LocalDate.now()
@@ -95,6 +96,7 @@ class PeriodeOffsetIntegrasjonTest(
                 Assertions.assertNull(it.kildeBehandlingId)
             }
 
+        // Act & Assert
         assertDoesNotThrow {
             iverksettMotOppdrag.utførStegOgAngiNeste(
                 behandling,
@@ -107,6 +109,7 @@ class PeriodeOffsetIntegrasjonTest(
             )
         }
 
+        // Assert
         beregningService
             .hentAndelerTilkjentYtelseForBehandling(behandling.id)
             .forEach {
@@ -118,6 +121,7 @@ class PeriodeOffsetIntegrasjonTest(
     @Test
     @Tag("integration")
     fun `Sjekk at offset IKKE settes på andel tilkjent ytelse når behandlingen simuleres`() {
+        // Arrange
         val fnr = randomFnr()
         val barnFnr = randomFnr()
         val stønadFom = LocalDate.now()
@@ -161,10 +165,12 @@ class PeriodeOffsetIntegrasjonTest(
                 Assertions.assertNull(it.kildeBehandlingId)
             }
 
+        // Act & Assert
         assertDoesNotThrow {
             simuleringService.oppdaterSimuleringPåBehandling(behandling)
         }
 
+        // Assert
         beregningService
             .hentAndelerTilkjentYtelseForBehandling(behandling.id)
             .forEach {

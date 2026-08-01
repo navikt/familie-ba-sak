@@ -49,6 +49,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest {
         fun `For behandling med årsak satsendring, månedlig valutajustering, finnmarkstillegg, svalbardtillegg og satsendring EØS blir ikke endrete utbetalinger filtrert bort`(
             årsak: BehandlingÅrsak,
         ) {
+            // Arrange
             val behandling =
                 lagBehandling(
                     behandlingType = BehandlingType.REVURDERING,
@@ -61,13 +62,16 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest {
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns emptyList()
             every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns listOf(endretUtbetalingAndel)
 
+            // Act
             val endreteUtbetalinger = andelerTilkjentYtelseOgEndreteUtbetalingerService.finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
 
+            // Assert
             assertThat(endreteUtbetalinger).hasSize(1)
         }
 
         @Test
         fun `For behandling med årsak nye opplysinger blir endrete utbetalinger uten overlappende andeler filtrert bort`() {
+            // Arrange
             val behandling =
                 lagBehandling(
                     behandlingType = BehandlingType.REVURDERING,
@@ -95,8 +99,10 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest {
                     ),
                 )
 
+            // Act
             val endreteUtbetalinger = andelerTilkjentYtelseOgEndreteUtbetalingerService.finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
 
+            // Assert
             assertThat(endreteUtbetalinger)
                 .singleElement()
                 .extracting { it.andelerTilkjentYtelse }
@@ -105,6 +111,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest {
 
         @Test
         fun `For behandling med årsak nye opplsyninger blir endrete utbetalinger med overlappende andeler kombinert`() {
+            // Arrange
             val behandling =
                 lagBehandling(
                     behandlingType = BehandlingType.REVURDERING,
@@ -137,8 +144,10 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest {
                     ),
                 )
 
+            // Act
             val endreteUtbetalinger = andelerTilkjentYtelseOgEndreteUtbetalingerService.finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
 
+            // Assert
             assertThat(endreteUtbetalinger)
                 .singleElement()
                 .extracting { it.andelerTilkjentYtelse }

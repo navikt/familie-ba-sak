@@ -59,6 +59,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
     @Test
     fun `Skal kaste gode feilmeldinger ved feil mot infotrygd-barnetrygd`() {
+        // Arrange
         val fnr = randomFnr()
 
         stubFor(

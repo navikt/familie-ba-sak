@@ -52,6 +52,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
     @Test
     @Tag("integration")
     fun `Tjeneste svarer med 200 OK og feilet ressurs`() {
+        // Arrange
         wireMockServer.stubFor(
             post("/api/oppgave/opprett").willReturn(
                 aResponse()
@@ -61,12 +62,14 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
             ),
         )
 
+        // Act & Assert
         assertThrows<IntegrasjonException> { integrasjonKlient.opprettOppgave(lagTestOppgave()) }
     }
 
     @Test
     @Tag("integration")
     fun `Tjeneste svarer med 500 og skal feile`() {
+        // Arrange
         wireMockServer.stubFor(
             post("/api/oppgave/opprett").willReturn(
                 aResponse()
@@ -75,12 +78,14 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
             ),
         )
 
+        // Act & Assert
         assertThrows<IntegrasjonException> { integrasjonKlient.opprettOppgave(lagTestOppgave()) }
     }
 
     @Test
     @Tag("integration")
     fun `Tjeneste svarer med forbidden og skal kaste feil videre`() {
+        // Arrange
         wireMockServer.stubFor(
             post("/api/oppgave/opprett").willReturn(
                 aResponse()
@@ -90,6 +95,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
             ),
         )
 
+        // Act & Assert
         val feil =
             assertThrows<HttpClientErrorException.Forbidden> { integrasjonKlient.opprettOppgave(lagTestOppgave()) }
         assertTrue(feil.statusCode == HttpStatus.FORBIDDEN)
@@ -99,6 +105,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
     @Test
     @Tag("integration")
     fun `Tjeneste svarer med 404 og not found skal ligge på integrasjon exception`() {
+        // Arrange
         wireMockServer.stubFor(
             post("/api/oppgave/opprett").willReturn(
                 aResponse()
@@ -106,6 +113,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
             ),
         )
 
+        // Act & Assert
         assertThrows<HttpClientErrorException.NotFound> { integrasjonKlient.opprettOppgave(lagTestOppgave()) }
     }
 }

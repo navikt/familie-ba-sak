@@ -11,6 +11,7 @@ import java.math.BigDecimal
 class TilkjentYtelseDtoTest {
     @Test
     fun `Skal slå sammen etterfølgende andeler med samme kalkulert utbetalingsbeløp, ytelsetype og prosent`() {
+        // Arrange
         val aktør = randomAktør()
 
         val andeler =
@@ -33,13 +34,17 @@ class TilkjentYtelseDtoTest {
                 ),
             )
 
+        // Act
         val ytelsePerioderDto = andeler.tilYtelsePerioderDto()
+
+        // Assert
         val forventetYtelsePeriodeDto = listOf(YtelsePeriodeDto(beløp = 1234, stønadFom = årMnd("2020-03"), stønadTom = årMnd("2021-12"), ytelseType = YtelseType.ORDINÆR_BARNETRYGD, skalUtbetales = true))
         Assertions.assertThat(ytelsePerioderDto).containsAll(forventetYtelsePeriodeDto).hasSize(forventetYtelsePeriodeDto.size)
     }
 
     @Test
     fun `Skal ikke slå sammen etterfølgende andeler med forskjellig kalkulert utbetalingsbeløp, ytelsetype eller prosent`() {
+        // Arrange
         val aktør = randomAktør()
 
         val andeler =
@@ -78,7 +83,10 @@ class TilkjentYtelseDtoTest {
                 ),
             )
 
+        // Act
         val ytelsePerioderDto = andeler.tilYtelsePerioderDto()
+
+        // Assert
         val forventetYtelsePerioderDtos =
             listOf(
                 YtelsePeriodeDto(beløp = 1234, stønadFom = årMnd("2020-03"), stønadTom = årMnd("2020-12"), ytelseType = YtelseType.SMÅBARNSTILLEGG, skalUtbetales = true),

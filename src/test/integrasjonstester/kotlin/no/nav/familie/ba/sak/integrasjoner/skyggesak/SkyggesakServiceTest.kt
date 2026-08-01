@@ -41,6 +41,7 @@ class SkyggesakServiceTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Skal sende skyggesak for fagsak med sendtTidspunkt null`() {
+        // Arrange
         val sendtTidspunkt = listOf(null, LocalDateTime.now())
         skyggesakRepository.saveAll(
             sendtTidspunkt.mapIndexed { i, tid -> Skyggesak(fagsakId = i.toLong(), sendtTidspunkt = tid) },
@@ -48,8 +49,10 @@ class SkyggesakServiceTest : AbstractSpringIntegrationTest() {
 
         every { skyggesakService.fagsakRepository.finnFagsak(any()) } returns Fagsak(aktør = Aktør("1234567890123"))
 
+        // Act
         skyggesakService.sendSkyggesaker()
 
+        // Assert
         verify(exactly = 1) {
             skyggesakService.integrasjonKlient.opprettSkyggesak(Aktør("1234567890123"), 0)
         }
@@ -58,6 +61,7 @@ class SkyggesakServiceTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Skal slette skyggesaker eldre enn 14 dager`() {
+        // Arrange
         val now = LocalDateTime.now()
         val sendtTidspunkt = listOf(now.minusDays(13), now.minusDays(14), null)
 
@@ -66,8 +70,11 @@ class SkyggesakServiceTest : AbstractSpringIntegrationTest() {
         )
 
         Assertions.assertEquals(2, skyggesakRepository.finnSkyggesakerSomErSendt().size)
+
+        // Act
         skyggesakService.fjernGamleSkyggesakInnslag()
 
+        // Assert
         // Sjekker at usendt skyggesak ikke er slettet, samt skyggesak sendt for mindre enn 14 dager siden
         Assertions.assertEquals(
             null,

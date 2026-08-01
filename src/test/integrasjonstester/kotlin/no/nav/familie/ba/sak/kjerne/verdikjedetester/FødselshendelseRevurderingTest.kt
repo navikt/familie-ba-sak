@@ -34,6 +34,7 @@ class FødselshendelseRevurderingTest(
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
+        // Arrange
         val revurderingsbarnSinFødselsdato = now().minusMonths(3)
         val scenario =
             ScenarioDto(
@@ -70,6 +71,8 @@ class FødselshendelseRevurderingTest(
 
         val søkerIdent = scenario.søker.ident
         val vurdertBarn = scenario.barna.maxByOrNull { it.fødselsdato }!!.ident
+
+        // Act
         val behandling =
             behandleFødselshendelse(
                 nyBehandlingHendelse =
@@ -87,6 +90,7 @@ class FødselshendelseRevurderingTest(
                 brevmalService = brevmalService,
             )
 
+        // Assert
         val fagsakDtoEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id)
 

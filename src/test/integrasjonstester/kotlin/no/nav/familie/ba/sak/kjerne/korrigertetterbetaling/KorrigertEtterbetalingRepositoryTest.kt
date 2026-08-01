@@ -25,6 +25,7 @@ class KorrigertEtterbetalingRepositoryTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `finnAktivtKorrigeringPåBehandling skal returnere null dersom det ikke eksisterer en aktiv etterbetaling korrigering på behandling`() {
+        // Arrange
         val behandling = opprettBehandling()
 
         val inaktivKorrigertEtterbetaling =
@@ -38,14 +39,17 @@ class KorrigertEtterbetalingRepositoryTest(
 
         korrigertEtterbetalingRepository.saveAndFlush(inaktivKorrigertEtterbetaling)
 
+        // Act
         val ikkeEksisterendeKorrigertEtterbetaling =
             korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.id)
 
+        // Assert
         assertThat(ikkeEksisterendeKorrigertEtterbetaling, Is(nullValue()))
     }
 
     @Test
     fun `finnAktivtKorrigeringPåBehandling skal returnere aktiv korrigering på behandling dersom det finnes`() {
+        // Arrange
         val behandling = opprettBehandling()
 
         val aktivKorrigertEtterbetaling =
@@ -59,15 +63,18 @@ class KorrigertEtterbetalingRepositoryTest(
 
         korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling)
 
+        // Act
         val eksisterendeKorrigertEtterbetaling =
             korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.id)!!
 
+        // Assert
         assertThat(eksisterendeKorrigertEtterbetaling.begrunnelse, Is("Test på aktiv korrigering"))
         assertThat(eksisterendeKorrigertEtterbetaling.beløp, Is(1000))
     }
 
     @Test
     fun `Det skal kastes DataIntegrityViolationException dersom det forsøkes å lagre aktivt korrigering når det allerede finnes en`() {
+        // Arrange
         val behandling = opprettBehandling()
 
         val aktivKorrigertEtterbetaling =
@@ -90,6 +97,7 @@ class KorrigertEtterbetalingRepositoryTest(
 
         korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling)
 
+        // Act & Assert
         assertThrows<DataIntegrityViolationException> {
             korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling2)
         }
@@ -97,6 +105,7 @@ class KorrigertEtterbetalingRepositoryTest(
 
     @Test
     fun `hentAlleKorrigeringPåBehandling skal returnere alle KorrigertEtterbetaling på behandling`() {
+        // Arrange
         val behandling = opprettBehandling()
 
         val aktivKorrigertEtterbetaling =
@@ -120,9 +129,11 @@ class KorrigertEtterbetalingRepositoryTest(
         korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling)
         korrigertEtterbetalingRepository.saveAndFlush(inaktivKorrigertEtterbetaling)
 
+        // Act
         val eksisterendeKorrigertEtterbetaling =
             korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandling.id)
 
+        // Assert
         assertThat(eksisterendeKorrigertEtterbetaling.size, Is(2))
         assertThat(eksisterendeKorrigertEtterbetaling.map { it.begrunnelse }, containsInAnyOrder("1", "2"))
     }

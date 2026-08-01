@@ -35,13 +35,17 @@ class TotrinnskontrollTest(
     @Test
     @Tag("integration")
     fun `Skal godkjenne 2 trinnskontroll`() {
+        // Arrange
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
             behandlingService.opprettBehandling(nyOrdinærBehandling(fagsakId = fagsak.id))
 
+        // Act
         behandlingService.sendBehandlingTilBeslutter(behandling)
+
+        // Assert
         assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingHentOgPersisterService.hent(behandling.id).status)
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
@@ -59,10 +63,12 @@ class TotrinnskontrollTest(
                 .behandlingStatus,
         ).isEqualTo(BehandlingStatus.FATTER_VEDTAK.name)
 
+        // Act
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling = behandling)
 
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "Beslutter", "beslutterId", Beslutning.GODKJENT)
 
+        // Assert
         assertEquals(BehandlingStatus.IVERKSETTER_VEDTAK, behandlingHentOgPersisterService.hent(behandling.id).status)
 
         assertThat(
@@ -88,17 +94,24 @@ class TotrinnskontrollTest(
     @Test
     @Tag("integration")
     fun `Skal underkjenne 2 trinnskontroll`() {
+        // Arrange
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
             behandlingService.opprettBehandling(nyOrdinærBehandling(fagsakId = fagsak.id))
 
+        // Act
         behandlingService.sendBehandlingTilBeslutter(behandling)
+
+        // Assert
         assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingHentOgPersisterService.hent(behandling.id).status)
 
+        // Act
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling = behandling)
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "Beslutter", "beslutterId", Beslutning.UNDERKJENT)
+
+        // Assert
         assertEquals(BehandlingStatus.UTREDES, behandlingHentOgPersisterService.hent(behandling.id).status)
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
@@ -122,6 +135,7 @@ class TotrinnskontrollTest(
 
     @Test
     fun `Skal ikke kunne godkjenne eget vedtak`() {
+        // Arrange
         val totrinnskontroll =
             Totrinnskontroll(
                 behandling = lagBehandlingUtenId(),
@@ -132,11 +146,13 @@ class TotrinnskontrollTest(
                 godkjent = true,
             )
 
+        // Act & Assert
         assertTrue(totrinnskontroll.erUgyldig())
     }
 
     @Test
     fun `Skal kunne underkjenne eget vedtak`() {
+        // Arrange
         val totrinnskontroll =
             Totrinnskontroll(
                 behandling = lagBehandlingUtenId(),
@@ -147,6 +163,7 @@ class TotrinnskontrollTest(
                 godkjent = false,
             )
 
+        // Act & Assert
         assertFalse(totrinnskontroll.erUgyldig())
     }
 }

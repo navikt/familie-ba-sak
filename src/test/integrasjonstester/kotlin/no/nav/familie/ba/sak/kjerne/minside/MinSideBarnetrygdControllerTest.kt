@@ -45,6 +45,7 @@ class MinSideBarnetrygdControllerTest(
     inner class HentMinSideBarnetrygd {
         @Test
         fun `skal returnere UNAUTHORIZED når request mangler token`() {
+            // Act & Assert
             val error =
                 assertThrows<HttpClientErrorException> {
                     restClient
@@ -60,12 +61,14 @@ class MinSideBarnetrygdControllerTest(
 
         @Test
         fun `skal returnere FORBIDDEN når token mangler fødselsnummer`() {
+            // Arrange
             val headers =
                 HttpHeaders().apply {
                     contentType = MediaType.APPLICATION_JSON
                     setBearerAuth(hentTokenForTokenX(null))
                 }
 
+            // Act & Assert
             val error =
                 assertThrows<HttpClientErrorException> {
                     restClient
@@ -81,12 +84,14 @@ class MinSideBarnetrygdControllerTest(
 
         @Test
         fun `skal returnere BAD_REQUEST når token inneholder ugyldig fødselsnummer`() {
+            // Arrange
             val headers =
                 HttpHeaders().apply {
                     contentType = MediaType.APPLICATION_JSON
                     setBearerAuth(hentTokenForTokenX("12345678910"))
                 }
 
+            // Act & Assert
             val error =
                 assertThrows<HttpClientErrorException> {
                     restClient
@@ -102,6 +107,7 @@ class MinSideBarnetrygdControllerTest(
 
         @Test
         fun `skal hente min side barnetrygd med TokenX-token`() {
+            // Arrange
             val fnr = randomFnr()
             val andelFom = YearMonth.now().minusMonths(5)
             val andelTom = YearMonth.now().plusMonths(5)
@@ -143,6 +149,7 @@ class MinSideBarnetrygdControllerTest(
                     setBearerAuth(hentTokenForTokenX(fnr))
                 }
 
+            // Act
             val response =
                 restClient
                     .get()
@@ -151,6 +158,7 @@ class MinSideBarnetrygdControllerTest(
                     .retrieve()
                     .toEntity<HentMinSideBarnetrygdDto.Suksess>()
 
+            // Assert
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(
                 response.body

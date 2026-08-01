@@ -49,6 +49,7 @@ class InfotrygdFeedKlientTest : AbstractSpringIntegrationTest() {
     @Test
     @Tag("integration")
     fun `skal legge til fødselsnummer i infotrygd feed`() {
+        // Arrange
         wireMockServer.stubFor(
             post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(
                 okJson(jsonMapper.writeValueAsString(success("Create"))),
@@ -56,10 +57,12 @@ class InfotrygdFeedKlientTest : AbstractSpringIntegrationTest() {
         )
         val request = InfotrygdFødselhendelsesFeedTaskDto(listOf("fnr"))
 
+        // Act
         request.fnrBarn.forEach {
             klient.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto(fnrBarn = it))
         }
 
+        // Assert
         wireMockServer.verify(
             anyRequestedFor(anyUrl())
                 .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("srvfamilie-ba-sak"))
@@ -74,8 +77,10 @@ class InfotrygdFeedKlientTest : AbstractSpringIntegrationTest() {
     @Test
     @Tag("integration")
     fun `Invokering av Infotrygd feed genererer http feil`() {
+        // Arrange
         wireMockServer.stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(aResponse().withStatus(401)))
 
+        // Act & Assert
         assertThrows<HttpClientErrorException> {
             klient.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto("fnr"))
         }
@@ -84,8 +89,10 @@ class InfotrygdFeedKlientTest : AbstractSpringIntegrationTest() {
     @Test
     @Tag("integration")
     fun `Invokering av Infotrygd returnerer ulovlig response format`() {
+        // Arrange
         wireMockServer.stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(aResponse().withBody("Create")))
 
+        // Act & Assert
         assertThrows<RuntimeException> {
             klient.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto("fnr"))
         }

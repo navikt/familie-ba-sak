@@ -13,38 +13,47 @@ internal class LoggServiceEnhetTest {
 
     @Test
     fun `loggSammensattKontrollsakLagtTil skal lagre ned logg på at sammensatt kontrollsak er opprettet`() {
+        // Arrange
         val behandling = lagBehandling(id = 1)
         val sammensattKontrollsak = SammensattKontrollsak(behandlingId = behandling.id, fritekst = "test")
 
         every { loggRepository.save(any()) } returnsArgument 0
 
+        // Act
         val opprettetLogg = loggService.loggSammensattKontrollsakLagtTil(sammensattKontrollsak)
 
+        // Assert
         assertThat(opprettetLogg.type).isEqualTo(LoggType.SAMMENSATT_KONTROLLSAK_LAGT_TIL)
         assertThat(opprettetLogg.behandlingId).isEqualTo(behandling.id)
     }
 
     @Test
     fun `loggSammensattKontrollsakEndret skal lagre ned logg på at sammensatt kontrollsak er endret`() {
+        // Arrange
         val behandling = lagBehandling(id = 1)
         val oppdatertSammensattKontrollsak = SammensattKontrollsak(behandlingId = behandling.id, fritekst = "test2")
 
         every { loggRepository.save(any()) } returnsArgument 0
 
+        // Act
         val opprettetLogg = loggService.loggSammensattKontrollsakEndret(oppdatertSammensattKontrollsak)
 
+        // Assert
         assertThat(opprettetLogg.type).isEqualTo(LoggType.SAMMENSATT_KONTROLLSAK_ENDRET)
         assertThat(opprettetLogg.behandlingId).isEqualTo(behandling.id)
     }
 
     @Test
     fun `loggSammensattKontrollsakFjernet skal lagre ned logg på at sammensatt kontrollsak er fjernet`() {
+        // Arrange
         val behandling = lagBehandling(id = 1)
 
         every { loggRepository.save(any()) } returnsArgument 0
 
+        // Act
         val opprettetLogg = loggService.loggSammensattKontrollsakFjernet(behandlingId = behandling.id)
 
+        // Assert
         assertThat(opprettetLogg.type).isEqualTo(LoggType.SAMMENSATT_KONTROLLSAK_FJERNET)
         assertThat(opprettetLogg.behandlingId).isEqualTo(behandling.id)
     }

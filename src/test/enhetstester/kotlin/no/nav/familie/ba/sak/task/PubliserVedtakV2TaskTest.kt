@@ -34,8 +34,10 @@ class PubliserVedtakV2TaskTest {
 
     @Test
     fun skalOppretteTask() {
+        // Act
         val task = PubliserVedtakV2Task.opprettTask("ident", 42)
 
+        // Assert
         Assertions.assertThat(task.payload).isEqualTo("42")
         Assertions.assertThat(task.metadata["personIdent"]).isEqualTo("ident")
         Assertions.assertThat(task.type).isEqualTo("publiserVedtakV2Task")
@@ -43,13 +45,17 @@ class PubliserVedtakV2TaskTest {
 
     @Test
     fun `skal kjøre task`() {
+        // Arrange
         every { kafkaProducerMock.sendMessageForTopicVedtakV2(ofType(VedtakDVHV2::class)) }.returns(100)
         every { taskRepositoryMock.save(any()) } returns Task(type = "test", payload = "")
 
         val task = PubliserVedtakV2Task.opprettTask("ident", 42)
+
+        // Act
         publiserVedtakV2Task.doTask(task)
         taskRepositoryMock.save(task)
 
+        // Assert
         val slot = slot<Task>()
         verify(exactly = 1) { taskRepositoryMock.save(capture(slot)) }
         Assertions.assertThat(slot.captured.metadata["offset"]).isEqualTo("100")

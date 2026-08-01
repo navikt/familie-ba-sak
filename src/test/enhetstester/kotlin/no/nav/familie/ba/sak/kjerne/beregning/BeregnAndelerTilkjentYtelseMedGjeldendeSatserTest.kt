@@ -58,6 +58,7 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
 
     @Test
     fun `minimal oppfylt vilkårsvurdering ett barn skal gi utbetalinger etter satsendringer`() {
+        // Arrange
         val søker = søker født 19.nov(1995)
         val barn = barn født 14.nov(2017)
 
@@ -85,11 +86,13 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 barn får alt av 2012 i feb(2026)..okt(2035),
             )
 
+        // Act & Assert
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
     }
 
     @Test
     fun `minimal oppfylt vilkårsvurdering to barn skal gi utbetalinger etter satsendringer`() {
+        // Arrange
         val søker = søker født 19.nov(1995)
         val barn1 = barn født 14.nov(2017)
         val barn2 = barn født 1.mai(2013)
@@ -131,11 +134,13 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 barn2 får alt av 2012 i feb(2026)..apr(2031),
             )
 
+        // Act & Assert
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
     }
 
     @Test
     fun `vilkårsvurdering med søker og ett barn der søker mangler vurdering av ett vilkår, skal ikke gi utbetalinger`() {
+        // Arrange
         val søker = søker født 19.nov(1995)
         val barn = barn født 14.des(2019)
 
@@ -148,11 +153,13 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 (UNDER_18_ÅR oppfylt barn.under18år()) og
                 (GIFT_PARTNERSKAP og BOR_MED_SØKER og BOSATT_I_RIKET og LOVLIG_OPPHOLD oppfylt 26.jan(2020)..uendelig)
 
+        // Act & Assert
         assertEquals(emptyList<BeregnetAndel>(), vurdering.beregnAndelerTilkjentYtelseForBarna())
     }
 
     @Test
     fun `vilkårsvurdering med søker og ett barn der barn mangler vurdering av ett vilkår, skal ikke gi utbetalinger`() {
+        // Arrange
         val søker = søker født 19.nov(1995)
         val barn = barn født 14.des(2019)
 
@@ -165,11 +172,13 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 // mangler LOVLIG_OPPHOLD
                 (GIFT_PARTNERSKAP og BOR_MED_SØKER og BOSATT_I_RIKET oppfylt 26.jan(2020)..uendelig)
 
+        // Act & Assert
         assertEquals(emptyList<BeregnetAndel>(), vurdering.beregnAndelerTilkjentYtelseForBarna())
     }
 
     @Test
     fun `vilkårsvurdering der søkers vilkårsresultater ikke overlapper for noen vilkår, skal ikke gi utbetalinger`() {
+        // Arrange
         val søker = søker født 19.nov(1995)
         val barn = barn født 14.des(2019)
 
@@ -182,11 +191,13 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 (UNDER_18_ÅR oppfylt barn.under18år()) og
                 (GIFT_PARTNERSKAP og BOR_MED_SØKER og BOSATT_I_RIKET og LOVLIG_OPPHOLD oppfylt 26.jan(2020)..uendelig)
 
+        // Act & Assert
         assertEquals(emptyList<BeregnetAndel>(), vurdering.beregnAndelerTilkjentYtelseForBarna())
     }
 
     @Test
     fun `vilkårsvurdering der barnet vilkårsresultater ikke overlapper for noen vilkår, skal ikke gi utbetalinger`() {
+        // Arrange
         val søker = søker født 19.nov(1995)
         val barn = barn født 14.des(2019)
 
@@ -201,11 +212,13 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 (BOSATT_I_RIKET oppfylt 1.aug(2027)..31.des(2031)) og
                 (LOVLIG_OPPHOLD oppfylt 1.jan(2032)..uendelig)
 
+        // Act & Assert
         assertEquals(emptyList<BeregnetAndel>(), vurdering.beregnAndelerTilkjentYtelseForBarna())
     }
 
     @Test
     fun `minimal vilkårsvurdering ett barn og delt bosted`() {
+        // Arrange
         val søker = søker født 19.nov(1995)
         val barn = barn født 14.des(2019)
 
@@ -232,11 +245,13 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 barn får alt av 2012 i feb(2026)..nov(2037),
             )
 
+        // Act & Assert
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
     }
 
     @Test
     fun `Sjekk overgang fra oppfylt nasjonalt til oppfylt EØS dagen andre dag i måneden`() {
+        // Arrange
         val søker = søker født 19.nov(1995)
         val barn = barn født 14.des(2019)
 
@@ -264,11 +279,13 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 barn får alt av 1654 i sep(2021)..nov(2021),
             )
 
+        // Act & Assert
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
     }
 
     @Test
     fun `vilkårsvurdering ett barn som dør før fylte 18`() {
+        // Arrange
         val søker = søker født 19.nov(1995)
         val barn = barn født 14.des(2019) død 9.des(2024)
 
@@ -294,11 +311,13 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 barn får alt av 1766 i jul(2023)..des(2024),
             )
 
+        // Act & Assert
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
     }
 
     @Test
     fun `vilkårsvurdering ett barn som dør samme måned som fylte 18`() {
+        // Arrange
         val søker = søker født 19.nov(1995)
         val barn = barn født 14.des(2019) død 9.des(2037)
 
@@ -326,11 +345,13 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 barn får alt av 2012 i feb(2026)..nov(2037),
             )
 
+        // Act & Assert
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
     }
 
     @Test
     fun `skal opprette riktige satser for barn og søker ved utvidet barnetrygd`() {
+        // Arrange
         val søker = PersonType.SØKER født 19.nov(1995)
         val barn = PersonType.BARN født 14.des(2018)
 
@@ -365,6 +386,7 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 søker får 2572 i feb(2026)..nov(2036),
             )
 
+        // Act & Assert
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelse())
     }
 }

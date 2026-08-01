@@ -29,6 +29,7 @@ class BosattIRiketVilkårTest {
 
     @Test
     fun `Skal sjekke at person bor i riket dersom vedkommende har vært utvandret langt tilbake i tid`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER, fødselsdato = LocalDate.of(1950, 1, 1))
 
         søker.apply {
@@ -98,17 +99,20 @@ class BosattIRiketVilkårTest {
                 )
         }
 
+        // Act
         val evaluering =
             VurderPersonErBosattIRiket(
                 adresser = søker.bostedsadresser,
                 vurderFra = LocalDate.now().minusDays(1),
             ).vurder()
 
+        // Assert
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
     }
 
     @Test
     fun `Skal sjekke at person ikke bor i riket`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
 
         søker.apply {
@@ -130,17 +134,20 @@ class BosattIRiketVilkårTest {
                 )
         }
 
+        // Act
         val evaluering =
             VurderPersonErBosattIRiket(
                 adresser = søker.bostedsadresser,
                 vurderFra = LocalDate.now().minusDays(1),
             ).vurder()
 
+        // Assert
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
     }
 
     @Test
     fun `Skal sjekke at person ikke bor i riket dersom vedkommende har vært utvandret`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
 
         søker.apply {
@@ -162,17 +169,20 @@ class BosattIRiketVilkårTest {
                 )
         }
 
+        // Act
         val evaluering =
             VurderPersonErBosattIRiket(
                 adresser = søker.bostedsadresser,
                 vurderFra = LocalDate.now().minusMonths(4),
             ).vurder()
 
+        // Assert
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
     }
 
     @Test
     fun `Skal sjekke at person ikke bor i riket dersom vedkommende har vært utvandret først i perioden`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
 
         søker.apply {
@@ -187,17 +197,20 @@ class BosattIRiketVilkårTest {
                 )
         }
 
+        // Act
         val evaluering =
             VurderPersonErBosattIRiket(
                 adresser = søker.bostedsadresser,
                 vurderFra = LocalDate.now().minusMonths(4),
             ).vurder()
 
+        // Assert
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
     }
 
     @Test
     fun `Skal sjekke at person ikke bor i riket dersom vedkommende har vært utvandret sist i perioden`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
 
         søker.apply {
@@ -213,17 +226,20 @@ class BosattIRiketVilkårTest {
                 )
         }
 
+        // Act
         val evaluering =
             VurderPersonErBosattIRiket(
                 adresser = søker.bostedsadresser,
                 vurderFra = LocalDate.now().minusMonths(4),
             ).vurder()
 
+        // Assert
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
     }
 
     @Test
     fun `Skal sjekke at person bor i riket selv om hen har ekstra adresse uten fom`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER, fødselsdato = LocalDate.now().minusMonths(7))
 
         søker.apply {
@@ -244,17 +260,20 @@ class BosattIRiketVilkårTest {
                 )
         }
 
+        // Act
         val evaluering =
             VurderPersonErBosattIRiket(
                 adresser = søker.bostedsadresser,
                 vurderFra = LocalDate.now().minusMonths(4),
             ).vurder()
 
+        // Assert
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
     }
 
     @Test
     fun `Skal sjekke at person bor i riket selv om hen kun har en adresse uten fom `() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
 
         søker.apply {
@@ -269,18 +288,21 @@ class BosattIRiketVilkårTest {
                 )
         }
 
+        // Act
         val evaluering =
             VurderPersonErBosattIRiket(
                 adresser = søker.bostedsadresser,
                 vurderFra = LocalDate.now().minusMonths(4),
             ).vurder()
 
+        // Assert
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
         assertEquals(VilkårOppfyltÅrsak.BOR_I_RIKET_KUN_ADRESSER_UTEN_FOM, evaluering.evalueringÅrsaker.single())
     }
 
     @Test
     fun `Skal sjekke at person ikke bor i riket om hen har flere adresser uten fom `() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
 
         søker.apply {
@@ -307,12 +329,14 @@ class BosattIRiketVilkårTest {
                 )
         }
 
+        // Act
         val evaluering =
             VurderPersonErBosattIRiket(
                 adresser = søker.bostedsadresser,
                 vurderFra = LocalDate.now().minusMonths(4),
             ).vurder()
 
+        // Assert
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM,

@@ -68,6 +68,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Endrede utbetalingsandeler fra forrige behandling kopieres riktig og oppdaterer andel med riktig beløp`() {
+        // Arrange
         val scenario =
             ScenarioDto(
                 søker =
@@ -127,6 +128,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                 forrigeBehandlingSomErVedtatt = iverksattFørstegangsbehandling,
             )
 
+        // Act
         gjennomførVilkårsvurdering(
             vilkårsvurdering = vilkårsvurderingRevurdering,
             behandling = behandlingRevurdering,
@@ -141,6 +143,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             )
         val andelerPåvirketAvEndringer = andelerTilkjentYtelse.filter { it.prosent == BigDecimal.ZERO }
 
+        // Assert
         assertEquals(1, kopierteEndredeUtbetalingAndeler.size)
 
         assertThat(andelerPåvirketAvEndringer).allSatisfy { andel ->

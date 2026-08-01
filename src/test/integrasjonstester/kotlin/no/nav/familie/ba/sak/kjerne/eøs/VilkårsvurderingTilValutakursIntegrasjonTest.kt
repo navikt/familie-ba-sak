@@ -18,6 +18,7 @@ class VilkårsvurderingTilValutakursIntegrasjonTest : AbstractSpringIntegrationT
 
     @Test
     fun `vilkårsvurdering med EØS-perioder + kompetanser med sekundærland fører til skjemaer med valutakurser`() {
+        // Arrange
         val søkerStartdato = 1.jan(2020)
         val barnStartdato = 2.jan(2020)
 
@@ -43,20 +44,24 @@ class VilkårsvurderingTilValutakursIntegrasjonTest : AbstractSpringIntegrationT
                 barnStartdato to "PPPSSSSSSPPSSS--",
             )
 
+        // Act
         val utvidetBehandlingFør =
             vilkårsvurderingTestController
                 .opprettBehandlingMedVilkårsvurdering(vilkårsvurderingRequest)
                 .body
                 ?.data!!
 
+        // Assert
         assertTrue(utvidetBehandlingFør.valutakurser.isEmpty())
 
+        // Act
         val utvidetBehandlingEtter =
             kompetanseTestController
                 .endreKompetanser(utvidetBehandlingFør.behandlingId, kompetanseRequest)
                 .body
                 ?.data!!
 
+        // Assert
         assertTrue(utvidetBehandlingEtter.valutakurser.isNotEmpty())
     }
 }

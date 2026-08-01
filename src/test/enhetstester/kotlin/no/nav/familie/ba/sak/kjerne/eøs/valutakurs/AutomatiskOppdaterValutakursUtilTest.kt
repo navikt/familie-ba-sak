@@ -17,38 +17,48 @@ class AutomatiskOppdaterValutakursUtilTest {
 
     @Test
     fun `finnFørsteEndringIValutakurs skal returnere TIDENES_ENDE hvis begge er tomme`() {
+        // Arrange
         val valutakurserDenneBehandling = emptyList<Valutakurs>()
         val valutakurserForrigeBehandling = emptyList<Valutakurs>()
 
+        // Act
         val actual = finnFørsteEndringIValutakurs(valutakurserDenneBehandling, valutakurserForrigeBehandling)
 
+        // Assert
         assertThat(actual).isEqualTo(TIDENES_ENDE.toYearMonth())
     }
 
     @Test
     fun `finnFørsteEndringIValutakurs skal returnere første endring`() {
+        // Arrange
         val fom = YearMonth.now()
         val valutakurserDenneBehandling = listOf(valutakurs(fom = fom, tom = fom.plusMonths(1)))
         val valutakurserForrigeBehandling = emptyList<Valutakurs>()
 
+        // Act
         val actual = finnFørsteEndringIValutakurs(valutakurserDenneBehandling, valutakurserForrigeBehandling)
 
+        // Assert
         assertThat(actual).isEqualTo(fom)
     }
 
     @Test
     fun `finnFørsteEndringIValutakurs skal returnere TIDENES_ENDE hvis ingen endringer`() {
+        // Arrange
         val fom = YearMonth.now()
         val valutakurserDenneBehandling = listOf(valutakurs(fom = fom, tom = fom.plusMonths(1)))
         val valutakurserForrigeBehandling = listOf(valutakurs(fom = fom, tom = fom.plusMonths(1)))
 
+        // Act
         val actual = finnFørsteEndringIValutakurs(valutakurserDenneBehandling, valutakurserForrigeBehandling)
 
+        // Assert
         assertThat(actual).isEqualTo(TIDENES_ENDE.toYearMonth())
     }
 
     @Test
     fun `finnFørsteEndringIValutakurs skal returnere første endring i tidslinje med endring`() {
+        // Arrange
         val fom = YearMonth.now()
         val valutakurserDenneBehandling = listOf(valutakurs(fom = fom, tom = fom.plusMonths(2), kurs = BigDecimal.ONE))
         val valutakurserForrigeBehandling =
@@ -58,8 +68,11 @@ class AutomatiskOppdaterValutakursUtilTest {
             )
 
         val expected = fom.plusMonths(2)
+
+        // Act
         val actual = finnFørsteEndringIValutakurs(valutakurserDenneBehandling, valutakurserForrigeBehandling)
 
+        // Assert
         assertThat(actual).isEqualTo(expected)
     }
 

@@ -66,6 +66,7 @@ internal class StartSatsendringTest {
 
     @Test
     fun `start satsendring og opprett satsendringtask på sak hvis toggler er på `() {
+        // Arrange
         every { featureToggleService.isEnabled(FeatureToggle.SATSENDRING_ENABLET, false) } returns true
 
         val behandling = lagBehandling()
@@ -79,13 +80,16 @@ internal class StartSatsendringTest {
 
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns behandling
 
+        // Act
         startSatsendring.startSatsendring(5)
 
+        // Assert
         verify(exactly = 1) { taskRepository.save(any()) }
     }
 
     @Test
     fun `finnLøpendeFagsaker har totalt antall sider 3, så den skal kalle finnLøpendeFagsaker 3 ganger for å få 5 satsendringer`() {
+        // Arrange
         every { featureToggleService.isEnabled(any(), false) } returns true
         every { featureToggleService.isEnabled(any<FeatureToggle>()) } returns true
 
@@ -101,14 +105,17 @@ internal class StartSatsendringTest {
 
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns behandling
 
+        // Act
         startSatsendring.startSatsendring(5)
 
+        // Assert
         verify(exactly = 5) { taskRepository.save(any()) }
         verify(exactly = 3) { fagsakRepository.finnLøpendeFagsakerForSatsendring(any(), any()) }
     }
 
     @Test
     fun `kanStarteSatsendringPåFagsak gir false når vi ikke har noen tidligere behandling`() {
+        // Arrange
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns null
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns
             Satskjøring(
@@ -116,11 +123,13 @@ internal class StartSatsendringTest {
                 satsTidspunkt = hentAktivSatsendringstidspunkt(),
             )
 
+        // Act & Assert
         assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
     }
 
     @Test
     fun `kanStarteSatsendringPåFagsak gir false når vi har en satskjøring for fagsaken i satskjøringsrepoet`() {
+        // Arrange
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns
             Satskjøring(
@@ -128,47 +137,58 @@ internal class StartSatsendringTest {
                 satsTidspunkt = hentAktivSatsendringstidspunkt(),
             )
 
+        // Act & Assert
         assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
     }
 
     @Test
     fun `kanStarteSatsendringPåFagsak gir false når harSisteSats er true`() {
+        // Arrange
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns null
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
 
+        // Act & Assert
         assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
     }
 
     @Test
     fun `kanStarteSatsendringPåFagsak gir true når harSisteSats er false`() {
+        // Arrange
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns null
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns false
 
+        // Act & Assert
         assertTrue(startSatsendring.kanStarteSatsendringPåFagsak(1L))
     }
 
     @Test
     fun `kanGjennomføreSatsendringManuelt gir false når vi ikke har noen tidligere behandling`() {
+        // Arrange
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns null
 
+        // Act & Assert
         assertFalse(startSatsendring.kanGjennomføreSatsendringManuelt(1L))
     }
 
     @Test
     fun `kanGjennomføreSatsendringManuelt gir false når harSisteSats er true`() {
+        // Arrange
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns null
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
 
+        // Act & Assert
         assertFalse(startSatsendring.kanGjennomføreSatsendringManuelt(1L))
     }
 
     @Test
     fun `opprettSatsendringSynkrontVedGammelSats skal kaste dersom man ikke kan starte satsendring`() {
+        // Arrange
         every { startSatsendring.kanStarteSatsendringPåFagsak(any()) } returns false
 
+        // Act & Assert
         assertThrows<Exception> {
             startSatsendring.gjennomførSatsendringManuelt(0L)
         }
@@ -176,8 +196,10 @@ internal class StartSatsendringTest {
 
     @Test
     fun `kanGjennomføreSatsendringManuelt skal kaste feil for alle andre resultater enn OK`() {
+        // Arrange
         every { startSatsendring.kanGjennomføreSatsendringManuelt(any()) } returns true
 
+        // Act & Assert
         SatsendringSvar.entries.forEach {
             every { autovedtakSatsendringService.kjørBehandling(any()) } returns it
 

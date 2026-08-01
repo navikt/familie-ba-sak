@@ -77,6 +77,7 @@ class VilkårTilTilkjentYtelseTest {
         barn1Andel3Type: String?,
         erDeltBosted: Boolean?,
     ) {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2021, 9, 1))
 
@@ -102,12 +103,14 @@ class VilkårTilTilkjentYtelseTest {
         every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val faktiskTilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
             )
 
+        // Assert
         Assertions.assertEquals(
             forventetTilkjentYtelse.andelerTilkjentYtelse,
             faktiskTilkjentYtelse.andelerTilkjentYtelse,
@@ -134,6 +137,7 @@ class VilkårTilTilkjentYtelseTest {
         barn1Andel1Periode: String?,
         barn1Andel1Type: String?,
     ) {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2021, 9, 1))
 
@@ -182,12 +186,14 @@ class VilkårTilTilkjentYtelseTest {
         }
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val faktiskTilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
             )
 
+        // Assert
         Assertions.assertEquals(
             forventetTilkjentYtelse.andelerTilkjentYtelse,
             faktiskTilkjentYtelse.andelerTilkjentYtelse,
@@ -225,6 +231,7 @@ class VilkårTilTilkjentYtelseTest {
         barn2Andel2Periode: String?,
         barn2Andel2Type: String?,
     ) {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2020, 2, 1))
         val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2022, 4, 1))
@@ -253,12 +260,14 @@ class VilkårTilTilkjentYtelseTest {
         every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val faktiskTilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
             )
 
+        // Assert
         Assertions.assertEquals(
             forventetTilkjentYtelse.andelerTilkjentYtelse,
             faktiskTilkjentYtelse.andelerTilkjentYtelse,

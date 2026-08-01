@@ -46,6 +46,7 @@ class RolletilgangTest(
 ) : WebSpringAuthTestRunner() {
     @Test
     fun `Skal kaste feil når innlogget veileder prøver å opprette fagsak gjennom rest-endepunkt`() {
+        // Arrange
         val fnr = randomFnr()
 
         val header = HttpHeaders()
@@ -69,6 +70,7 @@ class RolletilgangTest(
                 header,
             )
 
+        // Act & Assert
         val error =
             assertThrows<HttpClientErrorException> {
                 restClient
@@ -80,6 +82,7 @@ class RolletilgangTest(
                     .body<Ressurs<MinimalFagsakDto>>()
             }
 
+        // Assert
         val ressurs: Ressurs<MinimalFagsakDto> = jsonMapper.readValue(error.responseBodyAsString)
 
         assertEquals(HttpStatus.FORBIDDEN, error.statusCode)
@@ -92,6 +95,7 @@ class RolletilgangTest(
 
     @Test
     fun `Skal få 201 når innlogget saksbehandler prøver å opprette fagsak gjennom rest-endepunkt, tester også db-tilgangskontroll`() {
+        // Arrange
         val fnr = randomFnr()
 
         val header = HttpHeaders()
@@ -106,6 +110,7 @@ class RolletilgangTest(
             ),
         )
 
+        // Act
         val response =
             restClient
                 .post()
@@ -120,12 +125,14 @@ class RolletilgangTest(
                 ).retrieve()
                 .toEntity<Ressurs<MinimalFagsakDto>>()
 
+        // Assert
         assertEquals(HttpStatus.CREATED, response.statusCode)
         assertEquals(Ressurs.Status.SUKSESS, response.body!!.status)
     }
 
     @Test
     fun `Skal kaste feil når innlogget veileder prøver å opprette behandling gjennom test-rest-endepunkt som validerer på db-nivå`() {
+        // Arrange
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
@@ -147,6 +154,7 @@ class RolletilgangTest(
                 header,
             )
 
+        // Act & Assert
         val error =
             assertThrows<HttpClientErrorException> {
                 restClient
@@ -158,6 +166,7 @@ class RolletilgangTest(
                     .body<Ressurs<MinimalFagsakDto>>()
             }
 
+        // Assert
         val ressurs: Ressurs<Behandling> = jsonMapper.readValue(error.responseBodyAsString)
 
         assertEquals(HttpStatus.FORBIDDEN, error.statusCode)
@@ -170,6 +179,7 @@ class RolletilgangTest(
 
     @Test
     fun `Skal kaste feil når innlogget saksbehandler prøver å kalle på et forvalterendepunkt`() {
+        // Arrange
         val header = HttpHeaders()
         header.contentType = MediaType.APPLICATION_JSON
         header.setBearerAuth(
@@ -189,6 +199,7 @@ class RolletilgangTest(
                 header,
             )
 
+        // Act & Assert
         val error =
             assertThrows<HttpClientErrorException> {
                 restClient
@@ -200,6 +211,7 @@ class RolletilgangTest(
                     .body<Ressurs<MinimalFagsakDto>>()
             }
 
+        // Assert
         val ressurs: Ressurs<Fagsak> = jsonMapper.readValue(error.responseBodyAsString)
 
         assertEquals(HttpStatus.FORBIDDEN, error.statusCode)
@@ -212,6 +224,7 @@ class RolletilgangTest(
 
     @Test
     fun `Skal få 200 OK når innlogget forvalter prøver å kalle på et forvalterendepunkt`() {
+        // Arrange
         val header = HttpHeaders()
         header.contentType = MediaType.APPLICATION_JSON
         header.setBearerAuth(
@@ -232,6 +245,7 @@ class RolletilgangTest(
                 header,
             )
 
+        // Act
         val response =
             restClient
                 .post()
@@ -241,6 +255,7 @@ class RolletilgangTest(
                 .retrieve()
                 .toEntity(String::class.java)
 
+        // Assert
         assertEquals(HttpStatus.OK, response.statusCode)
     }
 }

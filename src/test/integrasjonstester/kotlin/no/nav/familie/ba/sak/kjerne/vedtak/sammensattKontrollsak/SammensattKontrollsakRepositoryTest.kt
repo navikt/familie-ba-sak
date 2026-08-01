@@ -24,12 +24,14 @@ class SammensattKontrollsakRepositoryTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `save skal kaste feil dersom vi forsøker å lagre ny SammensattKontrollsak og det allerede finnes en SammensattKontrollsak tilknyttet behandling`() {
+        // Arrange
         val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
         sammensattKontrollsakRepository.saveAndFlush(SammensattKontrollsak(behandlingId = behandling.id, fritekst = "Fritekst"))
 
+        // Act & Assert
         assertThrows<DataIntegrityViolationException> { sammensattKontrollsakRepository.saveAndFlush(SammensattKontrollsak(behandlingId = behandling.id, fritekst = "Fritekst")) }
     }
 

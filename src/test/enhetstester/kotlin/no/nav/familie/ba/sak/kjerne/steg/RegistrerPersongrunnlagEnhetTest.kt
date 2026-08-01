@@ -44,6 +44,7 @@ class RegistrerPersongrunnlagEnhetTest {
 
     @Test
     fun `Kopierer kompetanser, valutakurser og utenlandsk periodebeløp til ny behandling`() {
+        // Arrange
         val mor = lagPerson(type = PersonType.SØKER)
         val barn1 = lagPerson(type = PersonType.BARN)
         val barn2 = lagPerson(type = PersonType.BARN)
@@ -88,6 +89,7 @@ class RegistrerPersongrunnlagEnhetTest {
             )
         } just runs
 
+        // Act
         registrerPersongrunnlagSteg.utførStegOgAngiNeste(
             behandling = behandling2,
             data =
@@ -97,6 +99,7 @@ class RegistrerPersongrunnlagEnhetTest {
                 ),
         )
 
+        // Assert
         verify(exactly = 1) {
             kompetanseService.kopierOgErstattKompetanser(
                 BehandlingId(behandling1.id),

@@ -15,6 +15,7 @@ class MånedligValutajusteringTaskTest {
 
     @Test
     fun `doTask utfører valutajustering når nåværende måned samsvarer med måned i paýload`() {
+        // Arrange
         val currentMonth = YearMonth.now()
         val taskDto =
             MånedligValutajusteringTask.MånedligValutajusteringTaskDto(
@@ -24,10 +25,12 @@ class MånedligValutajusteringTaskTest {
         val taskPayload = jsonMapper.writeValueAsString(taskDto)
         val taskInstance = Task(type = MånedligValutajusteringTask.TASK_STEP_TYPE, payload = taskPayload)
 
+        // Act
         assertDoesNotThrow {
             task.doTask(taskInstance)
         }
 
+        // Assert
         verify {
             autovedtakMånedligValutajusteringService.utførMånedligValutajustering(
                 fagsakId = 123L,
@@ -38,6 +41,7 @@ class MånedligValutajusteringTaskTest {
 
     @Test
     fun `doTask logger info og utfører ikke valutajustering når nåværende måned ikke samsvarer med måned i paýload`() {
+        // Arrange
         val taskDto =
             MånedligValutajusteringTask.MånedligValutajusteringTaskDto(
                 fagsakId = 123L,
@@ -46,10 +50,12 @@ class MånedligValutajusteringTaskTest {
         val taskPayload = jsonMapper.writeValueAsString(taskDto)
         val taskInstance = Task(type = MånedligValutajusteringTask.TASK_STEP_TYPE, payload = taskPayload)
 
+        // Act
         assertDoesNotThrow {
             task.doTask(taskInstance)
         }
 
+        // Assert
         verify(exactly = 0) {
             autovedtakMånedligValutajusteringService.utførMånedligValutajustering(any(), any())
         }

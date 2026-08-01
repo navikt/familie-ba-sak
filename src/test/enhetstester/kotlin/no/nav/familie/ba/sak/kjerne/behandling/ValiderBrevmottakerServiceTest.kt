@@ -44,13 +44,16 @@ class ValiderBrevmottakerServiceTest {
 
     @Test
     fun `Skal ikke kaste funksjonell feil når en behandling ikke inneholder noen manuelle brevmottakere`() {
+        // Arrange
         every { brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId) } returns emptyList()
 
+        // Act
         validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
             behandlingId,
             ekstraBarnLagtTilIBrev = emptyList(),
         )
 
+        // Assert
         verify(exactly = 1) { brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId) }
         verify(exactly = 0) { persongrunnlagService.hentAktiv(any()) }
         verify(exactly = 0) {
@@ -62,6 +65,7 @@ class ValiderBrevmottakerServiceTest {
 
     @Test
     fun `Skal kaste en FunksjonellFeil exception når en behandling inneholder minst en strengt fortrolig person og minst en manuell brevmottaker`() {
+        // Arrange
         every { brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId) } returns listOf(brevmottaker)
         every { persongrunnlagService.hentAktiv(behandlingId) } returns
             lagTestPersonopplysningGrunnlag(
@@ -73,6 +77,7 @@ class ValiderBrevmottakerServiceTest {
                 søker.aktør.aktivFødselsnummer(),
             )
 
+        // Act & Assert
         assertThatThrownBy {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
                 behandlingId,
@@ -83,6 +88,7 @@ class ValiderBrevmottakerServiceTest {
 
     @Test
     fun `Skal ikke kaste funksjonell feil når behandling ikke inneholder noen strengt fortrolige personer og inneholder minst en manuell brevmottaker`() {
+        // Arrange
         every { brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId) } returns listOf(brevmottaker)
         every { persongrunnlagService.hentAktiv(behandlingId) } returns
             lagTestPersonopplysningGrunnlag(
@@ -91,10 +97,13 @@ class ValiderBrevmottakerServiceTest {
             )
         every { familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any()) } returns emptyList()
 
+        // Act
         validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
             behandlingId,
             ekstraBarnLagtTilIBrev = emptyList(),
         )
+
+        // Assert
         verify(exactly = 1) {
             familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(
                 any(),
@@ -104,6 +113,7 @@ class ValiderBrevmottakerServiceTest {
 
     @Test
     fun `Skal ikke kaste en exception når en behandling inneholder minst en strengt fortrolig person og ingen manuelle brevmottakere`() {
+        // Arrange
         every { brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId) } returns emptyList()
         every { persongrunnlagService.hentAktiv(behandlingId) } returns
             lagTestPersonopplysningGrunnlag(
@@ -115,6 +125,7 @@ class ValiderBrevmottakerServiceTest {
                 søker.aktør.aktivFødselsnummer(),
             )
 
+        // Act
         validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
             behandlingId,
             ekstraBarnLagtTilIBrev = emptyList(),
@@ -123,6 +134,7 @@ class ValiderBrevmottakerServiceTest {
 
     @Test
     fun `Skal kaste en FunksjonellFeil exception når en behandling inneholder minst en strengt fortrolig person og det blir forsøkt lagt til en ny manuell brevmottaker`() {
+        // Arrange
         every { brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId) } returns emptyList()
         every { persongrunnlagService.hentAktiv(behandlingId) } returns
             lagTestPersonopplysningGrunnlag(
@@ -134,6 +146,7 @@ class ValiderBrevmottakerServiceTest {
                 søker.aktør.aktivFødselsnummer(),
             )
 
+        // Act & Assert
         assertThatThrownBy {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
                 behandlingId,

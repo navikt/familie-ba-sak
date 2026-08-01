@@ -41,9 +41,11 @@ class GrensesnittavstemMotOppdragTest {
         triggerDato: LocalDate,
         nesteTriggerDato: LocalDate,
     ) {
+        // Arrange
         val slot = slot<Task>()
         every { taskRepositoryMock.save(capture(slot)) } answers { slot.captured }
 
+        // Act
         grensesnittavstemMotOppdrag.onCompletion(
             Task(
                 payload =
@@ -59,6 +61,7 @@ class GrensesnittavstemMotOppdragTest {
             ).medTriggerTid(triggerDato.atTime(8, 0, 0)),
         )
 
+        // Assert
         val lagretTask = slot.captured
         val testDto = jsonMapper.readValue(lagretTask.payload, GrensesnittavstemmingTaskDTO::class.java)
 
@@ -69,46 +72,59 @@ class GrensesnittavstemMotOppdragTest {
 
     @Test
     fun skalBeregneNesteAvstemmingForSammenhengendeHelligdag() {
+        // Arrange
         val juledagen = LocalDate.of(2019, 12, 24)
 
+        // Act
         val testDto = GrensesnittavstemMotOppdrag.nesteAvstemmingDTO(juledagen)
 
+        // Assert
         assertEquals(LocalDate.of(2019, 12, 27).atStartOfDay(), testDto.tomDato)
         assertEquals(LocalDate.of(2019, 12, 24).atStartOfDay(), testDto.fomDato)
     }
 
     @Test
     fun skalBeregneNesteAvstemmingForEnkeltHelligdag() {
+        // Arrange
         val nyttårsdag = LocalDate.of(2019, 12, 31)
 
+        // Act
         val testDto = GrensesnittavstemMotOppdrag.nesteAvstemmingDTO(nyttårsdag)
 
+        // Assert
         assertEquals(LocalDate.of(2020, 1, 2).atStartOfDay(), testDto.tomDato)
         assertEquals(LocalDate.of(2019, 12, 31).atStartOfDay(), testDto.fomDato)
     }
 
     @Test
     fun skalBeregneNesteAvstemmingForLanghelg() {
+        // Arrange
         val valborg = LocalDate.of(2020, 4, 30)
 
+        // Act
         val testDto = GrensesnittavstemMotOppdrag.nesteAvstemmingDTO(valborg)
 
+        // Assert
         assertEquals(LocalDate.of(2020, 5, 4).atStartOfDay(), testDto.tomDato)
         assertEquals(LocalDate.of(2020, 4, 30).atStartOfDay(), testDto.fomDato)
     }
 
     @Test
     fun skalBeregneNesteAvstemmingForUkedag() {
+        // Arrange
         val enTirsdag = LocalDate.of(2020, 1, 14)
 
+        // Act
         val testDto = GrensesnittavstemMotOppdrag.nesteAvstemmingDTO(enTirsdag)
 
+        // Assert
         assertEquals(LocalDate.of(2020, 1, 15).atStartOfDay(), testDto.tomDato)
         assertEquals(LocalDate.of(2020, 1, 14).atStartOfDay(), testDto.fomDato)
     }
 
     @Test
     fun skalLageNyAvstemmingstaskEtterJobb() {
+        // Arrange
         val iDag = LocalDate.of(2020, 1, 15).atStartOfDay()
         val testTask =
             Task(
@@ -127,8 +143,10 @@ class GrensesnittavstemMotOppdragTest {
         val slot = slot<Task>()
         every { taskRepositoryMock.save(any()) } returns testTask
 
+        // Act
         grensesnittavstemMotOppdrag.onCompletion(testTask)
 
+        // Assert
         verify(exactly = 1) { taskRepositoryMock.save(capture(slot)) }
         assertEquals(GrensesnittavstemMotOppdrag.TASK_STEP_TYPE, slot.captured.type)
         assertEquals(iDag.plusDays(1).toLocalDate().atTime(8, 0), slot.captured.triggerTid)

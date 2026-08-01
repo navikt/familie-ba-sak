@@ -43,6 +43,7 @@ internal class VilkårsvurderingTidslinjeServiceTest {
 
     @Test
     fun `skal forskyve fom med 1 mnd for periode med erAnnenForelderOmfattetAvNorskLovgivning`() {
+        // Arrange
         val søker = lagPerson(type = PersonType.SØKER)
         val barn = lagPerson(type = PersonType.BARN)
         val fagsak = Fagsak(aktør = søker.aktør)
@@ -76,16 +77,19 @@ internal class VilkårsvurderingTidslinjeServiceTest {
             )
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandling.id) } returns vilkårsvurdering
 
+        // Act
         val faktiskTidslinje =
             vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(
                 behandlingId = BehandlingId(behandling.id),
             )
+        // Assert
         val forventetTidslinje = "++".tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(feb(2023))
         assertThat(faktiskTidslinje).isEqualTo(forventetTidslinje)
     }
 
     @Test
     fun `skal ikke gi noen oppfylte perioder hvis vilkår kun oppfylt innenfor én måned`() {
+        // Arrange
         val søker = lagPerson(type = PersonType.SØKER)
         val barn = lagPerson(type = PersonType.BARN)
         val fagsak = Fagsak(aktør = søker.aktør)
@@ -119,16 +123,19 @@ internal class VilkårsvurderingTidslinjeServiceTest {
             )
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandling.id) } returns vilkårsvurdering
 
+        // Act
         val faktiskTidslinje =
             vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(
                 behandlingId = BehandlingId(behandling.id),
             )
 
+        // Assert
         assertThat(faktiskTidslinje.erTom()).isTrue
     }
 
     @Test
     fun `skal forskyve fom med 1 mnd for flere perioder med erAnnenForelderOmfattetAvNorskLovgivning`() {
+        // Arrange
         val søker = lagPerson(type = PersonType.SØKER)
         val barn = lagPerson(type = PersonType.BARN)
         val fagsak = Fagsak(aktør = søker.aktør)
@@ -170,10 +177,12 @@ internal class VilkårsvurderingTidslinjeServiceTest {
             )
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandling.id) } returns vilkårsvurdering
 
+        // Act
         val faktiskTidslinje =
             vilkårsvurderingTidslinjeService
                 .hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId = BehandlingId(behandling.id))
 
+        // Assert
         val forventetTidslinje = "++ +++".tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(feb(2023))
 
         assertThat(faktiskTidslinje).isEqualTo(forventetTidslinje)

@@ -26,14 +26,17 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
     @Test
     fun `leggTilSmåbarnstilleggPåBehandling skal legge til småbarnstillegg på behandling som en AndelTilkjentYtelse`() {
+        // Arrange
         val behandling = lagBehandling()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
 
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelse
 
+        // Act
         val småbarnsTillegg =
             småbarnstilleggKorrigeringService.leggTilSmåbarnstilleggPåBehandling(YearMonth.of(2020, 10), behandling)
 
+        // Assert
         verify(exactly = 1) { tilkjentYtelseRepository.findByBehandling(behandling.id) }
         verify(exactly = 1) {
             loggService.opprettSmåbarnstilleggLogg(
@@ -50,6 +53,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
     @Test
     fun `leggTilSmåbarnstilleggPåBehandling skal kaste feil hvis småbarnstillegg allerede finnes for periode`() {
+        // Arrange
         val behandling = lagBehandling()
         val tilkjentYtelseMock = mockk<TilkjentYtelse>()
 
@@ -63,6 +67,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelseMock
         every { tilkjentYtelseMock.andelerTilkjentYtelse } returns mutableSetOf(andelTilkjentYtelse)
 
+        // Act & Assert
         val feil =
             assertThrows<FunksjonellFeil> {
                 småbarnstilleggKorrigeringService.leggTilSmåbarnstilleggPåBehandling(YearMonth.of(2020, 10), behandling)
@@ -76,6 +81,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
     @Test
     fun `fjernSmåbarnstilleggPåBehandling skal splitte eksisterende overlappende småbarnstilleggsperiode`() {
+        // Arrange
         val behandling = lagBehandling()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
 
@@ -90,9 +96,11 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelse
         every { tilkjentYtelseRepository.saveAndFlush(any()) } returns tilkjentYtelse
 
+        // Act
         val oppsplittetSmåbarnstillegg =
             småbarnstilleggKorrigeringService.fjernSmåbarnstilleggPåBehandling(YearMonth.of(2020, 5), behandling)
 
+        // Assert
         verify(exactly = 1) {
             loggService.opprettSmåbarnstilleggLogg(
                 behandling,
@@ -111,6 +119,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
     @Test
     fun `fjernSmåbarnstilleggPåBehandling skal kaste feil hvis småbarnstillegg ikke finnes for periode`() {
+        // Arrange
         val behandling = lagBehandling()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
 
@@ -124,6 +133,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelse
 
+        // Act & Assert
         val feil =
             assertThrows<FunksjonellFeil> {
                 småbarnstilleggKorrigeringService.fjernSmåbarnstilleggPåBehandling(YearMonth.of(2025, 5), behandling)

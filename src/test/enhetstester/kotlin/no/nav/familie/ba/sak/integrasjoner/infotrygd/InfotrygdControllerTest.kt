@@ -48,6 +48,7 @@ class InfotrygdControllerTest {
 
     @Test
     fun `hentInfotrygdsakerForSøker skal returnere ok dersom saksbehandler har tilgang`() {
+        // Arrange
         val fnr = "12345678910"
 
         every { personidentService.hentAktør(fnr) } returns lagAktør(fnr)
@@ -58,8 +59,11 @@ class InfotrygdControllerTest {
                 any(),
             )
         } returns InfotrygdSøkResponse(listOf(Sak(status = "IP")), emptyList())
+
+        // Act
         val respons = infotrygdController.hentInfotrygdsakerForSøker(Personident(fnr))
 
+        // Assert
         Assertions.assertEquals(HttpStatus.OK, respons.statusCode)
         Assertions.assertEquals(true, respons.body?.data?.harTilgang)
         Assertions.assertEquals(
@@ -73,6 +77,7 @@ class InfotrygdControllerTest {
 
     @Test
     fun `hentInfotrygdsakerForSøker skal returnere ok, men ha gradering satt, dersom saksbehandler ikke har tilgang`() {
+        // Arrange
         val fnr = "12345678910"
 
         every { personidentService.hentAktør(fnr) } returns lagAktør(fnr)
@@ -81,8 +86,10 @@ class InfotrygdControllerTest {
         every { systemOnlyPdlRestKlient.hentAdressebeskyttelse(any()) } returns
             listOf(Adressebeskyttelse(ADRESSEBESKYTTELSEGRADERING.FORTROLIG))
 
+        // Act
         val respons = infotrygdController.hentInfotrygdsakerForSøker(Personident(fnr))
 
+        // Assert
         Assertions.assertEquals(HttpStatus.OK, respons.statusCode)
         Assertions.assertEquals(false, respons.body?.data?.harTilgang)
         Assertions.assertEquals(ADRESSEBESKYTTELSEGRADERING.FORTROLIG, respons.body?.data?.adressebeskyttelsegradering)

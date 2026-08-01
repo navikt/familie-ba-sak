@@ -108,6 +108,7 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `periode erstattes dersom en periode med overlappende tidsintervall legges til`() {
+        // Arrange
         val vilkårResultatDto =
             VilkårResultatDto(
                 2,
@@ -120,11 +121,14 @@ class VilkårsvurderingStegUtilsTest {
                 LocalDateTime.now(),
                 behandling.id,
             )
+
+        // Act
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
             vilkårResultatDto,
         )
 
+        // Assert
         assertEquals(2, personResultat.vilkårResultater.size)
         assertPeriode(
             Periode(
@@ -145,6 +149,7 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `periode splittes dersom en periode med inneklemt tidsintervall legges til`() {
+        // Arrange
         val vilkårResultatDto =
             VilkårResultatDto(
                 2,
@@ -158,11 +163,13 @@ class VilkårsvurderingStegUtilsTest {
                 behandling.id,
             )
 
+        // Act
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
             vilkårResultatDto,
         )
 
+        // Assert
         assertEquals(4, personResultat.vilkårResultater.size)
         assertPeriode(
             Periode(
@@ -196,6 +203,7 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `fom-dato flyttes korrekt`() {
+        // Arrange
         val vilkårResultatDto =
             VilkårResultatDto(
                 2,
@@ -209,11 +217,13 @@ class VilkårsvurderingStegUtilsTest {
                 behandling.id,
             )
 
+        // Act
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
             vilkårResultatDto,
         )
 
+        // Assert
         assertEquals(3, personResultat.vilkårResultater.size)
         assertPeriode(
             Periode(
@@ -240,6 +250,7 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `tom-dato flyttes korrekt`() {
+        // Arrange
         val vilkårResultatDto =
             VilkårResultatDto(
                 2,
@@ -253,11 +264,13 @@ class VilkårsvurderingStegUtilsTest {
                 behandling.id,
             )
 
+        // Act
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
             vilkårResultatDto,
         )
 
+        // Assert
         assertEquals(3, personResultat.vilkårResultater.size)
         assertPeriode(
             Periode(
@@ -284,6 +297,7 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `skal sette erAutomatiskVurdert til false og begrunnelseForManuellKontroll til null`() {
+        // Arrange
         val vilkårResultatDto =
             VilkårResultatDto(
                 id = 1,
@@ -302,16 +316,19 @@ class VilkårsvurderingStegUtilsTest {
             it.begrunnelseForManuellKontroll = INFORMASJON_FRA_SØKNAD
         }
 
+        // Act
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
             vilkårResultatDto,
         )
 
+        // Assert
         with(personResultat.vilkårResultater.first { it.id == 1L }) {
             assertThat(erAutomatiskVurdert).isFalse()
             assertThat(begrunnelseForManuellKontroll).isNull()
         }
 
+        // Assert
         assertThat(personResultat.vilkårResultater.filter { it.id != 1L }).allSatisfy {
             assertThat(it.erAutomatiskVurdert).isTrue()
             assertThat(it.begrunnelseForManuellKontroll).isEqualTo(INFORMASJON_FRA_SØKNAD)
@@ -320,8 +337,10 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `Skal fjerne og ikke fylle inn tom periode i midten`() {
+        // Act
         VilkårsvurderingUtils.muterPersonResultatDelete(personResultat, 2)
 
+        // Assert
         assertEquals(2, personResultat.vilkårResultater.size)
         assertPeriode(
             Periode(
@@ -341,11 +360,13 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `Skal fjerne første periode`() {
+        // Act
         VilkårsvurderingUtils.muterPersonResultatDelete(
             personResultat,
             1,
         )
 
+        // Assert
         assertEquals(2, personResultat.vilkårResultater.size)
         assertPeriode(
             Periode(
@@ -365,11 +386,13 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `Skal fjerne siste periode`() {
+        // Act
         VilkårsvurderingUtils.muterPersonResultatDelete(
             personResultat,
             3,
         )
 
+        // Assert
         assertEquals(2, personResultat.vilkårResultater.size)
         assertPeriode(
             Periode(
@@ -389,6 +412,7 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `Skal nullstille periode hvis det kun finnes en periode`() {
+        // Arrange
         val mockPersonResultat =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
@@ -409,25 +433,35 @@ class VilkårsvurderingStegUtilsTest {
             )
         mockPersonResultat.setSortedVilkårResultater(setOf(mockVilkårResultat))
 
+        // Act
         VilkårsvurderingUtils.muterPersonResultatDelete(
             mockPersonResultat,
             1,
         )
 
+        // Assert
         assertEquals(1, mockPersonResultat.vilkårResultater.size)
         assertEquals(Resultat.IKKE_VURDERT, mockPersonResultat.getSortedVilkårResultat(0)!!.resultat)
     }
 
     @Test
     fun `Skal legge til periode`() {
+        // Assert
         assertEquals(3, personResultat.vilkårResultater.size)
+
+        // Act
         VilkårsvurderingUtils.muterPersonResultatPost(personResultat, Vilkår.BOR_MED_SØKER)
+
+        // Assert
         assertEquals(4, personResultat.vilkårResultater.size)
     }
 
     @Test
     fun `Skal kaste feil når det legges til periode i en vilkårtype der det allerede finnes en uvurdert periode`() {
+        // Arrange
         VilkårsvurderingUtils.muterPersonResultatPost(personResultat, Vilkår.BOR_MED_SØKER)
+
+        // Act & Assert
         assertThrows(FunksjonellFeil::class.java) {
             VilkårsvurderingUtils.muterPersonResultatPost(personResultat, Vilkår.BOR_MED_SØKER)
         }
@@ -435,6 +469,7 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `Skal tilpasse vilkår for endret vilkår når begge mangler tom-dato`() {
+        // Arrange
         val vilkårResultat =
             VilkårResultat(
                 personResultat = personResultat,
@@ -457,14 +492,17 @@ class VilkårsvurderingStegUtilsTest {
                 behandlingId = behandling.id,
             )
 
+        // Act
         VilkårsvurderingUtils.tilpassVilkårForEndretVilkår(personResultat, vilkårResultat, vilkårResultatDto)
 
+        // Assert
         assertEquals(LocalDate.of(2020, 1, 1), vilkårResultat.periodeFom)
         assertEquals(LocalDate.of(2020, 5, 31), vilkårResultat.periodeTom)
     }
 
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke bort ikke oppfylte perioder når det gjelder samme behandling`() {
+        // Arrange
         val søkerAktørId = randomAktør()
         val behandling = lagBehandling()
 
@@ -477,6 +515,7 @@ class VilkårsvurderingStegUtilsTest {
                 listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT),
             )
 
+        // Act
         val (initiell, _) =
             VilkårsvurderingUtils.flyttResultaterTilInitielt(
                 initiellVilkårsvurdering = initiellVilkårvurdering,
@@ -486,6 +525,7 @@ class VilkårsvurderingStegUtilsTest {
         val opprettetBosattIRiket =
             initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == BOSATT_I_RIKET }
 
+        // Assert
         assertEquals(2, opprettetBosattIRiket.size)
         assertEquals(
             listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT).sorted(),
@@ -495,6 +535,7 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke oppfylt om oppfylt finnes ved kopiering fra forrige behandling`() {
+        // Arrange
         val søkerAktørId = randomAktør()
         val behandling = lagBehandling()
         val behandling2 = lagBehandling()
@@ -508,6 +549,7 @@ class VilkårsvurderingStegUtilsTest {
                 listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT),
             )
 
+        // Act
         val (initiell, _) =
             VilkårsvurderingUtils.flyttResultaterTilInitielt(
                 initiellVilkårsvurdering = initiellVilkårvurdering,
@@ -517,12 +559,14 @@ class VilkårsvurderingStegUtilsTest {
         val opprettetBosattIRiket =
             initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == BOSATT_I_RIKET }
 
+        // Assert
         assertEquals(1, opprettetBosattIRiket.size)
         assertEquals(Resultat.OPPFYLT, opprettetBosattIRiket.first().resultat)
     }
 
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke ikke oppfylt om oppfylt ikke finnes`() {
+        // Arrange
         val søkerAktørId = randomAktør()
         val behandling = lagBehandling()
 
@@ -535,6 +579,7 @@ class VilkårsvurderingStegUtilsTest {
                 listOf(Resultat.IKKE_OPPFYLT, Resultat.IKKE_OPPFYLT),
             )
 
+        // Act
         val (initiell, _) =
             VilkårsvurderingUtils.flyttResultaterTilInitielt(
                 initiellVilkårsvurdering = initiellVilkårsvurdering,
@@ -544,6 +589,7 @@ class VilkårsvurderingStegUtilsTest {
         val opprettetBosattIRiket =
             initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == BOSATT_I_RIKET }
 
+        // Assert
         assertEquals(2, opprettetBosattIRiket.size)
         assertTrue(opprettetBosattIRiket.none { it.resultat == Resultat.OPPFYLT })
     }

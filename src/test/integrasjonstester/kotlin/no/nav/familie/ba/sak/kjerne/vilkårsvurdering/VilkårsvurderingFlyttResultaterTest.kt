@@ -46,6 +46,7 @@ class VilkårsvurderingFlyttResultaterTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Skal ikke endre på forrige behandling sin vilkårsvurdering ved flytting av resultater`() {
+        // Arrange
         val søker = lagPerson(type = PersonType.SØKER)
         val barn1Fnr = leggTilPersonInfo(randomBarnFødselsdato(alder = 6))
         val barn1Aktør = personidentService.hentAktør(barn1Fnr)
@@ -131,6 +132,7 @@ class VilkårsvurderingFlyttResultaterTest(
         val vilkårsvurderingFraForrigeBehandlingFørNyRevurdering =
             vilkårsvurderingService.hentAktivForBehandling(behandlingId = førstegangsbehandling.id)
 
+        // Act
         // Lager revurdering når utvidet ikke løper, så underkategorien er ordinær
         kjørStegprosessForBehandling(
             tilSteg = StegType.REGISTRERE_PERSONGRUNNLAG,
@@ -148,6 +150,7 @@ class VilkårsvurderingFlyttResultaterTest(
             brevmalService = brevmalService,
         )
 
+        // Assert
         // Sjekker at vilkårsvurderingen fra forrige behandling ikke er endret
         val vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering =
             vilkårsvurderingService.hentAktivForBehandling(behandlingId = førstegangsbehandling.id)

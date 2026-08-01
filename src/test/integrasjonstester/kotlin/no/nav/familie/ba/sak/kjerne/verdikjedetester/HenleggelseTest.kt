@@ -54,8 +54,10 @@ class HenleggelseTest(
 
     @Test
     fun `Opprett behandling, henlegg behandling feilaktig opprettet og opprett behandling på nytt`() {
+        // Arrange
         val førsteBehandling = opprettBehandlingOgRegistrerSøknad(scenarioDto)
 
+        // Act
         val responseHenlagtSøknad =
             familieBaSakKlient().henleggSøknad(
                 førsteBehandling.behandlingId,
@@ -65,6 +67,7 @@ class HenleggelseTest(
                 ),
             )
 
+        // Assert
         generellAssertUtvidetBehandlingDto(
             utvidetBehandlingDto = responseHenlagtSøknad,
             behandlingStatus = BehandlingStatus.AVSLUTTET,
@@ -88,7 +91,10 @@ class HenleggelseTest(
 
     @Test
     fun `Opprett behandling, hent forhåndsvising av brev, henlegg behandling søknad trukket`() {
+        // Arrange
         val førsteBehandling = opprettBehandlingOgRegistrerSøknad(scenarioDto)
+
+        // Act
 
         /**
          * Denne forhåndsvisningen går ikke til sanity for øyeblikket, men det er en mulighet å legge til
@@ -113,6 +119,7 @@ class HenleggelseTest(
                 ),
             )
 
+        // Assert
         generellAssertUtvidetBehandlingDto(
             utvidetBehandlingDto = responseHenlagtSøknad,
             behandlingStatus = BehandlingStatus.AVSLUTTET,

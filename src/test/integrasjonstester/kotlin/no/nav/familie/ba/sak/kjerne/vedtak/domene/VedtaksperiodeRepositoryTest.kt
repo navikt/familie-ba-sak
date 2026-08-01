@@ -26,6 +26,7 @@ class VedtaksperiodeRepositoryTest(
     inner class FinnBehandlingIdForVedtaksperiode {
         @Test
         fun `skal kunne hente behandlingId til en vedtaksperiode`() {
+            // Arrange
             val søker = aktørIdRepository.save(randomAktør())
             val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
             val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak))
@@ -34,6 +35,7 @@ class VedtaksperiodeRepositoryTest(
             lagVedtaksperiodeMedBegrunnelser.begrunnelser.clear()
             val vedtaksperiode = vedtaksperiodeRepository.save(lagVedtaksperiodeMedBegrunnelser)
 
+            // Act & Assert
             assertThat(vedtaksperiodeRepository.finnBehandlingIdForVedtaksperiode(vedtaksperiode.id))
                 .isEqualTo(behandling.id)
         }

@@ -35,20 +35,24 @@ internal class SøknadGrunnlagServiceTest {
 
     @Test
     fun `finnPersonerFremstiltKravFor skal returnere tom liste dersom behandlingen ikke er søknad, fødselshendelse eller manuell migrering`() {
+        // Arrange
         val behandling = lagBehandling(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
         every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns null
 
+        // Act
         val personerFramstiltForKrav =
             søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
                 forrigeBehandling = null,
             )
 
+        // Assert
         assertThat(personerFramstiltForKrav, Is(emptyList()))
     }
 
     @Test
     fun `finnPersonerFremstiltKravFor skal returnere aktør som person framstilt krav for dersom det er søkt for utvidet barnetrygd`() {
+        // Arrange
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
 
         val barnSomIkkeErKryssetAvFor =
@@ -69,17 +73,20 @@ internal class SøknadGrunnlagServiceTest {
 
         every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns søknadDto
 
+        // Act
         val personerFramstiltForKrav =
             søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
                 forrigeBehandling = null,
             )
 
+        // Assert
         assertThat(personerFramstiltForKrav.single(), Is(behandling.fagsak.aktør))
     }
 
     @Test
     fun `finnPersonerFremstiltKravFor skal returnere aktør som person framstilt krav for dersom det er søkt for utvidet barnetrygd og barn som er krysset for`() {
+        // Arrange
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val barn = lagPerson(type = PersonType.BARN)
 
@@ -102,18 +109,21 @@ internal class SøknadGrunnlagServiceTest {
         every { personidentService.hentAktør(barn.aktør.aktivFødselsnummer()) } returns barn.aktør
         every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns søknadDto
 
+        // Act
         val personerFramstiltForKrav =
             søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
                 forrigeBehandling = null,
             )
 
+        // Assert
         assertThat(personerFramstiltForKrav.size, Is(2))
         assertThat(personerFramstiltForKrav, containsInAnyOrder(behandling.fagsak.aktør, barn.aktør))
     }
 
     @Test
     fun `finnPersonerFremstiltKravFor skal bare returnere barn som er folkeregistret og krysset av på søknad`() {
+        // Arrange
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val barn1Fnr = randomFnr()
         val mocketAktør = mockk<Aktør>()
@@ -158,12 +168,14 @@ internal class SøknadGrunnlagServiceTest {
         every { personidentService.hentAktør(barn1Fnr) } returns mocketAktør
         every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns søknadDto
 
+        // Act
         val personerFramstiltForKrav =
             søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
                 forrigeBehandling = null,
             )
 
+        // Assert
         assertThat(personerFramstiltForKrav.single(), Is(mocketAktør))
 
         verify(exactly = 1) { personidentService.hentAktør(barn1Fnr) }
@@ -171,6 +183,7 @@ internal class SøknadGrunnlagServiceTest {
 
     @Test
     fun `finnPersonerFremstiltKravFor skal returnere nye barn dersom behandlingen har fødselshendelse som årsak`() {
+        // Arrange
         val forrigeBehandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
         val nyttBarn = lagPerson()
@@ -178,12 +191,14 @@ internal class SøknadGrunnlagServiceTest {
         every { persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling) } returns listOf(nyttBarn)
         every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns null
 
+        // Act
         val personerFramstiltForKrav =
             søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
                 forrigeBehandling = forrigeBehandling,
             )
 
+        // Assert
         assertThat(personerFramstiltForKrav.single(), Is(nyttBarn.aktør))
 
         verify(exactly = 1) { persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling) }
@@ -191,6 +206,7 @@ internal class SøknadGrunnlagServiceTest {
 
     @Test
     fun `finnPersonerFremstiltKravFor skal returnere eksisterende personer fra persongrunnlaget dersom behandlingen er en manuell migrering`() {
+        // Arrange
         val behandling =
             lagBehandling(
                 årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
@@ -203,12 +219,14 @@ internal class SøknadGrunnlagServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns eksisterendePersonpplysningGrunnlag
         every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns null
 
+        // Act
         val personerFramstiltForKrav =
             søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
                 forrigeBehandling = null,
             )
 
+        // Assert
         assertThat(personerFramstiltForKrav.single(), Is(eksisterendeBarn.aktør))
 
         verify(exactly = 1) { persongrunnlagService.hentAktivThrows(behandling.id) }
@@ -216,6 +234,7 @@ internal class SøknadGrunnlagServiceTest {
 
     @Test
     fun `finnPersonerFremstiltKravFor skal ikke returnere duplikater av personer`() {
+        // Arrange
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val barn = lagPerson(type = PersonType.BARN)
 
@@ -246,12 +265,14 @@ internal class SøknadGrunnlagServiceTest {
         every { personidentService.hentAktør(barn.aktør.aktivFødselsnummer()) } returns barn.aktør
         every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns søknadDto
 
+        // Act
         val personerFramstiltForKrav =
             søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
                 forrigeBehandling = null,
             )
 
+        // Assert
         assertThat(personerFramstiltForKrav.size, Is(1))
         assertThat(personerFramstiltForKrav.single(), Is(barn.aktør))
     }

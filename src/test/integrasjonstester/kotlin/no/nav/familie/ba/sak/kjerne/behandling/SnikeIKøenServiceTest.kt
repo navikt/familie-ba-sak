@@ -58,12 +58,16 @@ class SnikeIKøenServiceTest(
     @ParameterizedTest
     @EnumSource(BehandlingStatus::class, names = ["UTREDES", "SATT_PÅ_VENT"], mode = EnumSource.Mode.INCLUDE)
     fun `skal kunne sette en behandling med status UTREDES eller SATT_PÅ_VENT på maskinell vent`(status: BehandlingStatus) {
+        // Arrange
         val fagsak = opprettLøpendeFagsak()
         val behandling = opprettBehandling(status = status, fagsak = fagsak)
 
+        // Act
         settAktivBehandlingTilPåMaskinellVent(behandling)
 
         val oppdatertBehandling = behandlingRepository.finnBehandling(behandling.id)
+
+        // Assert
         assertThat(behandling.status).isEqualTo(status)
         assertThat(behandling.aktiv).isTrue()
         assertThat(oppdatertBehandling.status).isEqualTo(BehandlingStatus.SATT_PÅ_MASKINELL_VENT)
@@ -72,20 +76,25 @@ class SnikeIKøenServiceTest(
 
     @Test
     fun `reaktivering av behandling skal sette status tilbake til UTREDES`() {
+        // Arrange
         val fagsak = opprettLøpendeFagsak()
         val behandling1 = opprettBehandling(fagsak = fagsak)
         settAktivBehandlingTilPåMaskinellVent(behandling1)
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true, fagsak = fagsak)
 
+        // Act
         snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling2)
 
         val oppdatertBehandling = behandlingRepository.finnBehandling(behandling1.id)
+
+        // Assert
         assertThat(oppdatertBehandling.status).isEqualTo(BehandlingStatus.UTREDES)
         assertThat(oppdatertBehandling.aktiv).isTrue()
     }
 
     @Test
     fun `reaktivering av behandling som er på vent skal sette status tilbake til SATT_PÅ_VENT`() {
+        // Arrange
         val fagsak = opprettLøpendeFagsak()
         val behandling1 = opprettBehandling(fagsak = fagsak)
         lagreArbeidsfordeling(behandling1)
@@ -93,53 +102,65 @@ class SnikeIKøenServiceTest(
         settAktivBehandlingTilPåMaskinellVent(behandling1)
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true, fagsak = fagsak)
 
+        // Act
         snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling2)
 
         val oppdatertBehandling = behandlingRepository.finnBehandling(behandling1.id)
+
+        // Assert
         assertThat(oppdatertBehandling.status).isEqualTo(BehandlingStatus.SATT_PÅ_VENT)
         assertThat(oppdatertBehandling.aktiv).isTrue()
     }
 
     @Test
     fun `siste behandlingen er den som er aktiv til at behandlingen som er satt på vent er aktivert på nytt`() {
+        // Arrange
         val fagsak = opprettLøpendeFagsak()
         opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false, fagsak = fagsak)
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true, fagsak = fagsak)
         lagUtbetalingsoppdragOgAvslutt(behandling2)
 
+        // Assert
         validerSisteBehandling(fagsak = fagsak, behandling = behandling2)
         validerErAktivBehandling(behandling = behandling2)
     }
 
     @Test
     fun `behandling som er satt på vent blir aktivert, men ennå ikke iverksatt, og er då siste aktive behandlingen`() {
+        // Arrange
         val fagsak = opprettLøpendeFagsak()
         val behandling1 = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false, fagsak = fagsak)
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true, fagsak = fagsak)
         lagUtbetalingsoppdragOgAvslutt(behandling2)
 
+        // Act
         snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling2)
 
+        // Assert
         validerSisteBehandling(fagsak = fagsak, behandling = behandling2)
         validerErAktivBehandling(behandling1)
     }
 
     @Test
     fun `behandling som er satt på vent blir aktivert og iverksatt, og er då siste aktive behandlingen`() {
+        // Arrange
         val fagsak = opprettLøpendeFagsak()
         val behandling1 = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false, fagsak = fagsak)
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true, fagsak = fagsak)
         lagUtbetalingsoppdragOgAvslutt(behandling2)
 
+        // Act
         snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling2)
         lagUtbetalingsoppdragOgAvslutt(behandling1)
 
+        // Assert
         validerSisteBehandling(behandling = behandling1, fagsak = fagsak)
         validerErAktivBehandling(behandling1)
     }
 
     @Test
     fun `reaktivering skal tilbakestille behandling på vent`() {
+        // Arrange
         val fagsak = opprettLøpendeFagsak()
         val behandling1 = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false, fagsak = fagsak)
 
@@ -156,13 +177,16 @@ class SnikeIKøenServiceTest(
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true, fagsak = fagsak)
         lagUtbetalingsoppdragOgAvslutt(behandling2)
 
+        // Act
         snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling2)
 
+        // Assert
         assertThat(vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtak.id)).isEmpty()
     }
 
     @Test
     fun `reaktivering skal tilbakestille til vilkårsvurdering kun dersom steget er lagt til på behandlingen`() {
+        // Arrange
         val fagsak = opprettLøpendeFagsak()
         val behandling1 = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false, fagsak = fagsak)
         lagreArbeidsfordeling(behandling1)
@@ -173,9 +197,12 @@ class SnikeIKøenServiceTest(
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true, fagsak = fagsak)
         lagUtbetalingsoppdragOgAvslutt(behandling2)
 
+        // Act
         snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling2)
 
         val oppdatertBehandling = behandlingRepository.finnBehandling(behandling1.id)
+
+        // Assert
         assertThat(oppdatertBehandling.steg).isEqualTo(initielStegTilstand)
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(oppdatertBehandling.id, StegType.VILKÅRSVURDERING)
@@ -201,7 +228,10 @@ class SnikeIKøenServiceTest(
 
     @Test
     fun `skal ikke reaktivere noe hvis det ikke finnes en behandling som er på maskinell vent`() {
+        // Arrange
         val fagsak = opprettLøpendeFagsak()
+
+        // Act
         val behandling2 =
             opprettBehandling(
                 status = BehandlingStatus.AVSLUTTET,
@@ -209,12 +239,14 @@ class SnikeIKøenServiceTest(
                 fagsak = fagsak,
             )
 
+        // Assert
         assertThat(snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling2)).isFalse()
         assertThat(behandlingRepository.finnBehandling(behandling2.id).aktiv).isTrue()
     }
 
     @Test
     fun `skal kunne reaktivere en behandling selv om det ikke finnes en annen behandling som er aktiv, eks henlagt`() {
+        // Arrange
         val fagsak = opprettLøpendeFagsak()
         val behandling1 = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false, fagsak = fagsak)
         val behandling2 =
@@ -225,8 +257,10 @@ class SnikeIKøenServiceTest(
                 fagsak = fagsak,
             )
 
+        // Act
         snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling2)
 
+        // Assert
         assertThat(behandlingRepository.finnBehandling(behandling1.id).aktiv).isTrue()
         assertThat(behandlingRepository.finnBehandling(behandling2.id).aktiv).isFalse()
     }
@@ -235,9 +269,11 @@ class SnikeIKøenServiceTest(
     inner class ValideringAvSettPåVent {
         @Test
         fun `kan ikke sette en inaktiv behandling på vent`() {
+            // Arrange
             val fagsak = opprettLøpendeFagsak()
             val behandling = opprettBehandling(aktiv = false, fagsak = fagsak)
 
+            // Act & Assert
             assertThatThrownBy {
                 settAktivBehandlingTilPåMaskinellVent(behandling)
             }.hasMessageContaining("er ikke aktiv")
@@ -246,9 +282,11 @@ class SnikeIKøenServiceTest(
         @ParameterizedTest
         @EnumSource(BehandlingStatus::class, names = ["UTREDES", "SATT_PÅ_VENT"], mode = EnumSource.Mode.EXCLUDE)
         fun `kan ikke sette en behandling på vent med annen status enn UTREDES eller SATT_PÅ_VENT`(status: BehandlingStatus) {
+            // Arrange
             val fagsak = opprettLøpendeFagsak()
             val behandling = opprettBehandling(status = status, fagsak = fagsak)
 
+            // Act & Assert
             assertThatThrownBy {
                 settAktivBehandlingTilPåMaskinellVent(behandling)
             }.hasMessageContaining("kan ikke settes på maskinell vent då status")
@@ -260,20 +298,24 @@ class SnikeIKøenServiceTest(
         @Suppress("UNUSED_VARIABLE")
         @Test
         fun `skal feile når åpen behandling er aktiv`() {
+            // Arrange
             val fagsak = opprettLøpendeFagsak()
             val behandlingPåVent = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = true, fagsak = fagsak)
             val behandlingSomSnekIKøen = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = false, fagsak = fagsak)
 
+            // Act & Assert
             assertThatThrownBy { snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandlingSomSnekIKøen) }
                 .hasMessageContaining("Åpen behandling har feil tilstand")
         }
 
         @Test
         fun `skal feile når behandling som snek i køen har status satt på vent`() {
+            // Arrange
             val fagsak = opprettLøpendeFagsak()
             opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false, fagsak = fagsak)
             val behandlingSomSnekIKøen = opprettBehandling(status = BehandlingStatus.UTREDES, aktiv = true, fagsak = fagsak)
 
+            // Act & Assert
             assertThatThrownBy { snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandlingSomSnekIKøen) }
                 .hasMessageContaining("er ikke avsluttet")
         }

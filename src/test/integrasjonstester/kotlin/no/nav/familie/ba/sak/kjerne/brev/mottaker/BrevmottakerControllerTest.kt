@@ -30,6 +30,7 @@ internal class BrevmottakerControllerTest(
     @Test
     @Tag("integration")
     fun kanLagreOgSlette() {
+        // Arrange
         val fagsak =
             lagFagsakUtenId(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
         val behandling = lagBehandlingUtenId(fagsak = fagsak).let { behandlingRepository.save(it) }
@@ -45,9 +46,13 @@ internal class BrevmottakerControllerTest(
                 "poststed",
                 "NO",
             )
+
+        // Act
         brevmottakerController.leggTilBrevmottaker(behandling.id, brevmottaker)
 
         brevmottakerController.leggTilBrevmottaker(behandling.id, brevmottaker.copy(type = MottakerType.VERGE))
+
+        // Assert
         brevmottakerController.hentBrevmottakere(behandling.id).body?.data!!.apply {
             Assertions.assertThat(this).hasSize(2)
             forEach { lagretBrevmottaker ->

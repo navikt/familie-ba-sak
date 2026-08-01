@@ -21,8 +21,10 @@ class ModiaContextControllerTest(
 
     @Test
     fun `skal hente context`() {
+        // Act
         val response = modiaContextController.hentContext()
 
+        // Assert
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
         assertThat(response.body?.data?.aktivBruker).isEqualTo("13025514402")
@@ -31,11 +33,13 @@ class ModiaContextControllerTest(
 
     @Test
     fun `skal oppdatere context`() {
+        // Act
         val response =
             modiaContextController.settNyAktivBruker(
                 NyAktivBrukerIModiaContextDto(personIdent = "13025514402"),
             )
 
+        // Assert
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
         assertThat(response.body?.data?.aktivBruker).isEqualTo("13025514402")
@@ -44,6 +48,7 @@ class ModiaContextControllerTest(
 
     @Test
     fun `skal kaste feil ved ugyldig personIdent`() {
+        // Act & Assert
         val exception =
             assertThrows<IllegalStateException> {
                 modiaContextController.settNyAktivBruker(

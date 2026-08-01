@@ -49,6 +49,7 @@ class LoggServiceTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Skal lage noen logginnslag på forskjellige behandlinger og hente dem fra databasen`() {
+        // Arrange
         val behandling: Behandling = lagBehandling()
         val behandling1: Behandling = lagBehandling()
 
@@ -82,7 +83,10 @@ class LoggServiceTest(
             )
         loggService.lagre(logg3)
 
+        // Act
         val loggForBehandling = loggService.hentLoggForBehandling(behandling.id)
+
+        // Assert
         assertEquals(2, loggForBehandling.size)
 
         val loggForBehandling1 = loggService.hentLoggForBehandling(behandling1.id)
@@ -91,6 +95,7 @@ class LoggServiceTest(
 
     @Test
     fun `Skal lage logginnslag ved stegflyt for automatisk behandling`() {
+        // Arrange
         val barnsFødselsdato = LocalDate.of(2020, 2, 29)
         val barnetsIdent =
             FakePersonopplysningerService.leggTilPersonInfo(
@@ -110,6 +115,7 @@ class LoggServiceTest(
                 egendefinertMock = PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen"),
             )
 
+        // Act
         val behandling =
             stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(
                 NyBehandlingHendelse(
@@ -118,6 +124,7 @@ class LoggServiceTest(
                 ),
             )
 
+        // Assert
         val loggForBehandling = loggService.hentLoggForBehandling(behandlingId = behandling.id)
         assertEquals(2, loggForBehandling.size)
         assertTrue(loggForBehandling.any { it.type == LoggType.LIVSHENDELSE && it.tekst == "Gjelder barn 29.02.20" })
@@ -127,7 +134,10 @@ class LoggServiceTest(
 
     @Test
     fun `Skal lage nye vilkårslogger og endringer`() {
+        // Arrange
         val behandling = lagBehandling()
+
+        // Act
         val vilkårsvurderingLogg =
             loggService.opprettVilkårsvurderingLogg(
                 behandling = behandling,
@@ -135,6 +145,7 @@ class LoggServiceTest(
                 nyttBehandlingsresultat = Behandlingsresultat.INNVILGET,
             )
 
+        // Assert
         assertNotNull(vilkårsvurderingLogg)
         assertEquals("Vilkårsvurdering gjennomført", vilkårsvurderingLogg!!.tittel)
 
@@ -155,6 +166,7 @@ class LoggServiceTest(
 
     @Test
     fun `Skal ikke logge ved uforandret behandlingsresultat`() {
+        // Act
         val vilkårsvurderingLogg =
             loggService.opprettVilkårsvurderingLogg(
                 behandling = lagBehandling(),
@@ -162,16 +174,20 @@ class LoggServiceTest(
                 nyttBehandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET,
             )
 
+        // Assert
         assertNull(vilkårsvurderingLogg)
     }
 
     @Test
     fun `Skal lage noen logginnslag på helmanuell migrering ved avvik innenfor beløpsgrenser`() {
+        // Arrange
         val behandling =
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
             )
+
+        // Act
         loggService.opprettBehandlingLogg(BehandlingLoggRequest(behandling))
         loggService.opprettVilkårsvurderingLogg(behandling, behandling.resultat, Behandlingsresultat.INNVILGET)
         loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = true)
@@ -183,6 +199,7 @@ class LoggServiceTest(
         )
         loggService.opprettFerdigstillBehandling(behandling)
 
+        // Assert
         val logger = loggService.hentLoggForBehandling(behandling.id)
         assertEquals(5, logger.size)
         assertTrue {
@@ -220,11 +237,14 @@ class LoggServiceTest(
 
     @Test
     fun `Skal lage noen logginnslag på helmanuell migrering ved avvik utenfor beløpsgrenser`() {
+        // Arrange
         val behandling =
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
             )
+
+        // Act
         loggService.opprettBehandlingLogg(BehandlingLoggRequest(behandling))
         loggService.opprettVilkårsvurderingLogg(behandling, behandling.resultat, Behandlingsresultat.INNVILGET)
         loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = false)
@@ -236,6 +256,7 @@ class LoggServiceTest(
         )
         loggService.opprettFerdigstillBehandling(behandling)
 
+        // Assert
         val logger = loggService.hentLoggForBehandling(behandling.id)
         assertEquals(5, logger.size)
         assertTrue {
@@ -273,12 +294,15 @@ class LoggServiceTest(
 
     @Test
     fun `Om to logginnslag blir oppretta i samme sekund skal vi sortere med den første først`() {
+        // Arrange
         val behandlingId =
             lagBehandling(
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 årsak = BehandlingÅrsak.SØKNAD,
             ).id
         val tidspunkt = LocalDateTime.now()
+
+        // Act
         val logg1 =
             loggService.lagre(
                 Logg(
@@ -302,17 +326,21 @@ class LoggServiceTest(
                 ),
             )
 
+        // Assert
         val logginnslag = loggService.hentLoggForBehandling(behandlingId)
         assertEquals(listOf(logg2.id, logg1.id), logginnslag.map { it.id })
     }
 
     @Test
     fun `eldste logginnslag skal komme sist og nyaste først`() {
+        // Arrange
         val behandlingId =
             lagBehandling(
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 årsak = BehandlingÅrsak.SØKNAD,
             ).id
+
+        // Act
         val eldst =
             loggService.lagre(
                 Logg(
@@ -344,6 +372,7 @@ class LoggServiceTest(
                 ),
             )
 
+        // Assert
         val logginnslag = loggService.hentLoggForBehandling(behandlingId)
         assertEquals(listOf(nyast.id, mellomst.id, eldst.id), logginnslag.map { it.id })
     }

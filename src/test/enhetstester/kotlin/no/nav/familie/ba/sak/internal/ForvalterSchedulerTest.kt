@@ -35,8 +35,10 @@ class ForvalterSchedulerTest {
 
     @Test
     fun `Skal opprette task av type finnSakerMedFlereMigreringsbehandlinger`() {
+        // Act
         service.opprettFinnSakerMedFlereMigreringsbehandlingerTask()
 
+        // Assert
         assertThat(slot.captured.payload).isEqualTo(YearMonth.now().minusMonths(1).toString())
         assertThat(slot.captured.type).isEqualTo("finnSakerMedFlereMigreringsbehandlinger")
     }

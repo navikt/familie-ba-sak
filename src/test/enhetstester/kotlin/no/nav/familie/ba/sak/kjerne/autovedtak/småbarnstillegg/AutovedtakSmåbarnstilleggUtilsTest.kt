@@ -18,6 +18,7 @@ import java.time.YearMonth
 class AutovedtakSmåbarnstilleggUtilsTest {
     @Test
     fun `Skal legge til innvilgelsesbegrunnelse for småbarnstillegg`() {
+        // Arrange
         val vedtaksperiodeMedBegrunnelser =
             lagVedtaksperiodeMedBegrunnelser(
                 fom = LocalDate.now().førsteDagIInneværendeMåned(),
@@ -25,6 +26,7 @@ class AutovedtakSmåbarnstilleggUtilsTest {
                 type = Vedtaksperiodetype.UTBETALING,
             )
 
+        // Act
         val oppdatertVedtaksperiodeMedBegrunnelser =
             finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
                 vedtaksperioderMedBegrunnelser =
@@ -39,6 +41,7 @@ class AutovedtakSmåbarnstilleggUtilsTest {
                 redusertMånedPeriode = null,
             )
 
+        // Assert
         assertNotNull(oppdatertVedtaksperiodeMedBegrunnelser)
         assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.any { it.standardbegrunnelse == Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG })
         assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.none { it.standardbegrunnelse == Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD })
@@ -46,6 +49,7 @@ class AutovedtakSmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal legge til reduksjonsbegrunnelse for småbarnstillegg`() {
+        // Arrange
         val vedtaksperiodeMedBegrunnelser =
             lagVedtaksperiodeMedBegrunnelser(
                 fom = LocalDate.now().nesteMåned().førsteDagIInneværendeMåned(),
@@ -53,6 +57,7 @@ class AutovedtakSmåbarnstilleggUtilsTest {
                 type = Vedtaksperiodetype.UTBETALING,
             )
 
+        // Act
         val oppdatertVedtaksperiodeMedBegrunnelser =
             finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
                 vedtaksperioderMedBegrunnelser =
@@ -67,6 +72,7 @@ class AutovedtakSmåbarnstilleggUtilsTest {
                     ),
             )
 
+        // Assert
         assertNotNull(oppdatertVedtaksperiodeMedBegrunnelser)
         assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.none { it.standardbegrunnelse == Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG })
         assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.any { it.standardbegrunnelse == Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD })
@@ -74,6 +80,7 @@ class AutovedtakSmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal legge til reduksjonsbegrunnelse fra inneværende måned for småbarnstillegg`() {
+        // Arrange
         val vedtaksperiodeMedBegrunnelser =
             lagVedtaksperiodeMedBegrunnelser(
                 fom = LocalDate.now().førsteDagIInneværendeMåned(),
@@ -81,6 +88,7 @@ class AutovedtakSmåbarnstilleggUtilsTest {
                 type = Vedtaksperiodetype.UTBETALING,
             )
 
+        // Act
         val oppdatertVedtaksperiodeMedBegrunnelser =
             finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
                 vedtaksperioderMedBegrunnelser =
@@ -95,6 +103,7 @@ class AutovedtakSmåbarnstilleggUtilsTest {
                     ),
             )
 
+        // Assert
         assertNotNull(oppdatertVedtaksperiodeMedBegrunnelser)
         assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.none { it.standardbegrunnelse == Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG })
         assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.any { it.standardbegrunnelse == Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD })
@@ -102,6 +111,7 @@ class AutovedtakSmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal kaste feil om det ikke finnes innvilget eller redusert periode å begrunne`() {
+        // Arrange
         val vedtaksperiodeMedBegrunnelser =
             lagVedtaksperiodeMedBegrunnelser(
                 fom = LocalDate.now().nesteMåned().førsteDagIInneværendeMåned(),
@@ -109,6 +119,7 @@ class AutovedtakSmåbarnstilleggUtilsTest {
                 type = Vedtaksperiodetype.UTBETALING,
             )
 
+        // Act & Assert
         assertThrows<VedtaksperiodefinnerSmåbarnstilleggFeil> {
             finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
                 vedtaksperioderMedBegrunnelser =

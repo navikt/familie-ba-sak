@@ -13,7 +13,10 @@ class JournalføringUtilsTest {
 
     @Test
     fun `Skal utlede ordinær når søknad om ordinær journalføres`() {
+        // Arrange
         val søkerFnr = randomFnr()
+
+        // Act & Assert
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
             lagMockJournalføringDto(
@@ -27,7 +30,10 @@ class JournalføringUtilsTest {
 
     @Test
     fun `Skal utlede utvidet når søknad om utvidet journalføres`() {
+        // Arrange
         val søkerFnr = randomFnr()
+
+        // Act & Assert
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
             lagMockJournalføringDto(
@@ -42,7 +48,10 @@ class JournalføringUtilsTest {
 
     @Test
     fun `Skal utlede ordinær når søknad om ordinær journalføres, men underkategori ikke er satt`() {
+        // Arrange
         val søkerFnr = randomFnr()
+
+        // Act
         val underkategori: BehandlingUnderkategori =
             lagMockJournalføringDto(bruker = NavnOgIdent(navn = "Mock", søkerFnr))
                 .copy(
@@ -51,12 +60,17 @@ class JournalføringUtilsTest {
                     underkategori = null,
                     opprettOgKnyttTilNyBehandling = true,
                 ).hentUnderkategori()
+
+        // Assert
         assertEquals(BehandlingUnderkategori.ORDINÆR, underkategori)
     }
 
     @Test
     fun `Skal utlede ordinær når søknad om ordinær journalføres, og underkategori er satt til ordinær`() {
+        // Arrange
         val søkerFnr = randomFnr()
+
+        // Act
         val underkategori: BehandlingUnderkategori =
             lagMockJournalføringDto(bruker = NavnOgIdent(navn = "Mock", søkerFnr))
                 .copy(
@@ -65,12 +79,17 @@ class JournalføringUtilsTest {
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                     opprettOgKnyttTilNyBehandling = true,
                 ).hentUnderkategori()
+
+        // Assert
         assertEquals(BehandlingUnderkategori.ORDINÆR, underkategori)
     }
 
     @Test
     fun `Skal utlede utvidet når søknad om utvidet journalføres, men underkategori ikke er satt`() {
+        // Arrange
         val søkerFnr = randomFnr()
+
+        // Act
         val underkategori: BehandlingUnderkategori =
             lagMockJournalføringDto(bruker = NavnOgIdent(navn = "Mock", søkerFnr))
                 .copy(
@@ -79,12 +98,17 @@ class JournalføringUtilsTest {
                     underkategori = null,
                     opprettOgKnyttTilNyBehandling = true,
                 ).hentUnderkategori()
+
+        // Assert
         assertEquals(BehandlingUnderkategori.UTVIDET, underkategori)
     }
 
     @Test
     fun `Skal utlede utvidet når søknad om utvidet journalføres, og underkategori er satt til utvidet`() {
+        // Arrange
         val søkerFnr = randomFnr()
+
+        // Act
         val underkategori: BehandlingUnderkategori =
             lagMockJournalføringDto(bruker = NavnOgIdent(navn = "Mock", søkerFnr))
                 .copy(
@@ -93,6 +117,8 @@ class JournalføringUtilsTest {
                     underkategori = BehandlingUnderkategori.UTVIDET,
                     opprettOgKnyttTilNyBehandling = true,
                 ).hentUnderkategori()
+
+        // Assert
         assertEquals(BehandlingUnderkategori.UTVIDET, underkategori)
     }
 }

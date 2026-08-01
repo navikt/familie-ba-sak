@@ -87,11 +87,13 @@ class FiltreringsregelForFlereBarnTest {
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 genererFaktaMedTidligereBarn(1, 3, 7, 0),
             )
 
+        // Assert
         Assertions.assertThat(evalueringer.erOppfylt()).isFalse
         Assertions.assertThat(
             evalueringer
@@ -112,6 +114,7 @@ class FiltreringsregelForFlereBarnTest {
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det er registrert dødsfall på minst ett barn`() {
+        // Arrange
         val behandling = lagBehandling()
         val personInfo = generePersonInfoMedBarn(setOf(barnAktør0, barnAktør1))
 
@@ -192,6 +195,7 @@ class FiltreringsregelForFlereBarnTest {
                     ),
             )
 
+        // Act
         val fødselshendelsefiltreringResultater =
             filtreringsreglerService.kjørFiltreringsregler(
                 NyBehandlingHendelse(
@@ -205,6 +209,7 @@ class FiltreringsregelForFlereBarnTest {
                 behandling,
             )
 
+        // Assert
         Assertions.assertThat(fødselshendelsefiltreringResultater.erOppfylt()).isFalse
         Assertions.assertThat(
             fødselshendelsefiltreringResultater
@@ -215,6 +220,7 @@ class FiltreringsregelForFlereBarnTest {
 
     @Test
     fun `Regelevaluering skal resultere i JA når alle filtreringsregler er oppfylt`() {
+        // Arrange
         val behandling = lagBehandling()
         val personInfo = generePersonInfoMedBarn(setOf(barnAktør0, barnAktør1))
 
@@ -293,6 +299,7 @@ class FiltreringsregelForFlereBarnTest {
                     ),
             )
 
+        // Act
         val fødselshendelsefiltreringResultater =
             filtreringsreglerService.kjørFiltreringsregler(
                 NyBehandlingHendelse(
@@ -306,6 +313,7 @@ class FiltreringsregelForFlereBarnTest {
                 behandling,
             )
 
+        // Assert
         Assertions.assertThat(fødselshendelsefiltreringResultater.erOppfylt()).isTrue
     }
 

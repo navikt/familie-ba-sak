@@ -70,6 +70,7 @@ class HentStatusTest {
 
     @Test
     fun `henter status fra økonomi for behandling der alle utbetalingene hører til denne behandlinga`() {
+        // Arrange
         val tilfeldigPerson = tilfeldigPerson()
         val nyBehandling = lagBehandling()
         lagTilkjentYtelse(nyBehandling, listOf(lagUtbetalingsperiode(nyBehandling)))
@@ -96,14 +97,18 @@ class HentStatusTest {
 
         every { beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(any()) } returns andelerTilkjentYtelse
 
+        // Act
         val nesteSteg =
             statusFraOppdrag.utførStegOgAngiNeste(nyBehandling, statusFraOppdragMedTask(tilfeldigPerson, nyBehandling))
+
+        // Assert
         assertThat(nesteSteg).isEqualTo(StegType.IVERKSETT_MOT_FAMILIE_TILBAKE)
         verify { økonomiKlient.hentStatus(match { it.behandlingsId == nyBehandling.id.toString() }) }
     }
 
     @Test
     fun `kan håndtere nullutbetaling uten tidligere historikk`() {
+        // Arrange
         val tilfeldigPerson = tilfeldigPerson()
         val nyBehandling = lagBehandling()
         lagTilkjentYtelse(nyBehandling, listOf())
@@ -130,8 +135,11 @@ class HentStatusTest {
 
         every { beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(any()) } returns andelerTilkjentYtelse
 
+        // Act
         val nesteSteg =
             statusFraOppdrag.utførStegOgAngiNeste(nyBehandling, statusFraOppdragMedTask(tilfeldigPerson, nyBehandling))
+
+        // Assert
         assertThat(nesteSteg).isEqualTo(StegType.IVERKSETT_MOT_FAMILIE_TILBAKE)
         verify(exactly = 0) { økonomiKlient.hentStatus(any()) }
     }

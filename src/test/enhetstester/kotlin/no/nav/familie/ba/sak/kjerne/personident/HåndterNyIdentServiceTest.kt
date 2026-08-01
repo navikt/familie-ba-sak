@@ -297,6 +297,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
 
         @Test
         fun `Skal legge til ny ident på aktør som finnes i systemet`() {
+            // Arrange
             val personIdentSomFinnes = randomFnr()
             val personIdentSomSkalLeggesTil = randomFnr()
             val historiskIdent = randomFnr()
@@ -354,8 +355,10 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
                 null
             }
 
+            // Act
             val aktør = håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
 
+            // Assert
             assertThat(aktør?.personidenter?.size).isEqualTo(2)
             assertThat(personIdentSomSkalLeggesTil).isEqualTo(aktør!!.aktivFødselsnummer())
             assertThat(
@@ -375,6 +378,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
 
         @Test
         fun `Skal legge til ny ident på aktør som finnes i systemet, og som kun har fagsak og ingen behandling`() {
+            // Arrange
             val personIdentSomFinnes = randomFnr()
             val personIdentSomSkalLeggesTil = randomFnr()
             val historiskIdent = randomFnr()
@@ -435,8 +439,10 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
                 null
             }
 
+            // Act
             val aktør = håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
 
+            // Assert
             assertThat(aktør?.personidenter?.size).isEqualTo(2)
             assertThat(personIdentSomSkalLeggesTil).isEqualTo(aktør!!.aktivFødselsnummer())
             assertThat(
@@ -456,6 +462,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
 
         @Test
         fun `Skal kaste feil når vi prøver legge til ny ident på aktør som finnes i systemet og som har endret fødselsdato`() {
+            // Arrange
             val personIdentSomFinnes = randomFnr()
             val personIdentSomSkalLeggesTil = randomFnr()
             val historiskIdent = randomFnr()
@@ -499,6 +506,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
                 null
             }
 
+            // Act & Assert
             val exception =
                 assertThrows<Feil> {
                     håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
@@ -509,6 +517,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
 
         @Test
         fun `Skal ikke legge til ny ident på aktør som allerede har denne identen registert i systemet`() {
+            // Arrange
             val personIdentSomFinnes = randomFnr()
             val aktørIdSomFinnes = lagAktør(personIdentSomFinnes)
 
@@ -526,8 +535,10 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
                 ).personidenter.first()
             }
 
+            // Act
             val aktør = håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomFinnes))
 
+            // Assert
             assertThat(aktørIdSomFinnes.aktørId).isEqualTo(aktør?.aktørId)
             assertThat(aktør?.personidenter?.size).isEqualTo(1)
             assertThat(personIdentSomFinnes).isEqualTo(aktør?.personidenter?.single()?.fødselsnummer)
@@ -537,6 +548,7 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
 
         @Test
         fun `Hendelse på en ident hvor gammel ident1 er merget med ny ident2 skal ikke kaste feil når bruker har alt bruker ny ident`() {
+            // Arrange
             val fnrIdent1 = randomFnr()
             val aktørIdent1 = lagAktør(fnrIdent1)
             val aktivFnrIdent2 = randomFnr()
@@ -560,7 +572,10 @@ Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3
                 null
             }
 
+            // Act
             val aktør = håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(aktivFnrIdent2))
+
+            // Assert
             assertThat(aktivAktørIdent2.aktørId).isEqualTo(aktør?.aktørId)
             assertThat(aktør?.personidenter?.size).isEqualTo(1)
             assertThat(aktivFnrIdent2).isEqualTo(aktør?.personidenter?.single()?.fødselsnummer)

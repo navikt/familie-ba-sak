@@ -22,13 +22,19 @@ import java.time.LocalDate
 class LovligOppholdVilkårTest {
     @Test
     fun `Ikke lovlig opphold dersom søker ikke har noen gjeldende opphold registrert`() {
+        // Act
         val evaluering = vilkår.vurderVilkår(tredjelandsborger).evaluering
+
+        // Assert
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
     fun `Ikke lovlig opphold dersom søker er statsløs og ikke har noen gjeldende opphold registrert`() {
+        // Act
         val statsløsEvaluering = vilkår.vurderVilkår(statsløsPerson).evaluering
+
+        // Assert
         assertThat(statsløsEvaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
 
         val ukjentStatsborgerskapEvaluering =
@@ -38,7 +44,10 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold vurdert på bakgrunn av status`() {
+        // Act
         var evaluering = vilkår.vurderVilkår(faktaPerson(OPPHOLDSTILLATELSE.MIDLERTIDIG, null)).evaluering
+
+        // Assert
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
         evaluering = vilkår.vurderVilkår(faktaPerson(OPPHOLDSTILLATELSE.PERMANENT, null)).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
@@ -48,6 +57,7 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold vurdert på bakgrunn av status for statsløs søker`() {
+        // Act
         var evaluering =
             vilkår
                 .vurderVilkår(
@@ -56,6 +66,8 @@ class LovligOppholdVilkårTest {
                             mutableListOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
                     },
                 ).evaluering
+
+        // Assert
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
 
         evaluering =
@@ -87,6 +99,7 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Ikke lovlig opphold dersom utenfor gyldig periode`() {
+        // Act
         var evaluering =
             vilkår
                 .vurderVilkår(
@@ -113,6 +126,8 @@ class LovligOppholdVilkårTest {
                             ),
                     ),
                 ).evaluering
+
+        // Assert
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
 
         evaluering =
@@ -138,6 +153,7 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold dersom status med gjeldende periode`() {
+        // Act
         var evaluering =
             vilkår
                 .vurderVilkår(
@@ -173,6 +189,8 @@ class LovligOppholdVilkårTest {
                             ),
                     ),
                 ).evaluering
+
+        // Assert
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
 
         evaluering =
@@ -207,6 +225,7 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold blir oppfylt for mor med EØS medlemskap og har løpende arbeidsforhold`() {
+        // Act
         val evaluering =
             vilkår
                 .vurderVilkår(
@@ -222,12 +241,15 @@ class LovligOppholdVilkårTest {
                             )
                     },
                 ).evaluering
+
+        // Assert
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
         assertEquals(listOf(VilkårOppfyltÅrsak.EØS_MED_LØPENDE_ARBEIDSFORHOLD), evaluering.evalueringÅrsaker)
     }
 
     @Test
     fun `Lovlig opphold blir ikke oppfylt for mor med EØS medlemskap, uten løpende arbeidsforhold og annen forelder`() {
+        // Act
         val evaluering =
             vilkår
                 .vurderVilkår(
@@ -237,12 +259,15 @@ class LovligOppholdVilkårTest {
                         },
                     annenForelder = null,
                 ).evaluering
+
+        // Assert
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(listOf(VilkårIkkeOppfyltÅrsak.EØS_STATSBORGERSKAP_ANNEN_FORELDER_UKLART), evaluering.evalueringÅrsaker)
     }
 
     @Test
     fun `Lovlig opphold blir ikke oppfylt for mor med EØS medlemskap, uten løpende arbeidsforhold og annen forelder bor ikke med mor`() {
+        // Act
         val evaluering =
             vilkår
                 .vurderVilkår(
@@ -264,6 +289,8 @@ class LovligOppholdVilkårTest {
                                 ),
                         ),
                 ).evaluering
+
+        // Assert
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_ANNEN_FORELDER),
@@ -273,6 +300,7 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold blir ikke oppfylt for mor med EØS medlemskap, uten løpende arbeidsforhold og annen forelder har bodd med mor`() {
+        // Arrange
         val tidligereAdresse =
             lagGrVegadresse(adressenavn = "Uteveien", husnummer = "123", postnummer = "0245").also {
                 it.periode =
@@ -282,6 +310,7 @@ class LovligOppholdVilkårTest {
                     )
             }
 
+        // Act
         val evaluering =
             vilkår
                 .vurderVilkår(
@@ -307,6 +336,8 @@ class LovligOppholdVilkårTest {
                                 ),
                         ),
                 ).evaluering
+
+        // Assert
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_ANNEN_FORELDER),
@@ -316,7 +347,10 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold blir oppfylt for mor med EØS medlemskap, uten løpende arbeidsforhold og annen forelder bor med mor og nordisk`() {
+        // Arrange
         val adresse = lagGrVegadresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
+
+        // Act
         val evaluering =
             vilkår
                 .vurderVilkår(
@@ -334,6 +368,8 @@ class LovligOppholdVilkårTest {
                                 ),
                         ),
                 ).evaluering
+
+        // Assert
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårOppfyltÅrsak.ANNEN_FORELDER_NORDISK),
@@ -343,7 +379,10 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold blir ikke oppfylt for mor med EØS medlemskap, annen forelder(EØS) ikke løpende arbeidsforhold`() {
+        // Arrange
         val adresse = lagGrVegadresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
+
+        // Act
         val evaluering =
             vilkår
                 .vurderVilkår(
@@ -362,6 +401,8 @@ class LovligOppholdVilkårTest {
                             arbeidsforhold = mutableListOf(),
                         ),
                 ).evaluering
+
+        // Assert
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårIkkeOppfyltÅrsak.EØS_ANNEN_FORELDER_EØS_MEN_IKKE_MED_LØPENDE_ARBEIDSFORHOLD),
@@ -371,7 +412,10 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold blir oppfylt for mor med EØS medlemskap, annen forelder(EØS) har løpende arbeidsforhold`() {
+        // Arrange
         val adresse = lagGrVegadresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
+
+        // Act
         val evaluering =
             vilkår
                 .vurderVilkår(
@@ -398,6 +442,8 @@ class LovligOppholdVilkårTest {
                                 )
                         },
                 ).evaluering
+
+        // Assert
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårOppfyltÅrsak.ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD),
@@ -407,7 +453,10 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold blir ikke oppfylt for mor med EØS medlemskap, annen forelder er tredjelandsborger`() {
+        // Arrange
         val adresse = lagGrVegadresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
+
+        // Act
         val evaluering =
             vilkår
                 .vurderVilkår(
@@ -423,6 +472,8 @@ class LovligOppholdVilkårTest {
                                 mutableListOf(adresse)
                         },
                 ).evaluering
+
+        // Assert
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER),
@@ -432,7 +483,10 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold blir ikke oppfylt for mor med EØS medlemskap, annen forelder er statsløs`() {
+        // Arrange
         val adresse = lagGrVegadresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
+
+        // Act
         val evaluering =
             vilkår
                 .vurderVilkår(
@@ -448,6 +502,8 @@ class LovligOppholdVilkårTest {
                                 mutableListOf(adresse)
                         },
                 ).evaluering
+
+        // Assert
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS),
@@ -457,7 +513,10 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold gir resultat JA for barn ved fødselshendelse`() {
+        // Act
         val evaluering = vilkår.vurderVilkår(barn).evaluering
+
+        // Assert
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 

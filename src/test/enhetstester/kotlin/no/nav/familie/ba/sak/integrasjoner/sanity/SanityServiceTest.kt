@@ -17,6 +17,7 @@ class SanityServiceTest {
 
     @Test
     fun `hentSanityBegrunnelser - skal hente standardbegrunnelser`() {
+        // Arrange
         every { sanityKlient.hentBegrunnelser() } returns
             Standardbegrunnelse.entries.map {
                 SanityBegrunnelse(
@@ -33,15 +34,19 @@ class SanityServiceTest {
                 )
             }
 
+        // Act
         val begrunnelser = sanityService.hentSanityBegrunnelser()
 
+        // Assert
         assertThat(begrunnelser.keys).isEqualTo(Standardbegrunnelse.entries.toSet())
     }
 
     @Test
     fun `hentSanityBegrunnelser - skal kaste feil hvis det ikke er noen cache`() {
+        // Arrange
         every { sanityKlient.hentBegrunnelser() } throws RuntimeException("Feil ved henting av begrunnelser i test")
 
+        // Act & Assert
         val e = assertThrows<RuntimeException> { sanityService.hentSanityBegrunnelser() }
 
         assertThat(e.message).isEqualTo("Feil ved henting av begrunnelser i test")
@@ -49,6 +54,7 @@ class SanityServiceTest {
 
     @Test
     fun `hentSanityBegrunnelser - skal bruke cachet begrunnelser når sanityklient kaster feil`() {
+        // Arrange
         every { sanityKlient.hentBegrunnelser() } returns
             Standardbegrunnelse.entries.map {
                 SanityBegrunnelse(
@@ -65,6 +71,7 @@ class SanityServiceTest {
                 )
             } andThenThrows RuntimeException("Feil for å teste cachet versjon")
 
+        // Act & Assert
         sanityService.hentSanityBegrunnelser().also { begrunnelser ->
             assertThat(begrunnelser.keys).isEqualTo(Standardbegrunnelse.entries.toSet())
         }
@@ -76,6 +83,7 @@ class SanityServiceTest {
 
     @Test
     fun `hentSanityEØSBegrunnelser - skal ikke filtrere bort nye begrunnelser tilknyttet EØS praksisendring`() {
+        // Arrange
         every { sanityKlient.hentEØSBegrunnelser() } returns
             EØSStandardbegrunnelse.entries.map {
                 SanityEØSBegrunnelse(
@@ -98,15 +106,19 @@ class SanityServiceTest {
                 )
             }
 
+        // Act
         val eøsBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
 
+        // Assert
         assertThat(eøsBegrunnelser.keys).isEqualTo(EØSStandardbegrunnelse.entries.toSet())
     }
 
     @Test
     fun `hentSanityEØSBegrunnelser - skal kaste feil hvis det ikke er noen cache`() {
+        // Arrange
         every { sanityKlient.hentEØSBegrunnelser() } throws RuntimeException("Feil ved henting av EØS-begrunnelser i test")
 
+        // Act & Assert
         val e = assertThrows<RuntimeException> { sanityService.hentSanityEØSBegrunnelser() }
 
         assertThat(e.message).isEqualTo("Feil ved henting av EØS-begrunnelser i test")
@@ -114,6 +126,7 @@ class SanityServiceTest {
 
     @Test
     fun `hentSanityEØSBegrunnelser - skal bruke cachet begrunnelser når sanityklient kaster feil`() {
+        // Arrange
         every { sanityKlient.hentEØSBegrunnelser() } returns
             EØSStandardbegrunnelse.entries.map {
                 SanityEØSBegrunnelse(
@@ -136,6 +149,7 @@ class SanityServiceTest {
                 )
             } andThenThrows RuntimeException("Feil for å teste cachet versjon")
 
+        // Act & Assert
         sanityService.hentSanityEØSBegrunnelser().also { eøsBegrunnelser ->
             assertThat(eøsBegrunnelser).isNotEmpty()
         }

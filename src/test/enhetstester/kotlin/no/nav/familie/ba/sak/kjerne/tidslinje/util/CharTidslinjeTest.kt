@@ -11,9 +11,13 @@ import org.junit.jupiter.api.Test
 class CharTidslinjeTest {
     @Test
     fun testEnkelCharTidsline() {
+        // Arrange
         val tegn = "---------------"
+
+        // Act
         val charTidslinje = tegn.tilCharTidslinje(jan(2020)).tilMåned { it.single() }
 
+        // Assert
         assertEquals(1.jan(2020), charTidslinje.startsTidspunkt)
         assertEquals(tegn.length.toLong(), charTidslinje.innhold.sumOf { it.lengde })
 
@@ -26,9 +30,13 @@ class CharTidslinjeTest {
 
     @Test
     fun testUendeligCharTidslinje() {
+        // Arrange
         val tegn = "<--->"
+
+        // Act
         val charTidslinje = tegn.tilCharTidslinje(jan(2020))
 
+        // Assert
         assertEquals(PRAKTISK_TIDLIGSTE_DAG, charTidslinje.startsTidspunkt)
 
         val periode = charTidslinje.tilPerioder().single()
@@ -40,9 +48,13 @@ class CharTidslinjeTest {
 
     @Test
     fun testSammensattTidsline() {
+        // Arrange
         val tegn = "aabbbbcdddddda"
+
+        // Act
         val charTidslinje = tegn.tilCharTidslinje(jan(2020)).tilMåned { it.single() }
 
+        // Assert
         assertEquals(1.jan(2020), charTidslinje.startsTidspunkt)
         assertEquals(tegn.length.toLong(), charTidslinje.innhold.sumOf { it.lengde })
 

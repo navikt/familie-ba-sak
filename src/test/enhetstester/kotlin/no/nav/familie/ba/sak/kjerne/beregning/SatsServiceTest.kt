@@ -33,11 +33,14 @@ import java.time.LocalDate
 class SatsServiceTest {
     @Test
     fun `Skal opprette korrekt tidslinje for ordinær barnetrygd for barn som ble 6 år mens TILLEGGS_ORBA var aktivt`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2017, 4, 6))
 
+        // Act
         val ordinærTidslinje = lagOrdinærTidslinje(barn)
         val ordinærePerioder = ordinærTidslinje.tilPerioderIkkeNull().toList()
 
+        // Assert
         assertEquals(12, ordinærePerioder.size)
 
         assertPeriode(TestKrPeriode(beløp = 970, fom = "2017-04", tom = "2019-02"), ordinærePerioder[0])
@@ -56,11 +59,14 @@ class SatsServiceTest {
 
     @Test
     fun `Skal opprette korrekt tidslinje for ordinær barnetrygd for barn som er født etter at TILLEGGS_ORBA er ferdig`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2025, 1, 6))
 
+        // Act
         val ordinærTidslinje = lagOrdinærTidslinje(barn)
         val ordinærePerioder = ordinærTidslinje.tilPerioderIkkeNull().toList()
 
+        // Assert
         assertEquals(3, ordinærePerioder.size)
 
         assertPeriode(TestKrPeriode(beløp = 1766, fom = "2025-01", tom = "2025-04"), ordinærePerioder[0])
@@ -70,11 +76,14 @@ class SatsServiceTest {
 
     @Test
     fun `Skal opprette korrekt tidslinje for ordinær barnetrygd for barn som blir 6 år etter at TILLEGGS_ORBA er fjernet`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 12, 6))
 
+        // Act
         val ordinærTidslinje = lagOrdinærTidslinje(barn)
         val ordinærePerioder = ordinærTidslinje.tilPerioderIkkeNull().toList()
 
+        // Assert
         assertEquals(8, ordinærePerioder.size)
 
         assertPeriode(TestKrPeriode(beløp = 1054, fom = "2019-12", tom = "2020-08"), ordinærePerioder[0])
@@ -114,6 +123,7 @@ class SatsServiceTest {
     inner class SatstypeTidslinje {
         @Test
         fun `Skal gi riktig sats for ordinær barnetrygd, 6 til 18 år`() {
+            // Arrange
             val forventet =
                 (uendelig..feb(2019)).tilTidslinje { 970 } +
                     (mar(2019)..feb(2023)).tilTidslinje { 1054 } +
@@ -124,13 +134,16 @@ class SatsServiceTest {
                     (mai(2025)..jan(2026)).tilTidslinje { 1968 } +
                     (feb(2026)..uendelig).tilTidslinje { 2012 }
 
+            // Act
             val faktisk = satstypeTidslinje(ORBA)
 
+            // Assert
             assertEquals(forventet.tilPerioder(), faktisk.tilPerioder())
         }
 
         @Test
         fun `Skal gi riktig sats for tillegg ordinær barnetrygd, 0 til 6 år`() {
+            // Arrange
             val forventet =
                 (uendelig..feb(2019)).tilTidslinje { 970 } +
                     (mar(2019)..aug(2020)).tilTidslinje { 1054 } +
@@ -140,26 +153,32 @@ class SatsServiceTest {
                     (mar(2023)..jun(2023)).tilTidslinje { 1723 } +
                     (jul(2023)..aug(2024)).tilTidslinje { 1766 }
 
+            // Act
             val faktisk = satstypeTidslinje(TILLEGG_ORBA)
 
+            // Assert
             assertEquals(forventet.tilPerioder(), faktisk.tilPerioder())
         }
 
         @Test
         fun `Skal gi riktig sats for småbarnstillegg`() {
+            // Arrange
             val forventet =
                 (uendelig..feb(2023)).tilTidslinje { 660 } +
                     (mar(2023)..jun(2023)).tilTidslinje { 678 } +
                     (jul(2023)..jan(2026)).tilTidslinje { 696 } +
                     (feb(2026)..uendelig).tilTidslinje { 712 }
 
+            // Act
             val faktisk = satstypeTidslinje(SMA)
 
+            // Assert
             assertEquals(forventet.tilPerioder(), faktisk.tilPerioder())
         }
 
         @Test
         fun `Skal gi riktig sats for utvidet barnetrygd`() {
+            // Arrange
             val forventet =
                 (uendelig..feb(2019)).tilTidslinje { 970 } +
                     (mar(2019)..feb(2023)).tilTidslinje { 1054 } +
@@ -167,8 +186,10 @@ class SatsServiceTest {
                     (jul(2023)..jan(2026)).tilTidslinje { 2516 } +
                     (feb(2026)..uendelig).tilTidslinje { 2572 }
 
+            // Act
             val faktisk = satstypeTidslinje(UTVIDET_BARNETRYGD)
 
+            // Assert
             assertEquals(forventet.tilPerioder(), faktisk.tilPerioder())
         }
     }

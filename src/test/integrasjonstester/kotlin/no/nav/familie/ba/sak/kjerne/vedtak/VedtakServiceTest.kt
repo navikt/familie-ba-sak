@@ -191,6 +191,7 @@ class VedtakServiceTest(
     @Test
     @Tag("integration")
     fun `Opprett behandling med vedtak`() {
+        // Arrange
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
@@ -215,6 +216,7 @@ class VedtakServiceTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
+        // Act
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(
@@ -229,6 +231,7 @@ class VedtakServiceTest(
             Beslutning.GODKJENT,
         )
 
+        // Assert
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertNull(hentetVedtak!!.vedtaksdato)
@@ -245,11 +248,13 @@ class VedtakServiceTest(
     @Test
     @Tag("integration")
     fun `Kast feil når det forsøkes å oppdatere et vedtak som ikke er lagret`() {
+        // Arrange
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
+        // Act & Assert
         assertThrows<Feil> {
             vedtakService.oppdater(
                 Vedtak(

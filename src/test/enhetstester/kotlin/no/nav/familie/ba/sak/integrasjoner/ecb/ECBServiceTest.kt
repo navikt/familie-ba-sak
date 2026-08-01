@@ -39,6 +39,7 @@ class ECBServiceTest {
 
     @Test
     fun `Hent valutakurs for utenlandsk valuta til NOK og sjekk at beregning av kurs er riktig`() {
+        // Arrange
         val valutakursDato = LocalDate.of(2022, 6, 28)
         val valutakursNOK = BigDecimal.valueOf(10.337)
         val valutakursSEK = BigDecimal.valueOf(10.6543)
@@ -58,12 +59,17 @@ class ECBServiceTest {
                 valutakursDato,
             )
         } returns ecbExchangeRatesData.toExchangeRates()
+
+        // Act
         val sekTilNOKValutakurs = ecbService.hentValutakurs("SEK", valutakursDato)
+
+        // Assert
         assertEquals(BigDecimal.valueOf(0.9702185972), sekTilNOKValutakurs)
     }
 
     @Test
     fun `Test at ECBService kaster ESBServiceException dersom de returnerte kursene ikke inneholder kurs for forespurt valuta`() {
+        // Arrange
         val valutakursDato = LocalDate.of(2022, 7, 22)
         val ecbExchangeRatesData =
             createECBResponse(
@@ -79,11 +85,14 @@ class ECBServiceTest {
                 valutakursDato,
             )
         } returns ecbExchangeRatesData.toExchangeRates()
+
+        // Act & Assert
         assertThrows<ECBServiceException> { ecbService.hentValutakurs("SEK", valutakursDato) }
     }
 
     @Test
     fun `Test at ECBService kaster ESBServiceException dersom de returnerte kursene ikke inneholder kurser med forespurt dato`() {
+        // Arrange
         val valutakursDato = LocalDate.of(2022, 7, 20)
         val ecbExchangeRatesData =
             createECBResponse(
@@ -99,11 +108,14 @@ class ECBServiceTest {
                 valutakursDato,
             )
         } returns ecbExchangeRatesData.toExchangeRates()
+
+        // Act & Assert
         assertThrows<ECBServiceException> { ecbService.hentValutakurs("SEK", valutakursDato) }
     }
 
     @Test
     fun `Test at ECBService returnerer NOK til EUR dersom den forespurte valutaen er EUR`() {
+        // Arrange
         val nokTilEur = BigDecimal.valueOf(9.4567)
         val valutakursDato = LocalDate.of(2022, 7, 20)
         val ecbExchangeRatesData =
@@ -121,6 +133,8 @@ class ECBServiceTest {
                 valutakursDato,
             )
         } returns ecbExchangeRatesData.toExchangeRates()
+
+        // Act & Assert
         assertEquals(nokTilEur, ecbService.hentValutakurs("EUR", valutakursDato))
     }
 
