@@ -76,7 +76,7 @@ class SaksstatistikkTest(
                 .data!!
                 .id
 
-        val mellomlagredeStatistikkHendelser = saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SAK, fagsakId)
+        val mellomlagredeStatistikkHendelser = saksstatistikkMellomlagringRepository.findByTypeAndTypeIdOrderByIdAsc(SAK, fagsakId)
 
         assertEquals(1, mellomlagredeStatistikkHendelser.size)
         assertEquals(SAK, mellomlagredeStatistikkHendelser.first().type)
@@ -112,7 +112,7 @@ class SaksstatistikkTest(
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, BehandlingStatus.AVSLUTTET)
 
         val mellomlagretBehandling =
-            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(BEHANDLING, behandling.id)
+            saksstatistikkMellomlagringRepository.findByTypeAndTypeIdOrderByIdAsc(BEHANDLING, behandling.id)
         assertEquals(2, mellomlagretBehandling.size)
         assertNull(mellomlagretBehandling.first().konvertertTidspunkt)
         assertNull(mellomlagretBehandling.first().sendtTidspunkt)

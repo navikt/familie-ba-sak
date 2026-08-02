@@ -230,7 +230,7 @@ class FagsakDeltagerServiceIntegrationTest(
         assertEquals(
             FagsakStatus.OPPRETTET.name,
             saksstatistikkMellomlagringRepository
-                .findByTypeAndTypeId(SAK, fagsak.id)
+                .findByTypeAndTypeIdOrderByIdAsc(SAK, fagsak.id)
                 .last()
                 .jsonToSakDVH()
                 .sakStatus,

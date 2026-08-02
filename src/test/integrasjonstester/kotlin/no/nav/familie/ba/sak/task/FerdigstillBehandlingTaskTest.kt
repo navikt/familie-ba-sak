@@ -84,7 +84,7 @@ class FerdigstillBehandlingTaskTest(
         assertEquals(
             FagsakStatus.AVSLUTTET.name,
             saksstatistikkMellomlagringRepository
-                .findByTypeAndTypeId(
+                .findByTypeAndTypeIdOrderByIdAsc(
                     SaksstatistikkMellomlagringType.BEHANDLING,
                     ferdigstiltBehandling.id,
                 ).last()
@@ -97,7 +97,7 @@ class FerdigstillBehandlingTaskTest(
         assertEquals(
             FagsakStatus.LØPENDE.name,
             saksstatistikkMellomlagringRepository
-                .findByTypeAndTypeId(
+                .findByTypeAndTypeIdOrderByIdAsc(
                     SaksstatistikkMellomlagringType.SAK,
                     ferdigstiltFagsak.id,
                 ).last()
@@ -123,7 +123,7 @@ class FerdigstillBehandlingTaskTest(
         assertEquals(
             FagsakStatus.AVSLUTTET.name,
             saksstatistikkMellomlagringRepository
-                .findByTypeAndTypeId(
+                .findByTypeAndTypeIdOrderByIdAsc(
                     SaksstatistikkMellomlagringType.SAK,
                     ferdigstiltFagsak.id,
                 ).last()

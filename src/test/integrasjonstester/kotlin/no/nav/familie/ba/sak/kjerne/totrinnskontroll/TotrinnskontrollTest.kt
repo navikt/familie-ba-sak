@@ -44,14 +44,14 @@ class TotrinnskontrollTest(
         behandlingService.sendBehandlingTilBeslutter(behandling)
         assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingHentOgPersisterService.hent(behandling.id).status)
         assertThat(
-            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
+            saksstatistikkMellomlagringRepository.findByTypeAndTypeIdOrderByIdAsc(
                 SaksstatistikkMellomlagringType.BEHANDLING,
                 behandling.id,
             ),
         ).hasSize(2)
         assertThat(
             saksstatistikkMellomlagringRepository
-                .findByTypeAndTypeId(
+                .findByTypeAndTypeIdOrderByIdAsc(
                     SaksstatistikkMellomlagringType.BEHANDLING,
                     behandling.id,
                 ).last()
@@ -66,14 +66,14 @@ class TotrinnskontrollTest(
         assertEquals(BehandlingStatus.IVERKSETTER_VEDTAK, behandlingHentOgPersisterService.hent(behandling.id).status)
 
         assertThat(
-            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
+            saksstatistikkMellomlagringRepository.findByTypeAndTypeIdOrderByIdAsc(
                 SaksstatistikkMellomlagringType.BEHANDLING,
                 behandling.id,
             ),
         ).hasSize(3)
         assertThat(
             saksstatistikkMellomlagringRepository
-                .findByTypeAndTypeId(
+                .findByTypeAndTypeIdOrderByIdAsc(
                     SaksstatistikkMellomlagringType.BEHANDLING,
                     behandling.id,
                 ).last()
@@ -101,14 +101,14 @@ class TotrinnskontrollTest(
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "Beslutter", "beslutterId", Beslutning.UNDERKJENT)
         assertEquals(BehandlingStatus.UTREDES, behandlingHentOgPersisterService.hent(behandling.id).status)
         assertThat(
-            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
+            saksstatistikkMellomlagringRepository.findByTypeAndTypeIdOrderByIdAsc(
                 SaksstatistikkMellomlagringType.BEHANDLING,
                 behandling.id,
             ),
         ).hasSize(3)
         assertThat(
             saksstatistikkMellomlagringRepository
-                .findByTypeAndTypeId(
+                .findByTypeAndTypeIdOrderByIdAsc(
                     SaksstatistikkMellomlagringType.BEHANDLING,
                     behandling.id,
                 ).last()
