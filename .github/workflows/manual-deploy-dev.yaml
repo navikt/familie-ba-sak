@@ -87,8 +87,7 @@ jobs:
         needs.verdikjedetest-feature-toggle-av.result == 'success' &&
         needs.verdikjedetest-feature-toggle-paa.result == 'success'
       ))
-    # TODO NAV-22519: sett tilbake til @main før merge
-    uses: navikt/familie-baks-gha-workflows/.github/workflows/deploy.yaml@NAV-22519_eksponer_deployet_branch # ratchet:exclude
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/deploy.yaml@main # ratchet:exclude
     with:
       image: ${{ needs.build.outputs.image }}
       cluster: dev-gcp
