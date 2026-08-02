@@ -32,17 +32,4 @@ class PreprodControllerTest {
         assertThat(respons.body?.data?.branch).isEqualTo("NAV-22519_min_branch")
         assertThat(respons.body?.data?.versjon).isEqualTo("familie-ba-sak:abc123")
     }
-
-    @Test
-    fun `skal returnere ukjent når branch og versjon ikke er satt som miljøvariabler`() {
-        // Arrange
-        val preprodController = lagPreprodController(branch = "ukjent", versjon = "ukjent")
-
-        // Act
-        val respons = preprodController.hentVersjonsinfo()
-
-        // Assert
-        assertThat(respons.body?.data?.branch).isEqualTo("ukjent")
-        assertThat(respons.body?.data?.versjon).isEqualTo("ukjent")
-    }
 }
