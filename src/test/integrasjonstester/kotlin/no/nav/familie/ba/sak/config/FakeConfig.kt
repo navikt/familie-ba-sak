@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.fake.FakeFeatureToggleService
 import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdKlient
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
 import no.nav.familie.ba.sak.fake.FakeLeaderClientService
+import no.nav.familie.ba.sak.fake.FakeOppdragBackendKlient
 import no.nav.familie.ba.sak.fake.FakePdlIdentRestKlient
 import no.nav.familie.ba.sak.fake.FakePdlRestKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService
@@ -62,6 +63,11 @@ class FakeConfig {
     @Primary
     @Profile("fake-økonomi-klient")
     fun fakeØkonomiKlient(): FakeØkonomiKlient = FakeØkonomiKlient()
+
+    @Bean
+    @Primary
+    @Profile("fake-økonomi-klient")
+    fun fakeOppdragBackendKlient(): FakeOppdragBackendKlient = FakeOppdragBackendKlient()
 
     @Bean
     @Primary
