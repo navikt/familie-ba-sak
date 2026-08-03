@@ -27,6 +27,7 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Skal teste at endret utbetalingsandeler for ordinær og utvidet endrer utbetaling for søker og barn`() {
+        // Arrange
         val barnFødselsdato = LocalDate.of(2022, 10, 15)
 
         val scenario =
@@ -116,6 +117,7 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
                 erTilknyttetAndeler = true,
             )
 
+        // Act
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
             utvidetBehandlingDtoEtterBehandlingsresultat.behandlingId,
             endretUtbetalingAndelDtoUtvidetBarnetrygd,
@@ -144,6 +146,7 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             behandlingId = utvidetBehandlingDtoEtterBehandlingsresultat.behandlingId,
         )
 
+        // Assert
         val andelerTilkjentYtelseMedEndretPeriode =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = utvidetBehandlingDtoEtterBehandlingsresultat.behandlingId)
 

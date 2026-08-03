@@ -50,6 +50,7 @@ class VurderTilbakekrevingStegTest {
 
     @Test
     fun `skal utføre steg for vanlig behandling uten åpen tilbakekreving`() {
+        // Act
         val stegType =
             assertDoesNotThrow {
                 vurderTilbakekrevingSteg.utførStegOgAngiNeste(
@@ -57,6 +58,8 @@ class VurderTilbakekrevingStegTest {
                     tilbakekrevingDto,
                 )
             }
+
+        // Assert
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
         verify(exactly = 1) { tilbakekrevingService.validerRestTilbakekreving(tilbakekrevingDto, behandling.id) }
         verify(exactly = 1) { tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto, behandling.id) }
@@ -64,7 +67,10 @@ class VurderTilbakekrevingStegTest {
 
     @Test
     fun `skal utføre steg for vanlig behandling med åpen tilbakekreving`() {
+        // Arrange
         every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any()) } returns true
+
+        // Act
         val stegType =
             assertDoesNotThrow {
                 vurderTilbakekrevingSteg.utførStegOgAngiNeste(
@@ -72,6 +78,8 @@ class VurderTilbakekrevingStegTest {
                     tilbakekrevingDto,
                 )
             }
+
+        // Assert
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
         verify(exactly = 0) { tilbakekrevingService.validerRestTilbakekreving(tilbakekrevingDto, behandling.id) }
         verify(exactly = 0) { tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto, behandling.id) }

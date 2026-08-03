@@ -73,6 +73,7 @@ class SendMeldingTilBisysTaskTest {
 
     @Test
     fun `Skal send riktig melding til Bisys hvis barnetrygd er opphørt`() {
+        // Arrange
         val (behandlingRepository, kafkaProducer, tilkjentYtelseRepository, kafkaResult, behandling) = setupMocks()
         val sendMeldingTilBisysTask =
             SendMeldingTilBisysTask(kafkaProducer, tilkjentYtelseRepository, behandlingRepository)
@@ -112,8 +113,10 @@ class SendMeldingTilBisysTaskTest {
             )
         } returns kafkaResult
 
+        // Act
         sendMeldingTilBisysTask.doTask(SendMeldingTilBisysTask.opprettTask(behandling[1].id))
 
+        // Assert
         verify(exactly = 1) { kafkaProducer.kafkaAivenTemplate.send(any(), any(), any()) }
         val jsonMelding = jsonMapper.readValue(meldingSlot.captured, BarnetrygdBisysMelding::class.java)
         assertThat(jsonMelding.søker).isEqualTo(behandling[1].fagsak.aktør.aktivFødselsnummer())
@@ -125,6 +128,7 @@ class SendMeldingTilBisysTaskTest {
 
     @Test
     fun `Skal send riktig melding til Bisys hvis barnetrygd er redusert`() {
+        // Arrange
         val (behandlingRepository, kafkaProducer, tilkjentYtelseRepository, kafkaResult, behandling) = setupMocks()
         val sendMeldingTilBisysTask =
             SendMeldingTilBisysTask(kafkaProducer, tilkjentYtelseRepository, behandlingRepository)
@@ -172,8 +176,10 @@ class SendMeldingTilBisysTaskTest {
             )
         } returns kafkaResult
 
+        // Act
         sendMeldingTilBisysTask.doTask(SendMeldingTilBisysTask.opprettTask(behandling[1].id))
 
+        // Assert
         verify(exactly = 1) { kafkaProducer.kafkaAivenTemplate.send(any(), any(), any()) }
         val jsonMelding = jsonMapper.readValue(meldingSlot.captured, BarnetrygdBisysMelding::class.java)
         assertThat(jsonMelding.søker).isEqualTo(behandling[1].fagsak.aktør.aktivFødselsnummer())
@@ -185,6 +191,7 @@ class SendMeldingTilBisysTaskTest {
 
     @Test
     fun `finnBarnEndretOpplysning() skal return riktig endret opplysning for barn`() {
+        // Arrange
         val (behandlingRepository, kafkaProducer, tilkjentYtelseRepository, _, behandling) = setupMocks()
 
         val sendMeldingTilBisysTask =
@@ -270,7 +277,10 @@ class SendMeldingTilBisysTaskTest {
                 )
             }
 
+        // Act
         val endretPerioder = sendMeldingTilBisysTask.finnBarnEndretOpplysning(behandling[1])
+
+        // Assert
         val barn1Perioder = endretPerioder[barn1.aktør.aktivFødselsnummer()]
         val barn2Perioder = endretPerioder[barn2.aktør.aktivFødselsnummer()]
         val barn3Perioder = endretPerioder[barn3.aktør.aktivFødselsnummer()]
@@ -296,6 +306,7 @@ class SendMeldingTilBisysTaskTest {
 
     @Test
     fun `Skal ikke sende melding til bisys hvis endring ikke er reduksjon eller opphøring`() {
+        // Arrange
         val (behandlingRepository, kafkaProducer, tilkjentYtelseRepository, _, behandling) = setupMocks()
         val sendMeldingTilBisysTask =
             SendMeldingTilBisysTask(kafkaProducer, tilkjentYtelseRepository, behandlingRepository)
@@ -334,8 +345,10 @@ class SendMeldingTilBisysTaskTest {
                 )
             }
 
+        // Act
         sendMeldingTilBisysTask.doTask(SendMeldingTilBisysTask.opprettTask(behandling[1].id))
 
+        // Assert
         verify(exactly = 0) { kafkaProducer.kafkaAivenTemplate.send(any(), any(), any()) }
     }
 }

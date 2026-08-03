@@ -23,22 +23,31 @@ internal class OppdaterSkjemaTest {
 
     @Test
     fun `oppdatere med tom kompetanse skal ikke har noen effekt`() {
+        // Arrange
         val tomKompetanse = Kompetanse(null, null)
 
+        // Act
         val faktiskeKompetanser = oppdaterSkjemaerRekursivt(kompetanser, tomKompetanse)
+
+        // Assert
         assertEqualsUnordered(kompetanser, faktiskeKompetanser)
     }
 
     @Test
     fun `oppdatere tom liste av kompetansr med en gyldig kompetanse skal gi tom liste`() {
+        // Arrange
         val kompetanse = kompetanse(jan(2020), "------", barn1, barn2, barn3)
 
+        // Act
         val faktiskeKompetanser = oppdaterSkjemaerRekursivt(emptyList(), kompetanse)
+
+        // Assert
         assertEqualsUnordered(emptyList(), faktiskeKompetanser)
     }
 
     @Test
     fun `oppdatere utenfor gjeldende kompetanser skal ikke ha effekt`() {
+        // Arrange
         val kompetanse =
             kompetanse(
                 jan(2019),
@@ -48,12 +57,16 @@ internal class OppdaterSkjemaTest {
                 barn3,
             )
 
+        // Act
         val faktiskeKompetanser = oppdaterSkjemaerRekursivt(kompetanser, kompetanse)
+
+        // Assert
         assertEqualsUnordered(kompetanser, faktiskeKompetanser)
     }
 
     @Test
     fun `oppdatere mer enn gjeldende kompetanser skal bare påvirke eksisterende tidsperioder`() {
+        // Arrange
         val kompetanse = kompetanse(jan(2020), "PPPPPPPPPPPPPPPPPPPPPP", barn1, barn2, barn3)
 
         val forventedeKompetanser =
@@ -62,12 +75,16 @@ internal class OppdaterSkjemaTest {
                 .medKompetanse("  PP", barn2, barn3)
                 .byggKompetanser()
 
+        // Act
         val faktiskeKompetanser = oppdaterSkjemaerRekursivt(kompetanser, kompetanse)
+
+        // Assert
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
     @Test
     fun `oppdatere kompetanser som begynner uendret, skal likevel bli endret`() {
+        // Arrange
         val kompetanse = kompetanse(jan(2020), "    SSSSSSSSS", barn1)
 
         val forventedeKompetanser =
@@ -77,7 +94,10 @@ internal class OppdaterSkjemaTest {
                 .medKompetanse("             PP", barn1, barn2, barn3)
                 .byggKompetanser()
 
+        // Act
         val faktiskeKompetanser = oppdaterSkjemaerRekursivt(kompetanser, kompetanse)
+
+        // Assert
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 }

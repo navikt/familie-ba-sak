@@ -45,6 +45,7 @@ class BehandlingsresultatOpphørUtilsTest {
 
     @Test
     fun `hentOpphørsresultatPåBehandling skal returnere IKKE_OPPHØRT dersom nåværende andeler strekker seg lengre enn dagens dato`() {
+        // Arrange
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -80,6 +81,7 @@ class BehandlingsresultatOpphørUtilsTest {
                 ),
             )
 
+        // Act
         val opphørsresultat =
             hentOpphørsresultatPåBehandling(
                 nåværendeAndeler = nåværendeAndeler,
@@ -88,11 +90,13 @@ class BehandlingsresultatOpphørUtilsTest {
                 forrigeEndretAndeler = emptyList(),
             )
 
+        // Assert
         assertEquals(Opphørsresultat.IKKE_OPPHØRT, opphørsresultat)
     }
 
     @Test
     fun `hentOpphørsresultatPåBehandling skal returnere OPPHØRT dersom nåværende andeler opphører mens forrige andeler ikke opphører til og med dagens dato`() {
+        // Arrange
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -128,6 +132,7 @@ class BehandlingsresultatOpphørUtilsTest {
                 ),
             )
 
+        // Act
         val opphørsresultat =
             hentOpphørsresultatPåBehandling(
                 nåværendeAndeler = nåværendeAndeler,
@@ -136,11 +141,13 @@ class BehandlingsresultatOpphørUtilsTest {
                 forrigeEndretAndeler = emptyList(),
             )
 
+        // Assert
         assertEquals(Opphørsresultat.OPPHØRT, opphørsresultat)
     }
 
     @Test
     fun `hentOpphørsresultatPåBehandling skal returnere OPPHØRT dersom nåværende andeler opphører tidligere enn forrige andeler og dagens dato`() {
+        // Arrange
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -176,6 +183,7 @@ class BehandlingsresultatOpphørUtilsTest {
                 ),
             )
 
+        // Act
         val opphørsresultat =
             hentOpphørsresultatPåBehandling(
                 nåværendeAndeler = nåværendeAndeler,
@@ -184,11 +192,13 @@ class BehandlingsresultatOpphørUtilsTest {
                 forrigeEndretAndeler = emptyList(),
             )
 
+        // Assert
         assertEquals(Opphørsresultat.OPPHØRT, opphørsresultat)
     }
 
     @Test
     fun `hentOpphørsresultatPåBehandling skal returnere OPPHØRT dersom vi går fra andeler på person til fullt opphør på person`() {
+        // Arrange
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
 
         val forrigeAndeler =
@@ -201,6 +211,7 @@ class BehandlingsresultatOpphørUtilsTest {
                 ),
             )
 
+        // Act
         val opphørsresultat =
             hentOpphørsresultatPåBehandling(
                 nåværendeAndeler = emptyList(),
@@ -209,11 +220,13 @@ class BehandlingsresultatOpphørUtilsTest {
                 forrigeEndretAndeler = emptyList(),
             )
 
+        // Assert
         assertEquals(Opphørsresultat.OPPHØRT, opphørsresultat)
     }
 
     @Test
     fun `hentOpphørsresultatPåBehandling skal returnere FORTSATT_OPPHØRT dersom nåværende andeler har lik opphørsdato som forrige andeler`() {
+        // Arrange
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -249,6 +262,7 @@ class BehandlingsresultatOpphørUtilsTest {
                 ),
             )
 
+        // Act
         val opphørsresultat =
             hentOpphørsresultatPåBehandling(
                 nåværendeAndeler = nåværendeAndeler,
@@ -257,11 +271,13 @@ class BehandlingsresultatOpphørUtilsTest {
                 forrigeEndretAndeler = emptyList(),
             )
 
+        // Assert
         assertEquals(Opphørsresultat.FORTSATT_OPPHØRT, opphørsresultat)
     }
 
     @Test
     fun `hentOpphørsresultatPåBehandling skal returnere IKKE_OPPHØRT dersom nåværende andeler har lik opphørsdato som forrige andeler men det er i fremtiden`() {
+        // Arrange
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -297,6 +313,7 @@ class BehandlingsresultatOpphørUtilsTest {
                 ),
             )
 
+        // Act
         val opphørsresultat =
             hentOpphørsresultatPåBehandling(
                 nåværendeAndeler = nåværendeAndeler,
@@ -305,12 +322,14 @@ class BehandlingsresultatOpphørUtilsTest {
                 forrigeEndretAndeler = emptyList(),
             )
 
+        // Assert
         assertEquals(Opphørsresultat.IKKE_OPPHØRT, opphørsresultat)
     }
 
     @ParameterizedTest
     @EnumSource(Årsak::class, names = ["ALLEREDE_UTBETALT", "ENDRE_MOTTAKER", "ETTERBETALING_3ÅR"])
     internal fun `filtrerBortIrrelevanteAndeler - skal filtrere andeler som har 0 i beløp og endret utbetaling andel med årsak ALLEREDE_UTBETALT, ENDRE_MOTTAKER eller ETTERBETALING_3ÅR`(årsak: Årsak) {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         val barnAktør = barn.aktør
 
@@ -354,14 +373,17 @@ class BehandlingsresultatOpphørUtilsTest {
                 ),
             )
 
+        // Act
         val andelerEtterFiltrering = andeler.filtrerBortIrrelevanteAndeler(endretUtBetalingAndeler)
 
+        // Assert
         assertEquals(andelerEtterFiltrering.minOf { it.stønadFom }, for1mndSiden)
         assertEquals(andelerEtterFiltrering.maxOf { it.stønadTom }, om1mnd)
     }
 
     @Test
     internal fun `filtrerBortIrrelevanteAndeler - skal ikke filtrere andeler som har 0 i beløp og endret utbetaling andel med årsak DELT_BOSTED`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         val barnAktør = barn.aktør
 
@@ -405,14 +427,17 @@ class BehandlingsresultatOpphørUtilsTest {
                 ),
             )
 
+        // Act
         val andelerEtterFiltrering = andeler.filtrerBortIrrelevanteAndeler(endretUtBetalingAndeler)
 
+        // Assert
         assertEquals(andelerEtterFiltrering.minOf { it.stønadFom }, for3mndSiden)
         assertEquals(andelerEtterFiltrering.maxOf { it.stønadTom }, om4mnd)
     }
 
     @Test
     internal fun `filtrerBortIrrelevanteAndeler - skal ikke filtrere andeler som har 0 i beløp grunnet differanseberegning`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         val barnAktør = barn.aktør
         val søker = lagPerson(type = PersonType.SØKER)
@@ -443,14 +468,17 @@ class BehandlingsresultatOpphørUtilsTest {
                 ),
             )
 
+        // Act
         val andelerEtterFiltrering = andeler.filtrerBortIrrelevanteAndeler(endretAndeler = emptyList())
 
+        // Assert
         assertEquals(andelerEtterFiltrering.minOf { it.stønadFom }, for3mndSiden)
         assertEquals(andelerEtterFiltrering.maxOf { it.stønadTom }, om4mnd)
     }
 
     @Test
     fun `utledOpphørsdatoForNåværendeBehandlingMedFallback - skal returnere null hvis det ikke finnes andeler i inneværende behandling og kun irrelevante nullutbetalinger i forrige behandling`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
 
         val forrigeAndeler =
@@ -489,6 +517,7 @@ class BehandlingsresultatOpphørUtilsTest {
                 ),
             )
 
+        // Act
         val opphørstidspunktInneværendeBehandling =
             emptyList<AndelTilkjentYtelse>().utledOpphørsdatoForNåværendeBehandlingMedFallback(
                 forrigeAndelerIBehandling = forrigeAndeler,
@@ -496,11 +525,13 @@ class BehandlingsresultatOpphørUtilsTest {
                 nåværendeEndretAndelerIBehandling = emptyList(),
             )
 
+        // Assert
         assertNull(opphørstidspunktInneværendeBehandling)
     }
 
     @Test
     fun `utledOpphørsdatoForNåværendeBehandlingMedFallback - skal returnere tidligste fom på andeler i forrige behandling hvis det ikke finnes andeler i inneværende behandling`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
 
         val forrigeAndeler =
@@ -531,6 +562,7 @@ class BehandlingsresultatOpphørUtilsTest {
                 ),
             )
 
+        // Act
         val opphørstidspunktInneværendeBehandling =
             emptyList<AndelTilkjentYtelse>().utledOpphørsdatoForNåværendeBehandlingMedFallback(
                 forrigeAndelerIBehandling = forrigeAndeler,
@@ -538,6 +570,7 @@ class BehandlingsresultatOpphørUtilsTest {
                 nåværendeEndretAndelerIBehandling = emptyList(),
             )
 
+        // Assert
         assertEquals(for1mndSiden, opphørstidspunktInneværendeBehandling)
     }
 }

@@ -42,6 +42,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `ikke oppdater status på fagsaker som er løpende og har løpende utbetalinger`() {
+        // Arrange
         val forelderIdent = randomFnr()
 
         val fagsakOriginal =
@@ -56,18 +57,23 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
             andelKalkulertUtbetalingsbeløp = 1054,
         )
 
+        // Act
         val fagsak = fagsakService.hentLøpendeFagsaker()
 
+        // Assert
         Assertions.assertTrue(fagsak.any { it.id == fagsakOriginal.id })
 
+        // Act
         fagsakService.oppdaterLøpendeStatusPåFagsaker()
         val fagsak2 = fagsakService.hentLøpendeFagsaker()
 
+        // Assert
         Assertions.assertTrue(fagsak2.any { it.id == fagsakOriginal.id })
     }
 
     @Test
     fun `skal sette status til avsluttet hvis ingen løpende utbetalinger`() {
+        // Arrange
         val forelderIdent = randomFnr()
 
         val fagsakOriginal =
@@ -89,14 +95,17 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         tilkjentYtelse.stønadTom = LocalDate.now().minusMonths(1).toYearMonth()
         tilkjentYtelseRepository.save(tilkjentYtelse)
 
+        // Act
         fagsakService.oppdaterLøpendeStatusPåFagsaker()
         val fagsak = fagsakService.hentLøpendeFagsaker()
 
+        // Assert
         Assertions.assertFalse(fagsak.any { it.id == fagsakOriginal.id })
     }
 
     @Test
     fun `skal sette status til avsluttet hvis alle løpende andeler er satt til 0 grunnet endret utbetalingsandeler`() {
+        // Arrange
         val forelderIdent = randomFnr()
 
         val fagsakOriginal =
@@ -112,14 +121,17 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
             andelKalkulertUtbetalingsbeløp = 0,
         )
 
+        // Act
         fagsakService.oppdaterLøpendeStatusPåFagsaker()
         val fagsak = fagsakService.hentLøpendeFagsaker()
 
+        // Assert
         Assertions.assertFalse(fagsak.any { it.id == fagsakOriginal.id })
     }
 
     @Test
     fun `skal ikke sette status til avsluttet hvis alle løpende andeler er satt til 0 grunnet nullutbetaling`() {
+        // Arrange
         val forelderIdent = randomFnr()
 
         val fagsakOriginal =
@@ -135,9 +147,11 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
             andelKalkulertUtbetalingsbeløp = 0,
         )
 
+        // Act
         fagsakService.oppdaterLøpendeStatusPåFagsaker()
         val fagsak = fagsakService.hentLøpendeFagsaker()
 
+        // Assert
         Assertions.assertTrue(fagsak.any { it.id == fagsakOriginal.id })
     }
 

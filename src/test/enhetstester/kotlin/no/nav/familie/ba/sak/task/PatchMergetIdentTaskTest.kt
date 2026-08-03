@@ -61,6 +61,7 @@ class PatchMergetIdentTaskTest {
 
     @Test
     fun `Skal kunne patche barnets ident for en fagsak hvor gammel ident er en historisk ident av ny ident`() {
+        // Arrange
         val dto =
             PatchMergetIdentDto(
                 fagsakId = fagsak.id,
@@ -82,8 +83,10 @@ class PatchMergetIdentTaskTest {
         val aktørMergeLoggSlot = slot<AktørMergeLogg>()
         every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
 
+        // Act
         task.doTask(Task(payload = jsonMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
 
+        // Assert
         val aktørMergeLogg = aktørMergeLoggSlot.captured
         assertThat(aktørMergeLogg.nyAktørId).isEqualTo(nyAktør.aktørId)
         assertThat(aktørMergeLogg.fagsakId).isEqualTo(dto.fagsakId)
@@ -96,6 +99,7 @@ class PatchMergetIdentTaskTest {
 
     @Test
     fun `Skal kaste feil ved patching av ident hvis ident på barnet ikke finnes på fagsaken`() {
+        // Arrange
         val dto =
             PatchMergetIdentDto(
                 fagsakId = fagsak.id,
@@ -105,6 +109,7 @@ class PatchMergetIdentTaskTest {
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns emptySet()
 
+        // Act & Assert
         assertThrows<Feil> { task.doTask(Task(payload = jsonMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
             assertThat(it.message).isEqualTo("Fant ikke ident som skal patches på fagsak=${fagsak.id} aktører=[]")
         }
@@ -112,6 +117,7 @@ class PatchMergetIdentTaskTest {
 
     @Test
     fun `Skal kaste feil ved patching av ident hvis gammel ident ikke er historisk av ny ident`() {
+        // Arrange
         val dto =
             PatchMergetIdentDto(
                 fagsakId = fagsak.id,
@@ -122,6 +128,7 @@ class PatchMergetIdentTaskTest {
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
         every { pdlIdentRestKlient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns emptyList()
 
+        // Act & Assert
         assertThrows<Feil> { task.doTask(Task(payload = jsonMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
             assertThat(it.message).isEqualTo("Ident som skal patches finnes ikke som historisk ident av ny ident")
         }
@@ -129,6 +136,7 @@ class PatchMergetIdentTaskTest {
 
     @Test
     fun `Skal kaste feil ved patching av ident hvis ny personident allerede eksisterer i personident`() {
+        // Arrange
         val dto =
             PatchMergetIdentDto(
                 fagsakId = fagsak.id,
@@ -146,6 +154,7 @@ class PatchMergetIdentTaskTest {
 
         every { personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident) } returns Personident(nyAktør.aktivFødselsnummer(), nyAktør)
 
+        // Act & Assert
         assertThrows<Feil> { task.doTask(Task(payload = jsonMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
             assertThat(it.message).isEqualTo("Fant allerede en personident for nytt fødselsnummer")
         }
@@ -153,6 +162,7 @@ class PatchMergetIdentTaskTest {
 
     @Test
     fun `Skal kunne patche barnets ident for en fagsak hvor gammel ident ikke er en historisk ident av ny ident, men man har valgt å overstyre`() {
+        // Arrange
         val dto =
             PatchMergetIdentDto(
                 fagsakId = fagsak.id,
@@ -173,8 +183,10 @@ class PatchMergetIdentTaskTest {
         val aktørMergeLoggSlot = slot<AktørMergeLogg>()
         every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
 
+        // Act
         task.doTask(Task(payload = jsonMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
 
+        // Assert
         val aktørMergeLogg = aktørMergeLoggSlot.captured
         assertThat(aktørMergeLogg.nyAktørId).isEqualTo(nyAktør.aktørId)
         assertThat(aktørMergeLogg.fagsakId).isEqualTo(dto.fagsakId)
@@ -187,6 +199,7 @@ class PatchMergetIdentTaskTest {
 
     @Test
     fun `Skal kunne patche søkers ident for en fagsak hvor gammel ident er en historisk ident av ny ident`() {
+        // Arrange
         val dto =
             PatchMergetIdentDto(
                 fagsakId = fagsak.id,
@@ -208,8 +221,10 @@ class PatchMergetIdentTaskTest {
         val aktørMergeLoggSlot = slot<AktørMergeLogg>()
         every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
 
+        // Act
         task.doTask(Task(payload = jsonMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
 
+        // Assert
         val aktørMergeLogg = aktørMergeLoggSlot.captured
         assertThat(aktørMergeLogg.nyAktørId).isEqualTo(nyAktør.aktørId)
         assertThat(aktørMergeLogg.fagsakId).isEqualTo(dto.fagsakId)

@@ -13,6 +13,7 @@ class BehandlingValideringTest {
     fun `Skal kaste feil for alle behandlingstatus utenom UTREDES dersom behandling forsøkes å redigeres på`(
         behandlingStatus: BehandlingStatus,
     ) {
+        // Act & Assert
         val melding = assertThrows<FunksjonellFeil> { validerBehandlingKanRedigeres(behandlingStatus) }.message
 
         assertThat(melding).isEqualTo("Behandlingen er låst for videre redigering da den har statusen ${behandlingStatus.name}")

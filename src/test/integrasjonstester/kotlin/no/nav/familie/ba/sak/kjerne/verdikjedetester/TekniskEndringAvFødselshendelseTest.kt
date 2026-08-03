@@ -41,6 +41,7 @@ class TekniskEndringAvFødselshendelseTest(
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Skal teknisk opphøre fødselshendelse`() {
+        // Arrange
         System.setProperty(FeatureToggle.TEKNISK_ENDRING.navn, "true")
 
         val scenario =
@@ -71,6 +72,7 @@ class TekniskEndringAvFødselshendelseTest(
                 brevmalService = brevmalService,
             )!!
 
+        // Act
         val utvidetBehandlingDto =
             familieBaSakKlient().opprettBehandling(
                 behandlingType = BehandlingType.TEKNISK_ENDRING,

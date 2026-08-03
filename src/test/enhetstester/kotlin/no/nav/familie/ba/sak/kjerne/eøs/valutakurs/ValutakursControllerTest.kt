@@ -55,66 +55,91 @@ class ValutakursControllerTest {
 
     @Test
     fun `Test at valutakurs hentes fra ECB dersom dato og valuta er satt`() {
+        // Arrange
         val valutakursDato = LocalDate.of(2022, 1, 1)
         val valuta = "SEK"
+
+        // Act & Assert
         assertThrows<MockKException> {
             valutakursController.oppdaterValutakurs(
                 1,
                 valutakursDto.copy(valutakursdato = valutakursDato, valutakode = valuta),
             )
         }
+
+        // Assert
         verify(exactly = 1) { ecbService.hentValutakurs("SEK", valutakursDato) }
         verify(exactly = 1) { valutakursService.oppdaterValutakurs(any(), any()) }
     }
 
     @Test
     fun `Test at valutakurs ikke hentes fra ECB dersom dato ikke er satt`() {
+        // Arrange
         val valutakursDato = LocalDate.of(2022, 1, 1)
+
+        // Act & Assert
         assertThrows<MockKException> {
             valutakursController.oppdaterValutakurs(
                 1,
                 valutakursDto.copy(valutakode = "SEK"),
             )
         }
+
+        // Assert
         verify(exactly = 0) { ecbService.hentValutakurs("SEK", valutakursDato) }
         verify(exactly = 1) { valutakursService.oppdaterValutakurs(any(), any()) }
     }
 
     @Test
     fun `Test at valutakurs ikke hentes fra ECB dersom valuta ikke er satt`() {
+        // Arrange
         val valutakursDato = LocalDate.of(2022, 1, 1)
+
+        // Act & Assert
         assertThrows<MockKException> {
             valutakursController.oppdaterValutakurs(
                 1,
                 valutakursDto.copy(valutakursdato = valutakursDato),
             )
         }
+
+        // Assert
         verify(exactly = 0) { ecbService.hentValutakurs("SEK", valutakursDato) }
         verify(exactly = 1) { valutakursService.oppdaterValutakurs(any(), any()) }
     }
 
     @Test
     fun `Test at valutakurs ikke hentes fra ECB dersom ISK og før 1 feb 2018`() {
+        // Arrange
         val valutakursDato = LocalDate.of(2018, 1, 31)
+
+        // Act & Assert
         assertThrows<MockKException> {
             valutakursController.oppdaterValutakurs(
                 1,
                 valutakursDto.copy(valutakursdato = valutakursDato, valutakode = "ISK"),
             )
         }
+
+        // Assert
         verify(exactly = 0) { ecbService.hentValutakurs("ISK", valutakursDato) }
         verify(exactly = 1) { valutakursService.oppdaterValutakurs(any(), any()) }
     }
 
     @Test
     fun `Test at valutakurs hentes fra ECB dersom ISK og etter 1 feb 2018`() {
+        // Arrange
         val valutakursDato = LocalDate.of(2018, 2, 1)
+
+        // Act & Assert
         assertThrows<MockKException> {
             valutakursController.oppdaterValutakurs(
                 1,
                 valutakursDto.copy(valutakursdato = valutakursDato, valutakode = "ISK"),
             )
         }
+
+        // Assert
         verify(exactly = 1) { ecbService.hentValutakurs("ISK", valutakursDato) }
         verify(exactly = 1) { valutakursService.oppdaterValutakurs(any(), any()) }
     }

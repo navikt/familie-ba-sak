@@ -59,6 +59,7 @@ class OvergangsstønadServiceTest {
     fun `Ved satsendring og månedlig valutajustering skal gamle perioder kopieres`(
         årsak: BehandlingÅrsak,
     ) {
+        // Arrange
         val søker = lagPerson(type = PersonType.SØKER)
         val fagsak = Fagsak(aktør = søker.aktør)
         val forrigeBehandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD, fagsak = fagsak)
@@ -99,11 +100,13 @@ class OvergangsstønadServiceTest {
         val slot = slot<List<PeriodeOvergangsstønadGrunnlag>>()
         every { periodeOvergangsstønadGrunnlagRepository.saveAll(capture(slot)) } returnsArgument 0
 
+        // Act
         overgangsstønadService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
             søkerAktør = søker.aktør,
             behandling = behandling,
         )
 
+        // Assert
         assertThat(slot.captured).containsAll(forventetNyePerioder)
         verify(exactly = 1) { periodeOvergangsstønadGrunnlagRepository.saveAll(forventetNyePerioder) }
         verify(exactly = 0) { efSakRestKlient.hentPerioderMedFullOvergangsstønad(any()) }
@@ -111,6 +114,7 @@ class OvergangsstønadServiceTest {
 
     @Test
     fun `Vanlige behandlinger skal hente perioder fra EF`() {
+        // Arrange
         val behandling = lagBehandling(årsak = BehandlingÅrsak.NYE_OPPLYSNINGER)
         val søker = lagPerson(type = PersonType.SØKER)
 
@@ -138,11 +142,13 @@ class OvergangsstønadServiceTest {
         val slot = slot<List<PeriodeOvergangsstønadGrunnlag>>()
         every { periodeOvergangsstønadGrunnlagRepository.saveAll(capture(slot)) } returnsArgument 0
 
+        // Act
         overgangsstønadService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
             søkerAktør = søker.aktør,
             behandling = behandling,
         )
 
+        // Assert
         verify(exactly = 1) { efSakRestKlient.hentPerioderMedFullOvergangsstønad(søker.aktør.aktivFødselsnummer()) }
         assertThat(slot.captured).containsExactly(
             forventetPeriode,

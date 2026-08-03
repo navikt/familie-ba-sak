@@ -28,6 +28,7 @@ class RegistrerPersongrunnlagTest(
     @Test
     @Tag("integration")
     fun `Legg til personer på behandling`() {
+        // Arrange
         val morId = randomFnr()
         val barn1Id = randomFnr()
         val barn2Id = randomFnr()
@@ -35,6 +36,8 @@ class RegistrerPersongrunnlagTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
+
+        // Act
         stegService.håndterPersongrunnlag(
             behandling = behandling1,
             registrerPersongrunnlagDTO =
@@ -44,6 +47,7 @@ class RegistrerPersongrunnlagTest(
                 ),
         )
 
+        // Assert
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
         Assertions.assertEquals(3, grunnlag1!!.personer.size)
@@ -63,6 +67,7 @@ class RegistrerPersongrunnlagTest(
     @Test
     @Tag("integration")
     fun `Legg til barn på eksisterende behandling`() {
+        // Arrange
         val morId = randomFnr()
         val barn1Id = randomFnr()
         val barn2Id = randomFnr()
@@ -70,6 +75,8 @@ class RegistrerPersongrunnlagTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
+
+        // Act
         stegService.håndterPersongrunnlag(
             behandling = behandling1,
             registrerPersongrunnlagDTO =
@@ -79,12 +86,14 @@ class RegistrerPersongrunnlagTest(
                 ),
         )
 
+        // Assert
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
         Assertions.assertEquals(2, grunnlag1!!.personer.size)
         Assertions.assertTrue(grunnlag1.personer.any { it.aktør.aktivFødselsnummer() == morId })
         Assertions.assertTrue(grunnlag1.personer.any { it.aktør.aktivFødselsnummer() == barn1Id })
 
+        // Act
         stegService.håndterPersongrunnlag(
             behandling = behandling1,
             registrerPersongrunnlagDTO =
@@ -97,6 +106,8 @@ class RegistrerPersongrunnlagTest(
                         ),
                 ),
         )
+
+        // Assert
         val grunnlag2 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
         Assertions.assertEquals(3, grunnlag2!!.personer.size)
@@ -104,6 +115,7 @@ class RegistrerPersongrunnlagTest(
         Assertions.assertTrue(grunnlag2.personer.any { it.aktør.aktivFødselsnummer() == barn1Id })
         Assertions.assertTrue(grunnlag2.personer.any { it.aktør.aktivFødselsnummer() == barn2Id })
 
+        // Act
         // Skal ikke føre til flere personer på persongrunnlaget
         stegService.håndterPersongrunnlag(
             behandling = behandling1,
@@ -118,6 +130,7 @@ class RegistrerPersongrunnlagTest(
                 ),
         )
 
+        // Assert
         val grunnlag3 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
         Assertions.assertEquals(3, grunnlag3!!.personer.size)

@@ -23,6 +23,7 @@ class ValutakursRepositoryTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Skal lagre flere valutakurser med gjenbruk av flere aktører`() {
+        // Arrange
         val søker = aktørIdRepository.save(randomAktør())
         val barn1 = aktørIdRepository.save(randomAktør())
         val barn2 = aktørIdRepository.save(randomAktør())
@@ -30,6 +31,7 @@ class ValutakursRepositoryTest(
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak))
 
+        // Act
         val valutakurs =
             valutakursRepository.save(
                 lagValutakurs(
@@ -44,11 +46,13 @@ class ValutakursRepositoryTest(
                 ).also { it.behandlingId = behandling.id },
             )
 
+        // Assert
         assertEquals(valutakurs.barnAktører, valutakurs2.barnAktører)
     }
 
     @Test
     fun `Skal lagre skjema-feltene`() {
+        // Arrange
         val søker = aktørIdRepository.save(randomAktør())
         val barn1 = aktørIdRepository.save(randomAktør())
 
@@ -68,9 +72,11 @@ class ValutakursRepositoryTest(
                 ),
             )
 
+        // Act
         val hentedeValutakurser =
             valutakursRepository.finnFraBehandlingId(behandlingId = behandling.id)
 
+        // Assert
         assertEquals(1, hentedeValutakurser.size)
         assertEquals(valutakurs, hentedeValutakurser.first())
     }

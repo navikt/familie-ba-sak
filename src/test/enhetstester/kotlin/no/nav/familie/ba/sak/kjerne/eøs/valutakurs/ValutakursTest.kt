@@ -15,13 +15,16 @@ class ValutakursTest {
     inner class `Valider at erObligatoriskeFelterSatt` {
         @Test
         fun `gir false ved tom valutakurs`() {
+            // Arrange
             val tomValutakurs = lagValutakurs()
 
+            // Act & Assert
             assertThat(tomValutakurs.erObligatoriskeFelterSatt()).isFalse()
         }
 
         @Test
         fun `gir false dersom fom ikke er satt`() {
+            // Arrange
             val valutakursUtenFom =
                 lagValutakurs(
                     valutakode = "NOK",
@@ -31,11 +34,13 @@ class ValutakursTest {
                     barnAktører = setOf(randomAktør()),
                 )
 
+            // Act & Assert
             assertThat(valutakursUtenFom.erObligatoriskeFelterSatt()).isFalse()
         }
 
         @Test
         fun `gir false dersom valutakode ikke er satt`() {
+            // Arrange
             val valutakursUtenValutakode =
                 lagValutakurs(
                     fom = LocalDate.now().toYearMonth(),
@@ -45,11 +50,13 @@ class ValutakursTest {
                     barnAktører = setOf(randomAktør()),
                 )
 
+            // Act & Assert
             assertThat(valutakursUtenValutakode.erObligatoriskeFelterSatt()).isFalse()
         }
 
         @Test
         fun `gir false dersom kurs ikke er satt`() {
+            // Arrange
             val valutakursUtenKurs =
                 lagValutakurs(
                     fom = LocalDate.now().toYearMonth(),
@@ -59,11 +66,13 @@ class ValutakursTest {
                     barnAktører = setOf(randomAktør()),
                 )
 
+            // Act & Assert
             assertThat(valutakursUtenKurs.erObligatoriskeFelterSatt()).isFalse()
         }
 
         @Test
         fun `gir false dersom valutakursdato ikke er satt`() {
+            // Arrange
             val valutakursUtenValutakursdato =
                 lagValutakurs(
                     fom = LocalDate.now().toYearMonth(),
@@ -73,11 +82,13 @@ class ValutakursTest {
                     barnAktører = setOf(randomAktør()),
                 )
 
+            // Act & Assert
             assertThat(valutakursUtenValutakursdato.erObligatoriskeFelterSatt()).isFalse()
         }
 
         @Test
         fun `gir false dersom vurderingsform ikke er satt`() {
+            // Arrange
             val valutakursUtenVurderingsform =
                 lagValutakurs(
                     fom = LocalDate.now().toYearMonth(),
@@ -88,11 +99,13 @@ class ValutakursTest {
                     vurderingsform = Vurderingsform.IKKE_VURDERT,
                 )
 
+            // Act & Assert
             assertThat(valutakursUtenVurderingsform.erObligatoriskeFelterSatt()).isFalse()
         }
 
         @Test
         fun `gir false dersom barnAktører er tomt sett`() {
+            // Arrange
             val valutakursUtenBarn =
                 lagValutakurs(
                     fom = LocalDate.now().toYearMonth(),
@@ -103,11 +116,13 @@ class ValutakursTest {
                     vurderingsform = Vurderingsform.MANUELL,
                 )
 
+            // Act & Assert
             assertThat(valutakursUtenBarn.erObligatoriskeFelterSatt()).isFalse()
         }
 
         @Test
         fun `gir true dersom obligatoriske felter er satt`() {
+            // Arrange
             val valutakursMedObligatoriskeFelter =
                 lagValutakurs(
                     fom = LocalDate.now().toYearMonth(),
@@ -118,6 +133,7 @@ class ValutakursTest {
                     vurderingsform = Vurderingsform.MANUELL,
                 )
 
+            // Act & Assert
             assertThat(valutakursMedObligatoriskeFelter.erObligatoriskeFelterSatt()).isTrue()
         }
     }
@@ -126,14 +142,17 @@ class ValutakursTest {
     inner class `Valider måValutakurserOppdateresForMåned` {
         @Test
         fun `gir true når det ikke er noen valutakurser`() {
+            // Arrange
             val måned = LocalDate.now().toYearMonth()
             val valutakurser = listOf<Valutakurs>()
 
+            // Act & Assert
             assertThat(valutakurser.måValutakurserOppdateresForMåned(måned)).isTrue()
         }
 
         @Test
         fun `gir false når alle valutakurser er oppdatert for gitt måned`() {
+            // Arrange
             val måned = LocalDate.now().toYearMonth()
 
             val valutakurs1 =
@@ -154,11 +173,13 @@ class ValutakursTest {
 
             val valutakurser = listOf(valutakurs1, valutakurs2)
 
+            // Act & Assert
             assertThat(valutakurser.måValutakurserOppdateresForMåned(måned)).isFalse()
         }
 
         @Test
         fun `gir true når minst én valutakurs ikke er oppdatert for gitt måned`() {
+            // Arrange
             val måned = LocalDate.now().toYearMonth()
 
             val valutakurs1 =
@@ -179,11 +200,13 @@ class ValutakursTest {
 
             val valutakurser = listOf(valutakurs1, valutakurs2)
 
+            // Act & Assert
             assertThat(valutakurser.måValutakurserOppdateresForMåned(måned)).isTrue()
         }
 
         @Test
         fun `gir true når en valutakurs har feil valutakursdato for gitt måned`() {
+            // Arrange
             val måned = LocalDate.now().toYearMonth()
 
             val valutakurs =
@@ -196,6 +219,7 @@ class ValutakursTest {
 
             val valutakurser = listOf(valutakurs)
 
+            // Act & Assert
             assertThat(valutakurser.måValutakurserOppdateresForMåned(måned)).isTrue()
         }
     }

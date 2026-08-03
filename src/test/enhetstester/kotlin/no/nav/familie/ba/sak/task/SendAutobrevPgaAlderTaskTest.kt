@@ -18,14 +18,17 @@ class SendAutobrevPgaAlderTaskTest {
 
     @Test
     fun `ignorere gammel task når nåværende måned ikke samsvarer med måned i payload`() {
+        // Arrange
         val autobrevDTO = AutobrevPgaAlderDTO(fagsakId = 1, alder = 18, årMåned = YearMonth.now().minusMonths(1))
         val taskPayload = jsonMapper.writeValueAsString(autobrevDTO)
         val taskInstance = Task(type = SendAutobrevPgaAlderTask.TASK_STEP_TYPE, payload = taskPayload)
 
+        // Act
         assertDoesNotThrow {
             sendAutobrevPgaAlderTask.doTask(taskInstance)
         }
 
+        // Assert
         verify(exactly = 0) {
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(any(), any())
         }
@@ -34,6 +37,7 @@ class SendAutobrevPgaAlderTaskTest {
 
     @Test
     fun `Kall opprettOmregningsoppgaveForBarnIBrytingsalder hvis dato i tasken er nåværendeMåned måned`() {
+        // Arrange
         val nåværendeMåned = YearMonth.now()
         val autobrevDTO = AutobrevPgaAlderDTO(fagsakId = 1, alder = 18, årMåned = nåværendeMåned)
         val taskPayload = jsonMapper.writeValueAsString(autobrevDTO)
@@ -43,10 +47,12 @@ class SendAutobrevPgaAlderTaskTest {
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(any(), any())
         } returns AutobrevOmregningSvar.OK
 
+        // Act
         assertDoesNotThrow {
             sendAutobrevPgaAlderTask.doTask(taskInstance)
         }
 
+        // Assert
         verify {
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(any(), any())
         }

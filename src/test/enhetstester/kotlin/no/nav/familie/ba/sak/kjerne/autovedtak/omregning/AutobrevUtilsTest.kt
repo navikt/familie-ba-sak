@@ -9,19 +9,23 @@ import org.junit.jupiter.api.assertThrows
 class AutobrevUtilsTest {
     @Test
     fun `Skal sjekke at historiske og gjeldene begrunnelser blir hentet for 18 år`() {
+        // Act
         val begrunnelser = AutobrevUtils.hentStandardbegrunnelserReduksjonForAlder(alder = 18)
 
+        // Assert
         assertEquals(listOf("REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK", "REDUKSJON_UNDER_18_ÅR"), begrunnelser.map { it.name })
     }
 
     @Test
     fun `Skal sjekke at gjeldende begrunnelse for autobrev er i listen over alle`() {
+        // Act & Assert
         assertThrows<Feil> {
             AutobrevUtils
                 .hentStandardbegrunnelserReduksjonForAlder(6)
                 .contains(AutobrevUtils.hentGjeldendeVedtakbegrunnelseReduksjonForAlder(6))
         }.apply { assertEquals("Alder må være oppgitt til 18 år.", message) }
 
+        // Act & Assert
         assertTrue(
             AutobrevUtils
                 .hentStandardbegrunnelserReduksjonForAlder(18)

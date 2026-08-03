@@ -11,6 +11,7 @@ import java.time.YearMonth
 class SmåbarnstilleggUtilsTest {
     @Test
     fun `Skal kunne automatisk iverksette småbarnstillegg når endringer i OS kun er frem i tid`() {
+        // Arrange
         val forrigeAndeler =
             listOf(
                 lagAndelTilkjentYtelse(
@@ -30,12 +31,14 @@ class SmåbarnstilleggUtilsTest {
                     ),
                 )
 
+        // Act
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) =
             hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
                 forrigeSmåbarnstilleggAndeler = forrigeAndeler,
                 nyeSmåbarnstilleggAndeler = nyeAndeler,
             )
 
+        // Assert
         assertTrue(
             kanAutomatiskIverksetteSmåbarnstillegg(
                 innvilgedeMånedPerioder = innvilgedeMånedPerioder,
@@ -46,6 +49,7 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal ikke kunne automatisk iverksette småbarnstillegg når endringer i OS er tilbake og frem i tid`() {
+        // Arrange
         val forrigeAndeler =
             listOf(
                 lagAndelTilkjentYtelse(
@@ -69,12 +73,14 @@ class SmåbarnstilleggUtilsTest {
                 ),
             )
 
+        // Act
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) =
             hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
                 forrigeSmåbarnstilleggAndeler = forrigeAndeler,
                 nyeSmåbarnstilleggAndeler = nyeAndeler,
             )
 
+        // Assert
         assertFalse(
             kanAutomatiskIverksetteSmåbarnstillegg(
                 innvilgedeMånedPerioder = innvilgedeMånedPerioder,
@@ -85,6 +91,7 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal ikke kunne automatisk iverksette småbarnstillegg når endringer i OS er 2 måneder frem i tid`() {
+        // Arrange
         val forrigeAndeler =
             listOf(
                 lagAndelTilkjentYtelse(
@@ -108,12 +115,14 @@ class SmåbarnstilleggUtilsTest {
                 ),
             )
 
+        // Act
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) =
             hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
                 forrigeSmåbarnstilleggAndeler = forrigeAndeler,
                 nyeSmåbarnstilleggAndeler = nyeAndeler,
             )
 
+        // Assert
         assertFalse(
             kanAutomatiskIverksetteSmåbarnstillegg(
                 innvilgedeMånedPerioder = innvilgedeMånedPerioder,
@@ -124,6 +133,7 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal ikke kunne automatisk iverksette småbarnstillegg når reduksjon i OS kun tilbake i tid`() {
+        // Arrange
         val forrigeAndeler =
             listOf(
                 lagAndelTilkjentYtelse(
@@ -135,12 +145,14 @@ class SmåbarnstilleggUtilsTest {
 
         val nyeAndeler = emptyList<AndelTilkjentYtelse>()
 
+        // Act
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) =
             hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
                 forrigeSmåbarnstilleggAndeler = forrigeAndeler,
                 nyeSmåbarnstilleggAndeler = nyeAndeler,
             )
 
+        // Assert
         assertFalse(
             kanAutomatiskIverksetteSmåbarnstillegg(
                 innvilgedeMånedPerioder = innvilgedeMånedPerioder,

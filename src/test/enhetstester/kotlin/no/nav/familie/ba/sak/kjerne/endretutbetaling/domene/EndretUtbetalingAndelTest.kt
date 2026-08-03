@@ -24,10 +24,12 @@ import java.time.YearMonth
 internal class EndretUtbetalingAndelTest {
     @Test
     fun `Sjekk validering med tomme felt`() {
+        // Arrange
         val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
         endretUtbetalingAndel.begrunnelse = ""
 
+        // Act & Assert
         assertThrows<RuntimeException> {
             endretUtbetalingAndel.validerUtfyltEndring()
         }
@@ -35,6 +37,7 @@ internal class EndretUtbetalingAndelTest {
 
     @Test
     fun `Sjekk validering for delt bosted med tomt felt avtaletidpunkt`() {
+        // Arrange
         val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
 
@@ -46,6 +49,7 @@ internal class EndretUtbetalingAndelTest {
         endretUtbetalingAndel.søknadstidspunkt = LocalDate.now()
         endretUtbetalingAndel.begrunnelse = "begrunnelse"
 
+        // Act & Assert
         assertThrows<RuntimeException> {
             endretUtbetalingAndel.validerUtfyltEndring()
         }
@@ -53,6 +57,7 @@ internal class EndretUtbetalingAndelTest {
 
     @Test
     fun `Sjekk validering for delt bosted med ikke tomt felt avtaletidpunkt`() {
+        // Arrange
         val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
 
@@ -65,11 +70,13 @@ internal class EndretUtbetalingAndelTest {
         endretUtbetalingAndel.avtaletidspunktDeltBosted = LocalDate.now()
         endretUtbetalingAndel.begrunnelse = "begrunnelse"
 
+        // Act & Assert
         assertTrue(endretUtbetalingAndel.validerUtfyltEndring())
     }
 
     @Test
     fun `Skal sette tom til siste måned med andel tilkjent ytelse hvis tom er null og det ikke finnes noen andre endringsperioder`() {
+        // Arrange
         val behandling = lagBehandling()
         val barn1 = lagPerson(type = PersonType.BARN)
         val barn2 = lagPerson(type = PersonType.BARN)
@@ -108,6 +115,7 @@ internal class EndretUtbetalingAndelTest {
                 ),
             )
 
+        // Act
         val nyTom =
             beregnGyldigTom(
                 andelTilkjentYtelser = andelTilkjentYtelser,
@@ -115,12 +123,14 @@ internal class EndretUtbetalingAndelTest {
                 andreEndredeAndelerPåBehandling = emptyList(),
             )
 
+        // Assert
         val forventetTom = minOf(sisteTomPåAndelerBarn1, sisteTomPåAndelerBarn2)
         assertEquals(forventetTom, nyTom)
     }
 
     @Test
     fun `Skal sette tom til måneden før neste endringsperiode`() {
+        // Arrange
         val behandling = lagBehandling()
         val barn1 = lagPerson(type = PersonType.BARN)
         val barn2 = lagPerson(type = PersonType.BARN)
@@ -177,6 +187,7 @@ internal class EndretUtbetalingAndelTest {
                 ),
             )
 
+        // Act
         val nyTom =
             beregnGyldigTom(
                 andelTilkjentYtelser = andelTilkjentYtelser,
@@ -184,12 +195,14 @@ internal class EndretUtbetalingAndelTest {
                 andreEndredeAndelerPåBehandling = andreEndretAndeler,
             )
 
+        // Assert
         val forventetTom = andreEndretAndeler.minOf { it.fom!! }.minusMonths(1)
         assertEquals(forventetTom, nyTom)
     }
 
     @Test
     fun `Skal sette tom til siste måned med andel tilkjent ytelse per aktør hvis tom er null og det ikke finnes noen andre endringsperioder`() {
+        // Arrange
         val behandling = lagBehandling()
         val barn1 = lagPerson(type = PersonType.BARN)
         val barn2 = lagPerson(type = PersonType.BARN)
@@ -228,6 +241,7 @@ internal class EndretUtbetalingAndelTest {
                 ),
             )
 
+        // Act
         val faktiskTomPerAktør =
             beregnGyldigTomPerAktør(
                 endretUtbetalingAndel = nyEndretUtbetalingAndel,
@@ -235,6 +249,7 @@ internal class EndretUtbetalingAndelTest {
                 andreEndredeAndelerPåBehandling = listOf(eksisterendeEndretUtbetalingAndel),
             )
 
+        // Assert
         val forventetTomPerAktør =
             mapOf(
                 barn1.aktør to eksisterendeEndretUtbetalingAndel.fom?.minusMonths(1),
@@ -249,8 +264,10 @@ internal class EndretUtbetalingAndelTest {
 
         @Test
         fun `skal returnere false hvis tom ikke er null`() {
+            // Arrange
             val endretUtbetalingAndel = endretUtbetalingAndel.copy(tom = YearMonth.of(2025, 12))
 
+            // Act & Assert
             assertThat(
                 skalSplitteEndretUtbetalingAndel(
                     endretUtbetalingAndel = endretUtbetalingAndel,
@@ -261,6 +278,7 @@ internal class EndretUtbetalingAndelTest {
 
         @Test
         fun `skal returnere false hvis begge personer har samme gyldigTomDato`() {
+            // Arrange
             val person1 = tilfeldigPerson()
             val person2 = tilfeldigPerson()
 
@@ -270,6 +288,7 @@ internal class EndretUtbetalingAndelTest {
                     person2.aktør to YearMonth.of(2025, 6),
                 )
 
+            // Act & Assert
             assertThat(
                 skalSplitteEndretUtbetalingAndel(
                     endretUtbetalingAndel = endretUtbetalingAndel,
@@ -280,6 +299,7 @@ internal class EndretUtbetalingAndelTest {
 
         @Test
         fun `skal returnere true hvis tom-dato er null og gyldigTomDato inneholder flere datoer`() {
+            // Arrange
             val person1 = tilfeldigPerson()
             val person2 = tilfeldigPerson()
 
@@ -289,6 +309,7 @@ internal class EndretUtbetalingAndelTest {
                     person2.aktør to YearMonth.of(2025, 7),
                 )
 
+            // Act & Assert
             assertThat(
                 skalSplitteEndretUtbetalingAndel(
                     endretUtbetalingAndel = endretUtbetalingAndel,
@@ -302,6 +323,7 @@ internal class EndretUtbetalingAndelTest {
     inner class SplittEndretUbetalingAndel {
         @Test
         fun `skal splitte andel med gyldig tom per aktør`() {
+            // Arrange
             val person1 = tilfeldigPerson()
             val person2 = tilfeldigPerson()
             val person3 = tilfeldigPerson()
@@ -327,12 +349,14 @@ internal class EndretUtbetalingAndelTest {
                     person3.aktør to YearMonth.of(2025, 12),
                 )
 
+            // Act
             val splittedeAndeler =
                 splittEndretUbetalingAndel(
                     endretUtbetalingAndel = endretUtbetalingAndel,
                     gyldigTomEtterDagensDatoPerAktør = gyldigTomEtterDagensDatoPerAktør,
                 )
 
+            // Assert
             assertThat(splittedeAndeler).hasSize(2)
 
             val (førsteAndel, andreAndel) = splittedeAndeler

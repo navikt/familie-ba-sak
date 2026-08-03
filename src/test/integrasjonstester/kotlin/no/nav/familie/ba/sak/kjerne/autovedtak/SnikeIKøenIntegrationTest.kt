@@ -75,10 +75,12 @@ class SnikeIKøenIntegrationTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `automatisk behandling sniker foran åpen behandling før besluttersteget og setter den tilbake til vilkårsvurderingssteget`() {
+        // Arrange
         val åpenBehandling = fullførFørstegangsbehandlingOgKjørRevurderingTilSteg(StegType.BEHANDLINGSRESULTAT)
 
         SnikeIKøenServiceTestConfig.endringstidspunktMock = LocalDateTime.now().minusHours(4)
 
+        // Act & Assert
         assertEquals(
             BEHANDLING_FERDIG,
             autovedtakStegService.kjørBehandlingOmregning(
@@ -114,10 +116,12 @@ class SnikeIKøenIntegrationTest(
 
     @Test
     fun `automatisk behandling forsøker å rekjøre og avbrytes med manuell oppgave etter 7 dager med åpen behandling på besluttersteget`() {
+        // Arrange
         val åpenBehandling = fullførFørstegangsbehandlingOgKjørRevurderingTilSteg(StegType.SEND_TIL_BESLUTTER)
 
         val tid6DagerSiden = LocalDateTime.now().minusDays(6)
 
+        // Act & Assert
         assertThrows<RekjørSenereException> {
             autovedtakStegService.kjørBehandlingOmregning(
                 åpenBehandling.fagsak.aktør,
@@ -131,6 +135,7 @@ class SnikeIKøenIntegrationTest(
             )
         }
 
+        // Act
         autovedtakStegService.kjørBehandlingOmregning(
             åpenBehandling.fagsak.aktør,
             OmregningBrevData(
@@ -142,6 +147,7 @@ class SnikeIKøenIntegrationTest(
             førstegangKjørt = tid6DagerSiden.minusDays(1),
         )
 
+        // Assert
         val lagredeTaskerAvType =
             fakeTaskRepositoryWrapper
                 .hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE)

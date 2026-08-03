@@ -28,29 +28,35 @@ internal class DokumentDistribueringServiceTest {
 
     @Test
     fun `Skal kalle 'loggBrevIkkeDistribuertUkjentAdresse' ved 400 kode og 'Mottaker har ukjent adresse' melding`() {
+        // Arrange
         every {
             integrasjonKlient.distribuerBrev(any())
         } throws HttpClientErrorException("Mottaker har ukjent adresse", HttpStatus.BAD_REQUEST, "", null, null, null)
 
+        // Act
         dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
             distribuerDokumentDTO = lagDistribuerDokumentDTO(),
             loggBehandlerRolle = BehandlerRolle.BESLUTTER,
         )
 
+        // Assert
         verify(exactly = 1) { loggService.opprettBrevIkkeDistribuertUkjentAdresseLogg(any(), any()) }
     }
 
     @Test
     fun `Skal kalle 'håndterMottakerDødIngenAdressePåBehandling' ved 410 Gone svar under distribuering`() {
+        // Arrange
         every {
             integrasjonKlient.distribuerBrev(any())
         } throws HttpClientErrorException("", HttpStatus.GONE, "", null, null, null)
 
+        // Act
         dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
             distribuerDokumentDTO = lagDistribuerDokumentDTO(),
             loggBehandlerRolle = BehandlerRolle.BESLUTTER,
         )
 
+        // Assert
         verify(exactly = 1) {
             loggService.opprettBrevIkkeDistribuertUkjentDødsboadresseLogg(any(), any())
         }
@@ -58,10 +64,12 @@ internal class DokumentDistribueringServiceTest {
 
     @Test
     fun `Skal hoppe over distribuering ved 409 Conflict mot dokdist`() {
+        // Arrange
         every {
             integrasjonKlient.distribuerBrev(any())
         } throws HttpClientErrorException("", HttpStatus.CONFLICT, "", null, null, null)
 
+        // Act & Assert
         assertDoesNotThrow {
             dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
                 distribuerDokumentDTO = lagDistribuerDokumentDTO(),

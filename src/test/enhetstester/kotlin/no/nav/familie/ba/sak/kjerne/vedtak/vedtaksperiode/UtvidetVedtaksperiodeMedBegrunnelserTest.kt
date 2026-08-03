@@ -24,6 +24,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
 
     @Test
     fun `Skal kun legge på utbetalingsdetaljer som gjelder riktig andeler tilkjent ytelse for fortsatt innvilget`() {
+        // Arrange
         val behandling = lagBehandling()
 
         val personopplysningGrunnlag =
@@ -78,12 +79,14 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
                 type = Vedtaksperiodetype.FORTSATT_INNVILGET,
             )
 
+        // Act
         val utvidetVedtaksperiodeMedBegrunnelser =
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
             )
 
+        // Assert
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
         Assertions.assertEquals(
             barn1.tilPersonDto().personIdent,

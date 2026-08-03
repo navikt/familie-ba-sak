@@ -144,6 +144,7 @@ class BeregningServiceTest {
 
     @Test
     fun `Skal mappe perioderesultat til andel ytelser for innvilget vedtak med 18-års vilkår som sluttdato`() {
+        // Arrange
         val behandling = lagBehandling()
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
 
@@ -196,11 +197,13 @@ class BeregningServiceTest {
                 listOf(barn.aktør.aktivFødselsnummer()),
             )
 
+        // Act
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
             personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
+        // Assert
         verify(exactly = 1) { tilkjentYtelseRepository.saveAndFlush(capture(slot)) }
 
         Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelse.size)
@@ -226,6 +229,7 @@ class BeregningServiceTest {
 
     @Test
     fun `Skal mappe perioderesultat til andel ytelser for innvilget vedtak som spenner over flere satsperioder`() {
+        // Arrange
         val behandling = lagBehandling()
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
 
@@ -278,11 +282,13 @@ class BeregningServiceTest {
                 listOf(barn.aktør.aktivFødselsnummer()),
             )
 
+        // Act
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
             personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
+        // Assert
         verify(exactly = 1) { tilkjentYtelseRepository.saveAndFlush(capture(slot)) }
 
         Assertions.assertEquals(2, slot.captured.andelerTilkjentYtelse.size)
@@ -302,6 +308,7 @@ class BeregningServiceTest {
 
     @Test
     fun `Skal verifisere at endret utbetaling andel appliseres på en innvilget utbetaling andel`() {
+        // Arrange
         val behandling = lagBehandling()
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 4, 5))
@@ -384,11 +391,13 @@ class BeregningServiceTest {
 
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id) } returns andelTilkjentYtelser
 
+        // Act
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
             personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
+        // Assert
         verify(exactly = 1) { tilkjentYtelseRepository.saveAndFlush(capture(slot)) }
 
         Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelse.size)
@@ -402,6 +411,7 @@ class BeregningServiceTest {
 
     @Test
     fun `Skal mappe perioderesultat til andel ytelser for avslått vedtak`() {
+        // Arrange
         val behandling = lagBehandling()
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
         val barn = lagPerson(type = PersonType.BARN)
@@ -447,11 +457,13 @@ class BeregningServiceTest {
                 listOf(barn.aktør.aktivFødselsnummer()),
             )
 
+        // Act
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
             personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
+        // Assert
         verify(exactly = 1) { tilkjentYtelseRepository.saveAndFlush(capture(slot)) }
 
         Assertions.assertTrue(slot.captured.andelerTilkjentYtelse.isEmpty())
@@ -459,6 +471,7 @@ class BeregningServiceTest {
 
     @Test
     fun `For flere barn med forskjellige perioderesultat skal perioderesultat mappes til andel ytelser`() {
+        // Arrange
         val behandling = lagBehandling()
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
         val barnFødselsdato = LocalDate.of(2019, 1, 1)
@@ -562,11 +575,13 @@ class BeregningServiceTest {
                 listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
             )
 
+        // Act
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
             personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
+        // Assert
         verify(exactly = 1) { tilkjentYtelseRepository.saveAndFlush(capture(slot)) }
 
         Assertions.assertEquals(5, slot.captured.andelerTilkjentYtelse.size)
@@ -602,6 +617,7 @@ class BeregningServiceTest {
 
     @Test
     fun `Skal ikke oppdatere utvidet andeler basert på endringsperioder med årsak=delt bosted`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(2))
         val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.now().minusYears(31))
 
@@ -614,6 +630,7 @@ class BeregningServiceTest {
         val endretUtbetalingAndelFom = utvidetFom.minusMonths(2).toYearMonth()
         val endretUtbetalingAndelTom = utvidetTom.minusMonths(2).toYearMonth()
 
+        // Act
         val andelerTilkjentYtelse =
             genererAndelerTilkjentYtelseForScenario(
                 endretUtbetalingÅrsak = Årsak.DELT_BOSTED,
@@ -629,6 +646,7 @@ class BeregningServiceTest {
                 søker = søker,
             )
 
+        // Assert
         Assertions.assertEquals(5, andelerTilkjentYtelse.size)
 
         val (andelerSøker, andelerBarn) = andelerTilkjentYtelse.partition { it.aktør.aktivFødselsnummer() == søker.aktør.aktivFødselsnummer() }
@@ -673,6 +691,7 @@ class BeregningServiceTest {
 
     @Test
     fun `Skal oppdatere utvidet andeler og småbarnstillegg med riktig periode og sats ved endringsperiode med årsak=etterbetaling 3år`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(2))
         val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.now().minusYears(31))
 
@@ -685,6 +704,7 @@ class BeregningServiceTest {
         val endretUtbetalingAndelFom = utvidetFom.minusMonths(2).toYearMonth()
         val endretUtbetalingAndelTom = utvidetTom.minusMonths(2).toYearMonth()
 
+        // Act
         val andelerTilkjentYtelse =
             genererAndelerTilkjentYtelseForScenario(
                 endretUtbetalingÅrsak = Årsak.ETTERBETALING_3ÅR,
@@ -700,6 +720,7 @@ class BeregningServiceTest {
                 søker = søker,
             )
 
+        // Assert
         Assertions.assertEquals(7, andelerTilkjentYtelse.size)
 
         val (andelerSøker, andelerBarn) = andelerTilkjentYtelse.partition { it.aktør.aktivFødselsnummer() == søker.aktør.aktivFødselsnummer() }
@@ -756,6 +777,7 @@ class BeregningServiceTest {
 
     @Test
     fun `Skal få utvidet, men ikke småbarnstillegg hvis to barn, men barn under 3 år har endringsperiode med årsak=etterbetaling 3 år`() {
+        // Arrange
         val barnUnder3År = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(2))
         val barnOver3År = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(7))
         val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.now().minusYears(31))
@@ -769,6 +791,7 @@ class BeregningServiceTest {
         val endretUtbetalingAndelFom = fom.plusMonths(1).toYearMonth()
         val endretUtbetalingAndelTom = utvidetTom.minusMonths(2).toYearMonth()
 
+        // Act
         val andelerTilkjentYtelse =
             genererAndelerTilkjentYtelseForScenario(
                 endretUtbetalingÅrsak = Årsak.ETTERBETALING_3ÅR,
@@ -789,6 +812,7 @@ class BeregningServiceTest {
         // BARNA
         val (andelerBarnUnder3År, andelerBarnOver3År) = andelerBarn.partition { it.aktør.aktivFødselsnummer() == barnUnder3År.aktør.aktivFødselsnummer() }
 
+        // Assert
         Assertions.assertEquals(2, andelerBarnUnder3År.size)
         // Barn (under 3 år) under endringsperiode
         Assertions.assertEquals(barnUnder3År.aktør, andelerBarnUnder3År[0].aktør)
@@ -837,7 +861,10 @@ class BeregningServiceTest {
 
     @Test
     fun `Dersom barn har flere godkjente perioderesultat back2back skal det ikke bli glippe i andel ytelser`() {
+        // Arrange
         val førstePeriodeTomForBarnet = LocalDate.of(2020, 11, 30)
+
+        // Act
         kjørScenarioForBack2Backtester(
             førstePeriodeTomForBarnet = førstePeriodeTomForBarnet,
             andrePeriodeFomForBarnet = førstePeriodeTomForBarnet.plusDays(1),
@@ -849,7 +876,10 @@ class BeregningServiceTest {
 
     @Test
     fun `Dersom barn har flere godkjente perioderesultat som ikke følger back2back skal det bli glippe på en måned i andel ytelser`() {
+        // Arrange
         val førstePeriodeTomForBarnet = LocalDate.of(2020, 11, 29)
+
+        // Act
         kjørScenarioForBack2Backtester(
             førstePeriodeTomForBarnet = førstePeriodeTomForBarnet,
             andrePeriodeFomForBarnet = førstePeriodeTomForBarnet.plusDays(2),
@@ -861,7 +891,10 @@ class BeregningServiceTest {
 
     @Test
     fun `Dersom barn har flere godkjente perioderesultat back2back og delt bosted kun i første periode skal det ikke bli glippe i andel ytelser men beløpsendringen skal inntreffe som normalt neste måned`() {
+        // Arrange
         val førstePeriodeTomForBarnet = LocalDate.of(2020, 11, 30)
+
+        // Act
         kjørScenarioForBack2Backtester(
             førstePeriodeTomForBarnet = førstePeriodeTomForBarnet,
             andrePeriodeFomForBarnet = LocalDate.of(2020, 12, 1),
@@ -874,7 +907,10 @@ class BeregningServiceTest {
 
     @Test
     fun `Dersom barn har flere godkjente perioderesultat back2back og delt bosted kun i andre periode skal det ikke bli glippe i andel ytelser men beløpsendringen skal inntreffe som normalt neste måned`() {
+        // Arrange
         val førstePeriodeTomForBarnet = LocalDate.of(2020, 11, 30)
+
+        // Act
         kjørScenarioForBack2Backtester(
             førstePeriodeTomForBarnet = førstePeriodeTomForBarnet,
             andrePeriodeFomForBarnet = LocalDate.of(2020, 12, 1),
@@ -887,7 +923,10 @@ class BeregningServiceTest {
 
     @Test
     fun `Dersom barn har flere godkjente perioderesultat back2back der alle er delt bosted skal det ikke bli glippe i andel ytelser`() {
+        // Arrange
         val førstePeriodeTomForBarnet = LocalDate.of(2020, 11, 30)
+
+        // Act
         kjørScenarioForBack2Backtester(
             førstePeriodeTomForBarnet = førstePeriodeTomForBarnet,
             andrePeriodeFomForBarnet = førstePeriodeTomForBarnet.plusDays(1),
@@ -901,6 +940,7 @@ class BeregningServiceTest {
 
     @Test
     fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere INGEN_ENDRING_I_UTBETALING dersom det utbetalingsbeløpene er like mellom nåværende og forrige behandling`() {
+        // Arrange
         val forrigeBehandling = lagBehandling()
         val nåværendeBehandling = lagBehandling()
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
@@ -941,9 +981,11 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
 
+        // Act
         val erEndringIUtbetaling =
             beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(nåværendeBehandling)
 
+        // Assert
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING)
 
         verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
@@ -953,6 +995,7 @@ class BeregningServiceTest {
 
     @Test
     fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere INGEN_ENDRING_I_UTBETALING dersom man har gått fra andeler med 0 i beløp til ingen andeler`() {
+        // Arrange
         val forrigeBehandling = lagBehandling()
         val nåværendeBehandling = lagBehandling()
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
@@ -978,9 +1021,11 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns emptyList()
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
 
+        // Act
         val erEndringIUtbetaling =
             beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(nåværendeBehandling)
 
+        // Assert
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING)
 
         verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
@@ -990,6 +1035,7 @@ class BeregningServiceTest {
 
     @Test
     fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere INGEN_ENDRING_I_UTBETALING dersom man har gått fra ingen andeler til andeler med 0 i beløp`() {
+        // Arrange
         val forrigeBehandling = lagBehandling()
         val nåværendeBehandling = lagBehandling()
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
@@ -1015,9 +1061,11 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns emptyList()
 
+        // Act
         val erEndringIUtbetaling =
             beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(nåværendeBehandling)
 
+        // Assert
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING)
 
         verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
@@ -1027,6 +1075,7 @@ class BeregningServiceTest {
 
     @Test
     fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere ENDRING_I_UTBETALING dersom man har gått fra ingen andeler til andeler med over 0 i beløp`() {
+        // Arrange
         val forrigeBehandling = lagBehandling()
         val nåværendeBehandling = lagBehandling()
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
@@ -1052,9 +1101,11 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns emptyList()
 
+        // Act
         val erEndringIUtbetaling =
             beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(nåværendeBehandling)
 
+        // Assert
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING)
 
         verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
@@ -1064,6 +1115,7 @@ class BeregningServiceTest {
 
     @Test
     fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere ENDRING_I_UTBETALING dersom man fikk beløp over 0 i forrige behandling og det har forandret på seg`() {
+        // Arrange
         val forrigeBehandling = lagBehandling()
         val nåværendeBehandling = lagBehandling()
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
@@ -1105,9 +1157,11 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
 
+        // Act
         val erEndringIUtbetaling =
             beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(nåværendeBehandling)
 
+        // Assert
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING)
 
         verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }

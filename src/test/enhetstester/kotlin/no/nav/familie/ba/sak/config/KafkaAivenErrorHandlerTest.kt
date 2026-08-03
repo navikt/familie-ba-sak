@@ -24,6 +24,7 @@ class KafkaAivenErrorHandlerTest {
 
     @Test
     fun `handle skal stoppe container hvis man mottar feil med en tom liste med records`() {
+        // Act & Assert
         assertThatThrownBy {
             errorHandler.handleRemaining(
                 RuntimeException("Feil i test"),
@@ -39,7 +40,10 @@ class KafkaAivenErrorHandlerTest {
 
     @Test
     fun `handle skal stoppe container hvis man mottar feil med en liste med records`() {
+        // Arrange
         val consumerRecord = ConsumerRecord("topic", 1, 1, 1, "record")
+
+        // Act & Assert
         assertThatThrownBy {
             errorHandler.handleRemaining(
                 RuntimeException("Feil i test"),
@@ -55,6 +59,7 @@ class KafkaAivenErrorHandlerTest {
 
     @Test
     fun `handle skal stoppe container hvis man mottar feil hvor liste med records er empty`() {
+        // Act & Assert
         assertThatThrownBy {
             errorHandler.handleRemaining(
                 RuntimeException("Feil i test"),

@@ -26,6 +26,7 @@ class SatsendringEøsKjøringRepositoryTest(
 
     @Test
     fun `findByBehandlingId returnerer kjøring når behandlingId matcher`() {
+        // Arrange
         val fagsak = opprettFagsak()
         val behandling = behandlingRepository.saveAndFlush(lagBehandlingUtenId(fagsak = fagsak))
 
@@ -39,20 +40,25 @@ class SatsendringEøsKjøringRepositoryTest(
                 ),
             )
 
+        // Act
         val funnet = satsendringEøsKjøringRepository.findByBehandlingId(behandling.id)
 
+        // Assert
         assertThat(funnet).isEqualTo(lagretKjøring)
     }
 
     @Test
     fun `findByBehandlingId returnerer null når behandlingId ikke finnes`() {
+        // Act
         val funnet = satsendringEøsKjøringRepository.findByBehandlingId(999L)
 
+        // Assert
         assertThat(funnet).isNull()
     }
 
     @Test
     fun `findByFagsakIdAndUtbetalingslandAndSatsTidspunkt returnerer kjøring når alle felter matcher`() {
+        // Arrange
         val fagsak = opprettFagsak()
         val lagretKjøring =
             satsendringEøsKjøringRepository.saveAndFlush(
@@ -63,6 +69,7 @@ class SatsendringEøsKjøringRepositoryTest(
                 ),
             )
 
+        // Act
         val funnet =
             satsendringEøsKjøringRepository.findByFagsakIdAndUtbetalingslandAndSatsTidspunkt(
                 fagsakId = fagsak.id,
@@ -70,11 +77,13 @@ class SatsendringEøsKjøringRepositoryTest(
                 satsTidspunkt = satsTidspunkt,
             )
 
+        // Assert
         assertThat(funnet).isEqualTo(lagretKjøring)
     }
 
     @Test
     fun `findByFagsakIdAndUtbetalingslandAndSatsTidspunkt returnerer null når utbetalingsland ikke matcher`() {
+        // Arrange
         val fagsak = opprettFagsak()
         satsendringEøsKjøringRepository.saveAndFlush(
             SatsendringEøsKjøring(
@@ -84,6 +93,7 @@ class SatsendringEøsKjøringRepositoryTest(
             ),
         )
 
+        // Act
         val funnet =
             satsendringEøsKjøringRepository.findByFagsakIdAndUtbetalingslandAndSatsTidspunkt(
                 fagsakId = fagsak.id,
@@ -91,11 +101,13 @@ class SatsendringEøsKjøringRepositoryTest(
                 satsTidspunkt = satsTidspunkt,
             )
 
+        // Assert
         assertThat(funnet).isNull()
     }
 
     @Test
     fun `findByFagsakIdAndUtbetalingslandAndSatsTidspunkt returnerer null når satsTidspunkt ikke matcher`() {
+        // Arrange
         val fagsak = opprettFagsak()
         satsendringEøsKjøringRepository.saveAndFlush(
             SatsendringEøsKjøring(
@@ -105,6 +117,7 @@ class SatsendringEøsKjøringRepositoryTest(
             ),
         )
 
+        // Act
         val funnet =
             satsendringEøsKjøringRepository.findByFagsakIdAndUtbetalingslandAndSatsTidspunkt(
                 fagsakId = fagsak.id,
@@ -112,11 +125,13 @@ class SatsendringEøsKjøringRepositoryTest(
                 satsTidspunkt = satsTidspunkt.plusMonths(1),
             )
 
+        // Assert
         assertThat(funnet).isNull()
     }
 
     @Test
     fun `findByFagsakIdAndUtbetalingslandAndSatsTidspunkt returnerer null når fagsakId ikke matcher`() {
+        // Arrange
         val fagsak = opprettFagsak()
         satsendringEøsKjøringRepository.saveAndFlush(
             SatsendringEøsKjøring(
@@ -127,6 +142,8 @@ class SatsendringEøsKjøringRepositoryTest(
         )
 
         val annenFagsak = opprettFagsak()
+
+        // Act
         val funnet =
             satsendringEøsKjøringRepository.findByFagsakIdAndUtbetalingslandAndSatsTidspunkt(
                 fagsakId = annenFagsak.id,
@@ -134,6 +151,7 @@ class SatsendringEøsKjøringRepositoryTest(
                 satsTidspunkt = satsTidspunkt,
             )
 
+        // Assert
         assertThat(funnet).isNull()
     }
 

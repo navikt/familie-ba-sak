@@ -61,6 +61,7 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr og barns fødselsnummer`() {
+        // Arrange
         wireMockServer.stubFor(
             post(løpendeBarnetrygdURL).willReturn(
                 okJson(
@@ -91,10 +92,12 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
 
         val infotrygdSøkRequest = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
 
+        // Act
         val finnesIkkeHosInfotrygd = klient.harLøpendeSakIInfotrygd(søkersIdenter, barnasIdenter)
         val hentsakerResponse = klient.hentSaker(søkersIdenter, barnasIdenter)
         val hentstønaderResponse = klient.hentStønader(søkersIdenter, barnasIdenter)
 
+        // Assert
         wireMockServer.verify(
             anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(
                 equalToJson(
@@ -129,6 +132,7 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr`() {
+        // Arrange
         wireMockServer.stubFor(
             post(løpendeBarnetrygdURL).willReturn(
                 okJson(
@@ -141,8 +145,10 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
 
         val infotrygdSøkRequest = InfotrygdSøkRequest(søkersIdenter, emptyList())
 
+        // Act
         val finnesIkkeHosInfotrygd = klient.harLøpendeSakIInfotrygd(søkersIdenter, emptyList())
 
+        // Assert
         wireMockServer.verify(
             anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(
                 equalToJson(
@@ -157,8 +163,10 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Invokering av Infotrygd-Barnetrygd genererer http feil`() {
+        // Arrange
         wireMockServer.stubFor(post(løpendeBarnetrygdURL).willReturn(aResponse().withStatus(401)))
 
+        // Act & Assert
         assertThrows<HttpClientErrorException> {
             klient.harLøpendeSakIInfotrygd(søkersIdenter, barnasIdenter)
         }
@@ -166,18 +174,21 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `harNyligSendtBrevFor skal returnerer true for personIdent`() {
+        // Arrange
         wireMockServer.stubFor(
             post(brevURL).willReturn(
                 okJson(jsonMapper.writeValueAsString(InfotrygdBarnetrygdKlient.SendtBrevResponse(true, emptyList()))),
             ),
         )
 
+        // Act
         val harNyligSendtBrev =
             klient.harNyligSendtBrevFor(
                 søkersIdenter,
                 listOf(InfotrygdBrevkode.BREV_BATCH_INNVILGET_SMÅBARNSTILLEGG),
             )
 
+        // Assert
         Assertions.assertEquals(true, harNyligSendtBrev.harSendtBrev)
     }
 }

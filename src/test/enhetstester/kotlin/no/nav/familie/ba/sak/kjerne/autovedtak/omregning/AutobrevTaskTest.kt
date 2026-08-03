@@ -36,6 +36,7 @@ internal class AutobrevTaskTest {
 
     @Test
     fun `oppretter ingen autobrev tasker for 6 år, 2 for 18 år og 1 for småbarnstillegg`() {
+        // Arrange
         val fagsaker =
             setOf(
                 Fagsak(1, aktør = lagAktør(randomFnr())),
@@ -48,8 +49,10 @@ internal class AutobrevTaskTest {
         every { opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(any()) } just runs
         every { behandlingHentOgPersisterService.partitionByIverksatteBehandlinger<Long>(any()) } returns listOf(1L)
 
+        // Act
         autobrevTask.doTask(autoBrevTask)
 
+        // Assert
         verify(exactly = 0) {
             opprettTaskService.opprettSendAutobrevPgaAlderTask(any(), 6)
         }

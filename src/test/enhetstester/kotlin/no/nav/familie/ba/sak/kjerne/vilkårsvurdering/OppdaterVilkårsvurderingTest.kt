@@ -26,13 +26,17 @@ import java.time.LocalDate
 class OppdaterVilkårsvurderingTest {
     @Test
     fun `Skal legge til nytt vilkår`() {
+        // Arrange
         val fnr1 = randomFnr()
         val aktørId1 = randomAktør()
         val behandling = lagBehandling()
         val resA = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
         val resB = lagVilkårsvurderingResultatB(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
+        // Act
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
+
+        // Assert
         Assertions.assertEquals(
             3,
             oppdatert.personResultater
@@ -52,13 +56,17 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal fjerne vilkår`() {
+        // Arrange
         val fnr1 = randomFnr()
         val aktørId1 = randomAktør()
         val behandling = lagBehandling()
         val resA = lagVilkårsvurderingResultatB(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
         val resB = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
+        // Act
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
+
+        // Assert
         Assertions.assertEquals(
             2,
             oppdatert.personResultater
@@ -84,6 +92,7 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal legge til person på vilkårsvurdering`() {
+        // Arrange
         val fnr1 = randomFnr()
         val fnr2 = randomFnr()
         val aktørId1 = randomAktør()
@@ -96,13 +105,17 @@ class OppdaterVilkårsvurderingTest {
                 fnrAktør = listOf(Pair(fnr1, aktørId1), Pair(fnr2, aktørId2)),
             )
 
+        // Act
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
+
+        // Assert
         Assertions.assertEquals(2, oppdatert.personResultater.size)
         Assertions.assertEquals(0, gammelt.personResultater.size)
     }
 
     @Test
     fun `Skal fjerne person på vilkårsvurdering`() {
+        // Arrange
         val fnr1 = randomFnr()
         val fnr2 = randomFnr()
         val aktørId1 = randomAktør()
@@ -115,13 +128,17 @@ class OppdaterVilkårsvurderingTest {
             )
         val resB = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
+        // Act
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
+
+        // Assert
         Assertions.assertEquals(1, oppdatert.personResultater.size)
         Assertions.assertEquals(1, gammelt.personResultater.size)
     }
 
     @Test
     fun `Skal lage advarsel tekst`() {
+        // Arrange
         val fnr1 = randomFnr()
         val fnr2 = randomFnr()
         val aktørId1 = lagAktør(fnr1)
@@ -140,8 +157,11 @@ class OppdaterVilkårsvurderingTest {
                 .first()
                 .vilkårResultater
                 .toList()
+
+        // Act
         val generertAdvarsel = lagFjernAdvarsel(resterende.personResultater)
 
+        // Assert
         Assertions.assertEquals(
             "Du har gjort endringer i behandlingsgrunnlaget. Dersom du går videre vil vilkår for følgende personer fjernes:\n" +
                 fnr1 + ":\n" +
@@ -153,6 +173,7 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal ha med tomt vilkår på person hvis vilkåret ble avslått forrige behandling`() {
+        // Arrange
         val søkerAktørId = randomAktør()
         val nyBehandling = lagBehandling()
         val forrigeBehandling = lagBehandling()
@@ -185,12 +206,14 @@ class OppdaterVilkårsvurderingTest {
         personResultat.setSortedVilkårResultater(bosattIRiketVilkårResultater)
         aktivMedBosattIRiketIkkeOppfylt.personResultater = setOf(personResultat)
 
+        // Act
         val (nyInit, nyAktiv) =
             flyttResultaterTilInitielt(
                 initiellVilkårsvurdering = init,
                 aktivVilkårsvurdering = aktivMedBosattIRiketIkkeOppfylt,
             )
 
+        // Assert
         val nyInitBosattIRiketVilkår =
             nyInit.personResultater
                 .find { it.aktør == søkerAktørId }
@@ -205,6 +228,7 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal ha med oppfylte perioder fra vilkår på person hvis vilkåret ble både avslått og innvilget forrige behandling`() {
+        // Arrange
         val søkerAktørId = randomAktør()
         val nyBehandling = lagBehandling()
         val forrigeBehandling = lagBehandling()
@@ -244,12 +268,14 @@ class OppdaterVilkårsvurderingTest {
         personResultat.setSortedVilkårResultater(bosattIRiketVilkårResultater)
         aktivMedBosattIRiketDelvisIkkeOppfylt.personResultater = setOf(personResultat)
 
+        // Act
         val (nyInit, nyAktiv) =
             flyttResultaterTilInitielt(
                 initiellVilkårsvurdering = init,
                 aktivVilkårsvurdering = aktivMedBosattIRiketDelvisIkkeOppfylt,
             )
 
+        // Assert
         val nyInitBosattIRiketVilkår =
             nyInit.personResultater
                 .find { it.aktør == søkerAktørId }
@@ -264,6 +290,7 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal beholde vilkår om utvidet barnetrygd når forrige behandling inneholdt utvidet-vilkåret, men inneværende behandling er ordinær`() {
+        // Arrange
         val søkerAktørId = randomAktør()
         val behandling = lagBehandling()
 
@@ -276,6 +303,7 @@ class OppdaterVilkårsvurderingTest {
                 listOf(Vilkår.UTVIDET_BARNETRYGD),
             )
 
+        // Act
         val (nyInit, nyAktiv) =
             flyttResultaterTilInitielt(
                 initiellVilkårsvurdering = initUtenUtvidetVilkår,
@@ -284,6 +312,7 @@ class OppdaterVilkårsvurderingTest {
                 løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
             )
 
+        // Assert
         val nyInitInnholderUtvidetVilkår =
             nyInit.personResultater
                 .first()
@@ -296,6 +325,7 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal beholde vilkår om utvidet barnetrygd når det eksisterer løpende sak med utvidet, men inneværende behandling er ordinær`() {
+        // Arrange
         val søkerAktørId = randomAktør()
         val behandling = lagBehandling()
 
@@ -308,6 +338,7 @@ class OppdaterVilkårsvurderingTest {
                 listOf(Vilkår.UTVIDET_BARNETRYGD),
             )
 
+        // Act
         val (nyInit, nyAktiv) =
             flyttResultaterTilInitielt(
                 initiellVilkårsvurdering = initUtenUtvidetVilkår,
@@ -315,6 +346,7 @@ class OppdaterVilkårsvurderingTest {
                 løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
             )
 
+        // Assert
         val nyInitInnholderUtvidetVilkår =
             nyInit.personResultater
                 .first()
@@ -327,6 +359,7 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal fjerne vilkår om utvidet barnetrygd når den inneværende behandlingen gjelder ordinær, og det ikke eksisterer løpende sak med utvidet, eller utvidet-vilkåret var på forrige behandling`() {
+        // Arrange
         val søkerAktørId = randomAktør()
         val behandling = lagBehandling()
 
@@ -339,6 +372,7 @@ class OppdaterVilkårsvurderingTest {
                 listOf(Vilkår.UTVIDET_BARNETRYGD),
             )
 
+        // Act
         val (nyInit, nyAktiv) =
             flyttResultaterTilInitielt(
                 initiellVilkårsvurdering = initUtenUtvidetVilkår,
@@ -347,6 +381,7 @@ class OppdaterVilkårsvurderingTest {
                 aktørerMedUtvidetAndelerIForrigeBehandling = emptyList(),
             )
 
+        // Assert
         val nyInitInnholderIkkeUtvidetVilkår =
             nyInit.personResultater
                 .first()
@@ -364,6 +399,7 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal kun kopiere over oppfylte utvidet-vilkår ved opprettelse av ny behandling, men slette alle fra aktiv`() {
+        // Arrange
         val søkerAktørId = randomAktør()
         val nyBehandling = lagBehandling()
         val forrigeBehandling = lagBehandling()
@@ -397,6 +433,7 @@ class OppdaterVilkårsvurderingTest {
         personResultat.setSortedVilkårResultater(utvidetVilkårResultater)
         aktivVilkårsvurderingMedUtvidet.personResultater = setOf(personResultat)
 
+        // Act
         val (nyInit, nyAktiv) =
             flyttResultaterTilInitielt(
                 initiellVilkårsvurdering = initUtenUtvidetVilkår,
@@ -405,6 +442,7 @@ class OppdaterVilkårsvurderingTest {
                 aktørerMedUtvidetAndelerIForrigeBehandling = listOf(søkerAktørId),
             )
 
+        // Assert
         val nyInitUtvidetVilkår =
             nyInit.personResultater
                 .first()
@@ -417,6 +455,7 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal kopiere over alle utvidet-vilkår fra aktiv vilkårsvurdering hvis den aktive vilkårsvurderingen er fra den inneværende behandlingen`() {
+        // Arrange
         val søkerAktørId = randomAktør()
         val behandling = lagBehandling()
 
@@ -449,6 +488,7 @@ class OppdaterVilkårsvurderingTest {
         personResultat.setSortedVilkårResultater(utvidetVilkårResultater)
         aktivVilkårsvurderingMedUtvidet.personResultater = setOf(personResultat)
 
+        // Act
         val (nyInit, nyAktiv) =
             flyttResultaterTilInitielt(
                 initiellVilkårsvurdering = initUtenUtvidetVilkår,
@@ -457,6 +497,7 @@ class OppdaterVilkårsvurderingTest {
                 aktørerMedUtvidetAndelerIForrigeBehandling = listOf(søkerAktørId),
             )
 
+        // Assert
         val nyInitUtvidetVilkår =
             nyInit.personResultater
                 .first()
@@ -469,6 +510,7 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal ikke legge til utvidet vilkåret hvis det kun eksisterer ikke-oppfylte perioder, men fortsatt slette fra aktiv`() {
+        // Arrange
         val søkerAktørId = randomAktør()
         val nyBehandling = lagBehandling()
         val forrigeBehandling = lagBehandling()
@@ -502,6 +544,7 @@ class OppdaterVilkårsvurderingTest {
         personResultat.setSortedVilkårResultater(utvidetVilkårResultater)
         aktivVilkårsvurderingMedUtvidetIkkeOppfylt.personResultater = setOf(personResultat)
 
+        // Act
         val (nyInit, nyAktiv) =
             flyttResultaterTilInitielt(
                 initiellVilkårsvurdering = initUtenUtvidetVilkår,
@@ -510,6 +553,7 @@ class OppdaterVilkårsvurderingTest {
                 aktørerMedUtvidetAndelerIForrigeBehandling = emptyList(),
             )
 
+        // Assert
         val nyInitInneholderIkkeUtvidetVilkår =
             nyInit.personResultater
                 .first()
@@ -522,6 +566,7 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal beholde andreVurderinger lagt til på inneværende behandling`() {
+        // Arrange
         val søkerAktørId = randomAktør()
         val nyBehandling = lagBehandling()
 
@@ -539,12 +584,14 @@ class OppdaterVilkårsvurderingTest {
             .find { it.erSøkersResultater() }!!
             .leggTilBlankAnnenVurdering(AnnenVurderingType.OPPLYSNINGSPLIKT)
 
+        // Act
         val (nyInit, nyAktiv) =
             flyttResultaterTilInitielt(
                 initiellVilkårsvurdering = initiellVilkårsvurderingUtenAndreVurderinger,
                 aktivVilkårsvurdering = aktivVilkårsvurdering,
             )
 
+        // Assert
         val nyInitInnholderOpplysningspliktVilkår =
             nyInit.personResultater
                 .find { it.erSøkersResultater() }!!

@@ -22,6 +22,7 @@ class FeilutbetaltValutaServiceTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun kanLagreEndreOgSlette() {
+        // Arrange
         val fagsak =
             lagFagsakUtenId(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
         val behandling = lagBehandlingUtenId(fagsak = fagsak).let { behandlingHentOgPersisterService.lagreEllerOppdater(it, false) }
@@ -33,14 +34,17 @@ class FeilutbetaltValutaServiceTest(
                 feilutbetaltBeløp = 1234,
             )
 
+        // Act
         val id = feilutbetaltValutaService.leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta, behandlingId = behandling.id)
 
+        // Assert
         feilutbetaltValutaService
             .hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it[0].id).isEqualTo(id) }
             .also { Assertions.assertThat(it[0].fom).isNotNull() }
             .also { Assertions.assertThat(it[0].tom).isNotNull() }
 
+        // Act
         feilutbetaltValutaService.oppdatertFeilutbetaltValutaPeriode(
             feilutbetaltValutaDto =
                 FeilutbetaltValutaDto(
@@ -52,11 +56,13 @@ class FeilutbetaltValutaServiceTest(
             id = id,
         )
 
+        // Assert
         feilutbetaltValutaService
             .hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.get(0).id).isEqualTo(id) }
             .also { Assertions.assertThat(it.get(0).tom).isEqualTo("2020-05-31") }
 
+        // Arrange
         val feilutbetaltValuta2 =
             FeilutbetaltValutaDto(
                 id = 0,
@@ -65,15 +71,19 @@ class FeilutbetaltValutaServiceTest(
                 feilutbetaltBeløp = 100,
             )
 
+        // Act
         val id2 = feilutbetaltValutaService.leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta2, behandlingId = behandling.id)
 
+        // Assert
         feilutbetaltValutaService
             .hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.size).isEqualTo(2) }
             .also { Assertions.assertThat(it.get(0).id).isEqualTo(id2) }
 
+        // Act
         feilutbetaltValutaService.fjernFeilutbetaltValutaPeriode(id = id, behandlingId = behandling.id)
 
+        // Assert
         feilutbetaltValutaService
             .hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.size).isEqualTo(1) }

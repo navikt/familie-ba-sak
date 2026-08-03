@@ -14,6 +14,7 @@ import java.time.YearMonth
 class InternKonsistensavstemmingUtilTest {
     @Test
     fun `Skal ignorere forskjeller før første utbetalingsoppdragsperiode`() {
+        // Arrange
         val andelerSisteVedtatteBehandling =
             listOf(
                 lagAndelTilkjentYtelse(
@@ -43,11 +44,13 @@ class InternKonsistensavstemmingUtilTest {
             )
         val utbetalingsoppdrag = jsonMapper.readValue<Utbetalingsoppdrag>(mockUtbetalingsoppdrag)
 
+        // Act & Assert
         Assertions.assertFalse(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
     }
 
     @Test
     fun `skal se at vi mangler andel for oppdragsperiode`() {
+        // Arrange
         val andelerSisteVedtatteBehandling =
             listOf(
                 lagAndelTilkjentYtelse(
@@ -71,11 +74,13 @@ class InternKonsistensavstemmingUtilTest {
             )
         val utbetalingsoppdrag = jsonMapper.readValue<Utbetalingsoppdrag>(mockUtbetalingsoppdrag)
 
+        // Act & Assert
         Assertions.assertTrue(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
     }
 
     @Test
     fun `skal se at andel og oppdragsperiode har forskjellig beløp`() {
+        // Arrange
         val andelerSisteVedtatteBehandling =
             listOf(
                 lagAndelTilkjentYtelse(
@@ -105,11 +110,13 @@ class InternKonsistensavstemmingUtilTest {
             )
         val utbetalingsoppdrag = jsonMapper.readValue<Utbetalingsoppdrag>(mockUtbetalingsoppdrag)
 
+        // Act & Assert
         Assertions.assertTrue(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
     }
 
     @Test
     fun `skal ikke si det er forskjell ved riktig utbetalingsoppdrag når det er flere kjeder`() {
+        // Arrange
         val andelStringer =
             listOf(
                 "2021-05,2021-08,1354,ORDINÆR_BARNETRYGD",
@@ -133,11 +140,13 @@ class InternKonsistensavstemmingUtilTest {
 
         val utbetalingsoppdrag = jsonMapper.readValue<Utbetalingsoppdrag>(utbetalingsoppdragMockMedUtvidet)
 
+        // Act & Assert
         Assertions.assertFalse(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
     }
 
     @Test
     fun `skal ikke si det er forskjell ved riktig utbetalingsoppdrag når kun ett barn ble endret i siste behandling som iverksatte`() {
+        // Arrange
         val andelStringer =
             listOf(
                 // barn 1, ble laget i siste behandling som iverksatte
@@ -165,11 +174,13 @@ class InternKonsistensavstemmingUtilTest {
 
         val utbetalingsoppdrag = jsonMapper.readValue<Utbetalingsoppdrag>(utbetalingsoppdragMockEndringKunEttBarn)
 
+        // Act & Assert
         Assertions.assertFalse(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
     }
 
     @Test
     fun `skal ikke si det er forskjell ved opphør`() {
+        // Arrange
         val andelStringer =
             listOf(
                 "2016-02,2019-02,970,ORDINÆR_BARNETRYGD,2193974415300",
@@ -194,11 +205,13 @@ class InternKonsistensavstemmingUtilTest {
 
         val utbetalingsoppdrag = jsonMapper.readValue<Utbetalingsoppdrag>(utbetalingsoppdragMockOpphør)
 
+        // Act & Assert
         Assertions.assertFalse(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
     }
 
     @Test
     fun `skal si andelene og utbetalingene er like dersom andel blir splittet opp, men betaler ut det samme i periodene`() {
+        // Arrange
         val andelStringer =
             listOf(
                 "2021-01,2022-03,1054,ORDINÆR_BARNETRYGD",
@@ -220,6 +233,7 @@ class InternKonsistensavstemmingUtilTest {
 
         val utbetalingsoppdrag = jsonMapper.readValue<Utbetalingsoppdrag>(utbetalingsoppdragMockEnPeriode)
 
+        // Act & Assert
         Assertions.assertFalse(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
     }
 }

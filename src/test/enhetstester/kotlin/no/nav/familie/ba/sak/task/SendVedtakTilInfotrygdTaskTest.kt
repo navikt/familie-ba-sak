@@ -28,14 +28,17 @@ internal class SendVedtakTilInfotrygdTaskTest {
 
     @Test
     fun `skal sende vedtak til infotrygd ved første gang behandling`() {
+        // Arrange
         val behandling = lagBehandling(status = BehandlingStatus.AVSLUTTET)
         val fom = YearMonth.now().minusMonths(2)
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id) } returns lagAndelerMedFom(behandling, fom)
         val slot = slot<InfotrygdVedtakFeedDto>()
         every { infotrygdFeedKlient.sendVedtakFeedTilInfotrygd(capture(slot)) } returns Unit
 
+        // Act
         sendVedtakTilInfotrygdTask.doTask(SendVedtakTilInfotrygdTask.opprettTask(behandling.fagsak.aktør.aktivFødselsnummer(), behandling.id))
 
+        // Assert
         assertThat(slot.captured.fnrStoenadsmottaker).isEqualTo(behandling.fagsak.aktør.aktivFødselsnummer())
         assertThat(slot.captured.datoStartNyBa).isEqualTo(fom.atDay(1))
     }

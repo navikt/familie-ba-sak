@@ -30,6 +30,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Ikke bosatt i riket, skal ikke passere vilkår`() {
+        // Arrange
         val mockSøkerUtenHjem = genererAutomatiskTestperson(bostedsadresser = emptyList())
 
         val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato(), mockSøkerUtenHjem)
@@ -38,13 +39,18 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår =
             stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandling)
+
+        // Act
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
+
+        // Assert
         Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 
     @Test
     fun `Barnet er gift, skal ikke passere vilkår`() {
+        // Arrange
         val mockBarnGift = genererAutomatiskTestperson(sivilstander = listOf(Sivilstand(SIVILSTANDTYPE.GIFT)))
 
         val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato(), mockSøkerAutomatiskBehandling)
@@ -53,13 +59,18 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår =
             stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandling)
+
+        // Act
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
+
+        // Assert
         Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 
     @Test
     fun `Skal ikke passere vilkårsvurdering dersom barn er over 18`() {
+        // Arrange
         val barnFødselsdato = LocalDate.parse("1999-10-10")
         val barn = genererAutomatiskTestperson(barnFødselsdato, emptySet(), emptyList())
 
@@ -82,13 +93,18 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår =
             stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandling)
+
+        // Act
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
+
+        // Assert
         Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 
     @Test
     fun `Skal ikke passere vilkårsvurdering dersom barn ikke bor med mor`() {
+        // Arrange
         val barnFødselsdato = LocalDate.now()
         val barn = genererAutomatiskTestperson(barnFødselsdato, emptySet(), emptyList())
         val barnFnr = leggTilPersonInfo(barnFødselsdato, barn)
@@ -131,8 +147,12 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår =
             stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandling)
+
+        // Act
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
+
+        // Assert
         Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 }

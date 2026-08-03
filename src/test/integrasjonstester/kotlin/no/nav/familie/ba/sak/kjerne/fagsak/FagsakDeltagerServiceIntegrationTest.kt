@@ -68,6 +68,7 @@ class FagsakDeltagerServiceIntegrationTest(
      */
     @Test
     fun `test å søke fagsak med fnr`() {
+        // Arrange
         val søker1Fødselsdato = LocalDate.of(1990, 2, 19)
         val søker1Fnr =
             leggTilPersonInfo(
@@ -194,6 +195,7 @@ class FagsakDeltagerServiceIntegrationTest(
             RegistrerPersongrunnlagDTO(ident = søker2Fnr, barnasIdenter = listOf(barn1Fnr)),
         )
 
+        // Act & Assert
         val søkeresultat1 = fagsakDeltagerService.hentFagsakDeltagere(søker1Fnr)
         assertEquals(1, søkeresultat1.size)
         assertEquals(Kjønn.KVINNE, søkeresultat1[0].kjønn)
@@ -239,6 +241,7 @@ class FagsakDeltagerServiceIntegrationTest(
 
     @Test
     fun `Skal teste at arkiverte fagsaker med behandling ikke blir funnet ved søk`() {
+        // Arrange
         val søker1Fnr =
             leggTilPersonInfo(
                 randomSøkerFødselsdato(),
@@ -267,14 +270,17 @@ class FagsakDeltagerServiceIntegrationTest(
             fagsakService.hentFagsakPåPerson(søker1Aktør).also { it?.arkivert = true }!!,
         )
 
+        // Act
         val søkeresultat1 = fagsakDeltagerService.hentFagsakDeltagere(søker1Fnr)
 
+        // Assert
         assertEquals(1, søkeresultat1.size)
         assertNull(søkeresultat1.first().fagsakId)
     }
 
     @Test
     fun `Skal teste at arkiverte fagsaker uten behandling ikke blir funnet ved søk`() {
+        // Arrange
         val søker1Fnr =
             leggTilPersonInfo(
                 randomSøkerFødselsdato(),
@@ -292,14 +298,17 @@ class FagsakDeltagerServiceIntegrationTest(
             fagsakService.hentFagsakPåPerson(søker1Aktør).also { it?.arkivert = true }!!,
         )
 
+        // Act
         val søkeresultat1 = fagsakDeltagerService.hentFagsakDeltagere(søker1Fnr)
 
+        // Assert
         assertEquals(1, søkeresultat1.size)
         assertNull(søkeresultat1.first().fagsakId)
     }
 
     @Test
     fun `Skal returnere tom liste ved søk hvis ident ikke har aktiv fødselsnummer`() {
+        // Arrange
         val fnr = randomFnr()
         fakePdlIdentRestKlient.leggTilIdent(
             fnr,
@@ -308,14 +317,19 @@ class FagsakDeltagerServiceIntegrationTest(
                 IdentInformasjon("122334343", gruppe = "AKTOERID", historisk = false),
             ),
         )
+
+        // Act & Assert
         assertThat(fagsakDeltagerService.hentFagsakDeltagere(fnr)).hasSize(0)
     }
 
     @Test
     fun `Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
+        // Arrange
         val aktør = lagAktør()
 
         leggTilPersonIkkeFunnet(aktør.aktivFødselsnummer())
+
+        // Act & Assert
         assertEquals(emptyList<FagsakDeltagerDto>(), fagsakDeltagerService.hentFagsakDeltagere(aktør.aktivFødselsnummer()))
     }
 }

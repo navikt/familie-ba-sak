@@ -67,6 +67,7 @@ class BehandlingSatsendringTest(
 
     @Test
     fun `Skal kjøre satsendring på løpende fagsak hvor brukeren har barnetrygd under 6 år`() {
+        // Arrange
         val scenario = lagScenario().also { stubScenario(it) }
         val behandling = opprettBehandling(scenario)
         val atyForBehandlingMedGammelSatsFraFørMars2024 =
@@ -86,9 +87,11 @@ class BehandlingSatsendringTest(
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsTidspunkt)
 
+        // Act
         val satsendringResultat =
             autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, hentAktivSatsendringstidspunkt()))
 
+        // Assert
         assertEquals(SatsendringSvar.SATSENDRING_KJØRT_OK, satsendringResultat)
 
         val satsendringBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)
@@ -120,15 +123,18 @@ class BehandlingSatsendringTest(
 
     @Test
     fun `Skal ignorere satsendring hvis siste sats alt er satt`() {
+        // Arrange
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsTidspunkt)
 
         val scenario = lagScenario().also { stubScenario(it) }
         val behandling = opprettBehandling(scenario)
 
+        // Act
         val satsendringResultat =
             autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, hentAktivSatsendringstidspunkt()))
 
+        // Assert
         assertEquals(SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT, satsendringResultat)
 
         val satskjøring = satskjøringRepository.findByFagsakIdAndSatsTidspunkt(behandling.fagsak.id, satsTidspunkt = hentAktivSatsendringstidspunkt())

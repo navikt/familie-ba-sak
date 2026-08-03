@@ -83,6 +83,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Skal lagre andelerTilkjentYtelse med kobling til TilkjentYtelse`() {
+        // Arrange
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
@@ -128,8 +129,10 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             )
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
+        // Act
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
+        // Assert
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         val andelBarn1 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.aktør.aktivFødselsnummer() == barn1Id }
         val andelBarn2 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.aktør.aktivFødselsnummer() == barn2Id }
@@ -152,6 +155,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
     @Test
     @Transactional
     fun `genererTilkjentYtelseFraVilkårsvurdering - skal trigge differanseberegning`() {
+        // Arrange
         val søker = personidentService.hentOgLagreAktør(randomFnr(), true)
         val barn = personidentService.hentOgLagreAktør(randomFnr(), true)
 
@@ -236,8 +240,10 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         utenlandskPeriodebeløpRepository.save(utenlandskPeriodebeløp)
         valutakursRepository.save(valutakurs)
 
+        // Act
         val tilkjentYtelse = beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling = behandling, personopplysningGrunnlag = personopplysningGrunnlag)
 
+        // Assert
         assertThat(tilkjentYtelse.andelerTilkjentYtelse.any { it.differanseberegnetPeriodebeløp != null }).isEqualTo(true)
     }
 }

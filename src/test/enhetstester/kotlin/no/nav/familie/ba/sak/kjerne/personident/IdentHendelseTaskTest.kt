@@ -14,14 +14,21 @@ internal class IdentHendelseTaskTest {
 
     @Test
     fun opprettTask() {
+        // Arrange
         val nyPersonIdent = PersonIdent("123")
+
+        // Act
         val task = IdentHendelseTask.opprettTask(nyPersonIdent)
+
+        // Assert
         assertEquals(nyPersonIdent, jsonMapper.readValue(task.payload, PersonIdent::class.java))
         assertEquals("123", task.metadata["nyPersonIdent"])
         assertEquals("IdentHendelseTask", task.type)
 
+        // Act
         identHendelseTask.doTask(task)
 
+        // Assert
         val slot = slot<PersonIdent>()
         verify(exactly = 1) { håndterNyIdentService.håndterNyIdent(capture(slot)) }
         assertEquals(nyPersonIdent, slot.captured)

@@ -38,6 +38,7 @@ class FødselshendelseFørstegangsbehandlingTest(
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn født november 2021 og behandles desember 2021 uten utbetalinger`() {
+        // Arrange
         val scenario =
             ScenarioDto(
                 søker = ScenarioPersonDto(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
@@ -50,6 +51,8 @@ class FødselshendelseFørstegangsbehandlingTest(
                         ),
                     ),
             ).also { stubScenario(it) }
+
+        // Act
         val behandling =
             behandleFødselshendelse(
                 nyBehandlingHendelse =
@@ -66,6 +69,7 @@ class FødselshendelseFørstegangsbehandlingTest(
                 brevmalService = brevmalService,
             )
 
+        // Assert
         val fagsakDtoEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id)
         generellAssertFagsak(
@@ -112,6 +116,7 @@ class FødselshendelseFørstegangsbehandlingTest(
 
     @Test
     fun `Skal innvilge fødselshendelse på mor med 2 barn uten utbetalinger`() {
+        // Arrange
         val scenario =
             ScenarioDto(
                 søker = ScenarioPersonDto(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
@@ -129,6 +134,8 @@ class FødselshendelseFørstegangsbehandlingTest(
                         ),
                     ),
             ).also { stubScenario(it) }
+
+        // Act
         val behandling =
             behandleFødselshendelse(
                 nyBehandlingHendelse =
@@ -145,6 +152,7 @@ class FødselshendelseFørstegangsbehandlingTest(
                 brevmalService = brevmalService,
             )
 
+        // Assert
         val fagsakDtoEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id)
         generellAssertFagsak(
@@ -172,6 +180,7 @@ class FødselshendelseFørstegangsbehandlingTest(
 
     @Test
     fun `Skal innvilge fødselshendelse på mor med 2 barn der barna er født i hver sin måned`() {
+        // Arrange
         val fødselsdagBarn2 = LocalDate.now().førsteDagIInneværendeMåned()
         val fødselsdagBarn1 = fødselsdagBarn2.minusDays(1)
 
@@ -194,6 +203,8 @@ class FødselshendelseFørstegangsbehandlingTest(
                         ),
                     ),
             ).also { stubScenario(it) }
+
+        // Act
         val behandling =
             behandleFødselshendelse(
                 nyBehandlingHendelse =
@@ -210,6 +221,7 @@ class FødselshendelseFørstegangsbehandlingTest(
                 brevmalService = brevmalService,
             )
 
+        // Assert
         val fagsakDtoEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id)
         generellAssertFagsak(

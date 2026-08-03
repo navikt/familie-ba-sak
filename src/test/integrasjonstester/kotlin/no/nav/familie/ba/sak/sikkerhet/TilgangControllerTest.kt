@@ -20,6 +20,7 @@ class TilgangControllerTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun testHarTilgangTilKode6Person() {
+        // Arrange
         val fødselsdato = LocalDate.now()
         val fnr =
             leggTilPersonInfo(
@@ -29,7 +30,10 @@ class TilgangControllerTest(
 
         fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(listOf(Tilgang(fnr, true)))
 
+        // Act
         val response = tilgangController.hentTilgangOgDiskresjonskode(TilgangRequestDTO(fnr))
+
+        // Assert
         val tilgangDTO = response.body?.data ?: throw Feil("Fikk ikke forventet respons")
         assertThat(tilgangDTO.adressebeskyttelsegradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
         assertThat(tilgangDTO.saksbehandlerHarTilgang).isEqualTo(true)

@@ -14,6 +14,7 @@ internal class KompetanseMappingTest {
 
     @Test
     fun sjekkAtMappingFremOgTilbakeGirSammeResultat() {
+        // Arrange
         val barnAktører = setOf(barn1.aktør, barn2.aktør, barn3.aktør)
         val kompetanse =
             Kompetanse(
@@ -27,8 +28,10 @@ internal class KompetanseMappingTest {
                 resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
             )
 
+        // Act
         val restKompetanse = kompetanse.tilKompetanseDto()
 
+        // Assert
         assertEquals(kompetanse, restKompetanse.tilKompetanse(barnAktører.toList()))
     }
 }

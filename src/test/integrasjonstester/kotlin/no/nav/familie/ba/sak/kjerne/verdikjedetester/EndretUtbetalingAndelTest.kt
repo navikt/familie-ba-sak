@@ -29,6 +29,7 @@ class EndretUtbetalingAndelTest(
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Skal teste at endret utbetalingsandel overskriver eksisterende utbetalingsandel`() {
+        // Arrange
         val (scenario, utvidetBehandlingDto) = genererBehandlingsresultat()
 
         val endretFom = YearMonth.of(2021, 9)
@@ -48,11 +49,13 @@ class EndretUtbetalingAndelTest(
                 erTilknyttetAndeler = true,
             )
 
+        // Act
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
             utvidetBehandlingDto.data!!.behandlingId,
             endretUtbetalingAndelDto,
         )
 
+        // Assert
         val andelerTilkjentYtelseMedEndretPeriode =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = utvidetBehandlingDto.data!!.behandlingId)
 
@@ -83,6 +86,7 @@ class EndretUtbetalingAndelTest(
 
     @Test
     fun `Skal teste at fjernet endret utbetalingsandel oppretter tidligere eksisterende utbetalingsandel`() {
+        // Arrange
         val (scenario, utvidetBehandlingDto) = genererBehandlingsresultat()
 
         val endretFom = YearMonth.of(2021, 9)
@@ -114,11 +118,13 @@ class EndretUtbetalingAndelTest(
                 .first()
                 .id
 
+        // Act
         familieBaSakKlient().fjernEndretUtbetalingAndel(
             utvidetBehandlingDto.data!!.behandlingId,
             endretUtbetalingAndelId!!,
         )
 
+        // Assert
         val andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = utvidetBehandlingDto.data!!.behandlingId)
 

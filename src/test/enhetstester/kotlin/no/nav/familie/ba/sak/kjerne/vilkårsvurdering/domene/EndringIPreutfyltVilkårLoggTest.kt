@@ -11,6 +11,7 @@ import java.time.LocalDateTime
 class EndringIPreutfyltVilkårLoggTest {
     @Test
     fun `oppdaterEndringIPreutfyltVilkårLogg beholder forrige-verdier og oppdaterer ny-verdier`() {
+        // Arrange
         val behandling = lagBehandling(id = 1234)
         val forrigeVilkår =
             VilkårResultat(
@@ -76,8 +77,10 @@ class EndringIPreutfyltVilkårLoggTest {
                 nyttVilkår = førsteEditDto,
             )
 
+        // Act
         val oppdatertLogg = opprinneligLogg.oppdaterEndringIPreutfyltVilkårLogg(andreEditDto)
 
+        // Assert
         // forrige*-felt er uendret (original preutfylt-tilstand)
         assertThat(oppdatertLogg.forrigeResultat).isEqualTo(Resultat.IKKE_OPPFYLT)
         assertThat(oppdatertLogg.forrigeFom).isEqualTo(LocalDate.of(2020, 1, 1))
@@ -97,6 +100,7 @@ class EndringIPreutfyltVilkårLoggTest {
 
     @Test
     fun `opprettLoggForEndringIPreutfyltVilkår mapper forrige og nye verdier`() {
+        // Arrange
         val behandling = lagBehandling(id = 1234)
         val forrigeVilkår =
             VilkårResultat(
@@ -134,6 +138,7 @@ class EndringIPreutfyltVilkårLoggTest {
                 begrunnelseForManuellKontroll = null,
             )
 
+        // Act
         val logg =
             EndringIPreutfyltVilkårLogg.opprettLoggForEndringIPreutfyltVilkår(
                 behandling = behandling,
@@ -141,6 +146,7 @@ class EndringIPreutfyltVilkårLoggTest {
                 nyttVilkår = nyttVilkår,
             )
 
+        // Assert
         assertThat(logg.behandling).isEqualTo(behandling)
         assertThat(logg.vilkårResultatId).isEqualTo(forrigeVilkår.id)
         assertThat(logg.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
@@ -161,6 +167,7 @@ class EndringIPreutfyltVilkårLoggTest {
 
     @Test
     fun `opprettLoggForEndringIPreutfyltVilkår håndterer nullfelt`() {
+        // Arrange
         val behandling = lagBehandling(id = 5678)
         val forrigeVilkår =
             VilkårResultat(
@@ -198,6 +205,7 @@ class EndringIPreutfyltVilkårLoggTest {
                 begrunnelseForManuellKontroll = null,
             )
 
+        // Act
         val logg =
             EndringIPreutfyltVilkårLogg.opprettLoggForEndringIPreutfyltVilkår(
                 behandling = behandling,
@@ -205,6 +213,7 @@ class EndringIPreutfyltVilkårLoggTest {
                 nyttVilkår = nyttVilkår,
             )
 
+        // Assert
         assertThat(logg.forrigeFom).isNull()
         assertThat(logg.nyFom).isNull()
         assertThat(logg.forrigeTom).isNull()

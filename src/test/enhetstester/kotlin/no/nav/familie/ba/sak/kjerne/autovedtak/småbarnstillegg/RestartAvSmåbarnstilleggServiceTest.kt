@@ -30,6 +30,7 @@ class RestartAvSmåbarnstilleggServiceTest {
 
     @Test
     fun `Skal ikke inkludere saker som er migrert forrige måned ved opprettelse av restartet småbarnstillegg oppgave`() {
+        // Arrange
         every { behandlingHentOgPersisterService.partitionByIverksatteBehandlinger<Long>(any()) } returns
             listOf(0L, 1L, 2L)
 
@@ -48,6 +49,7 @@ class RestartAvSmåbarnstilleggServiceTest {
             restartAvSmåbarnstilleggService.periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(any(), any())
         } returns false
 
+        // Act & Assert
         Assertions.assertEquals(
             listOf(0L, 2L),
             restartAvSmåbarnstilleggService.finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned(),

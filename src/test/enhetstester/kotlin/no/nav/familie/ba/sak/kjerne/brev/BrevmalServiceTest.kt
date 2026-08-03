@@ -32,16 +32,20 @@ internal class BrevmalServiceTest {
 
     @Test
     fun `hentBrevmal skal returnere VEDTAK_OPPHØR_DØDSFALL dersom behandlingårsak er DØDSFALL_BRUKER`() {
+        // Arrange
         val behandling = lagBehandling(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
 
+        // Act & Assert
         assertThat(brevmalService.hentBrevmal(behandling), Is(Brevmal.VEDTAK_OPPHØR_DØDSFALL))
     }
 
     @Test
     fun `hentVedtaksbrevmal skal kaste feil dersom behandling har status IKKE_VURDERT`() {
+        // Arrange
         val behandling =
             lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV, resultat = Behandlingsresultat.IKKE_VURDERT)
 
+        // Act & Assert
         assertThrows<FunksjonellFeil> {
             brevmalService.hentVedtaksbrevmal(behandling)
         }
@@ -53,6 +57,7 @@ internal class BrevmalServiceTest {
         names = ["INNVILGET", "INNVILGET_OG_ENDRET", "INNVILGET_OG_OPPHØRT", "INNVILGET_ENDRET_OG_OPPHØRT", "DELVIS_INNVILGET", "DELVIS_INNVILGET_OG_ENDRET", "DELVIS_INNVILGET_OG_OPPHØRT", "DELVIS_INNVILGET_ENDRET_OG_OPPHØRT", "AVSLÅTT_OG_ENDRET", "AVSLÅTT_OG_OPPHØRT", "AVSLÅTT_ENDRET_OG_OPPHØRT"],
     )
     fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON for førstegangsbehandling som er institusjon med gitte typer behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
+        // Arrange
         val behandling =
             mockk<Behandling>().apply {
                 every { resultat } returns behandlingsresultat
@@ -60,6 +65,7 @@ internal class BrevmalServiceTest {
                 every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
             }
 
+        // Act & Assert
         assertThat(brevmalService.hentManuellVedtaksbrevtype(behandling), Is(Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON))
     }
 
@@ -69,6 +75,7 @@ internal class BrevmalServiceTest {
         names = ["INNVILGET", "INNVILGET_OG_ENDRET", "INNVILGET_OG_OPPHØRT", "INNVILGET_ENDRET_OG_OPPHØRT", "DELVIS_INNVILGET", "DELVIS_INNVILGET_OG_ENDRET", "DELVIS_INNVILGET_OG_OPPHØRT", "DELVIS_INNVILGET_ENDRET_OG_OPPHØRT", "AVSLÅTT_OG_ENDRET", "AVSLÅTT_OG_OPPHØRT", "AVSLÅTT_ENDRET_OG_OPPHØRT"],
     )
     fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_FØRSTEGANGSVEDTAK for førstegangsbehandling med gitte behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
+        // Arrange
         val behandling =
             mockk<Behandling>().apply {
                 every { resultat } returns behandlingsresultat
@@ -76,6 +83,7 @@ internal class BrevmalServiceTest {
                 every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
             }
 
+        // Act & Assert
         assertThat(brevmalService.hentManuellVedtaksbrevtype(behandling), Is(Brevmal.VEDTAK_FØRSTEGANGSVEDTAK))
     }
 
@@ -85,6 +93,7 @@ internal class BrevmalServiceTest {
         names = ["INNVILGET", "INNVILGET_OG_ENDRET", "INNVILGET_OG_OPPHØRT", "INNVILGET_ENDRET_OG_OPPHØRT", "DELVIS_INNVILGET", "DELVIS_INNVILGET_OG_ENDRET", "DELVIS_INNVILGET_OG_OPPHØRT", "DELVIS_INNVILGET_ENDRET_OG_OPPHØRT", "AVSLÅTT_OG_ENDRET", "AVSLÅTT_OG_OPPHØRT", "AVSLÅTT_ENDRET_OG_OPPHØRT"],
     )
     fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON for revurdering med ingen løpende ytelser som er institusjon med gitte behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
+        // Arrange
         val behandling =
             mockk<Behandling>(relaxed = true).apply {
                 every { resultat } returns behandlingsresultat
@@ -100,6 +109,7 @@ internal class BrevmalServiceTest {
                 ),
             )
 
+        // Act & Assert
         assertThat(brevmalService.hentManuellVedtaksbrevtype(behandling), Is(Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON))
     }
 
@@ -109,6 +119,7 @@ internal class BrevmalServiceTest {
         names = ["INNVILGET", "INNVILGET_OG_ENDRET", "INNVILGET_OG_OPPHØRT", "INNVILGET_ENDRET_OG_OPPHØRT", "DELVIS_INNVILGET", "DELVIS_INNVILGET_OG_ENDRET", "DELVIS_INNVILGET_OG_OPPHØRT", "DELVIS_INNVILGET_ENDRET_OG_OPPHØRT", "AVSLÅTT_OG_ENDRET", "AVSLÅTT_OG_OPPHØRT", "AVSLÅTT_ENDRET_OG_OPPHØRT"],
     )
     fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_ENDRING_INSTITUSJON for revurdering med løpende ytelser som er institusjon med gitte typer behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
+        // Arrange
         val behandling =
             mockk<Behandling>(relaxed = true).apply {
                 every { resultat } returns behandlingsresultat
@@ -124,6 +135,7 @@ internal class BrevmalServiceTest {
                 ),
             )
 
+        // Act & Assert
         assertThat(brevmalService.hentManuellVedtaksbrevtype(behandling), Is(Brevmal.VEDTAK_ENDRING_INSTITUSJON))
     }
 
@@ -133,6 +145,7 @@ internal class BrevmalServiceTest {
         names = ["INNVILGET", "INNVILGET_OG_ENDRET", "INNVILGET_OG_OPPHØRT", "INNVILGET_ENDRET_OG_OPPHØRT", "DELVIS_INNVILGET", "DELVIS_INNVILGET_OG_ENDRET", "DELVIS_INNVILGET_OG_OPPHØRT", "DELVIS_INNVILGET_ENDRET_OG_OPPHØRT", "AVSLÅTT_OG_ENDRET", "AVSLÅTT_OG_OPPHØRT", "AVSLÅTT_ENDRET_OG_OPPHØRT"],
     )
     fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_ENDRING for revurdering med løpende ytelser med gitte behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
+        // Arrange
         val behandling =
             mockk<Behandling>(relaxed = true).apply {
                 every { resultat } returns behandlingsresultat
@@ -148,6 +161,7 @@ internal class BrevmalServiceTest {
                 ),
             )
 
+        // Act & Assert
         assertThat(brevmalService.hentManuellVedtaksbrevtype(behandling), Is(Brevmal.VEDTAK_ENDRING))
     }
 
@@ -157,6 +171,7 @@ internal class BrevmalServiceTest {
         names = ["INNVILGET", "INNVILGET_OG_ENDRET", "INNVILGET_OG_OPPHØRT", "INNVILGET_ENDRET_OG_OPPHØRT", "DELVIS_INNVILGET", "DELVIS_INNVILGET_OG_ENDRET", "DELVIS_INNVILGET_OG_OPPHØRT", "DELVIS_INNVILGET_ENDRET_OG_OPPHØRT", "AVSLÅTT_OG_ENDRET", "AVSLÅTT_OG_OPPHØRT", "AVSLÅTT_ENDRET_OG_OPPHØRT"],
     )
     fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_OPPHØR_MED_ENDRING for revurdering med ingen løpende ytelser med gitte behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
+        // Arrange
         val behandling =
             mockk<Behandling>(relaxed = true).apply {
                 every { resultat } returns behandlingsresultat
@@ -172,11 +187,13 @@ internal class BrevmalServiceTest {
                 ),
             )
 
+        // Act & Assert
         assertThat(brevmalService.hentManuellVedtaksbrevtype(behandling), Is(Brevmal.VEDTAK_OPPHØR_MED_ENDRING))
     }
 
     @Test
     fun `hentVedtaksbrevmal skal returnere AUTOVEDTAK_ENDRING for automatisk skjermet barn behandling omregning 18 år`() {
+        // Arrange
         val skjermetBarnFagsak =
             lagFagsak(
                 type = FagsakType.SKJERMET_BARN,
@@ -192,11 +209,13 @@ internal class BrevmalServiceTest {
                 resultat = Behandlingsresultat.ENDRET_OG_OPPHØRT,
             )
 
+        // Act & Assert
         assertThat(brevmalService.hentVedtaksbrevmal(behandling), Is(Brevmal.AUTOVEDTAK_ENDRING))
     }
 
     @Test
     fun `hentVedtaksbrevmal skal returnere AUTOVEDTAK_SATSENDRING_EØS for automatisk behandling med årsak SATSENDRING_EØS`() {
+        // Arrange
         val behandling =
             lagBehandling(
                 årsak = BehandlingÅrsak.SATSENDRING_EØS,
@@ -205,6 +224,7 @@ internal class BrevmalServiceTest {
                 resultat = Behandlingsresultat.ENDRET_UTBETALING,
             )
 
+        // Act & Assert
         assertThat(brevmalService.hentVedtaksbrevmal(behandling), Is(Brevmal.AUTOVEDTAK_SATSENDRING_EØS))
     }
 }

@@ -50,32 +50,39 @@ class OppgaveControllerTest {
 
     @Test
     fun `Tildeling av oppgave til saksbehandler skal returnere OK og sende med OppgaveId i respons`() {
+        // Arrange
         val oppgaveId = "1234"
         val saksbehandlerId = "Z999999"
         every { oppgaveService.fordelOppgave(any(), any()) } returns oppgaveId
 
+        // Act
         val respons = oppgaveController.fordelOppgave(oppgaveId.toLong(), saksbehandlerId)
 
+        // Assert
         Assertions.assertEquals(HttpStatus.OK, respons.statusCode)
         Assertions.assertEquals(oppgaveId, respons.body?.data)
     }
 
     @Test
     fun `Tilbakestilling av tildeling på oppgave skal returnere OK og sende med Oppgave i respons`() {
+        // Arrange
         val oppgave =
             Oppgave(
                 id = 1234,
             )
         every { oppgaveService.tilbakestillFordelingPåOppgave(oppgave.id!!) } returns oppgave
 
+        // Act
         val respons = oppgaveController.tilbakestillFordelingPåOppgave(oppgave.id!!)
 
+        // Assert
         Assertions.assertEquals(HttpStatus.OK, respons.statusCode)
         Assertions.assertEquals(oppgave, respons.body?.data)
     }
 
     @Test
     fun `Tildeling av oppgave skal returnere feil ved feil fra integrasjonsklienten`() {
+        // Arrange
         val oppgaveId = "1234"
         val saksbehandlerId = "Z999998"
         every {
@@ -85,6 +92,7 @@ class OppgaveControllerTest {
             )
         } throws IntegrasjonException("Kall mot integrasjon feilet ved fordel oppgave")
 
+        // Act & Assert
         val exception =
             assertThrows<IntegrasjonException> {
                 oppgaveController.fordelOppgave(
@@ -98,10 +106,15 @@ class OppgaveControllerTest {
 
     @Test
     fun `hentOppgaver via OppgaveController skal fungere`() {
+        // Arrange
         every {
             oppgaveService.hentOppgaver(any())
         } returns FinnOppgaveResponseDto(1, listOf(Oppgave(tema = Tema.BAR)))
+
+        // Act
         val response = oppgaveController.hentOppgaver(FinnOppgaveRequestDto())
+
+        // Assert
         val oppgaverOgAntall = response.body?.data as FinnOppgaveResponseDto
         Assertions.assertEquals(1, oppgaverOgAntall.antallTreffTotalt)
         Assertions.assertEquals(Tema.BAR, oppgaverOgAntall.oppgaver.first().tema)

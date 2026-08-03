@@ -48,47 +48,67 @@ class YtelseTypeTest {
     inner class TilSatsTypeTest {
         @Test
         fun `tilSatsType for ORDINÆR_BARNETRYGD for en som er under 6 år i august 2024 skal returnere TILLEGGS_ORBA og ORBA`() {
+            // Arrange
             val person = lagPerson(fødselsdato = LocalDate.of(2024, 8, 1).minusYears(6).plusMonths(1))
             val ytelseDatoFom = YearMonth.of(2024, 8)
 
+            // Act
             val result = YtelseType.ORDINÆR_BARNETRYGD.tilSatsType(person, ytelseDatoFom, TIDENES_ENDE.toYearMonth())
+
+            // Assert
             assertThat(result).isEqualTo(setOf(SatsType.TILLEGG_ORBA, SatsType.ORBA))
         }
 
         @Test
         fun `tilSatsType for ORDINÆR_BARNETRYGD for en som er under 6 år i september 2024 skal returnere ORBA`() {
+            // Arrange
             val person = lagPerson(fødselsdato = LocalDate.of(2024, 9, 1).minusYears(6).plusMonths(1))
             val ytelseDatoFom = YearMonth.of(2024, 9)
 
+            // Act
             val result = YtelseType.ORDINÆR_BARNETRYGD.tilSatsType(person, ytelseDatoFom, TIDENES_ENDE.toYearMonth()).single()
+
+            // Assert
             assertThat(result).isEqualTo(SatsType.ORBA)
         }
 
         @Test
         fun `tilSatsType for ORDINÆR_BARNETRYGD etter 6 år`() {
+            // Arrange
             val person = mockk<Person>()
             val ytelseDatoFom = YearMonth.of(2026, 1)
             every { person.hentSeksårsdag() } returns LocalDate.of(2025, 1, 1)
 
+            // Act
             val result = YtelseType.ORDINÆR_BARNETRYGD.tilSatsType(person, ytelseDatoFom, TIDENES_ENDE.toYearMonth()).single()
+
+            // Assert
             assertThat(result).isEqualTo(SatsType.ORBA)
         }
 
         @Test
         fun `tilSatsType for UTVIDET_BARNETRYGD`() {
+            // Arrange
             val person = mockk<Person>()
             val ytelseDatoFom = YearMonth.of(2020, 1)
 
+            // Act
             val result = YtelseType.UTVIDET_BARNETRYGD.tilSatsType(person, ytelseDatoFom, TIDENES_ENDE.toYearMonth()).single()
+
+            // Assert
             assertThat(result).isEqualTo(SatsType.UTVIDET_BARNETRYGD)
         }
 
         @Test
         fun `tilSatsType for SMÅBARNSTILLEGG`() {
+            // Arrange
             val person = mockk<Person>()
             val ytelseDatoFom = YearMonth.of(2020, 1)
 
+            // Act
             val result = YtelseType.SMÅBARNSTILLEGG.tilSatsType(person, ytelseDatoFom, TIDENES_ENDE.toYearMonth()).single()
+
+            // Assert
             assertThat(result).isEqualTo(SatsType.SMA)
         }
     }

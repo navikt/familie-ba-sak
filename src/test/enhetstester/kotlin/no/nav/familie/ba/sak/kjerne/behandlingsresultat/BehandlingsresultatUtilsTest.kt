@@ -29,6 +29,7 @@ class BehandlingsresultatUtilsTest {
         opphørsresultat: Opphørsresultat,
         behandlingsresultat: Behandlingsresultat,
     ) {
+        // Act
         val kombinertResultat =
             BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(
                 søknadsresultat,
@@ -36,6 +37,7 @@ class BehandlingsresultatUtilsTest {
                 opphørsresultat,
             )
 
+        // Assert
         assertEquals(kombinertResultat, behandlingsresultat)
     }
 
@@ -46,6 +48,7 @@ class BehandlingsresultatUtilsTest {
         endringsresultat: Endringsresultat,
         opphørsresultat: Opphørsresultat,
     ) {
+        // Act & Assert
         assertThrows<FunksjonellFeil> {
             BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(
                 søknadsresultat,

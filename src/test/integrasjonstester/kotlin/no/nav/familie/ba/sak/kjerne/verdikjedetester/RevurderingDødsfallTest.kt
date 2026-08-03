@@ -43,6 +43,7 @@ class RevurderingDødsfallTest(
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Dødsfall bruker skal kjøre gjennom`() {
+        // Arrange
         val scenario =
             ScenarioDto(
                 søker =
@@ -96,6 +97,7 @@ class RevurderingDødsfallTest(
                 ),
             )
 
+        // Act
         val behandlingDødsfall =
             kjørStegprosessForBehandling(
                 tilSteg = StegType.BEHANDLING_AVSLUTTET,
@@ -113,6 +115,7 @@ class RevurderingDødsfallTest(
                 brevmalService = brevmalService,
             )
 
+        // Assert
         val fagsakDtoEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = behandlingDødsfall.fagsak.id)
 
@@ -126,6 +129,7 @@ class RevurderingDødsfallTest(
 
     @Test
     fun `Dødsfall bruker skal stoppes dersom ikke bosatt i riket er stoppet før dagens dato`() {
+        // Arrange
         val scenario =
             ScenarioDto(
                 søker =
@@ -162,6 +166,7 @@ class RevurderingDødsfallTest(
         val overstyrendeVilkårResultater =
             (scenario.barna + scenario.søker).associate { it.aktørId to emptyList<VilkårResultat>() }.toMutableMap()
 
+        // Act & Assert
         assertThrows<FunksjonellFeil> {
             kjørStegprosessForBehandling(
                 tilSteg = StegType.BEHANDLINGSRESULTAT,

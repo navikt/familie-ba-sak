@@ -22,6 +22,7 @@ class KompetanseRepositoryTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Skal lagre flere kompetanser med gjenbruk av flere aktører`() {
+        // Arrange
         val søker = aktørIdRepository.save(randomAktør())
         val barn1 = aktørIdRepository.save(randomAktør())
         val barn2 = aktørIdRepository.save(randomAktør())
@@ -29,6 +30,7 @@ class KompetanseRepositoryTest(
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak))
 
+        // Act
         val kompetanse =
             kompetanseRepository.save(
                 lagKompetanse(
@@ -43,11 +45,13 @@ class KompetanseRepositoryTest(
                 ).also { it.behandlingId = behandling.id },
             )
 
+        // Assert
         assertEquals(kompetanse.barnAktører, kompetanse2.barnAktører)
     }
 
     @Test
     fun `Skal lagre skjema-feltene`() {
+        // Arrange
         val søker = aktørIdRepository.save(randomAktør())
         val barn1 = aktørIdRepository.save(randomAktør())
 
@@ -68,8 +72,10 @@ class KompetanseRepositoryTest(
                 ),
             )
 
+        // Act
         val hentedeKompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = behandling.id)
 
+        // Assert
         assertEquals(1, hentedeKompetanser.size)
         assertEquals(kompetanse, hentedeKompetanser.first())
     }

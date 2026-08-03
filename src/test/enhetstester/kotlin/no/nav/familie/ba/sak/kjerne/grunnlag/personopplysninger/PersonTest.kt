@@ -31,130 +31,160 @@ class PersonTest {
 
         @Test
         fun `skal returnere false når aktør er forskjellig`() {
+            // Arrange
             val nyPerson = personMedNyId().copy(aktør = randomAktør())
 
+            // Act & Assert
             assertThat(person.personopplysningerErLike(nyPerson)).isFalse()
         }
 
         @Test
         fun `skal returnere false når navn er forskjellig`() {
+            // Arrange
             val nyPerson = personMedNyId().copy(navn = "Annet Navn")
 
+            // Act & Assert
             assertThat(person.personopplysningerErLike(nyPerson)).isFalse()
         }
 
         @Test
         fun `skal returnere false når fødselsdato er forskjellig`() {
+            // Arrange
             val nyPerson = personMedNyId().copy(fødselsdato = LocalDate.now().minusYears(18))
 
+            // Act & Assert
             assertThat(person.personopplysningerErLike(nyPerson)).isFalse()
         }
 
         @Test
         fun `skal returnere false når kjønn er forskjellig`() {
+            // Arrange
             val nyPerson = personMedNyId().copy(kjønn = Kjønn.MANN)
 
+            // Act & Assert
             assertThat(person.personopplysningerErLike(nyPerson)).isFalse()
         }
 
         @Test
         fun `skal returnere false når målform er forskjellig`() {
+            // Arrange
             val nyPerson = personMedNyId().copy(målform = Målform.NN)
 
+            // Act & Assert
             assertThat(person.personopplysningerErLike(nyPerson)).isFalse()
         }
 
         @Test
         fun `skal returnere false når type er forskjellig`() {
+            // Arrange
             val nyPerson = personMedNyId().copy(type = PersonType.ANNENPART)
 
+            // Act & Assert
             assertThat(person.personopplysningerErLike(nyPerson)).isFalse()
         }
 
         @Test
         fun `skal returnere false når harFalskIdentitet er forskjellig`() {
+            // Arrange
             val nyPerson = personMedNyId().copy(harFalskIdentitet = true)
 
+            // Act & Assert
             assertThat(person.personopplysningerErLike(nyPerson)).isFalse()
         }
 
         @Test
         fun `skal returnere false når dødsfall er forskjellig`() {
+            // Arrange
             val nyPerson =
                 personMedNyId().apply {
                     dødsfall = lagDødsfall(person = this, LocalDate.of(2020, 1, 1))
                 }
 
+            // Act & Assert
             assertThat(person.personopplysningerErLike(nyPerson)).isFalse()
         }
 
         @Test
         fun `skal returnere false når opphold er forskjellige`() {
+            // Arrange
             val nyPerson =
                 personMedNyId().apply {
                     opphold = mutableListOf(lagGrOpphold(person = this))
                 }
 
+            // Act & Assert
             assertThat(person.personopplysningerErLike(nyPerson)).isFalse()
         }
 
         @Test
         fun `skal returnere false når bostedsadresser er forskjellige`() {
+            // Arrange
             val nyPerson =
                 personMedNyId().apply {
                     bostedsadresser = mutableListOf(lagGrVegadresseBostedsadresse(person = this))
                 }
 
+            // Act & Assert
             assertThat(person.personopplysningerErLike(nyPerson)).isFalse()
         }
 
         @Test
         fun `skal returnere false når oppholdsadresser er forskjellige`() {
+            // Arrange
             val nyPerson =
                 personMedNyId().apply {
                     oppholdsadresser = mutableListOf(lagGrVegadresseOppholdsadresse(person = this))
                 }
 
+            // Act & Assert
             assertThat(person.personopplysningerErLike(nyPerson)).isFalse()
         }
 
         @Test
         fun `skal returnere false når deltBosted er forskjellige`() {
+            // Arrange
             val nyPerson =
                 personMedNyId().apply {
                     deltBosted = mutableListOf(lagGrVegadresseDeltBosted(person = this))
                 }
 
+            // Act & Assert
             assertThat(person.personopplysningerErLike(nyPerson)).isFalse()
         }
 
         @Test
         fun `skal returnere false når sivilstander er forskjellige`() {
+            // Arrange
             val nyPerson =
                 personMedNyId().apply {
                     sivilstander = mutableListOf(lagGrSivilstand(person = this))
                 }
 
+            // Act & Assert
             assertThat(person.personopplysningerErLike(nyPerson)).isFalse()
         }
 
         @Test
         fun `skal returnere false når statsborgerskap er forskjellige`() {
+            // Arrange
             val nyPerson =
                 personMedNyId().apply {
                     statsborgerskap = mutableListOf(lagGrStatsborgerskap(person = this))
                 }
 
+            // Act & Assert
             assertThat(person.personopplysningerErLike(nyPerson)).isFalse()
         }
 
         @Test
         fun `skal returnere false når arbeidsforhold er forskjellige`() {
+            // Arrange
             val nyPerson =
                 personMedNyId().apply {
                     arbeidsforhold = mutableListOf(lagGrArbeidsforhold(person = this))
                 }
 
+            // Act & Assert
             assertThat(person.personopplysningerErLike(nyPerson)).isFalse()
         }
     }

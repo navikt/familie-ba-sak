@@ -15,8 +15,11 @@ import java.time.LocalDate
 class FlerlingUtilsTest {
     @Test
     fun `Skal behandle 1 barn når mor ikke har andre barn`() {
+        // Arrange
         val morsIdent = randomFnr()
         val barn = randomFnr()
+
+        // Act
         val (barnSomSkalBehandlesForMor, _) =
             finnBarnSomSkalBehandlesForMor(
                 nyBehandlingHendelse = NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barn)),
@@ -31,15 +34,19 @@ class FlerlingUtilsTest {
                 barnaSomHarBlittBehandlet = emptyList(),
             )
 
+        // Assert
         assertEquals(1, barnSomSkalBehandlesForMor.size)
         assertTrue(barnSomSkalBehandlesForMor.contains(barn))
     }
 
     @Test
     fun `Skal behandle 1 barn når mor har andre barn`() {
+        // Arrange
         val morsIdent = randomFnr()
         val barn = randomFnr()
         val barn2 = randomFnr()
+
+        // Act
         val (barnSomSkalBehandlesForMor, _) =
             finnBarnSomSkalBehandlesForMor(
                 nyBehandlingHendelse = NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barn)),
@@ -59,15 +66,19 @@ class FlerlingUtilsTest {
                 barnaSomHarBlittBehandlet = listOf(barn2),
             )
 
+        // Assert
         assertEquals(1, barnSomSkalBehandlesForMor.size)
         assertTrue(barnSomSkalBehandlesForMor.contains(barn))
     }
 
     @Test
     fun `Skal behandle 0 barn når mor har tvillinger og de allerede er behandlet`() {
+        // Arrange
         val morsIdent = randomFnr()
         val barn = randomFnr()
         val barn2 = randomFnr()
+
+        // Act
         val (barnSomSkalBehandlesForMor, alleBarnSomKanBehandles) =
             finnBarnSomSkalBehandlesForMor(
                 nyBehandlingHendelse = NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barn2)),
@@ -87,15 +98,19 @@ class FlerlingUtilsTest {
                 barnaSomHarBlittBehandlet = listOf(barn, barn2),
             )
 
+        // Assert
         assertEquals(0, barnSomSkalBehandlesForMor.size)
         assertEquals(1, alleBarnSomKanBehandles.size)
     }
 
     @Test
     fun `Skal behandle 2 barn når hendelse inneholder flere barn og mor har ikke andre barn selv om barn ikke er definert som flerling`() {
+        // Arrange
         val morsIdent = randomFnr()
         val barn = randomFnr()
         val barn2 = randomFnr()
+
+        // Act
         val (barnSomSkalBehandlesForMor, _) =
             finnBarnSomSkalBehandlesForMor(
                 nyBehandlingHendelse =
@@ -119,6 +134,7 @@ class FlerlingUtilsTest {
                 barnaSomHarBlittBehandlet = emptyList(),
             )
 
+        // Assert
         assertEquals(2, barnSomSkalBehandlesForMor.size)
         assertTrue(barnSomSkalBehandlesForMor.contains(barn))
         assertTrue(barnSomSkalBehandlesForMor.contains(barn2))
@@ -126,9 +142,12 @@ class FlerlingUtilsTest {
 
     @Test
     fun `Skal behandle 2 barn når mor har fått tvilling på samme dag og hendelse inneholder 1 barn`() {
+        // Arrange
         val morsIdent = randomFnr()
         val barn = randomFnr()
         val barn2 = randomFnr()
+
+        // Act
         val (barnSomSkalBehandlesForMor, _) =
             finnBarnSomSkalBehandlesForMor(
                 nyBehandlingHendelse =
@@ -152,6 +171,7 @@ class FlerlingUtilsTest {
                 barnaSomHarBlittBehandlet = emptyList(),
             )
 
+        // Assert
         assertEquals(2, barnSomSkalBehandlesForMor.size)
         assertTrue(barnSomSkalBehandlesForMor.contains(barn))
         assertTrue(barnSomSkalBehandlesForMor.contains(barn2))
@@ -159,12 +179,15 @@ class FlerlingUtilsTest {
 
     @Test
     fun `Skal behandle 4 barn når mor har fått firlinger på samme dag og hendelse inneholder 1 barn`() {
+        // Arrange
         val morsIdent = randomFnr()
         val barn = randomFnr()
         val barn2 = randomFnr()
         val barn3 = randomFnr()
         val barn4 = randomFnr()
         val barn5 = randomFnr()
+
+        // Act
         val (barnSomSkalBehandlesForMor, _) =
             finnBarnSomSkalBehandlesForMor(
                 nyBehandlingHendelse =
@@ -198,6 +221,7 @@ class FlerlingUtilsTest {
                 barnaSomHarBlittBehandlet = listOf(barn5),
             )
 
+        // Assert
         assertEquals(4, barnSomSkalBehandlesForMor.size)
         assertTrue(barnSomSkalBehandlesForMor.contains(barn))
         assertTrue(barnSomSkalBehandlesForMor.contains(barn2))
@@ -207,9 +231,12 @@ class FlerlingUtilsTest {
 
     @Test
     fun `Skal behandle 2 barn når mor har fått tvilling med 1 dag mellomrom og hendelse inneholder 1 barn født dagen etter tvilling`() {
+        // Arrange
         val morsIdent = randomFnr()
         val barn = randomFnr()
         val barn2 = randomFnr()
+
+        // Act
         val (barnSomSkalBehandlesForMor, _) =
             finnBarnSomSkalBehandlesForMor(
                 nyBehandlingHendelse =
@@ -233,6 +260,7 @@ class FlerlingUtilsTest {
                 barnaSomHarBlittBehandlet = emptyList(),
             )
 
+        // Assert
         assertEquals(2, barnSomSkalBehandlesForMor.size)
         assertTrue(barnSomSkalBehandlesForMor.contains(barn))
         assertTrue(barnSomSkalBehandlesForMor.contains(barn2))
@@ -240,9 +268,12 @@ class FlerlingUtilsTest {
 
     @Test
     fun `Skal behandle 2 barn når mor har fått tvilling med 1 dag mellomrom og hendelse inneholder 1 barn født dagen før tvilling`() {
+        // Arrange
         val morsIdent = randomFnr()
         val barn = randomFnr()
         val barn2 = randomFnr()
+
+        // Act
         val (barnSomSkalBehandlesForMor, _) =
             finnBarnSomSkalBehandlesForMor(
                 nyBehandlingHendelse =
@@ -266,6 +297,7 @@ class FlerlingUtilsTest {
                 barnaSomHarBlittBehandlet = emptyList(),
             )
 
+        // Assert
         assertEquals(2, barnSomSkalBehandlesForMor.size)
         assertTrue(barnSomSkalBehandlesForMor.contains(barn))
         assertTrue(barnSomSkalBehandlesForMor.contains(barn2))
@@ -273,9 +305,11 @@ class FlerlingUtilsTest {
 
     @Test
     fun `Skal lage oppgave fordi barnet i hendelse ikke behandles på åpen behandling`() {
+        // Arrange
         val barn = randomAktør()
         val barn2 = randomAktør()
 
+        // Act & Assert
         assertFalse(
             barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
                 barnaPåHendelse = listOf(barn),
@@ -286,9 +320,11 @@ class FlerlingUtilsTest {
 
     @Test
     fun `Skal ignorere hendelse fordi barnet i hendelse behandles på åpen behandling`() {
+        // Arrange
         val barn = randomAktør()
         val barn2 = randomAktør()
 
+        // Act & Assert
         assertTrue(
             barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
                 barnaPåHendelse = listOf(barn),
@@ -299,10 +335,12 @@ class FlerlingUtilsTest {
 
     @Test
     fun `Skal ignorere hendelse fordi barna i hendelse behandles på åpen behandling`() {
+        // Arrange
         val barn = randomAktør()
         val barn2 = randomAktør()
         val barn3 = randomAktør()
 
+        // Act & Assert
         assertTrue(
             barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
                 barnaPåHendelse = listOf(barn, barn2),
@@ -313,10 +351,12 @@ class FlerlingUtilsTest {
 
     @Test
     fun `Skal lage oppgave fordi kun 1 av barna i hendelse behandles på åpen behandling`() {
+        // Arrange
         val barn = randomAktør()
         val barn2 = randomAktør()
         val barn3 = randomAktør()
 
+        // Act & Assert
         assertFalse(
             barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
                 barnaPåHendelse = listOf(barn, barn2),

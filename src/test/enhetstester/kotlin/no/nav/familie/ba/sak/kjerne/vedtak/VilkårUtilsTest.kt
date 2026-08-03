@@ -16,6 +16,7 @@ class VilkårUtilsTest {
      */
     @Test
     fun `vedtaksperioder sorteres korrekt til brev`() {
+        // Arrange
         val avslagMedTomDatoInneværendeMåned =
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 fom = LocalDate.now().minusMonths(6),
@@ -54,6 +55,7 @@ class VilkårUtilsTest {
                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
             )
 
+        // Act
         val sorterteVedtaksperioder =
             listOf(
                 utbetalingsperiode,
@@ -63,6 +65,7 @@ class VilkårUtilsTest {
                 avslagUtenTomDato,
             ).shuffled().sorter()
 
+        // Assert
         // Utbetalingsperiode, opphørspersiode og avslagsperiode med fom-dato sorteres kronologisk
         Assertions.assertEquals(avslagMedTomDatoInneværendeMåned, sorterteVedtaksperioder[0])
         Assertions.assertEquals(avslagUtenTomDato, sorterteVedtaksperioder[1])

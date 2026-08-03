@@ -11,10 +11,14 @@ import org.junit.jupiter.api.Test
 class BehandlingStegTilstandTest {
     @Test
     fun `Verifiser at siste steg får status IKKE_UTFØRT`() {
+        // Arrange
         val behandling = opprettBehandling()
+
+        // Act
         behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
 
+        // Assert
         assertEquals(
             BehandlingStegStatus.UTFØRT,
             behandling.behandlingStegTilstand.first { it.behandlingSteg == StegType.REGISTRERE_SØKNAD }.behandlingStegStatus,
@@ -31,11 +35,15 @@ class BehandlingStegTilstandTest {
 
     @Test
     fun `Verifiser maks et steg av hver type`() {
+        // Arrange
         val behandling = opprettBehandling()
+
+        // Act
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
         behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
 
+        // Assert
         assertEquals(
             BehandlingStegStatus.IKKE_UTFØRT,
             behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.VILKÅRSVURDERING }.behandlingStegStatus,
@@ -44,12 +52,16 @@ class BehandlingStegTilstandTest {
 
     @Test
     fun `Verifiser at alle steg med høyere rekkefølge enn siste fjernes`() {
+        // Arrange
         val behandling = opprettBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
         behandling.leggTilBehandlingStegTilstand(StegType.SEND_TIL_BESLUTTER)
+
+        // Act
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
 
+        // Assert
         assertEquals(
             BehandlingStegStatus.UTFØRT,
             behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG }.behandlingStegStatus,
@@ -67,12 +79,16 @@ class BehandlingStegTilstandTest {
 
     @Test
     fun `Verifiser henlegg søknad ikke endrer stegstatus`() {
+        // Arrange
         val behandling = opprettBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
         behandling.leggTilBehandlingStegTilstand(StegType.SEND_TIL_BESLUTTER)
+
+        // Act
         behandling.leggTilHenleggStegOmDetIkkeFinnesFraFør()
 
+        // Assert
         assertEquals(
             BehandlingStegStatus.UTFØRT,
             behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_SØKNAD }.behandlingStegStatus,

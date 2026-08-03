@@ -20,6 +20,7 @@ class TilbakekrevingUtilTest {
 
     @Test
     fun `test validerVerdierPåRestTilbakekreving kaster feil ved tilbakekreving uten feilutbetaling`() {
+        // Act & Assert
         assertThrows<Exception> {
             validerVerdierPåRestTilbakekreving(
                 tilbakekrevingDto =
@@ -34,6 +35,7 @@ class TilbakekrevingUtilTest {
 
     @Test
     fun `test validerVerdierPåRestTilbakekreving kaster feil ved ingen tilbakekreving når det er en feilutbetaling`() {
+        // Act & Assert
         assertThrows<Exception> {
             validerVerdierPåRestTilbakekreving(
                 tilbakekrevingDto = null,
@@ -44,6 +46,7 @@ class TilbakekrevingUtilTest {
 
     @Test
     fun `test sammenslåing av feilutbetalingsperioder med ensom siste periode`() {
+        // Arrange
         val simuleringsPerioder =
             listOf(
                 opprettSimuleringsPeriode(
@@ -68,8 +71,10 @@ class TilbakekrevingUtilTest {
                 ),
             )
 
+        // Act
         val sammenslåttePerioder = slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder)
 
+        // Assert
         Assertions.assertEquals(2, sammenslåttePerioder.size)
         Assertions.assertEquals(fom1, sammenslåttePerioder[0].fom)
         Assertions.assertEquals(tom2, sammenslåttePerioder[0].tom)
@@ -79,6 +84,7 @@ class TilbakekrevingUtilTest {
 
     @Test
     fun `test sammenslåing av feilutbetalingsperioder med ensom første periode`() {
+        // Arrange
         val simuleringsPerioder =
             listOf(
                 opprettSimuleringsPeriode(
@@ -103,8 +109,10 @@ class TilbakekrevingUtilTest {
                 ),
             )
 
+        // Act
         val sammenslåttePerioder = slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder)
 
+        // Assert
         Assertions.assertEquals(2, sammenslåttePerioder.size)
         Assertions.assertEquals(fom1, sammenslåttePerioder[0].fom)
         Assertions.assertEquals(tom1, sammenslåttePerioder[0].tom)

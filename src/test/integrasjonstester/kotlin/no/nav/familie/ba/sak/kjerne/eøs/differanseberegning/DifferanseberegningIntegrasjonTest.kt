@@ -35,6 +35,7 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `vilkårsvurdering med EØS-perioder + kompetanser med sekundærland fører til skjemaer med valutakurser`() {
+        // Arrange
         val søkerStartdato = 1.jan(2020)
         val barnStartdato = 2.jan(2020)
 
@@ -75,6 +76,7 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
                 barnStartdato to "5555566644234489",
             )
 
+        // Act
         val utvidetBehandlingFørsteGang =
             vilkårsvurderingTestController
                 .opprettBehandlingMedVilkårsvurdering(vilkårsvurderingRequest)
@@ -107,9 +109,11 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
         val sumUtbetalingDifferanseberegnet =
             utvidetbehandlingDifferanseberegnet.utbetalingsperioder.sumUtbetaling()
 
+        // Assert
         Assertions.assertEquals(3, utvidetbehandlingDifferanseberegnet.endretUtbetalingAndeler.size)
         Assertions.assertEquals(10, utvidetbehandlingDifferanseberegnet.utbetalingsperioder.size)
 
+        // Arrange
         val vilkårsvurderingRequest2 =
             mapOf(
                 søkerStartdato to
@@ -127,6 +131,7 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
                     ),
             )
 
+        // Act
         val utvidetBehandlingTilbakestilt =
             vilkårsvurderingTestController
                 .oppdaterVilkårsvurderingIBehandling(
@@ -138,6 +143,7 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
         val sumUtbetalingTilbakestilt =
             utvidetBehandlingTilbakestilt.utbetalingsperioder.sumUtbetaling()
 
+        // Assert
         Assertions.assertEquals(3, utvidetBehandlingTilbakestilt.endretUtbetalingAndeler.size)
         Assertions.assertEquals(4, utvidetBehandlingTilbakestilt.utbetalingsperioder.size)
 

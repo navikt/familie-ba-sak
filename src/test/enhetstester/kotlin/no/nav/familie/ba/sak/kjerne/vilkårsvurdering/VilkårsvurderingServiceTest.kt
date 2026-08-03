@@ -23,6 +23,7 @@ internal class VilkårsvurderingServiceTest {
 
     @Test
     fun `oppdaterVilkårVedDødsfall skal sette tom dato til dødsfallsdato dersom dødsfallsdato er tidligere enn nåværende tom`() {
+        // Arrange
         val behandling = lagBehandling(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
         val aktør = randomAktør()
         val vilkårFomDato = LocalDate.of(2000, 1, 1)
@@ -40,8 +41,10 @@ internal class VilkårsvurderingServiceTest {
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns vilkårsvurdering
 
+        // Act
         vilkårsvurderingService.oppdaterVilkårVedDødsfall(behandlingId = BehandlingId(behandling.id), dødsfallsDato, aktør)
 
+        // Assert
         val vilkårResultater = vilkårsvurdering.personResultater.single().vilkårResultater
 
         assertThat(vilkårResultater.all { it.periodeTom == dødsfallsDato }, Is(true))
@@ -49,6 +52,7 @@ internal class VilkårsvurderingServiceTest {
 
     @Test
     fun `oppdaterVilkårVedDødsfall skal ikke sette tom dato til dødsfallsdato dersom dødsfallsdato er senere enn nåværende tom`() {
+        // Arrange
         val behandling = lagBehandling(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
         val aktør = randomAktør()
         val vilkårFomDato = LocalDate.of(2000, 1, 1)
@@ -66,8 +70,10 @@ internal class VilkårsvurderingServiceTest {
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns vilkårsvurdering
 
+        // Act
         vilkårsvurderingService.oppdaterVilkårVedDødsfall(behandlingId = BehandlingId(behandling.id), dødsfallsDato, aktør)
 
+        // Assert
         val vilkårResultater = vilkårsvurdering.personResultater.single().vilkårResultater
 
         assertThat(vilkårResultater.all { it.periodeTom == vilkårTomDato }, Is(true))
@@ -75,6 +81,7 @@ internal class VilkårsvurderingServiceTest {
 
     @Test
     fun `oppdaterVilkårVedDødsfall skal ikke sette tom dato til dødsfallsdato dersom tom dato ikke allerede er satt`() {
+        // Arrange
         val behandling = lagBehandling(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
         val aktør = randomAktør()
         val vilkårFomDato = LocalDate.of(2000, 1, 1)
@@ -91,8 +98,10 @@ internal class VilkårsvurderingServiceTest {
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns vilkårsvurdering
 
+        // Act
         vilkårsvurderingService.oppdaterVilkårVedDødsfall(behandlingId = BehandlingId(behandling.id), dødsfallsDato, aktør)
 
+        // Assert
         val vilkårResultater = vilkårsvurdering.personResultater.single().vilkårResultater
 
         assertThat(vilkårResultater.all { it.periodeTom == null }, Is(true))

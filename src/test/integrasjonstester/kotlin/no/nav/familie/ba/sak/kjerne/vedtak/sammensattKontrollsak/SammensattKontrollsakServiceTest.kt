@@ -36,13 +36,17 @@ class SammensattKontrollsakServiceTest(
 
     @Test
     fun `finnSammensattKontrollsak skal returnere SammensattKontrollsak dersom det finnes en SammensattKontrollsak knyttet til behandlingsId`() {
+        // Arrange
         val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
         sammensattKontrollsakRepository.saveAndFlush(SammensattKontrollsak(behandlingId = behandling.id, fritekst = "Fritekst"))
 
+        // Act
         val sammensattKontrollsak = sammensattKontrollsakRepository.finnSammensattKontrollsakForBehandling(behandling.id)
+
+        // Assert
         assertThat(sammensattKontrollsak).isNotNull
         assertThat(sammensattKontrollsak!!.behandlingId).isEqualTo(behandling.id)
         assertThat(sammensattKontrollsak.fritekst).isEqualTo("Fritekst")
@@ -50,12 +54,15 @@ class SammensattKontrollsakServiceTest(
 
     @Test
     fun `opprettSammensattKontrollsak skal opprette SammensattKontrollsak basert på OpprettSammensattKontrollsakDto`() {
+        // Arrange
         val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
+        // Act
         val sammensattKontrollsak = sammensattKontrollsakService.opprettSammensattKontrollsak(OpprettSammensattKontrollsakDto(behandlingId = behandling.id, fritekst = "Fritekst"))
 
+        // Assert
         assertThat(sammensattKontrollsak.behandlingId).isEqualTo(behandling.id)
         assertThat(sammensattKontrollsak.fritekst).isEqualTo("Fritekst")
 
@@ -66,13 +73,17 @@ class SammensattKontrollsakServiceTest(
 
     @Test
     fun `oppdaterSammensattKontrollsak skal oppdatere SammensattKontrollsak basert på SammensattKontrollsakDto`() {
+        // Arrange
         val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
         val eksisterendeSammensattKontrollsak = sammensattKontrollsakService.opprettSammensattKontrollsak(OpprettSammensattKontrollsakDto(behandlingId = behandling.id, fritekst = "Fritekst"))
+
+        // Act
         val oppdatertSammensattKontrollsak = sammensattKontrollsakService.oppdaterSammensattKontrollsak(SammensattKontrollsakDto(id = eksisterendeSammensattKontrollsak.id, behandlingId = behandling.id, fritekst = "Oppdatert fritekst"))
 
+        // Assert
         assertThat(oppdatertSammensattKontrollsak.id).isEqualTo(eksisterendeSammensattKontrollsak.id)
         assertThat(oppdatertSammensattKontrollsak.behandlingId).isEqualTo(behandling.id)
         assertThat(oppdatertSammensattKontrollsak.fritekst).isEqualTo("Oppdatert fritekst")
@@ -85,13 +96,17 @@ class SammensattKontrollsakServiceTest(
 
     @Test
     fun `slettSammensattKontrollsak skal slette SammensattKontrollsak basert på SammensattKontrollsakDto`() {
+        // Arrange
         val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
         val eksisterendeSammensattKontrollsak = sammensattKontrollsakService.opprettSammensattKontrollsak(OpprettSammensattKontrollsakDto(behandlingId = behandling.id, fritekst = "Fritekst"))
+
+        // Act
         sammensattKontrollsakService.slettSammensattKontrollsak(eksisterendeSammensattKontrollsak.id)
 
+        // Assert
         assertThat(sammensattKontrollsakService.finnSammensattKontrollsak(behandlingId = behandling.id)).isNull()
 
         val loggForBehandling = loggService.hentLoggForBehandling(behandling.id)

@@ -120,27 +120,37 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Kjør flyway migreringer og sjekk at behandlingslagerservice klarer å lese å skrive til postgresql`() {
+        // Arrange
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+
+        // Act
         behandlingService.opprettBehandling(
             nyOrdinærBehandling(
                 fagsakId = fagsak.id,
             ),
         )
+
+        // Assert
         assertEquals(1, behandlingHentOgPersisterService.hentBehandlinger(fagsak.id).size)
     }
 
     @Test
     fun `Test at opprettEllerOppdaterBehandling kjører uten feil`() {
+        // Arrange
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+
+        // Act
         behandlingService.opprettBehandling(
             nyOrdinærBehandling(
                 fagsakId = fagsak.id,
             ),
         )
+
+        // Assert
         assertEquals(
             1,
             behandlingHentOgPersisterService.hentBehandlinger(fagsak.id).size,
@@ -149,31 +159,40 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Opprett behandling`() {
+        // Arrange
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+
+        // Act
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
+
+        // Assert
         assertEquals(fagsak.id, behandling.fagsak.id)
     }
 
     @Test
     fun `Kast feil ved opprettelse av behandling for ny person med åpen sak i Infotrygd`() {
+        // Arrange
         val fnr = randomFnr()
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
 
         fakeInfotrygdBarnetrygdKlient.leggTilÅpenSakIInfotrygd(fnr, emptyList(), true)
 
+        // Act & Assert
         assertThatThrownBy { behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak)) }
             .hasMessageContaining("sak i Infotrygd")
     }
 
     @Test
     fun `Kast feil ved opprettelse av behandling for ny person med løpende sak i Infotrygd, utenom migrering`() {
+        // Arrange
         val fnr = randomFnr()
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
 
         fakeInfotrygdBarnetrygdKlient.leggTilLøpendeSakIInfotrygd(fnr, emptyList(), true)
 
+        // Act & Assert
         assertThatThrownBy { behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak)) }
             .hasMessageContaining("sak i Infotrygd")
 
@@ -201,11 +220,15 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Opprett behandle sak oppgave ved opprettelse av førstegangsbehandling`() {
+        // Arrange
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+
+        // Act
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fagsakId = fagsak.id))
 
+        // Assert
         val lagredeTaskerAvType =
             fakeTaskRepositoryWrapper
                 .hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE)
@@ -218,20 +241,27 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Opprett aktivt vedtak ved opprettelse av behandling`() {
+        // Arrange
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+
+        // Act
         val behandling =
             behandlingService.opprettBehandling(nyOrdinærBehandling(fagsakId = fagsak.id))
 
+        // Assert
         assertNotNull(vedtakService.hentAktivForBehandling(behandlingId = behandling.id))
     }
 
     @Test
     fun `Ikke opprett behandle sak oppgave ved opprettelse av fødselshendelsebehandling`() {
+        // Arrange
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+
+        // Act
         val behandling =
             behandlingService.opprettBehandling(
                 NyBehandling(
@@ -244,6 +274,7 @@ class BehandlingIntegrationTest(
                 ),
             )
 
+        // Assert
         val lagredeTaskerAvType =
             fakeTaskRepositoryWrapper
                 .hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE)
@@ -256,6 +287,7 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Kast feil om man lager ny behandling på fagsak som har behandling som skal godkjennes`() {
+        // Arrange
         val morId = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morId))
@@ -270,6 +302,7 @@ class BehandlingIntegrationTest(
         )
         behandlingRepository.saveAndFlush(behandling)
 
+        // Act & Assert
         assertThrows(Exception::class.java) {
             behandlingService.opprettBehandling(
                 NyBehandling(
@@ -285,6 +318,7 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Opprett barnas beregning på vedtak`() {
+        // Arrange
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
@@ -362,6 +396,7 @@ class BehandlingIntegrationTest(
             )
         vilkårsvurderingRepository.save(vilkårsvurdering)
 
+        // Act
         val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         val barnOgYtelsePeriodeDtoMap =
             personopplysningGrunnlag
@@ -371,6 +406,7 @@ class BehandlingIntegrationTest(
                     { personMedAndelerDto -> personMedAndelerDto.ytelsePerioder.sortedBy { it.stønadFom } },
                 )
 
+        // Assert
         val satsEndringDatoSeptember2020 =
             SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1354)!!.toYearMonth()
         val satsEndringDatoSeptember2021 =
@@ -417,6 +453,7 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Endre barnas beregning på vedtak`() {
+        // Arrange
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
@@ -482,6 +519,7 @@ class BehandlingIntegrationTest(
             )
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering2)
 
+        // Act
         val satsEndringDatoSeptember2021 =
             SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1654)!!.toYearMonth()
         val satsEndringDatoJanuar2022 = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1676)!!.toYearMonth()
@@ -495,6 +533,7 @@ class BehandlingIntegrationTest(
                     { personMedAndelerDto -> personMedAndelerDto.ytelsePerioder.sortedBy { it.stønadFom } },
                 )
 
+        // Assert
         assertEquals(2, barnOgYtelsePeriodeDtoMap.size)
 
         // Barn 1
@@ -526,6 +565,7 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Hent en persons bostedsadresse fra PDL og lagre den i database`() {
+        // Arrange
         val matrikkelId = 123456L
         val søkerHusnummer = "12"
         val søkerHusbokstav = "A"
@@ -614,6 +654,7 @@ class BehandlingIntegrationTest(
             Målform.NB,
         )
 
+        // Assert
         val søker = personRepository.findByAktør(søkerAktør).first()
         val vegadresse = søker.bostedsadresser.sisteAdresse() as GrVegadresseBostedsadresse
         assertEquals(søkerAdressnavn, vegadresse.adressenavn)
@@ -651,6 +692,7 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Skal lagre og sende korrekt sakstatistikk for behandlingsresultat`() {
+        // Arrange
         val fnr = randomFnr()
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         val behandling =
@@ -658,6 +700,7 @@ class BehandlingIntegrationTest(
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
         val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
 
+        // Act
         vedtakService.oppdater(vedtak!!)
 
         behandlingHentOgPersisterService.lagreEllerOppdater(
@@ -666,6 +709,7 @@ class BehandlingIntegrationTest(
             },
         )
 
+        // Assert
         val behandlingDvhMeldinger =
             saksstatistikkMellomlagringRepository
                 .finnMeldingerKlarForSending()

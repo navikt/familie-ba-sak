@@ -28,11 +28,13 @@ class ManueltBrevRequestTest {
     inner class TilBrev {
         @Test
         fun `Forlenget svartidsbrev request skal gi forlenget svartid brevmal med riktig data`() {
+            // Act
             val brev =
                 baseRequest
                     .copy(brevmal = Brevmal.FORLENGET_SVARTIDSBREV)
                     .tilBrev("12345678910", "mottakerNavn", "saksbehandlerNavn") { emptyMap() }
 
+            // Assert
             assertThat(brev::class).isEqualTo(ForlengetSvartidsbrev::class)
             brev as ForlengetSvartidsbrev
 
@@ -47,7 +49,8 @@ class ManueltBrevRequestTest {
 
         @Test
         fun `Forlenget svartidsbrev institusjon request skal gi forlenget svartid brevmal med riktig data`() {
-            val brev =
+            // Arrange
+            val brevRequest =
                 baseRequest
                     .copy(
                         brevmal = Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON,
@@ -56,8 +59,12 @@ class ManueltBrevRequestTest {
                                 fødselsnummer = "testident",
                                 navn = "testnavn",
                             ),
-                    ).tilBrev("998765432", mottakerNavn = "Testorganisasjon", saksbehandlerNavn = "saksbehandlerNavn") { emptyMap() }
+                    )
 
+            // Act
+            val brev = brevRequest.tilBrev("998765432", mottakerNavn = "Testorganisasjon", saksbehandlerNavn = "saksbehandlerNavn") { emptyMap() }
+
+            // Assert
             assertThat(brev::class).isEqualTo(ForlengetSvartidsbrev::class)
             brev as ForlengetSvartidsbrev
 
@@ -76,6 +83,7 @@ class ManueltBrevRequestTest {
 
         @Test
         fun `Innhente opplysninger brev institusjon skal fylle ut orgnummer og gjelder feltet`() {
+            // Arrange
             val fnr = "12345678910"
             val orgnr = "123456789"
             val brevRequestTilInstitusjon =
@@ -89,6 +97,8 @@ class ManueltBrevRequestTest {
                 )
 
             val mottakerNavn = "mottakerNavn"
+
+            // Act & Assert
             brevRequestTilInstitusjon.tilBrev(orgnr, mottakerNavn, "saksbehandlerNavn") { emptyMap() }.data.apply {
                 assertThat(flettefelter.organisasjonsnummer).containsExactly(orgnr)
                 assertThat(flettefelter.fodselsnummer).containsExactly(brevRequestTilInstitusjon.vedrørende?.fødselsnummer)
@@ -99,6 +109,7 @@ class ManueltBrevRequestTest {
 
         @Test
         fun `Innhente opplysninger brevet skal ikke fylle ut org nummer og gjelder feltet selvom vedrørende er satt`() {
+            // Arrange
             val fnr = "12345678910"
 
             val brevRequestTilPerson =
@@ -112,6 +123,8 @@ class ManueltBrevRequestTest {
                 )
 
             val mottakerNavn = "mottakerNavn"
+
+            // Act & Assert
             brevRequestTilPerson.tilBrev(fnr, mottakerNavn, "saksbehandlerNavn") { emptyMap() }.data.apply {
                 assertThat(flettefelter.fodselsnummer).containsExactly(fnr)
                 assertThat(flettefelter.navn).containsExactly(mottakerNavn)
@@ -122,6 +135,7 @@ class ManueltBrevRequestTest {
 
         @Test
         fun `tilBrev genererer 'Utbetaling etter KA-vedtak'-brev som forventet`() {
+            // Arrange
             val fnr = "12345678910"
             val brevRequestTilPerson =
                 baseRequest.copy(
@@ -129,7 +143,11 @@ class ManueltBrevRequestTest {
                     fritekstAvsnitt = "Fritekst avsnitt",
                 )
             val mottakerNavn = "mottakerNavn"
+
+            // Act
             val brev = brevRequestTilPerson.tilBrev(fnr, mottakerNavn, "Saks Behandlersen") { emptyMap() }.data as UtbetalingEtterKAVedtakData
+
+            // Assert
             with(brev.flettefelter) {
                 assertThat(fodselsnummer).containsExactly(fnr)
                 assertThat(navn).containsExactly(mottakerNavn)
@@ -142,6 +160,7 @@ class ManueltBrevRequestTest {
 
         @Test
         fun `tilBrev genererer 'innhente opplysninger klage'-brev som forventet`() {
+            // Arrange
             val fnr = "12345678910"
             val mottakerNavn = "mottakerNavn"
             val brevRequestTilPerson =
@@ -154,7 +173,11 @@ class ManueltBrevRequestTest {
                             navn = "navn tilhørende $fnr",
                         ),
                 )
+
+            // Act
             val brev = brevRequestTilPerson.tilBrev(fnr, mottakerNavn, "Saks Behandlersen") { emptyMap() }.data as InformasjonsbrevInnhenteOpplysningerKlageData
+
+            // Assert
             with(brev.flettefelter) {
                 assertThat(fodselsnummer).containsExactly(fnr)
                 assertThat(navn).containsExactly(mottakerNavn)
@@ -167,6 +190,7 @@ class ManueltBrevRequestTest {
 
         @Test
         fun `tilBrev genererer 'innhente opplysninger klage'-brev som forventet for institusjon`() {
+            // Arrange
             val fnr = "12345678910"
             val orgnr = "123456789"
             val mottakerNavn = "mottakerNavn"
@@ -180,7 +204,11 @@ class ManueltBrevRequestTest {
                             navn = "navn tilhørende $fnr",
                         ),
                 )
+
+            // Act
             val brev = brevRequestTilInstitusjon.tilBrev(orgnr, mottakerNavn, "Saks Behandlersen") { emptyMap() }.data as InformasjonsbrevInnhenteOpplysningerKlageData
+
+            // Assert
             with(brev.flettefelter) {
                 assertThat(fodselsnummer).containsExactly(fnr)
                 assertThat(navn).containsExactly(mottakerNavn)
@@ -193,6 +221,7 @@ class ManueltBrevRequestTest {
 
         @Test
         fun `'innhente opplysninger klage'-brev krever at fritekst avsnitt har en verdi`() {
+            // Arrange
             val fnr = "12345678910"
             val mottakerNavn = "mottakerNavn"
             val brevRequestTilPerson =
@@ -200,6 +229,8 @@ class ManueltBrevRequestTest {
                     brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE,
                     fritekstAvsnitt = "",
                 )
+
+            // Act & Assert
             val funksjonellFeil =
                 assertThrows<FunksjonellFeil> {
                     brevRequestTilPerson.tilBrev(fnr, mottakerNavn, "Saks Behandlersen") { emptyMap() }
@@ -209,6 +240,7 @@ class ManueltBrevRequestTest {
 
         @Test
         fun `tilBrev genererer 'innhente opplysninger klage institusjon'-brev som forventet`() {
+            // Arrange
             val fnr = "12345678910"
             val orgnr = "123456789"
             val saksbehandler = "Saks Behandlersen"
@@ -225,8 +257,11 @@ class ManueltBrevRequestTest {
                         ),
                     fritekstAvsnitt = fritekstAvsnitt,
                 )
+
+            // Act
             val brev = brevRequestTilInstitusjon.tilBrev(orgnr, mottakerNavn, saksbehandler) { emptyMap() }.data as InformasjonsbrevInnhenteOpplysningerKlageData
 
+            // Assert
             with(brev.flettefelter) {
                 assertThat(organisasjonsnummer).containsExactly(orgnr)
                 assertThat(fodselsnummer).containsExactly(brevRequestTilInstitusjon.vedrørende?.fødselsnummer)
@@ -239,6 +274,7 @@ class ManueltBrevRequestTest {
 
         @Test
         fun `'innhente opplysninger klage institusjon'-brev krever at fritekst avsnitt har en verdi`() {
+            // Arrange
             val orgnr = "123456789"
             val saksbehandler = "Saks Behandlersen"
             val mottakerNavn = "mottakerNavn"
@@ -248,6 +284,8 @@ class ManueltBrevRequestTest {
                     brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON,
                     fritekstAvsnitt = "",
                 )
+
+            // Act & Assert
             val funksjonellFeil =
                 assertThrows<FunksjonellFeil> {
                     brevRequestTilInstitusjon.tilBrev(orgnr, mottakerNavn, saksbehandler) { emptyMap() }
@@ -257,11 +295,13 @@ class ManueltBrevRequestTest {
 
         @Test
         fun `Varsel årleg kontroll eøs request skal gi varsel årleg kontroll eøs brevmal med riktig data`() {
+            // Act
             val brev =
                 baseRequest
                     .copy(brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS, mottakerlandSed = listOf("SE"))
                     .tilBrev("12345678910", "mottakerNavn", "saksbehandlerNavn") { mapOf(Pair("SE", "Sverige")) }
 
+            // Assert
             assertThat(brev::class).isEqualTo(VarselbrevÅrlegKontrollEøs::class)
             brev as VarselbrevÅrlegKontrollEøs
 
@@ -279,7 +319,10 @@ class ManueltBrevRequestTest {
 
         @Test
         fun `Varsel årleg kontroll eøs med innhenting av opplysninger request skal gi varsel årleg kontroll eøs brevmal med riktig data`() {
+            // Arrange
             val dokumentliste = listOf("Dokument 1", "Dokument 2")
+
+            // Act
             val brev =
                 baseRequest
                     .copy(
@@ -288,6 +331,7 @@ class ManueltBrevRequestTest {
                         multiselectVerdier = dokumentliste,
                     ).tilBrev("12345678910", "mottakerNavn", "saksbehandlerNavn") { mapOf(Pair("SE", "Sverige")) }
 
+            // Assert
             assertThat(brev::class).isEqualTo(VarselbrevÅrlegKontrollEøs::class)
             brev as VarselbrevÅrlegKontrollEøs
 
@@ -306,6 +350,7 @@ class ManueltBrevRequestTest {
 
         @Test
         fun `Varsel årleg kontroll EØS request med flere mottakerland skal gi riktig brevdata`() {
+            // Act
             val brev =
                 baseRequest
                     .copy(brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS, mottakerlandSed = listOf("SE", "DK"))
@@ -313,6 +358,7 @@ class ManueltBrevRequestTest {
                         mapOf(Pair("SE", "Sverige"), Pair("DK", "Danmark"))
                     }
 
+            // Assert
             assertThat(brev::class).isEqualTo(VarselbrevÅrlegKontrollEøs::class)
             brev as VarselbrevÅrlegKontrollEøs
 
@@ -326,12 +372,14 @@ class ManueltBrevRequestTest {
 
         @Test
         fun `Varsel årleg kontroll EØS request skal validere mottakerland`() {
+            // Arrange
             val brevRequest =
                 baseRequest.copy(
                     brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS,
                     mottakerlandSed = listOf("SE", "NO"),
                 )
 
+            // Act & Assert
             assertThrows<FunksjonellFeil> {
                 brevRequest.tilBrev("12345678910", "mottakerNavn", "saksbehandlerNavn") {
                     mapOf(Pair("SE", "Sverige"), Pair("NO", "Norge"))

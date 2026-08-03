@@ -29,12 +29,16 @@ class AInntektControllerTest(
 
     @Test
     fun `kan hente ut A-Inntekt url`() {
+        // Act
         val responseRessurs = ainntektController.hentAInntektUrl(PersonIdent(ident = randomFnr()))
+
+        // Assert
         assertThat(responseRessurs.data).isEqualTo(ainntektUrl)
     }
 
     @Test
     fun `prøver å hente ut A-Inntekt url på et ugyldig fnr`() {
+        // Act & Assert
         val feil =
             assertThrows<IllegalStateException> {
                 ainntektController.hentAInntektUrl(PersonIdent(ident = "10000111111"))

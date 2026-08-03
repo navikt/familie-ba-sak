@@ -70,6 +70,7 @@ class FiltreringsreglerServiceTest {
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat ikke oppfylt når mors vilkår om utvidet barnetrygd er oppfylt i tidsrommet barnet er mellom 0 og 18`() {
+        // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
@@ -103,8 +104,10 @@ class FiltreringsreglerServiceTest {
         mockkObject(FiltreringsregelEvaluering)
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
 
+        // Act
         filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
+        // Assert
         verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
@@ -120,6 +123,7 @@ class FiltreringsreglerServiceTest {
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat oppfylt når mors vilkår om utvidet barnetrygd er oppfylt utenfor tidsrommet barnet er mellom 0 og 18`() {
+        // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
@@ -153,8 +157,10 @@ class FiltreringsreglerServiceTest {
         mockkObject(FiltreringsregelEvaluering)
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
 
+        // Act
         filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
+        // Assert
         verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
@@ -170,6 +176,7 @@ class FiltreringsreglerServiceTest {
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat ikke oppfylt når en vilkårsperiode for utvidet barnetrygd er oppfylt i tidsrommet barnet er mellom 0 og 18`() {
+        // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
@@ -208,8 +215,10 @@ class FiltreringsreglerServiceTest {
         mockkObject(FiltreringsregelEvaluering)
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
 
+        // Act
         filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
+        // Assert
         verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
@@ -225,6 +234,7 @@ class FiltreringsreglerServiceTest {
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat ikke oppfylt når tom-dato er null på vilkåret utvidet barnetrygd`() {
+        // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
@@ -263,8 +273,10 @@ class FiltreringsreglerServiceTest {
         mockkObject(FiltreringsregelEvaluering)
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
 
+        // Act
         filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
+        // Assert
         verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
@@ -280,6 +292,7 @@ class FiltreringsreglerServiceTest {
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat oppfylt når begge barnas fødselsdatoer er etter tom på vilkåret utvidet barnetrygd`() {
+        // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn1 = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val barn2 = tilfeldigPerson(fødselsdato = LocalDate.of(2020, 1, 1))
@@ -321,8 +334,10 @@ class FiltreringsreglerServiceTest {
         mockkObject(FiltreringsregelEvaluering)
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
 
+        // Act
         filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
+        // Assert
         verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
@@ -338,6 +353,7 @@ class FiltreringsreglerServiceTest {
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat ikke oppfylt når mors vilkår om utvidet barnetrygd er oppfylt i tidsrommet et av barna er mellom 0 og 18`() {
+        // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn1 = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val barn2 = tilfeldigPerson(fødselsdato = LocalDate.of(2020, 1, 1))
@@ -379,8 +395,10 @@ class FiltreringsreglerServiceTest {
         mockkObject(FiltreringsregelEvaluering)
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
 
+        // Act
         filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
+        // Assert
         verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
@@ -396,6 +414,7 @@ class FiltreringsreglerServiceTest {
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat ikke oppfylt når mor har opphørt barnetrygd`() {
+        // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
@@ -416,8 +435,10 @@ class FiltreringsreglerServiceTest {
         mockkObject(FiltreringsregelEvaluering)
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
 
+        // Act
         filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
+        // Assert
         verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
@@ -433,6 +454,7 @@ class FiltreringsreglerServiceTest {
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat oppfylt når vilkår er oppfylt og mor ikke har opphørt barnetrygd`() {
+        // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
@@ -448,8 +470,10 @@ class FiltreringsreglerServiceTest {
         mockkObject(FiltreringsregelEvaluering)
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
 
+        // Act
         filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
+        // Assert
         verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured

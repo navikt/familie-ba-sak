@@ -28,6 +28,7 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserTest {
 
     @Test
     fun `test tilpasning av utenlandske periodebeløp mot kompleks endring av kompetanse`() {
+        // Arrange
         val forrigeUtenlandskePeriodebeløp =
             UtenlandskPeriodebeløpBuilder(jan2020)
                 .medBeløp("--3456789-----", "EUR", "N", barn1, barn2)
@@ -47,14 +48,17 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserTest {
                 .medBeløp(" -        ", null, "N", barn1, barn3)
                 .bygg()
 
+        // Act
         val faktiskeUtenlandskePeriodebeløp =
             tilpassUtenlandskePeriodebeløpTilKompetanser(forrigeUtenlandskePeriodebeløp, gjeldendeKompetanser, inneværendeMåned)
 
+        // Assert
         assertEqualsUnordered(forventedeUtenlandskePeriodebeløp, faktiskeUtenlandskePeriodebeløp)
     }
 
     @Test
     fun `test at endret annennForeldersAktivitetsland i kompetanse fører til endring i utenlandsk periodebeløp`() {
+        // Arrange
         val forrigeUtenlandskePeriodebeløp =
             UtenlandskPeriodebeløpBuilder(jan2020)
                 .medBeløp("555555", "EUR", "N", barn1)
@@ -65,9 +69,11 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserTest {
                 .medKompetanse("SSSSSS", barn1, annenForeldersAktivitetsland = "S")
                 .byggKompetanser()
 
+        // Act
         val faktiskeUtenlandskePeriodebeløp =
             tilpassUtenlandskePeriodebeløpTilKompetanser(forrigeUtenlandskePeriodebeløp, gjeldendeKompetanser, inneværendeMåned)
 
+        // Assert
         val forventedeUtenlandskePeriodebeløp =
             UtenlandskPeriodebeløpBuilder(jan2020)
                 .medBeløp("------", null, "S", barn1)
@@ -78,6 +84,7 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserTest {
 
     @Test
     fun `test at ikke fremtidige utenlandske periodebeløp genereres`() {
+        // Arrange
         val gjeldendeUtenlandskePeriodeBeløp =
             UtenlandskPeriodebeløpBuilder(nov2020)
                 .medBeløp("12345", "PLN", "PL", barn1)
@@ -93,9 +100,11 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserTest {
                 .medBeløp("123", "PLN", "PL", barn1)
                 .bygg()
 
+        // Act
         val faktiskeUtenlandskPeriodebeløp =
             tilpassUtenlandskePeriodebeløpTilKompetanser(gjeldendeUtenlandskePeriodeBeløp, kompetanser, inneværendeMåned)
 
+        // Assert
         assertThat(faktiskeUtenlandskPeriodebeløp).isEqualTo(forventedeUtenlandskePeriodebeløp)
     }
 }

@@ -26,6 +26,7 @@ class TilpassKompetanserTilRegelverkTest {
 
     @Test
     fun testTilpassKompetanserUtenKompetanser() {
+        // Arrange
         val kompetanser: List<Kompetanse> = emptyList()
 
         val eøsPerioder =
@@ -49,6 +50,7 @@ class TilpassKompetanserTilRegelverkTest {
                     erAnnenForelderOmfattetAvNorskLovgivning = false,
                 ).byggKompetanser()
 
+        // Act
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = kompetanser,
@@ -58,11 +60,13 @@ class TilpassKompetanserTilRegelverkTest {
                 inneværendeMåned = YearMonth.now(),
             )
 
+        // Assert
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
     @Test
     fun testTilpassKompetanserUtenEøsPerioder() {
+        // Arrange
         val kompetanser =
             KompetanseBuilder(jan2020)
                 .medKompetanse("SSSSSSS", barn1)
@@ -72,6 +76,7 @@ class TilpassKompetanserTilRegelverkTest {
 
         val forventedeKompetanser = emptyList<Kompetanse>()
 
+        // Act
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = kompetanser,
@@ -80,11 +85,13 @@ class TilpassKompetanserTilRegelverkTest {
                 inneværendeMåned = YearMonth.now(),
             )
 
+        // Assert
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
     @Test
     fun testTilpassKompetanserMotEøsEttBarn() {
+        // Arrange
         val kompetanser =
             KompetanseBuilder(jan2020)
                 .medKompetanse("SSSSSSS", barn1)
@@ -100,6 +107,7 @@ class TilpassKompetanserTilRegelverkTest {
                 .medKompetanse("SSS  SS--", barn1)
                 .byggKompetanser()
 
+        // Act
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = kompetanser,
@@ -108,11 +116,13 @@ class TilpassKompetanserTilRegelverkTest {
                 inneværendeMåned = YearMonth.now(),
             )
 
+        // Assert
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
     @Test
     fun testTilpassKompetanserMotEøsToBarn() {
+        // Arrange
         val kompetanser =
             KompetanseBuilder(jan2020)
                 .medKompetanse("SS--SSSS", barn1, barn2)
@@ -132,6 +142,7 @@ class TilpassKompetanserTilRegelverkTest {
                 .byggKompetanser()
                 .sortedBy { it.fom }
 
+        // Act
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = kompetanser,
@@ -140,11 +151,13 @@ class TilpassKompetanserTilRegelverkTest {
                 inneværendeMåned = YearMonth.now(),
             ).sortedBy { it.fom }
 
+        // Assert
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
     @Test
     fun testTilpassKompetanserMotEøsForFlereBarn() {
+        // Arrange
         // "SSSSSSS", barn1
         // "SSSPPSS", barn2
         // "-SSSSSS", barn3

@@ -61,6 +61,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
 
     @Test
     fun `Skal lage reduksjon fra sist iverksatte behandling-periode når småbarnstillegg blir borte`() {
+        // Arrange
         val personScenario: ScenarioDto = lagScenario(barnFødselsdato)
         val fagsak: MinimalFagsakDto = lagFagsak(personScenario)
 
@@ -91,6 +92,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
             perioderBehandling1.filter { utvidetVedtaksperiodeMedBegrunnelser -> utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.any { it.ytelseType == YtelseType.SMÅBARNSTILLEGG } }.size,
         )
 
+        // Act
         val behandling2 =
             fullførRevurderingUtenOvergangstonad(
                 fagsak = fagsak,
@@ -104,6 +106,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         val periodeMedReduksjon =
             perioderBehandling2.singleOrNull { it.type == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING }
 
+        // Assert
         Assertions.assertEquals(
             0,
             perioderBehandling2.filter { it.utbetalingsperiodeDetaljer.any { it.ytelseType == YtelseType.SMÅBARNSTILLEGG } }.size,

@@ -19,10 +19,12 @@ internal class FiltreringsregelTest {
 
     @Test
     fun `Regelevaluering skal resultere i Ja`() {
+        // Arrange
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
         val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -39,15 +41,18 @@ internal class FiltreringsregelTest {
                 ),
             )
 
+        // Assert
         assertThat(evalueringer.erOppfylt()).isTrue
     }
 
     @Test
     fun `Regelevaluering skal resultere i NEI når mor mottar utvidet barnetrygd`() {
+        // Arrange
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
         val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -65,16 +70,19 @@ internal class FiltreringsregelTest {
                 ),
             )
 
+        // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
         assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET)
     }
 
     @Test
     fun `Regelevaluering skal gi resultat IKKE_OPPFYLT når mor har løpende EØS-barnetrygd`() {
+        // Arrange
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
         val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -93,16 +101,19 @@ internal class FiltreringsregelTest {
                 ),
             )
 
+        // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
         assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD)
     }
 
     @Test
     fun `Regelevaluering skal resultere i NEI når mor er under 18 år`() {
+        // Arrange
         val mor = tilfeldigPerson(LocalDate.now().minusYears(17)).copy(aktør = gyldigAktørId)
         val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -119,12 +130,14 @@ internal class FiltreringsregelTest {
                 ),
             )
 
+        // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
         assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_ER_OVER_18_ÅR)
     }
 
     @Test
     fun `Regelevaluering skal resultere i JA når det har gått mer enn 5 måneder siden forrige barn ble født`() {
+        // Arrange
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
         val barnet1 = tilfeldigPerson(LocalDate.now().plusMonths(0)).copy(aktør = gyldigAktørId)
         val barnet2 = tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(aktør = gyldigAktørId)
@@ -134,6 +147,7 @@ internal class FiltreringsregelTest {
                 PersonInfo(LocalDate.now().minusMonths(8)),
             )
 
+        // Act
         val evaluering =
             Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
                 FiltreringsreglerFakta(
@@ -149,11 +163,14 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
+
+        // Assert
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mindre enn 5 måneder siden forrige barn ble født`() {
+        // Arrange
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
         val barnet1 = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val barnet2 = tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(aktør = gyldigAktørId)
@@ -163,6 +180,7 @@ internal class FiltreringsregelTest {
                 PersonInfo(LocalDate.now().minusMonths(8)),
             )
 
+        // Act
         val evaluering =
             Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
                 FiltreringsreglerFakta(
@@ -179,15 +197,18 @@ internal class FiltreringsregelTest {
                 ),
             )
 
+        // Assert
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det er registrert dødsfall på mor`() {
+        // Arrange
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
         val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -204,16 +225,19 @@ internal class FiltreringsregelTest {
                 ),
             )
 
+        // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
         assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_LEVER)
     }
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det er registrert dødsfall på barnet`() {
+        // Arrange
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
         val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -230,16 +254,19 @@ internal class FiltreringsregelTest {
                 ),
             )
 
+        // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
         assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.BARN_LEVER)
     }
 
     @Test
     fun `Regelevaluering skal resultere i NEI når mor har verge`() {
+        // Arrange
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
         val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -256,6 +283,7 @@ internal class FiltreringsregelTest {
                 ),
             )
 
+        // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
         assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_HAR_IKKE_VERGE)
     }
@@ -276,12 +304,14 @@ internal class FiltreringsregelTest {
 
     @Test
     fun `Mor er under 18`() {
+        // Arrange
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("2020-10-23"), aktør = lagAktør("04086226621"))
         val barn1Person =
             tilfeldigPerson(fødselsdato = LocalDate.parse("2019-10-23"), aktør = lagAktør("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-09-23"))
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -297,17 +327,20 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
+        // Assert
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_ER_OVER_18_ÅR)
     }
 
     @Test
     fun `Barn med mindre mellomrom enn 5mnd`() {
+        // Arrange
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = lagAktør("04086226621"))
         val barn1Person =
             tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = lagAktør("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-09-23"))
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -323,17 +356,21 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
+
+        // Assert
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
     }
 
     @Test
     fun `Tvillinger født på samme dag skal gi oppfylt`() {
+        // Arrange
         val mor =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = lagAktør(randomFnr()))
         val barn1Person =
             tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = lagAktør(randomFnr()))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-10-23"))
 
+        // Act
         val evaluering =
             Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
                 FiltreringsreglerFakta(
@@ -349,17 +386,21 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
+
+        // Assert
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test
     fun `Mor lever ikke`() {
+        // Arrange
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = lagAktør("04086226621"))
         val barn1Person =
             tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = lagAktør("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -375,17 +416,21 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
+
+        // Assert
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_LEVER)
     }
 
     @Test
     fun `Barnet lever ikke`() {
+        // Arrange
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = lagAktør("04086226621"))
         val barn1Person =
             tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = lagAktør("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -401,17 +446,20 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
+        // Assert
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.BARN_LEVER)
     }
 
     @Test
     fun `Mor har verge`() {
+        // Arrange
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = lagAktør("04086226621"))
         val barn1Person =
             tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = lagAktør("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -427,17 +475,21 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
+
+        // Assert
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_HAR_IKKE_VERGE)
     }
 
     @Test
     fun `Mor er død og er under vergemål`() {
+        // Arrange
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = lagAktør("04086226621"))
         val barn1Person =
             tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = lagAktør("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -453,11 +505,14 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
+
+        // Assert
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_LEVER)
     }
 
     @Test
     fun `Flere barn født`() {
+        // Arrange
         val nyligFødselsdato = LocalDate.now().minusDays(2)
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = lagAktør("04086226621"))
@@ -467,6 +522,7 @@ internal class FiltreringsregelTest {
             tilfeldigPerson(fødselsdato = nyligFødselsdato, aktør = lagAktør("23128438785"))
         val barn3PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -482,17 +538,21 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
+
+        // Assert
         Assertions.assertTrue(evalueringer.erOppfylt())
     }
 
     @Test
     fun `Mor har ugyldig fødselsnummer`() {
+        // Arrange
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = lagAktør("23236789111"))
         val barn1Person =
             tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = lagAktør("21111777001"))
         val barn3PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -508,11 +568,14 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
+
+        // Assert
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_GYLDIG_FNR)
     }
 
     @Test
     fun `Barn med ugyldig fødselsnummer`() {
+        // Arrange
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = lagAktør("04086226621"))
         val barn1Person =
@@ -520,6 +583,7 @@ internal class FiltreringsregelTest {
         val barn2Person =
             tilfeldigPerson(fødselsdato = LocalDate.parse("2018-09-23"), aktør = lagAktør("23091823456"))
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -535,16 +599,20 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
+
+        // Assert
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.BARN_GYLDIG_FNR)
     }
 
     @Test
     fun `Fagsak migrert etter barn født`() {
+        // Arrange
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = lagAktør("04086226621"))
         val barn1Person =
             tilfeldigPerson(fødselsdato = LocalDate.parse("2020-09-23"), aktør = lagAktør("23092023456"))
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -561,6 +629,8 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
+
+        // Assert
         assertIkkeOppfyltFiltreringsregel(
             evalueringer,
             Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
@@ -569,6 +639,7 @@ internal class FiltreringsregelTest {
 
     @Test
     fun `Saken er godkjent fordi barnet er født i denne måneden`() {
+        // Arrange
         val fødselsdatoIDenneMåned = LocalDate.now().withDayOfMonth(1)
 
         val søkerPerson =
@@ -576,6 +647,7 @@ internal class FiltreringsregelTest {
         val barn1Person =
             tilfeldigPerson(fødselsdato = fødselsdatoIDenneMåned, aktør = lagAktør("23091823456"))
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -591,16 +663,20 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
+
+        // Assert
         Assertions.assertTrue(evalueringer.erOppfylt())
     }
 
     @Test
     fun `Skal returnere ikke oppfylt for regelevaluering når det allerede løper barnetrygd for barnet på annen forelder`() {
+        // Arrange
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
         val barn1Person =
             tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -616,16 +692,20 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
+
+        // Assert
         Assertions.assertTrue(!evalueringer.erOppfylt())
     }
 
     @Test
     fun `Skal returnere ikke oppfylt for regelevaluering når mor oppfyller vilkår for utvidet barnetrygd`() {
+        // Arrange
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
         val barn1Person =
             tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -641,16 +721,19 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
+        // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
     }
 
     @Test
     fun `Skal returnere oppfylt for regelevaluering når mor ikke oppfyller vilkår for utvidet barnetrygd`() {
+        // Arrange
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
         val barn1Person =
             tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -666,16 +749,20 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
+
+        // Assert
         assertThat(evalueringer.erOppfylt()).isTrue
     }
 
     @Test
     fun `Skal returnere ikke oppfylt for regelevaluering når mor har opphørt barnetrygd`() {
+        // Arrange
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
         val barn1Person =
             tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
 
+        // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
@@ -691,6 +778,8 @@ internal class FiltreringsregelTest {
                     morHarIkkeOpphørtBarnetrygd = false,
                 ),
             )
+
+        // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
     }
 
@@ -705,6 +794,7 @@ internal class FiltreringsregelTest {
 
     @Test
     fun `Filtreringsreglene skal følge en fagbestemt rekkefølge`() {
+        // Arrange
         val fagbestemtFiltreringsregelrekkefølge =
             listOf(
                 Filtreringsregel.MOR_GYLDIG_FNR,
@@ -721,6 +811,8 @@ internal class FiltreringsregelTest {
                 Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
                 Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
             )
+
+        // Assert
         assertThat(Filtreringsregel.entries.size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
         assertThat(
             Filtreringsregel

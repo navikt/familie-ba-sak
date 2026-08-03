@@ -40,6 +40,7 @@ import java.time.YearMonth
 internal class TidslinjerTest {
     @Test
     fun `lag en søker med to barn og mye kompleksitet i vilkårsvurderingen`() {
+        // Arrange
         val barnsFødselsdato = 13.jan(2020)
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato)
@@ -77,12 +78,14 @@ internal class TidslinjerTest {
             .byggPerson()
         val barn2Result = "?EE!!!E!!EEEEEEEEEEE".tilRegelverkResultatTidslinje(startMånedRegelverk)
 
+        // Act
         val vilkårsvurderingTidslinjer =
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
                 søkerOgBarn = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2).tilPersonEnkelSøkerOgBarn(),
             )
 
+        // Assert
         assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinje().regelverkResultatTidslinje)
         assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
         assertEquals(barn2Result, vilkårsvurderingTidslinjer.forBarn(barn2).regelverkResultatTidslinje)
@@ -90,6 +93,7 @@ internal class TidslinjerTest {
 
     @Test
     fun `lag en søker med ett barn og søker går fra EØS-regelverk til nasjonalt`() {
+        // Arrange
         val barnsFødselsdato = 13.jan(2020)
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato)
@@ -116,18 +120,21 @@ internal class TidslinjerTest {
             .byggPerson()
         val barn1Result = "?????!!!!!EE!!!?????".tilRegelverkResultatTidslinje(startMånedRegelverk)
 
+        // Act
         val vilkårsvurderingTidslinjer =
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
                 søkerOgBarn = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1).tilPersonEnkelSøkerOgBarn(),
             )
 
+        // Assert
         assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinje().regelverkResultatTidslinje)
         assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
     }
 
     @Test
     fun `Virkningstidspunkt for vilkårsvurdering varer frem til måneden før barnet fyller 18 år`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
@@ -146,6 +153,7 @@ internal class TidslinjerTest {
                 .medVilkår("+>", GIFT_PARTNERSKAP)
                 .byggPerson()
 
+        // Act
         val vilkårsvurderingTidslinjer =
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
@@ -154,6 +162,7 @@ internal class TidslinjerTest {
                         .tilPersonEnkelSøkerOgBarn(),
             )
 
+        // Assert
         assertEquals(
             barn1.fødselsdato
                 .til18ÅrsVilkårsdato()
@@ -170,6 +179,7 @@ internal class TidslinjerTest {
 
     @Test
     fun `Sjekk overgang fra oppfylt nasjonalt til oppfylt EØS i månedsskiftet`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
@@ -191,6 +201,7 @@ internal class TidslinjerTest {
                 (1.mai(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, EØS_FORORDNINGEN) },
             )
 
+        // Act
         val vilkårsvurderingTidslinjer =
             VilkårsvurderingBuilder()
                 .forPerson(søker, 30.apr(2020))
@@ -204,6 +215,7 @@ internal class TidslinjerTest {
                 .medVilkår(borMedSøker)
                 .byggVilkårsvurderingTidslinjer()
 
+        // Assert
         val barn1Result = "E".tilRegelverkResultatTidslinje(YearMonth.of(2020, 5))
 
         assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
@@ -211,6 +223,7 @@ internal class TidslinjerTest {
 
     @Test
     fun `Sjekk overgang fra oppfylt EØS til oppfylt nasjonalt i månedsskiftet`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
@@ -232,6 +245,7 @@ internal class TidslinjerTest {
                 (1.mai(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, NASJONALE_REGLER) },
             )
 
+        // Act
         val vilkårsvurderingTidslinjer =
             VilkårsvurderingBuilder()
                 .forPerson(søker, 30.apr(2020))
@@ -245,6 +259,7 @@ internal class TidslinjerTest {
                 .medVilkår(borMedSøker)
                 .byggVilkårsvurderingTidslinjer()
 
+        // Assert
         val barn1Result = "N".tilRegelverkResultatTidslinje(YearMonth.of(2020, 5))
 
         assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
@@ -252,6 +267,7 @@ internal class TidslinjerTest {
 
     @Test
     fun `Sjekk overgang fra oppfylt EØS til oppfylt blandet i månedsskiftet`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
@@ -265,6 +281,7 @@ internal class TidslinjerTest {
                 (1.mai(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, NASJONALE_REGLER) },
             )
 
+        // Act
         val vilkårsvurderingTidslinjer =
             VilkårsvurderingBuilder()
                 .forPerson(søker, 30.apr(2020))
@@ -278,6 +295,7 @@ internal class TidslinjerTest {
                 .medVilkår(borMedSøker)
                 .byggVilkårsvurderingTidslinjer()
 
+        // Assert
         val barn1Result = "!".tilRegelverkResultatTidslinje(YearMonth.of(2020, 5))
 
         assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
@@ -285,6 +303,7 @@ internal class TidslinjerTest {
 
     @Test
     fun `Sjekk overgang fra oppfylt nasjonalt til oppfylt EØS dagen før siste dag i måneden`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
@@ -308,6 +327,7 @@ internal class TidslinjerTest {
                 (30.apr(2021)..30.nov(2021)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, EØS_FORORDNINGEN) },
             )
 
+        // Act
         val barnaRegelverkTidslinjer =
             VilkårsvurderingBuilder()
                 .forPerson(søker, 26.jan(2020))
@@ -330,6 +350,7 @@ internal class TidslinjerTest {
                 inneværendeMåned = YearMonth.now(),
             )
 
+        // Assert
         assertEquals(1, kompetanser.size)
         assertEquals(YearMonth.of(2021, 5), kompetanser.first().fom)
         assertEquals(YearMonth.of(2021, 11), kompetanser.first().tom)
@@ -337,6 +358,7 @@ internal class TidslinjerTest {
 
     @Test
     fun `Sjekk overgang fra oppfylt nasjonalt til oppfylt EØS dagen andre dag i måneden`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
@@ -360,6 +382,7 @@ internal class TidslinjerTest {
                 (2.mai(2021)..30.nov(2021)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, EØS_FORORDNINGEN) },
             )
 
+        // Act
         val barnaRegelverkTidslinjer =
             VilkårsvurderingBuilder()
                 .forPerson(søker, 26.jan(2020))
@@ -382,6 +405,7 @@ internal class TidslinjerTest {
                 inneværendeMåned = YearMonth.now(),
             )
 
+        // Assert
         val forventetRegelverkResultat =
             "NNNNNNNNNNNNNNNNEEEEEE".tilRegelverkResultatTidslinje(feb(2020))
 
@@ -393,6 +417,7 @@ internal class TidslinjerTest {
 
     @Test
     fun `Sjekk overgang fra oppfylt nasjonalt til oppfylt EØS dagen før siste dag i måneden, der siste periode er uendelig`() {
+        // Arrange
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
@@ -416,6 +441,7 @@ internal class TidslinjerTest {
                 (30.apr(2021)..uendelig).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, EØS_FORORDNINGEN) },
             )
 
+        // Act
         val barnaRegelverkTidslinjer =
             VilkårsvurderingBuilder()
                 .forPerson(søker, 26.jan(2020))
@@ -438,6 +464,7 @@ internal class TidslinjerTest {
                 inneværendeMåned = YearMonth.now(),
             )
 
+        // Assert
         assertEquals(1, kompetanser.size)
         assertEquals(YearMonth.of(2021, 5), kompetanser.first().fom)
         assertNull(kompetanser.first().tom)

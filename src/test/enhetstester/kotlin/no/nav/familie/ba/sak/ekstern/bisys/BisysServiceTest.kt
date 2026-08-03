@@ -47,6 +47,7 @@ internal class BisysServiceTest {
 
     @Test
     fun `Skal returnere tom liste siden person ikke har finens i infotrygd og barnetrygd`() {
+        // Arrange
         val fnr = randomFnr()
         val aktør = lagAktør(fnr)
 
@@ -60,22 +61,28 @@ internal class BisysServiceTest {
 
         every { mockFagsakRepository.finnFagsakForAktør(aktør) } returns null
 
+        // Act
         val response = bisysService.hentUtvidetBarnetrygd(fnr, LocalDate.of(2021, 1, 1))
 
+        // Assert
         assertThat(response.perioder).hasSize(0)
     }
 
     @Test
     fun `Skal returnere tom liste hvis tjenesten kalles på en bruker som bare har NPID`() {
+        // Arrange
         every { mockPersonidentService.hentIdenter(any(), any()) } answers { listOf(IdentInformasjon("ident av typen npid", false, Type.NPID.name)) }
 
+        // Act
         val response = bisysService.hentUtvidetBarnetrygd("ident av typen npid", LocalDate.of(2021, 1, 1))
 
+        // Assert
         assertThat(response.perioder).hasSize(0)
     }
 
     @Test
     fun `Skal returnere periode kun fra infotrygd`() {
+        // Arrange
         val fnr = randomFnr()
         val aktør = lagAktør(fnr)
 
@@ -98,13 +105,16 @@ internal class BisysServiceTest {
 
         every { mockFagsakRepository.finnFagsakForAktør(aktør) } returns null
 
+        // Act
         val response = bisysService.hentUtvidetBarnetrygd(fnr, LocalDate.of(2021, 1, 1))
 
+        // Assert
         assertThat(response.perioder).hasSize(1).contains(periodeInfotrygd)
     }
 
     @Test
     fun `Skal returnere utvidet barnetrygdperiode fra basak`() {
+        // Arrange
         val behandling = lagBehandling()
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling, utbetalingsoppdrag = lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id))
@@ -132,9 +142,11 @@ internal class BisysServiceTest {
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(behandling.fagsak.aktør.aktivFødselsnummer()) }
         every { mockPersonidentService.hentIdenter(any(), any()) } answers { listOf(IdentInformasjon(behandling.fagsak.aktør.aktivFødselsnummer(), false, Type.FOLKEREGISTERIDENT.name)) }
 
+        // Act
         val response =
             bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.aktør.aktivFødselsnummer(), LocalDate.of(2021, 1, 1))
 
+        // Assert
         assertThat(response.perioder).hasSize(1)
         assertThat(response.perioder.first().beløp).isEqualTo(660.0)
         assertThat(response.perioder.first().fomMåned).isEqualTo(YearMonth.of(2020, 1))
@@ -144,6 +156,7 @@ internal class BisysServiceTest {
 
     @Test
     fun `Skal slå sammen resultat fra ba-sak og infotrygd`() {
+        // Arrange
         val behandling = lagBehandling()
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling, utbetalingsoppdrag = lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id))
@@ -188,9 +201,11 @@ internal class BisysServiceTest {
         every { mockBehandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
         every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
+        // Act
         val response =
             bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.aktør.aktivFødselsnummer(), LocalDate.of(2019, 1, 1))
 
+        // Assert
         assertThat(response.perioder).hasSize(1)
         assertThat(response.perioder.first().beløp).isEqualTo(660.0)
         assertThat(response.perioder.first().fomMåned).isEqualTo(YearMonth.of(2019, 1))
@@ -200,6 +215,7 @@ internal class BisysServiceTest {
 
     @Test
     fun `Skal slå sammen resultat fra ba-sak og infotrygd når periodene overlapper`() {
+        // Arrange
         val behandling = lagBehandling()
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling, utbetalingsoppdrag = lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id))
@@ -243,9 +259,11 @@ internal class BisysServiceTest {
         every { mockBehandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
         every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
+        // Act
         val response =
             bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.aktør.aktivFødselsnummer(), LocalDate.of(2021, 1, 1))
 
+        // Assert
         assertThat(response.perioder).hasSize(1)
         assertThat(response.perioder.first().beløp).isEqualTo(1054.0)
         assertThat(response.perioder.first().fomMåned).isEqualTo(YearMonth.of(2020, 9))
@@ -255,6 +273,7 @@ internal class BisysServiceTest {
 
     @Test
     fun `Skal slå sammen resultat fra ba-sak og infotrygd, typisk rett etter en migrering, hvor tomMåned i infotrygd er null`() {
+        // Arrange
         val behandling = lagBehandling()
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling, utbetalingsoppdrag = lagMinimalUtbetalingsoppdragString(behandlingId = behandling.id))
@@ -298,9 +317,11 @@ internal class BisysServiceTest {
         every { mockBehandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
         every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
+        // Act
         val response =
             bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.aktør.aktivFødselsnummer(), LocalDate.of(2021, 1, 1))
 
+        // Assert
         assertThat(response.perioder).hasSize(1)
         assertThat(response.perioder.first().beløp).isEqualTo(1054.0)
         assertThat(response.perioder.first().fomMåned).isEqualTo(YearMonth.of(2019, 3))
@@ -310,6 +331,7 @@ internal class BisysServiceTest {
 
     @Test
     fun `Skal ikke slå sammen resultat fra ba-sak og infotrygd hvis periode er manuelt beregnet i infotrygd`() {
+        // Arrange
         val behandling = lagBehandling()
 
         val tilkjentYtelse =
@@ -356,9 +378,11 @@ internal class BisysServiceTest {
         every { mockBehandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
         every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
+        // Act
         val response =
             bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.aktør.aktivFødselsnummer(), LocalDate.of(2019, 1, 1))
 
+        // Assert
         assertThat(response.perioder).hasSize(2)
         assertThat(response.perioder.first().beløp).isEqualTo(660.0)
         assertThat(response.perioder.first().fomMåned).isEqualTo(YearMonth.of(2019, 1))

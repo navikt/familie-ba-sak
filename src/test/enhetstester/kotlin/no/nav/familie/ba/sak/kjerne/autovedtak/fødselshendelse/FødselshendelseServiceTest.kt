@@ -82,6 +82,7 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `Skal opprette manuell oppgave hvis resultat av fødselshendelse blir INNVILGET_OG_ENDRET`() {
+        // Arrange
         val søkerPerson = lagPerson(type = PersonType.SØKER)
         val fagsak = defaultFagsak(aktør = søkerPerson.aktør)
 
@@ -188,7 +189,10 @@ class FødselshendelseServiceTest {
                 ),
             )
 
+        // Act
         autovedtakFødselshendelseService.kjørBehandling(FødselshendelseData(nyBehandlingHendelse))
+
+        // Assert
         verify(exactly = 0) {
             opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = any(),

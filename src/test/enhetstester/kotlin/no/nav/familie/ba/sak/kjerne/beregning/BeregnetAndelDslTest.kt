@@ -17,9 +17,13 @@ import java.time.YearMonth
 class BeregnetAndelDslTest {
     @Test
     fun `sjekk at andel bygges riktig`() {
+        // Arrange
         val barn = barn født 14.des(2019) død 9.des(2024)
+
+        // Act
         val andel = barn får alt av 1054 i feb(2020)..aug(2020)
 
+        // Assert
         Assertions.assertEquals(barn, andel.person)
         Assertions.assertEquals(BigDecimal.valueOf(100), andel.prosent)
         Assertions.assertEquals(1054, andel.beløp)
@@ -30,8 +34,13 @@ class BeregnetAndelDslTest {
 
     @Test
     fun `sjekk at halvparten av oddetall rundes opp`() {
+        // Arrange
         val barn = barn født 14.des(2019)
+
+        // Act
         val andel = barn får halvparten av 1723
+
+        // Assert
         Assertions.assertEquals(BigDecimal.valueOf(50), andel.prosent)
         Assertions.assertEquals(862, andel.beløp)
     }

@@ -12,12 +12,14 @@ import org.springframework.stereotype.Service
 class UnleashServiceInjectionTest {
     @Test
     fun `UnleashService skal kun være injected i FeatureToggleService`() {
+        // Arrange
         val scanner =
             ClassPathScanningCandidateComponentProvider(false).apply {
                 addIncludeFilter(AnnotationTypeFilter(Service::class.java))
                 addIncludeFilter(AnnotationTypeFilter(Component::class.java))
             }
 
+        // Act
         val classesWithUnleashServiceInjection =
             scanner
                 .findCandidateComponents("no.nav.familie.ba.sak")
@@ -38,6 +40,7 @@ class UnleashServiceInjectionTest {
                     hasConstructorInjection || hasFieldInjection
                 }.map { it.simpleName }
 
+        // Assert
         assertThat(classesWithUnleashServiceInjection)
             .describedAs(
                 "UnleashService er feilaktig injected. Bruk FeatureToggleService i stedet.",

@@ -35,6 +35,7 @@ internal class UtilsTest {
 
     @Test
     fun `Nullable verdier blir tom string`() {
+        // Arrange
         val adresse =
             GrVegadresseBostedsadresse(
                 matrikkelId = null,
@@ -48,25 +49,34 @@ internal class UtilsTest {
                 poststed = null,
             )
 
+        // Act & Assert
         assertEquals("Test 1, 1234", adresse.tilFrontendString())
     }
 
     @Test
     fun `hent property fra maven skal ikke være blank`() {
+        // Act
         val result = hentPropertyFraMaven("java.version")
+
+        // Assert
         assertTrue(result?.isNotBlank() == true)
     }
 
     @Test
     fun `hent property som mangler skal returnere null`() {
+        // Act
         val result = hentPropertyFraMaven("skalikkefinnes")
+
+        // Assert
         assertTrue(result.isNullOrEmpty())
     }
 
     @Test
     fun `Test transformering av en personer til brevtekst`() {
+        // Arrange
         val førsteBarn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(6))
 
+        // Act & Assert
         assertEquals(
             førsteBarn.fødselsdato.tilKortString(),
             listOf(førsteBarn.fødselsdato).tilBrevTekst(),
@@ -75,9 +85,11 @@ internal class UtilsTest {
 
     @Test
     fun `Test transformering av to personer til brevtekst`() {
+        // Arrange
         val førsteBarn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(6))
         val andreBarn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(6))
 
+        // Act & Assert
         assertEquals(
             "${førsteBarn.fødselsdato.tilKortString()} og ${andreBarn.fødselsdato.tilKortString()}",
             listOf(førsteBarn.fødselsdato, andreBarn.fødselsdato).tilBrevTekst(),
@@ -86,10 +98,12 @@ internal class UtilsTest {
 
     @Test
     fun `Test transformering av tre personer til brevtekst`() {
+        // Arrange
         val førsteBarn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(6))
         val andreBarn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(6))
         val tredjeBarn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(6))
 
+        // Act & Assert
         assertEquals(
             "${førsteBarn.fødselsdato.tilKortString()}, ${andreBarn.fødselsdato.tilKortString()} og ${tredjeBarn.fødselsdato.tilKortString()}",
             listOf(førsteBarn.fødselsdato, andreBarn.fødselsdato, tredjeBarn.fødselsdato).tilBrevTekst(),
@@ -110,8 +124,13 @@ internal class UtilsTest {
     inner class TilEtterfølgendePar {
         @Test
         fun `skal plukke ut to og to etterfølgende elementer inkludert det siste elementet`() {
+            // Arrange
             val liste = listOf(1, 2, 3, 4, 5)
+
+            // Act
             val par = liste.tilEtterfølgendePar { a, b -> a to b }
+
+            // Assert
             assertThat(par).hasSize(5)
             assertThat(par[0]).isEqualTo(Pair(1, 2))
             assertThat(par[1]).isEqualTo(Pair(2, 3))

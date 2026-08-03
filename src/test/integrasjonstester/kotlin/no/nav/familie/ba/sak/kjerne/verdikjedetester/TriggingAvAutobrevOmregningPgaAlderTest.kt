@@ -45,14 +45,20 @@ class TriggingAvAutobrevOmregningPgaAlderTest(
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Omregning og autobrev skal ikke kjøre hvis behandling er begrunnet for 18 åringer`() {
+        // Act
         val behandlinger = kjørFørstegangsbehandlingOgTriggAutobrev(Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR)
+
+        // Assert
         assertThat(behandlinger).hasSize(1)
         assertThat(behandlinger.filter { it.opprettetÅrsak == BehandlingÅrsak.SØKNAD }).hasSize(1)
     }
 
     @Test
     fun `Omregning og autobrev skal kjøre hvis behandling IKKE er begrunnet for 18 åringer`() {
+        // Act
         val behandlinger = kjørFørstegangsbehandlingOgTriggAutobrev(null)
+
+        // Assert
         assertThat(behandlinger.size).isEqualTo(2)
         assertThat(behandlinger.filter { it.opprettetÅrsak == BehandlingÅrsak.SØKNAD }).hasSize(1)
         assertThat(behandlinger.filter { it.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR }).hasSize(1)

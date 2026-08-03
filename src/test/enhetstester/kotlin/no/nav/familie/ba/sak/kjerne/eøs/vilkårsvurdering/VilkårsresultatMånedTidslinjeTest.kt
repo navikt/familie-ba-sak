@@ -23,8 +23,13 @@ import org.junit.jupiter.api.Test
 class VilkårsresultatMånedTidslinjeTest {
     @Test
     fun `Virkningstidspunkt fra vilkårsvurdering er måneden etter at normalt vilkår er oppfylt`() {
+        // Arrange
         val dagTidslinje = periode(oppfyltVilkår(BOSATT_I_RIKET), 15.apr(2022), 14.apr(2040)).tilTidslinje()
+
+        // Act
         val faktiskMånedTidslinje = dagTidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
+
+        // Assert
         val forventetMånedTidslinje =
             periode(oppfyltVilkår(BOSATT_I_RIKET), mai(2022), apr(2040)).tilTidslinje().tilMåned { it.first() }
 
@@ -33,8 +38,11 @@ class VilkårsresultatMånedTidslinjeTest {
 
     @Test
     fun `Back to back perioder i månedsskiftet gir sammenhengende perioder`() {
+        // Arrange
         val periodeFom = 15.apr(2022)
         val periodeFom2 = 1.jul(2022)
+
+        // Act
         val faktiskMånedTidslinje =
             listOf(
                 lagVilkårResultat(
@@ -50,6 +58,7 @@ class VilkårsresultatMånedTidslinjeTest {
             ).tilVilkårRegelverkResultatTidslinje()
                 .tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
 
+        // Assert
         val forventetMånedTidslinje =
             periode(oppfyltVilkår(BOSATT_I_RIKET), mai(2022), null).tilTidslinje().tilMåned { it.first() }
 
@@ -58,8 +67,13 @@ class VilkårsresultatMånedTidslinjeTest {
 
     @Test
     fun `Siste dag fom-måned og første dag i tom-måned gir oppfylt fra neste måned`() {
+        // Arrange
         val dagTidslinje = periode(oppfyltVilkår(BOSATT_I_RIKET), 29.feb(2020), 1.mai(2020)).tilTidslinje()
+
+        // Act
         val faktiskMånedstidslinje = dagTidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
+
+        // Assert
         val forventetMånedTidslinje =
             periode(oppfyltVilkår(BOSATT_I_RIKET), mar(2020), mai(2020)).tilTidslinje().tilMåned { it.first() }
 
@@ -68,14 +82,17 @@ class VilkårsresultatMånedTidslinjeTest {
 
     @Test
     fun `Bytte av regelverk innen en måned skal gi kontinuerlig oppfylt tidslinje`() {
+        // Arrange
         val dagvilkårtidslinje =
             konkatenerTidslinjer(
                 periode(oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN), 26.feb(2020), 7.mar(2020)).tilTidslinje(),
                 periode(oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER), 21.mar(2020), 13.mai(2020)).tilTidslinje(),
             )
 
+        // Act
         val faktiskMånedstidslinje = dagvilkårtidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
 
+        // Assert
         val forventetMånedstidslinje =
             konkatenerTidslinjer(
                 periode(oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN), mar(2020), mar(2020)).tilTidslinje(),
@@ -87,8 +104,13 @@ class VilkårsresultatMånedTidslinjeTest {
 
     @Test
     fun `Hvis vilkåret er oppfylt siste dag i måneden, skal kun gi oppfylt frem til og med den måneden`() {
+        // Arrange
         val dagTidslinje = periode(oppfyltVilkår(BOSATT_I_RIKET), 15.apr(2022), 30.nov(2022)).tilTidslinje()
+
+        // Act
         val faktiskMånedTidslinje = dagTidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
+
+        // Assert
         val forventetMånedTidslinje =
             periode(oppfyltVilkår(BOSATT_I_RIKET), mai(2022), nov(2022)).tilTidslinje().tilMåned { it.first() }
 

@@ -28,6 +28,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
     inner class PermitAll {
         @Test
         fun `internal endepunkt er tilgjengelig uten token`() {
+            // Act
             val response =
                 restClient
                     .get()
@@ -35,6 +36,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
                     .retrieve()
                     .toEntity(String::class.java)
 
+            // Assert
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         }
     }
@@ -43,6 +45,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
     inner class UtenToken {
         @Test
         fun `api-kall uten token returnerer 401`() {
+            // Act & Assert
             val feil =
                 assertThrows<HttpStatusCodeException> {
                     restClient
@@ -66,8 +69,10 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
         fun `saksbehandlere har tilgang til interne endepunkter`(
             rolle: Rolle,
         ) {
+            // Arrange
             val headers = hentHeaders(groups = listOf(rolle.name))
 
+            // Act & Assert
             try {
                 restClient
                     .get()
@@ -82,12 +87,14 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
         @Test
         fun `m2m-token fra teamfamilie-app har tilgang til interne endepunkter`() {
+            // Arrange
             val headers =
                 HttpHeaders().apply {
                     contentType = MediaType.APPLICATION_JSON
                     setBearerAuth(token(mapOf("azp_name" to "dev-gcp:teamfamilie:tilfeldig-applikasjon")))
                 }
 
+            // Act & Assert
             try {
                 restClient
                     .get()
@@ -102,12 +109,14 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
         @Test
         fun `m2m-token uten teamfamilie-namespace har ikke tilgang til interne endepunkter`() {
+            // Arrange
             val headers =
                 HttpHeaders().apply {
                     contentType = MediaType.APPLICATION_JSON
                     setBearerAuth(token(mapOf("azp_name" to "dev-gcp:ukjent-namespace:ukjent-applikasjon")))
                 }
 
+            // Act & Assert
             val feil =
                 assertThrows<HttpStatusCodeException> {
                     restClient
@@ -128,12 +137,14 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
         @Test
         fun `token fra annen applikasjon enn klage har ikke tilgang til klage-endepunkt`() {
+            // Arrange
             val headers =
                 HttpHeaders().apply {
                     contentType = MediaType.APPLICATION_JSON
                     setBearerAuth(token(mapOf("azp_name" to "dev-gcp:teamfamilie:ikke-klage")))
                 }
 
+            // Act & Assert
             val feil =
                 assertThrows<HttpStatusCodeException> {
                     restClient
@@ -149,12 +160,14 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
         @Test
         fun `klage-token har tilgang til klage-endepunkt`() {
+            // Arrange
             val headers =
                 HttpHeaders().apply {
                     contentType = MediaType.APPLICATION_JSON
                     setBearerAuth(klageToken())
                 }
 
+            // Act & Assert
             try {
                 restClient
                     .get()
@@ -174,12 +187,14 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
         @Test
         fun `pensjon-token har ikke tilgang til generelt api-endepunkt`() {
+            // Arrange
             val headers =
                 HttpHeaders().apply {
                     contentType = MediaType.APPLICATION_JSON
                     setBearerAuth(pensjonToken("omsorgsopptjening-start-innlesning"))
                 }
 
+            // Act & Assert
             val feil =
                 assertThrows<HttpStatusCodeException> {
                     restClient
@@ -198,12 +213,14 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
         fun `pensjon-token har tilgang til pensjon-endepunkt`(
             applikasjonNavn: String,
         ) {
+            // Arrange
             val headers =
                 HttpHeaders().apply {
                     contentType = MediaType.APPLICATION_JSON
                     setBearerAuth(pensjonToken(applikasjonNavn))
                 }
 
+            // Act & Assert
             try {
                 restClient
                     .get()
@@ -223,12 +240,14 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
         @Test
         fun `bisys-token har ikke tilgang til generelt api-endepunkt`() {
+            // Arrange
             val headers =
                 HttpHeaders().apply {
                     contentType = MediaType.APPLICATION_JSON
                     setBearerAuth(bisysToken("bidrag-grunnlag"))
                 }
 
+            // Act & Assert
             val feil =
                 assertThrows<HttpStatusCodeException> {
                     restClient
@@ -247,12 +266,14 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
         fun `bisys-token har tilgang til bisys-endepunkt`(
             applikasjonNavn: String,
         ) {
+            // Arrange
             val headers =
                 HttpHeaders().apply {
                     contentType = MediaType.APPLICATION_JSON
                     setBearerAuth(bisysToken(applikasjonNavn))
                 }
 
+            // Act & Assert
             try {
                 restClient
                     .post()
@@ -270,12 +291,14 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
     inner class TokenXIsolasjon {
         @Test
         fun `tokenx-token blir avvist på azuread-endepunkt`() {
+            // Arrange
             val headers =
                 HttpHeaders().apply {
                     contentType = MediaType.APPLICATION_JSON
                     setBearerAuth(hentTokenForTokenX("12345678910"))
                 }
 
+            // Act & Assert
             val feil =
                 assertThrows<HttpStatusCodeException> {
                     restClient
@@ -291,8 +314,10 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
         @Test
         fun `azure-token blir avvist på tokenx-endepunkt`() {
+            // Arrange
             val headers = hentHeaders()
 
+            // Act & Assert
             val feil =
                 assertThrows<HttpStatusCodeException> {
                     restClient

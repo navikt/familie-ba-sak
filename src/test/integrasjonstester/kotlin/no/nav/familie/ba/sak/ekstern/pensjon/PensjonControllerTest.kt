@@ -26,12 +26,15 @@ import java.util.UUID
 class PensjonControllerTest : WebSpringAuthTestRunner() {
     @Test
     fun `Verifiser at pensjon-endepunkt - bestillPersonerMedBarnetrygdForGittÅrPåKafka - for henting av identer med barnetrygd - returnerer en gyldig UUID som string`() {
+        // Arrange
         val headers = HttpHeaders()
         headers.accept = Arrays.asList(MediaType.TEXT_PLAIN)
         headers.setBearerAuth(
             hentTokenForPsys(),
         )
         val entity: HttpEntity<String> = HttpEntity<String>(headers)
+
+        // Act
         val responseEntity: ResponseEntity<String> =
             restClient
                 .get()
@@ -39,17 +42,21 @@ class PensjonControllerTest : WebSpringAuthTestRunner() {
                 .headers { h -> h.addAll(entity.headers) }
                 .retrieve()
                 .toEntity(String::class.java)
+
+        // Assert
         assertEquals(UUID.fromString(responseEntity.body.toString()).toString(), responseEntity.body.toString())
     }
 
     @Test
     fun `Skal kaste feil tilgang når psys kaller tjenste som ikke er psys-relatert`() {
+        // Arrange
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(
             hentTokenForPsys(),
         )
 
+        // Act & Assert
         val error =
             assertThrows<HttpStatusCodeException> {
                 restClient

@@ -13,12 +13,15 @@ class VilkårTest {
     inner class `Hent relevante vilkår for persontype BARN` {
         @Test
         fun `For ordinær nasjonal sak`() {
+            // Act
             val relevanteVilkår =
                 Vilkår.hentVilkårFor(
                     personType = PersonType.BARN,
                     fagsakType = FagsakType.NORMAL,
                     behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 )
+
+            // Assert
             val vilkårForBarn =
                 setOf(
                     Vilkår.UNDER_18_ÅR,
@@ -32,12 +35,15 @@ class VilkårTest {
 
         @Test
         fun `For utvidet nasjonal sak`() {
+            // Act
             val relevanteVilkår =
                 Vilkår.hentVilkårFor(
                     personType = PersonType.BARN,
                     fagsakType = FagsakType.NORMAL,
                     behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 )
+
+            // Assert
             val vilkårForBarn =
                 setOf(
                     Vilkår.UNDER_18_ÅR,
@@ -51,12 +57,15 @@ class VilkårTest {
 
         @Test
         fun `For ordinær institusjonssak`() {
+            // Act
             val relevanteVilkår =
                 Vilkår.hentVilkårFor(
                     personType = PersonType.BARN,
                     fagsakType = FagsakType.INSTITUSJON,
                     behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 )
+
+            // Assert
             val vilkårForBarn =
                 setOf(
                     Vilkår.UNDER_18_ÅR,
@@ -70,12 +79,15 @@ class VilkårTest {
 
         @Test
         fun `For utvidet institusjonssak`() {
+            // Act
             val relevanteVilkår =
                 Vilkår.hentVilkårFor(
                     personType = PersonType.BARN,
                     fagsakType = FagsakType.INSTITUSJON,
                     behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 )
+
+            // Assert
             val vilkårForBarn =
                 setOf(
                     Vilkår.UNDER_18_ÅR,
@@ -89,12 +101,15 @@ class VilkårTest {
 
         @Test
         fun `For ordinær enslig mindreårig sak`() {
+            // Act
             val relevanteVilkår =
                 Vilkår.hentVilkårFor(
                     personType = PersonType.BARN,
                     fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG,
                     behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 )
+
+            // Assert
             val vilkårForBarn =
                 setOf(
                     Vilkår.UNDER_18_ÅR,
@@ -108,12 +123,15 @@ class VilkårTest {
 
         @Test
         fun `For utvidet enslig mindreårig sak`() {
+            // Act
             val relevanteVilkår =
                 Vilkår.hentVilkårFor(
                     personType = PersonType.BARN,
                     fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG,
                     behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 )
+
+            // Assert
             val vilkårForBarn =
                 setOf(
                     Vilkår.UNDER_18_ÅR,
@@ -131,12 +149,15 @@ class VilkårTest {
     inner class `Hent relevante vilkår for persontype SØKER` {
         @Test
         fun `For ordinær nasjonal sak`() {
+            // Act
             val relevanteVilkår =
                 Vilkår.hentVilkårFor(
                     personType = PersonType.SØKER,
                     fagsakType = FagsakType.NORMAL,
                     behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 )
+
+            // Assert
             val vilkårForBarn =
                 setOf(
                     Vilkår.BOSATT_I_RIKET,
@@ -147,12 +168,15 @@ class VilkårTest {
 
         @Test
         fun `For utvidet nasjonal sak`() {
+            // Act
             val relevanteVilkår =
                 Vilkår.hentVilkårFor(
                     personType = PersonType.SØKER,
                     fagsakType = FagsakType.NORMAL,
                     behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 )
+
+            // Assert
             val vilkårForBarn =
                 setOf(
                     Vilkår.BOSATT_I_RIKET,
@@ -164,48 +188,60 @@ class VilkårTest {
 
         @Test
         fun `For ordinær institusjonssak`() {
+            // Act
             val relevanteVilkår =
                 Vilkår.hentVilkårFor(
                     personType = PersonType.SØKER,
                     fagsakType = FagsakType.INSTITUSJON,
                     behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 )
+
+            // Assert
             val vilkårForBarn = emptySet<Vilkår>()
             Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
         }
 
         @Test
         fun `For utvidet institusjonssak`() {
+            // Act
             val relevanteVilkår =
                 Vilkår.hentVilkårFor(
                     personType = PersonType.SØKER,
                     fagsakType = FagsakType.INSTITUSJON,
                     behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 )
+
+            // Assert
             val vilkårForBarn = emptySet<Vilkår>()
             Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
         }
 
         @Test
         fun `For ordinær enslig mindreårig sak`() {
+            // Act
             val relevanteVilkår =
                 Vilkår.hentVilkårFor(
                     personType = PersonType.SØKER,
                     fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG,
                     behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 )
+
+            // Assert
             val vilkårForBarn = emptySet<Vilkår>()
             Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
         }
 
         @Test
         fun `For utvidet enslig mindreårig sak`() {
+            // Act
             val relevanteVilkår =
                 Vilkår.hentVilkårFor(
                     personType = PersonType.SØKER,
                     fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG,
                     behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 )
+
+            // Assert
             val vilkårForBarn = emptySet<Vilkår>()
             Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
         }

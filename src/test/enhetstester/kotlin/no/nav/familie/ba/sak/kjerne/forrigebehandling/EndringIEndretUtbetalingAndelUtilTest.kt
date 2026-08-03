@@ -21,6 +21,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
     @Test
     fun `Endring i endret utbetaling andel - skal ikke ha endret periode hvis årsak endres mellom etterbetaling 3 år og 3 mnd`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeEndretAndel =
             lagEndretUtbetalingAndel(
@@ -34,6 +35,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
         val nåværendeEndretAndel = forrigeEndretAndel.copy(årsak = Årsak.ETTERBETALING_3MND)
 
+        // Act
         val perioderMedEndring =
             EndringIEndretUtbetalingAndelUtil
                 .lagEndringIEndretUbetalingAndelPerPersonTidslinje(
@@ -42,11 +44,13 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         assertTrue(perioderMedEndring.isEmpty())
     }
 
     @Test
     fun `Endring i endret utbetaling andel - skal ha endret periode hvis årsak endres til noe annet enn etterbetaling`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeEndretAndel =
             lagEndretUtbetalingAndel(
@@ -60,6 +64,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
         val nåværendeEndretAndel = forrigeEndretAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT)
 
+        // Act
         val perioderMedEndring =
             EndringIEndretUtbetalingAndelUtil
                 .lagEndringIEndretUbetalingAndelPerPersonTidslinje(
@@ -68,6 +73,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         assertEquals(1, perioderMedEndring.size)
         assertEquals(jan22, perioderMedEndring.single().fom?.toYearMonth())
         assertEquals(aug22, perioderMedEndring.single().tom?.toYearMonth())
@@ -75,6 +81,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
     @Test
     fun `Endring i endret utbetaling andel - skal ikke ha noen endrede perioder hvis kun prosent er endret`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeEndretAndel =
             lagEndretUtbetalingAndel(
@@ -89,6 +96,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
         val nåværendeEndretAndel = forrigeEndretAndel.copy(prosent = BigDecimal(100))
 
+        // Act
         val perioderMedEndring =
             EndringIEndretUtbetalingAndelUtil
                 .lagEndringIEndretUbetalingAndelPerPersonTidslinje(
@@ -97,11 +105,13 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         assertTrue(perioderMedEndring.isEmpty())
     }
 
     @Test
     fun `Endring i endret utbetaling andel - skal ikke ha noen endrede perioder hvis kun søknadstidspunkt er endret og den var allerede satt før`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeEndretAndel =
             lagEndretUtbetalingAndel(
@@ -116,6 +126,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
         val nåværendeEndretAndel = forrigeEndretAndel.copy(søknadstidspunkt = jan22.førsteDagIInneværendeMåned())
 
+        // Act
         val perioderMedEndring =
             EndringIEndretUtbetalingAndelUtil
                 .lagEndringIEndretUbetalingAndelPerPersonTidslinje(
@@ -124,11 +135,13 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         assertTrue(perioderMedEndring.isEmpty())
     }
 
     @Test
     fun `Endring i endret utbetaling andel - skal ha noen endrede perioder hvis søknadstidspunkt ikke var satt tidligere men er nå satt`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeEndretAndel =
             lagEndretUtbetalingAndel(
@@ -143,6 +156,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
         val nåværendeEndretAndel = forrigeEndretAndel.copy(søknadstidspunkt = jan22.førsteDagIInneværendeMåned())
 
+        // Act
         val perioderMedEndring =
             EndringIEndretUtbetalingAndelUtil
                 .lagEndringIEndretUbetalingAndelPerPersonTidslinje(
@@ -151,6 +165,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         assertEquals(1, perioderMedEndring.size)
         assertEquals(jan22, perioderMedEndring.single().fom?.toYearMonth())
         assertEquals(aug22, perioderMedEndring.single().tom?.toYearMonth())
@@ -158,6 +173,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
     @Test
     fun `Endring i endret utbetaling andel - skal ikke returnere endret periode hvis et av to barn kun har endring mellom etterbetalingsårsaker`() {
+        // Arrange
         val barn1 = lagPerson(type = PersonType.BARN)
         val barn2 = lagPerson(type = PersonType.BARN)
 
@@ -182,6 +198,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
             )
 
+        // Act
         val perioderMedEndring =
             listOf(barn1, barn2)
                 .map { person ->
@@ -192,11 +209,13 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 }.flatMap { it.tilPerioder() }
                 .filter { it.verdi == true }
 
+        // Assert
         assertTrue(perioderMedEndring.isEmpty())
     }
 
     @Test
     fun `Endring i endret utbetaling andel - skal returnere endret periode hvis et barn har reell endring selv om et annet barn kun har endring mellom etterbetalingsårsaker`() {
+        // Arrange
         val barn1 = lagPerson(type = PersonType.BARN)
         val barn2 = lagPerson(type = PersonType.BARN)
 
@@ -221,6 +240,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
             )
 
+        // Act
         val perioderMedEndring =
             listOf(barn1, barn2)
                 .map {
@@ -231,6 +251,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 }.flatMap { it.tilPerioder() }
                 .filter { it.verdi == true }
 
+        // Assert
         assertEquals(1, perioderMedEndring.size)
         assertEquals(jan22, perioderMedEndring.single().fom?.toYearMonth())
         assertEquals(aug22, perioderMedEndring.single().tom?.toYearMonth())
@@ -238,6 +259,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
     @Test
     fun `Endring i endret utbetaling andel - skal noen endrede perioder hvis eneste endring er at perioden blir lenger`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeEndretAndel =
             lagEndretUtbetalingAndel(
@@ -252,6 +274,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
         val nåværendeEndretAndel = forrigeEndretAndel.copy(tom = des22)
 
+        // Act
         val perioderMedEndring =
             EndringIEndretUtbetalingAndelUtil
                 .lagEndringIEndretUbetalingAndelPerPersonTidslinje(
@@ -260,6 +283,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         assertEquals(1, perioderMedEndring.size)
         assertEquals(sep22, perioderMedEndring.single().fom?.toYearMonth())
         assertEquals(des22, perioderMedEndring.single().tom?.toYearMonth())
@@ -267,6 +291,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
     @Test
     fun `Endring i endret utbetaling andel - skal ha endrede perioder hvis endringsperiode oppstår i nåværende behandling`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         val nåværendeEndretAndel =
             lagEndretUtbetalingAndel(
@@ -279,6 +304,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned(),
             )
 
+        // Act
         val perioderMedEndring =
             EndringIEndretUtbetalingAndelUtil
                 .lagEndringIEndretUbetalingAndelPerPersonTidslinje(
@@ -287,6 +313,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         assertEquals(1, perioderMedEndring.size)
         assertEquals(jan22, perioderMedEndring.single().fom?.toYearMonth())
         assertEquals(aug22, perioderMedEndring.single().tom?.toYearMonth())

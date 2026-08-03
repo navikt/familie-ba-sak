@@ -55,6 +55,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
     @Test
     fun `skal tilpasse utenlandsk periodebeløp til endrede kompetanser`() {
+        // Arrange
         val behandlingId = BehandlingId(10L)
 
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).toLocalDate())
@@ -74,9 +75,11 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
         every { kompetanseRepository.finnFraBehandlingId(behandlingId.id) } returns kompetanser
 
+        // Act
         tilpassUtenlandskePeriodebeløpTilKompetanserService
             .tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId)
 
+        // Assert
         val faktiskeUtenlandskePeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId)
 
         val forventedeUtenlandskePeriodebeløp =
@@ -89,6 +92,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
     @Test
     fun `Slette et utenlandskPeriodebeløp-skjema skal resultere i et skjema uten innhold, men som fortsatt har utbetalingsland`() {
+        // Arrange
         val behandlingId = BehandlingId(10L)
 
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).toLocalDate())
@@ -99,8 +103,10 @@ internal class UtenlandskPeriodebeløpServiceTest {
                 .lagreTil(utenlandskPeriodebeløpRepository)
                 .single()
 
+        // Act
         utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(behandlingId, lagretUtenlandskPeriodebeløp.id)
 
+        // Assert
         val faktiskUtenlandskPeriodebeløp =
             utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId).single()
 
@@ -116,6 +122,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
     @Test
     fun `Skal kunne lukke åpen utenlandskPeriodebeløp-skjema ved å sende inn identisk skjema med satt tom-dato`() {
+        // Arrange
         val behandlingId = BehandlingId(10L)
 
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).toLocalDate())
@@ -133,8 +140,11 @@ internal class UtenlandskPeriodebeløpServiceTest {
                 .medIntervall(Intervall.UKENTLIG)
                 .bygg()
                 .first()
+
+        // Act
         utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(behandlingId, oppdatertUtenlandskPeriodebeløp)
 
+        // Assert
         // Forventer en liste på 2 elementer hvor det første dekker 2 mnd og det andre dekker fra mnd 3 og til uendelig (null). Det siste elementet skal ha beløp, valutakode og intervall satt til null, mens utbetalingsland skal være "SE".
         val faktiskUtenlandskPeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId)
 
@@ -150,6 +160,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
     @Test
     fun `Skal kaste funksjonell feil dersom fom ikke er satt`() {
+        // Act & Assert
         val feilmelding =
             assertThrows<FunksjonellFeil> {
                 utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(
@@ -168,6 +179,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
     @Test
     fun `Skal kaste funksjonell feil dersom det forsøkes å settes fom fra og med 1 januar 2026 med valutakode BGN`() {
+        // Act & Assert
         val feilmelding =
             assertThrows<FunksjonellFeil> {
                 utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(
@@ -186,6 +198,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
     @Test
     fun `Skal kaste funksjonell feil dersom det forsøkes å settes tom fra og med 1 januar 2026 med valutakode BGN`() {
+        // Act & Assert
         val feilmelding =
             assertThrows<FunksjonellFeil> {
                 utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(
@@ -204,6 +217,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
     @Test
     fun `Skal splitte utenlandskPeriodebeløp for Bulgarsk Lev til før og etter cut-off`() {
+        // Arrange
         val behandling = lagBehandling()
         val behandlingId = BehandlingId(behandling.id)
 
@@ -220,8 +234,10 @@ internal class UtenlandskPeriodebeløpServiceTest {
             .medIntervall(Intervall.MÅNEDLIG)
             .lagreTil(utenlandskPeriodebeløpRepository)
 
+        // Act
         utenlandskPeriodebeløpService.oppdaterBulgarskUtenlandskPeriodebeløpVedBehov(behandlingId)
 
+        // Assert
         val utenlandskPeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId)
 
         assertThat(utenlandskPeriodebeløp).hasSize(4)

@@ -64,9 +64,13 @@ class FagsakControllerTest(
     @Test
     @Tag("integration")
     fun `Skal opprette fagsak av type NORMAL`() {
+        // Arrange
         val fnr = randomFnr()
 
+        // Act
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
+
+        // Assert
         val fagsak = fagsakService.hentNormalFagsak(lagAktør(fnr))
         assertEquals(fnr, fagsak?.aktør?.aktivFødselsnummer())
         assertEquals(FagsakType.NORMAL, fagsak?.type)
@@ -77,12 +81,15 @@ class FagsakControllerTest(
     @Test
     @Tag("integration")
     fun `Skal opprette fagsak av type SKJERMET_BARN`() {
+        // Arrange
         val fnr = randomFnr()
         val søkersIdent = randomFnr()
         val skjermetBarnSøker = SkjermetBarnSøkerDto(søkersIdent = søkersIdent)
 
+        // Act
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr, fagsakType = FagsakType.SKJERMET_BARN, skjermetBarnSøker = skjermetBarnSøker))
 
+        // Assert
         val fagsak = fagsakService.hentFagsakPåPerson(lagAktør(fnr), FagsakType.SKJERMET_BARN)
 
         assertThat(fnr).isEqualTo(fagsak?.aktør?.aktivFødselsnummer())
@@ -94,10 +101,13 @@ class FagsakControllerTest(
     @Test
     @Tag("integration")
     fun `Skal opprette skyggesak i Sak`() {
+        // Arrange
         val fnr = randomFnr()
 
+        // Act
         val fagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr)).body?.data
 
+        // Assert
         val skyggesak = skyggesakRepository.finnSkyggesakerKlareForSending(Pageable.unpaged())
         assertEquals(1, skyggesak.filter { it.fagsakId == fagsak?.id }.size)
     }
@@ -105,9 +115,13 @@ class FagsakControllerTest(
     @Test
     @Tag("integration")
     fun `Skal returnere eksisterende fagsak på person som allerede finnes`() {
+        // Arrange
         val fnr = randomFnr()
 
+        // Act
         val nyMinimalFagsakDto = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
+
+        // Assert
         assertEquals(Ressurs.Status.SUKSESS, nyMinimalFagsakDto.body?.status)
         assertEquals(fnr, fagsakService.hentNormalFagsak(lagAktør(fnr))?.aktør?.aktivFødselsnummer())
 
@@ -124,6 +138,7 @@ class FagsakControllerTest(
     @Test
     @Tag("integration")
     fun `Skal returnere eksisterende fagsak på person som allerede finnes med gammel ident`() {
+        // Arrange
         val fnr = randomFnr()
         val nyttFnr = randomFnr()
         val aktørId = randomAktør().aktørId
@@ -132,7 +147,10 @@ class FagsakControllerTest(
         val aktør = aktørIdRepository.save(Aktør(aktørId))
         personidentRepository.save(Personident(fødselsnummer = fnr, aktør = aktør, aktiv = true))
 
+        // Act
         val nyFagsakDto = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
+
+        // Assert
         assertEquals(Ressurs.Status.SUKSESS, nyFagsakDto.body?.status)
         assertEquals(fnr, fagsakService.hentNormalFagsak(aktør)?.aktør?.aktivFødselsnummer())
 
@@ -155,12 +173,17 @@ class FagsakControllerTest(
     @Test
     @Tag("integration")
     fun `Skal returnere eksisterende fagsak på person som allerede finnes basert på aktørid`() {
+        // Arrange
         val aktørId = randomAktør()
         val fagsakRequest = FagsakRequest(personIdent = aktørId.aktivFødselsnummer())
+
+        // Act
         val fagsakDto =
             fagsakController.hentEllerOpprettFagsak(
                 fagsakRequest,
             )
+
+        // Assert
         assertEquals(Ressurs.Status.SUKSESS, fagsakDto.body?.status)
 
         val eksisterendeFagsakDto = fagsakController.hentEllerOpprettFagsak(fagsakRequest)
@@ -171,8 +194,10 @@ class FagsakControllerTest(
     @Test
     @Tag("integration")
     fun `Skal få valideringsfeil ved oppretting av fagsak av type INSTITUSJON uten FagsakInstitusjon satt`() {
+        // Arrange
         val fnr = randomFnr()
 
+        // Act & Assert
         val exception =
             assertThrows<FunksjonellFeil> {
                 fagsakController.hentEllerOpprettFagsak(
@@ -190,9 +215,11 @@ class FagsakControllerTest(
     @Test
     @Tag("integration")
     fun `Skal opprette fagsak av type INSTITUSJON hvor FagsakInstitusjon er satt`() {
+        // Arrange
         val fnr = randomFnr()
         val orgNrNav = "889640782"
 
+        // Act
         fagsakController.hentEllerOpprettFagsak(
             FagsakRequest(
                 personIdent = fnr,
@@ -200,6 +227,8 @@ class FagsakControllerTest(
                 institusjon = InstitusjonDto(orgNrNav, "tss-id"),
             ),
         )
+
+        // Assert
         val fagsakerRessurs = fagsakService.hentMinimalFagsakerForPerson(lagAktør(fnr))
         assert(fagsakerRessurs.status == Ressurs.Status.SUKSESS)
         val fagsaker = fagsakerRessurs.data!!

@@ -98,9 +98,13 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
 
     @Test
     fun `listen skal lytte request og opprette hentFagsystemsbehandlingRespons`() {
+        // Arrange
         val consumerRecord = ConsumerRecord("testtopic", 1, 1, "1", lagRequest())
+
+        // Act
         hentFagsystemsbehandlingRequestConsumer.listen(consumerRecord, acknowledgment)
 
+        // Assert
         verify { fagsystemsbehandlingService.hentFagsystemsbehandling(capture(requestSlot)) }
 
         val request = requestSlot.captured

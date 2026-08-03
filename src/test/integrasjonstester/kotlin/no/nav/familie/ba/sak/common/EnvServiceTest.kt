@@ -13,8 +13,10 @@ class EnvServiceTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `erDev skal returnere true dersom appen er startet med dev-profil`() {
+        // Arrange
         val envService = EnvService(environment)
 
+        // Act & Assert
         assertTrue(envService.erDev())
         assertFalse(envService.erProd())
         assertFalse(envService.erPreprod())

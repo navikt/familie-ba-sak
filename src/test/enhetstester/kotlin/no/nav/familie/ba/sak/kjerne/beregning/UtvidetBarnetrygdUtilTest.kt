@@ -23,6 +23,7 @@ import java.time.YearMonth
 class UtvidetBarnetrygdUtilTest {
     @Test
     fun `Valider utvidet vilkår - skal kaste feil hvis fom og tom er i samme kalendermåned uten etterfølgende periode`() {
+        // Arrange
         val vilkårResultat =
             lagVilkårResultat(
                 vilkårType = Vilkår.UTVIDET_BARNETRYGD,
@@ -31,6 +32,7 @@ class UtvidetBarnetrygdUtilTest {
                 resultat = Resultat.OPPFYLT,
             )
 
+        // Act & Assert
         assertThrows<FunksjonellFeil> {
             validerUtvidetVilkårsresultat(
                 vilkårResultat = vilkårResultat,
@@ -41,6 +43,7 @@ class UtvidetBarnetrygdUtilTest {
 
     @Test
     fun `Valider utvidet vilkår - skal ikke kaste feil hvis fom og tom er i samme kalendermåned og har etterfølgende periode`() {
+        // Arrange
         val vilkårResultat =
             lagVilkårResultat(
                 vilkårType = Vilkår.UTVIDET_BARNETRYGD,
@@ -57,6 +60,7 @@ class UtvidetBarnetrygdUtilTest {
                 resultat = Resultat.OPPFYLT,
             )
 
+        // Act & Assert
         assertDoesNotThrow {
             validerUtvidetVilkårsresultat(
                 vilkårResultat = vilkårResultat,
@@ -71,8 +75,10 @@ class UtvidetBarnetrygdUtilTest {
 
     @Test
     fun `Beregn utvidet - skal ikke gi rett til utvidet for perioder der barnet ikke bor med søker`() {
+        // Arrange
         val testBeregnUtvidet = TestBeregnTilkjentYtelseUtvidet()
 
+        // Act & Assert
         val feilmeldinger =
             assertThrows<FunksjonellFeil> {
                 testBeregnUtvidet.med(UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER)

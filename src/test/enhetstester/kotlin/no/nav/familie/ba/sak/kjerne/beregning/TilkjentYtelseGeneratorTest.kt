@@ -94,6 +94,7 @@ class TilkjentYtelseGeneratorTest {
 
     @Test
     fun `Barn som fyller 6 år i det vilkårene er oppfylt får andel måneden etter`() {
+        // Arrange
         val barnFødselsdato = LocalDate.of(2016, 2, 2)
         val barnSeksårsdag = barnFødselsdato.plusYears(6)
 
@@ -106,12 +107,14 @@ class TilkjentYtelseGeneratorTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val tilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
             )
 
+        // Assert
         assertEquals(1, tilkjentYtelse.andelerTilkjentYtelse.size)
 
         val andelTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.first()
@@ -126,6 +129,7 @@ class TilkjentYtelseGeneratorTest {
 
     @Test
     fun `Barn som fyller 6 år i det vilkårene ikke lenger er oppfylt får andel den måneden også`() {
+        // Arrange
         val barnSeksårsdag = LocalDate.of(2022, 2, 2)
         val barnFødselsdato = barnSeksårsdag.minusYears(6)
 
@@ -141,12 +145,14 @@ class TilkjentYtelseGeneratorTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val tilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
             )
 
+        // Assert
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
 
         val andelTilkjentYtelseFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
@@ -166,6 +172,7 @@ class TilkjentYtelseGeneratorTest {
 
     @Test
     fun `Det skal utbetales for inneværende måned hvis barn dør minst 1 måned før 18 års datoen`() {
+        // Arrange
         val barnFødselsDato = LocalDate.of(2012, 2, 2)
         val barnDødsfallsDato = LocalDate.of(2030, 1, 1)
 
@@ -180,12 +187,14 @@ class TilkjentYtelseGeneratorTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val tilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
             )
 
+        // Assert
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
 
         val andelFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
@@ -200,6 +209,7 @@ class TilkjentYtelseGeneratorTest {
 
     @Test
     fun `Det skal ikke utbetales for inneværende måned hvis barn dør samme måned som 18 års datoen`() {
+        // Arrange
         val barnFødselsDato = LocalDate.of(2012, 2, 20)
         val barnDødsfallsDato = LocalDate.of(2030, 2, 2)
 
@@ -214,12 +224,14 @@ class TilkjentYtelseGeneratorTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val tilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
             )
 
+        // Assert
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
 
         val andelFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
@@ -234,6 +246,7 @@ class TilkjentYtelseGeneratorTest {
 
     @Test
     fun `1 barn får normal utbetaling med satsendring fra september 2020, september 2021 og januar 2022`() {
+        // Arrange
         val barnFødselsdato = LocalDate.of(2021, 2, 2)
         val barnSeksårsdag = barnFødselsdato.plusYears(6)
 
@@ -246,6 +259,7 @@ class TilkjentYtelseGeneratorTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
@@ -255,6 +269,7 @@ class TilkjentYtelseGeneratorTest {
                 .toList()
                 .sortedBy { it.stønadFom }
 
+        // Assert
         assertEquals(4, andeler.size)
 
         val andelTilkjentYtelseFør6ÅrSeptember2020 = andeler[0]
@@ -297,6 +312,7 @@ class TilkjentYtelseGeneratorTest {
 
     @Test
     fun `Halvt beløp av grunnsats utbetales ved delt bosted`() {
+        // Arrange
         val barnFødselsdato = LocalDate.of(2021, 2, 2)
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
@@ -309,6 +325,7 @@ class TilkjentYtelseGeneratorTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
+        // Act
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
@@ -319,6 +336,8 @@ class TilkjentYtelseGeneratorTest {
                 .sortedBy { it.stønadFom }
 
         val andelTilkjentYtelseFør6ÅrSeptember2020 = andeler[0]
+
+        // Assert
         assertEquals(677, andelTilkjentYtelseFør6ÅrSeptember2020.kalkulertUtbetalingsbeløp)
 
         val andelTilkjentYtelseFør6ÅrSeptember2021 = andeler[1]
@@ -333,6 +352,7 @@ class TilkjentYtelseGeneratorTest {
 
     @Test
     fun `Skal opprette riktig tilkjent ytelse-perioder for perioder på barn som ikke er back-to-back over månedskiftet`() {
+        // Arrange
         val barnFødselsdato = LocalDate.of(2016, 2, 5)
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
@@ -354,6 +374,7 @@ class TilkjentYtelseGeneratorTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns oppdatertVilkårsvurdering
 
+        // Act
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
@@ -363,12 +384,14 @@ class TilkjentYtelseGeneratorTest {
                 .toList()
                 .sortedBy { it.stønadFom }
 
+        // Assert
         assertEquals(YearMonth.of(2019, 8), andeler[1].stønadTom)
         assertEquals(YearMonth.of(2019, 10), andeler[2].stønadFom)
     }
 
     @Test
     fun `Skal opprette riktig tilkjent ytelse-perioder for perioder på søker som ikke er back-to-back over månedskiftet`() {
+        // Arrange
         val barnFødselsdato = LocalDate.of(2016, 2, 5)
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
@@ -390,6 +413,7 @@ class TilkjentYtelseGeneratorTest {
 
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns oppdatertVilkårsvurdering
 
+        // Act
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
@@ -399,6 +423,7 @@ class TilkjentYtelseGeneratorTest {
                 .toList()
                 .sortedBy { it.stønadFom }
 
+        // Assert
         assertEquals(YearMonth.of(2019, 8), andeler[1].stønadTom)
         assertEquals(YearMonth.of(2019, 10), andeler[2].stønadFom)
     }
@@ -406,6 +431,7 @@ class TilkjentYtelseGeneratorTest {
     // src/test/resources/scenario/Far søker om delt bosted - Mor har tidligere mottatt fult utvidet og ordinær barnetrygd
     @Test
     fun `Skal støtte endret utbetaling som delvis overlapper delt bosted på søker og barn og småbarnstillegg på søker`() {
+        // Arrange
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
         val månedFørBarnBlir18 =
             barnFødtAugust2019.fødselsdato
@@ -419,6 +445,7 @@ class TilkjentYtelseGeneratorTest {
                 .toYearMonth()
         val barnFyller3ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(3).toYearMonth()
 
+        // Act
         val tilkjentYtelse =
             settOppScenarioOgBeregnTilkjentYtelse(
                 endretAndeler =
@@ -453,6 +480,8 @@ class TilkjentYtelseGeneratorTest {
 
         val andelerTilkjentYtelseITidsrom =
             tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+
+        // Assert
         assertEquals(6, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -488,6 +517,7 @@ class TilkjentYtelseGeneratorTest {
     // src/test/resources/scenario/Far søker om delt bosted - Mor har tidligere mottatt fult, men har ikke mottatt utvidet
     @Test
     fun `Skal støtte endret utbetaling som kun gjelder barn på delt bosted utbetaling`() {
+        // Arrange
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
         val månedFørBarnBlir18 =
             barnFødtAugust2019.fødselsdato
@@ -501,6 +531,7 @@ class TilkjentYtelseGeneratorTest {
                 .toYearMonth()
         val barnFyller3ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(3).toYearMonth()
 
+        // Act
         val tilkjentYtelse =
             settOppScenarioOgBeregnTilkjentYtelse(
                 endretAndeler =
@@ -528,6 +559,8 @@ class TilkjentYtelseGeneratorTest {
 
         val andelerTilkjentYtelseITidsrom =
             tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+
+        // Assert
         assertEquals(4, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -558,6 +591,7 @@ class TilkjentYtelseGeneratorTest {
     // src/test/resources/scenario/Mor har tidligere mottatt barnetrygden - Far har nå søkt om delt bosted og mors barnetrygd skal også deles
     @Test
     fun `Skal gi riktig resultat når barnetrygden går over til å være delt, kun småbarnstillegg og utvidet blir delt i første periode`() {
+        // Arrange
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
         val månedFørBarnBlir18 =
             barnFødtAugust2019.fødselsdato
@@ -571,6 +605,7 @@ class TilkjentYtelseGeneratorTest {
                 .toYearMonth()
         val barnFyller3ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(3).toYearMonth()
 
+        // Act
         val tilkjentYtelse =
             settOppScenarioOgBeregnTilkjentYtelse(
                 endretAndeler =
@@ -612,6 +647,8 @@ class TilkjentYtelseGeneratorTest {
 
         val andelerTilkjentYtelseITidsrom =
             tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+
+        // Assert
         assertEquals(5, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -645,6 +682,7 @@ class TilkjentYtelseGeneratorTest {
     // src/test/resources/scenario/Mor har tidligere mottatt barnetrygden - Far har nå søkt om delt bosted og mors barnetrygd skal også deles 2
     @Test
     fun `Delt, utvidet og ordinær barnetrygd deles fra juni, men skal utbetales fult fra juni til og med juli - deles som vanlig fra August`() {
+        // Arrange
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
         val månedFørBarnBlir18 =
             barnFødtAugust2019.fødselsdato
@@ -658,6 +696,7 @@ class TilkjentYtelseGeneratorTest {
                 .toYearMonth()
         val barnFyller3ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(3).toYearMonth()
 
+        // Act
         val tilkjentYtelse =
             settOppScenarioOgBeregnTilkjentYtelse(
                 endretAndeler =
@@ -706,6 +745,8 @@ class TilkjentYtelseGeneratorTest {
 
         val andelerTilkjentYtelseITidsrom =
             tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+
+        // Assert
         assertEquals(7, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -742,6 +783,7 @@ class TilkjentYtelseGeneratorTest {
     // src/test/resources/scenario/Far søker om utvidet barnetrygd - Har full overgangsstønad, men søker sent og får ikke etterbetalt mer enn 3år
     @Test
     fun `Småbarnstillleg, utvidet og ordinær barnetrygd fra april, men skal ikke utbetales før august på grunn av etterbetaling 3 år`() {
+        // Arrange
         val barnFødtAugust2016 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 8, 15))
         val månedFørBarnBlir18 =
             barnFødtAugust2016.fødselsdato
@@ -749,6 +791,7 @@ class TilkjentYtelseGeneratorTest {
                 .minusMonths(1)
                 .toYearMonth()
 
+        // Act
         val tilkjentYtelse =
             settOppScenarioOgBeregnTilkjentYtelse(
                 endretAndeler =
@@ -783,6 +826,8 @@ class TilkjentYtelseGeneratorTest {
 
         val andelerTilkjentYtelseITidsrom =
             tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2019) }
+
+        // Assert
         assertEquals(6, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -817,6 +862,7 @@ class TilkjentYtelseGeneratorTest {
     // src/test/resources/scenario/Far har mottatt delt utvidet barnetrygd for barn 12år - Søker nå om barnetrygd for barn som flyttet til han for over 3 år siden
     @Test
     fun `Det er småbarnstillegg på søker og ordinær barnetrygd på barn 1 fra april, men det skal ikke utbetales før august på grunn av etterbetaling 3 år - Søker og barn 2 har utbetalinger fra tidligere behandlinger som ikke skal overstyres`() {
+        // Arrange
         val barnFødtAugust2016 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 8, 15))
         val månedFørBarnFødtAugust2016Blir18 =
             barnFødtAugust2016.fødselsdato
@@ -826,6 +872,7 @@ class TilkjentYtelseGeneratorTest {
         val barnFødtDesember2006 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2006, 12, 1))
         val månedFørBarnFødtDesember2006Blir18 = barnFødtDesember2006.fødselsdato.til18ÅrsVilkårsdato().toYearMonth()
 
+        // Act
         val tilkjentYtelse =
             settOppScenarioOgBeregnTilkjentYtelse(
                 endretAndeler =
@@ -869,6 +916,8 @@ class TilkjentYtelseGeneratorTest {
 
         val andelerTilkjentYtelseITidsrom =
             tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2019) }
+
+        // Assert
         assertEquals(8, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -913,6 +962,7 @@ class TilkjentYtelseGeneratorTest {
     // src/test/resources/scenario/Far søker om utvidet barnetrygd for barn under 3 år - han har full overgangsstlnad for bare deler av perioden
     @Test
     fun `Skal gi riktig resultat når det overgangsstønad i deler av utbetalingen`() {
+        // Arrange
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
         val månedFørBarnBlir6 =
             barnFødtAugust2019.fødselsdato
@@ -920,6 +970,7 @@ class TilkjentYtelseGeneratorTest {
                 .minusMonths(1)
                 .toYearMonth()
 
+        // Act
         val tilkjentYtelse =
             settOppScenarioOgBeregnTilkjentYtelse(
                 atypiskeVilkårBarna =
@@ -946,6 +997,8 @@ class TilkjentYtelseGeneratorTest {
 
         val andelerTilkjentYtelseITidsrom =
             tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+
+        // Assert
         assertEquals(3, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -970,6 +1023,7 @@ class TilkjentYtelseGeneratorTest {
     // src/test/resources/scenario/Far søker om utvidet barnetrygd for barn under 3år, men oppfyller vilkårene kun tilbake i tid
     @Test
     fun `Skal gi riktig resultat når det overgangsstønad i deler av utbetalingen - Overgangsstønaden stopper før barn fyller 3 år fordi søker ikke lenger har rett til utvidet barnetrygd`() {
+        // Arrange
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
         val månedFørBarnBlir6 =
             barnFødtAugust2019.fødselsdato
@@ -977,6 +1031,7 @@ class TilkjentYtelseGeneratorTest {
                 .minusMonths(1)
                 .toYearMonth()
 
+        // Act
         val tilkjentYtelse =
             settOppScenarioOgBeregnTilkjentYtelse(
                 atypiskeVilkårBarna =
@@ -1003,6 +1058,8 @@ class TilkjentYtelseGeneratorTest {
 
         val andelerTilkjentYtelseITidsrom =
             tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+
+        // Assert
         assertEquals(3, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -1028,6 +1085,7 @@ class TilkjentYtelseGeneratorTest {
     // src/test/resources/scenario/Far søker om utvidet barnetrygd for barn under 3 år - Har full overgangsstønad som opphører når barnet fyller 3 år
     @Test
     fun `Skal gi riktig resultat når søker har rett på ordinær og utvidet barnetrygd fra mars og rett på overgangsstønad fra April`() {
+        // Arrange
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
         val månedFørBarnBlir18 =
             barnFødtAugust2019.fødselsdato
@@ -1040,6 +1098,7 @@ class TilkjentYtelseGeneratorTest {
                 .minusMonths(1)
                 .toYearMonth()
 
+        // Act
         val tilkjentYtelse =
             settOppScenarioOgBeregnTilkjentYtelse(
                 atypiskeVilkårBarna =
@@ -1058,6 +1117,7 @@ class TilkjentYtelseGeneratorTest {
         val andelerTilkjentYtelseITidsrom =
             tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
 
+        // Assert
         assertEquals(3, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -1083,9 +1143,11 @@ class TilkjentYtelseGeneratorTest {
 
     @Test
     fun `genrering av utvidet skal avhenge av endret utbetaling med årsak ENDRE_MOTTAKER`() {
+        // Arrange
         val barnMedFullUtbetaling = lagPerson(type = PersonType.BARN, fødselsdato = januar2019.atDay(1))
         val barnMedHalvUtbetaling = lagPerson(type = PersonType.BARN, fødselsdato = januar2019.atDay(1))
 
+        // Act
         val tilkjentYtelse =
             settOppScenarioOgBeregnTilkjentYtelse(
                 endretAndeler =
@@ -1141,6 +1203,7 @@ class TilkjentYtelseGeneratorTest {
                 overgangsstønadPerioder = emptyList(),
             )
 
+        // Assert
         assertEquals(9, tilkjentYtelse.andelerTilkjentYtelse.size)
 
         val (søkersAndeler, barnasAndeler) = tilkjentYtelse.andelerTilkjentYtelse.partition { it.erSøkersAndel() }

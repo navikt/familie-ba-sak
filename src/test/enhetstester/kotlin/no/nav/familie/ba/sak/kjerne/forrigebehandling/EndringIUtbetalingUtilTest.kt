@@ -19,6 +19,7 @@ class EndringIUtbetalingUtilTest {
 
     @Test
     fun `Endring i beløp - Skal returnere periode med endring når ny andel med beløp større enn 0 er lagt til`() {
+        // Arrange
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -53,6 +54,7 @@ class EndringIUtbetalingUtilTest {
                 ),
             )
 
+        // Act
         val perioderMedEndring =
             EndringIUtbetalingUtil
                 .lagEndringIUtbetalingTidslinje(
@@ -61,21 +63,25 @@ class EndringIUtbetalingUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(sep22, perioderMedEndring.single().fom?.toYearMonth())
         Assertions.assertEquals(des22, perioderMedEndring.single().tom?.toYearMonth())
 
+        // Act
         val endringstidspunkt =
             EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
                 nåværendeAndeler = nåværendeAndeler,
                 forrigeAndeler = forrigeAndeler,
             )
 
+        // Assert
         Assertions.assertEquals(sep22, endringstidspunkt)
     }
 
     @Test
     fun `Endring i beløp - Skal ikke gi noen perioder med endring hvis andelene er helt like forrige behandling og nå`() {
+        // Arrange
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -95,6 +101,7 @@ class EndringIUtbetalingUtilTest {
                 ),
             )
 
+        // Act
         val perioderMedEndring =
             EndringIUtbetalingUtil
                 .lagEndringIUtbetalingTidslinje(
@@ -103,19 +110,23 @@ class EndringIUtbetalingUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         Assertions.assertTrue(perioderMedEndring.isEmpty())
 
+        // Act
         val endringstidspunkt =
             EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
                 nåværendeAndeler = andeler,
                 forrigeAndeler = andeler,
             )
 
+        // Assert
         Assertions.assertNull(endringstidspunkt)
     }
 
     @Test
     fun `Endring i beløp - Skal returnere periode med endring hvis utvidet ikke er endret men småbarnstillegg kun er lagt på`() {
+        // Arrange
         val søker = lagPerson(type = PersonType.SØKER).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -159,6 +170,7 @@ class EndringIUtbetalingUtilTest {
                 ),
             )
 
+        // Act
         val perioderMedEndring =
             EndringIUtbetalingUtil
                 .lagEndringIUtbetalingTidslinje(
@@ -167,21 +179,25 @@ class EndringIUtbetalingUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(mai22, perioderMedEndring.single().fom?.toYearMonth())
         Assertions.assertEquals(aug22, perioderMedEndring.single().tom?.toYearMonth())
 
+        // Act
         val endringstidspunkt =
             EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
                 nåværendeAndeler = nåværendeAndeler,
                 forrigeAndeler = forrigeAndeler,
             )
 
+        // Assert
         Assertions.assertEquals(mai22, endringstidspunkt)
     }
 
     @Test
     fun `Endring i beløp - Skal returnere periode med endring hvis andel med beløp større enn 0 er fjernet`() {
+        // Arrange
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -200,6 +216,7 @@ class EndringIUtbetalingUtilTest {
                 aktør = barn2Aktør,
             )
 
+        // Act
         val perioderMedEndring =
             EndringIUtbetalingUtil
                 .lagEndringIUtbetalingTidslinje(
@@ -208,21 +225,25 @@ class EndringIUtbetalingUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(jan22, perioderMedEndring.single().fom?.toYearMonth())
         Assertions.assertEquals(aug22, perioderMedEndring.single().tom?.toYearMonth())
 
+        // Act
         val endringstidspunkt =
             EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
                 nåværendeAndeler = listOf(andelBarn2),
                 forrigeAndeler = listOf(andelBarn2, andelBarn1),
             )
 
+        // Assert
         Assertions.assertEquals(jan22, endringstidspunkt)
     }
 
     @Test
     fun `Endring i beløp - Skal ikke returnere periode med endring hvis andel med 0 i beløp er fjernet`() {
+        // Arrange
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -241,6 +262,7 @@ class EndringIUtbetalingUtilTest {
                 aktør = barn2Aktør,
             )
 
+        // Act
         val perioderMedEndring =
             EndringIUtbetalingUtil
                 .lagEndringIUtbetalingTidslinje(
@@ -249,14 +271,17 @@ class EndringIUtbetalingUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         Assertions.assertTrue(perioderMedEndring.isEmpty())
 
+        // Act
         val endringstidspunkt =
             EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
                 nåværendeAndeler = listOf(andelBarn2),
                 forrigeAndeler = listOf(andelBarn2, andelBarn1),
             )
 
+        // Assert
         Assertions.assertNull(endringstidspunkt)
     }
 }

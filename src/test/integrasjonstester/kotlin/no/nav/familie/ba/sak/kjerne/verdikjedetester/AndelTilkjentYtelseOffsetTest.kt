@@ -60,6 +60,7 @@ class AndelTilkjentYtelseOffsetTest(
 
     @Test
     fun `Skal ha riktig offset for andeler når man legger til ny andel`() {
+        // Arrange
         val personScenario1: ScenarioDto = lagScenario(barnFødselsdato)
         val fagsak1: MinimalFagsakDto = lagFagsak(personScenario = personScenario1)
         val behandling1 =
@@ -76,6 +77,7 @@ class AndelTilkjentYtelseOffsetTest(
                 barnFødselsdato = barnFødselsdato,
             )
 
+        // Act
         val andelerBehandling1 = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = behandling1.id)
         val offsetBehandling1 = andelerBehandling1.mapNotNull { it.periodeOffset }.map { it.toInt() }.sorted()
 
@@ -85,6 +87,7 @@ class AndelTilkjentYtelseOffsetTest(
         val nyAndelIBehandling2 = andelerBehandling2.single { it.erSmåbarnstillegg() }
         val forventetOffsetNyAndel = offsetBehandling1.max() + 1
 
+        // Assert
         Assertions.assertEquals(forventetOffsetNyAndel, nyAndelIBehandling2.periodeOffset?.toInt())
 
         // Ønsker at uendrede andeler skal beholde samme offset

@@ -16,6 +16,7 @@ class FinnSakerMedFlereMigreringsbehandlingerTaskTest {
 
     @Test
     fun `Skal kaste feil hvis man finner åpne saker med flere migreringsbehandlinger fra sist måned`() {
+        // Arrange
         val fagsakMedMigrering1 = mockk<FagsakMedFlereMigreringer>()
         val fagsakMedMigrering2 = mockk<FagsakMedFlereMigreringer>()
         every { fagsakMedMigrering1.fagsakId } returns 1
@@ -25,11 +26,13 @@ class FinnSakerMedFlereMigreringsbehandlingerTaskTest {
         every { fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger(any()) } returns
             listOf(fagsakMedMigrering1, fagsakMedMigrering2)
 
+        // Act & Assert
         val exception =
             assertThrows<Feil> {
                 task.doTask(Task(type = FinnSakerMedFlereMigreringsbehandlingerTask.TASK_STEP_TYPE, payload = "2023-10"))
             }
 
+        // Assert
         assertThat(exception.message).isEqualTo(
             """
             Det er nye fagsaker som har har flere enn 1 migrering fra Infotrygd. Send liste til fag og avvikshåndter tasken. fraOgMedÅrMåned=2023-10 
@@ -41,8 +44,10 @@ class FinnSakerMedFlereMigreringsbehandlingerTaskTest {
 
     @Test
     fun `Skal ikke kaste feil hvis man ikke finner nye åpne saker som har flere enn 1 migrering`() {
+        // Arrange
         every { fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger(any()) } returns emptyList()
 
+        // Act
         task.doTask(Task(type = FinnSakerMedFlereMigreringsbehandlingerTask.TASK_STEP_TYPE, payload = "2023-10"))
     }
 }

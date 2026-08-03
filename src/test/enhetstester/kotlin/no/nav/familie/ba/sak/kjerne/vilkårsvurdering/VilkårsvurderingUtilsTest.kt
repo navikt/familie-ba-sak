@@ -29,6 +29,7 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `feil kastes når det finnes løpende oppfylt ved forsøk på å legge til avslag uten periode`() {
+        // Arrange
         val personResultat =
             PersonResultat(
                 vilkårsvurdering = uvesentligVilkårsvurdering,
@@ -60,6 +61,7 @@ class VilkårsvurderingUtilsTest {
                 erEksplisittAvslagPåSøknad = true,
             )
 
+        // Act & Assert
         assertThrows<FunksjonellFeil> {
             VilkårsvurderingUtils.validerAvslagUtenPeriodeMedLøpende(
                 personSomEndres = personResultat,
@@ -70,6 +72,7 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `feil kastes når det finnes avslag uten periode ved forsøk på å legge til løpende oppfylt`() {
+        // Arrange
         val personResultat =
             PersonResultat(
                 vilkårsvurdering = uvesentligVilkårsvurdering,
@@ -101,6 +104,7 @@ class VilkårsvurderingUtilsTest {
                 behandlingId = 0,
             )
 
+        // Act & Assert
         assertThrows<FunksjonellFeil> {
             VilkårsvurderingUtils.validerAvslagUtenPeriodeMedLøpende(
                 personSomEndres = personResultat,
@@ -111,6 +115,7 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `skal ikke kaste feil hvis vilkåret er bor med søker`() {
+        // Arrange
         val personResultat =
             PersonResultat(
                 vilkårsvurdering = uvesentligVilkårsvurdering,
@@ -142,6 +147,7 @@ class VilkårsvurderingUtilsTest {
                 erEksplisittAvslagPåSøknad = true,
             )
 
+        // Act & Assert
         assertDoesNotThrow {
             VilkårsvurderingUtils.validerAvslagUtenPeriodeMedLøpende(
                 personSomEndres = personResultat,
@@ -152,6 +158,7 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `feil kastes ikke når når ingen periode er løpende`() {
+        // Arrange
         val personResultat =
             PersonResultat(
                 vilkårsvurdering = uvesentligVilkårsvurdering,
@@ -183,6 +190,7 @@ class VilkårsvurderingUtilsTest {
                 behandlingId = 0,
             )
 
+        // Act & Assert
         assertDoesNotThrow {
             VilkårsvurderingUtils.validerAvslagUtenPeriodeMedLøpende(
                 personSomEndres = personResultat,
@@ -193,6 +201,7 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `skal liste opp begrunnelser uten vilkår`() {
+        // Arrange
         val sanityBegrunnelser =
             mapOf(
                 Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
@@ -204,14 +213,17 @@ class VilkårsvurderingUtilsTest {
             )
         val vedtakBegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
 
+        // Act
         val vedtakBegrunnelserTilknyttetVilkårDto =
             vedtakBegrunnelseTilVedtakBegrunnelseTilknyttetVilkårDto(sanityBegrunnelser, vedtakBegrunnelse)
 
+        // Assert
         Assertions.assertEquals(1, vedtakBegrunnelserTilknyttetVilkårDto.size)
     }
 
     @Test
     fun `skal liste opp begrunnelsene en gang per vilkår`() {
+        // Arrange
         val sanityBegrunnelser =
             mapOf(
                 Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
@@ -223,25 +235,30 @@ class VilkårsvurderingUtilsTest {
             )
         val vedtakBegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
 
+        // Act
         val vedtakBegrunnelserTilknyttetVilkårDto =
             vedtakBegrunnelseTilVedtakBegrunnelseTilknyttetVilkårDto(sanityBegrunnelser, vedtakBegrunnelse)
 
+        // Assert
         Assertions.assertEquals(2, vedtakBegrunnelserTilknyttetVilkårDto.size)
     }
 
     @Test
     fun `genererPersonResultatForPerson skal sette til-og-med dato på alle vilkår til dødsfallsdato og begrunnelse til dødsfall hvis barn er død`() {
+        // Arrange
         val nyBehandling = lagBehandling()
 
         val vilkårsvurdering = Vilkårsvurdering(behandling = nyBehandling)
         val dødtBarn = lagPerson(type = PersonType.BARN).apply { dødsfall = lagDødsfallFraPdl(this, "2012-12-12", null) }
 
+        // Act
         val personResultatForDødtBarn =
             genererPersonResultatForPerson(
                 vilkårsvurdering = vilkårsvurdering,
                 person = dødtBarn,
             )
 
+        // Assert
         Assertions.assertTrue(personResultatForDødtBarn.vilkårResultater.all { it.begrunnelse == "Dødsfall" })
         Assertions.assertTrue(
             personResultatForDødtBarn.vilkårResultater.all {
@@ -252,17 +269,20 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `genererPersonResultatForPerson skal sette til-og-med dato på under-18-årsvilkår til 18 års datoen hvis barn ikke er død`() {
+        // Arrange
         val nyBehandling = lagBehandling()
 
         val vilkårsvurdering = Vilkårsvurdering(behandling = nyBehandling)
         val levendeBarn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 10, 10))
 
+        // Act
         val personResultatForLevendeBarn =
             genererPersonResultatForPerson(
                 vilkårsvurdering = vilkårsvurdering,
                 person = levendeBarn,
             )
 
+        // Assert
         val under18ÅrVilkår =
             personResultatForLevendeBarn.vilkårResultater.find { it.vilkårType == Vilkår.UNDER_18_ÅR }!!
 

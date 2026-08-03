@@ -24,6 +24,7 @@ class TilkjentYtelseRepositoryOppdaterTilkjentYtelseTest {
 
     @Test
     fun `skal ikke kaste exception hvis tilkjent ytelse oppdateres med gyldige andeler`() {
+        // Arrange
         val behandling = lagBehandling()
 
         val forrigeTilkjentYtelse =
@@ -40,11 +41,13 @@ class TilkjentYtelseRepositoryOppdaterTilkjentYtelseTest {
 
         every { tilkjentYtelseRepository.saveAndFlush(any()) } returns nyTilkjentYtelse
 
+        // Act
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(
             forrigeTilkjentYtelse,
             nyTilkjentYtelse.andelerTilkjentYtelse,
         )
 
+        // Assert
         verify(exactly = 1) { tilkjentYtelseRepository.saveAndFlush(any()) }
     }
 }

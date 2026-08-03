@@ -48,6 +48,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
 
     @Test
     fun `Plukk riktige behandlinger - skal være nyeste, løpende med opphør i småbarnstillegg for valgt måned`() {
+        // Arrange
         val personScenario1: ScenarioDto = lagScenario(barnFødselsdato)
         val fagsak1: MinimalFagsakDto = lagFagsak(personScenario = personScenario1)
         fullførBehandling(
@@ -79,9 +80,12 @@ class AutobrevSmåbarnstilleggOpphørTest(
                 barnFødselsdato = barnFødselsdato,
             )
 
+        // Act
         val andelerForSmåbarnstilleggFagsak1Behandling2 =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = fagsak2behandling2.id)
         val førsteDagIStønadTomMåned = YearMonth.now().minusMonths(1)
+
+        // Assert
         assertEquals(
             førsteDagIStønadTomMåned,
             andelerForSmåbarnstilleggFagsak1Behandling2
@@ -90,11 +94,13 @@ class AutobrevSmåbarnstilleggOpphørTest(
                 }?.stønadTom,
         )
 
+        // Act
         val fagsaker: List<Long> =
             fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
                 iverksatteLøpendeBehandlinger = listOf(fagsak1behandling2.id, fagsak2behandling2.id),
             )
 
+        // Assert
         assertTrue(fagsaker.containsAll(listOf(fagsak2.id)))
         assertFalse(fagsaker.contains(fagsak1.id))
     }

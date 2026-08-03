@@ -40,6 +40,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `opprettKopiEllerNyttPersonopplysningGrunnlag - skal opprette nytt PersonopplysningGrunnlag som kopi av personopplysningsgrunnlag fra forrige behandling ved satsendring`() {
+        // Arrange
         val morId = randomFnr()
         val barnId = randomFnr()
 
@@ -92,6 +93,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
                 satsendring,
             )
 
+        // Act
         personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
             satsendringBehandling,
             førsteBehandling,
@@ -99,6 +101,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
             listOf(barnId),
         )
 
+        // Assert
         val grunnlagFraSatsendringBehandling =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = satsendringBehandling.id)
 
@@ -113,6 +116,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
 
     @Test
     fun `opprettKopiEllerNyttPersonopplysningGrunnlag - skal opprette nytt PersonopplysningGrunnlag som kopi av personopplysningsgrunnlag fra forrige behandling med barn som hadde andeler tilkjent ytelse`() {
+        // Arrange
         val morId = randomFnr()
         val barn1Id = randomFnr()
         val barn2Id = randomFnr()
@@ -167,6 +171,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
                 satsendring,
             )
 
+        // Act
         personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
             satsendringBehandling,
             førsteBehandling,
@@ -174,6 +179,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
             listOf(barn1Id, barn2Id),
         )
 
+        // Assert
         val grunnlagFraSatsendringBehandling =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = satsendringBehandling.id)
 
@@ -192,6 +198,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
 
     @Test
     fun `opprettKopiEllerNyttPersonopplysningGrunnlag - skal opprette nytt PersonopplysningGrunnlag som kopi av personopplysningsgrunnlag fra forrige behandling ved årsak 'Falsk identitet'`() {
+        // Arrange
         val morId = randomFnr()
         val barnId = randomFnr()
 
@@ -246,6 +253,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
                 falskIdentitetBehandlingUtenID,
             )
 
+        // Act
         personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
             falskIdentitetBehandling,
             førsteBehandling,
@@ -253,6 +261,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
             listOf(barnId),
         )
 
+        // Assert
         val grunnlagFraFalskIdentitetBehandling =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = falskIdentitetBehandling.id)
 

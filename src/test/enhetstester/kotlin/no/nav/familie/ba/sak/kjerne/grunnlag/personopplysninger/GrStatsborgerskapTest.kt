@@ -21,31 +21,46 @@ class GrStatsborgerskapTest {
     inner class Equals {
         @Test
         fun `skal returnere false hvis person er ulik`() {
+            // Arrange
             val annetStatsborgerskap = statsborgerskap.copy(person = tilfeldigPerson())
+
+            // Act & Assert
             assert(statsborgerskap != annetStatsborgerskap)
         }
 
         @Test
         fun `skal returnere false hvis periode er ulik`() {
+            // Arrange
             val annetStatsborgerskap = statsborgerskap.copy(gyldigPeriode = DatoIntervallEntitet(fom = LocalDate.of(2001, 1, 1), tom = LocalDate.of(2001, 12, 31)))
+
+            // Act & Assert
             assert(statsborgerskap != annetStatsborgerskap)
         }
 
         @Test
         fun `skal returnere false hvis landkode er ulik`() {
+            // Arrange
             val annetStatsborgerskap = statsborgerskap.copy(landkode = "SE")
+
+            // Act & Assert
             assert(statsborgerskap != annetStatsborgerskap)
         }
 
         @Test
         fun `skal returnere false hvis medlemskap er ulik`() {
+            // Arrange
             val annetStatsborgerskap = statsborgerskap.copy(medlemskap = Medlemskap.EØS)
+
+            // Act & Assert
             assert(statsborgerskap != annetStatsborgerskap)
         }
 
         @Test
         fun `skal returnere true hvis alle felter er like`() {
+            // Arrange
             val annetStatsborgerskap = statsborgerskap.copy(id = 1)
+
+            // Act & Assert
             assert(statsborgerskap == annetStatsborgerskap)
         }
     }

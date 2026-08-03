@@ -30,6 +30,7 @@ import java.time.Month
 class VilkårsvurderingForskyvningUtilsTest {
     @Test
     fun `Skal lage riktig splitt når bor med søker går fra delt bosted til fullt`() {
+        // Arrange
         val fom = LocalDate.now().minusMonths(7).førsteDagIInneværendeMåned()
         val deltBostedTom = LocalDate.now().minusMonths(1).sisteDagIMåned()
         val barnets18årsdag = LocalDate.now().plusYears(14)
@@ -57,8 +58,10 @@ class VilkårsvurderingForskyvningUtilsTest {
                 maksTom = barnets18årsdag,
             )
 
+        // Act
         val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(barnets18årsdag.minusYears(18))
 
+        // Assert
         assertEquals(5, tidslinjer.size)
 
         val borMedSøkerTidslinje = tidslinjer.first()
@@ -84,6 +87,7 @@ class VilkårsvurderingForskyvningUtilsTest {
 
     @Test
     fun `Skal lage riktig splitt når bor med søker går fra fullt til delt bosted`() {
+        // Arrange
         val fom = LocalDate.now().minusMonths(7).førsteDagIInneværendeMåned()
         val deltBostedTom = LocalDate.now().minusMonths(1).sisteDagIMåned()
         val barnets18årsdag = LocalDate.now().plusYears(14)
@@ -111,8 +115,10 @@ class VilkårsvurderingForskyvningUtilsTest {
                 maksTom = barnets18årsdag,
             )
 
+        // Act
         val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(barnets18årsdag.minusYears(18))
 
+        // Assert
         assertEquals(5, tidslinjer.size)
 
         val borMedSøkerTidslinje = tidslinjer.first()
@@ -138,6 +144,7 @@ class VilkårsvurderingForskyvningUtilsTest {
 
     @Test
     fun `Skal lage riktig splitt når bor med søker er oppfylt i to back2back-perioder uten utdypende vilkårsvurdering`() {
+        // Arrange
         val fom = LocalDate.now().minusMonths(7).førsteDagIInneværendeMåned()
         val b2bTom = LocalDate.now().minusMonths(1).sisteDagIMåned()
         val barnets18årsdag = LocalDate.now().plusYears(14)
@@ -164,8 +171,10 @@ class VilkårsvurderingForskyvningUtilsTest {
                 maksTom = barnets18årsdag,
             )
 
+        // Act
         val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(barnets18årsdag.minusYears(18))
 
+        // Assert
         assertEquals(5, tidslinjer.size)
 
         val borMedSøkerTidslinje = tidslinjer.first()
@@ -191,6 +200,7 @@ class VilkårsvurderingForskyvningUtilsTest {
 
     @Test
     fun `Skal forskyve UNDER_18 tidslinjen og beskjære den måneden før 18-årsdag`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
 
         val under18VilkårResultat =
@@ -203,9 +213,11 @@ class VilkårsvurderingForskyvningUtilsTest {
                 ),
             )
 
+        // Act
         val forskjøvetTidslinje =
             under18VilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = Vilkår.UNDER_18_ÅR, barn.fødselsdato)
 
+        // Assert
         val forskjøvedePerioder = forskjøvetTidslinje.tilPerioder()
 
         assertEquals(1, forskjøvedePerioder.size)
@@ -224,6 +236,7 @@ class VilkårsvurderingForskyvningUtilsTest {
 
     @Test
     fun `Skal forskyve UNDER_18 tidslinjen, men ikke kutte den måneden før hvis til og med dato ikke er i måneden hen fyller 18`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
 
         val tomDato = barn.fødselsdato.plusYears(7)
@@ -238,9 +251,11 @@ class VilkårsvurderingForskyvningUtilsTest {
                 ),
             )
 
+        // Act
         val forskjøvetTidslinje =
             under18VilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = Vilkår.UNDER_18_ÅR, barn.fødselsdato)
 
+        // Assert
         val forskjøvedePerioder = forskjøvetTidslinje.tilPerioder()
 
         assertEquals(1, forskjøvedePerioder.size)
@@ -253,27 +268,35 @@ class VilkårsvurderingForskyvningUtilsTest {
 
     @Test
     fun `Skal gi tom liste og ikke kaste feil dersom vi ikke sender med noen vilkårresultater`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
 
+        // Act
         val forskjøvedeOppfylteVilkårTomListe =
             emptyList<VilkårResultat>()
                 .tilForskjøvetTidslinjeForOppfyltVilkår(
                     vilkår = Vilkår.UNDER_18_ÅR,
                     fødselsdato = barn.fødselsdato,
                 ).tilPerioder()
+
+        // Assert
         assertEquals(forskjøvedeOppfylteVilkårTomListe.size, 0)
 
+        // Act
         val forskjøvedeVilkårTomListe =
             emptyList<VilkårResultat>()
                 .tilForskjøvetTidslinje(
                     vilkår = Vilkår.UNDER_18_ÅR,
                     fødselsdato = barn.fødselsdato,
                 ).tilPerioder()
+
+        // Assert
         assertEquals(forskjøvedeVilkårTomListe.size, 0)
     }
 
     @Test
     fun `skal forskyve eksplisitt avslag når avslaget starter og opphører innenfor samme måned`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
 
         val vilkårResultat =
@@ -287,6 +310,7 @@ class VilkårsvurderingForskyvningUtilsTest {
                 ),
             )
 
+        // Act
         val forskjøvedeVilkår =
             vilkårResultat
                 .tilForskjøvetTidslinje(
@@ -294,6 +318,7 @@ class VilkårsvurderingForskyvningUtilsTest {
                     fødselsdato = barn.fødselsdato,
                 ).tilPerioderIkkeNull()
 
+        // Assert
         assertEquals(1, forskjøvedeVilkår.size)
 
         val periode = forskjøvedeVilkår.single()
@@ -303,6 +328,7 @@ class VilkårsvurderingForskyvningUtilsTest {
 
     @Test
     fun `skal ikke forskyve eksplisitt avslag når avslaget blir etterfulgt av en innvilget periode`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
 
         val vilkårResultat =
@@ -322,6 +348,7 @@ class VilkårsvurderingForskyvningUtilsTest {
                 ),
             )
 
+        // Act
         val forskjøvedeVilkår =
             vilkårResultat
                 .tilForskjøvetTidslinje(
@@ -329,6 +356,7 @@ class VilkårsvurderingForskyvningUtilsTest {
                     fødselsdato = barn.fødselsdato,
                 ).tilPerioderIkkeNull()
 
+        // Assert
         assertEquals(2, forskjøvedeVilkår.size)
 
         val periode = forskjøvedeVilkår.single { it.verdi.erEksplisittAvslagPåSøknad == true }
@@ -338,6 +366,7 @@ class VilkårsvurderingForskyvningUtilsTest {
 
     @Test
     fun `skal ikke forskyve eksplisitt avslag når avslaget ikke opphører innenfor samme måned`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
 
         val vilkårResultat =
@@ -351,6 +380,7 @@ class VilkårsvurderingForskyvningUtilsTest {
                 ),
             )
 
+        // Act
         val forskjøvedeVilkår =
             vilkårResultat
                 .tilForskjøvetTidslinje(
@@ -358,6 +388,7 @@ class VilkårsvurderingForskyvningUtilsTest {
                     fødselsdato = barn.fødselsdato,
                 ).tilPerioderIkkeNull()
 
+        // Assert
         assertEquals(1, forskjøvedeVilkår.size)
         val periode = forskjøvedeVilkår.single()
         assertEquals(1.feb(2023), periode.fom)
@@ -366,6 +397,7 @@ class VilkårsvurderingForskyvningUtilsTest {
 
     @Test
     fun `skal ikke forskyve opphørsperioder som starter og slutter innenfor samme måned`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
 
         val vilkårResultat =
@@ -378,6 +410,7 @@ class VilkårsvurderingForskyvningUtilsTest {
                 ),
             )
 
+        // Act
         val forskjøvedeVilkår =
             vilkårResultat
                 .tilForskjøvetTidslinje(
@@ -385,11 +418,13 @@ class VilkårsvurderingForskyvningUtilsTest {
                     fødselsdato = barn.fødselsdato,
                 ).tilPerioderIkkeNull()
 
+        // Assert
         assertEquals(0, forskjøvedeVilkår.size)
     }
 
     @Test
     fun `Skal kutte UNDER_18 tidslinjen måneden før 18-årsdag`() {
+        // Arrange
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
 
         val under18VilkårResultat =
@@ -407,8 +442,10 @@ class VilkårsvurderingForskyvningUtilsTest {
                 tom = under18VilkårResultat.periodeTom?.sisteDagIMåned(),
             ).tilTidslinje()
 
+        // Act
         val under18PerioderFørBeskjæring = under18årVilkårTidslinje.tilPerioder()
 
+        // Assert
         assertEquals(1, under18PerioderFørBeskjæring.size)
         assertEquals(
             barn.fødselsdato.førsteDagINesteMåned(),
@@ -419,8 +456,10 @@ class VilkårsvurderingForskyvningUtilsTest {
             under18PerioderFørBeskjæring.first().tom,
         )
 
+        // Act
         val tidslinjeBeskåret = under18årVilkårTidslinje.beskjærPå18År(barn.fødselsdato)
 
+        // Assert
         val under18PerioderEtterBeskjæring = tidslinjeBeskåret.tilPerioder()
 
         assertEquals(1, under18PerioderEtterBeskjæring.size)

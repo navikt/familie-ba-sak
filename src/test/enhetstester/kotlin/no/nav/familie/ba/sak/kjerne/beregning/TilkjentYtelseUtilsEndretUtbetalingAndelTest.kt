@@ -37,6 +37,8 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
     @Test
     fun `teste nye andeler tilkjent ytelse for to barn med endrete utbetalingsandeler`() {
+        // Arrange
+
         /**
          * Tidslinjer barn 1:
          * -------------[############]-----------[#########]---------- AndelTilkjentYtelse
@@ -105,6 +107,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
                 )
             }
 
+        // Act
         val andelerTilkjentYtelserEtterEUA =
             AndelTilkjentYtelseMedEndretUtbetalingGenerator.lagAndelerMedEndretUtbetalingAndeler(
                 andelTilkjentYtelserUtenEndringer = (andelTilkjentytelseForBarn1 + andelTilkjentytelseForBarn2),
@@ -114,6 +117,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         val andelerTilkjentYtelserEtterEUAList = andelerTilkjentYtelserEtterEUA.map { it.andel }.toList()
 
+        // Assert
         assertEquals(8, andelerTilkjentYtelserEtterEUAList.size)
 
         verifiserAndelTilkjentYtelse(

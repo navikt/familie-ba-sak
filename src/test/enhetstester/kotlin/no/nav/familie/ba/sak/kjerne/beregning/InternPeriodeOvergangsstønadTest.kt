@@ -12,7 +12,10 @@ import java.time.LocalDate
 class InternPeriodeOvergangsstønadTest {
     @Test
     fun `Skal slå sammen perioder som er sammenhengende`() {
+        // Arrange
         val personIdent = randomFnr()
+
+        // Act
         val sammenslåttePerioder =
             listOf(
                 InternPeriodeOvergangsstønad(
@@ -27,12 +30,16 @@ class InternPeriodeOvergangsstønadTest {
                 ),
             ).slåSammenSammenhengendePerioder()
 
+        // Assert
         assertEquals(1, sammenslåttePerioder.size)
     }
 
     @Test
     fun `Skal ikke slå sammen perioder som ikke er sammenhengende`() {
+        // Arrange
         val personIdent = randomFnr()
+
+        // Act
         val sammenslåttePerioder =
             listOf(
                 InternPeriodeOvergangsstønad(
@@ -47,6 +54,7 @@ class InternPeriodeOvergangsstønadTest {
                 ),
             ).slåSammenSammenhengendePerioder()
 
+        // Assert
         assertEquals(2, sammenslåttePerioder.size)
     }
 }

@@ -63,8 +63,10 @@ class SettPåVentServiceTest(
     @ParameterizedTest
     @EnumSource(value = SettPåVentÅrsak::class)
     fun `Kan sette en behandling på vent hvis statusen er utredes`(årsak: SettPåVentÅrsak) {
+        // Arrange
         val behandling = opprettBehandling()
 
+        // Act
         val settBehandlingPåVent =
             settPåVentService.settBehandlingPåVent(
                 behandling.id,
@@ -72,6 +74,7 @@ class SettPåVentServiceTest(
                 årsak,
             )
 
+        // Assert
         assertThat(settBehandlingPåVent.behandling.id).isEqualTo(behandling.id)
         assertThat(settBehandlingPåVent.frist).isEqualTo(frist)
         assertThat(settBehandlingPåVent.årsak).isEqualTo(årsak)
@@ -83,8 +86,10 @@ class SettPåVentServiceTest(
     @ParameterizedTest
     @EnumSource(value = SettPåVentÅrsak::class)
     fun `gjenopprett behandling skal sette status til utredes på nytt`(årsak: SettPåVentÅrsak) {
+        // Arrange
         val behandling = opprettBehandling()
 
+        // Act
         settPåVentService.settBehandlingPåVent(
             behandling.id,
             frist,
@@ -93,6 +98,7 @@ class SettPåVentServiceTest(
         val behandlingEtterSattPåVent = behandlingRepository.finnBehandling(behandling.id).status
         val gjenopptattSettPåVent = settPåVentService.gjenopptaBehandling(behandling.id)
 
+        // Assert
         assertThat(gjenopptattSettPåVent.aktiv).isFalse()
         assertThat(behandling.status).isEqualTo(BehandlingStatus.UTREDES)
         assertThat(behandlingEtterSattPåVent).isEqualTo(BehandlingStatus.SATT_PÅ_VENT)
@@ -118,6 +124,7 @@ class SettPåVentServiceTest(
     @ParameterizedTest
     @EnumSource(value = SettPåVentÅrsak::class)
     fun `Kan ikke endre på behandling etter at den er satt på vent`(årsak: SettPåVentÅrsak) {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
         val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
 
@@ -142,6 +149,7 @@ class SettPåVentServiceTest(
             årsak = årsak,
         )
 
+        // Act & Assert
         assertThrows<FunksjonellFeil> {
             stegService.håndterBehandlingsresultat(behandlingRepository.finnBehandling(behandlingId))
         }
@@ -150,6 +158,7 @@ class SettPåVentServiceTest(
     @ParameterizedTest
     @EnumSource(value = SettPåVentÅrsak::class)
     fun `Kan endre på behandling etter venting er deaktivert`(årsak: SettPåVentÅrsak) {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
         val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
         val behandlingEtterVilkårsvurderingSteg =
@@ -174,12 +183,14 @@ class SettPåVentServiceTest(
 
         val nå = LocalDate.now()
 
+        // Act
         val settPåVent =
             settPåVentService.gjenopptaBehandling(
                 behandlingId = behandlingEtterVilkårsvurderingSteg.id,
                 nå = nå,
             )
 
+        // Assert
         Assertions.assertEquals(
             nå,
             settPåVentRepository.findByIdOrNull(settPåVent.id)!!.tidTattAvVent,
@@ -193,6 +204,7 @@ class SettPåVentServiceTest(
     @ParameterizedTest
     @EnumSource(value = SettPåVentÅrsak::class)
     fun `Kan ikke sette ventefrist til før dagens dato`(årsak: SettPåVentÅrsak) {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
         val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
         val behandlingEtterVilkårsvurderingSteg =
@@ -209,6 +221,7 @@ class SettPåVentServiceTest(
                 brevmalService = brevmalService,
             )
 
+        // Act & Assert
         assertThrows<FunksjonellFeil> {
             settPåVentService.settBehandlingPåVent(
                 behandlingId = behandlingEtterVilkårsvurderingSteg.id,
@@ -221,6 +234,7 @@ class SettPåVentServiceTest(
     @ParameterizedTest
     @EnumSource(value = SettPåVentÅrsak::class)
     fun `Kan oppdatere sett på vent på behandling`(årsak: SettPåVentÅrsak) {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
         val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
 
@@ -253,15 +267,18 @@ class SettPåVentServiceTest(
 
         val nyFrist = LocalDate.now().plusDays(9)
 
+        // Act
         settPåVent.frist = nyFrist
         settPåVentRepository.save(settPåVent)
 
+        // Assert
         Assertions.assertEquals(nyFrist, settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId)!!.frist)
     }
 
     @ParameterizedTest
     @EnumSource(value = SettPåVentÅrsak::class)
     fun `Skal gjennopta behandlinger etter ventefristen`(årsak: SettPåVentÅrsak) {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
         val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
 
@@ -309,6 +326,7 @@ class SettPåVentServiceTest(
             årsak = årsak,
         )
 
+        // Act
         taBehandlingerEtterVentefristAvVentTask.doTask(
             Task(
                 type = TaBehandlingerEtterVentefristAvVentTask.TASK_STEP_TYPE,
@@ -316,6 +334,7 @@ class SettPåVentServiceTest(
             ),
         )
 
+        // Assert
         Assertions.assertNull(settPåVentRepository.findByBehandlingIdAndAktiv(behandling1.id, true))
         Assertions.assertNotNull(settPåVentRepository.findByBehandlingIdAndAktiv(behandling2.id, true))
     }
@@ -323,6 +342,7 @@ class SettPåVentServiceTest(
     @ParameterizedTest
     @EnumSource(value = SettPåVentÅrsak::class)
     fun `Skal ikke kunne gjenoppta behandlingen hvis den er satt på maskinell vent`(årsak: SettPåVentÅrsak) {
+        // Arrange
         val behandling = opprettBehandling()
 
         settPåVentService.settBehandlingPåVent(
@@ -332,10 +352,13 @@ class SettPåVentServiceTest(
         )
         snikeIKøenService.settAktivBehandlingPåMaskinellVent(behandling.id, SettPåMaskinellVentÅrsak.SATSENDRING)
 
+        // Act
         val throwable =
             catchThrowable {
                 settPåVentService.gjenopptaBehandling(behandling.id)
             }
+
+        // Assert
         assertThat(throwable).isInstanceOf(FunksjonellFeil::class.java)
         assertThat((throwable as FunksjonellFeil).frontendFeilmelding)
             .isEqualTo("Behandlingen er under maskinell vent, og kan gjenopptas senere.")
@@ -343,8 +366,10 @@ class SettPåVentServiceTest(
 
     @Test
     fun `Skal kaste feil for årsak AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING med annen frist enn 5 dager`() {
+        // Arrange
         val behandling = opprettBehandling()
 
+        // Act & Assert
         val feil =
             assertThrows<Feil> {
                 settPåVentService.settBehandlingPåVent(
@@ -362,8 +387,10 @@ class SettPåVentServiceTest(
 
     @Test
     fun `Skal opprette Tilbakekrevingsvedtak motregning for behandlinger som settes på vent med årsak AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING`() {
+        // Arrange
         val behandling = opprettBehandling()
 
+        // Act
         val settPåVent =
             settPåVentService.settBehandlingPåVent(
                 behandlingId = behandling.id,
@@ -371,6 +398,7 @@ class SettPåVentServiceTest(
                 årsak = SettPåVentÅrsak.AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING,
             )
 
+        // Assert
         assertThat(settPåVent.årsak).isEqualTo(SettPåVentÅrsak.AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING)
         assertThat(settPåVent.frist).isEqualTo(frist)
 
@@ -383,14 +411,17 @@ class SettPåVentServiceTest(
     @ParameterizedTest
     @EnumSource(value = SettPåVentÅrsak::class, mode = EnumSource.Mode.EXCLUDE, names = ["AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING"])
     fun `Skal ikke opprette Tilbakekrevingsvedtak motregning for behandlinger som settes på vent med annen årsak enn AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING`(årsak: SettPåVentÅrsak) {
+        // Arrange
         val behandling = opprettBehandling()
 
+        // Act
         settPåVentService.settBehandlingPåVent(
             behandlingId = behandling.id,
             frist = frist,
             årsak = årsak,
         )
 
+        // Assert
         val tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandling.id)
 
         assertThat(tilbakekrevingsvedtakMotregning).isNull()

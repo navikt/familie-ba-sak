@@ -28,6 +28,7 @@ class TilpassValutakursTilUtenlandskePeridebeløpTest {
 
     @Test
     fun `test tilpasning av valutakurser mot kompleks endring av utenlandsk valutabeløp`() {
+        // Arrange
         val gjeldendeValutakurser =
             ValutakursBuilder(jan2020)
                 .medKurs("--3456789-----", "EUR", barn1, barn2)
@@ -48,14 +49,17 @@ class TilpassValutakursTilUtenlandskePeridebeløpTest {
                 .medKurs("      -    ", "DKK", barn1, barn3)
                 .bygg()
 
+        // Act
         val faktiskeValutakurser =
             tilpassValutakurserTilUtenlandskePeriodebeløp(gjeldendeValutakurser, utenlandskePeriodebeløp, inneværendeMåned)
 
+        // Assert
         assertEqualsUnordered(forventedeValutakurser, faktiskeValutakurser)
     }
 
     @Test
     fun `test at endret valuta i utenlandsk periodebeløp fører til endring i valutakurs`() {
+        // Arrange
         val gjeldendeValutakurser =
             ValutakursBuilder(jan2020)
                 .medKurs("333333", "EUR", barn1)
@@ -71,14 +75,17 @@ class TilpassValutakursTilUtenlandskePeridebeløpTest {
                 .medKurs("$$$$$$", "DKK", barn1)
                 .bygg()
 
+        // Act
         val faktiskeValutakurser =
             tilpassValutakurserTilUtenlandskePeriodebeløp(gjeldendeValutakurser, utenlandskePeriodebeløp, inneværendeMåned)
 
+        // Assert
         assertEqualsUnordered(forventedeValutakurser, faktiskeValutakurser)
     }
 
     @Test
     fun `test at ikke fremtidige valutakurser genereres`() {
+        // Arrange
         val gjeldendeValutakurser =
             ValutakursBuilder(nov2020)
                 .medKurs("12345", "PLN", barn1)
@@ -94,9 +101,11 @@ class TilpassValutakursTilUtenlandskePeridebeløpTest {
                 .medKurs("123", "PLN", barn1)
                 .bygg()
 
+        // Act
         val faktiskeValutakurser =
             tilpassValutakurserTilUtenlandskePeriodebeløp(gjeldendeValutakurser, utenlandskePeriodebeløp, inneværendeMåned)
 
+        // Assert
         assertThat(faktiskeValutakurser).isEqualTo(forventedeValutakurser)
     }
 }

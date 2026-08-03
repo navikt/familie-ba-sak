@@ -38,6 +38,7 @@ class EndringstidspunktTest(
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Skal filtrere bort alle vedtaksperioder før endringstidspunktet`() {
+        // Arrange
         val barnFødselsdato = LocalDate.now().minusYears(2)
         val scenario =
             ScenarioDto(
@@ -116,6 +117,7 @@ class EndringstidspunktTest(
 
         overstyrendeVilkårResultaterRevurdering[scenario.søker.aktørId] = emptyList()
 
+        // Act
         val revurdering =
             kjørStegprosessForBehandling(
                 tilSteg = StegType.BEHANDLING_AVSLUTTET,
@@ -137,6 +139,7 @@ class EndringstidspunktTest(
                 brevmalService = brevmalService,
             )
 
+        // Assert
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering.id)
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 

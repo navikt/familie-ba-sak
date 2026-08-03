@@ -80,23 +80,28 @@ class BrevServiceTest {
 
     @Test
     fun `Saksbehandler blir hentet fra sikkerhetscontext og beslutter viser placeholder tekst under behandling`() {
+        // Arrange
         val behandling = lagBehandling()
 
+        // Act
         val (saksbehandler, beslutter) =
             brevService.hentSaksbehandlerOgBeslutter(
                 behandling = behandling,
                 totrinnskontroll = null,
             )
 
+        // Assert
         Assertions.assertEquals("saksbehandlerNavn", saksbehandler)
         Assertions.assertEquals("Beslutter", beslutter)
     }
 
     @Test
     fun `Saksbehandler blir hentet og beslutter er hentet fra sikkerhetscontext under beslutning`() {
+        // Arrange
         val behandling = lagBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
 
+        // Act
         val (saksbehandler, beslutter) =
             brevService.hentSaksbehandlerOgBeslutter(
                 behandling = behandling,
@@ -108,15 +113,18 @@ class BrevServiceTest {
                     ),
             )
 
+        // Assert
         Assertions.assertEquals("Mock Saksbehandler", saksbehandler)
         Assertions.assertEquals("saksbehandlerNavn", beslutter)
     }
 
     @Test
     fun `Saksbehandler blir hentet og beslutter viser placeholder tekst under beslutning`() {
+        // Arrange
         val behandling = lagBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
 
+        // Act
         val (saksbehandler, beslutter) =
             brevService.hentSaksbehandlerOgBeslutter(
                 behandling = behandling,
@@ -128,15 +136,18 @@ class BrevServiceTest {
                     ),
             )
 
+        // Assert
         Assertions.assertEquals("System", saksbehandler)
         Assertions.assertEquals("saksbehandlerNavn", beslutter)
     }
 
     @Test
     fun `Saksbehandler og beslutter blir hentet etter at totrinnskontroll er besluttet`() {
+        // Arrange
         val behandling = lagBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
 
+        // Act
         val (saksbehandler, beslutter) =
             brevService.hentSaksbehandlerOgBeslutter(
                 behandling = behandling,
@@ -150,23 +161,28 @@ class BrevServiceTest {
                     ),
             )
 
+        // Assert
         Assertions.assertEquals("Mock Saksbehandler", saksbehandler)
         Assertions.assertEquals("Mock Beslutter", beslutter)
     }
 
     @Test
     fun `sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling skal returnere false dersom det ikke er noe andeler i behandlingen`() {
+        // Arrange
         val behandling = lagBehandling()
 
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns emptyList()
 
+        // Act
         val erLøpendeDifferanseUtbetalingPåBehandling = brevService.sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling)
 
+        // Assert
         assertThat(erLøpendeDifferanseUtbetalingPåBehandling).isFalse()
     }
 
     @Test
     fun `sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling skal returnere false dersom det ikke er noe løpende andeler i behandlingen`() {
+        // Arrange
         val behandling = lagBehandling()
         val andeler =
             listOf(
@@ -178,13 +194,16 @@ class BrevServiceTest {
 
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andeler
 
+        // Act
         val erLøpendeDifferanseUtbetalingPåBehandling = brevService.sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling)
 
+        // Assert
         assertThat(erLøpendeDifferanseUtbetalingPåBehandling).isFalse()
     }
 
     @Test
     fun `sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling skal returnere false dersom det løpende andeler i behandlingen men ikke differanseberegnet`() {
+        // Arrange
         val behandling = lagBehandling()
         val andeler =
             listOf(
@@ -196,13 +215,16 @@ class BrevServiceTest {
 
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andeler
 
+        // Act
         val erLøpendeDifferanseUtbetalingPåBehandling = brevService.sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling)
 
+        // Assert
         assertThat(erLøpendeDifferanseUtbetalingPåBehandling).isFalse()
     }
 
     @Test
     fun `sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling skal returnere true dersom det løpende andeler i behandlingen som er differanseberegnet`() {
+        // Arrange
         val behandling = lagBehandling()
         val andeler =
             listOf(
@@ -215,8 +237,10 @@ class BrevServiceTest {
 
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andeler
 
+        // Act
         val erLøpendeDifferanseUtbetalingPåBehandling = brevService.sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling)
 
+        // Assert
         assertThat(erLøpendeDifferanseUtbetalingPåBehandling).isTrue()
     }
 
@@ -225,28 +249,35 @@ class BrevServiceTest {
     fun `finnStarttidspunktForUtbetalingstabell returnerer endringstidspunkt for alle behandlingsårsaker utenom ÅRLIG_KONTROLL`(
         behandlingÅrsak: BehandlingÅrsak,
     ) {
+        // Arrange
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns LocalDate.of(2020, 1, 1)
 
         val behandling = lagBehandling(årsak = behandlingÅrsak)
 
+        // Act
         val starttidspunkt = brevService.finnStarttidspunktForUtbetalingstabell(behandling)
 
+        // Assert
         assertThat(starttidspunkt).isEqualTo(LocalDate.of(2020, 1, 1))
     }
 
     @Test
     fun `finnStarttidspunktForUtbetalingstabell returnerer endringstidspunkt for behandlingsårsak ÅRLIG_KONTROLL, dersom endringstidspunkt er tidligere enn 1 januar i fjor`() {
+        // Arrange
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns LocalDate.of(2020, 1, 1)
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
 
+        // Act
         val starttidspunkt = brevService.finnStarttidspunktForUtbetalingstabell(behandling)
 
+        // Assert
         assertThat(starttidspunkt).isEqualTo(LocalDate.of(2020, 1, 1))
     }
 
     @Test
     fun `finnStarttidspunktForUtbetalingstabell returnerer tidligst 1 januar året før for behandlingsårsak ÅRLIG_KONTROLL, dersom endringstidspunkt er TIDENES_ENDE`() {
+        // Arrange
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns TIDENES_ENDE
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
@@ -259,13 +290,16 @@ class BrevServiceTest {
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
 
+        // Act
         val starttidspunkt = brevService.finnStarttidspunktForUtbetalingstabell(behandling)
 
+        // Assert
         assertThat(starttidspunkt).isEqualTo(LocalDate.now(clockProvider.get()).minusYears(1).withDayOfYear(1))
     }
 
     @Test
     fun `finnStarttidspunktForUtbetalingstabell returnerer 1 januar året før for behandlingsårsak ÅRLIG_KONTROLL, selv om endringstidspunkt er senere`() {
+        // Arrange
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns LocalDate.of(2024, 1, 1)
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
@@ -278,13 +312,16 @@ class BrevServiceTest {
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
 
+        // Act
         val starttidspunkt = brevService.finnStarttidspunktForUtbetalingstabell(behandling)
 
+        // Assert
         assertThat(starttidspunkt).isEqualTo(LocalDate.now(clockProvider.get()).minusYears(1).withDayOfYear(1))
     }
 
     @Test
     fun `finnStarttidspunktForUtbetalingstabell returnerer første utbetalingstidspunkt ved ÅRLIG_KONTROLL dersom endringstidspunkt er TIDENES_ENDE og første utbetaling er etter 1 januar i fjor`() {
+        // Arrange
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns TIDENES_ENDE
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
@@ -297,8 +334,10 @@ class BrevServiceTest {
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
 
+        // Act
         val starttidspunkt = brevService.finnStarttidspunktForUtbetalingstabell(behandling)
 
+        // Assert
         assertThat(starttidspunkt).isEqualTo(LocalDate.of(2024, 5, 1))
     }
 
@@ -306,6 +345,7 @@ class BrevServiceTest {
     inner class HentBrevForTilbakekrevingsvedtakMotregningTest {
         @Test
         fun `Skal returnere brev med riktig genererte flettefelter`() {
+            // Arrange
             val behandling = lagBehandling()
             val arbeidsfordelingPåBehandling = lagArbeidsfordelingPåBehandling(behandlingId = behandling.id)
             val søker = lagPerson(type = PersonType.SØKER)
@@ -343,8 +383,10 @@ class BrevServiceTest {
             every { mockArbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id) } returns arbeidsfordelingPåBehandling
             every { mockAvregningService.hentPerioderMedAvregning(behandlingId = behandling.id) } returns avregningperioder
 
+            // Act
             val brev = brevService.hentBrevForTilbakekrevingsvedtakMotregning(tilbakekrevingsvedtakMotregning)
 
+            // Assert
             assertThat(brev.data.flettefelter.aarsakTilFeilutbetaling).isEqualTo(listOf("Årsak til feilutbetaling"))
             assertThat(brev.data.flettefelter.vurderingAvSkyld).isEqualTo(listOf("Vurdering av skyld"))
             assertThat(brev.data.flettefelter.sumAvFeilutbetaling).isEqualTo(listOf("600"))
@@ -353,6 +395,7 @@ class BrevServiceTest {
 
         @Test
         fun `Skal returnere brev med riktig genererte flettefelter når periodene bare er på 1 måned`() {
+            // Arrange
             val behandling = lagBehandling()
             val arbeidsfordelingPåBehandling = lagArbeidsfordelingPåBehandling(behandlingId = behandling.id)
             val søker = lagPerson(type = PersonType.SØKER)
@@ -390,8 +433,10 @@ class BrevServiceTest {
             every { mockArbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id) } returns arbeidsfordelingPåBehandling
             every { mockAvregningService.hentPerioderMedAvregning(behandlingId = behandling.id) } returns avregningperioder
 
+            // Act
             val brev = brevService.hentBrevForTilbakekrevingsvedtakMotregning(tilbakekrevingsvedtakMotregning)
 
+            // Assert
             assertThat(brev.data.flettefelter.aarsakTilFeilutbetaling).isEqualTo(listOf("Årsak til feilutbetaling"))
             assertThat(brev.data.flettefelter.vurderingAvSkyld).isEqualTo(listOf("Vurdering av skyld"))
             assertThat(brev.data.flettefelter.sumAvFeilutbetaling).isEqualTo(listOf("600"))

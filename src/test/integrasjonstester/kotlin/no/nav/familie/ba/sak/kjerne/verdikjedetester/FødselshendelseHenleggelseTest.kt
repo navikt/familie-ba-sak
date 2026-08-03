@@ -77,6 +77,7 @@ class FødselshendelseHenleggelseTest(
 
     @Test
     fun `Skal henlegge fødselshendelse på grunn av at søker er under 18 (filtreringsregel)`() {
+        // Arrange
         val scenario =
             ScenarioDto(
                 søker =
@@ -95,6 +96,7 @@ class FødselshendelseHenleggelseTest(
                     ),
             ).also { stubScenario(it) }
 
+        // Act
         val behandling =
             behandleFødselshendelse(
                 nyBehandlingHendelse =
@@ -111,6 +113,7 @@ class FødselshendelseHenleggelseTest(
                 brevmalService = brevmalService,
             )
 
+        // Assert
         assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
@@ -132,6 +135,7 @@ class FødselshendelseHenleggelseTest(
 
     @Test
     fun `Skal henlegge fødselshendelse på grunn av at barn ikke er bosatt i riket og bor ikke med mor (vilkårsvurdering)`() {
+        // Arrange
         val scenario =
             ScenarioDto(
                 søker = ScenarioPersonDto(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
@@ -147,6 +151,8 @@ class FødselshendelseHenleggelseTest(
             ).also { stubScenario(it) }
 
         val barnIdent = scenario.barna.first().ident
+
+        // Act
         val behandling =
             behandleFødselshendelse(
                 nyBehandlingHendelse =
@@ -163,6 +169,7 @@ class FødselshendelseHenleggelseTest(
                 brevmalService = brevmalService,
             )
 
+        // Assert
         assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
@@ -203,6 +210,7 @@ class FødselshendelseHenleggelseTest(
 
     @Test
     fun `Skal henlegge fødselshendelse på grunn av at mor mottar utvidet barnetrygd (filtreringsregel)`() {
+        // Arrange
         val scenario =
             ScenarioDto(
                 søker =
@@ -254,6 +262,7 @@ class FødselshendelseHenleggelseTest(
             ),
         )
 
+        // Act
         val revurdering =
             behandleFødselshendelse(
                 nyBehandlingHendelse =
@@ -270,6 +279,7 @@ class FødselshendelseHenleggelseTest(
                 brevmalService = brevmalService,
             )
 
+        // Assert
         assertEquals(BehandlingUnderkategori.UTVIDET, revurdering?.underkategori)
         assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, revurdering?.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, revurdering?.steg)
@@ -290,6 +300,7 @@ class FødselshendelseHenleggelseTest(
 
     @Test
     fun `Skal henlegge fødselshendelse på grunn av at mor mottar EØS-barnetrygd (filtreringsregel)`() {
+        // Arrange
         val scenario =
             ScenarioDto(
                 søker =
@@ -335,6 +346,7 @@ class FødselshendelseHenleggelseTest(
 
         oppdaterBehandlingOgRegelverkTilEøs(behandling)
 
+        // Act
         val revurdering =
             behandleFødselshendelse(
                 nyBehandlingHendelse =
@@ -351,6 +363,7 @@ class FødselshendelseHenleggelseTest(
                 brevmalService = brevmalService,
             )
 
+        // Assert
         assertEquals(BehandlingKategori.EØS, revurdering?.kategori)
         assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, revurdering?.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, revurdering?.steg)
@@ -371,6 +384,7 @@ class FødselshendelseHenleggelseTest(
 
     @Test
     fun `Skal sende tredjelandsborgere fra Ukraina til manuel oppfølging (midlertidig regel for ukrainakonflikten)`() {
+        // Arrange
         val fødselsdato = "1993-01-12"
         val barnFødselsdato = now()
         val scenario =
@@ -406,6 +420,8 @@ class FødselshendelseHenleggelseTest(
                         ),
                     ),
             ).also { stubScenario(it) }
+
+        // Act
         val behandling =
             behandleFødselshendelse(
                 nyBehandlingHendelse =
@@ -422,6 +438,7 @@ class FødselshendelseHenleggelseTest(
                 brevmalService = brevmalService,
             )!!
 
+        // Assert
         assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling.steg)
 

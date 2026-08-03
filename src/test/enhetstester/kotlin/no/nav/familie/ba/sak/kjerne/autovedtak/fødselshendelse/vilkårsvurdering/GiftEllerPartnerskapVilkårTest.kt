@@ -12,7 +12,10 @@ import org.junit.jupiter.api.Test
 class GiftEllerPartnerskapVilkårTest {
     @Test
     fun `Gift-vilkår gir resultat JA for fødselshendelse når sivilstand er uoppgitt`() {
+        // Act
         val evaluering = vilkår.vurderVilkår(barn)
+
+        // Assert
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 

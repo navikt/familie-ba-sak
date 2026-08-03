@@ -12,6 +12,7 @@ import java.time.LocalDate
 class DtoMappingTest {
     @Test
     fun `Manglende angitt flyttedato fra freg mappes som manglende dato`() {
+        // Arrange
         val adresseUtenFlyttedato =
             GrVegadresseBostedsadresse(
                 matrikkelId = 1234,
@@ -39,12 +40,14 @@ class DtoMappingTest {
                 poststed = "poststed",
             ).apply { periode = DatoIntervallEntitet(fom = flyttedato) }
 
+        // Assert
         assertEquals(null, adresseUtenFlyttedato.tilRegisteropplysningDto().fom)
         assertEquals(flyttedato, adresseMedFlyttedato.tilRegisteropplysningDto().fom)
     }
 
     @Test
     fun `Fyller ut og sorterer i rett rekkefølge`() {
+        // Arrange
         val fomA = LocalDate.of(2001, 1, 1)
         val fomB = LocalDate.of(2005, 1, 1)
         val tomB = LocalDate.of(2006, 1, 1)
@@ -55,9 +58,11 @@ class DtoMappingTest {
         val tidligereMedTom = RegisteropplysningDto(fom = fomB, tom = tomB, verdi = "")
         val nåværende = RegisteropplysningDto(fom = fomC, tom = null, verdi = "")
 
+        // Act
         val utfylteOpplysninger =
             listOf(manglerDatoer, tidligereUtenTom, tidligereMedTom, nåværende).shuffled().fyllInnTomDatoer()
 
+        // Assert
         assertEquals(null, utfylteOpplysninger[0].tom)
         assertEquals(fomB.minusDays(1), utfylteOpplysninger[1].tom)
         assertEquals(tomB, utfylteOpplysninger[2].tom)
@@ -66,11 +71,16 @@ class DtoMappingTest {
 
     @Test
     fun `Fyller ut tom-dato når denne mangler og det er påfølgende periode`() {
+        // Arrange
         val tidligereUtenTom = RegisteropplysningDto(fom = LocalDate.of(2001, 1, 1), tom = null, verdi = "")
         val nåværendeFom = LocalDate.of(2005, 1, 1)
         val nåværende = RegisteropplysningDto(fom = nåværendeFom, tom = null, verdi = "")
+
+        // Act
         val utfylteOpplysninger =
             listOf(tidligereUtenTom, nåværende).fyllInnTomDatoer()
+
+        // Assert
         assertEquals(nåværendeFom.minusDays(1), utfylteOpplysninger[0].tom)
     }
 
@@ -82,7 +92,10 @@ class DtoMappingTest {
 
     @Test
     fun `Fyller ikke ut tom-dato når denne er kjent, ved utvandring`() {
+        // Arrange
         val tomDato = LocalDate.of(2006, 1, 1)
+
+        // Assert
         assertEquals(tomDato, listOf(RegisteropplysningDto(fom = LocalDate.of(2005, 1, 1), tom = tomDato, verdi = ""))[0].tom)
     }
 }

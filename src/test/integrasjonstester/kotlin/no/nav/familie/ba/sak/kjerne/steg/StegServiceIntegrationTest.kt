@@ -93,6 +93,7 @@ class StegServiceIntegrationTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Skal sette default-verdier på gift-vilkår for barn`() {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(35))
         val barnFnr1 = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnFnr2 =
@@ -110,6 +111,7 @@ class StegServiceIntegrationTest(
                     ),
             )
 
+        // Act
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.REGISTRERE_SØKNAD,
@@ -124,6 +126,7 @@ class StegServiceIntegrationTest(
                 brevmalService = brevmalService,
             )
 
+        // Assert
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
         assertEquals(
             Resultat.OPPFYLT,
@@ -145,8 +148,11 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Skal kjøre gjennom alle steg med datageneratoren`() {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(35))
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
+
+        // Act
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.BEHANDLING_AVSLUTTET,
@@ -177,12 +183,14 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Skal feile når man prøver å håndtere feil steg`() {
+        // Arrange
         val (søkerFnr, _) = mockHentPersoninfoForIdenter()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         assertEquals(FØRSTE_STEG, behandling.steg)
 
+        // Act & Assert
         assertThrows<FunksjonellFeil> {
             stegService.håndterVilkårsvurdering(behandling)
         }
@@ -190,6 +198,7 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Skal feile når man prøver å endre en avsluttet behandling`() {
+        // Arrange
         val (søkerFnr, _) = mockHentPersoninfoForIdenter()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
@@ -200,10 +209,14 @@ class StegServiceIntegrationTest(
 
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
         behandling.status = BehandlingStatus.AVSLUTTET
+
+        // Act & Assert
         val feil =
             assertThrows<FunksjonellFeil> {
                 stegService.håndterSendTilBeslutter(behandling, "1234")
             }
+
+        // Assert
         assertEquals(
             "Behandling med id ${behandling.id} er avsluttet og stegprosessen kan ikke gjenåpnes",
             feil.message,
@@ -212,6 +225,7 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Skal feile når man prøver å noe annet enn å beslutte behandling når den er på dette steget`() {
+        // Arrange
         val (søkerFnr, _) = mockHentPersoninfoForIdenter()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
@@ -222,6 +236,8 @@ class StegServiceIntegrationTest(
 
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         behandling.status = BehandlingStatus.FATTER_VEDTAK
+
+        // Act & Assert
         assertThrows<FunksjonellFeil> {
             stegService.håndterSendTilBeslutter(behandling, "1234")
         }
@@ -229,12 +245,15 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Skal feile når man prøver å kalle beslutning-steget med feil status på behandling`() {
+        // Arrange
         val (søkerFnr, _) = mockHentPersoninfoForIdenter()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         behandling.status = BehandlingStatus.IVERKSETTER_VEDTAK
+
+        // Act & Assert
         assertThrows<FunksjonellFeil> {
             stegService.håndterBeslutningForVedtak(
                 behandling,
@@ -245,6 +264,7 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Underkjent beslutning setter steg tilbake til send til beslutter`() {
+        // Arrange
         val (søkerFnr, _) = mockHentPersoninfoForIdenter()
         val søkerAktørId = personidentService.hentAktør(søkerFnr)
 
@@ -264,22 +284,27 @@ class StegServiceIntegrationTest(
         behandling.behandlingStegTilstand.forEach { it.behandlingStegStatus = BehandlingStegStatus.UTFØRT }
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         behandling.status = BehandlingStatus.FATTER_VEDTAK
+
+        // Act
         stegService.håndterBeslutningForVedtak(
             behandling,
             BeslutningPåVedtakDto(beslutning = Beslutning.UNDERKJENT, begrunnelse = "Feil"),
         )
 
+        // Assert
         val behandlingEtterPersongrunnlagSteg = behandlingHentOgPersisterService.hent(behandlingId = behandling.id)
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterPersongrunnlagSteg.steg)
     }
 
     @Test
     fun `Henlegge før behandling er sendt til beslutter`() {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(35))
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
 
         val vilkårsvurdertBehandling = kjørGjennomStegInkludertVurderTilbakekreving(søkerFnr, listOf(barnFnr))
 
+        // Act
         val henlagtBehandling =
             stegService.håndterHenleggBehandling(
                 vilkårsvurdertBehandling,
@@ -288,6 +313,8 @@ class StegServiceIntegrationTest(
                     begrunnelse = "",
                 ),
             )
+
+        // Assert
         assertTrue(
             henlagtBehandling.behandlingStegTilstand.firstOrNull {
                 it.behandlingSteg == StegType.HENLEGG_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
@@ -304,6 +331,7 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Teknisk henleggelse med begrunnelse Satsendring skal beholde behandleSak-oppgaven åpen`() {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(35))
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
 
@@ -315,6 +343,8 @@ class StegServiceIntegrationTest(
                 DbOppgave(behandling = behandling, type = Oppgavetype.BehandleUnderkjentVedtak, gsakId = "3"),
             ),
         )
+
+        // Act
         val henlagtBehandling =
             stegService.håndterHenleggBehandling(
                 behandling,
@@ -323,6 +353,8 @@ class StegServiceIntegrationTest(
                     begrunnelse = "Satsendring",
                 ),
             )
+
+        // Assert
         assertEquals(StegType.BEHANDLING_AVSLUTTET, henlagtBehandling.steg)
         assertTrue {
             oppgaveRepository
@@ -346,6 +378,7 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `Henlegge etter behandling er sendt til beslutter`() {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(35))
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
 
@@ -355,6 +388,7 @@ class StegServiceIntegrationTest(
         val behandlingEtterSendTilBeslutter =
             behandlingHentOgPersisterService.hent(behandlingId = vilkårsvurdertBehandling.id)
 
+        // Act & Assert
         assertThrows<FunksjonellFeil> {
             stegService.håndterHenleggBehandling(
                 behandlingEtterSendTilBeslutter,
@@ -370,6 +404,7 @@ class StegServiceIntegrationTest(
     // Disse vil bli stoppet i BehandlingStegController.
     @Test
     fun `Henlegge dersom behandling står på FERDIGSTILLE_BEHANDLING steget`() {
+        // Arrange
         val (søkerFnr, _) = mockHentPersoninfoForIdenter()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
@@ -384,12 +419,14 @@ class StegServiceIntegrationTest(
             ),
         )
 
+        // Act
         val behandlingEtterHenleggelse =
             stegService.håndterHenleggBehandling(
                 behandling,
                 HenleggBehandlingInfoDto(årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET, begrunnelse = ""),
             )
 
+        // Assert
         assertThat(behandlingEtterHenleggelse.steg).isEqualTo(StegType.BEHANDLING_AVSLUTTET)
         assertThat(behandlingEtterHenleggelse.status).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(behandlingEtterHenleggelse.behandlingStegTilstand.any { it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.UTFØRT })
@@ -397,6 +434,7 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato og avvik i simulering innenfor beløpsgrenser`() {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(30))
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
 
@@ -445,6 +483,8 @@ class StegServiceIntegrationTest(
         )
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
+
+        // Act
         val behandling =
             stegService.håndterNyBehandling(
                 NyBehandling(
@@ -457,6 +497,8 @@ class StegServiceIntegrationTest(
                     fagsakId = fagsak.id,
                 ),
             )
+
+        // Assert
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
             behandling.behandlingStegTilstand.any {
@@ -467,13 +509,20 @@ class StegServiceIntegrationTest(
         assertMigreringsdato(nyMigreringsdato, behandling)
         assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
 
+        // Act
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
+
+        // Assert
         assertEquals(StegType.BEHANDLINGSRESULTAT, behandlingEtterVilkårsvurdering.steg)
 
+        // Act
         val behandlingEtterBehandlingsresultatSteg =
             stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
+
+        // Assert
         assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
 
+        // Act
         val behandlingEtterTilbakekrevingSteg =
             stegService.håndterVurderTilbakekreving(
                 behandlingEtterBehandlingsresultatSteg,
@@ -482,13 +531,18 @@ class StegServiceIntegrationTest(
                     begrunnelse = "ignorer tilbakekreving",
                 ),
             )
+
+        // Assert
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
+        // Act
         val behandlingEtterBeslutterSteg =
             stegService.håndterSendTilBeslutter(
                 behandlingEtterTilbakekrevingSteg,
                 "1234",
             )
+
+        // Assert
         assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterBeslutterSteg.steg)
         assertTrue {
             behandlingEtterBeslutterSteg.behandlingStegTilstand.any {
@@ -513,6 +567,7 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato og avvik i simulering utenefor beløpsgrenser`() {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(29))
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnasIdenter = listOf(barnFnr)
@@ -560,6 +615,8 @@ class StegServiceIntegrationTest(
         )
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
+
+        // Act
         val behandling =
             stegService.håndterNyBehandling(
                 NyBehandling(
@@ -572,6 +629,8 @@ class StegServiceIntegrationTest(
                     fagsakId = fagsak.id,
                 ),
             )
+
+        // Assert
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
             behandling.behandlingStegTilstand.any {
@@ -582,13 +641,20 @@ class StegServiceIntegrationTest(
         assertMigreringsdato(nyMigreringsdato, behandling)
         assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
 
+        // Act
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
+
+        // Assert
         assertEquals(StegType.BEHANDLINGSRESULTAT, behandlingEtterVilkårsvurdering.steg)
 
+        // Act
         val behandlingEtterBehandlingsresultatSteg =
             stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
+
+        // Assert
         assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
 
+        // Act
         val behandlingEtterTilbakekrevingSteg =
             stegService.håndterVurderTilbakekreving(
                 behandlingEtterBehandlingsresultatSteg,
@@ -597,13 +663,18 @@ class StegServiceIntegrationTest(
                     begrunnelse = "ignorer tilbakekreving",
                 ),
             )
+
+        // Assert
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
+        // Act
         val behandlingEtterBeslutterSteg =
             stegService.håndterSendTilBeslutter(
                 behandlingEtterTilbakekrevingSteg,
                 "1234",
             )
+
+        // Assert
         assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterBeslutterSteg.steg)
         assertTrue {
             behandlingEtterBeslutterSteg.behandlingStegTilstand.any {
@@ -628,6 +699,7 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato og avvik i simulering utenfor beløpsgrenser`() {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(18))
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnasIdenter = listOf(barnFnr)
@@ -675,6 +747,8 @@ class StegServiceIntegrationTest(
         )
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
+
+        // Act
         val behandling =
             stegService.håndterNyBehandling(
                 NyBehandling(
@@ -687,6 +761,8 @@ class StegServiceIntegrationTest(
                     fagsakId = fagsak.id,
                 ),
             )
+
+        // Assert
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
             behandling.behandlingStegTilstand.any {
@@ -697,13 +773,20 @@ class StegServiceIntegrationTest(
         assertMigreringsdato(nyMigreringsdato, behandling)
         assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
 
+        // Act
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
+
+        // Assert
         assertEquals(StegType.BEHANDLINGSRESULTAT, behandlingEtterVilkårsvurdering.steg)
 
+        // Act
         val behandlingEtterBehandlingsresultatSteg =
             stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
+
+        // Assert
         assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
 
+        // Act
         val behandlingEtterTilbakekrevingSteg =
             stegService.håndterVurderTilbakekreving(
                 behandlingEtterBehandlingsresultatSteg,
@@ -713,14 +796,17 @@ class StegServiceIntegrationTest(
                 ),
             )
 
+        // Assert
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
+        // Act
         val behandlingEtterSendTilBeslutterSteg =
             stegService.håndterSendTilBeslutter(
                 behandlingEtterTilbakekrevingSteg,
                 "1234",
             )
 
+        // Assert
         assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterSendTilBeslutterSteg.steg)
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
@@ -734,6 +820,7 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for helmanuell migrering med avvik i simulering innenfor beløpsgrenser`() {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(35))
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnasIdenter = listOf(barnFnr)
@@ -767,6 +854,8 @@ class StegServiceIntegrationTest(
         leggTilSimuleringResultat(fagsak.id.toString(), DetaljertSimuleringResultat(simuleringMottakerMock))
 
         val migreringsdato = LocalDate.now().minusMonths(6)
+
+        // Act
         val behandling =
             stegService.håndterNyBehandling(
                 NyBehandling(
@@ -779,6 +868,8 @@ class StegServiceIntegrationTest(
                     fagsakId = fagsak.id,
                 ),
             )
+
+        // Assert
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
             behandling.behandlingStegTilstand.any {
@@ -799,13 +890,20 @@ class StegServiceIntegrationTest(
         vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
         vilkårsvurderingService.oppdater(vilkårsvurdering)
 
+        // Act
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
+
+        // Assert
         assertEquals(StegType.BEHANDLINGSRESULTAT, behandlingEtterVilkårsvurdering.steg)
 
+        // Act
         val behandlingEtterBehandlingsresultatSteg =
             stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
+
+        // Assert
         assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
 
+        // Act
         val behandlingEtterTilbakekrevingSteg =
             stegService.håndterVurderTilbakekreving(
                 behandlingEtterBehandlingsresultatSteg,
@@ -814,13 +912,18 @@ class StegServiceIntegrationTest(
                     begrunnelse = "ignorer tilbakekreving",
                 ),
             )
+
+        // Assert
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
+        // Act
         val behandlingEtterBesultterSteg =
             stegService.håndterSendTilBeslutter(
                 behandlingEtterTilbakekrevingSteg,
                 "1234",
             )
+
+        // Assert
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBesultterSteg.steg)
         assertTrue {
             behandlingEtterBesultterSteg.behandlingStegTilstand.any {
@@ -845,6 +948,7 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for helmanuell migrering med avvik i simulering utenfor beløpsgrenser`() {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(35))
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnasIdenter = listOf(barnFnr)
@@ -878,6 +982,8 @@ class StegServiceIntegrationTest(
         leggTilSimuleringResultat(fagsak.id.toString(), DetaljertSimuleringResultat(simuleringMottakerMock))
 
         val migreringsdato = LocalDate.now().minusMonths(6)
+
+        // Act
         val behandling =
             stegService.håndterNyBehandling(
                 NyBehandling(
@@ -890,6 +996,8 @@ class StegServiceIntegrationTest(
                     fagsakId = fagsak.id,
                 ),
             )
+
+        // Assert
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
             behandling.behandlingStegTilstand.any {
@@ -910,13 +1018,20 @@ class StegServiceIntegrationTest(
         vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
         vilkårsvurderingService.oppdater(vilkårsvurdering)
 
+        // Act
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
+
+        // Assert
         assertEquals(StegType.BEHANDLINGSRESULTAT, behandlingEtterVilkårsvurdering.steg)
 
+        // Act
         val behandlingEtterBehandlingsresultatSteg =
             stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
+
+        // Assert
         assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
 
+        // Act
         val behandlingEtterTilbakekrevingSteg =
             stegService.håndterVurderTilbakekreving(
                 behandlingEtterBehandlingsresultatSteg,
@@ -925,16 +1040,21 @@ class StegServiceIntegrationTest(
                     begrunnelse = "ignorer tilbakekreving",
                 ),
             )
+
+        // Assert
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
+        // Act
         val behandlingEtterSendTilBeslutterSteg =
             stegService.håndterSendTilBeslutter(
                 behandlingEtterTilbakekrevingSteg,
                 "1234",
             )
 
+        // Assert
         assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutterSteg.steg)
 
+        // Act
         val behandlingEtterBesluttVedtakSteg =
             stegService.håndterBeslutningForVedtak(
                 behandlingEtterSendTilBeslutterSteg,
@@ -944,6 +1064,7 @@ class StegServiceIntegrationTest(
                 ),
             )
 
+        // Assert
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBesluttVedtakSteg.steg)
 
         assertTrue {
@@ -970,6 +1091,7 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for helmanuell migrering med manuelle posteringer med avvik innenfor beløpsgrenser`() {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(35))
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
 
@@ -1004,6 +1126,8 @@ class StegServiceIntegrationTest(
         leggTilSimuleringResultat(fagsak.id.toString(), DetaljertSimuleringResultat(simuleringMottakerMock))
 
         val migreringsdato = LocalDate.now().minusMonths(6)
+
+        // Act
         val behandling =
             stegService.håndterNyBehandling(
                 NyBehandling(
@@ -1016,6 +1140,8 @@ class StegServiceIntegrationTest(
                     fagsakId = fagsak.id,
                 ),
             )
+
+        // Assert
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
             behandling.behandlingStegTilstand.any {
@@ -1036,13 +1162,19 @@ class StegServiceIntegrationTest(
         vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
         vilkårsvurderingService.oppdater(vilkårsvurdering)
 
+        // Act
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
+
+        // Assert
         assertEquals(StegType.BEHANDLINGSRESULTAT, behandlingEtterVilkårsvurdering.steg)
 
+        // Act
         val behandlingEtterBehandlingsresultatSteg =
             stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
+        // Assert
         assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
 
+        // Act
         val behandlingEtterTilbakekrevingSteg =
             stegService.håndterVurderTilbakekreving(
                 behandlingEtterBehandlingsresultatSteg,
@@ -1051,17 +1183,22 @@ class StegServiceIntegrationTest(
                     begrunnelse = "ignorer tilbakekreving",
                 ),
             )
+
+        // Assert
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
+        // Act
         val behandlingEtterSendTilBeslutterSteg =
             stegService.håndterSendTilBeslutter(
                 behandlingEtterTilbakekrevingSteg,
                 "1234",
             )
 
+        // Assert
         assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutterSteg.steg)
 
         // Må manuelt godkjenne vedtak
+        // Act
         val behandlingEtterBesluttVedtakSteg =
             stegService.håndterBeslutningForVedtak(
                 behandlingEtterSendTilBeslutterSteg,
@@ -1071,6 +1208,7 @@ class StegServiceIntegrationTest(
                 ),
             )
 
+        // Assert
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBesluttVedtakSteg.steg)
 
         assertTrue {
@@ -1097,6 +1235,7 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for endre migreringsdato behandling og automatisk godkjenne totrinnskontroll`() {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(37))
         val barnFnr = leggTilPersonInfo(fødselsdato = LocalDate.now().minusYears(2))
         val barnasIdenter = listOf(barnFnr)
@@ -1144,6 +1283,8 @@ class StegServiceIntegrationTest(
         )
 
         val migreringsdato = LocalDate.now().minusMonths(6)
+
+        // Act
         val behandling =
             stegService.håndterNyBehandling(
                 NyBehandling(
@@ -1156,6 +1297,8 @@ class StegServiceIntegrationTest(
                     fagsakId = fagsak.id,
                 ),
             )
+
+        // Assert
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
             behandling.behandlingStegTilstand.any {
@@ -1171,13 +1314,20 @@ class StegServiceIntegrationTest(
         vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
         vilkårsvurderingService.oppdater(vilkårsvurdering)
 
+        // Act
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
+
+        // Assert
         assertEquals(StegType.BEHANDLINGSRESULTAT, behandlingEtterVilkårsvurdering.steg)
 
+        // Act
         val behandlingEtterBehandlingsresultatSteg =
             stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
+
+        // Assert
         assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
 
+        // Act
         val behandlingEtterTilbakekrevingSteg =
             stegService.håndterVurderTilbakekreving(
                 behandlingEtterBehandlingsresultatSteg,
@@ -1186,14 +1336,18 @@ class StegServiceIntegrationTest(
                     begrunnelse = "ignorer tilbakekreving",
                 ),
             )
+
+        // Assert
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
+        // Act
         val behandlingEtterSendTilBeslutterSteg =
             stegService.håndterSendTilBeslutter(
                 behandlingEtterTilbakekrevingSteg,
                 "1234",
             )
 
+        // Assert
         assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterSendTilBeslutterSteg.steg)
 
         assertTrue {

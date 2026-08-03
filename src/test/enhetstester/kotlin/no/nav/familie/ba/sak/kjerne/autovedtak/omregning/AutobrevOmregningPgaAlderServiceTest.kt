@@ -93,6 +93,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
 
     @Test
     fun `Verifiser at løpende fagsak med avsluttede behandlinger og barn på 18 ikke oppretter en behandling for omregning`() {
+        // Arrange
         val behandling = initMock(alder = 18, medSøsken = false).first
 
         val autobrevPgaAlderDTO =
@@ -102,6 +103,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
                 årMåned = inneværendeMåned(),
             )
 
+        // Act & Assert
         assertThat(
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevPgaAlderDTO),
         ).isEqualTo(AutobrevOmregningSvar.INGEN_LØPENDE_UTBETALING_FOR_BARN_UNDER_18)
@@ -111,6 +113,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning ikke opprettes om barn med angitt ålder ikke finnes`() {
+        // Arrange
         val behandling = initMock(alder = 7, medSøsken = false).first
 
         val autobrevPgaAlderDTO =
@@ -120,6 +123,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
                 årMåned = inneværendeMåned(),
             )
 
+        // Act & Assert
         assertThat(
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevPgaAlderDTO),
         ).isEqualTo(AutobrevOmregningSvar.INGEN_BARN_I_ALDER)
@@ -129,6 +133,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning ikke opprettes om fagsak ikke er løpende`() {
+        // Arrange
         val behandling = initMock(fagsakStatus = FagsakStatus.OPPRETTET, alder = 18, medSøsken = false).first
 
         val autobrevPgaAlderDTO =
@@ -138,6 +143,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
                 årMåned = inneværendeMåned(),
             )
 
+        // Act & Assert
         assertThat(
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevPgaAlderDTO),
         ).isEqualTo(AutobrevOmregningSvar.FAGSAK_IKKE_LØPENDE)
@@ -147,6 +153,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning blir trigget for løpende fagsak med barn som fyller 18 år inneværende måned og som har søsken`() {
+        // Arrange
         val behandling = initMock(alder = 18, medSøsken = true).first
 
         val autobrevPgaAlderDTO =
@@ -162,6 +169,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
         every { autovedtakStegService.kjørBehandlingOmregning(any(), any(), any()) } returns ""
 
+        // Act & Assert
         assertThat(
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevPgaAlderDTO),
         ).isEqualTo(AutobrevOmregningSvar.OK)
@@ -177,6 +185,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning ikke blir trigget for løpende fagsak med barn som fyller 18år inneværende måned, hvis barnet ikke har løpende andel tilkjent ytelse`() {
+        // Arrange
         val (behandling, _, barnIBrytningsalder) = initMock(alder = 18, medSøsken = true)
 
         val autobrevPgaAlderDTO =
@@ -216,6 +225,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
         every { autovedtakStegService.kjørBehandlingOmregning(any(), any()) } returns ""
 
+        // Act & Assert
         assertThat(
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevPgaAlderDTO),
         ).isEqualTo(AutobrevOmregningSvar.INGEN_LØPENDE_YTELSE_FOR_BARN_I_BRYTNINGSALDER)
@@ -230,6 +240,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning ikke blir trigget for løpende fagsak med barn som fyller 18 år inneværende måned, hvis det er nullutbetaling eøs`() {
+        // Arrange
         val behandling = initMock(alder = 18, medSøsken = true, eøsNullUtbetaling = true).first
 
         val autobrevPgaAlderDTO =
@@ -245,6 +256,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
         every { autovedtakStegService.kjørBehandlingOmregning(any(), any()) } returns ""
 
+        // Act & Assert
         assertThat(
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevPgaAlderDTO),
         ).isEqualTo(AutobrevOmregningSvar.EØS_MED_NULLUTBETALING)
@@ -259,6 +271,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
 
     @Test
     fun `Verifiser at vi ikke oppretter behandling hvis brev er sendt fra infotrygd`() {
+        // Arrange
         val behandling = initMock(alder = 18, medSøsken = true).first
 
         val autobrevPgaAlderDTO =
@@ -274,6 +287,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
 
+        // Act & Assert
         assertThat(
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevPgaAlderDTO),
         ).isEqualTo(AutobrevOmregningSvar.HAR_ALT_SENDT)
@@ -297,6 +311,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning blir trigget for skjermet barn fagsak med barn som fyller 18 år inneværende måned`() {
+        // Arrange
         val søkerAktør = randomAktør()
         val skjermetBarnSøker = SkjermetBarnSøker(aktør = søkerAktør)
         val skjermetBarnFagsak =
@@ -320,6 +335,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
         every { autovedtakStegService.kjørBehandlingOmregning(any(), any(), any()) } returns ""
 
+        // Act & Assert
         assertThat(
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevPgaAlderDTO),
         ).isEqualTo(AutobrevOmregningSvar.OK)

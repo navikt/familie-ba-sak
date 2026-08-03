@@ -14,9 +14,11 @@ class TidslinjeUtilTest {
 
     @Test
     fun erUnder18ÅrVilkårTidslinje() {
+        // Act
         val erUnder18ÅrVilkårTidslinje = erUnder18ÅrVilkårTidslinje(person.fødselsdato)
         val perioder = erUnder18ÅrVilkårTidslinje.tilPerioder()
 
+        // Assert
         assertThat(perioder).hasSize(1)
         assertThat(perioder[0].verdi).isTrue()
         assertThat(perioder[0].fom).isEqualTo(1.feb(2020))
@@ -25,9 +27,11 @@ class TidslinjeUtilTest {
 
     @Test
     fun erUnder6ÅrTidslinje() {
+        // Act
         val erUnder6ÅrTidslinje = erUnder6ÅrTidslinje(person)
         val perioder = erUnder6ÅrTidslinje.tilPerioder()
 
+        // Assert
         assertThat(perioder).hasSize(1)
         assertThat(perioder[0].verdi).isTrue()
         assertThat(perioder[0].fom).isEqualTo(1.jan(2020))
@@ -36,9 +40,11 @@ class TidslinjeUtilTest {
 
     @Test
     fun erTilogMed3ÅrTidslinje() {
+        // Act
         val erUnder6ÅrTidslinje = erTilogMed3ÅrTidslinje(person.fødselsdato)
         val perioder = erUnder6ÅrTidslinje.tilPerioder()
 
+        // Assert
         assertThat(perioder).hasSize(1)
         assertThat(perioder[0].verdi).isTrue()
         assertThat(perioder[0].fom).isEqualTo(1.feb(2020))
@@ -47,9 +53,11 @@ class TidslinjeUtilTest {
 
     @Test
     fun opprettBooleanTidslinjeYearMonth() {
+        // Act
         val tidslinje = opprettBooleanTidslinje(jan(2020), mar(2020))
         val perioder = tidslinje.tilPerioder()
 
+        // Assert
         assertThat(perioder).hasSize(1)
         assertThat(perioder[0].verdi).isTrue()
         assertThat(perioder[0].fom).isEqualTo(1.jan(2020))
@@ -58,9 +66,11 @@ class TidslinjeUtilTest {
 
     @Test
     fun opprettBooleanTidslinjeLocalDate() {
+        // Act
         val tidslinje = opprettBooleanTidslinje(15.jan(2020), 15.mar(2020))
         val perioder = tidslinje.tilPerioder()
 
+        // Assert
         assertThat(perioder).hasSize(1)
         assertThat(perioder[0].verdi).isTrue()
         assertThat(perioder[0].fom).isEqualTo(15.jan(2020))

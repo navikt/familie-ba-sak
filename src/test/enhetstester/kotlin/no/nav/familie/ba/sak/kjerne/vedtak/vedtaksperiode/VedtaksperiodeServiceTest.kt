@@ -120,15 +120,19 @@ class VedtaksperiodeServiceTest {
 
     @Test
     fun `nasjonal sak skal ikke ha årlig kontroll`() {
+        // Arrange
         val behandling = lagBehandling(behandlingKategori = BehandlingKategori.NASJONAL)
         val vedtak = Vedtak(behandling = behandling)
 
         every { kompetanseRepository.finnFraBehandlingId(behandlingId = behandling.id) } returns emptyList()
+
+        // Act & Assert
         assertFalse { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 
     @Test
     fun `EØS med periode med utløpt tom skal ikke ha årlig kontroll`() {
+        // Arrange
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
 
         every { kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id) } returns
@@ -139,11 +143,13 @@ class VedtaksperiodeServiceTest {
                 ),
             )
 
+        // Act & Assert
         assertFalse { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 
     @Test
     fun `EØS med periode med løpende tom skal ha årlig kontroll`() {
+        // Arrange
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
 
         every { kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id) } returns
@@ -154,11 +160,13 @@ class VedtaksperiodeServiceTest {
                 ),
             )
 
+        // Act & Assert
         assertTrue { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 
     @Test
     fun `EØS med periode uten tom skal ha årlig kontroll`() {
+        // Arrange
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
 
         every { kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id) } returns
@@ -169,17 +177,21 @@ class VedtaksperiodeServiceTest {
                 ),
             )
 
+        // Act & Assert
         assertTrue { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 
     @Test
     fun `skal beskrive perioder med for mye utbetalt for behandling med feilutbetalt valuta`() {
+        // Arrange
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
         val perioder =
             listOf(
                 LocalDate.now() to LocalDate.now().plusYears(1),
                 LocalDate.now().plusYears(2) to LocalDate.now().plusYears(3),
             )
+
+        // Act & Assert
         assertThat(vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)).isNull()
 
         every {
@@ -188,8 +200,11 @@ class VedtaksperiodeServiceTest {
             perioder.map {
                 FeilutbetaltValuta(1L, fom = it.first, tom = it.second, 200, true)
             }
+
+        // Act
         val periodebeskrivelser = vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)
 
+        // Assert
         perioder.forEach { periode ->
             assertThat(periodebeskrivelser!!.find { it.contains("${periode.first.year}") })
                 .contains("Fra", "til", "${periode.second.year}", "er det utbetalt 200 kroner for mye per måned.")
@@ -198,7 +213,10 @@ class VedtaksperiodeServiceTest {
 
     @Test
     fun `skal beskrive perioder med eøs refusjoner for behandlinger med avklarte refusjon eøs`() {
+        // Arrange
         val behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS)
+
+        // Act & Assert
         assertThat(
             vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(
                 behandling = behandling,
@@ -218,15 +236,20 @@ class VedtaksperiodeServiceTest {
                 ),
             )
 
+        // Act
         val perioder = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = behandling, avklart = true)
 
+        // Assert
         assertThat(perioder?.size).isEqualTo(1)
         assertThat(perioder?.single()).isEqualTo("Fra januar 2020 til januar 2022 blir etterbetaling på 200 kroner per måned utbetalt til myndighetene i Norge.")
     }
 
     @Test
     fun `skal beskrive perioder med eøs refusjoner for behandlinger med uavklarte refusjon eøs`() {
+        // Arrange
         val behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS)
+
+        // Act & Assert
         assertThat(
             vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(
                 behandling = behandling,
@@ -246,8 +269,10 @@ class VedtaksperiodeServiceTest {
                 ),
             )
 
+        // Act
         val perioder = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = behandling, avklart = false)
 
+        // Assert
         assertThat(perioder?.size).isEqualTo(1)
         assertThat(perioder?.single()).isEqualTo("Fra januar 2020 til januar 2022 blir ikke etterbetaling på 200 kroner per måned utbetalt nå siden det er utbetalt barnetrygd i Norge.")
     }

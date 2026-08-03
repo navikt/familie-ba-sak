@@ -15,6 +15,7 @@ import java.time.YearMonth
 class VedtaksperiodeMedBegrunnelseTest {
     @Test
     fun `Skal finne begrunnelse på tidligere vedtaksperiode for samme fra- og med dato`() {
+        // Arrange
         val fom = YearMonth.now().minusMonths(3)
         val vedtak = lagVedtak()
 
@@ -39,6 +40,7 @@ class VedtaksperiodeMedBegrunnelseTest {
                 },
             )
 
+        // Act
         val fagsakErBegrunnet =
             vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
                 standardbegrunnelser =
@@ -49,11 +51,13 @@ class VedtaksperiodeMedBegrunnelseTest {
                 måned = fom,
             )
 
+        // Assert
         assertTrue(fagsakErBegrunnet)
     }
 
     @Test
     fun `Skal ikke finne begrunnelse på tidligere vedtaksperiode når den er begrunnet for 1 år siden`() {
+        // Arrange
         val fom = YearMonth.now().minusMonths(3)
         val vedtak = lagVedtak()
 
@@ -78,17 +82,20 @@ class VedtaksperiodeMedBegrunnelseTest {
                 },
             )
 
+        // Act
         val fagsakErBegrunnet =
             vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
                 standardbegrunnelser = listOf(Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK),
                 måned = fom,
             )
 
+        // Assert
         assertFalse(fagsakErBegrunnet)
     }
 
     @Test
     fun `Skal ikke finne begrunnelse på tidligere vedtaksperiode når den ikke har begrunnelsen i det hele tatt`() {
+        // Arrange
         val fom = YearMonth.now().minusMonths(3)
         val vedtak = lagVedtak()
 
@@ -112,17 +119,20 @@ class VedtaksperiodeMedBegrunnelseTest {
                 },
             )
 
+        // Act
         val fagsakErBegrunnet =
             vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
                 standardbegrunnelser = listOf(Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK),
                 måned = fom,
             )
 
+        // Assert
         assertFalse(fagsakErBegrunnet)
     }
 
     @Test
     fun `Skal være begrunnet med reduksjon 3 år småbarnstillegg fra før`() {
+        // Arrange
         val vedtak = lagVedtak()
 
         val vedtaksperioder =
@@ -145,17 +155,20 @@ class VedtaksperiodeMedBegrunnelseTest {
                 },
             )
 
+        // Act
         val fagsakErBegrunnet =
             vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
                 standardbegrunnelser = listOf(Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR),
                 måned = YearMonth.now(),
             )
 
+        // Assert
         assertTrue(fagsakErBegrunnet)
     }
 
     @Test
     fun `Skal være begrunnet med reduksjon 3 år småbarnstillegg for 1 år siden, men sende ut brev for neste barn som fyller 3 år`() {
+        // Arrange
         val vedtak = lagVedtak()
 
         val vedtaksperioder =
@@ -178,17 +191,20 @@ class VedtaksperiodeMedBegrunnelseTest {
                 },
             )
 
+        // Act
         val fagsakErBegrunnet =
             vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
                 standardbegrunnelser = listOf(Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR),
                 måned = YearMonth.now(),
             )
 
+        // Assert
         assertFalse(fagsakErBegrunnet)
     }
 
     @Test
     fun `Skal være begrunnet med reduksjon ikke lenger full OS`() {
+        // Arrange
         val vedtak = lagVedtak()
 
         val vedtaksperioder =
@@ -211,12 +227,14 @@ class VedtaksperiodeMedBegrunnelseTest {
                 },
             )
 
+        // Act
         val fagsakErBegrunnet =
             vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
                 standardbegrunnelser = listOf(Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD),
                 måned = YearMonth.now(),
             )
 
+        // Assert
         assertTrue(fagsakErBegrunnet)
     }
 }

@@ -30,6 +30,7 @@ class SimuleringServiceTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Skal verifisere at simulering blir lagert og oppdatert`() {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
         val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
         val behandlingEtterVilkårsvurderingSteg =
@@ -49,6 +50,7 @@ class SimuleringServiceTest(
         val vedtakSimuleringMottakerMock =
             simuleringsMottakere.map { it.tilBehandlingSimuleringMottaker(behandlingEtterVilkårsvurderingSteg) }
 
+        // Act & Assert
         assertEquals(
             vedtakSimuleringMottakerMock.size,
             simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingEtterVilkårsvurderingSteg.id).size,

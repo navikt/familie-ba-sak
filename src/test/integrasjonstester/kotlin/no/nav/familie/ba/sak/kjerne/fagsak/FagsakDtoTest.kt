@@ -35,6 +35,7 @@ class FagsakDtoTest(
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Skal sjekke at gjeldende utbetalingsperioder kommer med i fagsak dto`() {
+        // Arrange
         val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
         val barnFnr = leggTilPersonInfo(randomBarnFødselsdato(10))
 
@@ -63,8 +64,10 @@ class FagsakDtoTest(
             vedtaksperiodeService = vedtaksperiodeService,
         )
 
+        // Act
         val fagsakDto = fagsakService.hentFagsakDto(fagsakId = førstegangsbehandling.fagsak.id)
 
+        // Assert
         assertThat(fagsakDto.data?.gjeldendeUtbetalingsperioder).isNotEmpty
     }
 }
