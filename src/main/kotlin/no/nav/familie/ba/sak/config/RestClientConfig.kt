@@ -58,6 +58,15 @@ class RestClientConfig(
             .lagHybridRestKlient(scope) { SikkerhetContext.hentJwt()?.tokenValue }
             .medJsonContentType()
 
+    // Går mot familie-oppdrag-backend som kjører i GCP.
+    @Bean("oppdragBackendRestClient")
+    fun oppdragBackendRestClient(
+        @Value("\${FAMILIE_OPPDRAG_BACKEND_SCOPE}") scope: String,
+    ): RestClient =
+        entraIDRestClientFactory
+            .lagHybridRestKlient(scope) { SikkerhetContext.hentJwt()?.tokenValue }
+            .medJsonContentType()
+
     @Bean("infotrygdBarnetrygdRestClient")
     fun infotrygdBarnetrygdRestClient(
         @Value("\${FAMILIE_BA_INFOTRYGD_SCOPE}") scope: String,
