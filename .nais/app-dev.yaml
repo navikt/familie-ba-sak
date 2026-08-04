@@ -113,6 +113,8 @@ spec:
           cluster: dev-gcp
         - application: familie-oppdrag
           cluster: dev-fss
+        - application: familie-oppdrag-backend
+          cluster: dev-gcp
         - application: familie-klage
           cluster: dev-gcp
         - application: logging
