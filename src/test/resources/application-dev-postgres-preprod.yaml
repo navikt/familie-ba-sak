@@ -1,4 +1,3 @@
-
 prosessering.fixedDelayString.in.milliseconds: 15000
 prosessering.rolle: "928636f4-fd0d-4149-978e-a6fb68bb19de" # 0000-GA-STDAPPS
 
@@ -43,8 +42,10 @@ FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner.intern.dev.nav.no/a
 FAMILIE_INTEGRASJONER_SCOPE: api://dev-fss.teamfamilie.familie-integrasjoner/.default
 PDL_URL: https://pdl-api.dev.intern.nav.no
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
-FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.dev.intern.nav.no/api
+FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.intern.dev.nav.no/api
 FAMILIE_OPPDRAG_SCOPE: api://dev-fss.teamfamilie.familie-oppdrag/.default
+FAMILIE_OPPDRAG_BACKEND_API_URL: https://familie-oppdrag-backend.intern.dev.nav.no/api
+FAMILIE_OPPDRAG_BACKEND_SCOPE: api://dev-gcp.teamfamilie.familie-oppdrag-backend/.default
 FAMILIE_BREV_API_URL: https://familie-brev.intern.dev.nav.no
 FAMILIE_TILBAKE_URL: https://tilbakekreving-backend.intern.dev.nav.no
 FAMILIE_TILBAKE_SCOPE: api://dev-gcp.tilbake.tilbakekreving-backend/.default

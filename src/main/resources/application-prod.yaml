@@ -1,4 +1,3 @@
-
 rolle:
   veileder: "199c2b39-e535-4ae8-ac59-8ccbee7991ae"
   saksbehandler: "847e3d72-9dc1-41c3-80ff-f5d4acdd5d46"
@@ -39,6 +38,8 @@ FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.prod-fss-pu
 
 FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.prod-fss-pub.nais.io/api
 FAMILIE_OPPDRAG_SCOPE: api://prod-fss.teamfamilie.familie-oppdrag/.default
+FAMILIE_OPPDRAG_BACKEND_API_URL: https://familie-oppdrag-backend.intern.nav.no/api
+FAMILIE_OPPDRAG_BACKEND_SCOPE: api://prod-gcp.teamfamilie.familie-oppdrag-backend/.default
 
 # Swagger
 AUTHORIZATION_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/authorize

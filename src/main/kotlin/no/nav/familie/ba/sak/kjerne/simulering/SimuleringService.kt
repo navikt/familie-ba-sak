@@ -4,6 +4,9 @@ import io.micrometer.core.instrument.Metrics
 import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.BehandlerRolle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.OppdragBackendKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.tilUtbetalingsoppdragDto
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
@@ -33,6 +36,7 @@ import java.time.LocalDate
 @Service
 class SimuleringService(
     private val økonomiKlient: ØkonomiKlient,
+    private val oppdragBackendKlient: OppdragBackendKlient,
     private val beregningService: BeregningService,
     private val økonomiSimuleringMottakerRepository: ØkonomiSimuleringMottakerRepository,
     private val tilgangService: TilgangService,
@@ -41,6 +45,7 @@ class SimuleringService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
 
@@ -71,7 +76,12 @@ class SimuleringService(
         // Simulerer ikke mot økonomi når det ikke finnes utbetalingsperioder
         if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) return null
 
-        val detaljertSimuleringResultat = økonomiKlient.hentSimulering(utbetalingsoppdrag)
+        val detaljertSimuleringResultat =
+            if (featureToggleService.isEnabled(FeatureToggle.OPPDRAG_MIGRERING_HENT_SIMULERING_GCP)) {
+                oppdragBackendKlient.hentSimulering(utbetalingsoppdrag)
+            } else {
+                økonomiKlient.hentSimulering(utbetalingsoppdrag)
+            }
 
         simulert.increment()
         return detaljertSimuleringResultat
