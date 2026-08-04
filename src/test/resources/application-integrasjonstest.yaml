@@ -1,6 +1,6 @@
 spring:
   flyway:
-    locations: filesystem:./src/test/resources/db/migration-tests,filesystem:./src/main/resources/db/migration
+    locations: classpath:db/migration,classpath:db/init
 
 AZURE_OPENID_CONFIG_ISSUER: dummy
 AZURE_OPENID_CONFIG_JWKS_URI: dummy

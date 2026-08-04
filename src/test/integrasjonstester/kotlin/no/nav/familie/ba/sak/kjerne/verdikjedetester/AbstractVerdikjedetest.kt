@@ -17,8 +17,8 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
             configurableApplicationContext,
-            "PDL_URL: http://localhost:1337/rest/api/pdl",
-            "FAMILIE_INTEGRASJONER_API_URL: http://localhost:1337/rest/api/integrasjoner",
+            "PDL_URL: \${wiremock.verdikjedetest.baseUrl}/rest/api/pdl",
+            "FAMILIE_INTEGRASJONER_API_URL: \${wiremock.verdikjedetest.baseUrl}/rest/api/integrasjoner",
         )
     }
 }
@@ -45,7 +45,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
 @Tag("verdikjedetest")
 @EnableWireMock(
-    ConfigureWireMock(name = "verdikjedetest", port = 1337),
+    ConfigureWireMock(name = "verdikjedetest", baseUrlProperties = ["wiremock.verdikjedetest.baseUrl"]),
 )
 abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
     @InjectWireMock("verdikjedetest")
