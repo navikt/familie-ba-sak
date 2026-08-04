@@ -72,5 +72,5 @@ enum class FeatureToggle(
     HENT_VEDTAKSBREV_FRA_JOARK("familie-ba-sak.hent-vedtaksbrev-fra-joark"),
 
     // NAV-30011
-    OPPDRAG_MIGRERING_HENT_SIMULERING_GCP("familie-ba-sak.oppdrag-migrering-hent-simulering-gcp"),
+    OPPDRAG_MIGRERING_HENT_SIMULERING_GCP("familie-baks-sak.oppdrag-migrering-hent-simulering-gcp"),
 }
