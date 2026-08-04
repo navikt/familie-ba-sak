@@ -41,6 +41,7 @@ fun lagRestSanityBegrunnelse(
     brevPeriodeType: String? = null,
     ikkeIBruk: Boolean? = false,
     stotterFritekst: Boolean? = false,
+    splittPaaSoknadstidspunkt: Boolean? = false,
 ): SanityBegrunnelseDto =
     SanityBegrunnelseDto(
         apiNavn = apiNavn,
@@ -63,6 +64,7 @@ fun lagRestSanityBegrunnelse(
         brevPeriodeType = brevPeriodeType,
         ikkeIBruk = ikkeIBruk,
         stotterFritekst = stotterFritekst,
+        splittPaaSoknadstidspunkt = splittPaaSoknadstidspunkt,
     )
 
 fun lagSanityBegrunnelse(
