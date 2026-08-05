@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.task
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import io.sentry.Sentry
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.brev.DokumentDistribueringService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -71,7 +70,6 @@ class DistribuerDokumentPåJournalpostIdTask(
                     )
                     throw e
                 } else {
-                    Sentry.captureException(e)
                     throw e
                 }
             }

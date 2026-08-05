@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedligValutaJusteringFeil
 import no.nav.familie.ba.sak.common.PdlNotFoundException
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
+import no.nav.familie.ba.sak.common.RessursUtils.feil
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
-import no.nav.familie.ba.sak.common.RessursUtils.frontendFeil
 import no.nav.familie.ba.sak.common.RessursUtils.funksjonellFeil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.rolleTilgangResponse
@@ -178,7 +178,7 @@ class ApiExceptionHandler {
         val mostSpecificCause =
             if (feil.throwable != null) NestedExceptionUtils.getMostSpecificCause(feil.throwable!!) else null
 
-        return frontendFeil(feil, mostSpecificCause)
+        return feil(feil, mostSpecificCause)
     }
 
     @ExceptionHandler(FunksjonellFeil::class)
