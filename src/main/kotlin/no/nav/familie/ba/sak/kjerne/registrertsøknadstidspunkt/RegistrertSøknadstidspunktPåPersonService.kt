@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -18,13 +16,11 @@ class RegistrertSøknadstidspunktPåPersonService(
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     fun hentForBehandling(behandlingId: Long): List<RegistrertSøknadstidspunktPåPerson> = registrertSøknadstidspunktRepository.findByBehandlingId(behandlingId)
 
     @Transactional
     fun settSøknadstidspunktForPersonerFremstiltKravFor(behandling: Behandling) {
-        if (!featureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON)) return
         if (behandling.opprettetÅrsak != BehandlingÅrsak.SØKNAD) return
 
         val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)?.toLocalDate() ?: return

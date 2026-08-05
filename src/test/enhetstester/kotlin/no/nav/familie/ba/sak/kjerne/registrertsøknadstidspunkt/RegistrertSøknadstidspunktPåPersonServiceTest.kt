@@ -7,8 +7,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
@@ -19,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -30,7 +27,6 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
     private val mockPersongrunnlagService = mockk<PersongrunnlagService>()
     private val mockBehandlingSøknadsinfoService = mockk<BehandlingSøknadsinfoService>()
     private val mockSøknadGrunnlagService = mockk<SøknadGrunnlagService>()
-    private val mockFeatureToggleService = mockk<FeatureToggleService>()
 
     private val registrertSøknadstidspunktService =
         RegistrertSøknadstidspunktPåPersonService(
@@ -38,13 +34,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             persongrunnlagService = mockPersongrunnlagService,
             behandlingSøknadsinfoService = mockBehandlingSøknadsinfoService,
             søknadGrunnlagService = mockSøknadGrunnlagService,
-            featureToggleService = mockFeatureToggleService,
         )
-
-    @BeforeEach
-    fun setup() {
-        every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON) } returns true
-    }
 
     @Nested
     inner class LagreSøknadstidspunkterPåPersonerTest {
@@ -290,20 +280,6 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             registrertSøknadstidspunktService.settSøknadstidspunktForPersonerFremstiltKravFor(behandling)
 
             // Assert
-            verify(exactly = 0) { mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(any<List<RegistrertSøknadstidspunktPåPerson>>()) }
-        }
-
-        @Test
-        fun `skal ikke gjøre noe når feature toggle er av`() {
-            // Arrange
-            val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
-            every { mockFeatureToggleService.isEnabled(FeatureToggle.KAN_REGISTRERE_SØKNADSTIDSPUNKT_PÅ_PERSON) } returns false
-
-            // Act
-            registrertSøknadstidspunktService.settSøknadstidspunktForPersonerFremstiltKravFor(behandling)
-
-            // Assert
-            verify(exactly = 0) { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) }
             verify(exactly = 0) { mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(any<List<RegistrertSøknadstidspunktPåPerson>>()) }
         }
     }
