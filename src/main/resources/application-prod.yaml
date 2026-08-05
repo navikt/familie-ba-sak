@@ -38,7 +38,6 @@ FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.prod-fss-pu
 
 FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.prod-fss-pub.nais.io/api
 FAMILIE_OPPDRAG_SCOPE: api://prod-fss.teamfamilie.familie-oppdrag/.default
-FAMILIE_OPPDRAG_BACKEND_API_URL: https://familie-oppdrag-backend.intern.nav.no/api
 FAMILIE_OPPDRAG_BACKEND_SCOPE: api://prod-gcp.teamfamilie.familie-oppdrag-backend/.default
 
 # Swagger
