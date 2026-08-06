@@ -452,5 +452,8 @@ class BehandlingStegComparator : Comparator<BehandlingStegTilstand> {
     override fun compare(
         bst1: BehandlingStegTilstand,
         bst2: BehandlingStegTilstand,
-    ): Int = bst1.opprettetTidspunkt.compareTo(bst2.opprettetTidspunkt)
+    ): Int {
+        val tidspunktCompare = bst1.opprettetTidspunkt.compareTo(bst2.opprettetTidspunkt)
+        return if (tidspunktCompare != 0) tidspunktCompare else bst1.behandlingSteg.compareTo(bst2.behandlingSteg)
+    }
 }
