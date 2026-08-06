@@ -7,8 +7,6 @@ credential:
 
 logging:
   config: "classpath:logback-devlauncher.xml"
-sentry.environment: local
-sentry.logging.enabled: false
 
 funksjonsbrytere:
   enabled: true
@@ -73,4 +71,3 @@ NAIS_TOKEN_ENDPOINT: http://localhost:6767/api/v1/token
 
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 DEPLOY_ENV: dev
-
