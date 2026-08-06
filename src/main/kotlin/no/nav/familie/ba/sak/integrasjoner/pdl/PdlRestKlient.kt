@@ -138,7 +138,7 @@ open class PdlRestKlient(
         }
     }
 
-    fun hentFødselsdato(fødselsnummer: String): LocalDate {
+    open fun hentFødselsdato(fødselsnummer: String): LocalDate {
         val pdlPersonRequest =
             PdlPersonRequest(
                 variables = PdlPersonRequestVariables(fødselsnummer),
