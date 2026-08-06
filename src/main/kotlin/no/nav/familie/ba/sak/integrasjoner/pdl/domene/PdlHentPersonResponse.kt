@@ -90,6 +90,15 @@ data class PdlMetadata(
     val historisk: Boolean,
 )
 
+data class PdlFødselsdatoHentPersonResponse(
+    val person: PdlFødselsdatoPerson?,
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class PdlFødselsdatoPerson(
+    val foedselsdato: List<PdlFødselsDato> = emptyList(),
+)
+
 // Filtrer på historisk slik at ikke-historiske alltid får prioritet
 fun List<PdlNavn>.filtrerNavnPåKilde(): PdlNavn? =
     this

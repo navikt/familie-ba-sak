@@ -23,8 +23,6 @@ import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
-import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -32,7 +30,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
-import java.time.LocalDate.now
 import java.time.LocalDateTime
 
 class LoggServiceTest(
@@ -100,19 +97,12 @@ class LoggServiceTest(
         val barnetsIdent =
             FakePersonopplysningerService.leggTilPersonInfo(
                 fødselsdato = barnsFødselsdato,
-                egendefinertMock =
-                    PersonInfo(
-                        fødselsdato = LocalDate.of(2018, 5, 1),
-                        kjønn = Kjønn.KVINNE,
-                        navn = "Barn Barnesen",
-                        sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = now().minusMonths(8))),
-                    ),
             )
 
         val morsIdent =
             FakePersonopplysningerService.leggTilPersonInfo(
                 fødselsdato = randomSøkerFødselsdato(),
-                egendefinertMock = PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen"),
+                egendefinertMock = PersonInfo(fødselsdato = LocalDate.of(2020, 2, 29), kjønn = Kjønn.KVINNE, navn = "Mor Moresen"),
             )
 
         // Act

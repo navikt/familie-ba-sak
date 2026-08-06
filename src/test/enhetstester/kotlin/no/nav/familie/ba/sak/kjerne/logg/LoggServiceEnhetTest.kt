@@ -3,13 +3,15 @@ package no.nav.familie.ba.sak.kjerne.logg
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class LoggServiceEnhetTest {
     private val loggRepository = mockk<LoggRepository>()
-    private val loggService = LoggService(loggRepository)
+    private val pdlRestKlient = mockk<PdlRestKlient>()
+    private val loggService = LoggService(loggRepository, pdlRestKlient)
 
     @Test
     fun `loggSammensattKontrollsakLagtTil skal lagre ned logg på at sammensatt kontrollsak er opprettet`() {
