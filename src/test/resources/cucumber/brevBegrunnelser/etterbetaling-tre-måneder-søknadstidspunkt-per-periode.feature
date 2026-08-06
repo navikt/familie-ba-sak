@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Brevbegrunnelser for etterbetaling tre måneder skal hente riktig søknadstidspunkt per periode
+Egenskap: Brevbegrunnelser for etterbetaling tre måneder skal splittes per søknadstidspunkt
 
   Bakgrunn:
     Gitt følgende fagsaker
@@ -19,7 +19,7 @@ Egenskap: Brevbegrunnelser for etterbetaling tre måneder skal hente riktig søk
       | 1            | 3       | BARN       | 05.10.2011  |              |
       | 1            | 4       | BARN       | 16.11.2018  |              |
 
-  Scenario: Skal hente riktig søknadstidspunkt for hver periode når barna har ulike søknadstidspunkt
+  Scenario: Skal lage én begrunnelse per søknadstidspunkt når barna i samme periode har ulike søknadstidspunkt
     Og dagens dato er 21.07.2026
     Og med personer fremstilt krav for
       | BehandlingId | AktørId |
@@ -141,7 +141,8 @@ Egenskap: Brevbegrunnelser for etterbetaling tre måneder skal hente riktig søk
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.11.2013 til 30.11.2018
       | Begrunnelse                                                   | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
-      | ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID_SED | STANDARD |               | 25.11.09 og 05.10.11 | 2           | oktober 2013                         | NB      | 0     | 28.01.26         |                         |                             |
+      | ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID_SED | STANDARD |               | 25.11.09             | 1           | oktober 2013                         | NB      | 0     | 28.01.26         |                         |                             |
+      | ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID_SED | STANDARD |               | 05.10.11             | 1           | oktober 2013                         | NB      | 0     | 28.04.26         |                         |                             |
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.12.2018 til 30.09.2025
       | Begrunnelse                                               | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |

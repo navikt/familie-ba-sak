@@ -42,6 +42,7 @@ data class SanityBegrunnelseDto(
     val regelverk: String?,
     val brevPeriodeType: String?,
     val ikkeIBruk: Boolean?,
+    val splittPaaSoknadstidspunkt: Boolean?,
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse? {
         if (apiNavn == null || apiNavn !in Standardbegrunnelse.entries.map { it.sanityApiNavn }) return null
@@ -102,6 +103,7 @@ data class SanityBegrunnelseDto(
             tema = (regelverk).finnEnumverdi<Tema>(apiNavn),
             periodeType = (brevPeriodeType).finnEnumverdi<BrevPeriodeType>(apiNavn),
             ikkeIBruk = ikkeIBruk ?: false,
+            splittPåSøknadstidspunkt = splittPaaSoknadstidspunkt ?: false,
         )
     }
 }

@@ -28,10 +28,10 @@ object RessursUtils {
             funksjonellFeil,
         )
 
-    fun <T> frontendFeil(
+    fun <T> feil(
         feil: Feil,
         throwable: Throwable?,
-    ): ResponseEntity<Ressurs<T>> = frontendErrorResponse(feil, throwable)
+    ): ResponseEntity<Ressurs<T>> = feilResponse(feil, throwable)
 
     fun <T> ok(data: T): ResponseEntity<Ressurs<T>> = ResponseEntity.ok(Ressurs.success(data))
 
@@ -57,8 +57,8 @@ object RessursUtils {
     ): ResponseEntity<Ressurs<T>> {
         val className = "[${throwable::class.java.name}] "
 
-        secureLogger.warn("$className En feil har oppstått: $errorMessage", throwable)
-        logger.warn("$className En feil har oppstått. Se securelogs for detaljer.")
+        secureLogger.error("$className En feil har oppstått: $errorMessage", throwable)
+        logger.error("$className En feil har oppstått. Se securelogs for detaljer.")
 
         Sentry.captureException(throwable)
         return ResponseEntity.status(httpStatus).body(Ressurs.failure(errorMessage))
@@ -72,7 +72,7 @@ object RessursUtils {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Ressurs.ikkeTilgang(errorMessage))
     }
 
-    private fun <T> frontendErrorResponse(
+    private fun <T> feilResponse(
         feil: Feil,
         throwable: Throwable?,
     ): ResponseEntity<Ressurs<T>> {
@@ -83,7 +83,7 @@ object RessursUtils {
                 "${feil.message}, ${feil.frontendFeilmelding}",
             feil,
         )
-        logger.warn("$className En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ", feil)
+        logger.error("$className En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ", feil)
 
         Sentry.captureException(feil)
         return ResponseEntity.status(feil.httpStatus).body(

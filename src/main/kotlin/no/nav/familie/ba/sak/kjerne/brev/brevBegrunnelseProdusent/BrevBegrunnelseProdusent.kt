@@ -90,6 +90,28 @@ fun Standardbegrunnelse.lagBrevBegrunnelse(
     }
 }
 
+private fun ISanityBegrunnelse.hentBarnGruppertPåSøknadstidspunkt(
+    gjelderSøker: Boolean,
+    barnasFødselsdatoer: List<LocalDate>,
+    grunnlagForPersonerIBegrunnelsen: Map<Person, IBegrunnelseGrunnlagForPeriode>,
+): List<Pair<LocalDate, List<Person>>>? {
+    if (!splittPåSøknadstidspunkt || gjelderSøker || barnasFødselsdatoer.isEmpty()) return null
+
+    val barnIBegrunnelsen = grunnlagForPersonerIBegrunnelsen.keys.filter { it.type == PersonType.BARN }
+
+    val alleBarnIBegrunnelsenFlettesInnIBrevteksten =
+        barnIBegrunnelsen.map { it.fødselsdato }.sorted() == barnasFødselsdatoer.sorted()
+    if (!alleBarnIBegrunnelsenFlettesInnIBrevteksten) return null
+
+    return barnIBegrunnelsen
+        .groupBy { barn ->
+            this
+                .hentRelevanteEndringsperioderForBegrunnelse(grunnlagForPersonerIBegrunnelsen.filterKeys { it == barn })
+                .hentSøknadstidspunkt(this) ?: return null
+        }.toList()
+        .sortedBy { (søknadstidspunkt, _) -> søknadstidspunkt }
+}
+
 private fun Standardbegrunnelse.lagEnkeltBegrunnelse(
     begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
     personerGjeldeneForBegrunnelse: List<Person>,
@@ -134,23 +156,52 @@ private fun Standardbegrunnelse.lagEnkeltBegrunnelse(
             antallBarnGjeldendeForBegrunnelse = personerGjeldeneForBegrunnelse.filter { it.type == PersonType.BARN }.size,
         )
 
-    sanityBegrunnelse.validerBrevbegrunnelse(
-        gjelderSøker,
-        barnasFødselsdatoer,
-    )
+    val barnGruppertPåSøknadstidspunkt =
+        sanityBegrunnelse.hentBarnGruppertPåSøknadstidspunkt(
+            gjelderSøker = gjelderSøker,
+            barnasFødselsdatoer = barnasFødselsdatoer,
+            grunnlagForPersonerIBegrunnelsen = grunnlagForPersonerIBegrunnelsen,
+        )
 
-    return listOf(
+    val begrunnelsesgrupper =
+        if (barnGruppertPåSøknadstidspunkt == null || barnGruppertPåSøknadstidspunkt.size == 1) {
+            listOf(
+                BegrunnelsesgruppePerSøknadstidspunkt(
+                    barnasFødselsdatoer = barnasFødselsdatoer,
+                    antallBarn = antallBarn,
+                    beløp = beløp,
+                    søknadstidspunkt =
+                        barnGruppertPåSøknadstidspunkt?.single()?.first ?: søknadstidspunktEndretUtbetaling,
+                ),
+            )
+        } else {
+            barnGruppertPåSøknadstidspunkt.map { (søknadstidspunkt, barnIGruppen) ->
+                BegrunnelsesgruppePerSøknadstidspunkt(
+                    barnasFødselsdatoer = barnIGruppen.map { it.fødselsdato },
+                    antallBarn = barnIGruppen.size,
+                    beløp = grunnlagForPersonerIBegrunnelsen.summerBeløpForBarn(barnIGruppen),
+                    søknadstidspunkt = søknadstidspunkt,
+                )
+            }
+        }
+
+    return begrunnelsesgrupper.map { begrunnelsesgruppe ->
+        sanityBegrunnelse.validerBrevbegrunnelse(
+            gjelderSøker,
+            begrunnelsesgruppe.barnasFødselsdatoer,
+        )
+
         BegrunnelseData(
             gjelderSoker = gjelderSøker,
-            barnasFodselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
-            antallBarn = antallBarn,
+            barnasFodselsdatoer = begrunnelsesgruppe.barnasFødselsdatoer.tilBrevTekst(),
+            antallBarn = begrunnelsesgruppe.antallBarn,
             maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
             maalform =
                 grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform
                     .tilSanityFormat(),
             apiNavn = this.sanityApiNavn,
-            belop = Utils.formaterBeløp(beløp),
-            soknadstidspunkt = søknadstidspunktEndretUtbetaling?.tilKortString() ?: "",
+            belop = Utils.formaterBeløp(begrunnelsesgruppe.beløp),
+            soknadstidspunkt = begrunnelsesgruppe.søknadstidspunkt?.tilKortString() ?: "",
             avtaletidspunktDeltBosted = "",
             sokersRettTilUtvidet =
                 hentSøkersRettTilUtvidet(
@@ -160,9 +211,22 @@ private fun Standardbegrunnelse.lagEnkeltBegrunnelse(
                         ),
                 ).tilSanityFormat(),
             vedtakBegrunnelseType = this.vedtakBegrunnelseType,
-        ),
-    )
+        )
+    }
 }
+
+private data class BegrunnelsesgruppePerSøknadstidspunkt(
+    val barnasFødselsdatoer: List<LocalDate>,
+    val antallBarn: Int,
+    val beløp: Int,
+    val søknadstidspunkt: LocalDate?,
+)
+
+private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.summerBeløpForBarn(barn: List<Person>) =
+    this
+        .filterKeys { it in barn }
+        .values
+        .sumOf { it.dennePerioden.andeler.sumOf { andel -> andel.kalkulertUtbetalingsbeløp } }
 
 private fun List<IEndretUtbetalingAndelForVedtaksperiode>.hentSøknadstidspunkt(
     sanityBegrunnelse: ISanityBegrunnelse,
