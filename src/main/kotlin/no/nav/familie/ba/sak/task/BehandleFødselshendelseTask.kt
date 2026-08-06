@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.MidlertidigEnhetIAutomatiskBehandlingFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering
@@ -14,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.VelgFagSystemSer
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
-import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -41,6 +41,7 @@ class BehandleFødselshendelseTask(
     private val personidentService: PersonidentService,
     private val startSatsendring: StartSatsendring,
     private val taskRepositoryWrapper: TaskRepositoryWrapper,
+    private val pdlRestKlient: PdlRestKlient,
 ) : AsyncTaskStep {
     private val dagerSidenBarnBleFødt: DistributionSummary = Metrics.summary("foedselshendelse.dagersidenbarnfoedt")
 
@@ -55,10 +56,9 @@ class BehandleFødselshendelseTask(
         secureLogger.info("Behandler fødselshendelse, mor=${nyBehandling.morsIdent}, barna=${nyBehandling.barnasIdenter}")
 
         nyBehandling.barnasIdenter.forEach {
-            // En litt forenklet løsning for å hente fødselsdato uten å kalle PDL. Gir ikke helt riktige data, men godt nok.
             val dagerSidenBarnetBleFødt =
                 ChronoUnit.DAYS.between(
-                    @Suppress("DEPRECATION") Fødselsnummer(it).fødselsdato,
+                    pdlRestKlient.hentFødselsdato(it),
                     LocalDateTime.now(),
                 )
             dagerSidenBarnBleFødt.record(dagerSidenBarnetBleFødt.toDouble())

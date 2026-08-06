@@ -92,6 +92,10 @@ class FakePdlRestKlient(
 
     override fun hentVergemaalEllerFremtidsfullmakt(aktør: Aktør): List<VergemaalEllerFremtidsfullmakt> = emptyList()
 
+    override fun hentFødselsdato(fødselsnummer: String): LocalDate =
+        FakePersonopplysningerService.personInfo[fødselsnummer]?.fødselsdato
+            ?: FakePersonopplysningerService.personInfo.getValue(INTEGRASJONER_FNR).fødselsdato
+
     override fun hentAdresser(identer: List<String>): Map<String, PdlAdresserPerson> =
         identer.associateWith { ident ->
             PdlAdresserPerson(

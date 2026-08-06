@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.MidlertidigEnhetIAutomatiskBehandlingFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering
@@ -22,8 +23,14 @@ import no.nav.familie.prosessering.error.RekjørSenereException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 internal class BehandleFødselshendelseTaskTest {
+    private val pdlRestKlient =
+        mockk<PdlRestKlient>().apply {
+            every { hentFødselsdato(any()) } returns LocalDate.now()
+        }
+
     @Test
     fun `håndterer syntetisk fødselsnummer`() {
         val autovedtakStegService =
@@ -92,6 +99,7 @@ internal class BehandleFødselshendelseTaskTest {
                             )
                         } returns true
                     },
+                pdlRestKlient = pdlRestKlient,
             ).doTask(
                 BehandleFødselshendelseTask.opprettTask(
                     BehandleFødselshendelseTaskDTO(
@@ -133,6 +141,7 @@ internal class BehandleFødselshendelseTaskTest {
                         )
                     }.throws(FunksjonellFeil("funksjonell feil"))
                 },
+            pdlRestKlient = pdlRestKlient,
         ).doTask(
             BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(
@@ -206,5 +215,6 @@ internal class BehandleFødselshendelseTaskTest {
                         )
                     } returns false
                 },
+            pdlRestKlient = pdlRestKlient,
         )
 }

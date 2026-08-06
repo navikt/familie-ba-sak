@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.config.BehandlerRolle.FORVALTER
 import no.nav.familie.ba.sak.config.BehandlerRolle.SAKSBEHANDLER
 import no.nav.familie.ba.sak.config.BehandlerRolle.SYSTEM
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -29,7 +30,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøs
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.hentRolletilgangFraSikkerhetscontext
-import no.nav.familie.kontrakter.felles.Fødselsnummer
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -37,6 +37,7 @@ import java.time.LocalDateTime
 @Service
 class LoggService(
     private val loggRepository: LoggRepository,
+    private val pdlRestKlient: PdlRestKlient,
 ) {
     private val metrikkPerLoggType: Map<LoggType, Counter> =
         LoggType.entries.associateWith {
@@ -199,12 +200,8 @@ class LoggService(
         behandling.barnasIdenter
             .filter { Identkonverterer.er11Siffer(it) }
             .distinct()
-            .map { Fødselsnummer(it) }
-            .map {
-                // En litt forenklet løsning for å hente fødselsdato uten å kalle PDL. Gir ikke helt riktige data, men godt nok.
-                @Suppress("DEPRECATION")
-                it.fødselsdato
-            }.map { it.tilKortString() }
+            .map { pdlRestKlient.hentFødselsdato(it) }
+            .map { it.tilKortString() }
             .slåSammen()
 
     fun opprettBehandlingLogg(behandlingLogg: BehandlingLoggRequest) {
