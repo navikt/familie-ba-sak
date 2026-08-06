@@ -24,6 +24,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdresserPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFødselsDato
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFødselsdatoHentPersonResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFødselsdatoPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentIdenterResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlIdenter
@@ -370,9 +372,40 @@ private fun stubHentIdenter(personIdent: String) {
 
 private fun stubHentPerson(scenario: ScenarioDto) {
     stubHentPersonEnkel(scenario.søker)
-    scenario.barna.forEach { stubHentPersonEnkel(it) }
+    scenario.barna.forEach {
+        stubHentPersonEnkel(it)
+        stubHentFødselsdato(it)
+    }
     stubHentPersonMedRelasjonSøker(scenario)
     scenario.barna.forEach { barn -> stubHentPersonMedRelasjonBarn(barn, scenario.søker) }
+}
+
+private fun stubHentFødselsdato(scenarioPerson: ScenarioPersonDto) {
+    val response =
+        PdlBaseResponse(
+            data =
+                PdlFødselsdatoHentPersonResponse(
+                    person = PdlFødselsdatoPerson(foedselsdato = listOf(PdlFødselsDato(scenarioPerson.fødselsdato))),
+                ),
+            errors = null,
+            extensions = null,
+        )
+    val pdlRequestBody =
+        PdlPersonRequest(
+            variables = PdlPersonRequestVariables(ident = scenarioPerson.ident),
+            query = hentGraphqlQuery("hentperson-foedselsdato"),
+        )
+
+    stubFor(
+        post(urlEqualTo("/rest/api/pdl/graphql"))
+            .withRequestBody(WireMock.equalToJson(jsonMapper.writeValueAsString(pdlRequestBody)))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(jsonMapper.writeValueAsString(response)),
+            ),
+    )
 }
 
 private fun stubHentPersonMedRelasjonSøker(scenario: ScenarioDto) {
