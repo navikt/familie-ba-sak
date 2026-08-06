@@ -152,18 +152,22 @@ open class PdlRestKlient(
             ) {
                 restClient
                     .post()
-                    .uri(pdlUri)
+                    .uri(pdlUri) // if your RestClient supports only this style, keep it
                     .headers { it.addAll(httpHeaders()) }
                     .body(pdlPersonRequest)
                     .retrieve()
-                    .body()!!
+                    .body<PdlBaseResponse<PdlFødselsdatoHentPersonResponse>>()!!
             }
 
         return feilsjekkOgReturnerData(
             ident = fødselsnummer,
             pdlResponse = pdlResponse,
         ) { pdlFødselsdato ->
-            pdlFødselsdato.person!!.foedselsdato.firstOrNull()?.foedselsdato?.let { LocalDate.parse(it) }
+            pdlFødselsdato.person!!
+                .foedselsdato
+                .firstOrNull()
+                ?.foedselsdato
+                ?.let { LocalDate.parse(it) }
         }
     }
 
