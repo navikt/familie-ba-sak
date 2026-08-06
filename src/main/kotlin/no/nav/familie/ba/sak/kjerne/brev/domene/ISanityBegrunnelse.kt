@@ -26,6 +26,7 @@ sealed interface ISanityBegrunnelse {
     val øvrigeTriggere: List<ØvrigTrigger>
     val ikkeIBruk: Boolean
     val støtterFritekst: Boolean
+    val splittPåSøknadstidspunkt: Boolean
     val endringsaarsaker: List<Årsak>
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere?
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>
@@ -76,6 +77,7 @@ data class SanityBegrunnelse(
     override val øvrigeTriggere: List<ØvrigTrigger> = emptyList(),
     override val ikkeIBruk: Boolean = false,
     override val støtterFritekst: Boolean = false,
+    override val splittPåSøknadstidspunkt: Boolean = false,
     override val endringsaarsaker: List<Årsak> = emptyList(),
     override val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     override val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger> = emptyList(),
@@ -110,6 +112,7 @@ data class SanityEØSBegrunnelse(
     override val øvrigeTriggere: List<ØvrigTrigger> = emptyList(),
     override val ikkeIBruk: Boolean = false,
     override val støtterFritekst: Boolean = false,
+    override val splittPåSøknadstidspunkt: Boolean = false,
     override val endringsaarsaker: List<Årsak> = emptyList(),
     override val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     override val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger> = emptyList(),
