@@ -152,7 +152,7 @@ open class PdlRestKlient(
             ) {
                 restClient
                     .post()
-                    .uri(pdlUri) // if your RestClient supports only this style, keep it
+                    .uri(pdlUri)
                     .headers { it.addAll(httpHeaders()) }
                     .body(pdlPersonRequest)
                     .retrieve()
