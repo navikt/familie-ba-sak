@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlDødsfallResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFalskIdentitet
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFalskIdentitetResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFødselsdatoHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlGeografiskTilknytningResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlOppholdResponse
@@ -134,6 +135,35 @@ open class PdlRestKlient(
                     historiskeIdenter = it.folkeregisteridentifikator,
                 )
             }
+        }
+    }
+
+    fun hentFødselsdato(fødselsnummer: String): LocalDate {
+        val pdlPersonRequest =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(fødselsnummer),
+                query = hentGraphqlQuery("hentperson-foedselsdato"),
+            )
+        val pdlResponse: PdlBaseResponse<PdlFødselsdatoHentPersonResponse> =
+            kallEksternTjeneste(
+                tjeneste = "pdl",
+                uri = pdlUri,
+                formål = "Hent fødselsdato",
+            ) {
+                restClient
+                    .post()
+                    .uri(pdlUri)
+                    .headers { it.addAll(httpHeaders()) }
+                    .body(pdlPersonRequest)
+                    .retrieve()
+                    .body()!!
+            }
+
+        return feilsjekkOgReturnerData(
+            ident = fødselsnummer,
+            pdlResponse = pdlResponse,
+        ) { pdlFødselsdato ->
+            pdlFødselsdato.person!!.foedselsdato.firstOrNull()?.foedselsdato?.let { LocalDate.parse(it) }
         }
     }
 
