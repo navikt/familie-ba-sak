@@ -6,10 +6,12 @@ import no.nav.familie.ba.sak.config.featureToggle.miljø.Profil
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
 import org.springframework.context.annotation.Profile
 import org.springframework.core.env.Environment
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -25,7 +27,12 @@ class PreprodController(
     private val environment: Environment,
     @Qualifier("shortCache")
     private val shortCacheManager: CacheManager,
+    @Value("\${APP_BRANCH:ukjent}") private val branch: String,
+    @Value("\${APP_VERSION:ukjent}") private val versjon: String,
 ) {
+    @GetMapping("/versjonsinfo")
+    fun hentVersjonsinfo(): ResponseEntity<Ressurs<VersjonsinfoDto>> = ResponseEntity.ok(Ressurs.success(VersjonsinfoDto(branch = branch, versjon = versjon)))
+
     @PutMapping(path = ["/{behandlingId}/fyll-ut-vilkarsvurdering"])
     fun settFomPåTommeVilkårTilFødselsdato(
         @PathVariable behandlingId: Long,
@@ -59,3 +66,8 @@ class PreprodController(
         return ResponseEntity.ok("Personopplysninger-cache er tømt")
     }
 }
+
+data class VersjonsinfoDto(
+    val branch: String,
+    val versjon: String,
+)
