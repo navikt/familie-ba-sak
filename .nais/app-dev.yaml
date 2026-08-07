@@ -128,7 +128,6 @@ spec:
         - host: familie-ba-infotrygd.dev-fss-pub.nais.io
         - host: familie-ba-infotrygd-feed.dev-fss-pub.nais.io
         - host: sdw-wsrest.ecb.europa.eu
-        - host: sentry.gc.nav.no
         - host: data-api.ecb.europa.eu
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
         - host: data.norges-bank.no
@@ -148,10 +147,13 @@ spec:
       value: preprod
     - name: JDK_JAVA_OPTIONS
       value: "-XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp"
+    - name: APP_VERSION
+      value: "{{ VERSION }}"
+    - name: APP_BRANCH
+      value: "{{ BRANCH }}"
   kafka:
     pool: nav-dev
   strategy:
     rollingUpdate:
       maxSurge: 100%
       maxUnavailable: 99%
-

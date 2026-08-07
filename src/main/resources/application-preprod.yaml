@@ -9,8 +9,6 @@ DEPLOY_ENV: dev
 logging:
   level:
     root: INFO
-sentry.environment: preprod
-
 SANITY_DATASET: "ba-brev"
 
 PDL_URL: https://pdl-api.dev-fss-pub.nais.io
