@@ -95,7 +95,7 @@ internal class TidTest {
         // Arrange
         val personAktørId = randomAktør()
         val behandling = lagBehandling()
-        val resultat: Resultat = mockk()
+        val resultat: Resultat = Resultat.OPPFYLT
         val vilkår: Vilkår = mockk(relaxed = true)
         val vilkårsvurdering = lagVilkårsvurdering(personAktørId, behandling, resultat)
 
