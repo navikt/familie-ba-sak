@@ -101,7 +101,6 @@ Keep diffs small and focused so they are easy to review.
 - **Coverage**: Kover (not JaCoCo) — reports go to `target/coverage/` or `target/site/kover/`
 - **JSON**: Jackson 3
 - **Mocking**: MockK (not Mockito)
-- **Sentry** for error tracking
 - **Cucumber 7.x** for BDD tests
 
 ## Git Workflow

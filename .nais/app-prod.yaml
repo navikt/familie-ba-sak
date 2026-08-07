@@ -131,7 +131,6 @@ spec:
         - host: familie-ba-infotrygd.prod-fss-pub.nais.io
         - host: familie-ba-infotrygd-feed.prod-fss-pub.nais.io
         - host: sdw-wsrest.ecb.europa.eu
-        - host: sentry.gc.nav.no
         - host: data-api.ecb.europa.eu
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
         - host: data.norges-bank.no
