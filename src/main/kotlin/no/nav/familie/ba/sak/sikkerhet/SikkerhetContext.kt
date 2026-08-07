@@ -50,7 +50,7 @@ object SikkerhetContext {
 
     fun harRolle(rolle: Rolle): Boolean = hentJwtAuthenticationToken()?.authorities?.any { it.authority == rolle.authority() } == true
 
-    fun <T> hentClaimFraToken(claim: String): T? = runCatching { hentJwt()?.getClaim<T>(claim) }.getOrNull()
+    fun <T : Any> hentClaimFraToken(claim: String): T? = runCatching { hentJwt()?.getClaim<T>(claim) }.getOrNull()
 
     fun hentJwt(): Jwt? = hentJwtAuthenticationToken()?.token
 
