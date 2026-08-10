@@ -14,9 +14,9 @@ import java.net.URI
 
 @Service
 class SamhandlerKlient(
-    @Value("\${FAMILIE_OPPDRAG_API_URL}")
+    @Value("\${FAMILIE_OPPDRAG_BACKEND_API_URL}")
     private val familieOppdragUri: String,
-    @Qualifier("økonomiRestClient") private val restClient: RestClient,
+    @Qualifier("oppdragBackendRestClient") private val restClient: RestClient,
 ) {
     @Cacheable("hent-samhandler", cacheManager = "dailyCache")
     fun hentSamhandler(orgNummer: String): SamhandlerInfo {
