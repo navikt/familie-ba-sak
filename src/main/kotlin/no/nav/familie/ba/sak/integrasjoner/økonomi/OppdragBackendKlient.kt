@@ -26,7 +26,7 @@ class OppdragBackendKlient(
         val uri = URI.create("$familieOppdragBackendUri/simulering/v1")
 
         return kallEksternTjenesteRessurs(
-            tjeneste = "familie-oppdrag-backend",
+            tjeneste = FAMILIE_OPPDRAG_BACKEND,
             uri = uri,
             formål = "Henter simulering på fagsak ${utbetalingsoppdrag.saksnummer} fra Økonomi",
         ) {

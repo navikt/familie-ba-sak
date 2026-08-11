@@ -78,7 +78,7 @@ class ØkonomiService(
             return
         }
         try {
-            if (featureToggleService.isEnabled(FeatureToggle.OPPDRAG_MIGRERING_IVERKSETT_OPPDRAG)) {
+            if (featureToggleService.isEnabled(FeatureToggle.OPPDRAG_MIGRERING_IVERKSETT_OPPDRAG_GCP)) {
                 oppdragBackendKlient.iverksettOppdrag(utbetalingsoppdrag)
             } else {
                 økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
@@ -101,7 +101,7 @@ class ØkonomiService(
         behandlingId: Long,
     ): OppdragStatus =
         if (tilkjentYtelseRepository.findByBehandling(behandlingId).skalIverksettesMotOppdrag()) {
-            if (featureToggleService.isEnabled(FeatureToggle.OPPDRAG_MIGRERING_IVERKSETT_OPPDRAG)) {
+            if (featureToggleService.isEnabled(FeatureToggle.OPPDRAG_MIGRERING_IVERKSETT_OPPDRAG_GCP)) {
                 oppdragBackendKlient.hentStatus(oppdragId)
             } else {
                 økonomiKlient.hentStatus(oppdragId)

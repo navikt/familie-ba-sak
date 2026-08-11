@@ -71,7 +71,7 @@ class HentStatusTest {
             )
 
         every { featureToggleService.isEnabled(toggle = any()) } returns false
-        every { featureToggleService.isEnabled(FeatureToggle.OPPDRAG_MIGRERING_IVERKSETT_OPPDRAG) } returns true
+        every { featureToggleService.isEnabled(FeatureToggle.OPPDRAG_MIGRERING_IVERKSETT_OPPDRAG_GCP) } returns true
     }
 
     @Test
