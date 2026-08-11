@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.OppdaterTilkjentYtelseService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.tilUtbetalingsoppdragDto
@@ -22,11 +24,13 @@ import org.springframework.web.client.RestClientResponseException
 @Service
 class ØkonomiService(
     private val økonomiKlient: ØkonomiKlient,
+    private val oppdragBackendKlient: OppdragBackendKlient,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
     private val oppdaterTilkjentYtelseService: OppdaterTilkjentYtelseService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
 
@@ -74,7 +78,11 @@ class ØkonomiService(
             return
         }
         try {
-            økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
+            if (featureToggleService.isEnabled(FeatureToggle.OPPDRAG_MIGRERING_IVERKSETT_OPPDRAG_GCP)) {
+                oppdragBackendKlient.iverksettOppdrag(utbetalingsoppdrag)
+            } else {
+                økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
+            }
         } catch (exception: Exception) {
             if (exception is RestClientResponseException &&
                 exception.statusCode == HttpStatus.CONFLICT
@@ -93,7 +101,11 @@ class ØkonomiService(
         behandlingId: Long,
     ): OppdragStatus =
         if (tilkjentYtelseRepository.findByBehandling(behandlingId).skalIverksettesMotOppdrag()) {
-            økonomiKlient.hentStatus(oppdragId)
+            if (featureToggleService.isEnabled(FeatureToggle.OPPDRAG_MIGRERING_IVERKSETT_OPPDRAG_GCP)) {
+                oppdragBackendKlient.hentStatus(oppdragId)
+            } else {
+                økonomiKlient.hentStatus(oppdragId)
+            }
         } else {
             OppdragStatus.KVITTERT_OK
         }

@@ -27,6 +27,15 @@ class FakeØkonomiKlient : ØkonomiKlient(familieOppdragUri = "http://familie-op
     companion object {
         val simuleringsresultater = mutableMapOf<String, DetaljertSimuleringResultat>()
 
+        val simuleringsMottakere =
+            listOf(
+                SimuleringMottaker(
+                    simulertPostering = simuleringsPosteringer,
+                    mottakerType = MottakerType.BRUKER,
+                    mottakerNummer = "12345678910",
+                ),
+            )
+
         fun leggTilSimuleringResultat(
             fagsakId: String,
             simuleringResultat: DetaljertSimuleringResultat,
@@ -36,7 +45,7 @@ class FakeØkonomiKlient : ØkonomiKlient(familieOppdragUri = "http://familie-op
     }
 }
 
-val simuleringsPosteringer =
+private val simuleringsPosteringer =
     listOf(
         SimulertPostering(
             fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
@@ -158,14 +167,5 @@ val simuleringsPosteringer =
             forfallsdato = LocalDate.now().plusYears(2),
             utenInntrekk = false,
             erFeilkonto = null,
-        ),
-    )
-
-val simuleringsMottakere =
-    listOf(
-        SimuleringMottaker(
-            simulertPostering = simuleringsPosteringer,
-            mottakerType = MottakerType.BRUKER,
-            mottakerNummer = "12345678910",
         ),
     )

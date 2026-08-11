@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigrerin
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingSøknadsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockOppdragBackendKlient
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockSystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockTilbakekrevingsvedtakMotregningRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategiForValutakurserRepository
@@ -510,11 +511,13 @@ class CucumberMock(
     val økonomiService =
         ØkonomiService(
             økonomiKlient = mockØkonomiKlient(),
+            oppdragBackendKlient = mockOppdragBackendKlient(),
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             utbetalingsoppdragGenerator = utbetalingsoppdragGenerator,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             oppdaterTilkjentYtelseService = oppdaterTilkjentYtelseService,
+            featureToggleService = mockFeatureToggleService(),
         )
 
     val håndterIverksettMotØkonomiSteg =

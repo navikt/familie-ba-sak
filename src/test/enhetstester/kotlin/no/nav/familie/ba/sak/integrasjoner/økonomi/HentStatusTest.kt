@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -36,6 +37,8 @@ import java.time.Month
 class HentStatusTest {
     private val økonomiKlient = mockk<ØkonomiKlient>()
 
+    private val oppdragBackendKlient = mockk<OppdragBackendKlient>()
+
     private val beregningService: BeregningService = mockk()
 
     lateinit var statusFraOppdrag: StatusFraOppdrag
@@ -53,11 +56,13 @@ class HentStatusTest {
         val økonomiService =
             ØkonomiService(
                 økonomiKlient = økonomiKlient,
+                oppdragBackendKlient = oppdragBackendKlient,
                 tilkjentYtelseValideringService = mockk(),
                 tilkjentYtelseRepository = tilkjentYtelseRepository,
                 utbetalingsoppdragGenerator = utbetalingsoppdragGenerator,
                 behandlingHentOgPersisterService = mockk(),
                 oppdaterTilkjentYtelseService = oppdaterTilkjentYtelseService,
+                featureToggleService = featureToggleService,
             )
         statusFraOppdrag =
             StatusFraOppdrag(
@@ -66,6 +71,7 @@ class HentStatusTest {
             )
 
         every { featureToggleService.isEnabled(toggle = any()) } returns false
+        every { featureToggleService.isEnabled(FeatureToggle.OPPDRAG_MIGRERING_IVERKSETT_OPPDRAG_GCP) } returns true
     }
 
     @Test
@@ -76,7 +82,7 @@ class HentStatusTest {
         lagTilkjentYtelse(nyBehandling, listOf(lagUtbetalingsperiode(nyBehandling)))
 
         every {
-            økonomiKlient.hentStatus(
+            oppdragBackendKlient.hentStatus(
                 match { it.behandlingsId == nyBehandling.id.toString() },
             )
         } returns OppdragStatus.KVITTERT_OK
@@ -103,7 +109,7 @@ class HentStatusTest {
 
         // Assert
         assertThat(nesteSteg).isEqualTo(StegType.IVERKSETT_MOT_FAMILIE_TILBAKE)
-        verify { økonomiKlient.hentStatus(match { it.behandlingsId == nyBehandling.id.toString() }) }
+        verify { oppdragBackendKlient.hentStatus(match { it.behandlingsId == nyBehandling.id.toString() }) }
     }
 
     @Test
@@ -114,7 +120,7 @@ class HentStatusTest {
         lagTilkjentYtelse(nyBehandling, listOf())
 
         every {
-            økonomiKlient.hentStatus(
+            oppdragBackendKlient.hentStatus(
                 match { it.behandlingsId == nyBehandling.id.toString() },
             )
         } returns OppdragStatus.KVITTERT_OK
@@ -141,7 +147,7 @@ class HentStatusTest {
 
         // Assert
         assertThat(nesteSteg).isEqualTo(StegType.IVERKSETT_MOT_FAMILIE_TILBAKE)
-        verify(exactly = 0) { økonomiKlient.hentStatus(any()) }
+        verify(exactly = 0) { oppdragBackendKlient.hentStatus(any()) }
     }
 
     private fun lagTilkjentYtelse(
