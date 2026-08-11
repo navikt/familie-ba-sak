@@ -12,10 +12,10 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonDto
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
+import no.nav.familie.ba.sak.fake.FakeOppdragBackendKlient
 import no.nav.familie.ba.sak.fake.FakePdlRestKlient.Companion.leggTilBostedsadresseIPDL
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
-import no.nav.familie.ba.sak.fake.FakeØkonomiKlient.Companion.leggTilSimuleringResultat
 import no.nav.familie.ba.sak.fake.tilPayload
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
@@ -288,7 +288,7 @@ class DokumentServiceIntegrationTest(
             bostedsadresse = lagBostedsadresse(vegadresse = lagVegadresse(kommunenummer = "5601")),
         )
 
-        leggTilSimuleringResultat(
+        FakeOppdragBackendKlient.leggTilSimuleringResultat(
             fagsakId = forrigeBehandling.fagsak.id.toString(),
             simuleringResultat = DetaljertSimuleringResultat(simuleringMottaker = emptyList()),
         )

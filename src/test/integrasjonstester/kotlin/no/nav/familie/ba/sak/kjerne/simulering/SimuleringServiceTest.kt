@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.simulering
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
+import no.nav.familie.ba.sak.fake.FakeOppdragBackendKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.fake.simuleringsMottakere
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -48,7 +48,7 @@ class SimuleringServiceTest(
             )
 
         val vedtakSimuleringMottakerMock =
-            simuleringsMottakere.map { it.tilBehandlingSimuleringMottaker(behandlingEtterVilkårsvurderingSteg) }
+            FakeOppdragBackendKlient.simuleringsMottakere.map { it.tilBehandlingSimuleringMottaker(behandlingEtterVilkårsvurderingSteg) }
 
         // Act & Assert
         assertEquals(

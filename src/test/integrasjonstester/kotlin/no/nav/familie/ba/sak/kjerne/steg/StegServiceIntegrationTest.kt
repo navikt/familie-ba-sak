@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
+import no.nav.familie.ba.sak.fake.FakeOppdragBackendKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakeØkonomiKlient
 import no.nav.familie.ba.sak.fake.FakeØkonomiKlient.Companion.leggTilSimuleringResultat
@@ -851,7 +852,7 @@ class StegServiceIntegrationTest(
                 ),
             )
 
-        leggTilSimuleringResultat(fagsak.id.toString(), DetaljertSimuleringResultat(simuleringMottakerMock))
+        FakeOppdragBackendKlient.leggTilSimuleringResultat(fagsak.id.toString(), DetaljertSimuleringResultat(simuleringMottakerMock))
 
         val migreringsdato = LocalDate.now().minusMonths(6)
 
