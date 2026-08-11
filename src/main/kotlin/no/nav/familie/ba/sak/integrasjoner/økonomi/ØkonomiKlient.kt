@@ -227,7 +227,7 @@ class ØkonomiKlient(
     }
 
     companion object {
-        const val FAMILIE_OPPDRAG = "familie-oppdrag"
+        private const val FAMILIE_OPPDRAG = "familie-oppdrag"
     }
 }
 
