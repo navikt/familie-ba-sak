@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
+import no.nav.familie.ba.sak.integrasjoner.norgesbank.NorgesBankService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
@@ -87,6 +88,7 @@ class ForvalterController(
     private val integrasjonKlient: IntegrasjonKlient,
     private val forvalterService: ForvalterService,
     private val ecbService: ECBService,
+    private val norgesBankService: NorgesBankService,
     private val testVerktøyService: TestVerktøyService,
     private val tilgangService: TilgangService,
     private val økonomiService: ØkonomiService,
@@ -206,6 +208,22 @@ class ForvalterController(
             throw Feil("Valutakode må ha store bokstaver og være tre bokstaver lang")
         }
         return ResponseEntity.ok(ecbService.hentValutakurs(valuta, dato))
+    }
+
+    @GetMapping("/hentValutakursNorgesBank/")
+    fun hentValutakursFraNorgesBank(
+        @RequestParam valuta: String,
+        @RequestParam dato: LocalDate,
+    ): ResponseEntity<BigDecimal> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Hent valutakurs fra Norges Bank",
+        )
+
+        if (!valuta.matches(Regex("[A-Z]{3}"))) {
+            throw Feil("Valutakode må ha store bokstaver og være tre bokstaver lang")
+        }
+        return ResponseEntity.ok(norgesBankService.hentValutakurs(valuta, dato))
     }
 
     @GetMapping(path = ["/behandling/{behandlingId}/begrunnelsetest"])
