@@ -19,7 +19,7 @@ class NorgesBankService(
     private val norgesBankValutakursRestKlient: NorgesBankValutakursRestKlient,
     private val ecbValutakursCacheRepository: ECBValutakursCacheRepository,
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(ECBService::class.java)
+    private val logger: Logger = LoggerFactory.getLogger(NorgesBankService::class.java)
 
     /**
      * @param utenlandskValuta valutaen vi skal hente kurs for
