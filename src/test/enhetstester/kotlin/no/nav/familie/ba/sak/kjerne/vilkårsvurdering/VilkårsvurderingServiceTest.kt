@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
+import io.mockk.verify
+import io.mockk.verifyOrder
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -20,6 +23,60 @@ internal class VilkårsvurderingServiceTest {
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
 
     private val vilkårsvurderingService = VilkårsvurderingService(vilkårsvurderingRepository, sanityService)
+
+    @Test
+    fun `lagreNyOgSlettGammel skal slette eksisterende aktiv vilkårsvurdering før den nye lagres`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val gammelVilkårsvurdering =
+            lagVilkårsvurdering(
+                søkerAktør = randomAktør(),
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+            )
+        val nyVilkårsvurdering =
+            lagVilkårsvurdering(
+                søkerAktør = randomAktør(),
+                behandling = behandling,
+                resultat = Resultat.IKKE_VURDERT,
+            )
+
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns gammelVilkårsvurdering
+        justRun { vilkårsvurderingRepository.delete(gammelVilkårsvurdering) }
+        every { vilkårsvurderingRepository.save(nyVilkårsvurdering) } returns nyVilkårsvurdering
+
+        // Act
+        val lagretVilkårsvurdering = vilkårsvurderingService.lagreNyOgSlettGammel(nyVilkårsvurdering)
+
+        // Assert
+        assertThat(lagretVilkårsvurdering, Is(nyVilkårsvurdering))
+        verifyOrder {
+            vilkårsvurderingRepository.delete(gammelVilkårsvurdering)
+            vilkårsvurderingRepository.save(nyVilkårsvurdering)
+        }
+    }
+
+    @Test
+    fun `lagreNyOgSlettGammel skal ikke slette noe dersom det ikke finnes en aktiv vilkårsvurdering`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val nyVilkårsvurdering =
+            lagVilkårsvurdering(
+                søkerAktør = randomAktør(),
+                behandling = behandling,
+                resultat = Resultat.IKKE_VURDERT,
+            )
+
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns null
+        every { vilkårsvurderingRepository.save(nyVilkårsvurdering) } returns nyVilkårsvurdering
+
+        // Act
+        val lagretVilkårsvurdering = vilkårsvurderingService.lagreNyOgSlettGammel(nyVilkårsvurdering)
+
+        // Assert
+        assertThat(lagretVilkårsvurdering, Is(nyVilkårsvurdering))
+        verify(exactly = 0) { vilkårsvurderingRepository.delete(any()) }
+    }
 
     @Test
     fun `oppdaterVilkårVedDødsfall skal sette tom dato til dødsfallsdato dersom dødsfallsdato er tidligere enn nåværende tom`() {

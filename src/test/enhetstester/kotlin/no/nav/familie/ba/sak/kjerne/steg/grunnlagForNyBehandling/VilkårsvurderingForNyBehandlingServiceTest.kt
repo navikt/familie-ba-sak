@@ -100,7 +100,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
 
                 val slot = slot<Vilkårsvurdering>()
 
-                every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(capture(slot)) } returnsArgument 0
+                every { vilkårsvurderingService.lagreNyOgSlettGammel(capture(slot)) } returnsArgument 0
 
                 every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
                     lagTestPersonopplysningGrunnlag(
@@ -123,7 +123,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                 )
 
                 // Assert
-                verify(exactly = 1) { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) }
+                verify(exactly = 1) { vilkårsvurderingService.lagreNyOgSlettGammel(any()) }
 
                 validerKopiertVilkårsvurdering(slot.captured, forrigeVilkårsvurdering, forventetNåværendeVilkårsvurdering)
             }
@@ -191,7 +191,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
 
                 val slot = slot<Vilkårsvurdering>()
 
-                every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(capture(slot)) } returnsArgument 0
+                every { vilkårsvurderingService.lagreNyOgSlettGammel(capture(slot)) } returnsArgument 0
 
                 every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
                     lagTestPersonopplysningGrunnlag(
@@ -214,7 +214,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                 )
 
                 // Assert
-                verify(exactly = 1) { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) }
+                verify(exactly = 1) { vilkårsvurderingService.lagreNyOgSlettGammel(any()) }
 
                 validerKopiertVilkårsvurdering(slot.captured, forrigeVilkårsvurdering, forventetNåværendeVilkårsvurdering)
             }
@@ -266,7 +266,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
 
                 val slot = slot<Vilkårsvurdering>()
 
-                every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(capture(slot)) } returnsArgument 0
+                every { vilkårsvurderingService.lagreNyOgSlettGammel(capture(slot)) } returnsArgument 0
 
                 every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
                     lagTestPersonopplysningGrunnlag(
@@ -289,7 +289,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                 )
 
                 // Assert
-                verify(exactly = 1) { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) }
+                verify(exactly = 1) { vilkårsvurderingService.lagreNyOgSlettGammel(any()) }
 
                 validerKopiertVilkårsvurdering(slot.captured, forrigeVilkårsvurdering, forventetNåværendeVilkårsvurdering)
             }
@@ -391,7 +391,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                     )
                 } just runs
                 every { endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(behandling, forrigeBehandling) } just runs
-                every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(capture(vilkårsvurderingSlot)) } returnsArgument 0
+                every { vilkårsvurderingService.lagreNyOgSlettGammel(capture(vilkårsvurderingSlot)) } returnsArgument 0
 
                 // Act
                 vilkårsvurderingForNyBehandlingService.opprettVilkårsvurderingUtenomHovedflyt(
@@ -520,7 +520,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                     )
                 } just runs
                 every { endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(behandling, forrigeBehandling) } just runs
-                every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(capture(vilkårsvurderingSlot)) } returnsArgument 0
+                every { vilkårsvurderingService.lagreNyOgSlettGammel(capture(vilkårsvurderingSlot)) } returnsArgument 0
 
                 // Act
                 vilkårsvurderingForNyBehandlingService.opprettVilkårsvurderingUtenomHovedflyt(

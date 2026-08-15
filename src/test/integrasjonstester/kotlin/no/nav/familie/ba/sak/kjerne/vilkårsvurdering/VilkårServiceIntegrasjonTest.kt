@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagSøkerVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
+import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -48,6 +49,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.ResultatBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -58,6 +60,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.JdbcTemplate
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -88,7 +91,34 @@ class VilkårServiceIntegrasjonTest(
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
     @Autowired
     private val brevmalService: BrevmalService,
+    @Autowired
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    @Autowired
+    private val jdbcTemplate: JdbcTemplate,
 ) : AbstractSpringIntegrationTest() {
+    @Test
+    fun `lagreNyOgSlettGammel skal slette forrige aktive vilkårsvurdering med personresultater, vilkårresultater og andre vurderinger`() {
+        // Arrange
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
+
+        val gammelVilkårsvurdering = vilkårsvurderingService.lagreNyOgSlettGammel(lagVilkårsvurdering(behandling = behandling))
+        val gammeltPersonResultat = gammelVilkårsvurdering.personResultater.single()
+        assertEquals(1, antallRader("person_resultat", "fk_vilkaarsvurdering_id", gammelVilkårsvurdering.id))
+        assertEquals(gammeltPersonResultat.vilkårResultater.size, antallRader("vilkar_resultat", "fk_person_resultat_id", gammeltPersonResultat.id))
+        assertEquals(gammeltPersonResultat.andreVurderinger.size, antallRader("annen_vurdering", "fk_person_resultat_id", gammeltPersonResultat.id))
+
+        // Act
+        val nyVilkårsvurdering = vilkårsvurderingService.lagreNyOgSlettGammel(lagVilkårsvurdering(behandling = behandling))
+
+        // Assert
+        assertEquals(nyVilkårsvurdering.id, vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.id)
+        assertTrue(vilkårsvurderingRepository.findById(gammelVilkårsvurdering.id).isEmpty)
+        assertEquals(0, antallRader("person_resultat", "fk_vilkaarsvurdering_id", gammelVilkårsvurdering.id))
+        assertEquals(0, antallRader("vilkar_resultat", "fk_person_resultat_id", gammeltPersonResultat.id))
+        assertEquals(0, antallRader("annen_vurdering", "fk_person_resultat_id", gammeltPersonResultat.id))
+    }
+
     @Test
     fun `Manuell vilkårsvurdering skal få erAutomatiskVurdert på enkelte vilkår`() {
         // Arrange
@@ -295,7 +325,7 @@ class VilkårServiceIntegrasjonTest(
 
         val kopiertVilkårsvurdering = vilkårsvurdering.kopier(inkluderAndreVurderinger = true)
 
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = kopiertVilkårsvurdering)
+        vilkårsvurderingService.lagreNyOgSlettGammel(vilkårsvurdering = kopiertVilkårsvurdering)
         val personResultater =
             vilkårsvurderingService
                 .hentAktivForBehandling(behandlingId = behandling.id)!!
@@ -1428,7 +1458,7 @@ class VilkårServiceIntegrasjonTest(
                         barnPersonResultat,
                     )
             }
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
+        vilkårsvurderingService.lagreNyOgSlettGammel(forrigeVilkårsvurdering)
 
         forrigeBehandling = markerBehandlingSomAvsluttet(forrigeBehandling)
 
@@ -1480,6 +1510,12 @@ class VilkårServiceIntegrasjonTest(
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt,
         )
     }
+
+    private fun antallRader(
+        tabell: String,
+        fremmednøkkel: String,
+        id: Long,
+    ): Int = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM $tabell WHERE $fremmednøkkel = ?", Int::class.java, id)!!
 
     private fun markerBehandlingSomAvsluttet(behandling: Behandling): Behandling {
         behandling.status = BehandlingStatus.AVSLUTTET

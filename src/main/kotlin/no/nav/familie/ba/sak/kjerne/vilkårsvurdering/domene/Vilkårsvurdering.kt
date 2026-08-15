@@ -39,7 +39,8 @@ data class Vilkårsvurdering(
     @OneToMany(
         fetch = FetchType.EAGER,
         mappedBy = "vilkårsvurdering",
-        cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH],
+        cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE],
+        orphanRemoval = true,
     )
     var personResultater: Set<PersonResultat> = setOf(),
 ) : BaseEntitet() {
