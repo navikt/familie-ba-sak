@@ -1,8 +1,10 @@
 -- NAV-29456: Inaktive vilkårsvurderinger skal slettes i stedet for å bli liggende.
 -- ON DELETE CASCADE gjør at sletting av en vilkårsvurdering også sletter tilhørende
 -- person_resultat, vilkar_resultat og annen_vurdering.
--- Constraintene legges til med NOT VALID (validering skjer i V318) for å unngå
--- full skann av store tabeller mens ACCESS EXCLUSIVE-låsen holdes.
+-- Constraintene legges til med NOT VALID for å unngå full skann av store tabeller mens
+-- ACCESS EXCLUSIVE-låsen holdes. De valideres ikke her: de erstatter allerede gyldige
+-- FK-er på de samme kolonnene, så ingen rader kan bryte dem. Eventuell VALIDATE CONSTRAINT
+-- kan kjøres etter opprydding av gamle inaktive rader, når tabellene er mindre.
 
 ALTER TABLE person_resultat
     DROP CONSTRAINT periode_resultat_fk_behandling_resultat_id_fkey, -- Navn fra før tabellene ble omdøpt i V43 og V103

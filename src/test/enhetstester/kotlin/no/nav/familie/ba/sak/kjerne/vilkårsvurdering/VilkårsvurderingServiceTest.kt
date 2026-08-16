@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
-import io.mockk.verifyOrder
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -50,10 +49,8 @@ internal class VilkårsvurderingServiceTest {
 
         // Assert
         assertThat(lagretVilkårsvurdering, Is(nyVilkårsvurdering))
-        verifyOrder {
-            vilkårsvurderingRepository.delete(gammelVilkårsvurdering)
-            vilkårsvurderingRepository.save(nyVilkårsvurdering)
-        }
+        verify { vilkårsvurderingRepository.delete(gammelVilkårsvurdering) }
+        verify { vilkårsvurderingRepository.save(nyVilkårsvurdering) }
     }
 
     @Test
