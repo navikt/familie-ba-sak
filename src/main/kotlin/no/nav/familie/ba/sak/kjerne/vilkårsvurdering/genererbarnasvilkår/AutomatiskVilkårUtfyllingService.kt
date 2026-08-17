@@ -76,6 +76,7 @@ class AutomatiskVilkårUtfyllingService(
                                 begrunnelse = "Kopiert fra søkers 'Bosatt i riket'-vilkår",
                                 sistEndretIBehandlingId = behandlingId,
                                 opprinneligKopiertFraVilkårResultat = vilkårResultatPeriode.verdi.id,
+                                opprinneligKopiertIBehandlingId = behandlingId,
                             )
                         }
                     }

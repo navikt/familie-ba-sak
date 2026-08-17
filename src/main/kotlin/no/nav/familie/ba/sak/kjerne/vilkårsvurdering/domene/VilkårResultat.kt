@@ -67,6 +67,8 @@ data class VilkårResultat(
     val erOpprinneligPreutfyltIBehandling: Long? = null,
     @Column(name = "opprinnelig_kopiert_fra_vilkar_resultat", updatable = false)
     val opprinneligKopiertFraVilkårResultat: Long? = null,
+    @Column(name = "opprinnelig_kopiert_i_behandling_id", updatable = false)
+    val opprinneligKopiertIBehandlingId: Long? = null,
     @Column(name = "er_eksplisitt_avslag_paa_soknad")
     var erEksplisittAvslagPåSøknad: Boolean? = null,
     @Column(name = "evaluering_aarsak")
