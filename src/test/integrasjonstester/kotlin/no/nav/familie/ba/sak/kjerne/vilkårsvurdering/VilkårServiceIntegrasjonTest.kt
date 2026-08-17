@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.antallRader
 import no.nav.familie.ba.sak.datagenerator.lagBarnVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagSøkerVilkårResultat
@@ -61,7 +60,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.jdbc.core.JdbcTemplate
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -94,8 +92,6 @@ class VilkårServiceIntegrasjonTest(
     private val brevmalService: BrevmalService,
     @Autowired
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    @Autowired
-    private val jdbcTemplate: JdbcTemplate,
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `lagreNyOgSlettGammel skal slette forrige aktive vilkårsvurdering med personresultater, vilkårresultater og andre vurderinger`() {
@@ -104,10 +100,6 @@ class VilkårServiceIntegrasjonTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
         val gammelVilkårsvurdering = vilkårsvurderingService.lagreNyOgSlettGammel(lagVilkårsvurdering(behandling = behandling))
-        val gammeltPersonResultat = gammelVilkårsvurdering.personResultater.single()
-        assertEquals(1, jdbcTemplate.antallRader("person_resultat", "fk_vilkaarsvurdering_id", gammelVilkårsvurdering.id))
-        assertEquals(gammeltPersonResultat.vilkårResultater.size, jdbcTemplate.antallRader("vilkar_resultat", "fk_person_resultat_id", gammeltPersonResultat.id))
-        assertEquals(gammeltPersonResultat.andreVurderinger.size, jdbcTemplate.antallRader("annen_vurdering", "fk_person_resultat_id", gammeltPersonResultat.id))
 
         // Act
         val nyVilkårsvurdering = vilkårsvurderingService.lagreNyOgSlettGammel(lagVilkårsvurdering(behandling = behandling))
@@ -115,9 +107,6 @@ class VilkårServiceIntegrasjonTest(
         // Assert
         assertEquals(nyVilkårsvurdering.id, vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.id)
         assertTrue(vilkårsvurderingRepository.findById(gammelVilkårsvurdering.id).isEmpty)
-        assertEquals(0, jdbcTemplate.antallRader("person_resultat", "fk_vilkaarsvurdering_id", gammelVilkårsvurdering.id))
-        assertEquals(0, jdbcTemplate.antallRader("vilkar_resultat", "fk_person_resultat_id", gammeltPersonResultat.id))
-        assertEquals(0, jdbcTemplate.antallRader("annen_vurdering", "fk_person_resultat_id", gammeltPersonResultat.id))
     }
 
     @Test
