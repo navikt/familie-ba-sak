@@ -16,8 +16,10 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SatsendringEøsData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.sats.EøsSats
@@ -26,8 +28,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -40,6 +42,7 @@ import java.time.YearMonth
 
 class AutovedtakSatsendringEøsServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val satsendringEøsKjøringService = mockk<SatsendringEøsKjøringService>(relaxed = true)
     private val utenlandskPeriodebeløpService = mockk<UtenlandskPeriodebeløpService>()
     private val autovedtakService = mockk<AutovedtakService>()
@@ -48,6 +51,7 @@ class AutovedtakSatsendringEøsServiceTest {
     private val service =
         AutovedtakSatsendringEøsService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            behandlingService = behandlingService,
             satsendringEøsKjøringService = satsendringEøsKjøringService,
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
             autovedtakService = autovedtakService,
@@ -183,9 +187,9 @@ class AutovedtakSatsendringEøsServiceTest {
         }
 
         @Test
-        fun `oppretter JournalførVedtaksbrevTask når steg er JOURNALFØR_VEDTAKSBREV`() {
+        fun `oppretter FerdigstillBehandlingTask og setter status IVERKSETTER_VEDTAK når steg er FERDIGSTILLE_BEHANDLING`() {
             // Arrange
-            val behandlingEtterResultat = lagBehandling(fagsak = fagsak, førsteSteg = StegType.JOURNALFØR_VEDTAKSBREV)
+            val behandlingEtterResultat = lagBehandling(fagsak = fagsak, førsteSteg = StegType.FERDIGSTILLE_BEHANDLING)
             val taskSlot = slot<Task>()
             every {
                 autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(any(), any(), any(), any())
@@ -197,7 +201,10 @@ class AutovedtakSatsendringEøsServiceTest {
 
             // Assert
             assertThat(resultat).isEqualTo(SatsendringEøsSvar.SATSENDRING_EØS_KJØRT_OK.melding)
-            assertThat(taskSlot.captured.type).isEqualTo(JournalførVedtaksbrevTask.TASK_STEP_TYPE)
+            assertThat(taskSlot.captured.type).isEqualTo(FerdigstillBehandlingTask.TASK_STEP_TYPE)
+            verify(exactly = 1) {
+                behandlingService.oppdaterStatusPåBehandling(behandlingEtterResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
+            }
         }
 
         @Test
