@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.SlettInaktiveVilkårsvurderingerService
+import no.nav.familie.ba.sak.task.SlettInaktiveVilkårsvurderingerScheduler.Companion.BATCH_STØRRELSE
+import no.nav.familie.ba.sak.task.SlettInaktiveVilkårsvurderingerScheduler.Companion.MAKS_ANTALL_BATCHER_PER_KJØRING
 import org.junit.jupiter.api.Test
 
 class SlettInaktiveVilkårsvurderingerSchedulerTest {
@@ -57,10 +59,10 @@ class SlettInaktiveVilkårsvurderingerSchedulerTest {
         scheduler.slettInaktiveVilkårsvurderinger()
 
         // Assert
-        verify(exactly = 1) { slettInaktiveVilkårsvurderingerService.slettBatchMedInaktiveVilkårsvurderinger(etterId = 0L, batchStørrelse = 500) }
-        verify(exactly = 1) { slettInaktiveVilkårsvurderingerService.slettBatchMedInaktiveVilkårsvurderinger(etterId = 500L, batchStørrelse = 500) }
+        verify(exactly = 1) { slettInaktiveVilkårsvurderingerService.slettBatchMedInaktiveVilkårsvurderinger(etterId = 0L, batchStørrelse = BATCH_STØRRELSE) }
+        verify(exactly = 1) { slettInaktiveVilkårsvurderingerService.slettBatchMedInaktiveVilkårsvurderinger(etterId = 500L, batchStørrelse = BATCH_STØRRELSE) }
         // Tredje kall (etter siste slettede id 800) returnerer tom liste -> løkka stopper og sletter ikke mer
-        verify(exactly = 1) { slettInaktiveVilkårsvurderingerService.slettBatchMedInaktiveVilkårsvurderinger(etterId = 800L, batchStørrelse = 500) }
+        verify(exactly = 1) { slettInaktiveVilkårsvurderingerService.slettBatchMedInaktiveVilkårsvurderinger(etterId = 800L, batchStørrelse = BATCH_STØRRELSE) }
         verify(exactly = 3) { slettInaktiveVilkårsvurderingerService.slettBatchMedInaktiveVilkårsvurderinger(any(), any()) }
     }
 
@@ -76,6 +78,6 @@ class SlettInaktiveVilkårsvurderingerSchedulerTest {
         scheduler.slettInaktiveVilkårsvurderinger()
 
         // Assert
-        verify(exactly = 100) { slettInaktiveVilkårsvurderingerService.slettBatchMedInaktiveVilkårsvurderinger(any(), any()) }
+        verify(exactly = MAKS_ANTALL_BATCHER_PER_KJØRING) { slettInaktiveVilkårsvurderingerService.slettBatchMedInaktiveVilkårsvurderinger(any(), any()) }
     }
 }

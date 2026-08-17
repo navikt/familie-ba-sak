@@ -60,7 +60,7 @@ class SlettInaktiveVilkårsvurderingerScheduler(
 
     companion object {
         private val logger = LoggerFactory.getLogger(SlettInaktiveVilkårsvurderingerScheduler::class.java)
-        private const val BATCH_STØRRELSE = 1000
-        private const val MAKS_ANTALL_BATCHER_PER_KJØRING = 100
+        internal const val BATCH_STØRRELSE = 1000
+        internal const val MAKS_ANTALL_BATCHER_PER_KJØRING = 100
     }
 }
