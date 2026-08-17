@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.antallRader
 import no.nav.familie.ba.sak.datagenerator.lagBarnVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagSøkerVilkårResultat
@@ -104,9 +105,9 @@ class VilkårServiceIntegrasjonTest(
 
         val gammelVilkårsvurdering = vilkårsvurderingService.lagreNyOgSlettGammel(lagVilkårsvurdering(behandling = behandling))
         val gammeltPersonResultat = gammelVilkårsvurdering.personResultater.single()
-        assertEquals(1, antallRader("person_resultat", "fk_vilkaarsvurdering_id", gammelVilkårsvurdering.id))
-        assertEquals(gammeltPersonResultat.vilkårResultater.size, antallRader("vilkar_resultat", "fk_person_resultat_id", gammeltPersonResultat.id))
-        assertEquals(gammeltPersonResultat.andreVurderinger.size, antallRader("annen_vurdering", "fk_person_resultat_id", gammeltPersonResultat.id))
+        assertEquals(1, jdbcTemplate.antallRader("person_resultat", "fk_vilkaarsvurdering_id", gammelVilkårsvurdering.id))
+        assertEquals(gammeltPersonResultat.vilkårResultater.size, jdbcTemplate.antallRader("vilkar_resultat", "fk_person_resultat_id", gammeltPersonResultat.id))
+        assertEquals(gammeltPersonResultat.andreVurderinger.size, jdbcTemplate.antallRader("annen_vurdering", "fk_person_resultat_id", gammeltPersonResultat.id))
 
         // Act
         val nyVilkårsvurdering = vilkårsvurderingService.lagreNyOgSlettGammel(lagVilkårsvurdering(behandling = behandling))
@@ -114,9 +115,9 @@ class VilkårServiceIntegrasjonTest(
         // Assert
         assertEquals(nyVilkårsvurdering.id, vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.id)
         assertTrue(vilkårsvurderingRepository.findById(gammelVilkårsvurdering.id).isEmpty)
-        assertEquals(0, antallRader("person_resultat", "fk_vilkaarsvurdering_id", gammelVilkårsvurdering.id))
-        assertEquals(0, antallRader("vilkar_resultat", "fk_person_resultat_id", gammeltPersonResultat.id))
-        assertEquals(0, antallRader("annen_vurdering", "fk_person_resultat_id", gammeltPersonResultat.id))
+        assertEquals(0, jdbcTemplate.antallRader("person_resultat", "fk_vilkaarsvurdering_id", gammelVilkårsvurdering.id))
+        assertEquals(0, jdbcTemplate.antallRader("vilkar_resultat", "fk_person_resultat_id", gammeltPersonResultat.id))
+        assertEquals(0, jdbcTemplate.antallRader("annen_vurdering", "fk_person_resultat_id", gammeltPersonResultat.id))
     }
 
     @Test
@@ -1510,12 +1511,6 @@ class VilkårServiceIntegrasjonTest(
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt,
         )
     }
-
-    private fun antallRader(
-        tabell: String,
-        fremmednøkkel: String,
-        id: Long,
-    ): Int = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM $tabell WHERE $fremmednøkkel = ?", Int::class.java, id)!!
 
     private fun markerBehandlingSomAvsluttet(behandling: Behandling): Behandling {
         behandling.status = BehandlingStatus.AVSLUTTET
