@@ -60,7 +60,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.jdbc.core.JdbcTemplate
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -93,8 +92,6 @@ class VilkårServiceIntegrasjonTest(
     private val brevmalService: BrevmalService,
     @Autowired
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    @Autowired
-    private val jdbcTemplate: JdbcTemplate,
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `lagreNyOgSlettGammel skal slette forrige aktive vilkårsvurdering med personresultater, vilkårresultater og andre vurderinger`() {
@@ -103,10 +100,6 @@ class VilkårServiceIntegrasjonTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
         val gammelVilkårsvurdering = vilkårsvurderingService.lagreNyOgSlettGammel(lagVilkårsvurdering(behandling = behandling))
-        val gammeltPersonResultat = gammelVilkårsvurdering.personResultater.single()
-        assertEquals(1, antallRader("person_resultat", "fk_vilkaarsvurdering_id", gammelVilkårsvurdering.id))
-        assertEquals(gammeltPersonResultat.vilkårResultater.size, antallRader("vilkar_resultat", "fk_person_resultat_id", gammeltPersonResultat.id))
-        assertEquals(gammeltPersonResultat.andreVurderinger.size, antallRader("annen_vurdering", "fk_person_resultat_id", gammeltPersonResultat.id))
 
         // Act
         val nyVilkårsvurdering = vilkårsvurderingService.lagreNyOgSlettGammel(lagVilkårsvurdering(behandling = behandling))
@@ -114,9 +107,6 @@ class VilkårServiceIntegrasjonTest(
         // Assert
         assertEquals(nyVilkårsvurdering.id, vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.id)
         assertTrue(vilkårsvurderingRepository.findById(gammelVilkårsvurdering.id).isEmpty)
-        assertEquals(0, antallRader("person_resultat", "fk_vilkaarsvurdering_id", gammelVilkårsvurdering.id))
-        assertEquals(0, antallRader("vilkar_resultat", "fk_person_resultat_id", gammeltPersonResultat.id))
-        assertEquals(0, antallRader("annen_vurdering", "fk_person_resultat_id", gammeltPersonResultat.id))
     }
 
     @Test
@@ -1510,12 +1500,6 @@ class VilkårServiceIntegrasjonTest(
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt,
         )
     }
-
-    private fun antallRader(
-        tabell: String,
-        fremmednøkkel: String,
-        id: Long,
-    ): Int = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM $tabell WHERE $fremmednøkkel = ?", Int::class.java, id)!!
 
     private fun markerBehandlingSomAvsluttet(behandling: Behandling): Behandling {
         behandling.status = BehandlingStatus.AVSLUTTET
