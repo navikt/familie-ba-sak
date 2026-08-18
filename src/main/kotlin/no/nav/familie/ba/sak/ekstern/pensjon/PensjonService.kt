@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.feilHvis
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.secureLogger
@@ -18,6 +19,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -25,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
 import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
@@ -46,6 +50,7 @@ class PensjonService(
     private val infotrygdBarnetrygdKlient: InfotrygdBarnetrygdKlient,
     private val envService: EnvService,
     private val featureToggleService: FeatureToggleService,
+    private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
 ) {
     fun hentBarnetrygd(
         personIdent: String,
@@ -69,13 +74,11 @@ class PensjonService(
         // Sjekk om det finnes relaterte saker, dvs om barna finnes i andre behandlinger
         val barnetrygdMedRelaterteSaker =
             barnetrygdTilPensjon
-                ?.barnetrygdPerioder
-                ?.filter { it.personIdent != aktør.aktivFødselsnummer() }
-                ?.map { it.personIdent }
-                ?.distinct()
-                ?.map { hentBarnetrygdForRelatertPersonTilPensjon(it, fraDato, aktør) }
-                ?.flatten()
-                ?: emptyList()
+                ?.barna
+                .orEmpty()
+                .flatMap { hentRelaterteFagsaker(it, aktør) }
+                .distinct()
+                .mapNotNull { hentBarnetrygdTilPensjon(it, fraDato) }
 
         return barnetrygdMedRelaterteSaker
             .plus(barnetrygdFraRelaterteInfotrygdsaker)
@@ -90,19 +93,15 @@ class PensjonService(
         return uuid.toString()
     }
 
-    private fun hentBarnetrygdForRelatertPersonTilPensjon(
+    private fun hentRelaterteFagsaker(
         personIdent: String,
-        fraDato: LocalDate,
         forelderAktør: Aktør,
-    ): List<BarnetrygdTilPensjon> {
+    ): List<Fagsak> {
         val aktør = personidentService.hentAktør(personIdent)
-        val fagsaker =
-            fagsakRepository
-                .finnFagsakerSomHarAndelerForAktør(aktør)
-                .filter { it.type == FagsakType.NORMAL } // skal kun ha normale fagsaker til med her
-                .filter { it.aktør != forelderAktør } // trenger ikke å hente data til forelderen på nytt
-                .distinct()
-        return fagsaker.mapNotNull { fagsak -> hentBarnetrygdTilPensjon(fagsak, fraDato) }
+        return fagsakRepository
+            .finnFagsakerSomHarAndelerForAktør(aktør)
+            .filter { it.type == FagsakType.NORMAL } // skal kun ha normale fagsaker til med her
+            .filter { it.aktør != forelderAktør } // trenger ikke å hente data til forelderen på nytt
     }
 
     private fun hentBarnetrygdTilPensjonFraInfotrygd(
@@ -179,7 +178,38 @@ class PensjonService(
                     norgeErSekundærlandMedNullUtbetaling = andel.differanseberegnetPeriodebeløp?.let { it < 0 } ?: false,
                     sakstypeEkstern = behandling.kategori.tilPensjonSakstype(),
                 )
+            }.splittPåSøkerHarSelvstendigRett(behandling)
+    }
+
+    /**
+     * Søker har selvstendig rett i periodene hvor annen forelder er omfattet av norsk lovgivning (EØS), jf. søkers bosatt i riket-vilkår.
+     */
+    private fun List<BarnetrygdPeriode>.splittPåSøkerHarSelvstendigRett(behandling: Behandling): List<BarnetrygdPeriode> {
+        if (isEmpty()) return this
+
+        return try {
+            val søkerHarSelvstendigRettTidslinje =
+                vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(
+                    behandlingId = BehandlingId(behandling.id),
+                    søkerAktør = behandling.fagsak.aktør,
+                )
+
+            groupBy { it.personIdent }.values.flatMap { perioderForBarn ->
+                perioderForBarn
+                    .distinct()
+                    .tilTidslinje()
+                    .kombinerMed(søkerHarSelvstendigRettTidslinje) { periodeIBa, søkerHarSelvstendigRett ->
+                        periodeIBa?.copy(søkerHarSelvstendigRett = søkerHarSelvstendigRett ?: false)
+                    }.tilBarnetrygdPerioder()
             }
+        } catch (e: Exception) {
+            throw EksternTjenesteFeilException(
+                eksternTjenesteFeil = EksternTjenesteFeil(PENSJON_HENT_BARNETRYGD_PATH),
+                melding = "Klarte ikke utlede selvstendig rett for behandling=${behandling.id}",
+                request = null,
+                throwable = e,
+            )
+        }
     }
 
     private fun testidenter(
@@ -259,7 +289,7 @@ class PensjonService(
                             secureLogger.warn("Klarte ikke kombinere ba-perioder og infotrygd-perioder", e)
 
                             throw EksternTjenesteFeilException(
-                                eksternTjenesteFeil = EksternTjenesteFeil("/api/ekstern/pensjon/hent-barnetrygd"),
+                                eksternTjenesteFeil = EksternTjenesteFeil(PENSJON_HENT_BARNETRYGD_PATH),
                                 melding = "Det oppstod feil ved kombinering av BA og IT-perioder for fjerning av evt. overlapp",
                                 request = BarnetrygdTilPensjonRequest(personIdent, fraDato),
                                 throwable = e,
@@ -282,13 +312,7 @@ class PensjonService(
                 .tilTidslinje()
                 .kombinerMed(opprinneligeInfotrygdPerioder.tilTidslinje()) { periodeIBa, periodeIInfotrygd ->
                     periodeIInfotrygd.takeIf { periodeIBa == null }
-                }.tilPerioderIkkeNull()
-                .map {
-                    it.verdi.copy(
-                        stønadFom = it.fom?.toYearMonth() ?: throw Feil("Fra og med-dato kan ikke være null"),
-                        stønadTom = it.tom?.toYearMonth() ?: throw Feil("Til og med-dato kan ikke være null"),
-                    )
-                }
+                }.tilBarnetrygdPerioder()
 
         sjekkOgLoggOmDetFinnesOverlapp(baSakPerioder, opprinneligeInfotrygdPerioder, infotrygdperioderSomIkkeOverlapperBaPerioder)
         return baSakPerioder + infotrygdperioderSomIkkeOverlapperBaPerioder
@@ -300,8 +324,9 @@ class PensjonService(
         infotrygdperioderMinusOverlappeneMedBA: List<BarnetrygdPeriode>,
     ) {
         if (infotrygdperioder != infotrygdperioderMinusOverlappeneMedBA) {
+            val personIdent = (baSak + infotrygdperioder).firstOrNull()?.personIdent
             secureLogger.warn(
-                "Fant overlapp mellom $baSak og $infotrygdperioder. " +
+                "Fant overlapp for personIdent=$personIdent mellom $baSak og $infotrygdperioder. " +
                     "Infotrygdperioder korrigert for overlapp:\n$infotrygdperioderMinusOverlappeneMedBA",
             )
         }
@@ -323,6 +348,14 @@ private fun List<BarnetrygdPeriode>.tilTidslinje() =
             )
         }.tilTidslinje()
 
+private fun Tidslinje<BarnetrygdPeriode>.tilBarnetrygdPerioder() =
+    tilPerioderIkkeNull().map {
+        it.verdi.copy(
+            stønadFom = it.fom?.toYearMonth() ?: throw Feil("Fra og med-dato kan ikke være null"),
+            stønadTom = it.tom?.toYearMonth() ?: throw Feil("Til og med-dato kan ikke være null"),
+        )
+    }
+
 private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): List<BarnetrygdTilPensjon> =
     when {
         barnetrygdPerioder.isEmpty() -> {
@@ -339,4 +372,4 @@ private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): Li
     }
 
 private val BarnetrygdTilPensjon.barna: List<String>
-    get() = barnetrygdPerioder.map { it.personIdent }.filter { it != fagsakEiersIdent }
+    get() = barnetrygdPerioder.map { it.personIdent }.filter { it != fagsakEiersIdent }.distinct()
