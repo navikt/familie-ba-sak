@@ -169,6 +169,7 @@ class AutomatiskVilkårUtfyllingServiceTest {
                 assertEquals(Resultat.OPPFYLT, vilkårForBarn.single().resultat, "Feil resultat for $vilkår")
                 assertThat(søkersBosattIRiketVilkårResultat).hasSize(1)
                 assertThat(søkersBosattIRiketVilkårResultat).contains(vilkårForBarn.single().opprinneligKopiertFraVilkårResultat)
+                assertEquals(behandling.id, vilkårForBarn.single().opprinneligKopiertIBehandlingId, "Feil opprinneligKopiertIBehandlingId for $vilkår")
             }
         }
 
