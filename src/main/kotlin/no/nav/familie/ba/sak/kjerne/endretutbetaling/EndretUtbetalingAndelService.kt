@@ -54,14 +54,15 @@ class EndretUtbetalingAndelService(
             throw FunksjonellFeil("Automatisk genererte endrede utbetalingsperioder kan ikke endres, kun fjernes.")
         }
 
-        val personerPåEndretUtbetalingAndel =
+        val personIdenterIEndretUtbetalingAndel =
             endretUtbetalingAndelDto.personIdenter.takeUnless { it.isNullOrEmpty() }
                 ?: throw FunksjonellFeil("Endret utbetalingsperiode må gjelde minst én person")
 
         val personerIEndretUtbetalingAndel =
             persongrunnlagService
-                .hentPersonerPåBehandling(personerPåEndretUtbetalingAndel, behandling)
-                .filter { personerPåEndretUtbetalingAndel.contains(it.aktør.aktivFødselsnummer()) }
+                .hentPersonerPåBehandling(personIdenterIEndretUtbetalingAndel, behandling)
+
+        val aktørerIEndretUtbetalingAndel = personerIEndretUtbetalingAndel.map { it.aktør }
 
         val vilkårsvurdering =
             vilkårsvurderingService.hentAktivForBehandling(behandling.id)
@@ -69,7 +70,7 @@ class EndretUtbetalingAndelService(
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
-        endretUtbetalingAndel.fraEndretUtbetalingAndelDto(endretUtbetalingAndelDto, personerIEndretUtbetalingAndel.toSet())
+        endretUtbetalingAndel.fraEndretUtbetalingAndelDto(endretUtbetalingAndelDto, aktørerIEndretUtbetalingAndel)
 
         val andreEndredeAndelerPåBehandling =
             endretUtbetalingAndelHentOgPersisterService
@@ -149,14 +150,14 @@ class EndretUtbetalingAndelService(
         val aktørerIBehandling = personopplysningGrunnlag.søkerOgBarn.map { it.aktør }.toSet()
 
         endretUtbetalingAndelRepository.findByBehandlingId(behandling.id).forEach { endretUtbetalingAndel ->
-            val personerFortsattIBehandlingOgAndelen = endretUtbetalingAndel.personer.filter { it.aktør in aktørerIBehandling }.toMutableSet()
+            val aktørerFortsattIBehandlingOgAndelen = endretUtbetalingAndel.aktører.filter { it in aktørerIBehandling }.toMutableSet()
             when {
-                personerFortsattIBehandlingOgAndelen.isEmpty() -> {
+                aktørerFortsattIBehandlingOgAndelen.isEmpty() -> {
                     endretUtbetalingAndelRepository.delete(endretUtbetalingAndel)
                 }
 
-                personerFortsattIBehandlingOgAndelen.size < endretUtbetalingAndel.personer.size -> {
-                    endretUtbetalingAndel.personer = personerFortsattIBehandlingOgAndelen
+                aktørerFortsattIBehandlingOgAndelen.size < endretUtbetalingAndel.aktører.size -> {
+                    endretUtbetalingAndel.aktører = aktørerFortsattIBehandlingOgAndelen
                     endretUtbetalingAndelRepository.save(endretUtbetalingAndel)
                 }
             }
@@ -176,11 +177,15 @@ class EndretUtbetalingAndelService(
         behandling: Behandling,
         forrigeBehandling: Behandling,
     ) {
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
-        val nyPersonPerAktør = personopplysningGrunnlag.personer.associateBy { it.aktør }
+        val aktørerINyBehandling =
+            persongrunnlagService
+                .hentAktivThrows(behandlingId = behandling.id)
+                .personer
+                .map { it.aktør }
+                .toSet()
 
         endretUtbetalingAndelHentOgPersisterService.hentForBehandling(forrigeBehandling.id).forEach { forrigeEndretUtbetalingAndel ->
-            kopierEndretUtbetalingAndel(forrigeEndretUtbetalingAndel, behandling, forrigeBehandling, nyPersonPerAktør)
+            kopierEndretUtbetalingAndel(forrigeEndretUtbetalingAndel, behandling, forrigeBehandling, aktørerINyBehandling)
         }
     }
 
@@ -188,24 +193,23 @@ class EndretUtbetalingAndelService(
         forrigeEndretUtbetalingAndel: EndretUtbetalingAndel,
         behandling: Behandling,
         forrigeBehandling: Behandling,
-        nyPersonPerAktør: Map<Aktør, Person>,
+        aktørerINyBehandling: Set<Aktør>,
     ) {
-        val nyePersoner = forrigeEndretUtbetalingAndel.personer.mapNotNull { nyPersonPerAktør[it.aktør] }
-        val droppedeAktørIder = forrigeEndretUtbetalingAndel.personer.map { it.aktør }.filterNot { it in nyPersonPerAktør }
+        val (nyeAktører, droppedeAktører) = forrigeEndretUtbetalingAndel.aktører.partition { it in aktørerINyBehandling }
 
-        if (droppedeAktørIder.isNotEmpty()) {
+        if (droppedeAktører.isNotEmpty()) {
             logger.warn(
-                "Dropper person(er) med aktørId ${droppedeAktørIder.joinToString(", ") { it.aktørId }} fra EndretUtbetalingAndel " +
+                "Dropper aktør(er) med aktørId ${droppedeAktører.joinToString(", ") { it.aktørId }} fra EndretUtbetalingAndel " +
                     "${forrigeEndretUtbetalingAndel.id} ved kopiering fra behandling ${forrigeBehandling.id} " +
                     "til behandling ${behandling.id}: finnes ikke i det nye persongrunnlaget",
             )
         }
 
-        if (nyePersoner.isEmpty()) {
+        if (nyeAktører.isEmpty()) {
             logger.warn(
                 "Dropper EndretUtbetalingAndel ${forrigeEndretUtbetalingAndel.id} ved " +
                     "kopiering fra behandling ${forrigeBehandling.id} til behandling " +
-                    "${behandling.id}: ingen av personene finnes i det nye persongrunnlaget",
+                    "${behandling.id}: ingen av aktørene finnes i det nye persongrunnlaget",
             )
             return
         }
@@ -214,7 +218,7 @@ class EndretUtbetalingAndelService(
             forrigeEndretUtbetalingAndel.copy(
                 id = 0,
                 behandlingId = behandling.id,
-                personer = nyePersoner.toMutableSet(),
+                aktører = nyeAktører.toMutableSet(),
             ),
         )
     }
@@ -280,7 +284,7 @@ class EndretUtbetalingAndelService(
                 it.manglerObligatoriskFelt() ||
                     (
                         it.årsak in setOf(ETTERBETALING_3ÅR, ETTERBETALING_3MND) &&
-                            it.personer.any { person -> person.aktør.aktivFødselsnummer() in personerSomErSøktFor }
+                            it.aktører.any { aktør -> aktør.aktivFødselsnummer() in personerSomErSøktFor }
                     )
             }.map { it.id }
 
