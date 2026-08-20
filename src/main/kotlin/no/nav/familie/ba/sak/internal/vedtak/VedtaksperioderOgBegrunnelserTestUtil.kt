@@ -420,7 +420,7 @@ private fun hentEndretUtbetalingRader(endredeUtbetalinger: List<EndretUtbetaling
         ?.filterIsInstance<IUtfyltEndretUtbetalingAndel>()
         ?.joinToString("") {
             """
-    | ${it.personer.joinToString(",") { person -> person.aktør.aktørId }} |${it.behandlingId}|${
+    | ${it.aktører.joinToString(",") { aktør -> aktør.aktørId }} |${it.behandlingId}|${
                 it.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
             }|${
                 it.tom.sisteDagIInneværendeMåned().tilddMMyyyy()

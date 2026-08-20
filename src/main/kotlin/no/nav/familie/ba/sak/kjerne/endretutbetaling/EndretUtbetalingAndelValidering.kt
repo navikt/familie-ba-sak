@@ -80,7 +80,7 @@ object EndretUtbetalingAndelValidering {
         endretUtbetalingAndel.validerUtfyltEndring()
         if (eksisterendeEndringerPåBehandling.any {
                 it.overlapperMed(endretUtbetalingAndel.periode) &&
-                    it.personer.intersect(endretUtbetalingAndel.personer).isNotEmpty()
+                    it.aktører.intersect(endretUtbetalingAndel.aktører).isNotEmpty()
             }
         ) {
             throw FunksjonellFeil(
@@ -95,16 +95,16 @@ object EndretUtbetalingAndelValidering {
         andelTilkjentYtelser: Collection<AndelTilkjentYtelse>,
     ) {
         endretUtbetalingAndel.validerUtfyltEndring()
-        endretUtbetalingAndel.personer.forEach { person ->
+        endretUtbetalingAndel.aktører.forEach { aktør ->
             val minsteDatoForTilkjentYtelse =
                 andelTilkjentYtelser
-                    .filter { it.aktør == person.aktør }
+                    .filter { it.aktør == aktør }
                     .minByOrNull { it.stønadFom }
                     ?.stønadFom
 
             val størsteDatoForTilkjentYtelse =
                 andelTilkjentYtelser
-                    .filter { it.aktør == person.aktør }
+                    .filter { it.aktør == aktør }
                     .maxByOrNull { it.stønadTom }
                     ?.stønadTom
 
