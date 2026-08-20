@@ -79,11 +79,11 @@ fun lagPersonResultaterForSøkerOgToBarn(
 fun lagPersonResultat(
     vilkårsvurdering: Vilkårsvurdering,
     person: Person,
-    resultat: Resultat,
+    resultat: Resultat = OPPFYLT,
     periodeFom: LocalDate?,
     periodeTom: LocalDate?,
     lagFullstendigVilkårResultat: Boolean = false,
-    personType: PersonType = PersonType.BARN,
+    personType: PersonType = person.type,
     vilkårType: Vilkår = BOSATT_I_RIKET,
     erDeltBosted: Boolean = false,
     erDeltBostedSkalIkkeDeles: Boolean = false,

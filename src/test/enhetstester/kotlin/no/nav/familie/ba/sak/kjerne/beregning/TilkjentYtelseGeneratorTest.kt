@@ -1443,7 +1443,7 @@ class TilkjentYtelseGeneratorTest {
             endretAndeler.map {
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                     behandlingId = vilkårsvurdering.behandling.id,
-                    personer = it.personer,
+                    aktører = it.personer.map(Person::aktør).toSet(),
                     prosent = if (it.skalUtbetales) BigDecimal(100) else BigDecimal.ZERO,
                     årsak = it.årsak,
                     fom = it.fom,

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
@@ -36,7 +37,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     @Test
     fun `utledSøknadResultatFraAndelerTilkjentYtelse skal bare utlede resultater for personer det er framstilt krav for`() {
         // Arrange
-        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn1Aktør = lagAktør()
 
         val forrigeAndel =
             lagAndelTilkjentYtelse(
@@ -62,7 +63,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     @Test
     fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere ingen relevante endringer dersom beløpene for periodene er lik forrige behandling`() {
         // Arrange
-        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn1Aktør = lagAktør()
 
         val forrigeAndel =
             lagAndelTilkjentYtelse(
@@ -89,7 +90,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     @Test
     fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere innvilget dersom det finnes beløp for perioder som er annerledes enn sist og større enn 0`() {
         // Arrange
-        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn1Aktør = lagAktør()
 
         val forrigeAndel =
             lagAndelTilkjentYtelse(
@@ -119,7 +120,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     @Test
     fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere ingen relevante endringer dersom beløp på nåværende andel er 0 og det ikke finnes noen endringsperioder eller differanse beregning`() {
         // Arrange
-        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn1Aktør = lagAktør()
 
         val forrigeAndel =
             lagAndelTilkjentYtelse(
@@ -149,8 +150,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     @Test
     fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere INNVILGET dersom beløp på nåværende andel er 0 og det finnes endringsperiode som DELT_BOSTED`() {
         // Arrange
-        val barn1Person = lagPerson(type = PersonType.BARN)
-        val barn1Aktør = barn1Person.aktør
+        val barn1Aktør = lagAktør()
 
         val andel =
             lagAndelTilkjentYtelse(
@@ -163,7 +163,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
-                personer = setOf(barn1Person),
+                aktører = setOf(barn1Aktør),
                 fom = jan22,
                 tom = aug22,
                 prosent = BigDecimal(100),
@@ -194,8 +194,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
         årsak: Årsak,
     ) {
         // Arrange
-        val barn1Person = lagPerson(type = PersonType.BARN)
-        val barn1Aktør = barn1Person.aktør
+        val barn1Aktør = lagAktør()
 
         val andel =
             lagAndelTilkjentYtelse(
@@ -208,7 +207,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
-                personer = setOf(barn1Person),
+                aktører = setOf(barn1Aktør),
                 fom = jan22,
                 tom = aug22,
                 prosent = BigDecimal(100),
@@ -239,8 +238,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
         årsak: Årsak,
     ) {
         // Arrange
-        val barn1Person = lagPerson(type = PersonType.BARN)
-        val barn1Aktør = barn1Person.aktør
+        val barn1Aktør = lagAktør()
 
         val forrigeAndel =
             lagAndelTilkjentYtelse(
@@ -252,7 +250,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
-                personer = setOf(barn1Person),
+                aktører = setOf(barn1Aktør),
                 fom = jan22,
                 tom = aug22,
                 prosent = BigDecimal(100),
@@ -280,8 +278,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     @Test
     fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere INNVILGET dersom beløpet på nåværende andel er 0 men er differanseberegnet`() {
         // Arrange
-        val barn1Person = lagPerson(type = PersonType.BARN)
-        val barn1Aktør = barn1Person.aktør
+        val barn1Aktør = lagAktør()
 
         val andel =
             lagAndelTilkjentYtelse(
@@ -316,9 +313,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
     @Test
     fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere INNVILGET OG AVSLÅTT dersom 1 barn får innvilget og 1 barn får avslått`() {
         // Arrange
-        val barn1Person = lagPerson(type = PersonType.BARN)
-        val barn1Aktør = barn1Person.aktør
-        val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn1Aktør = lagAktør()
+        val barn2Aktør = lagAktør()
 
         val forrigeAndeler =
             listOf(
@@ -347,7 +343,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
-                personer = setOf(barn1Person),
+                aktører = setOf(barn1Aktør),
                 fom = jan22,
                 tom = aug22,
                 prosent = BigDecimal(100),
@@ -378,9 +374,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
     @Test
     fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere INNVILGET dersom småbarnstillegg blir lagt til`() {
         // Arrange
-        val barn1Person = lagPerson(type = PersonType.BARN)
-        val barn1Aktør = barn1Person.aktør
-        val søker = lagPerson(type = PersonType.SØKER)
+        val barn1Aktør = lagAktør()
+        val søker = lagAktør()
 
         val forrigeAndelBarn =
             lagAndelTilkjentYtelse(
@@ -395,7 +390,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = søker.aktør,
+                aktør = søker,
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
             )
 
@@ -411,11 +406,11 @@ internal class BehandlingsresultatSøknadUtilsTest {
                             fom = jan22,
                             tom = aug22,
                             beløp = 630,
-                            aktør = søker.aktør,
+                            aktør = søker,
                             ytelseType = YtelseType.SMÅBARNSTILLEGG,
                         ),
                     ),
-                personerFremstiltKravFor = listOf(søker.aktør),
+                personerFremstiltKravFor = listOf(søker),
                 endretUtbetalingAndeler = emptyList(),
             ).filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }
 
