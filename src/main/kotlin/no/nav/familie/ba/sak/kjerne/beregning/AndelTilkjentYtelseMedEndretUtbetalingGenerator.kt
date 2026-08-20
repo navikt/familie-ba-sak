@@ -36,11 +36,11 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
         val endringerPerAktør =
             endretUtbetalingAndeler
                 .flatMap { andel ->
-                    andel.personer
+                    andel.aktører
                         .ifEmpty {
                             throw Feil("Endret utbetaling andel ${andel.id} i behandling ${tilkjentYtelse.behandling.id} er ikke knyttet til noen personer")
-                        }.map { person ->
-                            person.aktør to andel
+                        }.map { aktør ->
+                            aktør to andel
                         }
                 }.groupBy({ it.first }, { it.second })
 

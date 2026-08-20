@@ -238,25 +238,25 @@ class EndretUtbetalingAndelService(
         val nåværendeAndeler = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
         val forrigeAndeler = beregningService.hentAndelerFraForrigeIverksattebehandling(behandling)
         val personIdenter = (nåværendeAndeler + forrigeAndeler).map { it.aktør.aktivFødselsnummer() }.distinct()
-        val personerPåBehandling = persongrunnlagService.hentPersonerPåBehandling(personIdenter, behandling)
+        val aktørerPåBehandling = persongrunnlagService.hentPersonerPåBehandling(personIdenter, behandling).map { it.aktør }
         val nåværendeEndretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
 
-        val personerGruppertPåSøknadstidspunkt =
+        val aktørerGruppertPåSøknadstidspunkt =
             grupperPersonerPåSøknadstidspunkt(
-                personerPåBehandling = personerPåBehandling,
+                aktørerPåBehandling = aktørerPåBehandling,
                 lagretSøknadstidspunktPerIdent = lagretSøknadstidspunktPerIdent,
             )
 
         val genererteAndeler =
-            personerGruppertPåSøknadstidspunkt.flatMap { (søknadstidspunkt, personerMedDato) ->
-                val aktuelleAktører = personerMedDato.map { it.aktør }.toSet()
+            aktørerGruppertPåSøknadstidspunkt.flatMap { (søknadstidspunkt, aktørerMedDato) ->
+                val aktuelleAktører = aktørerMedDato.toSet()
                 genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
                     behandling = behandling,
                     søknadMottattDato = søknadstidspunkt,
                     nåværendeAndeler = nåværendeAndeler.filter { it.aktør in aktuelleAktører },
                     forrigeAndeler = forrigeAndeler.filter { it.aktør in aktuelleAktører },
                     nåværendeEndretUtbetalingAndeler = nåværendeEndretUtbetalingAndeler,
-                    personerPåBehandling = personerMedDato,
+                    aktørerPåBehandling = aktørerMedDato,
                     erAutomatiskGenerert = true,
                 )
             }
@@ -289,12 +289,12 @@ class EndretUtbetalingAndelService(
             }.map { it.id }
 
     private fun grupperPersonerPåSøknadstidspunkt(
-        personerPåBehandling: List<Person>,
+        aktørerPåBehandling: List<Aktør>,
         lagretSøknadstidspunktPerIdent: Map<String, LocalDate>,
-    ): Map<LocalDate, List<Person>> =
-        personerPåBehandling
-            .mapNotNull { person ->
-                lagretSøknadstidspunktPerIdent[person.aktør.aktivFødselsnummer()]?.let { person to it }
+    ): Map<LocalDate, List<Aktør>> =
+        aktørerPåBehandling
+            .mapNotNull { aktør ->
+                lagretSøknadstidspunktPerIdent[aktør.aktivFødselsnummer()]?.let { aktør to it }
             }.groupBy({ it.second }, { it.first })
 
     private fun oppdaterBehandlingMedBeregningOgVarsleAbonnenter(behandling: Behandling) {
