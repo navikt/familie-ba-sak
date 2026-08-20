@@ -60,6 +60,7 @@ class TilgangServiceTest {
             fakeFamilieIntegrasjonerTilgangskontrollKlient,
             cacheManager,
             mockk(),
+            mockk(relaxed = true),
         )
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository = mockk(relaxed = true)
     private val strengtFortroligService =
