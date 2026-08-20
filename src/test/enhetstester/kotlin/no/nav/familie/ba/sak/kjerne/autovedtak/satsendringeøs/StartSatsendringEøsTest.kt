@@ -5,6 +5,8 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.sats.EøsSats
@@ -20,11 +22,13 @@ import java.time.YearMonth
 class StartSatsendringEøsTest {
     private val behandlingRepository = mockk<BehandlingRepository>()
     private val opprettTaskService = mockk<OpprettTaskService>(relaxed = true)
+    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
 
     private val startSatsendringEøs =
         StartSatsendringEøs(
             behandlingRepository = behandlingRepository,
             opprettTaskService = opprettTaskService,
+            featureToggleService = featureToggleService,
         )
 
     private val land = "PL"
@@ -44,6 +48,7 @@ class StartSatsendringEøsTest {
     fun setUp() {
         mockkObject(EøsSatserRegister)
         every { EøsSatserRegister.hentSatsForLandIMåned(land, satsTidspunkt) } returns sats
+        every { featureToggleService.isEnabled(any<FeatureToggle>()) } returns true
     }
 
     @AfterEach
