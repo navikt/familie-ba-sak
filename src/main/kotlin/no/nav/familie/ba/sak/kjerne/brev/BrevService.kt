@@ -414,7 +414,9 @@ class BrevService(
                 flettefelter =
                     FlettefelterForDokumentImpl(
                         navn = data.grunnlag.søker.navn,
-                        fodselsnummer = data.grunnlag.søker.aktør.aktivFødselsnummer(),
+                        fodselsnummer =
+                            data.grunnlag.søker.aktør
+                                .aktivFødselsnummer(),
                     ),
                 utbetalingerPerMndEøs = hentUtbetalingerPerMndEøs(vedtak),
             )
