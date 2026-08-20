@@ -302,6 +302,10 @@
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
+            <artifactId>tilgangsmaskin-klient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.familie.felles</groupId>
             <artifactId>modell</artifactId>
         </dependency>
         <dependency>
