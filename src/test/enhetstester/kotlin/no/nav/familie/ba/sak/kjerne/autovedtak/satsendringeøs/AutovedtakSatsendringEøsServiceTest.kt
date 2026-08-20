@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.sats.EøsSats
@@ -28,8 +27,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -187,9 +186,9 @@ class AutovedtakSatsendringEøsServiceTest {
         }
 
         @Test
-        fun `oppretter FerdigstillBehandlingTask og setter status IVERKSETTER_VEDTAK når steg er FERDIGSTILLE_BEHANDLING`() {
+        fun `oppretter JournalførVedtaksbrevTask når steg er JOURNALFØR_VEDTAKSBREV`() {
             // Arrange
-            val behandlingEtterResultat = lagBehandling(fagsak = fagsak, førsteSteg = StegType.FERDIGSTILLE_BEHANDLING)
+            val behandlingEtterResultat = lagBehandling(fagsak = fagsak, førsteSteg = StegType.JOURNALFØR_VEDTAKSBREV)
             val taskSlot = slot<Task>()
             every {
                 autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(any(), any(), any(), any())
@@ -201,10 +200,7 @@ class AutovedtakSatsendringEøsServiceTest {
 
             // Assert
             assertThat(resultat).isEqualTo(SatsendringEøsSvar.SATSENDRING_EØS_KJØRT_OK.melding)
-            assertThat(taskSlot.captured.type).isEqualTo(FerdigstillBehandlingTask.TASK_STEP_TYPE)
-            verify(exactly = 1) {
-                behandlingService.oppdaterStatusPåBehandling(behandlingEtterResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-            }
+            assertThat(taskSlot.captured.type).isEqualTo(JournalførVedtaksbrevTask.TASK_STEP_TYPE)
         }
 
         @Test
