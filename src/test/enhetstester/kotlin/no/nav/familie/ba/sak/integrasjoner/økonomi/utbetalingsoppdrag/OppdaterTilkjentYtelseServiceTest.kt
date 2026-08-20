@@ -7,10 +7,10 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
-import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -120,7 +120,7 @@ class OppdaterTilkjentYtelseServiceTest {
             val behandling = lagBehandling()
             val fom = dagensDato.plusMonths(1).toYearMonth()
             val tom = dagensDato.plusMonths(2).toYearMonth()
-            val søker = lagPerson()
+            val søker = lagAktør()
             val tilkjentYtelse =
                 lagTilkjentYtelse(
                     behandling = behandling,
@@ -134,7 +134,7 @@ class OppdaterTilkjentYtelseServiceTest {
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
                                 kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                                person = søker,
+                                aktør = søker,
                                 id = 1,
                                 fom = fom,
                                 tom = tom,
@@ -168,7 +168,7 @@ class OppdaterTilkjentYtelseServiceTest {
                 listOf(
                     lagEndretUtbetalingAndel(
                         behandlingId = behandling.id,
-                        personer = setOf(søker),
+                        aktører = setOf(søker),
                         fom = fom,
                         tom = tom,
                         prosent = 0,

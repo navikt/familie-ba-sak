@@ -1218,7 +1218,7 @@ internal class UtvidetBarnetrygdTest {
             listOf(
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                     behandlingId = behandling.id,
-                    personer = personopplysningGrunnlag.personer,
+                    aktører = personopplysningGrunnlag.personer.map { it.aktør }.toSet(),
                     fom = YearMonth.of(2019, 5),
                     tom = YearMonth.of(2019, 5),
                     prosent = BigDecimal.ZERO,
