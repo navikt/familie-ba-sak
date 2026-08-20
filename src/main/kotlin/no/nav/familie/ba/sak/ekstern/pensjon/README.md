@@ -44,8 +44,9 @@ Responsen er på format
           "stønadTom": "2023-09",
           "sakstypeEkstern": "EØS",
           "kildesystem": "Infotrygd",
-          "pensjonstrygdet": true,       // settes kun fra Infotrygd
-          "norgeErSekundærland": null    // settes kun fra ba-sak
+          "pensjonstrygdet": true,                         // settes kun fra Infotrygd
+          "norgeErSekundærlandMedNullUtbetaling": false,   // settes kun fra ba-sak (false fra Infotrygd)
+          "søkerHarSelvstendigRett": null                  // settes kun fra ba-sak (null fra Infotrygd)
         }
       ]
     }
@@ -61,6 +62,11 @@ blir testdataene istedenfor krydret med litt tilfeldige uttrekk derfra innimello
 
 I motsetning til Bisys som kun er interessert i perioder med utvidet barnetrygd, er Pensjon kun ute etter periodene med ordinær barnetrygd. Derfor har vi filteret
 `filter { it.type == YtelseType.ORDINÆR_BARNETRYGD }` i `hentPerioder`funksjonen i ba-sak. I infotrygd gjør vi ikke denne filtreringen pga. sammenslåing av perioder, som betyr at en `UTVIDET_BARNETRYGD`-periode derfra egentlig er en kombinasjon hvor det også inngår ordinære andeler, og må derfor medregnes.
+
+`søkerHarSelvstendigRett` er `true` i periodene hvor fagsakeieren (`fagsakEiersIdent` på det aktuelle elementet, ikke nødvendigvis identen det spørres på) har selvstendig rett,
+dvs. at det i vilkårsvurderingen er satt at annen forelder er omfattet av norsk lovgivning (EØS). Opplysningen ligger på søkers vilkår og andelene er ikke splittet på den, så en andel
+som ligger an til å få ulik verdi kan bli returnert som flere perioder. Filtreringen på `fraDato` gjøres på andelene før splittingen (`stønadTom >= fraDato`), så en andel som strekker seg over `fraDato` returneres i sin helhet – også delene som ligger foran `fraDato`.
+Feltet er alltid `true`/`false` for perioder fra ba-sak og `null` for perioder fra Infotrygd.
 
 ## Nyttige lenker
 

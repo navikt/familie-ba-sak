@@ -83,7 +83,7 @@ class PensjonController(
         if (LocalDate.now().minusYears(3).isAfter(request.fraDato)) {
             throw EksternTjenesteFeilException(
                 EksternTjenesteFeil(
-                    "/api/ekstern/pensjon/hent-barnetrygd",
+                    PENSJON_HENT_BARNETRYGD_PATH,
                     HttpStatus.BAD_REQUEST,
                 ),
                 "fraDato kan ikke være lenger enn 3 år tilbake i tid",

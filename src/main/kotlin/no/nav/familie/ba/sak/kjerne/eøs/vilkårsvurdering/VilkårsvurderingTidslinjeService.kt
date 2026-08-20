@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.feilHvis
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.lagForskjøvetTidslinjeForOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -37,11 +39,22 @@ class VilkårsvurderingTidslinjeService(
 
     fun hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId: BehandlingId): Tidslinje<Boolean> {
         val søker = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId.id).søker
-        val søkerPersonresultater =
+        return hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId = behandlingId, søkerAktør = søker.aktør)
+    }
+
+    fun hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(
+        behandlingId: BehandlingId,
+        søkerAktør: Aktør,
+    ): Tidslinje<Boolean> {
+        val personResultaterForSøker =
             vilkårsvurderingService
                 .hentAktivForBehandlingThrows(behandlingId = behandlingId.id)
                 .personResultater
-                .single { it.aktør == søker.aktør }
+                .filter { it.aktør == søkerAktør }
+        feilHvis(personResultaterForSøker.size != 1) {
+            "Forventet ett personresultat for søker på behandling=${behandlingId.id}, fant ${personResultaterForSøker.size}"
+        }
+        val søkerPersonresultater = personResultaterForSøker.single()
 
         val erAnnenForelderOmfattetAvNorskLovgivingTidslinje =
             søkerPersonresultater.vilkårResultater

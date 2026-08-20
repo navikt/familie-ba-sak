@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.common.PERSONIDENT_REGEX
 import java.time.LocalDate
 import java.time.YearMonth
 
+const val PENSJON_HENT_BARNETRYGD_PATH = "/api/ekstern/pensjon/hent-barnetrygd"
+
 data class BarnetrygdTilPensjonRequest(
     @field:Pattern(regexp = PERSONIDENT_REGEX, message = PERSONIDENT_IKKE_GYLDIG_FEILMELDING)
     val ident: String,
@@ -41,7 +43,16 @@ data class BarnetrygdPeriode(
     val pensjonstrygdet: Boolean? = null,
     @Schema(description = "Brukes til å avgjøre om pensjonspoeng skal godskrives når utbetaltPerMnd=0. Settes kun når kildesystem=BA")
     val norgeErSekundærlandMedNullUtbetaling: Boolean? = false,
-)
+    @Schema(description = "True dersom søker (fagsakeier) har selvstendig rett i perioden, dvs. det er vurdert at annen forelder er omfattet av norsk lovgivning (EØS). Alltid true/false når kildesystem=BA, null når kildesystem=Infotrygd")
+    val søkerHarSelvstendigRett: Boolean? = null,
+) {
+    // personIdent utelates bevisst slik at perioder kan logges uten å eksponere personidenter
+    override fun toString(): String =
+        "BarnetrygdPeriode(delingsprosentYtelse=$delingsprosentYtelse, ytelseTypeEkstern=$ytelseTypeEkstern, utbetaltPerMnd=$utbetaltPerMnd, " +
+            "stønadFom=$stønadFom, stønadTom=$stønadTom, sakstypeEkstern=$sakstypeEkstern, kildesystem=$kildesystem, " +
+            "pensjonstrygdet=$pensjonstrygdet, norgeErSekundærlandMedNullUtbetaling=$norgeErSekundærlandMedNullUtbetaling, " +
+            "søkerHarSelvstendigRett=$søkerHarSelvstendigRett)"
+}
 
 enum class YtelseTypeEkstern {
     ORDINÆR_BARNETRYGD,
