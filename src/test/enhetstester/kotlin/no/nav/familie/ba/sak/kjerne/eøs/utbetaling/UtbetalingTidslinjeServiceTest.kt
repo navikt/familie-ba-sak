@@ -3,17 +3,15 @@ package no.nav.familie.ba.sak.kjerne.eøs.utbetaling
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
-import no.nav.familie.ba.sak.datagenerator.lagPerson
-import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.skalUtbetales
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
@@ -87,6 +85,7 @@ class UtbetalingTidslinjeServiceTest {
         val behandling = lagBehandling()
         val fomUtvidetOgEndring = YearMonth.now().minusYears(2)
         val tomUtvidet = YearMonth.now().plusYears(1)
+        val barn = lagAktør()
 
         every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns
             listOf(
@@ -96,13 +95,18 @@ class UtbetalingTidslinjeServiceTest {
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                     kalkulertUtbetalingsbeløp = 1000,
                 ),
+                lagAndelTilkjentYtelse(
+                    aktør = barn,
+                    fom = fomUtvidetOgEndring,
+                    tom = tomUtvidet,
+                    kalkulertUtbetalingsbeløp = 0,
+                ),
             )
 
-        val barn = lagPerson(type = PersonType.BARN)
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                personer = setOf(barn),
+                aktører = setOf(barn),
                 prosent = BigDecimal.ZERO,
                 årsak = årsak,
                 fom = fomUtvidetOgEndring,
@@ -119,7 +123,7 @@ class UtbetalingTidslinjeServiceTest {
         // Assert
         assertEquals(1, resultatMap.size)
 
-        val tidslinjeForBarn = resultatMap[barn.aktør]
+        val tidslinjeForBarn = resultatMap[barn]
         val perioderForBarn = tidslinjeForBarn?.tilPerioder() ?: emptyList()
 
         assertEquals(1, perioderForBarn.size)
@@ -138,6 +142,7 @@ class UtbetalingTidslinjeServiceTest {
         val behandling = lagBehandling()
         val fomUtvidetOgEndring = YearMonth.now().minusYears(2)
         val tomUtvidet = YearMonth.now().plusYears(1)
+        val barn = lagAktør()
 
         every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns
             listOf(
@@ -147,13 +152,18 @@ class UtbetalingTidslinjeServiceTest {
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                     kalkulertUtbetalingsbeløp = 1000,
                 ),
+                lagAndelTilkjentYtelse(
+                    aktør = barn,
+                    fom = fomUtvidetOgEndring,
+                    tom = tomUtvidet,
+                    kalkulertUtbetalingsbeløp = 0,
+                ),
             )
 
-        val barn = lagPerson(type = PersonType.BARN)
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                personer = setOf(barn),
+                aktører = setOf(barn),
                 prosent = BigDecimal.ZERO,
                 årsak = årsak,
                 fom = fomUtvidetOgEndring,
@@ -170,7 +180,7 @@ class UtbetalingTidslinjeServiceTest {
         // Assert
         assertEquals(1, resultatMap.size)
 
-        val tidslinjeForBarn = resultatMap[barn.aktør]
+        val tidslinjeForBarn = resultatMap[barn]
         val perioderForBarn = tidslinjeForBarn?.tilPerioder() ?: emptyList()
 
         assertEquals(1, perioderForBarn.size)
@@ -187,15 +197,24 @@ class UtbetalingTidslinjeServiceTest {
         // Arrange
         val behandling = lagBehandling()
 
-        every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns emptyList()
-
         val fomEndretUtbetaling = YearMonth.now().minusYears(2)
         val tomEndretUtbetaling = YearMonth.now()
-        val barn = lagPerson(type = PersonType.BARN)
+        val barn = lagAktør()
+
+        every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns
+            listOf(
+                lagAndelTilkjentYtelse(
+                    aktør = barn,
+                    fom = fomEndretUtbetaling,
+                    tom = tomEndretUtbetaling,
+                    kalkulertUtbetalingsbeløp = 0,
+                ),
+            )
+
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                personer = setOf(barn),
+                aktører = setOf(barn),
                 prosent = BigDecimal.ZERO,
                 årsak = Årsak.ALLEREDE_UTBETALT,
                 fom = fomEndretUtbetaling,
@@ -212,7 +231,7 @@ class UtbetalingTidslinjeServiceTest {
         // Assert
         assertEquals(1, resultatMap.size)
 
-        val perioderForBarn = resultatMap[barn.aktør]!!.tilPerioder()
+        val perioderForBarn = resultatMap[barn]!!.tilPerioder()
 
         assertEquals(2, perioderForBarn.size)
 
@@ -232,11 +251,11 @@ class UtbetalingTidslinjeServiceTest {
     inner class TilBarnasSkalIkkeUtbetalesTidslinjerTest {
         @Test
         fun `lager tidslinje for ett barn med én etterbetaling`() {
-            val person = tilfeldigPerson()
+            val person = lagAktør()
             val endringer =
                 listOf(
                     lagEndretUtbetalingAndel(
-                        personer = setOf(person),
+                        aktører = setOf(person),
                         årsak = Årsak.ETTERBETALING_3ÅR,
                         fom = YearMonth.of(2020, 3),
                         tom = YearMonth.of(2020, 7),
@@ -246,11 +265,11 @@ class UtbetalingTidslinjeServiceTest {
 
             val forventet =
                 mapOf(
-                    person.aktør to "TTTTT".somBoolskTidslinje(mar(2020)),
+                    person to "TTTTT".somBoolskTidslinje(mar(2020)),
                 )
 
             val faktisk =
-                endringer.tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer().mapValues { (_, tidslinje) ->
+                endringer.tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer(setOf(person)).mapValues { (_, tidslinje) ->
                     tidslinje.mapVerdi { !it.skalUtbetales() }
                 }
 
@@ -259,27 +278,27 @@ class UtbetalingTidslinjeServiceTest {
 
         @Test
         fun `lager tidslinje for to barn med flere etterbetalinger`() {
-            val person1 = tilfeldigPerson()
-            val person2 = tilfeldigPerson()
+            val person1 = lagAktør()
+            val person2 = lagAktør()
 
             val endringer =
                 listOf(
                     lagEndretUtbetalingAndel(
-                        personer = setOf(person1),
+                        aktører = setOf(person1),
                         årsak = Årsak.ETTERBETALING_3ÅR,
                         fom = YearMonth.of(2020, 3),
                         tom = YearMonth.of(2020, 7),
                         prosent = BigDecimal.ZERO,
                     ),
                     lagEndretUtbetalingAndel(
-                        personer = setOf(person2),
+                        aktører = setOf(person2),
                         årsak = Årsak.ETTERBETALING_3ÅR,
                         fom = YearMonth.of(2019, 11),
                         tom = YearMonth.of(2021, 3),
                         prosent = BigDecimal.ZERO,
                     ),
                     lagEndretUtbetalingAndel(
-                        personer = setOf(person1),
+                        aktører = setOf(person1),
                         årsak = Årsak.ETTERBETALING_3ÅR,
                         fom = YearMonth.of(2021, 1),
                         tom = YearMonth.of(2021, 5),
@@ -289,12 +308,12 @@ class UtbetalingTidslinjeServiceTest {
 
             val forventet =
                 mapOf(
-                    person1.aktør to "TTTTT     TTTTT".somBoolskTidslinje(mar(2020)).filtrerIkkeNull(),
-                    person2.aktør to "TTTTTTTTTTTTTTTTT".somBoolskTidslinje(nov(2019)).filtrerIkkeNull(),
+                    person1 to "TTTTT     TTTTT".somBoolskTidslinje(mar(2020)).filtrerIkkeNull(),
+                    person2 to "TTTTTTTTTTTTTTTTT".somBoolskTidslinje(nov(2019)).filtrerIkkeNull(),
                 )
 
             val faktisk =
-                endringer.tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer().mapValues { (_, tidslinje) ->
+                endringer.tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer(setOf(person1, person2)).mapValues { (_, tidslinje) ->
                     tidslinje.mapVerdi { !it.skalUtbetales() }
                 }
 
@@ -303,11 +322,11 @@ class UtbetalingTidslinjeServiceTest {
 
         @Test
         fun `lager tidslinje for ett barn med allerede utbetalt`() {
-            val person = tilfeldigPerson()
+            val person = lagAktør()
             val endringer =
                 listOf(
                     lagEndretUtbetalingAndel(
-                        personer = setOf(person),
+                        aktører = setOf(person),
                         årsak = Årsak.ALLEREDE_UTBETALT,
                         fom = YearMonth.of(2020, 3),
                         tom = YearMonth.of(2020, 7),
@@ -317,11 +336,11 @@ class UtbetalingTidslinjeServiceTest {
 
             val forventet =
                 mapOf(
-                    person.aktør to "TTTTT".somBoolskTidslinje(mar(2020)),
+                    person to "TTTTT".somBoolskTidslinje(mar(2020)),
                 )
 
             val faktisk =
-                endringer.tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer().mapValues { (_, tidslinje) ->
+                endringer.tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer(setOf(person)).mapValues { (_, tidslinje) ->
                     tidslinje.mapVerdi { !it.skalUtbetales() }
                 }
 

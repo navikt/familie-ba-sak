@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
@@ -57,8 +58,8 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
         @Test
         fun `skal returnere eksisterende andeler uten endringer hvis det ikke finnes noen endret utbetalinger`() {
             // Arrange
-            val barn1 = lagPerson(type = PersonType.BARN)
-            val barn2 = lagPerson(type = PersonType.BARN)
+            val barn1 = lagAktør()
+            val barn2 = lagAktør()
             val behandling = lagBehandling()
 
             val tilkjentYtelse =
@@ -72,7 +73,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().minusMonths(5),
-                    person = barn1,
+                    aktør = barn1,
                     behandling = behandling,
                     beløp = 1000,
                     sats = 1000,
@@ -82,7 +83,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(4),
                     tom = YearMonth.now(),
-                    person = barn2,
+                    aktør = barn2,
                     behandling = behandling,
                     beløp = 1500,
                     sats = 1500,
@@ -111,8 +112,8 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
         @Test
         fun `skal oppdatere andeler for riktig person med endret utbetaling`() {
             // Arrange
-            val barn1 = lagPerson(type = PersonType.BARN)
-            val barn2 = lagPerson(type = PersonType.BARN)
+            val barn1 = lagAktør()
+            val barn2 = lagAktør()
             val behandling = lagBehandling()
 
             val tilkjentYtelse =
@@ -129,7 +130,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                 lagAndelTilkjentYtelse(
                     fom = fom,
                     tom = tom,
-                    person = barn1,
+                    aktør = barn1,
                     behandling = behandling,
                     beløp = 1000,
                     sats = 1000,
@@ -139,7 +140,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                 lagAndelTilkjentYtelse(
                     fom = fom,
                     tom = tom,
-                    person = barn2,
+                    aktør = barn2,
                     behandling = behandling,
                     beløp = 1500,
                     sats = 1500,
@@ -148,7 +149,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
             val endretUtbetalingAndelForBarn1 =
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                     behandlingId = behandling.id,
-                    personer = setOf(barn1),
+                    aktører = setOf(barn1),
                     prosent = BigDecimal.ZERO,
                     årsak = Årsak.ALLEREDE_UTBETALT,
                     fom = fom,
@@ -168,7 +169,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
 
             assertThat(oppdaterteAndeler[0].kalkulertUtbetalingsbeløp).isEqualTo(0)
             assertThat(oppdaterteAndeler[0].prosent).isEqualTo(BigDecimal.ZERO)
-            assertThat(oppdaterteAndeler[0].aktør).isEqualTo(barn1.aktør)
+            assertThat(oppdaterteAndeler[0].aktør).isEqualTo(barn1)
             assertThat(oppdaterteAndeler[0].endreteUtbetalinger.size).isEqualTo(1)
             assertThat(oppdaterteAndeler[0].endreteUtbetalinger.single()).isEqualTo(endretUtbetalingAndelForBarn1.endretUtbetalingAndel)
 
@@ -179,8 +180,8 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
         @Test
         fun `skal kaste feil om man sender inn andel med småbarnstillegg til funksjonen`() {
             // Arrange
-            val barn1 = lagPerson(type = PersonType.BARN)
-            val søker = lagPerson(type = PersonType.SØKER)
+            val barn1 = lagAktør()
+            val søker = lagAktør()
             val behandling = lagBehandling()
 
             val tilkjentYtelse =
@@ -197,7 +198,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                 lagAndelTilkjentYtelse(
                     fom = fom,
                     tom = tom,
-                    person = barn1,
+                    aktør = barn1,
                     behandling = behandling,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 )
@@ -206,7 +207,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                 lagAndelTilkjentYtelse(
                     fom = fom,
                     tom = tom,
-                    person = søker,
+                    aktør = søker,
                     behandling = behandling,
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 )
@@ -215,7 +216,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                 lagAndelTilkjentYtelse(
                     fom = fom,
                     tom = tom,
-                    person = søker,
+                    aktør = søker,
                     behandling = behandling,
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 )
@@ -223,7 +224,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
             val endretUtbetalingAndelForSøker =
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                     behandlingId = behandling.id,
-                    personer = setOf(søker),
+                    aktører = setOf(søker),
                     prosent = BigDecimal.ZERO,
                     årsak = Årsak.ETTERBETALING_3MND,
                     fom = fom,
@@ -244,7 +245,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
         fun `skal oppdatere andeler med endring som går på tvers av andeler`() {
             // Arrange
             val behandling = lagBehandling()
-            val barn = lagPerson(type = PersonType.BARN)
+            val barn = lagAktør()
             val tilkjentYtelse =
                 TilkjentYtelse(
                     behandling = behandling,
@@ -256,7 +257,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().minusMonths(5),
-                    person = barn,
+                    aktør = barn,
                     behandling = behandling,
                     beløp = 1000,
                     sats = 1000,
@@ -266,7 +267,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(4),
                     tom = YearMonth.now(),
-                    person = barn,
+                    aktør = barn,
                     behandling = behandling,
                     beløp = 1500,
                     sats = 1500,
@@ -275,7 +276,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
             val endretUtbetalingAndel =
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                     behandlingId = behandling.id,
-                    personer = setOf(barn),
+                    aktører = setOf(barn),
                     prosent = BigDecimal.ZERO,
                     årsak = Årsak.ALLEREDE_UTBETALT,
                     fom = YearMonth.now().minusMonths(7),
@@ -322,7 +323,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
 
         @Test
         fun `endret utbetalingsandel skal overstyre andel`() {
-            val person = lagPerson()
+            val aktør = lagAktør()
             val behandling = lagBehandling()
             val fom = YearMonth.of(2018, 1)
             val tom = YearMonth.of(2019, 1)
@@ -331,7 +332,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                     lagAndelTilkjentYtelse(
                         fom = fom,
                         tom = tom,
-                        person = person,
+                        aktør = aktør,
                         behandling = behandling,
                     ),
                 )
@@ -341,7 +342,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
             val endretUtbetalingAndeler =
                 listOf(
                     lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
-                        personer = setOf(person),
+                        aktører = setOf(aktør),
                         fom = fom,
                         tom = tom,
                         prosent = endretProsent,
@@ -363,7 +364,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
 
         @Test
         fun `endret utbetalingsandel kobler endrede andeler til riktig endret utbetalingandel`() {
-            val person = lagPerson()
+            val aktør = lagAktør()
             val behandling = lagBehandling()
             val fom1 = YearMonth.of(2018, 1)
             val tom1 = YearMonth.of(2018, 11)
@@ -376,13 +377,13 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                     lagAndelTilkjentYtelse(
                         fom = fom1,
                         tom = tom1,
-                        person = person,
+                        aktør = aktør,
                         behandling = behandling,
                     ),
                     lagAndelTilkjentYtelse(
                         fom = fom2,
                         tom = tom2,
-                        person = person,
+                        aktør = aktør,
                         behandling = behandling,
                     ),
                 )
@@ -391,7 +392,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
 
             val endretUtbetalingAndel =
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
-                    personer = setOf(person),
+                    aktører = setOf(aktør),
                     fom = fom1,
                     tom = tom2,
                     prosent = endretProsent,
@@ -402,7 +403,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                 listOf(
                     endretUtbetalingAndel,
                     lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
-                        personer = setOf(person),
+                        aktører = setOf(aktør),
                         fom = tom2.nesteMåned(),
                         prosent = endretProsent,
                         behandlingId = behandling.id,
@@ -432,7 +433,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
         @Test
         fun `skal lage AndelTilkjentYtelseMedEndreteUtbetalinger uten endring hvis perioden ikke er knyttet til en endret utbetaling`() {
             // Arrange
-            val barn = lagPerson(type = PersonType.BARN)
+            val barn = lagAktør()
             val fom = LocalDate.now().minusMonths(9).førsteDagIInneværendeMåned()
             val tom = LocalDate.now().minusMonths(5).sisteDagIMåned()
             val periode =
@@ -441,7 +442,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                     tom = tom,
                     verdi =
                         AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
-                            aktør = barn.aktør,
+                            aktør = barn,
                             beløp = 1054,
                             beløpUtenEndretUtbetaling = 0,
                             sats = 1054,
@@ -463,7 +464,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
             // Assert
             assertThat(andel.endreteUtbetalinger.size).isEqualTo(0)
             assertThat(andel.andel.tilkjentYtelse).isEqualTo(tilkjentYtelse)
-            assertThat(andel.andel.aktør).isEqualTo(barn.aktør)
+            assertThat(andel.andel.aktør).isEqualTo(barn)
             assertThat(andel.andel.type).isEqualTo(YtelseType.ORDINÆR_BARNETRYGD)
             assertThat(andel.andel.kalkulertUtbetalingsbeløp).isEqualTo(1054)
             assertThat(andel.andel.nasjonaltPeriodebeløp).isEqualTo(1054)
@@ -477,7 +478,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
         @Test
         fun `skal lage AndelTilkjentYtelseMedEndreteUtbetalinger med endring hvis perioden er knyttet til en endret utbetaling`() {
             // Arrange
-            val barn = lagPerson(type = PersonType.BARN)
+            val barn = lagAktør()
             val fom = LocalDate.now().minusMonths(9).førsteDagIInneværendeMåned()
             val tom = LocalDate.now().minusMonths(5).sisteDagIMåned()
             val periode =
@@ -486,7 +487,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                     tom = tom,
                     verdi =
                         AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
-                            aktør = barn.aktør,
+                            aktør = barn,
                             beløp = 0,
                             beløpUtenEndretUtbetaling = 0,
                             sats = 1054,
@@ -497,7 +498,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                                     andeler = emptyList(),
                                     endretUtbetalingAndel =
                                         lagEndretUtbetalingAndel(
-                                            personer = setOf(barn),
+                                            aktører = setOf(barn),
                                             prosent = BigDecimal.ZERO,
                                             årsak = Årsak.ETTERBETALING_3MND,
                                         ),
@@ -521,12 +522,12 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
             assertThat(
                 andel.endreteUtbetalinger
                     .single()
-                    .personer
+                    .aktører
                     .single(),
             ).isEqualTo(barn)
 
             assertThat(andel.andel.tilkjentYtelse).isEqualTo(tilkjentYtelse)
-            assertThat(andel.andel.aktør).isEqualTo(barn.aktør)
+            assertThat(andel.andel.aktør).isEqualTo(barn)
             assertThat(andel.andel.type).isEqualTo(YtelseType.ORDINÆR_BARNETRYGD)
             assertThat(andel.andel.kalkulertUtbetalingsbeløp).isEqualTo(0)
             assertThat(andel.andel.nasjonaltPeriodebeløp).isEqualTo(0)
@@ -540,7 +541,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
         @Test
         fun `skal lage andeler kun for perioder med verdi`() {
             // Arrange
-            val barn = lagPerson(type = PersonType.BARN)
+            val barn = lagAktør()
             val perioder =
                 listOf(
                     Periode(
@@ -548,7 +549,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                         tom = LocalDate.now().minusMonths(5).sisteDagIMåned(),
                         verdi =
                             AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
-                                aktør = barn.aktør,
+                                aktør = barn,
                                 beløp = 0,
                                 beløpUtenEndretUtbetaling = 0,
                                 sats = 1054,
@@ -559,7 +560,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                                         andeler = emptyList(),
                                         endretUtbetalingAndel =
                                             lagEndretUtbetalingAndel(
-                                                personer = setOf(barn),
+                                                aktører = setOf(barn),
                                                 prosent = BigDecimal.ZERO,
                                                 årsak = Årsak.ETTERBETALING_3MND,
                                             ),
@@ -571,7 +572,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                         tom = LocalDate.now().sisteDagIMåned(),
                         verdi =
                             AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
-                                aktør = barn.aktør,
+                                aktør = barn,
                                 beløp = 1054,
                                 beløpUtenEndretUtbetaling = 0,
                                 sats = 1054,
