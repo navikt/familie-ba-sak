@@ -5,7 +5,10 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
+import no.nav.familie.ba.sak.integrasjoner.norgesbank.NorgesBankService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.UtfyltValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
@@ -21,8 +24,10 @@ import java.time.YearMonth
 @Service
 class MånedligValutajusteringService(
     private val ecbService: ECBService,
+    private val norgesBankService: NorgesBankService,
     private val valutakursService: ValutakursService,
     private val clockProvider: ClockProvider,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -42,9 +47,16 @@ class MånedligValutajusteringService(
 
         val sisteVirkedagForrigeMåned = inneværendeMåned.minusMonths(1).tilSisteVirkedag()
 
+        val skalHenteValutakursFraNorgesBank = featureToggleService.isEnabled(FeatureToggle.HENT_VALUTAKURS_FRA_NORGESBANK, false)
         val nyeValutaKurser =
             valutakurserSomMåOppdateres.map { valutakurs ->
-                val nyKurs = ecbService.hentValutakurs(valutakurs.valutakode, sisteVirkedagForrigeMåned)
+
+                val nyKurs =
+                    if (skalHenteValutakursFraNorgesBank) {
+                        norgesBankService.hentValutakurs(valutakurs.valutakode, sisteVirkedagForrigeMåned)
+                    } else {
+                        ecbService.hentValutakurs(valutakurs.valutakode, sisteVirkedagForrigeMåned)
+                    }
 
                 Valutakurs(
                     fom = maxOf(inneværendeMåned, valutakurs.fom),

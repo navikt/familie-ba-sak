@@ -5,11 +5,14 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.UtfyltStatus
 import no.nav.familie.ba.sak.ekstern.restDomene.ValutakursDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakurs
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
+import no.nav.familie.ba.sak.integrasjoner.norgesbank.NorgesBankService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -25,8 +28,10 @@ class ValutakursControllerTest {
     private val personidentService = mockk<PersonidentService>()
     private val utvidetBehandlingService = mockk<UtvidetBehandlingService>()
     private val ecbService = mockk<ECBService>()
+    private val norgesBankService = mockk<NorgesBankService>()
     private val tilgangService = mockk<TilgangService>()
     private val automatiskOppdaterValutakursService = mockk<AutomatiskOppdaterValutakursService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val valutakursController =
         ValutakursController(
@@ -35,7 +40,9 @@ class ValutakursControllerTest {
             personidentService = personidentService,
             utvidetBehandlingService = utvidetBehandlingService,
             ecbService = ecbService,
+            norgesBankService = norgesBankService,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
+            featureToggleService = featureToggleService,
         )
 
     private val barnId = "12345678910"
@@ -47,6 +54,8 @@ class ValutakursControllerTest {
     fun setup() {
         every { personidentService.hentAktør(any()) } returns lagAktør(barnId)
         every { valutakursService.hentValutakurs(any()) } returns valutakursDto.tilValutakurs(listOf(lagAktør(barnId)))
+        every { featureToggleService.isEnabled(FeatureToggle.HENT_VALUTAKURS_FRA_NORGESBANK, false) } returns true
+        every { norgesBankService.hentValutakurs(any(), any()) } returns BigDecimal.valueOf(0.95)
         every { ecbService.hentValutakurs(any(), any()) } returns BigDecimal.valueOf(0.95)
         justRun { tilgangService.validerTilgangTilBehandling(any(), any()) }
         justRun { tilgangService.verifiserHarTilgangTilHandling(any(), any()) }
@@ -68,7 +77,7 @@ class ValutakursControllerTest {
         }
 
         // Assert
-        verify(exactly = 1) { ecbService.hentValutakurs("SEK", valutakursDato) }
+        verify(exactly = 1) { norgesBankService.hentValutakurs("SEK", valutakursDato) }
         verify(exactly = 1) { valutakursService.oppdaterValutakurs(any(), any()) }
     }
 
@@ -140,7 +149,7 @@ class ValutakursControllerTest {
         }
 
         // Assert
-        verify(exactly = 1) { ecbService.hentValutakurs("ISK", valutakursDato) }
+        verify(exactly = 1) { norgesBankService.hentValutakurs("ISK", valutakursDato) }
         verify(exactly = 1) { valutakursService.oppdaterValutakurs(any(), any()) }
     }
 }

@@ -3,10 +3,13 @@ package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 import jakarta.validation.Valid
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.ValutakursDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakurs
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
+import no.nav.familie.ba.sak.integrasjoner.norgesbank.NorgesBankService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -30,7 +33,9 @@ class ValutakursController(
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val ecbService: ECBService,
+    private val norgesBankService: NorgesBankService,
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterValutakurs(
@@ -50,7 +55,7 @@ class ValutakursController(
             if (skalManueltSetteValutakurs(valutakursDto)) {
                 valutakursDto.tilValutakurs(barnAktører)
             } else {
-                oppdaterValutakursMedKursFraECB(valutakursDto, valutakursDto.tilValutakurs(barnAktører = barnAktører))
+                oppdaterValutakurs(valutakursDto, valutakursDto.tilValutakurs(barnAktører = barnAktører))
             }
 
         valutakursService.oppdaterValutakurs(BehandlingId(behandlingId), valutaKurs)
@@ -77,16 +82,21 @@ class ValutakursController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)))
     }
 
-    private fun oppdaterValutakursMedKursFraECB(
+    private fun oppdaterValutakurs(
         valutakursDto: ValutakursDto,
         valutakurs: Valutakurs,
     ) = if (valutakursErEndret(valutakursDto, valutakursService.hentValutakurs(valutakursDto.id))) {
+        val skalHenteValutakursFraNorgesBank = featureToggleService.isEnabled(FeatureToggle.HENT_VALUTAKURS_FRA_NORGESBANK, false)
         valutakurs.copy(
             kurs =
-                ecbService.hentValutakurs(
-                    valutakursDto.valutakode!!,
-                    valutakursDto.valutakursdato!!,
-                ),
+                if (skalHenteValutakursFraNorgesBank) {
+                    norgesBankService.hentValutakurs(valutakursDto.valutakode!!, valutakursDto.valutakursdato!!)
+                } else {
+                    ecbService.hentValutakurs(
+                        valutakursDto.valutakode!!,
+                        valutakursDto.valutakursdato!!,
+                    )
+                },
         )
     } else {
         valutakurs

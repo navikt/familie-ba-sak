@@ -5,14 +5,18 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.TestClockProvider
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
+import no.nav.familie.ba.sak.integrasjoner.norgesbank.NorgesBankService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.util.VirkedagerProvider
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -25,15 +29,24 @@ class MånedligValutajusteringServiceTest {
     private val barnAktør = randomAktør()
 
     private val ecbService = mockk<ECBService>()
+    private val norgesBankService = mockk<NorgesBankService>()
     private val valutakursService = mockk<ValutakursService>(relaxed = true)
+    private val featureToggleService = mockk<FeatureToggleService>()
     private val clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(inneværendeMåned)
 
     private val månedligValutajusteringService =
         MånedligValutajusteringService(
             ecbService = ecbService,
+            norgesBankService = norgesBankService,
             valutakursService = valutakursService,
             clockProvider = clockProvider,
+            featureToggleService = featureToggleService,
         )
+
+    @BeforeEach
+    fun beforeEach() {
+        every { featureToggleService.isEnabled(FeatureToggle.HENT_VALUTAKURS_FRA_NORGESBANK, false) } returns true
+    }
 
     @Test
     fun `oppdaterValutakurserFraOgMedInneværendeMåned skal oppdatere valutakurser fra og med inneværende måned`() {
@@ -52,7 +65,7 @@ class MånedligValutajusteringServiceTest {
             )
 
         every { valutakursService.hentValutakurser(behandlingId) } returns listOf(eksisterendeValutakurs)
-        every { ecbService.hentValutakurs("SEK", sisteVirkedagForrigeMåned) } returns BigDecimal("1.10")
+        every { norgesBankService.hentValutakurs("SEK", sisteVirkedagForrigeMåned) } returns BigDecimal("1.10")
 
         // Act
         månedligValutajusteringService.oppdaterValutakurserFraOgMedInneværendeMåned(behandlingId)
@@ -94,7 +107,7 @@ class MånedligValutajusteringServiceTest {
 
         // Assert
         verify(exactly = 0) { valutakursService.oppdaterValutakurs(any(), any()) }
-        verify(exactly = 0) { ecbService.hentValutakurs(any(), any()) }
+        verify(exactly = 0) { norgesBankService.hentValutakurs(any(), any()) }
     }
 
     @Test
@@ -114,7 +127,7 @@ class MånedligValutajusteringServiceTest {
             )
 
         every { valutakursService.hentValutakurser(behandlingId) } returns listOf(eksisterendeValutakurs)
-        every { ecbService.hentValutakurs("SEK", sisteVirkedagForrigeMåned) } returns BigDecimal("1.10")
+        every { norgesBankService.hentValutakurs("SEK", sisteVirkedagForrigeMåned) } returns BigDecimal("1.10")
 
         // Act
         månedligValutajusteringService.oppdaterValutakurserFraOgMedInneværendeMåned(behandlingId)
@@ -159,16 +172,16 @@ class MånedligValutajusteringServiceTest {
             )
 
         every { valutakursService.hentValutakurser(behandlingId) } returns listOf(valutakurs1, valutakurs2)
-        every { ecbService.hentValutakurs("SEK", sisteVirkedagForrigeMåned) } returns BigDecimal("1.10")
-        every { ecbService.hentValutakurs("EUR", sisteVirkedagForrigeMåned) } returns BigDecimal("11.75")
+        every { norgesBankService.hentValutakurs("SEK", sisteVirkedagForrigeMåned) } returns BigDecimal("1.10")
+        every { norgesBankService.hentValutakurs("EUR", sisteVirkedagForrigeMåned) } returns BigDecimal("11.75")
 
         // Act
         månedligValutajusteringService.oppdaterValutakurserFraOgMedInneværendeMåned(behandlingId)
 
         // Assert
         verify(exactly = 2) { valutakursService.oppdaterValutakurs(behandlingId, any()) }
-        verify(exactly = 1) { ecbService.hentValutakurs("SEK", sisteVirkedagForrigeMåned) }
-        verify(exactly = 1) { ecbService.hentValutakurs("EUR", sisteVirkedagForrigeMåned) }
+        verify(exactly = 1) { norgesBankService.hentValutakurs("SEK", sisteVirkedagForrigeMåned) }
+        verify(exactly = 1) { norgesBankService.hentValutakurs("EUR", sisteVirkedagForrigeMåned) }
     }
 
     @Test
@@ -188,7 +201,7 @@ class MånedligValutajusteringServiceTest {
             )
 
         every { valutakursService.hentValutakurser(behandlingId) } returns listOf(eksisterendeValutakurs)
-        every { ecbService.hentValutakurs("SEK", sisteVirkedagForrigeMåned) } returns BigDecimal("1.10")
+        every { norgesBankService.hentValutakurs("SEK", sisteVirkedagForrigeMåned) } returns BigDecimal("1.10")
 
         // Act
         månedligValutajusteringService.oppdaterValutakurserFraOgMedInneværendeMåned(behandlingId)
@@ -214,7 +227,7 @@ class MånedligValutajusteringServiceTest {
 
         // Assert
         verify(exactly = 0) { valutakursService.oppdaterValutakurs(any(), any()) }
-        verify(exactly = 0) { ecbService.hentValutakurs(any(), any()) }
+        verify(exactly = 0) { norgesBankService.hentValutakurs(any(), any()) }
     }
 
     @Test
@@ -229,7 +242,7 @@ class MånedligValutajusteringServiceTest {
 
         // Assert
         verify(exactly = 0) { valutakursService.oppdaterValutakurs(any(), any()) }
-        verify(exactly = 0) { ecbService.hentValutakurs(any(), any()) }
+        verify(exactly = 0) { norgesBankService.hentValutakurs(any(), any()) }
     }
 
     @Test
@@ -249,7 +262,7 @@ class MånedligValutajusteringServiceTest {
             )
 
         every { valutakursService.hentValutakurser(behandlingId) } returns listOf(eksisterendeValutakurs)
-        every { ecbService.hentValutakurs("SEK", sisteVirkedagForrigeMåned) } returns BigDecimal("1.10")
+        every { norgesBankService.hentValutakurs("SEK", sisteVirkedagForrigeMåned) } returns BigDecimal("1.10")
 
         // Act
         månedligValutajusteringService.oppdaterValutakurserFraOgMedInneværendeMåned(behandlingId)
@@ -280,7 +293,7 @@ class MånedligValutajusteringServiceTest {
             )
 
         every { valutakursService.hentValutakurser(behandlingId) } returns listOf(eksisterendeValutakurs)
-        every { ecbService.hentValutakurs("SEK", sisteVirkedagForrigeMåned) } returns BigDecimal("1.10")
+        every { norgesBankService.hentValutakurs("SEK", sisteVirkedagForrigeMåned) } returns BigDecimal("1.10")
 
         // Act
         månedligValutajusteringService.oppdaterValutakurserFraOgMedInneværendeMåned(behandlingId)
