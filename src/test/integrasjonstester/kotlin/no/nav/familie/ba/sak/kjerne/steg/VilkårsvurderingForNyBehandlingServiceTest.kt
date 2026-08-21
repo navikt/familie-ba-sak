@@ -134,7 +134,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                         barnPersonResultat,
                     )
             }
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
+        vilkårsvurderingService.lagreNyOgSlettGammel(forrigeVilkårsvurdering)
 
         markerBehandlingSomAvsluttet(forrigeBehandling)
 
@@ -309,7 +309,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                         barnPersonResultat,
                     )
             }
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
+        vilkårsvurderingService.lagreNyOgSlettGammel(forrigeVilkårsvurdering)
 
         markerBehandlingSomAvsluttet(forrigeBehandling)
 
@@ -491,7 +491,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                         barnPersonResultat,
                     )
             }
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
+        vilkårsvurderingService.lagreNyOgSlettGammel(forrigeVilkårsvurdering)
 
         markerBehandlingSomAvsluttet(forrigeBehandling)
 
@@ -648,7 +648,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                         barnPersonResultat,
                     )
             }
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
+        vilkårsvurderingService.lagreNyOgSlettGammel(forrigeVilkårsvurdering)
 
         markerBehandlingSomAvsluttet(forrigeBehandling)
 
@@ -773,7 +773,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                         barnPersonResultat,
                     )
             }
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
+        vilkårsvurderingService.lagreNyOgSlettGammel(forrigeVilkårsvurdering)
 
         markerBehandlingSomAvsluttet(forrigeBehandling)
 
@@ -1024,7 +1024,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 overstyrendeVilkårResultater = emptyMap(),
             )
 
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
+        vilkårsvurderingService.lagreNyOgSlettGammel(vilkårsvurdering)
 
         val endredeUtbetalingsAndeler =
             listOf(
