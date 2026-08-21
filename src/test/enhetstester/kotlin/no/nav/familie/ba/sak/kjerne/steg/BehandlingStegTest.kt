@@ -1781,7 +1781,6 @@ class BehandlingStegTest {
 
         @Nested
         inner class SatsendringEøs {
-            @Disabled
             @ParameterizedTest(name = "Henter neste steg for {0}")
             @CsvSource(
                 "REGISTRERE_PERSONGRUNNLAG, VILKÅRSVURDERING",
@@ -1813,7 +1812,6 @@ class BehandlingStegTest {
                 assertThat(nesteSteg).isEqualTo(forventetResultat)
             }
 
-            @Disabled
             @ParameterizedTest(name = "Henter neste steg for {0}")
             @CsvSource(
                 "REGISTRERE_PERSONGRUNNLAG, VILKÅRSVURDERING",
@@ -1843,7 +1841,6 @@ class BehandlingStegTest {
                 assertThat(nesteSteg).isEqualTo(forventetResultat)
             }
 
-            @Disabled
             @Test
             fun `skal kaste exception ved BEHANDLINGSRESULTAT når endringer i utbetaling ikke er utledet`() {
                 // Arrange

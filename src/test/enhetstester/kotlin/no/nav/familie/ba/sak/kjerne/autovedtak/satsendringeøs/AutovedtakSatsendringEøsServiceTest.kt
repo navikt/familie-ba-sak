@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SatsendringEøsData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
@@ -40,6 +41,7 @@ import java.time.YearMonth
 
 class AutovedtakSatsendringEøsServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val satsendringEøsKjøringService = mockk<SatsendringEøsKjøringService>(relaxed = true)
     private val utenlandskPeriodebeløpService = mockk<UtenlandskPeriodebeløpService>()
     private val autovedtakService = mockk<AutovedtakService>()
@@ -48,6 +50,7 @@ class AutovedtakSatsendringEøsServiceTest {
     private val service =
         AutovedtakSatsendringEøsService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            behandlingService = behandlingService,
             satsendringEøsKjøringService = satsendringEøsKjøringService,
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
             autovedtakService = autovedtakService,

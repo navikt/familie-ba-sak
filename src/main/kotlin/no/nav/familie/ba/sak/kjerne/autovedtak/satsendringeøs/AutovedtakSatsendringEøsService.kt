@@ -10,7 +10,9 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsSv
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsSvar.SATSENDRING_EØS_INGEN_RELEVANTE_UTENLANDSK_PERIODEBELØP
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsSvar.SATSENDRING_EØS_KJØRT_OK
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -21,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import org.slf4j.LoggerFactory
@@ -30,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class AutovedtakSatsendringEøsService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val behandlingService: BehandlingService,
     private val satsendringEøsKjøringService: SatsendringEøsKjøringService,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
     private val autovedtakService: AutovedtakService,
