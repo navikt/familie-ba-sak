@@ -18,10 +18,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-// Verner aktorv2-konsumenten mot endringer som knekker Avro-deserialisering: avhengighetsbump
-// (avro 1.12.2 feilet med SecurityException i prod) og simulert skjemaevolusjon fra PDL.
 class AktorV2AvroSerdeTest {
-    // Samme verdi-serde-oppsett som kafkaAivenHendelseListenerAvroLatestContainerFactory i KafkaAivenConfig
     private val config =
         mapOf(
             "schema.registry.url" to "mock://$REGISTRY_SCOPE",
@@ -31,30 +28,24 @@ class AktorV2AvroSerdeTest {
     private val deserializer = KafkaAvroDeserializer().apply { configure(config, false) }
 
     @Test
-    fun `skal serialisere og deserialisere Aktor med samme oppsett som aktorv2-konsumenten`() {
-        // Arrange
+    fun `skal serialisere og deserialisere en Aktor med oppsettet til aktorv2-konsumenten`() {
         val aktor = Aktor(listOf(Identifikator("1234567890123", Type.AKTORID, true)))
 
-        // Act
         val bytes = serializer.serialize(PDL_AKTOR_V2_TOPIC, aktor)
         val deserialisert = deserializer.deserialize(PDL_AKTOR_V2_TOPIC, bytes)
 
-        // Assert
         assertEquals(aktor, deserialisert)
     }
 
     @Test
-    fun `skal deserialisere tombstone til null`() {
-        // Act
+    fun `skal deserialisere en tombstone-melding til null`() {
         val deserialisert = deserializer.deserialize(PDL_AKTOR_V2_TOPIC, null)
 
-        // Assert
         assertNull(deserialisert)
     }
 
     @Test
-    fun `skal tåle at PDL legger til nytt felt i skjemaet`() {
-        // Arrange
+    fun `skal tåle at PDL legger til et nytt felt i skjemaet`() {
         val writerSkjema =
             writerSkjema(
                 typeSymboler = listOf("FOLKEREGISTERIDENT", "AKTORID", "NPID"),
@@ -62,25 +53,20 @@ class AktorV2AvroSerdeTest {
             )
         val melding = genericAktor(writerSkjema, "AKTORID")
 
-        // Act
         val bytes = serializer.serialize(PDL_AKTOR_V2_TOPIC, melding)
         val deserialisert = deserializer.deserialize(PDL_AKTOR_V2_TOPIC, bytes)
 
-        // Assert
         assertEquals(Aktor(listOf(Identifikator("1234567890123", Type.AKTORID, true))), deserialisert)
     }
 
     @Test
-    fun `ny identtype fra PDL knekker deserialiseringen fordi Type mangler default`() {
-        // Arrange
+    fun `skal feile når PDL tar i bruk en ny identtype siden Type-enumen ikke har noen default`() {
         val writerSkjema =
             writerSkjema(typeSymboler = listOf("MIDLERTIDIG_ID", "FOLKEREGISTERIDENT", "AKTORID", "NPID"))
         val bytes = serializer.serialize(PDL_AKTOR_V2_TOPIC, genericAktor(writerSkjema, "MIDLERTIDIG_ID"))
 
-        // Act
         val feil = assertThrows<SerializationException> { deserializer.deserialize(PDL_AKTOR_V2_TOPIC, bytes) }
 
-        // Assert
         val årsaker = generateSequence(feil as Throwable) { it.cause }.map { it.message.orEmpty() }
         assertTrue(årsaker.any { it.contains("MIDLERTIDIG_ID") }) {
             "Forventet oppløsningsfeil for ukjent enum-symbol, fikk: $feil"
@@ -88,8 +74,7 @@ class AktorV2AvroSerdeTest {
     }
 
     @Test
-    fun `skal feile på melding der PDL har fjernet et felt`() {
-        // Arrange
+    fun `skal feile når PDL fjerner et felt fra skjemaet`() {
         val writerSkjema =
             writerSkjema(
                 typeSymboler = listOf("FOLKEREGISTERIDENT", "AKTORID", "NPID"),
@@ -97,18 +82,14 @@ class AktorV2AvroSerdeTest {
             )
         val bytes = serializer.serialize(PDL_AKTOR_V2_TOPIC, genericAktor(writerSkjema, "AKTORID"))
 
-        // Act
         val feil = assertThrows<SerializationException> { deserializer.deserialize(PDL_AKTOR_V2_TOPIC, bytes) }
 
-        // Assert
         val årsaker = generateSequence(feil as Throwable) { it.cause }.map { it.message.orEmpty() }
         assertTrue(årsaker.any { it.contains("gjeldende") }) {
             "Forventet oppløsningsfeil for manglende felt 'gjeldende', fikk: $feil"
         }
     }
 
-    // Skjemaet slik PDL kan komme til å skrive det, bygget programmatisk slik at testene ikke er
-    // avhengige av eksakt JSON-emisjon fra Schema.toString()
     private fun writerSkjema(
         typeSymboler: List<String>,
         medNyttFelt: Boolean = false,
@@ -133,7 +114,6 @@ class AktorV2AvroSerdeTest {
         )
     }
 
-    // Setter kun feltene som finnes i writer-skjemaet, slik at feltvalg bare uttrykkes i writerSkjema()
     private fun genericAktor(
         writerSkjema: Schema,
         vararg enumVerdier: String,
