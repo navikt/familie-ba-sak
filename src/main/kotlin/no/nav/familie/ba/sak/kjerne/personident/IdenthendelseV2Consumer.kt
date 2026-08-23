@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.personident
 
+import no.nav.familie.ba.sak.config.KafkaAivenConfig.Companion.PDL_AKTOR_V2_TOPIC
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.person.pdl.aktor.v2.Aktor
@@ -27,7 +28,7 @@ class IdenthendelseV2Consumer(
     @KafkaListener(
         id = "familie-ba-sak-aktorv2",
         groupId = "familie-ba-sak-aktorv2-group",
-        topics = ["pdl.aktor-v2"],
+        topics = [PDL_AKTOR_V2_TOPIC],
         containerFactory = "kafkaAivenHendelseListenerAvroLatestContainerFactory",
     )
     @Transactional
@@ -48,6 +49,11 @@ class IdenthendelseV2Consumer(
                 SECURE_LOGGER.warn("Tom aktør fra identhendelse med nøkkel $aktørIdPåHendelse")
             }
 
+            if (aktør?.identifikatorer?.any { it.type == Type.UKJENT } == true) {
+                log.warn("Mottok identhendelse med ukjent identtype fra PDL. Sjekk om Type-enumen i AktorV2.avdl må oppdateres.")
+                SECURE_LOGGER.warn("Mottok identhendelse med ukjent identtype fra PDL: $consumerRecord")
+            }
+
             val aktivAktørid =
                 aktør
                     ?.identifikatorer
@@ -63,7 +69,7 @@ class IdenthendelseV2Consumer(
                     ?.singleOrNull { ident ->
                         ident.type == Type.FOLKEREGISTERIDENT && ident.gjeldende
                     }?.also { folkeregisterident ->
-                        personidentService.opprettTaskForIdentHendelse(PersonIdent(folkeregisterident.idnummer.toString()))
+                        personidentService.opprettTaskForIdentHendelse(PersonIdent(folkeregisterident.idnummer))
                     }
             } else {
                 SECURE_LOGGER.info("Ignorerer å lage task på ident-hendelse fordi aktør $aktørIdPåHendelse ikke lenger er en gyldig aktør")
