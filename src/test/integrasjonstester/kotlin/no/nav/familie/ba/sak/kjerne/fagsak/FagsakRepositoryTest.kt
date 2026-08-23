@@ -241,7 +241,7 @@ class FagsakRepositoryTest(
             lagrePersonopplysningGrunnlag(behandling = behandling, barnasFødselsdatoer = listOf(LocalDate.now().minusYears(19).minusDays(1)))
 
             // Act
-            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses()
+            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses(maksAntall = 100)
 
             // Assert
             assertThat(fagsakerSomSkalLåses).contains(fagsak.id)
@@ -255,7 +255,7 @@ class FagsakRepositoryTest(
             lagrePersonopplysningGrunnlag(behandling = behandling, barnasFødselsdatoer = listOf(LocalDate.now().minusYears(19)))
 
             // Act
-            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses()
+            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses(maksAntall = 100)
 
             // Assert
             assertThat(fagsakerSomSkalLåses).contains(fagsak.id)
@@ -269,7 +269,7 @@ class FagsakRepositoryTest(
             lagrePersonopplysningGrunnlag(behandling = behandling, barnasFødselsdatoer = listOf(LocalDate.now().minusYears(19).plusDays(1)))
 
             // Act
-            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses()
+            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses(maksAntall = 100)
 
             // Assert
             assertThat(fagsakerSomSkalLåses).doesNotContain(fagsak.id)
@@ -286,7 +286,7 @@ class FagsakRepositoryTest(
             )
 
             // Act
-            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses()
+            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses(maksAntall = 100)
 
             // Assert
             assertThat(fagsakerSomSkalLåses).doesNotContain(fagsak.id)
@@ -300,7 +300,7 @@ class FagsakRepositoryTest(
             lagrePersonopplysningGrunnlag(behandling = behandling, barnasFødselsdatoer = listOf(LocalDate.now().minusYears(25)))
 
             // Act
-            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses()
+            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses(maksAntall = 100)
 
             // Assert
             assertThat(fagsakerSomSkalLåses).doesNotContain(fagsak.id)
@@ -314,7 +314,7 @@ class FagsakRepositoryTest(
             lagrePersonopplysningGrunnlag(behandling = behandling, barnasFødselsdatoer = listOf(LocalDate.now().minusYears(25)))
 
             // Act
-            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses()
+            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses(maksAntall = 100)
 
             // Assert
             assertThat(fagsakerSomSkalLåses).doesNotContain(fagsak.id)
@@ -328,7 +328,7 @@ class FagsakRepositoryTest(
             lagrePersonopplysningGrunnlag(behandling = behandling, barnasFødselsdatoer = listOf(LocalDate.now().minusYears(25)))
 
             // Act
-            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses()
+            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses(maksAntall = 100)
 
             // Assert
             assertThat(fagsakerSomSkalLåses).doesNotContain(fagsak.id)
@@ -342,7 +342,7 @@ class FagsakRepositoryTest(
             lagrePersonopplysningGrunnlag(behandling = behandling, barnasFødselsdatoer = listOf(LocalDate.now().minusYears(25)))
 
             // Act
-            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses()
+            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses(maksAntall = 100)
 
             // Assert
             assertThat(fagsakerSomSkalLåses).doesNotContain(fagsak.id)
@@ -358,7 +358,7 @@ class FagsakRepositoryTest(
             lagrePersonopplysningGrunnlag(behandling = sisteBehandling, barnasFødselsdatoer = listOf(LocalDate.now().minusYears(10)))
 
             // Act
-            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses()
+            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses(maksAntall = 100)
 
             // Assert
             assertThat(fagsakerSomSkalLåses).doesNotContain(fagsak.id)
@@ -374,7 +374,7 @@ class FagsakRepositoryTest(
             lagrePersonopplysningGrunnlag(behandling = sisteBehandling, barnasFødselsdatoer = listOf(LocalDate.now().minusYears(25)))
 
             // Act
-            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses()
+            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses(maksAntall = 100)
 
             // Assert
             assertThat(fagsakerSomSkalLåses).containsOnlyOnce(fagsak.id)
@@ -388,10 +388,26 @@ class FagsakRepositoryTest(
             lagrePersonopplysningGrunnlag(behandling = behandling, barnasFødselsdatoer = emptyList())
 
             // Act
-            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses()
+            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses(maksAntall = 100)
 
             // Assert
             assertThat(fagsakerSomSkalLåses).doesNotContain(fagsak.id)
+        }
+
+        @Test
+        fun `skal ikke returnere flere fagsaker enn maksAntall`() {
+            // Arrange
+            repeat(3) {
+                val fagsak = opprettFagsak(fagsakStatus = FagsakStatus.AVSLUTTET)
+                val behandling = opprettBehandling(fagsak = fagsak)
+                lagrePersonopplysningGrunnlag(behandling = behandling, barnasFødselsdatoer = listOf(LocalDate.now().minusYears(25)))
+            }
+
+            // Act
+            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses(maksAntall = 2)
+
+            // Assert
+            assertThat(fagsakerSomSkalLåses).hasSize(2)
         }
     }
 
