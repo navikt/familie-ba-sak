@@ -49,8 +49,6 @@ class IdenthendelseV2Consumer(
                 SECURE_LOGGER.warn("Tom aktør fra identhendelse med nøkkel $aktørIdPåHendelse")
             }
 
-            loggHvisUkjentIdenttype(aktør)
-
             val aktivAktørid =
                 aktør
                     ?.identifikatorer
@@ -66,7 +64,7 @@ class IdenthendelseV2Consumer(
                     ?.singleOrNull { ident ->
                         ident.type == Type.FOLKEREGISTERIDENT && ident.gjeldende
                     }?.also { folkeregisterident ->
-                        personidentService.opprettTaskForIdentHendelse(PersonIdent(folkeregisterident.idnummer))
+                        personidentService.opprettTaskForIdentHendelse(PersonIdent(folkeregisterident.idnummer.toString()))
                     }
             } else {
                 SECURE_LOGGER.info("Ignorerer å lage task på ident-hendelse fordi aktør $aktørIdPåHendelse ikke lenger er en gyldig aktør")
@@ -79,13 +77,6 @@ class IdenthendelseV2Consumer(
             MDC.clear()
         }
         ack.acknowledge()
-    }
-
-    internal fun loggHvisUkjentIdenttype(aktør: Aktor?) {
-        if (aktør?.identifikatorer?.any { it.type == Type.UKJENT } == true) {
-            log.warn("Mottok identhendelse med ukjent identtype fra PDL. Sjekk om Type-enumen i AktorV2.avdl må oppdateres.")
-            SECURE_LOGGER.warn("Mottok identhendelse med ukjent identtype fra PDL: $aktør")
-        }
     }
 
     companion object {

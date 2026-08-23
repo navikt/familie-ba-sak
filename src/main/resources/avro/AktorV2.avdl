@@ -1,17 +1,11 @@
 @namespace("no.nav.person.pdl.aktor.v2")
 protocol AktorProtoV2 {
 
-  /**
-   * UKJENT finnes ikke i PDL sitt skjema og skal aldri brukes mot PDL sine REST-/GraphQL-felter.
-   * Den er reader-default slik at nye identtyper fra PDL deserialiseres til UKJENT i stedet
-   * for å knekke konsumenten.
-   */
   enum Type {
     FOLKEREGISTERIDENT,
     AKTORID,
-    NPID,
-    UKJENT
-  } = UKJENT;
+    NPID
+  }
 
   record Identifikator {
     string idnummer;

@@ -53,30 +53,38 @@ class AktorV2AvroSerdeTest {
     }
 
     @Test
-    fun `skal tåle at PDL legger til nytt felt og ny identtype i skjemaet`() {
-        // Arrange — ukjent symbol først i writer-lista, slik at kjente symboler får andre indekser
-        // enn hos leseren og navnebasert enum-oppløsning faktisk utøves
+    fun `skal tåle at PDL legger til nytt felt i skjemaet`() {
+        // Arrange
         val writerSkjema =
             writerSkjema(
-                typeSymboler = listOf("MIDLERTIDIG_ID", "FOLKEREGISTERIDENT", "AKTORID", "NPID"),
+                typeSymboler = listOf("FOLKEREGISTERIDENT", "AKTORID", "NPID"),
                 medNyttFelt = true,
             )
-        val melding = genericAktor(writerSkjema, "MIDLERTIDIG_ID", "AKTORID")
+        val melding = genericAktor(writerSkjema, "AKTORID")
 
         // Act
         val bytes = serializer.serialize(PDL_AKTOR_V2_TOPIC, melding)
         val deserialisert = deserializer.deserialize(PDL_AKTOR_V2_TOPIC, bytes)
 
         // Assert
-        assertEquals(
-            Aktor(
-                listOf(
-                    Identifikator("1234567890123", Type.UKJENT, true),
-                    Identifikator("1234567890123", Type.AKTORID, true),
-                ),
-            ),
-            deserialisert,
-        )
+        assertEquals(Aktor(listOf(Identifikator("1234567890123", Type.AKTORID, true))), deserialisert)
+    }
+
+    @Test
+    fun `ny identtype fra PDL knekker deserialiseringen fordi Type mangler default`() {
+        // Arrange
+        val writerSkjema =
+            writerSkjema(typeSymboler = listOf("MIDLERTIDIG_ID", "FOLKEREGISTERIDENT", "AKTORID", "NPID"))
+        val bytes = serializer.serialize(PDL_AKTOR_V2_TOPIC, genericAktor(writerSkjema, "MIDLERTIDIG_ID"))
+
+        // Act
+        val feil = assertThrows<SerializationException> { deserializer.deserialize(PDL_AKTOR_V2_TOPIC, bytes) }
+
+        // Assert
+        val årsaker = generateSequence(feil as Throwable) { it.cause }.map { it.message.orEmpty() }
+        assertTrue(årsaker.any { it.contains("MIDLERTIDIG_ID") }) {
+            "Forventet oppløsningsfeil for ukjent enum-symbol, fikk: $feil"
+        }
     }
 
     @Test
@@ -96,25 +104,6 @@ class AktorV2AvroSerdeTest {
         val årsaker = generateSequence(feil as Throwable) { it.cause }.map { it.message.orEmpty() }
         assertTrue(årsaker.any { it.contains("gjeldende") }) {
             "Forventet oppløsningsfeil for manglende felt 'gjeldende', fikk: $feil"
-        }
-    }
-
-    @Test
-    fun `Type-enumen skal ha UKJENT som reader-default`() {
-        // Arrange
-        val typeSkjema =
-            Aktor
-                .getClassSchema()
-                .getField("identifikatorer")
-                .schema()
-                .elementType
-                .getField("type")
-                .schema()
-
-        // Assert
-        assertEquals("UKJENT", typeSkjema.enumDefault) {
-            "AktorV2.avdl avviker bevisst fra PDL sitt skjema: UKJENT må stå som default ('= UKJENT;') " +
-                "for at nye identtyper fra PDL ikke skal knekke konsumenten"
         }
     }
 
