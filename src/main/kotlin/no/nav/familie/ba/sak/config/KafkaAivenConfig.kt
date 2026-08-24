@@ -143,6 +143,5 @@ class KafkaAivenConfig(
 
     companion object {
         const val LOCAL_KAFKA_BROKER = "http://localhost:9092"
-        const val PDL_AKTOR_V2_TOPIC = "pdl.aktor-v2"
     }
 }

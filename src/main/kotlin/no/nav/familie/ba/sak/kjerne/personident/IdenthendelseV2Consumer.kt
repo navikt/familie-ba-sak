@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.personident
 
-import no.nav.familie.ba.sak.config.KafkaAivenConfig.Companion.PDL_AKTOR_V2_TOPIC
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.person.pdl.aktor.v2.Aktor
@@ -28,7 +27,7 @@ class IdenthendelseV2Consumer(
     @KafkaListener(
         id = "familie-ba-sak-aktorv2",
         groupId = "familie-ba-sak-aktorv2-group",
-        topics = [PDL_AKTOR_V2_TOPIC],
+        topics = ["pdl.aktor-v2"],
         containerFactory = "kafkaAivenHendelseListenerAvroLatestContainerFactory",
     )
     @Transactional

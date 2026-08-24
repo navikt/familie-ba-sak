@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.personident
 import io.confluent.kafka.schemaregistry.testutil.MockSchemaRegistry
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import io.confluent.kafka.serializers.KafkaAvroSerializer
-import no.nav.familie.ba.sak.config.KafkaAivenConfig.Companion.PDL_AKTOR_V2_TOPIC
 import no.nav.person.pdl.aktor.v2.Aktor
 import no.nav.person.pdl.aktor.v2.Identifikator
 import no.nav.person.pdl.aktor.v2.Type
@@ -20,8 +19,9 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AktorV2AvroSerdeTest {
-    private val registryScope = "aktor-v2-serde-test"
+class AktorV2AvroSerialiseringOgDeserialiseringTest {
+    private val topic = "pdl.aktor-v2"
+    private val registryScope = "aktor-v2-serialisering-test"
     private val config =
         mapOf(
             "schema.registry.url" to "mock://$registryScope",
@@ -39,15 +39,15 @@ class AktorV2AvroSerdeTest {
     fun `skal serialisere og deserialisere en Aktor med oppsettet til aktorv2-konsumenten`() {
         val aktor = Aktor(listOf(Identifikator("1234567890123", Type.AKTORID, true)))
 
-        val bytes = serializer.serialize(PDL_AKTOR_V2_TOPIC, aktor)
-        val deserialisert = deserializer.deserialize(PDL_AKTOR_V2_TOPIC, bytes)
+        val bytes = serializer.serialize(topic, aktor)
+        val deserialisert = deserializer.deserialize(topic, bytes)
 
         assertEquals(aktor, deserialisert)
     }
 
     @Test
     fun `skal deserialisere en tombstone-melding til null`() {
-        val deserialisert = deserializer.deserialize(PDL_AKTOR_V2_TOPIC, null)
+        val deserialisert = deserializer.deserialize(topic, null)
 
         assertNull(deserialisert)
     }
@@ -56,8 +56,8 @@ class AktorV2AvroSerdeTest {
     fun `skal tåle at PDL legger til et nytt felt i skjemaet`() {
         val melding = lagAktorMelding(medNyttFelt = true)
 
-        val bytes = serializer.serialize(PDL_AKTOR_V2_TOPIC, melding)
-        val deserialisert = deserializer.deserialize(PDL_AKTOR_V2_TOPIC, bytes)
+        val bytes = serializer.serialize(topic, melding)
+        val deserialisert = deserializer.deserialize(topic, bytes)
 
         assertEquals(Aktor(listOf(Identifikator("1234567890123", Type.AKTORID, true))), deserialisert)
     }
@@ -69,9 +69,9 @@ class AktorV2AvroSerdeTest {
                 typeSymboler = listOf("MIDLERTIDIG_ID", "FOLKEREGISTERIDENT", "AKTORID", "NPID"),
                 type = "MIDLERTIDIG_ID",
             )
-        val bytes = serializer.serialize(PDL_AKTOR_V2_TOPIC, melding)
+        val bytes = serializer.serialize(topic, melding)
 
-        val feil = assertThrows<SerializationException> { deserializer.deserialize(PDL_AKTOR_V2_TOPIC, bytes) }
+        val feil = assertThrows<SerializationException> { deserializer.deserialize(topic, bytes) }
 
         assertTrue(feil.årsaksmeldinger().any { it.contains("MIDLERTIDIG_ID") }) {
             "Forventet oppløsningsfeil for ukjent enum-symbol, fikk: $feil"
@@ -81,9 +81,9 @@ class AktorV2AvroSerdeTest {
     @Test
     fun `skal feile når PDL fjerner et felt fra skjemaet`() {
         val melding = lagAktorMelding(utenGjeldende = true)
-        val bytes = serializer.serialize(PDL_AKTOR_V2_TOPIC, melding)
+        val bytes = serializer.serialize(topic, melding)
 
-        val feil = assertThrows<SerializationException> { deserializer.deserialize(PDL_AKTOR_V2_TOPIC, bytes) }
+        val feil = assertThrows<SerializationException> { deserializer.deserialize(topic, bytes) }
 
         assertTrue(feil.årsaksmeldinger().any { it.contains("gjeldende") }) {
             "Forventet oppløsningsfeil for manglende felt 'gjeldende', fikk: $feil"
