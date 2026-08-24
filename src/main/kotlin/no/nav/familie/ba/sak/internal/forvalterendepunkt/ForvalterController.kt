@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.internal.ForvalterPersonInfoDto
 import no.nav.familie.ba.sak.internal.ForvalterService
 import no.nav.familie.ba.sak.internal.HentPersonFraPdlRequest
-import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.internal.tilForvalterPersonInfoDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
@@ -89,7 +88,6 @@ class ForvalterController(
     private val integrasjonKlient: IntegrasjonKlient,
     private val forvalterService: ForvalterService,
     private val ecbService: ECBService,
-    private val testVerktøyService: TestVerktøyService,
     private val tilgangService: TilgangService,
     private val økonomiService: ØkonomiService,
     private val opprettTaskService: OpprettTaskService,
@@ -164,36 +162,6 @@ class ForvalterController(
             throw Feil("Valutakode må ha store bokstaver og være tre bokstaver lang")
         }
         return ResponseEntity.ok(ecbService.hentValutakurs(valuta, dato))
-    }
-
-    @GetMapping(path = ["/behandling/{behandlingId}/begrunnelsetest"])
-    fun hentBegrunnelsetestPåBehandling(
-        @PathVariable behandlingId: Long,
-    ): String {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Hente begrunnelsetest",
-        )
-
-        return testVerktøyService
-            .hentBegrunnelsetest(behandlingId)
-            .replace("\n", System.lineSeparator())
-    }
-
-    @GetMapping(path = ["/behandling/{behandlingId}/vedtaksperiodertest"])
-    fun hentVedtaksperioderTestPåBehandling(
-        @PathVariable behandlingId: Long,
-    ): String {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Hente vedtaksperiodertest",
-        )
-
-        return testVerktøyService
-            .hentVedtaksperioderTest(behandlingId)
-            .replace("\n", System.lineSeparator())
     }
 
     @PatchMapping("/patch-fagsak-med-ny-ident")
