@@ -23,14 +23,12 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatusScheduler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
-import no.nav.familie.ba.sak.task.DeaktiverMinsideTask
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
 import no.nav.familie.ba.sak.task.MaskineltUnderkjennVedtakTask
@@ -79,7 +77,6 @@ class ForvalterController(
     private val persongrunnlagService: PersongrunnlagService,
     private val hentAlleIdenterTilPsysTask: HentAlleIdenterTilPsysTask,
     private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
-    private val personidentRepository: PersonidentRepository,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val personidentService: PersonidentService,
     private val pdlRestKlient: PdlRestKlient,
@@ -248,44 +245,6 @@ class ForvalterController(
         )
 
         return ResponseEntity.ok(utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId).map { it.tilUtbetalingsperioder() })
-    }
-
-    @PostMapping("/aktiver-minside-for-ident")
-    @Operation(
-        summary = "Sender Kafka-melding om å aktivere MinSide for en ident",
-    )
-    fun aktiverMinsideForIdent(
-        @RequestBody ident: String,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Opprett task for å aktivere minside for ident",
-        )
-
-        val personIdent = personidentRepository.findByFødselsnummerOrNull(ident) ?: return ResponseEntity.status(404).body("Finner ikke person")
-
-        opprettTaskService.opprettAktiverMinsideTask(personIdent.aktør)
-
-        return ResponseEntity.ok("Task for aktivering av minside for ident opprettet")
-    }
-
-    @PostMapping("/deaktiver-minside-for-ident")
-    @Operation(
-        summary = "Sender Kafka-melding om å deaktivere MinSide for en ident",
-    )
-    fun deaktiverMinsideForIdent(
-        @RequestBody ident: String,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Opprett task for å deaktivere minside for ident",
-        )
-
-        val personIdent = personidentRepository.findByFødselsnummerOrNull(ident) ?: return ResponseEntity.status(404).body("Finner ikke person")
-
-        DeaktiverMinsideTask.opprettTask(personIdent.aktør)
-
-        return ResponseEntity.ok("Task for deaktivering av minside for ident opprettet")
     }
 
     @GetMapping("/identifiser-institusjoner-med-finnmarkstillegg")
