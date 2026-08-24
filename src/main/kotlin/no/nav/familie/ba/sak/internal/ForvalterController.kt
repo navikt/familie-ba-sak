@@ -758,14 +758,17 @@ class ForvalterController(
     }
 
     @PostMapping("/fagsaklåsing/start-batch")
-    @Operation(summary = "Start batch for å låse fagsaker iht. arkivloven")
-    fun startFagsakLåsingBatch(): ResponseEntity<Ressurs<String>> {
+    @Operation(summary = "Start batch for å låse fagsaker iht. arkivloven. maksAntall begrenser hvor mange fagsaker som låses i denne kjøringen.")
+    fun startFagsakLåsingBatch(
+        @RequestParam maksAntall: Int,
+    ): ResponseEntity<Ressurs<String>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
             handling = "Start fagsaklåsing-batch",
         )
-        fagsakStatusScheduler.startFagsakLåsing()
-        return ResponseEntity.ok(Ressurs.success("Fagsaklåsing-batch startet"))
+        val startet = fagsakStatusScheduler.startFagsakLåsing(maksAntall = maksAntall)
+        val melding = if (startet) "Fagsaklåsing-batch startet med maks $maksAntall fagsaker" else "Fagsaklåsing-batch ble ikke startet: toggle er av"
+        return ResponseEntity.ok(Ressurs.success(melding))
     }
 
     @PostMapping("/fagsaklåsing/lås-fagsak/{fagsakId}")

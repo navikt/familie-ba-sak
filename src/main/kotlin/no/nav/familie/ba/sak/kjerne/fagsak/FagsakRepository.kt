@@ -301,8 +301,10 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         SELECT yb.fk_fagsak_id
         FROM   yngste_barn yb
         WHERE  yb.yngste_foedselsdato + INTERVAL '19 years' <= CURRENT_DATE
+        ORDER BY yb.fk_fagsak_id
+        LIMIT :maksAntall
         """,
         nativeQuery = true,
     )
-    fun finnAvsluttedeFagsakerSomSkalLåses(): List<Long>
+    fun finnAvsluttedeFagsakerSomSkalLåses(maksAntall: Int): List<Long>
 }
