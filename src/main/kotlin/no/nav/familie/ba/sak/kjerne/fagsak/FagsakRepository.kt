@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import jakarta.persistence.LockModeType
-import no.nav.familie.ba.sak.internal.FagsakMedFlereMigreringer
+import no.nav.familie.ba.sak.internal.forvalter.FagsakMedFlereMigreringer
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
