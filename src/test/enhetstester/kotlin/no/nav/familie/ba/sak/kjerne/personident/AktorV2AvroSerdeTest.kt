@@ -16,16 +16,24 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AktorV2AvroSerdeTest {
+    private val registryScope = "aktor-v2-serde-test"
     private val config =
         mapOf(
-            "schema.registry.url" to "mock://$REGISTRY_SCOPE",
+            "schema.registry.url" to "mock://$registryScope",
             "specific.avro.reader" to true,
         )
     private val serializer = KafkaAvroSerializer().apply { configure(config, false) }
     private val deserializer = KafkaAvroDeserializer().apply { configure(config, false) }
+
+    @AfterAll
+    fun ryddOppMockSchemaRegistry() {
+        MockSchemaRegistry.dropScope(registryScope)
+    }
 
     @Test
     fun `skal serialisere og deserialisere en Aktor med oppsettet til aktorv2-konsumenten`() {
@@ -46,12 +54,7 @@ class AktorV2AvroSerdeTest {
 
     @Test
     fun `skal tåle at PDL legger til et nytt felt i skjemaet`() {
-        val writerSkjema =
-            writerSkjema(
-                typeSymboler = listOf("FOLKEREGISTERIDENT", "AKTORID", "NPID"),
-                medNyttFelt = true,
-            )
-        val melding = genericAktor(writerSkjema, "AKTORID")
+        val melding = lagAktorMelding(medNyttFelt = true)
 
         val bytes = serializer.serialize(PDL_AKTOR_V2_TOPIC, melding)
         val deserialisert = deserializer.deserialize(PDL_AKTOR_V2_TOPIC, bytes)
@@ -61,40 +64,40 @@ class AktorV2AvroSerdeTest {
 
     @Test
     fun `skal feile når PDL tar i bruk en ny identtype siden Type-enumen ikke har noen default`() {
-        val writerSkjema =
-            writerSkjema(typeSymboler = listOf("MIDLERTIDIG_ID", "FOLKEREGISTERIDENT", "AKTORID", "NPID"))
-        val bytes = serializer.serialize(PDL_AKTOR_V2_TOPIC, genericAktor(writerSkjema, "MIDLERTIDIG_ID"))
+        val melding =
+            lagAktorMelding(
+                typeSymboler = listOf("MIDLERTIDIG_ID", "FOLKEREGISTERIDENT", "AKTORID", "NPID"),
+                type = "MIDLERTIDIG_ID",
+            )
+        val bytes = serializer.serialize(PDL_AKTOR_V2_TOPIC, melding)
 
         val feil = assertThrows<SerializationException> { deserializer.deserialize(PDL_AKTOR_V2_TOPIC, bytes) }
 
-        val årsaker = generateSequence(feil as Throwable) { it.cause }.map { it.message.orEmpty() }
-        assertTrue(årsaker.any { it.contains("MIDLERTIDIG_ID") }) {
+        assertTrue(feil.årsaksmeldinger().any { it.contains("MIDLERTIDIG_ID") }) {
             "Forventet oppløsningsfeil for ukjent enum-symbol, fikk: $feil"
         }
     }
 
     @Test
     fun `skal feile når PDL fjerner et felt fra skjemaet`() {
-        val writerSkjema =
-            writerSkjema(
-                typeSymboler = listOf("FOLKEREGISTERIDENT", "AKTORID", "NPID"),
-                utenGjeldende = true,
-            )
-        val bytes = serializer.serialize(PDL_AKTOR_V2_TOPIC, genericAktor(writerSkjema, "AKTORID"))
+        val melding = lagAktorMelding(utenGjeldende = true)
+        val bytes = serializer.serialize(PDL_AKTOR_V2_TOPIC, melding)
 
         val feil = assertThrows<SerializationException> { deserializer.deserialize(PDL_AKTOR_V2_TOPIC, bytes) }
 
-        val årsaker = generateSequence(feil as Throwable) { it.cause }.map { it.message.orEmpty() }
-        assertTrue(årsaker.any { it.contains("gjeldende") }) {
+        assertTrue(feil.årsaksmeldinger().any { it.contains("gjeldende") }) {
             "Forventet oppløsningsfeil for manglende felt 'gjeldende', fikk: $feil"
         }
     }
 
-    private fun writerSkjema(
-        typeSymboler: List<String>,
+    // Bygger en Aktor-melding slik den ser ut med PDLs (potensielt endrede) writer-skjema.
+    // Skjemaet ligger i meldingen, så testene trenger ikke forholde seg til det separat.
+    private fun lagAktorMelding(
+        typeSymboler: List<String> = listOf("FOLKEREGISTERIDENT", "AKTORID", "NPID"),
+        type: String = "AKTORID",
         medNyttFelt: Boolean = false,
         utenGjeldende: Boolean = false,
-    ): Schema {
+    ): GenericRecord {
         val namespace = "no.nav.person.pdl.aktor.v2"
         val typeSkjema = Schema.createEnum("Type", null, namespace, typeSymboler)
         val identifikatorFelter =
@@ -105,39 +108,24 @@ class AktorV2AvroSerdeTest {
                 if (medNyttFelt) add(Schema.Field("nyttFelt", Schema.create(Schema.Type.STRING)))
             }
         val identifikatorSkjema = Schema.createRecord("Identifikator", null, namespace, false, identifikatorFelter)
-        return Schema.createRecord(
-            "Aktor",
-            null,
-            namespace,
-            false,
-            listOf(Schema.Field("identifikatorer", Schema.createArray(identifikatorSkjema))),
-        )
-    }
+        val aktorSkjema =
+            Schema.createRecord(
+                "Aktor",
+                null,
+                namespace,
+                false,
+                listOf(Schema.Field("identifikatorer", Schema.createArray(identifikatorSkjema))),
+            )
 
-    private fun genericAktor(
-        writerSkjema: Schema,
-        vararg enumVerdier: String,
-    ): GenericRecord {
-        val identifikatorSkjema = writerSkjema.getField("identifikatorer").schema().elementType
-        val identifikatorer =
-            enumVerdier.map { enumVerdi ->
-                GenericData.Record(identifikatorSkjema).apply {
-                    put("type", GenericData.EnumSymbol(identifikatorSkjema.getField("type").schema(), enumVerdi))
-                    identifikatorSkjema.getField("idnummer")?.let { put("idnummer", "1234567890123") }
-                    identifikatorSkjema.getField("gjeldende")?.let { put("gjeldende", true) }
-                    identifikatorSkjema.getField("nyttFelt")?.let { put("nyttFelt", "ny verdi") }
-                }
+        val identifikator =
+            GenericData.Record(identifikatorSkjema).apply {
+                put("idnummer", "1234567890123")
+                put("type", GenericData.EnumSymbol(typeSkjema, type))
+                if (!utenGjeldende) put("gjeldende", true)
+                if (medNyttFelt) put("nyttFelt", "ny verdi")
             }
-        return GenericData.Record(writerSkjema).apply { put("identifikatorer", identifikatorer) }
+        return GenericData.Record(aktorSkjema).apply { put("identifikatorer", listOf(identifikator)) }
     }
 
-    companion object {
-        private const val REGISTRY_SCOPE = "aktor-v2-serde-test"
-
-        @JvmStatic
-        @AfterAll
-        fun ryddOppMockSchemaRegistry() {
-            MockSchemaRegistry.dropScope(REGISTRY_SCOPE)
-        }
-    }
+    private fun Throwable.årsaksmeldinger(): Sequence<String> = generateSequence(this) { it.cause }.map { it.message.orEmpty() }
 }
