@@ -44,7 +44,7 @@
         <unleash.version>12.2.3</unleash.version>
         <testcontainers.postgresql.version>1.21.4</testcontainers.postgresql.version>
         <maven.model.version>3.9.16</maven.model.version>
-        <avro.version>1.12.1</avro.version>
+        <avro.version>1.12.2</avro.version>
         <confluent.version>8.3.1</confluent.version>
         <sonar.organization>navikt</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -64,7 +64,7 @@
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
                 <!-- Denne inkluderer junit-platform nyere enn 1.13.3 som kreves av cucumber 7.26, kan muligens fjernes når spring bumper til junit versjon 1.13.3 -->
-                <version>6.1.2</version>
+                <version>6.1.3</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -85,7 +85,7 @@
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
-                <version>2.2.53</version>
+                <version>2.2.54</version>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
