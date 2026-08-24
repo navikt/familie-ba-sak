@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.internal.forvalterendepunkt
 
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
@@ -15,11 +14,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatusScheduler
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
-import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
 import no.nav.familie.ba.sak.task.MaskineltUnderkjennVedtakTask
@@ -27,7 +23,6 @@ import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
 import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
-import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
 import no.nav.familie.kontrakter.ba.finnmarkstillegg.kommuneErIFinnmarkEllerNordTroms
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
@@ -59,11 +54,8 @@ class ForvalterController(
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val behandlingService: BehandlingService,
-    private val stønadsstatistikkService: StønadsstatistikkService,
-    private val persongrunnlagService: PersongrunnlagService,
     private val hentAlleIdenterTilPsysTask: HentAlleIdenterTilPsysTask,
     private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
-    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -127,22 +119,6 @@ class ForvalterController(
         return ResponseEntity.ok(Ressurs.success("Task for henleggelse av autovedtak startet"))
     }
 
-    @GetMapping("/stonadstatistikk-utbetalingsperioder/{behandlingId}")
-    fun hentStønadstatistikkUtbetalingsperioder(
-        @PathVariable behandlingId: Long,
-    ): ResponseEntity<List<UtbetalingsperiodeDVHV2>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Hente utbetalingsperioder til datavarehus for behandling",
-        )
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
-        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
-        val utbetalingsperioder = stønadsstatistikkService.hentUtbetalingsperioderTilDatavarehus(behandling = behandling, persongrunnlag = persongrunnlag)
-
-        return ResponseEntity.ok(utbetalingsperioder)
-    }
-
     @GetMapping("/identer-barnetrygd-pensjon/{aar}")
     fun hentAlleIdenterSomSendesTilPensjon(
         @PathVariable("aar") aar: Long,
@@ -191,18 +167,6 @@ class ForvalterController(
                 }
 
         return ResponseEntity.ok(institusjonerSomSkalHaFinnmarkstillegg)
-    }
-
-    @PostMapping("/send-behandlingsstatistikk-til-dvh")
-    fun sendBehandlingsstatistikkTilDvh(
-        @RequestBody behandlingId: Long,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Sende behandlingsstatistikk for behandling til Datavarehus",
-        )
-        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandlingId)
-        return ResponseEntity.ok("Sendt behandlingsstatistikk for behandling $behandlingId til Datavarehus")
     }
 
     @PatchMapping("/fagsak/{fagsakId}/endre-status-til-opprettet")
