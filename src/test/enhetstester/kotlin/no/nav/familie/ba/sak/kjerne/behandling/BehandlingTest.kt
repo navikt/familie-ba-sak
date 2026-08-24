@@ -238,7 +238,6 @@ class BehandlingTest {
             assertThat(erBehandlingMedVedtaksbrevutsending).isFalse()
         }
 
-        @Disabled
         @Test
         fun `kan sende vedtaksbrev for revurdering med årsak satsendring EØS`() {
             // Arrange
