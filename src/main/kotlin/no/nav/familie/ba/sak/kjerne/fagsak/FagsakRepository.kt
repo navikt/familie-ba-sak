@@ -274,7 +274,6 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     )
     fun finnIdenterForLøpendeFagsaker(): List<String>
 
-    @Lock(LockModeType.NONE)
     @Query(
         value = """
         WITH siste_vedtatte AS (
