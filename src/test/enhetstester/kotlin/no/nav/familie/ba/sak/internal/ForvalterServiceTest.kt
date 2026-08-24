@@ -10,14 +10,11 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.internal.forvalter.ForvalterService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -25,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -41,24 +37,14 @@ import kotlin.random.Random
 
 class ForvalterServiceTest {
     private val persongrunnlagService = mockk<PersongrunnlagService>()
-    private val økonomiService = mockk<ØkonomiService>()
-    private val vedtakService = mockk<VedtakService>()
-    private val beregningService = mockk<BeregningService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val fagsakRepository = mockk<FagsakRepository>()
-    private val tilkjentYtelseValideringService = mockk<TilkjentYtelseValideringService>()
-    private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
 
     private val forvalterService =
         ForvalterService(
-            økonomiService = økonomiService,
-            vedtakService = vedtakService,
-            beregningService = beregningService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             fagsakRepository = fagsakRepository,
-            tilkjentYtelseValideringService = tilkjentYtelseValideringService,
-            arbeidsfordelingService = arbeidsfordelingService,
             vilkårsvurderingService = vilkårsvurderingService,
             persongrunnlagService = persongrunnlagService,
             aktørIdRepository = mockk(relaxed = true),
