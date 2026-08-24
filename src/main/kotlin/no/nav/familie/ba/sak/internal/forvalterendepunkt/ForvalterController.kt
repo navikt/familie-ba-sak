@@ -33,8 +33,6 @@ import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkSer
 import no.nav.familie.ba.sak.task.DeaktiverMinsideTask
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
-import no.nav.familie.ba.sak.task.LogFagsakIdForJournalpostTask
-import no.nav.familie.ba.sak.task.LogJournalpostIdForFagsakTask
 import no.nav.familie.ba.sak.task.MaskineltUnderkjennVedtakTask
 import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -238,42 +236,6 @@ class ForvalterController(
         )
 
         return ResponseEntity.ok(hentAlleIdenterTilPsysTask.hentAlleIdenterMedBarnetrygd(aar.toInt(), UUID.randomUUID()))
-    }
-
-    @PostMapping("/hent-fagsak-id-for-journalpost")
-    @Operation(
-        summary = "Henter fagsak id som er koblet til journalposten",
-        description = "Oppretter task for å logge fagsak id som er koblet til journalpost. Fagsak id'n logges til securelog.",
-    )
-    fun hentFagsakIdForJournalpost(
-        @RequestParam("journalpostId") journalpostId: String,
-    ): ResponseEntity<Long> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Hente fagsakId for journalpost",
-        )
-
-        val opprettetTask = taskRepository.save(LogFagsakIdForJournalpostTask.opprettTask(journalpostId))
-
-        return ResponseEntity.ok(opprettetTask.id)
-    }
-
-    @PostMapping("/hent-journalpost-id-for-fagsak")
-    @Operation(
-        summary = "Henter journalpost ider koblet til fagsaken",
-        description = "Oppretter task for å logge journalpost id som er koblet til en fagsak. Journalpost ider logges til securelog.",
-    )
-    fun hentJournalpostIdForFagsak(
-        @RequestParam("fagsakId") fagsakId: String,
-    ): ResponseEntity<Long> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Hente journalpostId for fagsak",
-        )
-
-        val opprettetTask = taskRepository.save(LogJournalpostIdForFagsakTask.opprettTask(fagsakId))
-
-        return ResponseEntity.ok(opprettetTask.id)
     }
 
     @GetMapping("/hent-utbetalingstidslinjer-for-fagsak/{fagsakId}")
