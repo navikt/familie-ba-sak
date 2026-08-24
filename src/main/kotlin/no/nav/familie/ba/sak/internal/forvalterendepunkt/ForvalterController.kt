@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.internal
+package no.nav.familie.ba.sak.internal.forvalterendepunkt
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -21,6 +21,11 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinjeService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeDto
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
+import no.nav.familie.ba.sak.internal.ForvalterPersonInfoDto
+import no.nav.familie.ba.sak.internal.ForvalterService
+import no.nav.familie.ba.sak.internal.HentPersonFraPdlRequest
+import no.nav.familie.ba.sak.internal.TestVerktøyService
+import no.nav.familie.ba.sak.internal.tilForvalterPersonInfoDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
