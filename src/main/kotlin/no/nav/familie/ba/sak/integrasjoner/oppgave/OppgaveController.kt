@@ -137,7 +137,7 @@ class OppgaveController(
             handling = "ferdigstill oppgave",
         )
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
-        oppgaveService.ferdigstillOppgave(oppgave)
+        oppgaveService.tvingFerdigstillOppgave(oppgave)
 
         return ResponseEntity.ok(Ressurs.success("Oppgaven lukket"))
     }

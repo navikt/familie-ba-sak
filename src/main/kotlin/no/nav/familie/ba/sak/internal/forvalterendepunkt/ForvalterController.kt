@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
-import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
@@ -65,7 +64,6 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -88,7 +86,6 @@ import kotlin.concurrent.thread
 @RestController
 @RequestMapping("/api/forvalter")
 class ForvalterController(
-    private val oppgaveRepository: OppgaveRepository,
     private val integrasjonKlient: IntegrasjonKlient,
     private val forvalterService: ForvalterService,
     private val ecbService: ECBService,
@@ -115,50 +112,6 @@ class ForvalterController(
     private val pdlRestKlient: PdlRestKlient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
-
-    @PostMapping(
-        path = ["/ferdigstill-oppgaver"],
-        consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-    )
-    fun ferdigstillListeMedOppgaver(
-        @RequestBody oppgaveListe: List<Long>,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Ferdigstill liste med oppgaver",
-        )
-
-        var antallFeil = 0
-        oppgaveListe.forEach { oppgaveId ->
-            Result
-                .runCatching {
-                    ferdigstillOppgave(oppgaveId)
-                }.fold(
-                    onSuccess = { logger.info("Har ferdigstilt oppgave med oppgaveId=$oppgaveId") },
-                    onFailure = {
-                        logger.warn("Klarte ikke å ferdigstille oppgaveId=$oppgaveId", it)
-                        antallFeil = antallFeil.inc()
-                    },
-                )
-        }
-        return ResponseEntity.ok("Ferdigstill oppgaver kjørt. Antall som ikke ble ferdigstilt: $antallFeil")
-    }
-
-    private fun ferdigstillOppgave(oppgaveId: Long) {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Ferdigstill oppgave",
-        )
-
-        integrasjonKlient.ferdigstillOppgave(oppgaveId)
-        oppgaveRepository.findByGsakId(oppgaveId.toString()).also {
-            if (it != null && !it.erFerdigstilt) {
-                it.erFerdigstilt = true
-                oppgaveRepository.saveAndFlush(it)
-            }
-        }
-    }
 
     @PostMapping(path = ["/lag-og-send-utbetalingsoppdrag-til-økonomi"])
     fun lagOgSendUtbetalingsoppdragTilØkonomi(
