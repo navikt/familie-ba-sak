@@ -2,15 +2,10 @@ package no.nav.familie.ba.sak.internal.forvalterendepunkt
 
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
-import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
@@ -21,8 +16,6 @@ import no.nav.familie.ba.sak.internal.ForvalterPersonInfoDto
 import no.nav.familie.ba.sak.internal.HentPersonFraPdlRequest
 import no.nav.familie.ba.sak.internal.forvalter.ForvalterService
 import no.nav.familie.ba.sak.internal.tilForvalterPersonInfoDto
-import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
-import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -48,7 +41,6 @@ import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
 import no.nav.familie.ba.sak.task.PatchMergetAktørDto
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
-import no.nav.familie.ba.sak.task.SlettKompetanserTask
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
 import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
@@ -61,7 +53,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -71,10 +62,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 
 @RestController
@@ -82,15 +69,11 @@ import java.util.UUID
 class ForvalterController(
     private val integrasjonKlient: IntegrasjonKlient,
     private val forvalterService: ForvalterService,
-    private val ecbService: ECBService,
     private val tilgangService: TilgangService,
     private val opprettTaskService: OpprettTaskService,
     private val taskService: TaskService,
-    private val autovedtakMånedligValutajusteringService: AutovedtakMånedligValutajusteringService,
-    private val månedligValutajusteringScheduler: MånedligValutajusteringScheduler,
     private val fagsakStatusScheduler: FagsakStatusScheduler,
     private val fagsakService: FagsakService,
-    private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val behandlingService: BehandlingService,
@@ -104,22 +87,6 @@ class ForvalterController(
     private val pdlRestKlient: PdlRestKlient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
-
-    @GetMapping("/hentValutakurs/")
-    fun hentValutakursFraEcb(
-        @RequestParam valuta: String,
-        @RequestParam dato: LocalDate,
-    ): ResponseEntity<BigDecimal> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Hent valutakurs fra ECB",
-        )
-
-        if (!valuta.matches(Regex("[A-Z]{3}"))) {
-            throw Feil("Valutakode må ha store bokstaver og være tre bokstaver lang")
-        }
-        return ResponseEntity.ok(ecbService.hentValutakurs(valuta, dato))
-    }
 
     @PatchMapping("/patch-fagsak-med-ny-ident")
     fun patchMergetIdent(
@@ -196,49 +163,6 @@ class ForvalterController(
 
         taskService.save(OpprettInternKonsistensavstemmingTaskerTask.opprettTask(maksAntallTasker))
         return ResponseEntity.ok(Ressurs.success("Intern konsistensavstemming startet"))
-    }
-
-    @PostMapping("/valutajustering/{fagsakId}/juster-valuta")
-    @Operation(summary = "Start valutajustering på fagsak for gjeldende måned")
-    fun justerValuta(
-        @PathVariable fagsakId: Long,
-    ): ResponseEntity<Ressurs<MinimalFagsakDto>> {
-        val erPersonMedTilgangTilÅStarteValutajustering = featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ENKELT_SAK)
-
-        if (erPersonMedTilgangTilÅStarteValutajustering) {
-            autovedtakMånedligValutajusteringService.utførMånedligValutajustering(fagsakId = fagsakId, måned = YearMonth.now())
-        } else {
-            throw Feil("Du har ikke tilgang til å kjøre valutajustering")
-        }
-
-        val fagsak = fagsakService.hentMinimalFagsakDto(fagsakId)
-        return ResponseEntity.ok(fagsak)
-    }
-
-    @PostMapping("/start-valutajustering-scheduler")
-    @Operation(summary = "Start valutajustering for alle sekundærlandsaker i gjeldende måned")
-    fun lagMånedligValutajusteringTask(): ResponseEntity<Ressurs<String>> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Start valutajustering for alle sekundærlandsaker i gjeldende måned",
-        )
-
-        månedligValutajusteringScheduler.lagMånedligValutajusteringTask(triggerTid = LocalDateTime.now())
-        return ResponseEntity.ok(Ressurs.success("Valutajustering for alle sekundærlandsaker i gjeldende måned startet"))
-    }
-
-    @DeleteMapping("/slett-alle-kompetanser-for-behandling/{behandlingId}")
-    @Operation(summary = "Slett kompetanser, utenlandsk periodebeløp og valutakurser for en behandling som er på vilkårsvurderingssteget.")
-    fun slettKompetanser(
-        @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<String>> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Slett kompetanser, utenlandsk periodebeløp og valutakurser for en behandling som er på vilkårsvurderingssteget.",
-        )
-
-        val task = taskService.save(SlettKompetanserTask.opprettTask(behandlingId))
-        return ResponseEntity.ok(Ressurs.success("Kompetanser slettes i task ${task.id}"))
     }
 
     @PutMapping("/maskinelt-underkjenn-vedtak/{behandlingId}")
