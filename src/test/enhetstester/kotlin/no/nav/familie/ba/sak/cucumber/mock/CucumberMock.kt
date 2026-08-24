@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigrerin
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingSøknadsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockNorgesBankService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockOppdragBackendKlient
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockSystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockTilbakekrevingsvedtakMotregningRepository
@@ -20,6 +21,7 @@ import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
+import no.nav.familie.ba.sak.integrasjoner.norgesbank.NorgesBankService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.KlassifiseringKorrigerer
@@ -109,6 +111,7 @@ class CucumberMock(
     forrigeBehandling: Behandling? = dataFraCucumber.behandlingTilForrigeBehandling[nyBehandlingId]?.let { dataFraCucumber.behandlinger[it] },
     efSakRestKlientMock: EfSakRestKlient = mockEfSakRestKlient(),
     ecbService: ECBService = mockEcbService(dataFraCucumber),
+    norgesBankService: NorgesBankService = mockNorgesBankService(dataFraCucumber),
     scope: CoroutineScope? = null,
 ) {
     val clockProvider = lagClockProviderMedFastTidspunkt(dataFraCucumber.dagensDato)
@@ -342,6 +345,7 @@ class CucumberMock(
             vedtaksperiodeService = vedtaksperiodeService,
             clockProvider = clockProvider,
             ecbService = ecbService,
+            norgesBankService = norgesBankService,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilpassValutakurserTilUtenlandskePeriodebeløpService = tilpassValutakurserTilUtenlandskePeriodebeløpService,
@@ -636,8 +640,10 @@ class CucumberMock(
     val månedligValutajusteringService =
         MånedligValutajusteringService(
             ecbService = ecbService,
+            norgesBankService = norgesBankService,
             valutakursService = valutakursService,
             clockProvider = clockProvider,
+            featureToggleService = featureToggleService,
         )
 
     val autovedtakFinnmarkstilleggBegrunnelseService =

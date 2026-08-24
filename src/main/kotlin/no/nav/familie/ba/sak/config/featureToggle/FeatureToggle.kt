@@ -71,4 +71,7 @@ enum class FeatureToggle(
     // NAV-30011
     OPPDRAG_MIGRERING_HENT_SIMULERING_GCP("familie-baks-sak.oppdrag-migrering-hent-simulering-gcp"),
     OPPDRAG_MIGRERING_IVERKSETT_OPPDRAG_GCP("familie-ba-og-ks-sak.oppdrag-migrering-iverksett-oppdrag-gcp"),
+
+    // NAV-26710
+    HENT_VALUTAKURS_FRA_NORGESBANK("familie-baks-sak.hent-valutakurs-fra-norgesbank"),
 }

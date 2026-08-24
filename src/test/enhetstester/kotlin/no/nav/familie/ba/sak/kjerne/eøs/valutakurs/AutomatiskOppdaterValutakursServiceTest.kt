@@ -7,12 +7,14 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
+import no.nav.familie.ba.sak.integrasjoner.norgesbank.NorgesBankService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterValutakursService
@@ -51,6 +53,7 @@ class AutomatiskOppdaterValutakursServiceTest {
     val valutakursService = ValutakursService(valutakursRepository, emptyList())
     val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     val ecbService = mockk<ECBService>()
+    val norgesBankService = mockk<NorgesBankService>()
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     val simuleringService = mockk<SimuleringService>()
     val vurderingsstrategiForValutakurserRepository = mockk<VurderingsstrategiForValutakurserRepository>()
@@ -62,6 +65,7 @@ class AutomatiskOppdaterValutakursServiceTest {
             vedtaksperiodeService = vedtaksperiodeService,
             clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(dagensDato),
             ecbService = ecbService,
+            norgesBankService = norgesBankService,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilpassValutakurserTilUtenlandskePeriodebeløpService = tilpassValutakurserTilUtenlandskePeriodebeløpService,
@@ -89,7 +93,13 @@ class AutomatiskOppdaterValutakursServiceTest {
             val dato = secondArg<LocalDate>()
             dato.month.value.toBigDecimal()
         }
+        every { norgesBankService.hentValutakurs(any(), any()) } answers {
+            val dato = secondArg<LocalDate>()
+            dato.month.value.toBigDecimal()
+        }
         every { vurderingsstrategiForValutakurserRepository.findByBehandlingId(any()) } returns null
+        every { featureToggleService.isEnabled(FeatureToggle.HENT_VALUTAKURS_FRA_NORGESBANK, false) } returns true
+
         valutakursRepository.deleteAll()
         utenlandskPeriodebeløpRepository.deleteAll()
         justRun { tilpassDifferanseberegningEtterValutakursService.skjemaerEndret(any(), any()) }
@@ -274,6 +284,10 @@ class AutomatiskOppdaterValutakursServiceTest {
             }
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
             every { ecbService.hentValutakurs(any(), any()) } answers {
+                val dato = secondArg<LocalDate>()
+                (dato.month.value % 10).toBigDecimal()
+            }
+            every { norgesBankService.hentValutakurs(any(), any()) } answers {
                 val dato = secondArg<LocalDate>()
                 (dato.month.value % 10).toBigDecimal()
             }

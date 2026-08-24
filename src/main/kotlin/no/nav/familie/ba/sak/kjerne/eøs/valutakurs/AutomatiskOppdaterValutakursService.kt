@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
+import no.nav.familie.ba.sak.integrasjoner.norgesbank.NorgesBankService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.tilSisteVirkedag
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -42,6 +43,7 @@ class AutomatiskOppdaterValutakursService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val clockProvider: ClockProvider,
     private val ecbService: ECBService,
+    private val norgesBankService: NorgesBankService,
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilpassValutakurserTilUtenlandskePeriodebeløpService: TilpassValutakurserTilUtenlandskePeriodebeløpService,
@@ -207,6 +209,8 @@ class AutomatiskOppdaterValutakursService(
 
         if (månedForTidligsteTillatteAutomatiskeValutakurs.isAfter(slutt)) return emptyList()
 
+        val skalHenteValutakursFraNorgesBank = featureToggleService.isEnabled(FeatureToggle.HENT_VALUTAKURS_FRA_NORGESBANK, false)
+
         return start.rangeTo(slutt).map { måned ->
             val sisteVirkedagForrigeMåned = måned.minusMonths(1).tilSisteVirkedag()
 
@@ -216,7 +220,12 @@ class AutomatiskOppdaterValutakursService(
                 barnAktører = barn,
                 valutakursdato = sisteVirkedagForrigeMåned,
                 valutakode = valutakode,
-                kurs = ecbService.hentValutakurs(valutakode, sisteVirkedagForrigeMåned),
+                kurs =
+                    if (skalHenteValutakursFraNorgesBank) {
+                        norgesBankService.hentValutakurs(valutakode, sisteVirkedagForrigeMåned)
+                    } else {
+                        ecbService.hentValutakurs(valutakode, sisteVirkedagForrigeMåned)
+                    },
                 vurderingsform = Vurderingsform.AUTOMATISK,
             )
         }

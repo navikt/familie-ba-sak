@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
+import no.nav.familie.ba.sak.integrasjoner.norgesbank.NorgesBankService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -32,12 +33,22 @@ fun mockAutovedtakMånedligValutajusteringService(
             ?: throw Feil("Fant ikke valutakurs for valutakode=$valutakode og dato=$dato i ECB mocken")
     }
 
+    val norgesBankService = mockk<NorgesBankService>()
+    every { norgesBankService.hentValutakurs(any(), any()) } answers {
+        val valutakode = firstArg<String>()
+        val dato = secondArg<LocalDate>()
+
+        svarFraEcbMock[Pair(valutakode, dato)]
+            ?: throw Feil("Fant ikke valutakurs for valutakode=$valutakode og dato=$dato i ECB mocken")
+    }
+
     val cucumberMock =
         CucumberMock(
             dataFraCucumber = dataFraCucumber,
             nyBehandlingId = nyBehanldingId,
             forrigeBehandling = forrigeBehandling,
             ecbService = ecbService,
+            norgesBankService = norgesBankService,
         )
 
     every { cucumberMock.snikeIKøenService.kanSnikeForbi(any()) } returns true
