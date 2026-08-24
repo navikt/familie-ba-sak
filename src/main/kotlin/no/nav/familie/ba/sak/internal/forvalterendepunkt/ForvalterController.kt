@@ -4,8 +4,6 @@ import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
-import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinjeService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeDto
 import no.nav.familie.ba.sak.internal.forvalter.ForvalterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -37,7 +35,6 @@ class ForvalterController(
     private val fagsakService: FagsakService,
     private val taskRepository: TaskRepositoryWrapper,
     private val hentAlleIdenterTilPsysTask: HentAlleIdenterTilPsysTask,
-    private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -78,18 +75,6 @@ class ForvalterController(
         )
 
         return ResponseEntity.ok(hentAlleIdenterTilPsysTask.hentAlleIdenterMedBarnetrygd(aar.toInt(), UUID.randomUUID()))
-    }
-
-    @GetMapping("/hent-utbetalingstidslinjer-for-fagsak/{fagsakId}")
-    fun hentUtbetalingsTidslinjerForFagsak(
-        @PathVariable("fagsakId") fagsakId: Long,
-    ): ResponseEntity<List<List<UtbetalingsperiodeDto>>> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Hente gjeldende utbetalings-tidslinjer for fagsak",
-        )
-
-        return ResponseEntity.ok(utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId).map { it.tilUtbetalingsperioder() })
     }
 
     @GetMapping("/identifiser-institusjoner-med-finnmarkstillegg")
