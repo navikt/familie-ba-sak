@@ -1,16 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling.domene
 
 import io.mockk.mockk
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
-import no.nav.familie.ba.sak.datagenerator.lagPerson
-import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.beregnGyldigTom
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.beregnGyldigTomPerAktør
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.skalSplitteEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.splittEndretUbetalingAndel
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -41,7 +39,7 @@ internal class EndretUtbetalingAndelTest {
         val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
 
-        endretUtbetalingAndel.personer = mutableSetOf(tilfeldigPerson())
+        endretUtbetalingAndel.aktører = mutableSetOf(lagAktør())
         endretUtbetalingAndel.prosent = BigDecimal(0)
         endretUtbetalingAndel.fom = YearMonth.of(2020, 10)
         endretUtbetalingAndel.tom = YearMonth.of(2020, 10)
@@ -61,7 +59,7 @@ internal class EndretUtbetalingAndelTest {
         val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
 
-        endretUtbetalingAndel.personer = mutableSetOf(tilfeldigPerson())
+        endretUtbetalingAndel.aktører = mutableSetOf(lagAktør())
         endretUtbetalingAndel.prosent = BigDecimal(0)
         endretUtbetalingAndel.fom = YearMonth.of(2020, 10)
         endretUtbetalingAndel.tom = YearMonth.of(2020, 10)
@@ -78,12 +76,12 @@ internal class EndretUtbetalingAndelTest {
     fun `Skal sette tom til siste måned med andel tilkjent ytelse hvis tom er null og det ikke finnes noen andre endringsperioder`() {
         // Arrange
         val behandling = lagBehandling()
-        val barn1 = lagPerson(type = PersonType.BARN)
-        val barn2 = lagPerson(type = PersonType.BARN)
+        val barn1 = lagAktør()
+        val barn2 = lagAktør()
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                personer = setOf(barn1, barn2),
+                aktører = setOf(barn1, barn2),
                 fom = YearMonth.now(),
                 tom = null,
                 årsak = Årsak.DELT_BOSTED,
@@ -94,22 +92,22 @@ internal class EndretUtbetalingAndelTest {
         val andelTilkjentYtelser =
             listOf(
                 lagAndelTilkjentYtelse(
-                    person = barn1,
+                    aktør = barn1,
                     fom = YearMonth.now().minusMonths(4),
                     tom = YearMonth.now().plusMonths(4),
                 ),
                 lagAndelTilkjentYtelse(
-                    person = barn1,
+                    aktør = barn1,
                     fom = YearMonth.now().plusMonths(5),
                     tom = sisteTomPåAndelerBarn1,
                 ),
                 lagAndelTilkjentYtelse(
-                    person = barn2,
+                    aktør = barn2,
                     fom = YearMonth.now().minusMonths(4),
                     tom = YearMonth.now().plusMonths(4),
                 ),
                 lagAndelTilkjentYtelse(
-                    person = barn2,
+                    aktør = barn2,
                     fom = YearMonth.now().plusMonths(5),
                     tom = sisteTomPåAndelerBarn2,
                 ),
@@ -132,12 +130,12 @@ internal class EndretUtbetalingAndelTest {
     fun `Skal sette tom til måneden før neste endringsperiode`() {
         // Arrange
         val behandling = lagBehandling()
-        val barn1 = lagPerson(type = PersonType.BARN)
-        val barn2 = lagPerson(type = PersonType.BARN)
+        val barn1 = lagAktør()
+        val barn2 = lagAktør()
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                personer = setOf(barn1, barn2),
+                aktører = setOf(barn1, barn2),
                 fom = YearMonth.now(),
                 tom = null,
                 årsak = Årsak.DELT_BOSTED,
@@ -149,14 +147,14 @@ internal class EndretUtbetalingAndelTest {
             listOf(
                 lagEndretUtbetalingAndel(
                     behandlingId = behandling.id,
-                    personer = setOf(barn1),
+                    aktører = setOf(barn1),
                     fom = fomPåEndretAndelBarn1,
                     tom = YearMonth.now().plusMonths(8),
                     årsak = Årsak.DELT_BOSTED,
                 ),
                 lagEndretUtbetalingAndel(
                     behandlingId = behandling.id,
-                    personer = setOf(barn2),
+                    aktører = setOf(barn2),
                     fom = fomPåEndretAndelBarn2,
                     tom = YearMonth.now().plusMonths(8),
                     årsak = Årsak.DELT_BOSTED,
@@ -166,22 +164,22 @@ internal class EndretUtbetalingAndelTest {
         val andelTilkjentYtelser =
             listOf(
                 lagAndelTilkjentYtelse(
-                    person = barn1,
+                    aktør = barn1,
                     fom = YearMonth.now().minusMonths(4),
                     tom = YearMonth.now().plusMonths(4),
                 ),
                 lagAndelTilkjentYtelse(
-                    person = barn1,
+                    aktør = barn1,
                     fom = YearMonth.now().plusMonths(5),
                     tom = YearMonth.now().plusMonths(10),
                 ),
                 lagAndelTilkjentYtelse(
-                    person = barn2,
+                    aktør = barn2,
                     fom = YearMonth.now().minusMonths(4),
                     tom = YearMonth.now().plusMonths(4),
                 ),
                 lagAndelTilkjentYtelse(
-                    person = barn2,
+                    aktør = barn2,
                     fom = YearMonth.now().plusMonths(5),
                     tom = YearMonth.now().plusMonths(9),
                 ),
@@ -204,13 +202,13 @@ internal class EndretUtbetalingAndelTest {
     fun `Skal sette tom til siste måned med andel tilkjent ytelse per aktør hvis tom er null og det ikke finnes noen andre endringsperioder`() {
         // Arrange
         val behandling = lagBehandling()
-        val barn1 = lagPerson(type = PersonType.BARN)
-        val barn2 = lagPerson(type = PersonType.BARN)
+        val barn1 = lagAktør()
+        val barn2 = lagAktør()
 
         val nyEndretUtbetalingAndel =
             lagEndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                personer = setOf(barn1, barn2),
+                aktører = setOf(barn1, barn2),
                 fom = YearMonth.of(2025, 6),
                 tom = null,
                 årsak = Årsak.ALLEREDE_UTBETALT,
@@ -219,7 +217,7 @@ internal class EndretUtbetalingAndelTest {
         val eksisterendeEndretUtbetalingAndel =
             lagEndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                personer = setOf(barn1),
+                aktører = setOf(barn1),
                 fom = YearMonth.of(2025, 8),
                 tom = YearMonth.of(2025, 10),
                 årsak = Årsak.ENDRE_MOTTAKER,
@@ -230,12 +228,12 @@ internal class EndretUtbetalingAndelTest {
         val andelTilkjentYtelser =
             listOf(
                 lagAndelTilkjentYtelse(
-                    person = barn1,
+                    aktør = barn1,
                     fom = YearMonth.of(2025, 1),
                     tom = sisteTomPåAndelerBarn1,
                 ),
                 lagAndelTilkjentYtelse(
-                    person = barn2,
+                    aktør = barn2,
                     fom = YearMonth.of(2025, 1),
                     tom = sisteTomPåAndelerBarn2,
                 ),
@@ -252,8 +250,8 @@ internal class EndretUtbetalingAndelTest {
         // Assert
         val forventetTomPerAktør =
             mapOf(
-                barn1.aktør to eksisterendeEndretUtbetalingAndel.fom?.minusMonths(1),
-                barn2.aktør to sisteTomPåAndelerBarn2,
+                barn1 to eksisterendeEndretUtbetalingAndel.fom?.minusMonths(1),
+                barn2 to sisteTomPåAndelerBarn2,
             )
         assertEquals(forventetTomPerAktør, faktiskTomPerAktør)
     }
@@ -279,13 +277,13 @@ internal class EndretUtbetalingAndelTest {
         @Test
         fun `skal returnere false hvis begge personer har samme gyldigTomDato`() {
             // Arrange
-            val person1 = tilfeldigPerson()
-            val person2 = tilfeldigPerson()
+            val aktør1 = lagAktør()
+            val aktør2 = lagAktør()
 
             val gyldigTomEtterDagensDatoPerAktør =
                 mapOf(
-                    person1.aktør to YearMonth.of(2025, 6),
-                    person2.aktør to YearMonth.of(2025, 6),
+                    aktør1 to YearMonth.of(2025, 6),
+                    aktør2 to YearMonth.of(2025, 6),
                 )
 
             // Act & Assert
@@ -300,13 +298,13 @@ internal class EndretUtbetalingAndelTest {
         @Test
         fun `skal returnere true hvis tom-dato er null og gyldigTomDato inneholder flere datoer`() {
             // Arrange
-            val person1 = tilfeldigPerson()
-            val person2 = tilfeldigPerson()
+            val aktør1 = lagAktør()
+            val aktør2 = lagAktør()
 
             val gyldigTomEtterDagensDatoPerAktør =
                 mapOf(
-                    person1.aktør to YearMonth.of(2025, 6),
-                    person2.aktør to YearMonth.of(2025, 7),
+                    aktør1 to YearMonth.of(2025, 6),
+                    aktør2 to YearMonth.of(2025, 7),
                 )
 
             // Act & Assert
@@ -324,15 +322,15 @@ internal class EndretUtbetalingAndelTest {
         @Test
         fun `skal splitte andel med gyldig tom per aktør`() {
             // Arrange
-            val person1 = tilfeldigPerson()
-            val person2 = tilfeldigPerson()
-            val person3 = tilfeldigPerson()
+            val aktør1 = lagAktør()
+            val aktør2 = lagAktør()
+            val aktør3 = lagAktør()
 
             val endretUtbetalingAndel =
                 EndretUtbetalingAndel(
                     id = 1,
                     behandlingId = 0,
-                    personer = mutableSetOf(person1, person2, person3),
+                    aktører = mutableSetOf(aktør1, aktør2, aktør3),
                     prosent = BigDecimal.ZERO,
                     fom = YearMonth.of(2025, 1),
                     tom = null,
@@ -344,9 +342,9 @@ internal class EndretUtbetalingAndelTest {
 
             val gyldigTomEtterDagensDatoPerAktør =
                 mapOf(
-                    person1.aktør to YearMonth.of(2025, 10),
-                    person2.aktør to YearMonth.of(2025, 12),
-                    person3.aktør to YearMonth.of(2025, 12),
+                    aktør1 to YearMonth.of(2025, 10),
+                    aktør2 to YearMonth.of(2025, 12),
+                    aktør3 to YearMonth.of(2025, 12),
                 )
 
             // Act
@@ -363,23 +361,23 @@ internal class EndretUtbetalingAndelTest {
 
             assertThat(førsteAndel)
                 .usingRecursiveComparison()
-                .ignoringFields("id", "fom", "tom", "personer", "opprettetTidspunkt", "endretTidspunkt")
+                .ignoringFields("id", "fom", "tom", "aktører", "opprettetTidspunkt", "endretTidspunkt")
                 .isEqualTo(endretUtbetalingAndel)
 
             assertThat(førsteAndel.id).isEqualTo(0)
             assertThat(førsteAndel.fom).isEqualTo(YearMonth.of(2025, 1))
             assertThat(førsteAndel.tom).isEqualTo(YearMonth.of(2025, 10))
-            assertThat(førsteAndel.personer).containsExactlyInAnyOrder(person1, person2, person3)
+            assertThat(førsteAndel.aktører).containsExactlyInAnyOrder(aktør1, aktør2, aktør3)
 
             assertThat(andreAndel)
                 .usingRecursiveComparison()
-                .ignoringFields("id", "fom", "tom", "personer", "opprettetTidspunkt", "endretTidspunkt")
+                .ignoringFields("id", "fom", "tom", "aktører", "opprettetTidspunkt", "endretTidspunkt")
                 .isEqualTo(endretUtbetalingAndel)
 
             assertThat(andreAndel.id).isEqualTo(0)
             assertThat(andreAndel.fom).isEqualTo(YearMonth.of(2025, 11))
             assertThat(andreAndel.tom).isEqualTo(YearMonth.of(2025, 12))
-            assertThat(andreAndel.personer).containsExactlyInAnyOrder(person2, person3)
+            assertThat(andreAndel.aktører).containsExactlyInAnyOrder(aktør2, aktør3)
         }
     }
 }

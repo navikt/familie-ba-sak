@@ -1,14 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
-import no.nav.familie.ba.sak.datagenerator.tilfeldigSøker
-import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonDto
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -17,10 +14,10 @@ import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UtvidetVedtaksperiodeMedBegrunnelserTest {
-    val barn1 = tilfeldigPerson(personType = PersonType.BARN)
-    val barn2 = tilfeldigPerson(personType = PersonType.BARN)
-    val barn3 = tilfeldigPerson(personType = PersonType.BARN)
-    val søker = tilfeldigSøker()
+    val barn1 = lagAktør()
+    val barn2 = lagAktør()
+    val barn3 = lagAktør()
+    val søker = lagAktør()
 
     @Test
     fun `Skal kun legge på utbetalingsdetaljer som gjelder riktig andeler tilkjent ytelse for fortsatt innvilget`() {
@@ -30,10 +27,10 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandlingId = behandling.id,
-                barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
-                søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
-                søkerAktør = søker.aktør,
-                barnAktør = listOf(barn1.aktør, barn2.aktør),
+                barnasIdenter = listOf(barn1.aktivFødselsnummer(), barn2.aktivFødselsnummer()),
+                søkerPersonIdent = søker.aktivFødselsnummer(),
+                søkerAktør = søker,
+                barnAktør = listOf(barn1, barn2),
             )
 
         val fom = YearMonth.of(2018, 6)
@@ -44,7 +41,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
                 behandlingId = behandling.id,
                 fom = fom,
                 tom = tom,
-                personer = setOf(barn2),
+                aktører = setOf(barn2),
             )
 
         val andelerTilkjentYtelse =
@@ -54,21 +51,21 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
                     endretUtbetalingAndeler = emptyList(),
                     fom = fom.minusMonths(2),
                     tom = tom,
-                    person = barn1,
+                    aktør = barn1,
                 ),
                 lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     behandling = behandling,
                     endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
                     fom = fom,
                     tom = tom,
-                    person = barn2,
+                    aktør = barn2,
                 ),
                 lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     behandling = behandling,
                     endretUtbetalingAndeler = emptyList(),
                     fom = tom.plusMonths(1),
                     tom = tom.plusMonths(3),
-                    person = barn1,
+                    aktør = barn1,
                 ),
             )
 
@@ -89,7 +86,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         // Assert
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
         Assertions.assertEquals(
-            barn1.tilPersonDto().personIdent,
+            barn1.aktivFødselsnummer(),
             utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer
                 .single()
                 .person.personIdent,
