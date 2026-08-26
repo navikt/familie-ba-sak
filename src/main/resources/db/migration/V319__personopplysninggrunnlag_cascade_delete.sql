@@ -1,4 +1,4 @@
-SET LOCAL lock_timeout = '5s';
+SET LOCAL lock_timeout = '15s';
 
 ALTER TABLE po_person
     DROP CONSTRAINT po_person_fk_gr_personopplysninger_id_fkey,
