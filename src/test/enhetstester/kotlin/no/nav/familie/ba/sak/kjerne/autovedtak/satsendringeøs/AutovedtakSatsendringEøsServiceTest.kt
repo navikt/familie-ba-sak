@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SatsendringEøsData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
@@ -36,12 +35,12 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.math.BigDecimal
 import java.time.YearMonth
 
 class AutovedtakSatsendringEøsServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val satsendringEøsKjøringService = mockk<SatsendringEøsKjøringService>(relaxed = true)
     private val utenlandskPeriodebeløpService = mockk<UtenlandskPeriodebeløpService>()
     private val autovedtakService = mockk<AutovedtakService>()
@@ -50,7 +49,6 @@ class AutovedtakSatsendringEøsServiceTest {
     private val service =
         AutovedtakSatsendringEøsService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            behandlingService = behandlingService,
             satsendringEøsKjøringService = satsendringEøsKjøringService,
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
             autovedtakService = autovedtakService,
@@ -165,6 +163,23 @@ class AutovedtakSatsendringEøsServiceTest {
             every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(any()) } returns listOf(utenlandskPeriodebeløp)
             every { autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any()) } returns lagVedtak()
             every { taskRepository.save(any()) } returns mockk()
+        }
+
+        @Test
+        fun `kaster ikke feil når et utenlandsk periodebeløp har beløp lik ny sats og et utenlandsk periodebeløp har beløp lik gammel sats`() {
+            // Arrange
+            every {
+                autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(any(), any(), any(), any())
+            } returns lagBehandling(fagsak = fagsak, førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG)
+
+            every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(BehandlingId(behandling.id)) } returns
+                listOf(
+                    lagUtenlandskPeriodebeløp(beløp = forrigeSats.beløp),
+                    lagUtenlandskPeriodebeløp(beløp = gjeldendeSats.beløp),
+                )
+
+            // Act & Assert
+            assertDoesNotThrow { service.kjørBehandling(satsendringEøsData) }
         }
 
         @Test
