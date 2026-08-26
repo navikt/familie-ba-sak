@@ -71,4 +71,7 @@ enum class FeatureToggle(
     // NAV-30011
     OPPDRAG_MIGRERING_HENT_SIMULERING_GCP("familie-baks-sak.oppdrag-migrering-hent-simulering-gcp"),
     OPPDRAG_MIGRERING_IVERKSETT_OPPDRAG_GCP("familie-ba-og-ks-sak.oppdrag-migrering-iverksett-oppdrag-gcp"),
+
+    // NAV-30300
+    SKAL_SKYGGEKJØRE_TILGANGSMASKINEN("familie-ba-sak.skal-skyggekjore-tilgangsmaskinen"),
 }

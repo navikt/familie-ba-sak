@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.http.HttpStatus
-import org.springframework.web.client.RestTemplate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InfotrygdControllerTest {
@@ -29,7 +28,13 @@ class InfotrygdControllerTest {
     private val cacheManager = spyk(ConcurrentMapCacheManager())
     private val familieIntegrasjonerTilgangskontrollKlient = FakeFamilieIntegrasjonerTilgangskontrollKlient()
 
-    private val familieIntegrasjonerTilgangskontrollService = FamilieIntegrasjonerTilgangskontrollService(familieIntegrasjonerTilgangskontrollKlient, cacheManager, systemOnlyPdlRestKlient)
+    private val familieIntegrasjonerTilgangskontrollService =
+        FamilieIntegrasjonerTilgangskontrollService(
+            familieIntegrasjonerTilgangskontrollKlient,
+            cacheManager,
+            systemOnlyPdlRestKlient,
+            mockk(relaxed = true),
+        )
 
     private val infotrygdBarnetrygdKlient = mockk<InfotrygdBarnetrygdKlient>()
     private val personidentService = mockk<PersonidentService>()
