@@ -39,8 +39,14 @@ class TilkjentYtelseGenerator(
                 endretDato = LocalDate.now(),
             )
 
-        val endretUtbetalingAndelerSøker = endretUtbetalingAndeler.filter { it.personer.any { person -> person.type == PersonType.SØKER } }
-        val endretUtbetalingAndelerBarna = endretUtbetalingAndeler.filter { it.personer.any { person -> person.type == PersonType.BARN } }
+        val barnasAktører = personopplysningGrunnlag.barna.map { it.aktør }.toSet()
+        val endretUtbetalingAndelerSøker = endretUtbetalingAndeler.filter { it.endretUtbetalingAndel.aktører.contains(personopplysningGrunnlag.søker.aktør) }
+        val endretUtbetalingAndelerBarna =
+            endretUtbetalingAndeler.filter {
+                it.endretUtbetalingAndel.aktører
+                    .intersect(barnasAktører)
+                    .isNotEmpty()
+            }
 
         val andelerTilkjentYtelseBarnaUtenEndringer =
             OrdinærBarnetrygdUtil

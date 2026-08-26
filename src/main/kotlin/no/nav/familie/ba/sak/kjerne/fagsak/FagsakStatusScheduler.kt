@@ -40,18 +40,27 @@ class FagsakStatusScheduler(
     }
 
     @Scheduled(cron = "\${CRON_LÅS_FAGSAK_SCHEDULER}")
-    fun startFagsakLåsing() {
+    fun startFagsakLåsingScheduled() {
+        if (leaderClientService.isLeader() || envService.erDev()) {
+            startFagsakLåsing(maksAntall = STANDARD_MAKS_ANTALL_FAGSAKER_PER_KJØRING)
+        }
+    }
+
+    fun startFagsakLåsing(maksAntall: Int): Boolean {
         if (!featureToggleService.isEnabled(FeatureToggle.FAGSAKLÅSING_SCHEDULER)) {
             logger.info("Fagsaklåsing-scheduler-toggle er av, hopper over batch")
-            return
+            return false
         }
-        if (leaderClientService.isLeader() || envService.erDev()) {
-            taskRepository.save(Task(type = FinnFagsakerSomSkalLåsesTask.TASK_STEP_TYPE, payload = ""))
-            logger.info("Opprettet FinnFagsakerForLåsingTask")
-        }
+
+        taskRepository.save(FinnFagsakerSomSkalLåsesTask.opprettTask(maksAntall = maksAntall))
+        logger.info("Opprettet FinnFagsakerSomSkalLåsesTask med maks $maksAntall fagsaker")
+        return true
     }
 
     companion object {
         private val logger = LoggerFactory.getLogger(FagsakStatusScheduler::class.java)
+
+        // Maks antall fagsaker som låses per automatiske kjøring. Holdes lavt i oppstarten og økes etter hvert.
+        const val STANDARD_MAKS_ANTALL_FAGSAKER_PER_KJØRING = 100
     }
 }

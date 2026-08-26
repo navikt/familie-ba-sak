@@ -340,8 +340,8 @@ internal fun erEndringIEndretUtbetalingAndelerForPerson(
     nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
     forrigeEndretAndeler: List<EndretUtbetalingAndel>,
 ): Boolean {
-    val nåværendeEndretAndelerForPerson = nåværendeEndretAndeler.filter { it.personer.any { person -> person.aktør == aktør } }
-    val forrigeEndretAndelerForPerson = forrigeEndretAndeler.filter { it.personer.any { person -> person.aktør == aktør } }
+    val nåværendeEndretAndelerForPerson = nåværendeEndretAndeler.filter { aktør in it.aktører }
+    val forrigeEndretAndelerForPerson = forrigeEndretAndeler.filter { aktør in it.aktører }
 
     val endringIEndretUtbetalingAndelTidslinje =
         EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUbetalingAndelPerPersonTidslinje(

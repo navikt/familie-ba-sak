@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.toLocalDate
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.eøs.sats.EøsSatserRegister
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -13,6 +16,7 @@ import java.time.YearMonth
 class StartSatsendringEøs(
     private val behandlingRepository: BehandlingRepository,
     private val opprettTaskService: OpprettTaskService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun opprettSatsendringEøsTaskerForRelevanteFagsaker(
         utbetalingsland: String,
@@ -44,6 +48,9 @@ class StartSatsendringEøs(
         utbetalingsland: String,
         satsTidspunkt: YearMonth,
     ) {
+        if (!featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_SATSENDRING_EØS)) {
+            throw Feil("Toggle KAN_KJØRE_SATSENDRING_EØS er skrudd av")
+        }
         opprettTaskService.opprettSatsendringEøsTask(
             fagsakId = fagsakId,
             utbetalingsland = utbetalingsland,

@@ -21,7 +21,7 @@ fun beregnGyldigTom(
         andreEndredeAndelerPåBehandling
             .filter {
                 it.fom?.isAfter(endretUtbetalingAndel.fom) == true &&
-                    it.personer.intersect(endretUtbetalingAndel.personer).isNotEmpty()
+                    it.aktører.intersect(endretUtbetalingAndel.aktører).isNotEmpty()
             }.sortedBy { it.fom }
             .firstOrNull()
 
@@ -30,7 +30,7 @@ fun beregnGyldigTom(
     } else {
         val sisteTomAndeler =
             andelTilkjentYtelser
-                .filter { endretUtbetalingAndel.personer.any { person -> person.aktør == it.aktør } }
+                .filter { it.aktør in endretUtbetalingAndel.aktører }
                 .groupBy { it.aktør }
                 .minOf { (_, andelerForAktør) -> andelerForAktør.maxOf { it.stønadTom } }
 
@@ -44,19 +44,18 @@ fun beregnGyldigTomPerAktør(
     andelTilkjentYtelser: List<AndelTilkjentYtelse>,
 ): Map<Aktør, YearMonth?> {
     val førsteEndringEtterDenneEndringenPerAktør =
-        endretUtbetalingAndel.personer.associate { person ->
-            person.aktør to
-                andreEndredeAndelerPåBehandling
-                    .filter { it.fom?.isAfter(endretUtbetalingAndel.fom) == true && it.personer.contains(person) }
-                    .sortedBy { it.fom }
-                    .firstOrNull()
-                    ?.fom
-                    ?.minusMonths(1)
+        endretUtbetalingAndel.aktører.associateWith { aktør ->
+            andreEndredeAndelerPåBehandling
+                .filter { it.fom?.isAfter(endretUtbetalingAndel.fom) == true && it.aktører.contains(aktør) }
+                .sortedBy { it.fom }
+                .firstOrNull()
+                ?.fom
+                ?.minusMonths(1)
         }
 
     val sisteTomAndelerPerAktør =
         andelTilkjentYtelser
-            .filter { endretUtbetalingAndel.personer.any { person -> person.aktør == it.aktør } }
+            .filter { it.aktør in endretUtbetalingAndel.aktører }
             .filter { førsteEndringEtterDenneEndringenPerAktør[it.aktør] == null }
             .groupBy { it.aktør }
             .mapValues { (_, andelerForAktør) -> andelerForAktør.maxOfOrNull { it.stønadTom } }
@@ -87,7 +86,7 @@ fun splittEndretUbetalingAndel(
         .map { periode ->
             endretUtbetalingAndel.copy(
                 id = 0,
-                personer = endretUtbetalingAndel.personer.filter { periode.verdi.contains(it.aktør) }.toMutableSet(),
+                aktører = endretUtbetalingAndel.aktører.intersect(periode.verdi).toMutableSet(),
                 fom = periode.fom?.toYearMonth(),
                 tom = periode.tom?.toYearMonth(),
             )
