@@ -37,7 +37,7 @@ data class PersonopplysningGrunnlag(
     @OneToMany(
         fetch = FetchType.EAGER,
         mappedBy = "personopplysningGrunnlag",
-        cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH],
+        cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE],
     )
     val personer: MutableSet<Person> = mutableSetOf(),
     @Column(name = "aktiv", nullable = false)
