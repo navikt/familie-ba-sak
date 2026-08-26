@@ -30,6 +30,8 @@ NAIS_TOKEN_ENDPOINT: http://localhost/token
 NAIS_TOKEN_EXCHANGE_ENDPOINT: http://localhost/token/exchange
 
 FAMILIE_INTEGRASJONER_SCOPE: dummy
+TILGANGSMASKIN_SCOPE: dummy
+TILGANGSMASKIN_API_URL: http://localhost:28085/tilgangsmaskin
 PDL_SCOPE: dummy
 FAMILIE_OPPDRAG_SCOPE: dummy
 FAMILIE_OPPDRAG_BACKEND_SCOPE: dummy

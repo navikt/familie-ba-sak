@@ -25,6 +25,8 @@ FAMILIE_EF_SAK_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
 FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner.dev-fss-pub.nais.io/api
 FAMILIE_INTEGRASJONER_SCOPE: api://dev-fss.teamfamilie.familie-integrasjoner/.default
 
+TILGANGSMASKIN_SCOPE: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
+
 FAMILIE_BA_INFOTRYGD_FEED_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd-feed/.default
 FAMILIE_BA_INFOTRYGD_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd/.default
 FAMILIE_OPPDRAG_SCOPE: api://dev-fss.teamfamilie.familie-oppdrag/.default

@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.fake.FakeSanityKlient
 import no.nav.familie.ba.sak.fake.FakeSystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
 import no.nav.familie.ba.sak.fake.FakeTilbakekrevingKlient
+import no.nav.familie.ba.sak.fake.FakeTilgangsmaskinKlient
 import no.nav.familie.ba.sak.fake.FakeØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
@@ -48,6 +49,11 @@ class FakeConfig {
         every { mock.hentOboToken(any(), any()) } returns "mock-obo-token"
         return mock
     }
+
+    @Bean
+    @Primary
+    @Profile("integrasjonstest", "postgres")
+    fun fakeTilgangsmaskinKlient(): FakeTilgangsmaskinKlient = FakeTilgangsmaskinKlient()
 
     @Bean
     @Primary
