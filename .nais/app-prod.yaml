@@ -196,7 +196,7 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
     - name: JDK_JAVA_OPTIONS
-      value: "-XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp"
+      value: "-XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp -Dorg.apache.avro.SERIALIZABLE_PACKAGES=no.nav.person.pdl.aktor.v2"
   kafka:
     pool: nav-prod
   strategy:
