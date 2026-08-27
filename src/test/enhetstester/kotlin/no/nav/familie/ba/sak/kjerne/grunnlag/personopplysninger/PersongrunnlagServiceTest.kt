@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVegadresse
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRegisterhistorikkDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -428,6 +429,130 @@ class PersongrunnlagServiceTest {
             val sorterteAdresser = bostedadresseSøker.sortedBy { it.periode?.fom }
             assertThat(sorterteAdresser.first().periode?.tom).isAfter(eldsteBarn.fødselsdato)
             assertThat(sorterteAdresser.last().periode?.fom).isAfter(eldsteBarn.fødselsdato)
+        }
+
+        @Test
+        fun `skal ikke la bostedsadresse uten til-og-med dato bli stående igjen når adressen etter filtreres bort på eldste barns fødselsdato`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 1))
+            val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2024, 8, 22))
+            val behandling = lagBehandling()
+
+            every { persongrunnlagService.hentAktiv(behandling.id) } returns null
+            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
+
+            val gammelAdresse =
+                lagBostedsadresse(
+                    gyldigFraOgMed = LocalDate.of(2019, 8, 20),
+                    angittFlyttedato = LocalDate.of(2019, 8, 5),
+                    gyldigTilOgMed = null,
+                    vegadresse = lagVegadresse(adressenavn = "Haneborgveien"),
+                )
+            val avsluttetAdresse =
+                lagBostedsadresse(
+                    gyldigFraOgMed = LocalDate.of(2021, 8, 26),
+                    angittFlyttedato = LocalDate.of(2021, 8, 23),
+                    gyldigTilOgMed = LocalDate.of(2022, 1, 1),
+                    vegadresse = lagVegadresse(adressenavn = "Krokenvegen"),
+                )
+            val gjeldendeAdresse =
+                lagBostedsadresse(
+                    gyldigFraOgMed = LocalDate.of(2025, 7, 28),
+                    angittFlyttedato = LocalDate.of(2025, 7, 23),
+                    gyldigTilOgMed = null,
+                    vegadresse = lagVegadresse(adressenavn = "Astrids vei"),
+                )
+
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns
+                PersonInfo(
+                    fødselsdato = søker.fødselsdato,
+                    bostedsadresser = listOf(avsluttetAdresse, gammelAdresse, gjeldendeAdresse),
+                )
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn.aktør) } returns
+                PersonInfo(barn.fødselsdato)
+
+            every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
+            every { kodeverkService.hentPoststed(any()) } returns "Oslo"
+
+            // Act
+            val personopplysningGrunnlag =
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = søker.aktør,
+                    barnFraInneværendeBehandling = listOf(barn.aktør),
+                    behandling = behandling,
+                    målform = Målform.NB,
+                )
+
+            // Assert
+            assertThat(personopplysningGrunnlag.søker.bostedsadresser).hasSize(1)
+
+            val registrerteBostedsadresser =
+                personopplysningGrunnlag.søker
+                    .tilRegisterhistorikkDto(barn.fødselsdato)
+                    .bostedsadresse
+                    .orEmpty()
+            assertThat(registrerteBostedsadresser).hasSize(1)
+            assertThat(registrerteBostedsadresser.single().verdi).contains("Astrids vei")
+            assertThat(registrerteBostedsadresser.single().fom).isEqualTo(LocalDate.of(2025, 7, 23))
+            assertThat(registrerteBostedsadresser.single().tom).isNull()
+        }
+
+        @Test
+        fun `skal la utenlandsk bostedsadresse avslutte norsk bostedsadresse uten til-og-med dato før eldste barns fødselsdato`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 1))
+            val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2024, 8, 22))
+            val behandling = lagBehandling()
+
+            every { persongrunnlagService.hentAktiv(behandling.id) } returns null
+            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
+
+            val norskAdresseFørUtvandring =
+                lagBostedsadresse(
+                    gyldigFraOgMed = LocalDate.of(2019, 8, 5),
+                    gyldigTilOgMed = null,
+                    vegadresse = lagVegadresse(adressenavn = "Haneborgveien"),
+                )
+            // Utenlandske bostedsadresser hentes uten adressefelter fra PDL og har dermed kun datoer
+            val utenlandskAdresse =
+                lagBostedsadresse(
+                    gyldigFraOgMed = LocalDate.of(2022, 1, 2),
+                    gyldigTilOgMed = null,
+                )
+            val norskAdresseEtterInnvandring =
+                lagBostedsadresse(
+                    gyldigFraOgMed = LocalDate.of(2025, 7, 23),
+                    gyldigTilOgMed = null,
+                    vegadresse = lagVegadresse(adressenavn = "Astrids vei"),
+                )
+
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns
+                PersonInfo(
+                    fødselsdato = søker.fødselsdato,
+                    bostedsadresser = listOf(norskAdresseFørUtvandring, utenlandskAdresse, norskAdresseEtterInnvandring),
+                )
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn.aktør) } returns
+                PersonInfo(barn.fødselsdato)
+
+            every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
+            every { kodeverkService.hentPoststed(any()) } returns "Oslo"
+
+            // Act
+            val personopplysningGrunnlag =
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = søker.aktør,
+                    barnFraInneværendeBehandling = listOf(barn.aktør),
+                    behandling = behandling,
+                    målform = Målform.NB,
+                )
+
+            // Assert
+            val bostedsadresserSøker = personopplysningGrunnlag.søker.bostedsadresser
+            assertThat(bostedsadresserSøker).hasSize(1)
+            assertThat(bostedsadresserSøker.single().periode?.fom).isEqualTo(LocalDate.of(2025, 7, 23))
+            assertThat(bostedsadresserSøker.single().periode?.tom).isNull()
         }
 
         @Test
