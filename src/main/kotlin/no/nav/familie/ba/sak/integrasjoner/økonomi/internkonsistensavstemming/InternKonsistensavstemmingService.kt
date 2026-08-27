@@ -5,6 +5,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.OppdragBackendKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -23,10 +26,12 @@ import java.time.LocalDateTime
 @Service
 class InternKonsistensavstemmingService(
     val økonomiKlient: ØkonomiKlient,
+    val oppdragBackendKlient: OppdragBackendKlient,
     val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     val fagsakRepository: FagsakRepository,
     val taskService: TaskService,
+    val featureToggleService: FeatureToggleService,
 ) {
     fun validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåFagsaker(
         maksAntallTasker: Int = Int.MAX_VALUE,
@@ -79,8 +84,14 @@ class InternKonsistensavstemmingService(
     private fun hentFagsakTilSisteUtbetalingsoppdragOgSisteAndelerMap(fagsakIder: Set<Long>): Map<Long, Pair<List<AndelTilkjentYtelse>, Utbetalingsoppdrag?>> {
         val scope = CoroutineScope(SupervisorJob())
         val utbetalingsoppdragDeferred =
-            scope.async {
-                økonomiKlient.hentSisteUtbetalingsoppdragForFagsaker(fagsakIder)
+            if (featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP)) {
+                scope.async {
+                    oppdragBackendKlient.hentSisteUtbetalingsoppdragForFagsaker(fagsakIder)
+                }
+            } else {
+                scope.async {
+                    økonomiKlient.hentSisteUtbetalingsoppdragForFagsaker(fagsakIder)
+                }
             }
 
         val fagsakTilAndelerISisteBehandlingSendTilØkonomiMap =
