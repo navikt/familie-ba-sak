@@ -297,10 +297,18 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                    ON  p.fk_gr_personopplysninger_id = gr.id AND p.type = 'BARN'
             GROUP BY sv.fk_fagsak_id
         )
-        -- Fagsaker der yngste barn har fylt 18 år for mer enn 1 år siden
+        -- Fagsaker der yngste barn har fylt 18 år for mer enn 1 år siden,
+        -- og som ikke allerede har en LåsFagsakTask som ikke er ferdig behandlet
         SELECT yb.fk_fagsak_id
         FROM   yngste_barn yb
         WHERE  yb.yngste_foedselsdato + INTERVAL '19 years' <= CURRENT_DATE
+          AND NOT EXISTS (
+              SELECT 1
+              FROM   task t
+              WHERE  t.type    = 'låsFagsakTask'
+                AND  t.payload = CAST(yb.fk_fagsak_id AS TEXT)
+                AND  t.status  NOT IN ('FERDIG', 'AVVIKSHÅNDTERT')
+          )
         ORDER BY yb.fk_fagsak_id
         LIMIT :maksAntall
         """,
