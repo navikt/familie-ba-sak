@@ -655,7 +655,7 @@ class BehandlingIntegrationTest(
         )
 
         // Assert
-        val søker = personRepository.findByAktør(søkerAktør).first()
+        val søker = personRepository.finnPersonerIAktiveGrunnlag(søkerAktør).first()
         val vegadresse = søker.bostedsadresser.sisteAdresse() as GrVegadresseBostedsadresse
         assertEquals(søkerAdressnavn, vegadresse.adressenavn)
         assertEquals(matrikkelId, vegadresse.matrikkelId)
