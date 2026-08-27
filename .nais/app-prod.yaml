@@ -16,6 +16,11 @@ spec:
   image: {{image}}
   port: 8089
   leaderElection: true
+  startup:
+    path: /internal/health/liveness
+    initialDelay: 30
+    periodSeconds: 10
+    failureThreshold: 180
   liveness:
     path: /internal/health/liveness
     initialDelay: 30
