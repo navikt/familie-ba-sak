@@ -101,7 +101,7 @@ class ØkonomiService(
         behandlingId: Long,
     ): OppdragStatus =
         if (tilkjentYtelseRepository.findByBehandling(behandlingId).skalIverksettesMotOppdrag()) {
-            if (featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP)) {
+            if (featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP, behandlingId)) {
                 oppdragBackendKlient.hentStatus(oppdragId)
             } else {
                 økonomiKlient.hentStatus(oppdragId)
