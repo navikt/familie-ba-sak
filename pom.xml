@@ -44,7 +44,7 @@
         <unleash.version>12.2.3</unleash.version>
         <testcontainers.postgresql.version>1.21.4</testcontainers.postgresql.version>
         <maven.model.version>3.9.16</maven.model.version>
-        <avro.version>1.12.1</avro.version>
+        <avro.version>1.12.2</avro.version>
         <confluent.version>8.3.1</confluent.version>
         <sonar.organization>navikt</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
