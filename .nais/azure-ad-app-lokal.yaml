@@ -1,7 +1,7 @@
 #######
 # Denne er brukt til å gjøre det mulig å bruke tokens lokalt
 #
-# secret kan hentes fra cluster med "kubectl -n teamfamilie get secret azuread-familie-ba-sak-lokal -o json | jq '.data | map_values(@base64d)'"
+# secret kan hentes med: nais secret get azuread-familie-ba-sak-lokal -e dev-gcp -t teamfamilie --with-values --reason "<begrunnelse>"
 #
 # Kjøres en gang eller ved endringer med
 # kubectl apply -f .nais/azure-ad-app-lokal.yaml

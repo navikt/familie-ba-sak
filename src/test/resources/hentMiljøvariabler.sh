@@ -1,55 +1,83 @@
-# Check the status of nais device
-NAIS_STATUS=$(nais device status)
+#!/bin/bash
+# Henter miljøvariabler for DevLauncherPostgresPreprod med nais-cli.
+# NB: DevLauncherPostgresPreprod forkaster første linje på stdout – behold statuslinja før printf.
 
-if [[ "$NAIS_STATUS" != *"Connected"* ]]; then
+TEAM=teamfamilie
+MILJO=dev-gcp
+APP=familie-ba-sak
+BEGRUNNELSE="Lokal kjoering av familie-ba-sak mot preprod"
+
+if [[ "$(nais device status)" != *"Connected"* ]]; then
   echo "Naisdevice er ikke tilkoblet. Start naisdevice og velg connect. Status må være grønn."
-  return 1
+  exit 1
 fi
 
-# Check the status of gcloud auth print-identity-token
-if ! gcloud auth print-identity-token > /dev/null 2>&1; then
-  echo "Ikke logget inn på gcloud. Kjør nais login"
-  return 1
+# nais-cli skriver feilmeldinger til stdout, så vi fanger dem og viser dem videre.
+# Appens miljøvariabler hentes én gang og gjenbrukes for alle oppslagene under.
+if ! APP_ENV=$(nais app env "$APP" -e "$MILJO" -t "$TEAM" -o json 2>&1); then
+  printf '%s\n' "Klarte ikke hente miljøvariabler for $APP:" "$APP_ENV"
+  exit 1
 fi
 
-kubectl config use-context dev-gcp
+finn_secret() { # $1 = nøkkel -> setter FUNNET_SECRET
+  FUNNET_SECRET=$(printf '%s\n' "$APP_ENV" | jq -r --arg k "$1" '.[] | select(.name == $k) | .source.name' | head -1)
+  if [[ -z "$FUNNET_SECRET" ]]; then
+    printf '%s\n' "Fant ikke secreten bak $1 for $APP. Er du logget inn med 'nais login -y'?"
+    return 1
+  fi
+}
 
-AZURE_SECRET=$(kubectl -n teamfamilie get secret -o name | grep "azure-familie-ba-sak" | grep -v "frontend" | head -1 | cut -d/ -f2)
-TOKEN_X_SECRET=$(kubectl -n teamfamilie get secret -o name | grep "tokenx-familie-ba-sak" | head -1 | cut -d/ -f2)
+hent_secret_kv() { # $1 = secret-navn -> setter SECRET_KV
+  local ut
+  if ! ut=$(nais secret get "$1" -e "$MILJO" -t "$TEAM" --with-values --reason "$BEGRUNNELSE" -o json 2>&1); then
+    printf '%s\n' "Klarte ikke hente secreten $1:" "$ut"
+    return 1
+  fi
+  SECRET_KV=$(printf '%s\n' "$ut" | jq -r '.data[] | "\(.key)=\(.value)"')
+}
 
-AZURE_VARIABLER="$(kubectl -n teamfamilie get secret "$AZURE_SECRET" -o json | jq '.data | map_values(@base64d)')"
-TOKEN_X_VARIABLER="$(kubectl -n teamfamilie get secret "$TOKEN_X_SECRET" -o json | jq '.data | map_values(@base64d)')"
-UNLEASH_VARIABLER="$(kubectl -n teamfamilie get secret familie-ba-sak-unleash-api-token -o json | jq '.data | map_values(@base64d)')"
+finn_secret AZURE_APP_CLIENT_SECRET || exit 1
+AZURE_SECRET=$FUNNET_SECRET
+finn_secret TOKEN_X_CLIENT_ID || exit 1
+TOKEN_X_SECRET=$FUNNET_SECRET
+finn_secret UNLEASH_SERVER_API_TOKEN || exit 1
+UNLEASH_SECRET=$FUNNET_SECRET
 
-_jq() { echo "$2=$(echo "$1" | jq -r ".\"$2\"")"; }
+hent_secret_kv "$AZURE_SECRET" || exit 1
+AZURE_KV=$SECRET_KV
+hent_secret_kv "$TOKEN_X_SECRET" || exit 1
+TOKEN_X_KV=$SECRET_KV
+hent_secret_kv "$UNLEASH_SECRET" || exit 1
+UNLEASH_KV=$SECRET_KV
 
-AZURE_APP_CLIENT_ID="$(_jq "$AZURE_VARIABLER" "AZURE_APP_CLIENT_ID")"
-AZURE_APP_CLIENT_SECRET="$(_jq "$AZURE_VARIABLER" "AZURE_APP_CLIENT_SECRET")"
-AZURE_APP_TENANT_ID="$(_jq "$AZURE_VARIABLER" "AZURE_APP_TENANT_ID")"
-AZURE_APP_JWK="$(_jq "$AZURE_VARIABLER" "AZURE_APP_JWK")"
-AZURE_OPENID_CONFIG_ISSUER="$(_jq "$AZURE_VARIABLER" "AZURE_OPENID_CONFIG_ISSUER")"
-AZURE_OPENID_CONFIG_JWKS_URI="$(_jq "$AZURE_VARIABLER" "AZURE_OPENID_CONFIG_JWKS_URI")"
+UTDATA=""
+MANGLER=""
+legg_til() { # $1 = KEY=VALUE-blokk, $2 = nøkkel
+  local linje
+  linje=$(printf '%s\n' "$1" | grep "^$2=" | head -1)
+  if [[ -z "$linje" ]]; then
+    MANGLER="$MANGLER $2"
+  else
+    UTDATA="$UTDATA$linje"$'\n'
+  fi
+}
 
-TOKEN_X_CLIENT_ID="$(_jq "$TOKEN_X_VARIABLER" "TOKEN_X_CLIENT_ID")"
-TOKEN_X_ISSUER="$(_jq "$TOKEN_X_VARIABLER" "TOKEN_X_ISSUER")"
-TOKEN_X_JWKS_URI="$(_jq "$TOKEN_X_VARIABLER" "TOKEN_X_JWKS_URI")"
+legg_til "$AZURE_KV" AZURE_APP_CLIENT_ID
+legg_til "$AZURE_KV" AZURE_APP_CLIENT_SECRET
+legg_til "$AZURE_KV" AZURE_OPENID_CONFIG_ISSUER
+legg_til "$AZURE_KV" AZURE_OPENID_CONFIG_JWKS_URI
+legg_til "$AZURE_KV" AZURE_APP_TENANT_ID
+legg_til "$TOKEN_X_KV" TOKEN_X_CLIENT_ID
+legg_til "$TOKEN_X_KV" TOKEN_X_ISSUER
+legg_til "$TOKEN_X_KV" TOKEN_X_JWKS_URI
+legg_til "$UNLEASH_KV" UNLEASH_SERVER_API_URL
+legg_til "$UNLEASH_KV" UNLEASH_SERVER_API_TOKEN
+legg_til "$AZURE_KV" AZURE_APP_JWK
 
-UNLEASH_SERVER_API_URL="$(_jq "$UNLEASH_VARIABLER" "UNLEASH_SERVER_API_URL")"
-UNLEASH_SERVER_API_TOKEN="$(_jq "$UNLEASH_VARIABLER" "UNLEASH_SERVER_API_TOKEN")"
-
-if [[ -z "$AZURE_APP_CLIENT_ID" ]]; then
-  return 1
+if [[ -n "$MANGLER" ]]; then
+  printf '%s\n' "Manglet følgende nøkler i secretene:$MANGLER"
+  exit 1
 fi
 
-printf "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s" \
-  "$AZURE_APP_CLIENT_ID" \
-  "$AZURE_APP_CLIENT_SECRET" \
-  "$AZURE_OPENID_CONFIG_ISSUER" \
-  "$AZURE_OPENID_CONFIG_JWKS_URI" \
-  "$AZURE_APP_TENANT_ID" \
-  "$TOKEN_X_CLIENT_ID" \
-  "$TOKEN_X_ISSUER" \
-  "$TOKEN_X_JWKS_URI" \
-  "$UNLEASH_SERVER_API_URL" \
-  "$UNLEASH_SERVER_API_TOKEN" \
-  "$AZURE_APP_JWK"
+echo "Henter miljøvariabler med nais-cli..."
+printf '%s' "$UTDATA"
