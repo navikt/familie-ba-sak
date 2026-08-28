@@ -78,7 +78,7 @@ class ØkonomiService(
             return
         }
         try {
-            if (featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP)) {
+            if (featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP, behandlingId)) {
                 oppdragBackendKlient.iverksettOppdrag(utbetalingsoppdrag)
             } else {
                 økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
