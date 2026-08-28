@@ -20,8 +20,7 @@ class FalskIdentitetService(
     fun hentFalskIdentitet(aktør: Aktør): FalskIdentitetPersonInfo? {
         if (harFalskIdentitet(aktør)) {
             validerTilgangTilHåndteringAvFalskIdentitet()
-            val personer = personRepository.findByAktør(aktør)
-            val person = personer.firstOrNull { it.personopplysningGrunnlag.aktiv } ?: personer.firstOrNull()
+            val person = personRepository.finnPersonerIAktiveGrunnlag(aktør).firstOrNull()
 
             // Vurdere å bruke mer informasjon fra PdlFalskIdentitet hvis tilgjengelig
             // Henter navn, fødselsdato, kjønn og adresser fra personopplysningene i stedet for PDL

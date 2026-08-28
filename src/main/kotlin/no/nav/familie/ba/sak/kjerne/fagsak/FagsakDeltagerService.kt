@@ -145,8 +145,7 @@ class FagsakDeltagerService(
         personInfoForAktør: PdlPersonInfo,
     ): Collection<FagsakDeltagerDto> =
         personRepository
-            .findByAktør(aktør)
-            .filter { it.personopplysningGrunnlag.aktiv }
+            .finnPersonerIAktiveGrunnlag(aktør)
             .fold(mutableMapOf<Long, FagsakDeltagerDto>()) { fagsakDeltagerMap, person: Person ->
                 val behandling = behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
                 if (!behandling.aktiv || behandling.fagsak.arkivert || fagsakDeltagerMap.containsKey(behandling.fagsak.id)) {
