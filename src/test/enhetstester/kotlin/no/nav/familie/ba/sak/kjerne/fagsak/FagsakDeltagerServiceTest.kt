@@ -102,7 +102,7 @@ class FagsakDeltagerServiceTest {
             personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
         } returns PdlPersonInfo.Person(personInfo = personInfo)
         every { fagsakRepository.finnFagsakerForAktør(aktør) } returns emptyList()
-        every { personRepository.findByAktør(aktør) } returns emptyList()
+        every { personRepository.finnPersonerIAktiveGrunnlag(aktør) } returns emptyList()
         every { integrasjonKlient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
 
         // Act
@@ -146,7 +146,7 @@ class FagsakDeltagerServiceTest {
         every {
             personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(barnAktør)
         } returns PdlPersonInfo.Person(personInfo = barnPersonInfo)
-        every { personRepository.findByAktør(barnAktør) } returns listOf()
+        every { personRepository.finnPersonerIAktiveGrunnlag(barnAktør) } returns listOf()
         every {
             integrasjonKlient.sjekkErEgenAnsattBulk(match { it.containsAll(listOf(barnIdent, morIdent, farIdent)) })
         } returns emptyMap()
@@ -192,7 +192,7 @@ class FagsakDeltagerServiceTest {
             personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(barnAktør)
         } returns PdlPersonInfo.Person(personInfo = barnInfo)
         every { fagsakRepository.finnFagsakerForAktør(match { it in aktører }) } returns emptyList()
-        every { personRepository.findByAktør(match { it in aktører }) } returns emptyList()
+        every { personRepository.finnPersonerIAktiveGrunnlag(match { it in aktører }) } returns emptyList()
         every {
             integrasjonKlient.sjekkErEgenAnsattBulk(match { it.containsAll(listOf(barnIdent, morIdent, farIdent)) })
         } returns mapOf(barnIdent to false, morIdent to true) // Far utelates
@@ -223,7 +223,7 @@ class FagsakDeltagerServiceTest {
             personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør)
         } returns PdlPersonInfo.Person(personInfo = personInfo)
         every {
-            personRepository.findByAktør(person.aktør)
+            personRepository.finnPersonerIAktiveGrunnlag(person.aktør)
         } returns listOf(person)
         every {
             behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
@@ -258,7 +258,7 @@ class FagsakDeltagerServiceTest {
             personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør)
         } returns PdlPersonInfo.Person(personInfo = personInfo)
         every {
-            personRepository.findByAktør(person.aktør)
+            personRepository.finnPersonerIAktiveGrunnlag(person.aktør)
         } returns listOf(person)
         every {
             behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
@@ -293,7 +293,7 @@ class FagsakDeltagerServiceTest {
             personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør)
         } returns PdlPersonInfo.Person(personInfo = personInfo)
         every {
-            personRepository.findByAktør(person.aktør)
+            personRepository.finnPersonerIAktiveGrunnlag(person.aktør)
         } returns listOf(person)
         every {
             behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
@@ -329,7 +329,7 @@ class FagsakDeltagerServiceTest {
             personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør)
         } returns PdlPersonInfo.Person(personInfo = personInfo)
         every {
-            personRepository.findByAktør(person.aktør)
+            personRepository.finnPersonerIAktiveGrunnlag(person.aktør)
         } returns listOf(person)
         every {
             behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
