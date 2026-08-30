@@ -575,7 +575,7 @@ class PensjonServiceIntegrationTest(
                     )
                 },
             )
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
+        vilkårsvurderingService.lagreNyOgSlettGammel(vilkårsvurdering)
     }
 
     private fun avsluttOgLagreBehandling(behandling: Behandling) {
