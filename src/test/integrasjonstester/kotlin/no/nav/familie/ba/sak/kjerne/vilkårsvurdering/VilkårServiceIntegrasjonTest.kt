@@ -100,7 +100,6 @@ class VilkårServiceIntegrasjonTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
         val gammelVilkårsvurdering = vilkårsvurderingService.lagreNyOgSlettGammel(lagVilkårsvurdering(behandling = behandling))
-        val gammeltPersonResultat = gammelVilkårsvurdering.personResultater.single()
 
         // Act
         val nyVilkårsvurdering = vilkårsvurderingService.lagreNyOgSlettGammel(lagVilkårsvurdering(behandling = behandling))
