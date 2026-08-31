@@ -74,4 +74,7 @@ enum class FeatureToggle(
 
     // NAV-30300
     SKAL_SKYGGEKJØRE_TILGANGSMASKINEN("familie-ba-sak.skal-skyggekjore-tilgangsmaskinen"),
+
+    // NAV-29456
+    SKAL_SLETTE_INAKTIVE_VILKÅRSVURDERINGER("familie-ba-sak.skal-slette-inaktive-vilkarsvurderinger"),
 }
