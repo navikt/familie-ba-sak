@@ -44,7 +44,8 @@
         <unleash.version>12.2.3</unleash.version>
         <testcontainers.postgresql.version>1.21.4</testcontainers.postgresql.version>
         <maven.model.version>3.9.16</maven.model.version>
-        <avro.version>1.12.1</avro.version>
+        <avro.version>1.12.2</avro.version>
+        <avro.serializable.packages>no.nav.person.pdl.aktor.v2</avro.serializable.packages>
         <confluent.version>8.3.1</confluent.version>
         <sonar.organization>navikt</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -552,6 +553,9 @@
                     <excludedGroups>${excludedGroups}</excludedGroups>
                     <threadCount>1</threadCount>
                     <runOrder>random</runOrder>
+                    <systemPropertyVariables>
+                        <org.apache.avro.SERIALIZABLE_PACKAGES>${avro.serializable.packages}</org.apache.avro.SERIALIZABLE_PACKAGES>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>

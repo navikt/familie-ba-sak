@@ -62,16 +62,19 @@ OBS: Pass på at du ikke kjører postgres lokalt på samme port (5432)
 
 ### Autentisering
 
-For å kalle applikasjonen fra fontend må du sette miljøvariablene BA_SAK_CLIENT_ID og CLIENT_SECRET. Dette kan gjøres
-under `Edit Configurations -> Environment Variables`. Miljøvariablene kan hentes fra `azuread-familie-ba-sak-lokal` i
-dev-gcp-clusteret ved å gjøre følgende:
+For å kalle applikasjonen fra frontend må du sette miljøvariablene BA_SAK_CLIENT_ID og CLIENT_SECRET. Dette kan gjøres
+under `Edit Configurations -> Environment Variables`. Verdiene ligger i secreten `azuread-familie-ba-sak-lokal` i
+dev-gcp, og hentes med [nais-cli](https://cli.nais.io). Du må være på naisdevice og ha kjørt `nais login -y`,
+som logger deg inn i både gcloud og login.nais.io:
 
-1. Logg på `gcloud`, typisk med kommandoen: `gcloud auth login`
-2. Koble deg til dev-gcp-cluster'et: `kubectl config use-context dev-gcp`
-3. Hent info:  
-   `kubectl -n teamfamilie get secret azuread-familie-ba-sak-lokal -o json | jq '.data | map_values(@base64d)'`.
+```
+nais secret get azuread-familie-ba-sak-lokal -e dev-gcp -t teamfamilie --with-values --reason "Lokal utvikling av familie-ba-sak"
+```
 
-BA_SAK_CLIENT_ID må settes til `AZURE_APP_CLIENT_ID` og CLIENT_SECRET til`AZURE_APP_CLIENT_SECRET`
+Uthenting av secret-verdier logges. `--reason` (minst 10 tegn) er valgfritt – utelater du flagget, blir du
+spurt om begrunnelse. Merk at `nais secret get` uten `--with-values` ikke finner plattform-secrets som denne.
+
+BA_SAK_CLIENT_ID må settes til `AZURE_APP_CLIENT_ID` og CLIENT_SECRET til `AZURE_APP_CLIENT_SECRET`
 
 Se `.nais/azure-ad-app-lokal.yaml` dersom du ønsker å deploye `azuread-familie-ba-sak-lokal`
 
@@ -82,12 +85,20 @@ Til slutt skal miljøvariablene se slik ut:
 
 DevLauncherPostgresPreprod:
 Trenger i utgangspunktet ikke å sette miljøvariabler manuelt. De hentes automatisk fra Nais.
-Krever at man er logget på naisdevice og gcloud.
+Krever at man er på naisdevice og har kjørt `nais login -y`.
 Husk å sette `BA_SAK_SCOPE=api://dev-gcp.teamfamilie.familie-ba-sak/.default` i `.env`-filen frontend.
 
-Alternativt kan du starte med flagget '--manuellMiljø', og manuelt setje miljøvariablane.
-Det krever at man henter azuread fra en pod til familie-ba-sak. Som rulleres oftere enn azuread-familie-ba-sak-lokal
-`kubectl -n teamfamilie exec -c familie-ba-sak -it familie-ba-sak-byttmegmedpodid -- env | grep AZURE_APP_CLIENT`
+Alternativt kan du starte med flagget '--manuellMiljø' og sette miljøvariablene manuelt. Da må du bruke secreten som
+den kjørende familie-ba-sak-appen bruker (den rulleres oftere enn `azuread-familie-ba-sak-lokal`). Finn navnet på
+secreten via appens miljøvariabler:
+
+```
+nais app env familie-ba-sak -e dev-gcp -t teamfamilie
+```
+Se linja `Secrets in use:` nederst og finn secreten som starter med `azure-familie-ba-sak-`. Hent så verdiene:
+```
+nais secret get <navn fra forrige kommando> -e dev-gcp -t teamfamilie --with-values --reason "Lokal utvikling av familie-ba-sak"
+```
 
 * BA_SAK_CLIENT_ID=`AZURE_APP_CLIENT_ID` (fra `familie-ba-sak`)
 * CLIENT_SECRET=`AZURE_APP_CLIENT_SECRET` (fra `familie-ba-sak`)
@@ -109,7 +120,9 @@ og har et token som gjør at du kaller som ba-sak-frontend.
 
 Den nødvendige informasjonen for å få frontend-token'et får du ved å kalle:
 
-`kubectl -n teamfamilie get secret azuread-familie-ba-sak-frontend-lokal -o json | jq '.data | map_values(@base64d)'`.
+```
+nais secret get azuread-familie-ba-sak-frontend-lokal -e dev-gcp -t teamfamilie --with-values --reason "Postman mot familie-ba-sak i preprod"
+```
 
 I Postman gjør du et GET-kall med følgende oppsett:
 
@@ -117,8 +130,8 @@ I Postman gjør du et GET-kall med følgende oppsett:
 * Headers -> Cookie: `fpc=AsRNnIJ3MI9FqfN68mC5KW4`
 * Body: `x-www-form-urlencoded` med følgende key-values
     * `grant_type`: `client_credentials`
-    * `client_id`: <`AZURE_APP_CLIENT_ID`> fra kubectl-kallet over
-    * `client_secret`: <`AZURE_APP_CLIENT_SECRET`> fra kubectl-kallet over
+    * `client_id`: <`AZURE_APP_CLIENT_ID`> fra nais-kallet over
+    * `client_secret`: <`AZURE_APP_CLIENT_SECRET`> fra nais-kallet over
     * `scope`: `api://dev-gcp.teamfamilie.familie-ba-sak-lokal/.default`
 
 <details>
@@ -129,10 +142,11 @@ I Postman gjør du et GET-kall med følgende oppsett:
 
 For å finne den nødvendige informasjonen for å få frontend-token'et i prod må du:
 
-1. Endre kontekst til prod-gcp `kubectl config use-context prod-gcp`
-2. Finne navn på secret ved å kjøre `kubectl -n teamfamilie get secrets` og finne navnet på en secret som starter
-   med `azure-familie-ba-sak-frontend-`. Kopier navnet på secreten.
-3. Kjør `kubectl -n teamfamilie get secret [NAVN PÅ SECRET FRA STEG 2] -o json | jq '.data | map_values(@base64d)'`
+1. Finn navnet på azure-secreten familie-ba-sak-frontend bruker i prod-gcp. Kjør
+   `nais app env familie-ba-sak-frontend -e prod-gcp -t teamfamilie` og se etter secreten som starter med
+   `azure-familie-ba-sak-frontend-` i linja `Secrets in use:`. Kopier navnet på secreten. (Secreten er også synlig
+   under appen i [Nais Console](https://console.nais.io).)
+2. Kjør `nais secret get [NAVN PÅ SECRET FRA STEG 1] -e prod-gcp -t teamfamilie --with-values --reason "<hvorfor du trenger prod-token>"`
 
 I Postman gjør du et GET-kall med følgende oppsett (OBS OBS - husk at dette er rett mot prod!):
 
@@ -140,8 +154,8 @@ I Postman gjør du et GET-kall med følgende oppsett (OBS OBS - husk at dette er
 * Headers -> Cookie: `fpc=AsRNnIJ3MI9FqfN68mC5KW4`
 * Body: `x-www-form-urlencoded` med følgende key-values
     * `grant_type`: `client_credentials`
-    * `client_id`: <`AZURE_APP_CLIENT_ID`> fra kubectl-kallet over
-    * `client_secret`: <`AZURE_APP_CLIENT_SECRET`> fra kubectl-kallet over
+    * `client_id`: <`AZURE_APP_CLIENT_ID`> fra nais-kallet over
+    * `client_secret`: <`AZURE_APP_CLIENT_SECRET`> fra nais-kallet over
     * `scope`: `api://prod-gcp.teamfamilie.familie-ba-sak/.default`
 
 <br>
@@ -235,12 +249,12 @@ Se [Autentisering](#autentisering) for de to første
 Verdien for `BA_SAK_FRONTEND_CLIENT_ID` får du tilsvarende med følgende kall:
 
 ```
-kubectl -n teamfamilie get secret azuread-familie-ba-sak-frontend-lokal -o json | jq '.data | map_values(@base64d)'
+nais secret get azuread-familie-ba-sak-frontend-lokal -e dev-gcp -t teamfamilie --with-values --reason "Postman mot familie-ba-sak lokalt"
 ```
 
 `AZURE_APP_CLIENT_ID` inneholder client-id'en
 
-### Få tak i et gyldig token (dev-fss)
+### Få tak i et gyldig token (dev-gcp)
 
 I postman lagrer du følgende request, som gir deg et token som familie-ba-sak-frontend for å kalle familie-ba-sak:
 
@@ -252,7 +266,7 @@ Under *Body*, sjekk av for `x-www-form-urlencoded`, og legg inn følgende key-va
 * `grant_type`: `client_credentials`
 * `client_id`: <`AZURE_APP_CLIENT_ID` for familie-ba-sak-frontend>
 * `client_secret`: <`AZURE_APP_CLIENT_SECRET` for familie-ba-sak-frontend>
-* `scope`: `api://dev-fss.teamfamilie.familie-ba-sak-lokal/.default`
+* `scope`: `api://dev-gcp.teamfamilie.familie-ba-sak-lokal/.default`
 
 Under *Tests*, legg inn følgende script:
 
