@@ -19,13 +19,22 @@ import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import java.time.LocalDate
 
 object PersonopplysningsgrunnlagFiltreringUtils {
+    /**
+     * Bosatt i riket-vilkåret krever botid i Norge før eldste barn ble født (12 måneder, 6 måneder ved fødselshendelse).
+     * Bosteds- og oppholdsadresser beholdes derfor fra 12 måneder før eldste barns fødselsdato, slik at flytting innenfor
+     * Norge i denne perioden ikke fremstår som et brudd i botiden.
+     */
+    private const val ANTALL_MÅNEDER_ADRESSEHISTORIKK_FØR_ELDSTE_BARN = 12L
+
     fun List<Bostedsadresse>.filtrerBortBostedsadresserFørEldsteBarn(
         eldsteBarnsFødselsdato: LocalDate,
-    ): List<Bostedsadresse> = filtrerBortAdresserSomOpphørerFør(cutoffDato = eldsteBarnsFødselsdato) { Adresse.opprettFra(it) }
+    ): List<Bostedsadresse> = filtrerBortAdresserSomOpphørerFør(cutoffDato = eldsteBarnsFødselsdato.tilCutoffDatoForAdresser()) { Adresse.opprettFra(it) }
 
     fun List<Oppholdsadresse>.filtrerBortOppholdsadresserFørEldsteBarn(
         eldsteBarnsFødselsdato: LocalDate,
-    ): List<Oppholdsadresse> = filtrerBortAdresserSomOpphørerFør(cutoffDato = eldsteBarnsFødselsdato) { Adresse.opprettFra(it) }
+    ): List<Oppholdsadresse> = filtrerBortAdresserSomOpphørerFør(cutoffDato = eldsteBarnsFødselsdato.tilCutoffDatoForAdresser()) { Adresse.opprettFra(it) }
+
+    private fun LocalDate.tilCutoffDatoForAdresser(): LocalDate = minusMonths(ANTALL_MÅNEDER_ADRESSEHISTORIKK_FØR_ELDSTE_BARN)
 
     /**
      * Historiske adresser fra PDL mangler ofte til-og-med-dato og opphører implisitt når neste adresse begynner.

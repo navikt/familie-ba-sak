@@ -82,13 +82,13 @@ class PersongrunnlagFiltreringsTest {
     }
 
     @Test
-    fun `skal filtrere bort bostedsadresse uten til-og-med dato når neste adresse begynner på eldste barns fødselsdato`() {
+    fun `skal filtrere bort bostedsadresse uten til-og-med dato når neste adresse begynner 12 måneder før eldste barns fødselsdato`() {
         // Arrange
         val gammelAdresse = lagBostedsadresse(gyldigFraOgMed = LocalDate.of(2019, 8, 5), gyldigTilOgMed = null)
         val nyAdresse = lagBostedsadresse(gyldigFraOgMed = LocalDate.of(2024, 8, 22), gyldigTilOgMed = null)
         val bostedsadresserFør = listOf(gammelAdresse, nyAdresse)
 
-        val eldsteBarnsFødselsdato = LocalDate.of(2024, 8, 22)
+        val eldsteBarnsFødselsdato = LocalDate.of(2025, 8, 22)
 
         // Act
         val bostedsadresserEtter = bostedsadresserFør.filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato)
@@ -98,13 +98,13 @@ class PersongrunnlagFiltreringsTest {
     }
 
     @Test
-    fun `skal beholde bostedsadresse uten til-og-med dato når neste adresse begynner dagen etter eldste barns fødselsdato`() {
+    fun `skal beholde bostedsadresse uten til-og-med dato når neste adresse begynner mindre enn 12 måneder før eldste barns fødselsdato`() {
         // Arrange
         val gammelAdresse = lagBostedsadresse(gyldigFraOgMed = LocalDate.of(2019, 8, 5), gyldigTilOgMed = null)
         val nyAdresse = lagBostedsadresse(gyldigFraOgMed = LocalDate.of(2024, 8, 23), gyldigTilOgMed = null)
         val bostedsadresserFør = listOf(gammelAdresse, nyAdresse)
 
-        val eldsteBarnsFødselsdato = LocalDate.of(2024, 8, 22)
+        val eldsteBarnsFødselsdato = LocalDate.of(2025, 8, 22)
 
         // Act
         val bostedsadresserEtter = bostedsadresserFør.filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato)
@@ -137,7 +137,7 @@ class PersongrunnlagFiltreringsTest {
         val nyAdresse = lagBostedsadresse(gyldigFraOgMed = LocalDate.of(2024, 8, 25), angittFlyttedato = LocalDate.of(2024, 8, 20), gyldigTilOgMed = null)
         val bostedsadresserFør = listOf(gammelAdresse, nyAdresse)
 
-        val eldsteBarnsFødselsdato = LocalDate.of(2024, 8, 22)
+        val eldsteBarnsFødselsdato = LocalDate.of(2025, 8, 22)
 
         // Act
         val bostedsadresserEtter = bostedsadresserFør.filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato)
@@ -169,7 +169,7 @@ class PersongrunnlagFiltreringsTest {
         val nyAdresse = lagBostedsadresse(gyldigFraOgMed = LocalDate.of(2024, 8, 20), angittFlyttedato = null, gyldigTilOgMed = null)
         val bostedsadresserFør = listOf(gammelAdresse, nyAdresse)
 
-        val eldsteBarnsFødselsdato = LocalDate.of(2024, 8, 22)
+        val eldsteBarnsFødselsdato = LocalDate.of(2025, 8, 22)
 
         // Act
         val bostedsadresserEtter = bostedsadresserFør.filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato)
@@ -179,13 +179,13 @@ class PersongrunnlagFiltreringsTest {
     }
 
     @Test
-    fun `skal beholde bostedsadresse med til-og-med dato lik eldste barns fødselsdato`() {
+    fun `skal beholde bostedsadresse med til-og-med dato lik 12 måneder før eldste barns fødselsdato`() {
         // Arrange
         val avsluttetAdresse = lagBostedsadresse(gyldigFraOgMed = LocalDate.of(2019, 8, 5), gyldigTilOgMed = LocalDate.of(2024, 8, 22))
         val gjeldendeAdresse = lagBostedsadresse(gyldigFraOgMed = LocalDate.of(2024, 8, 23), gyldigTilOgMed = null)
         val bostedsadresserFør = listOf(avsluttetAdresse, gjeldendeAdresse)
 
-        val eldsteBarnsFødselsdato = LocalDate.of(2024, 8, 22)
+        val eldsteBarnsFødselsdato = LocalDate.of(2025, 8, 22)
 
         // Act
         val bostedsadresserEtter = bostedsadresserFør.filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato)
@@ -203,7 +203,7 @@ class PersongrunnlagFiltreringsTest {
         val nyAdresse = lagBostedsadresse(gyldigFraOgMed = LocalDate.of(2025, 7, 23), gyldigTilOgMed = null)
         val bostedsadresserFør = listOf(gjeldendeAdresse, adresseMedLikFomOgTom, adresseMedFomEtterTom, nyAdresse)
 
-        val eldsteBarnsFødselsdato = LocalDate.of(2024, 8, 22)
+        val eldsteBarnsFødselsdato = LocalDate.of(2025, 8, 22)
 
         // Act
         val bostedsadresserEtter = bostedsadresserFør.filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato)
