@@ -369,7 +369,7 @@ class PersongrunnlagServiceTest {
         }
 
         @Test
-        fun `skal bruke eldste barns fødselsdato som cutoff for å filtrere søkers bostedadresser`() {
+        fun `skal bruke 12 måneder før eldste barns fødselsdato som cutoff for å filtrere søkers bostedadresser`() {
             // Arrange
             val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 1))
             val eldsteBarn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2015, 1, 1))
@@ -381,10 +381,10 @@ class PersongrunnlagServiceTest {
             every { personopplysningerService.hentPersoninfoEnkel(eldsteBarn.aktør) } returns PersonInfo(eldsteBarn.fødselsdato)
             every { personopplysningerService.hentPersoninfoEnkel(yngreBarn.aktør) } returns PersonInfo(yngreBarn.fødselsdato)
 
-            val adresseFørEldsteBarn =
+            val adresseFørCutoff =
                 lagBostedsadresse(
                     gyldigFraOgMed = LocalDate.of(2000, 1, 1),
-                    gyldigTilOgMed = LocalDate.of(2014, 12, 31),
+                    gyldigTilOgMed = LocalDate.of(2013, 12, 31),
                     vegadresse = lagVegadresse(),
                 )
             val adresseOverlapperEldsteBarn =
@@ -403,7 +403,7 @@ class PersongrunnlagServiceTest {
             every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns
                 PersonInfo(
                     fødselsdato = søker.fødselsdato,
-                    bostedsadresser = listOf(adresseFørEldsteBarn, adresseOverlapperEldsteBarn, adresseEtterEldsteBarn),
+                    bostedsadresser = listOf(adresseFørCutoff, adresseOverlapperEldsteBarn, adresseEtterEldsteBarn),
                 )
             every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eldsteBarn.aktør) } returns
                 PersonInfo(eldsteBarn.fødselsdato)
@@ -553,6 +553,59 @@ class PersongrunnlagServiceTest {
             assertThat(bostedsadresserSøker).hasSize(1)
             assertThat(bostedsadresserSøker.single().periode?.fom).isEqualTo(LocalDate.of(2025, 7, 23))
             assertThat(bostedsadresserSøker.single().periode?.tom).isNull()
+        }
+
+        @Test
+        fun `skal beholde søkers bostedsadresse uten til-og-med dato ved flytting innenfor Norge mindre enn 12 måneder før eldste barns fødselsdato`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 1))
+            val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2024, 8, 22))
+            val behandling = lagBehandling()
+
+            every { persongrunnlagService.hentAktiv(behandling.id) } returns null
+            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
+
+            val adresseFørFlytting =
+                lagBostedsadresse(
+                    gyldigFraOgMed = LocalDate.of(2019, 8, 5),
+                    gyldigTilOgMed = null,
+                    vegadresse = lagVegadresse(adressenavn = "Haneborgveien"),
+                )
+            val adresseEtterFlytting =
+                lagBostedsadresse(
+                    gyldigFraOgMed = LocalDate.of(2024, 3, 22),
+                    gyldigTilOgMed = null,
+                    vegadresse = lagVegadresse(adressenavn = "Astrids vei"),
+                )
+
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør) } returns
+                PersonInfo(
+                    fødselsdato = søker.fødselsdato,
+                    bostedsadresser = listOf(adresseFørFlytting, adresseEtterFlytting),
+                )
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn.aktør) } returns
+                PersonInfo(barn.fødselsdato)
+
+            every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
+            every { kodeverkService.hentPoststed(any()) } returns "Oslo"
+
+            // Act
+            val personopplysningGrunnlag =
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = søker.aktør,
+                    barnFraInneværendeBehandling = listOf(barn.aktør),
+                    behandling = behandling,
+                    målform = Målform.NB,
+                )
+
+            // Assert
+            val bostedsadresserSøker = personopplysningGrunnlag.søker.bostedsadresser.sortedBy { it.periode?.fom }
+            assertThat(bostedsadresserSøker).hasSize(2)
+            assertThat(bostedsadresserSøker.first().periode?.fom).isEqualTo(LocalDate.of(2019, 8, 5))
+            assertThat(bostedsadresserSøker.first().periode?.tom).isNull()
+            assertThat(bostedsadresserSøker.last().periode?.fom).isEqualTo(LocalDate.of(2024, 3, 22))
+            assertThat(bostedsadresserSøker.last().periode?.tom).isNull()
         }
 
         @Test

@@ -337,7 +337,7 @@ class PersongrunnlagIntegrationTest(
     }
 
     @Test
-    fun `Skal oppdatere og filtrere adresser på eldste barns fødselsdato på søker med det nyeste fra PDL`() {
+    fun `Skal oppdatere adresser på søker med det nyeste fra PDL og filtrere bort adresser som opphørte mer enn 12 måneder før eldste barns fødselsdato`() {
         // Arrange
         val søkerfødselsdato = randomSøkerFødselsdato()
         val fødselsnrMor =
@@ -408,7 +408,7 @@ class PersongrunnlagIntegrationTest(
                     fødselsnrMor,
                 ),
             lagBostedsadresse(
-                gyldigTilOgMed = LocalDate.of(2018, 1, 1),
+                gyldigTilOgMed = LocalDate.of(2017, 1, 1),
                 gyldigFraOgMed = LocalDate.of(2016, 1, 1),
                 vegadresse = lagVegadresse(kommunenummer = "9601"),
             ),
@@ -433,7 +433,7 @@ class PersongrunnlagIntegrationTest(
                     fødselsnrMor,
                 ),
             lagOppholdsadresse(
-                gyldigTilOgMed = LocalDate.of(2018, 1, 1),
+                gyldigTilOgMed = LocalDate.of(2017, 1, 1),
                 gyldigFraOgMed = LocalDate.of(2016, 1, 1),
                 vegadresse = lagVegadresse(kommunenummer = "9601"),
             ),
