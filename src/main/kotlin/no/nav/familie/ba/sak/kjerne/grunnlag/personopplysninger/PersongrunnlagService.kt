@@ -44,7 +44,6 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -353,7 +352,7 @@ class PersongrunnlagService(
         val aktivtPersonopplysningGrunnlag = hentAktiv(behandling.id)
 
         return if (aktivtPersonopplysningGrunnlag == null || nyttPersonopplysningGrunnlag.harRelevantEndring(aktivtPersonopplysningGrunnlag)) {
-            lagreOgDeaktiverGammel(nyttPersonopplysningGrunnlag).also {
+            lagreOgSlettGammelt(nyttPersonopplysningGrunnlag).also {
                 /*
                  * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
                  * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
@@ -566,7 +565,7 @@ class PersongrunnlagService(
         personidentService.lagreHistoriskeIdenter(aktivtFødselsnummer = aktør.aktivFødselsnummer(), identer = historiskeIdenter)
     }
 
-    fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag = personopplysningGrunnlagLagreService.lagreOgSlettGammelt(personopplysningGrunnlag)
+    fun lagreOgSlettGammelt(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag = personopplysningGrunnlagLagreService.lagreOgSlettGammelt(personopplysningGrunnlag)
 
     fun oppdaterAdresserPåPersoner(
         personopplysningGrunnlag: PersonopplysningGrunnlag,

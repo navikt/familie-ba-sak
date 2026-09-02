@@ -42,7 +42,7 @@ fun mockPersongrunnlagService(dataFraCucumber: VedtaksperioderOgBegrunnelserStep
         dataFraCucumber.persongrunnlag[personopplysningGrunnlag.behandlingId] = personopplysningGrunnlag
         personopplysningGrunnlag
     }
-    every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers {
+    every { persongrunnlagService.lagreOgSlettGammelt(any()) } answers {
         val personopplysningGrunnlag = firstArg<PersonopplysningGrunnlag>()
         dataFraCucumber.persongrunnlag[personopplysningGrunnlag.behandlingId] = personopplysningGrunnlag
         personopplysningGrunnlag
