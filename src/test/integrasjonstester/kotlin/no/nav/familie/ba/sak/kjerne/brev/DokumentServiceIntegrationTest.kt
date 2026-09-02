@@ -361,7 +361,7 @@ class DokumentServiceIntegrationTest(
                 behandlingId = behandling.id,
                 barnasIdenter = listOf(fnr),
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(
             lagVilkårsvurdering(
@@ -411,7 +411,7 @@ class DokumentServiceIntegrationTest(
                 behandlingId = behandling.id,
                 barnasIdenter = listOf(fnr),
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(
             lagVilkårsvurdering(
@@ -459,7 +459,7 @@ class DokumentServiceIntegrationTest(
                 behandlingId = behandling.id,
                 barnasIdenter = listOf(fnr),
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(
             lagVilkårsvurdering(
@@ -507,7 +507,7 @@ class DokumentServiceIntegrationTest(
                 behandlingId = behandling.id,
                 barnasIdenter = listOf(fnr),
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(
             lagVilkårsvurdering(

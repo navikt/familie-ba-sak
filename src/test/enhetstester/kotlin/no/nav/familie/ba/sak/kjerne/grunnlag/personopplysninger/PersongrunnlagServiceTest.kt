@@ -565,7 +565,7 @@ class PersongrunnlagServiceTest {
             val behandling = lagBehandling()
 
             every { persongrunnlagService.hentAktiv(behandling.id) } returns null
-            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { persongrunnlagService.lagreOgSlettGammelt(any()) } answers { firstArg() }
             every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
 
             val adresseFørFlytting =

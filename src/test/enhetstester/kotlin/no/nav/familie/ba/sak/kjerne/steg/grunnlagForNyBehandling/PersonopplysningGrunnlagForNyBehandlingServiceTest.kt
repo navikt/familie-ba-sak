@@ -179,7 +179,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
                     }
                 }
             every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns personopplysningGrunnlag
-            every { persongrunnlagService.lagreOgDeaktiverGammel(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
+            every { persongrunnlagService.lagreOgSlettGammelt(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
             every { personidentService.hentOgLagreAktør(any(), any()) } returns lagAktør(søker.ident)
             every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns
                 listOf(
@@ -290,7 +290,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
                     }
                 }
             every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns personopplysningGrunnlag
-            every { persongrunnlagService.lagreOgDeaktiverGammel(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
+            every { persongrunnlagService.lagreOgSlettGammelt(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
             every { personidentService.hentOgLagreAktør(any(), any()) } returns lagAktør(søker.ident)
             every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns
                 listOf(
@@ -405,7 +405,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
                     }
                 }
             every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns personopplysningGrunnlag
-            every { persongrunnlagService.lagreOgDeaktiverGammel(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
+            every { persongrunnlagService.lagreOgSlettGammelt(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
             every { personidentService.hentOgLagreAktør(any(), any()) } returns lagAktør(søker.ident)
             every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns
                 listOf(
@@ -461,7 +461,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
             val kopiertPersonopplysningGrunnlag = slot<PersonopplysningGrunnlag>()
 
             every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns personopplysningGrunnlag
-            every { persongrunnlagService.lagreOgDeaktiverGammel(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
+            every { persongrunnlagService.lagreOgSlettGammelt(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
             every { personidentService.hentOgLagreAktør(any(), any()) } returns lagAktør(søker.ident)
             every { falskIdentitetService.harFalskIdentitet(søkerPerson.aktør) } returns true
             every { falskIdentitetService.harFalskIdentitet(barnPerson.aktør) } returns false

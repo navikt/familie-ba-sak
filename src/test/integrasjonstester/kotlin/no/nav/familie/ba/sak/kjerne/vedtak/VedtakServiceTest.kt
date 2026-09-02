@@ -214,7 +214,7 @@ class VedtakServiceTest(
                 søkerAktør = fagsak.aktør,
                 barnAktør = barnAktør,
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
 
         // Act
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)

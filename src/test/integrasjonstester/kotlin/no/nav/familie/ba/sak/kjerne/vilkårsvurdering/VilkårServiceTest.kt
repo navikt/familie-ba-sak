@@ -83,7 +83,7 @@ class VilkårServiceTest(
                 ),
             )
 
-        persongrunnlagService.lagreOgDeaktiverGammel(
+        persongrunnlagService.lagreOgSlettGammelt(
             lagTestPersonopplysningGrunnlag(
                 behandlingId = behandling.id,
                 søkerPersonIdent = søkerFnr,

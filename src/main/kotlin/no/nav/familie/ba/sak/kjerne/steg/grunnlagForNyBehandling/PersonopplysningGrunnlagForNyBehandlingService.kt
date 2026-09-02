@@ -62,7 +62,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
             persongrunnlagService
                 .hentAktivThrows(forrigeBehandlingSomErVedtatt.id)
                 .tilKopiForNyBehandling(behandling, listOf(søkerAktør).plus(barnaAktør))
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
     }
 
     private fun opprettKopiAvPersonopplysningGrunnlagMedNyAdresse(
@@ -80,7 +80,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
                 .tilKopiForNyBehandling(behandling, listOf(søkerAktør).plus(barnaAktør))
 
         persongrunnlagService.oppdaterAdresserPåPersoner(personopplysningGrunnlag)
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
     }
 
     private fun opprettKopiAvPersonopplysningGrunnlagMedFalskIdentitet(
@@ -108,7 +108,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
                 .hentAktivThrows(forrigeBehandlingSomErVedtatt.id)
                 .tilKopiForNyBehandling(behandling, aktørerIBehandling, aktørerMedFalskIdentitet)
 
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
     }
 
     private fun opprettPersonopplysningGrunnlag(
