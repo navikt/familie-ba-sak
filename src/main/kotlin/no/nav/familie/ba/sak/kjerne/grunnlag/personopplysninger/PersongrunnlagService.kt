@@ -61,6 +61,7 @@ import java.time.LocalDateTime
 @Service
 class PersongrunnlagService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    private val personopplysningGrunnlagLagreService: PersonopplysningGrunnlagLagreService,
     private val statsborgerskapService: StatsborgerskapService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val personopplysningerService: PersonopplysningerService,
@@ -557,17 +558,7 @@ class PersongrunnlagService(
         personidentService.lagreHistoriskeIdenter(aktivtFødselsnummer = aktør.aktivFødselsnummer(), identer = historiskeIdenter)
     }
 
-    fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {
-        val aktivPersongrunnlag = hentAktiv(personopplysningGrunnlag.behandlingId)
-
-        if (aktivPersongrunnlag != null) {
-            personopplysningGrunnlagRepository.delete(aktivPersongrunnlag)
-            personopplysningGrunnlagRepository.flush()
-        }
-
-        secureLogger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter persongrunnlag $personopplysningGrunnlag")
-        return personopplysningGrunnlagRepository.saveAndFlush(personopplysningGrunnlag)
-    }
+    fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag = personopplysningGrunnlagLagreService.lagreOgSlettGammelt(personopplysningGrunnlag)
 
     fun oppdaterAdresserPåPersoner(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
