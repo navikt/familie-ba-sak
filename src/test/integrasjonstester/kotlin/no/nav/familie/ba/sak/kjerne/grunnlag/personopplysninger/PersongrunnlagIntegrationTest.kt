@@ -45,6 +45,7 @@ class PersongrunnlagIntegrationTest(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingService: BehandlingService,
     @Autowired private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    @Autowired private val personRepository: PersonRepository,
     @Autowired private val fakePersonopplysningerService: FakePersonopplysningerService,
 ) : AbstractSpringIntegrationTest() {
     @Test
@@ -526,6 +527,8 @@ class PersongrunnlagIntegrationTest(
 
             // Assert
             assertThat(nyttPersonopplysningGrunnlag).isEqualTo(forrigePersonopplysningGrunnlag)
+            assertThat(nyttPersonopplysningGrunnlag.id).isEqualTo(forrigePersonopplysningGrunnlag.id)
+            assertThat(personopplysningGrunnlagRepository.findById(forrigePersonopplysningGrunnlag.id)).isPresent()
         }
 
         @Test
@@ -552,6 +555,8 @@ class PersongrunnlagIntegrationTest(
                     målform = Målform.NB,
                 )
 
+            val gammelPersonId = forrigePersonopplysningGrunnlag.personer.single().id
+
             assertThat(forrigePersonopplysningGrunnlag.aktiv).isTrue()
 
             // Act
@@ -568,8 +573,9 @@ class PersongrunnlagIntegrationTest(
             assertThat(nyttPersonopplysningGrunnlag.aktiv).isTrue()
             assertThat(nyttPersonopplysningGrunnlag.personer).extracting("aktør").containsExactlyInAnyOrder(søkerAktør, barnAktør)
 
-            val forrigePersonopplysningGrunnlagEtterOppdatering = personopplysningGrunnlagRepository.findById(forrigePersonopplysningGrunnlag.id).get()
-            assertThat(forrigePersonopplysningGrunnlagEtterOppdatering.aktiv).isFalse()
+            assertThat(personopplysningGrunnlagRepository.findById(forrigePersonopplysningGrunnlag.id)).isEmpty()
+            assertThat(personRepository.findById(gammelPersonId)).isEmpty()
+            assertThat(personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)?.id).isEqualTo(nyttPersonopplysningGrunnlag.id)
         }
 
         @Test
@@ -596,6 +602,8 @@ class PersongrunnlagIntegrationTest(
                     målform = Målform.NB,
                 )
 
+            val gammelPersonId = forrigePersonopplysningGrunnlag.personer.first().id
+
             assertThat(forrigePersonopplysningGrunnlag.aktiv).isTrue()
 
             // Act
@@ -612,8 +620,9 @@ class PersongrunnlagIntegrationTest(
             assertThat(nyttPersonopplysningGrunnlag.aktiv).isTrue()
             assertThat(nyttPersonopplysningGrunnlag.personer).extracting("aktør").containsExactly(søkerAktør)
 
-            val forrigePersonopplysningGrunnlagEtterOppdatering = personopplysningGrunnlagRepository.findById(forrigePersonopplysningGrunnlag.id).get()
-            assertThat(forrigePersonopplysningGrunnlagEtterOppdatering.aktiv).isFalse()
+            assertThat(personopplysningGrunnlagRepository.findById(forrigePersonopplysningGrunnlag.id)).isEmpty()
+            assertThat(personRepository.findById(gammelPersonId)).isEmpty()
+            assertThat(personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)?.id).isEqualTo(nyttPersonopplysningGrunnlag.id)
         }
 
         @Test
@@ -640,6 +649,8 @@ class PersongrunnlagIntegrationTest(
                     målform = Målform.NB,
                 )
 
+            val gammelPersonId = forrigePersonopplysningGrunnlag.personer.first().id
+
             assertThat(forrigePersonopplysningGrunnlag.aktiv).isTrue()
 
             fakePersonopplysningerService.hentPersoninfoEnkel(søkerAktør).also {
@@ -665,8 +676,9 @@ class PersongrunnlagIntegrationTest(
             assertThat(nyttPersonopplysningGrunnlag.personer).extracting("aktør").containsExactlyInAnyOrder(søkerAktør, barnAktør)
             assertThat(nyttPersonopplysningGrunnlag.personer.first { it.aktør == søkerAktør }.navn).isEqualTo("Søker sitt nye navn")
 
-            val forrigePersonopplysningGrunnlagEtterOppdatering = personopplysningGrunnlagRepository.findById(forrigePersonopplysningGrunnlag.id).get()
-            assertThat(forrigePersonopplysningGrunnlagEtterOppdatering.aktiv).isFalse()
+            assertThat(personopplysningGrunnlagRepository.findById(forrigePersonopplysningGrunnlag.id)).isEmpty()
+            assertThat(personRepository.findById(gammelPersonId)).isEmpty()
+            assertThat(personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)?.id).isEqualTo(nyttPersonopplysningGrunnlag.id)
         }
     }
 }
