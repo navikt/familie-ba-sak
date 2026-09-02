@@ -561,11 +561,12 @@ class PersongrunnlagService(
         val aktivPersongrunnlag = hentAktiv(personopplysningGrunnlag.behandlingId)
 
         if (aktivPersongrunnlag != null) {
-            personopplysningGrunnlagRepository.saveAndFlush(aktivPersongrunnlag.also { it.aktiv = false })
+            personopplysningGrunnlagRepository.delete(aktivPersongrunnlag)
+            personopplysningGrunnlagRepository.flush()
         }
 
         secureLogger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter persongrunnlag $personopplysningGrunnlag")
-        return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        return personopplysningGrunnlagRepository.saveAndFlush(personopplysningGrunnlag)
     }
 
     fun oppdaterAdresserPåPersoner(
