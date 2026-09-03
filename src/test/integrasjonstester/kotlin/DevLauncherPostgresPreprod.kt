@@ -70,6 +70,7 @@ private fun startTexasContainer() {
     logger.info("Texas startet på port $port \u2713")
 }
 
+// Henter clientId og secret fra Naisdevice og setter som system properties
 private fun settClientIdOgSecret() {
     val cmd = "src/test/resources/hentMiljøvariabler.sh"
 
