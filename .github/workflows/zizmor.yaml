@@ -1,0 +1,21 @@
+name: Zizmor
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/**']
+  pull_request:
+    paths: ['.github/**']
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  zizmor:
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/zizmor.yaml@main # ratchet:exclude
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
