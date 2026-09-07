@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
@@ -55,7 +54,9 @@ class SaksstatistikkService(
 
         val datoMottatt =
             when (behandling.opprettetÅrsak) {
-                BehandlingÅrsak.SØKNAD -> {
+                BehandlingÅrsak.SØKNAD,
+                BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
+                -> {
                     behandlingSøknadsinfoService.hentSøknadMottattDato(behandlingId) ?: behandling.opprettetTidspunkt
                 }
 
