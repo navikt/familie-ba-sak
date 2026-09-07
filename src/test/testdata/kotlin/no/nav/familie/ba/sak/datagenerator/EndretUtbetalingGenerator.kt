@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.datagenerator
 
+import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -31,7 +32,7 @@ fun lagEndretUtbetalingAndel(
     fom: YearMonth = YearMonth.now().minusMonths(1),
     tom: YearMonth? = YearMonth.now(),
     årsak: Årsak = Årsak.DELT_BOSTED,
-    avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
+    avtaletidspunktDeltBosted: LocalDate? = LocalDate.now().minusMonths(1).takeIf { årsak == Årsak.DELT_BOSTED },
     søknadstidspunkt: LocalDate? = LocalDate.now().minusMonths(1),
 ) = EndretUtbetalingAndel(
     id = id,
@@ -68,7 +69,7 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
     fom: YearMonth = YearMonth.now().minusMonths(1),
     tom: YearMonth? = YearMonth.now(),
     årsak: Årsak = Årsak.DELT_BOSTED,
-    avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
+    avtaletidspunktDeltBosted: LocalDate? = LocalDate.now().minusMonths(1).takeIf { årsak == Årsak.DELT_BOSTED },
     søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
     andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf(),
 ): EndretUtbetalingAndelMedAndelerTilkjentYtelse {
@@ -88,3 +89,27 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
 
     return EndretUtbetalingAndelMedAndelerTilkjentYtelse(eua, andelTilkjentYtelser)
 }
+
+fun lagEndretUtbetalingAndelDto(
+    id: Long? = null,
+    personIdenter: List<String>? = null,
+    prosent: BigDecimal = BigDecimal.ZERO,
+    fom: YearMonth = YearMonth.now().minusMonths(1),
+    tom: YearMonth = YearMonth.now(),
+    årsak: Årsak = Årsak.DELT_BOSTED,
+    avtaletidspunktDeltBosted: LocalDate? = LocalDate.now().minusMonths(1).takeIf { årsak == Årsak.DELT_BOSTED },
+    søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
+    begrunnelse: String = "Test",
+    erTilknyttetAndeler: Boolean = true,
+) = EndretUtbetalingAndelDto(
+    id = id,
+    personIdenter = personIdenter,
+    prosent = prosent,
+    fom = fom,
+    tom = tom,
+    årsak = årsak,
+    avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
+    søknadstidspunkt = søknadstidspunkt,
+    begrunnelse = begrunnelse,
+    erTilknyttetAndeler = erTilknyttetAndeler,
+)
