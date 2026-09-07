@@ -39,7 +39,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilUtfylteUtenl
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.tidslinje.erIkkeTom
 import no.nav.familie.tidslinje.utvidelser.beskjærFraOgMed
@@ -77,6 +76,11 @@ fun hentAutomatiskVedtaksbrevtype(
 
         BehandlingÅrsak.SATSENDRING_EØS -> {
             Brevmal.AUTOVEDTAK_SATSENDRING_EØS
+        }
+
+        BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD -> {
+            // TODO : Legg til automatisk behandling
+            throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
         }
 
         else -> {

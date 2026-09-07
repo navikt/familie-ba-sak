@@ -558,6 +558,33 @@ fun hentNesteSteg(
             }
         }
 
+        BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD -> {
+            when (utførendeStegType) {
+                // TODO : Dette må tilpasse når man legger til filtreringssteget for automatiserte behandlinger
+                REGISTRERE_SØKNAD -> FILTRERING_FØDSELSHENDELSER
+
+                FILTRERING_FØDSELSHENDELSER -> VILKÅRSVURDERING
+
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+
+                BEHANDLINGSRESULTAT -> hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling)
+
+                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+
+                JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
+
+                DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+
+                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+
+                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+
+                else -> throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
+            }
+        }
+
         else -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> hentNesteStegBasertPåOmDetErInstitusjonEllerIkke(behandling)

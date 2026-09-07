@@ -116,6 +116,10 @@ class StegService(
                     listOf(fagsak.aktør.aktivFødselsnummer())
                 }
 
+                nyBehandling.behandlingÅrsak === BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD -> {
+                    emptyList() // TODO : Burde vi hente barn fra søknaden?
+                }
+
                 nyBehandling.behandlingÅrsak in listOf(BehandlingÅrsak.FØDSELSHENDELSE, BehandlingÅrsak.HELMANUELL_MIGRERING) -> {
                     nyBehandling.barnasIdenter
                 }
