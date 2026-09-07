@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.UtfyltEndretUtbetalingAndelDeltBosted
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilIEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
@@ -416,15 +415,16 @@ private fun hentTekstForEndretUtbetaling(
 
 private fun hentEndretUtbetalingRader(endredeUtbetalinger: List<EndretUtbetalingAndel>?): String =
     endredeUtbetalinger
-        ?.map { it.tilIEndretUtbetalingAndel() }
-        ?.filterIsInstance<IUtfyltEndretUtbetalingAndel>()
-        ?.joinToString("") {
+        ?.mapNotNull { endretUtbetalingAndel ->
+            (endretUtbetalingAndel.tilIEndretUtbetalingAndel() as? IUtfyltEndretUtbetalingAndel)
+                ?.let { it to endretUtbetalingAndel.avtaletidspunktDeltBosted }
+        }?.joinToString("") { (utfyltEndretUtbetalingAndel, avtaletidspunktDeltBosted) ->
             """
-    | ${it.aktører.joinToString(",") { aktør -> aktør.aktørId }} |${it.behandlingId}|${
-                it.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
+    | ${utfyltEndretUtbetalingAndel.aktører.joinToString(",") { aktør -> aktør.aktørId }} |${utfyltEndretUtbetalingAndel.behandlingId}|${
+                utfyltEndretUtbetalingAndel.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
             }|${
-                it.tom.sisteDagIInneværendeMåned().tilddMMyyyy()
-            }|${it.årsak} | ${it.prosent} | ${it.søknadstidspunkt.tilddMMyyyy()} | ${if (it is UtfyltEndretUtbetalingAndelDeltBosted) it.avtaletidspunktDeltBosted else ""} |"""
+                utfyltEndretUtbetalingAndel.tom.sisteDagIInneværendeMåned().tilddMMyyyy()
+            }|${utfyltEndretUtbetalingAndel.årsak} | ${utfyltEndretUtbetalingAndel.prosent} | ${utfyltEndretUtbetalingAndel.søknadstidspunkt.tilddMMyyyy()} | ${avtaletidspunktDeltBosted?.tilddMMyyyy() ?: ""} |"""
         } ?: ""
 
 private fun hentTekstForTilkjentYtelse(
