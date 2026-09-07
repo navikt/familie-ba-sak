@@ -64,8 +64,8 @@ class FiltreringsregelForFlereBarnTest {
     val tilkjentYtelseValideringServiceMock = mockk<TilkjentYtelseValideringService>()
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     var clockProvider = TestClockProvider()
-    val filtreringsreglerService =
-        FiltreringsreglerService(
+    val filtreringsreglerFødselshendelseService =
+        FiltreringsreglerFødselshendelseService(
             personopplysningerService = personopplysningerServiceMock,
             personidentService = personidentService,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepositoryMock,
@@ -197,7 +197,7 @@ class FiltreringsregelForFlereBarnTest {
 
         // Act
         val fødselshendelsefiltreringResultater =
-            filtreringsreglerService.kjørFiltreringsregler(
+            filtreringsreglerFødselshendelseService.kjørFiltreringsregler(
                 NyBehandlingHendelse(
                     morsIdent = gyldigAktør.aktivFødselsnummer(),
                     barnasIdenter =
@@ -301,7 +301,7 @@ class FiltreringsregelForFlereBarnTest {
 
         // Act
         val fødselshendelsefiltreringResultater =
-            filtreringsreglerService.kjørFiltreringsregler(
+            filtreringsreglerFødselshendelseService.kjørFiltreringsregler(
                 NyBehandlingHendelse(
                     morsIdent = gyldigAktør.aktivFødselsnummer(),
                     barnasIdenter =

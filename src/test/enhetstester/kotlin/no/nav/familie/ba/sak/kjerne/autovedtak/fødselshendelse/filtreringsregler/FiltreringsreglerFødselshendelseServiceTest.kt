@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 
-class FiltreringsreglerServiceTest {
+class FiltreringsreglerFødselshendelseServiceTest {
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val personidentService = mockk<PersonidentService>()
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
@@ -54,8 +54,8 @@ class FiltreringsreglerServiceTest {
 
     private var clockProvider = TestClockProvider()
 
-    private val filtreringsreglerService =
-        FiltreringsreglerService(
+    private val filtreringsreglerFødselshendelseService =
+        FiltreringsreglerFødselshendelseService(
             personopplysningerService = personopplysningerService,
             personidentService = personidentService,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
@@ -105,7 +105,7 @@ class FiltreringsreglerServiceTest {
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
 
         // Act
-        filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
         verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
@@ -158,7 +158,7 @@ class FiltreringsreglerServiceTest {
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
 
         // Act
-        filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
         verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
@@ -216,7 +216,7 @@ class FiltreringsreglerServiceTest {
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
 
         // Act
-        filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
         verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
@@ -274,7 +274,7 @@ class FiltreringsreglerServiceTest {
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
 
         // Act
-        filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
         verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
@@ -335,7 +335,7 @@ class FiltreringsreglerServiceTest {
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
 
         // Act
-        filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
         verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
@@ -396,7 +396,7 @@ class FiltreringsreglerServiceTest {
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
 
         // Act
-        filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
         verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
@@ -436,7 +436,7 @@ class FiltreringsreglerServiceTest {
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
 
         // Act
-        filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
         verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
@@ -471,7 +471,7 @@ class FiltreringsreglerServiceTest {
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
 
         // Act
-        filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
         verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }

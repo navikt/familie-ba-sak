@@ -34,7 +34,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
-class FiltreringsreglerService(
+class FiltreringsreglerFødselshendelseService(
     private val personopplysningerService: PersonopplysningerService,
     private val personidentService: PersonidentService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
@@ -216,6 +216,6 @@ class FiltreringsreglerService(
     }
 
     companion object {
-        val logger = LoggerFactory.getLogger(FiltreringsreglerService::class.java)
+        val logger = LoggerFactory.getLogger(FiltreringsreglerFødselshendelseService::class.java)
     }
 }

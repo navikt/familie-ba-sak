@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -629,8 +628,8 @@ class BehandlingStegTest {
         inner class Fødselshendelser {
             @ParameterizedTest(name = "Henter neste steg for {0}")
             @CsvSource(
-                "REGISTRERE_PERSONGRUNNLAG, FILTRERING_FØDSELSHENDELSER",
-                "FILTRERING_FØDSELSHENDELSER, VILKÅRSVURDERING",
+                "REGISTRERE_PERSONGRUNNLAG, FILTRERING_AUTOMATISK_BEHANDLING",
+                "FILTRERING_AUTOMATISK_BEHANDLING, VILKÅRSVURDERING",
                 "VILKÅRSVURDERING, BEHANDLINGSRESULTAT",
                 "BEHANDLINGSRESULTAT, IVERKSETT_MOT_OPPDRAG",
                 "IVERKSETT_MOT_OPPDRAG, VENTE_PÅ_STATUS_FRA_ØKONOMI",
@@ -660,8 +659,8 @@ class BehandlingStegTest {
 
             @ParameterizedTest(name = "Henter neste steg for {0}")
             @CsvSource(
-                "REGISTRERE_PERSONGRUNNLAG, FILTRERING_FØDSELSHENDELSER",
-                "FILTRERING_FØDSELSHENDELSER, VILKÅRSVURDERING",
+                "REGISTRERE_PERSONGRUNNLAG, FILTRERING_AUTOMATISK_BEHANDLING",
+                "FILTRERING_AUTOMATISK_BEHANDLING, VILKÅRSVURDERING",
                 "VILKÅRSVURDERING, BEHANDLINGSRESULTAT",
                 "BEHANDLINGSRESULTAT, HENLEGG_BEHANDLING",
                 "IVERKSETT_MOT_OPPDRAG, VENTE_PÅ_STATUS_FRA_ØKONOMI",
@@ -691,8 +690,8 @@ class BehandlingStegTest {
 
             @ParameterizedTest(name = "Henter neste steg for {0}")
             @CsvSource(
-                "REGISTRERE_PERSONGRUNNLAG, FILTRERING_FØDSELSHENDELSER",
-                "FILTRERING_FØDSELSHENDELSER, VILKÅRSVURDERING",
+                "REGISTRERE_PERSONGRUNNLAG, FILTRERING_AUTOMATISK_BEHANDLING",
+                "FILTRERING_AUTOMATISK_BEHANDLING, VILKÅRSVURDERING",
                 "VILKÅRSVURDERING, BEHANDLINGSRESULTAT",
                 "BEHANDLINGSRESULTAT, HENLEGG_BEHANDLING",
                 "IVERKSETT_MOT_OPPDRAG, VENTE_PÅ_STATUS_FRA_ØKONOMI",
@@ -823,10 +822,10 @@ class BehandlingStegTest {
                     assertThrows<Feil> {
                         hentNesteSteg(
                             behandling = behandling,
-                            utførendeStegType = StegType.FILTRERING_FØDSELSHENDELSER,
+                            utførendeStegType = StegType.FILTRERING_AUTOMATISK_BEHANDLING,
                         )
                     }
-                assertThat(exception.message).isEqualTo("Stegtype ${StegType.FILTRERING_FØDSELSHENDELSER.displayName()} er ikke implementert for behandling med årsak SØKNAD og type FØRSTEGANGSBEHANDLING.")
+                assertThat(exception.message).isEqualTo("Stegtype ${StegType.FILTRERING_AUTOMATISK_BEHANDLING.displayName()} er ikke implementert for behandling med årsak SØKNAD og type FØRSTEGANGSBEHANDLING.")
             }
 
             @Test
@@ -2110,7 +2109,7 @@ class BehandlingStegTest {
             "REGISTRERE_INSTITUSJON, Registrere institusjon",
             "REGISTRERE_PERSONGRUNNLAG, Registrere persongrunnlag",
             "REGISTRERE_SØKNAD, Registrere søknad",
-            "FILTRERING_FØDSELSHENDELSER, Filtrering fødselshendelser",
+            "FILTRERING_AUTOMATISK_BEHANDLING, Filtrering automatisk behandling",
             "VILKÅRSVURDERING, Vilkårsvurdering",
             "BEHANDLINGSRESULTAT, Behandlingsresultat",
             "VURDER_TILBAKEKREVING, Vurder tilbakekreving",

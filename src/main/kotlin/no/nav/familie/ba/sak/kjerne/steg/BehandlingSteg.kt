@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType.BEHANDLING_AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.steg.StegType.BESLUTTE_VEDTAK
 import no.nav.familie.ba.sak.kjerne.steg.StegType.DISTRIBUER_VEDTAKSBREV
 import no.nav.familie.ba.sak.kjerne.steg.StegType.FERDIGSTILLE_BEHANDLING
-import no.nav.familie.ba.sak.kjerne.steg.StegType.FILTRERING_FØDSELSHENDELSER
+import no.nav.familie.ba.sak.kjerne.steg.StegType.FILTRERING_AUTOMATISK_BEHANDLING
 import no.nav.familie.ba.sak.kjerne.steg.StegType.HENLEGG_BEHANDLING
 import no.nav.familie.ba.sak.kjerne.steg.StegType.IVERKSETT_MOT_FAMILIE_TILBAKE
 import no.nav.familie.ba.sak.kjerne.steg.StegType.IVERKSETT_MOT_OPPDRAG
@@ -103,7 +103,7 @@ enum class StegType(
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
         gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES),
     ),
-    FILTRERING_FØDSELSHENDELSER(
+    FILTRERING_AUTOMATISK_BEHANDLING(
         rekkefølge = 2,
         tillattFor = listOf(BehandlerRolle.SYSTEM),
         gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES),
@@ -293,8 +293,8 @@ fun hentNesteSteg(
 
         BehandlingÅrsak.FØDSELSHENDELSE -> {
             when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> FILTRERING_FØDSELSHENDELSER
-                FILTRERING_FØDSELSHENDELSER -> VILKÅRSVURDERING
+                REGISTRERE_PERSONGRUNNLAG -> FILTRERING_AUTOMATISK_BEHANDLING
+                FILTRERING_AUTOMATISK_BEHANDLING -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> if (endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING) IVERKSETT_MOT_OPPDRAG else HENLEGG_BEHANDLING
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
@@ -561,9 +561,9 @@ fun hentNesteSteg(
         BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD -> {
             when (utførendeStegType) {
                 // TODO : Dette må tilpasse når man legger til filtreringssteget for automatiserte behandlinger
-                REGISTRERE_SØKNAD -> FILTRERING_FØDSELSHENDELSER
+                REGISTRERE_SØKNAD -> FILTRERING_AUTOMATISK_BEHANDLING
 
-                FILTRERING_FØDSELSHENDELSER -> VILKÅRSVURDERING
+                FILTRERING_AUTOMATISK_BEHANDLING -> VILKÅRSVURDERING
 
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
 
