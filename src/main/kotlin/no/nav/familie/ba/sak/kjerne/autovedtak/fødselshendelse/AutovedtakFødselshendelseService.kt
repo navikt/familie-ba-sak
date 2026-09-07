@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.FødselshendelseData
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerService
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerFødselshendelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -41,7 +41,7 @@ import org.springframework.stereotype.Service
 class AutovedtakFødselshendelseService(
     private val fagsakService: FagsakService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val filtreringsreglerService: FiltreringsreglerService,
+    private val filtreringsreglerFødselshendelseService: FiltreringsreglerFødselshendelseService,
     private val taskRepository: TaskRepositoryWrapper,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val persongrunnlagService: PersongrunnlagService,
@@ -118,7 +118,7 @@ class AutovedtakFødselshendelseService(
             )
 
         val behandlingEtterFiltrering =
-            stegService.håndterFiltreringsreglerForFødselshendelser(behandling, nyBehandling)
+            stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(behandling, nyBehandling)
 
         return if (behandlingEtterFiltrering.steg == StegType.HENLEGG_BEHANDLING) {
             stansetIAutomatiskFiltreringCounter.increment()
@@ -126,7 +126,7 @@ class AutovedtakFødselshendelseService(
             henleggBehandlingOgOpprettManuellOppgave(
                 behandling = behandlingEtterFiltrering,
                 begrunnelse =
-                    filtreringsreglerService
+                    filtreringsreglerFødselshendelseService
                         .hentFødselshendelsefiltreringResultater(behandlingId = behandling.id)
                         .first { it.resultat == Resultat.IKKE_OPPFYLT }
                         .begrunnelse,

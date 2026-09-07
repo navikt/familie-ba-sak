@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.FødselshendelseData
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerService
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerFødselshendelseService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -48,7 +48,7 @@ import java.time.LocalDate
 import java.time.Month
 
 class FødselshendelseServiceTest {
-    val filtreringsreglerService = mockk<FiltreringsreglerService>()
+    val filtreringsreglerFødselshendelseService = mockk<FiltreringsreglerFødselshendelseService>()
     val taskRepository = mockk<TaskRepositoryWrapper>()
     val behandlingRepository = mockk<BehandlingRepository>()
     val fagsakService = mockk<FagsakService>()
@@ -68,7 +68,7 @@ class FødselshendelseServiceTest {
         AutovedtakFødselshendelseService(
             fagsakService,
             behandlingHentOgPersisterService,
-            filtreringsreglerService,
+            filtreringsreglerFødselshendelseService,
             taskRepository,
             vilkårsvurderingRepository,
             persongrunnlagService,
@@ -127,7 +127,7 @@ class FødselshendelseServiceTest {
         every { behandlingHentOgPersisterService.hent(nyBehandling.id) } returns nyBehandling
         every { stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandlingHendelse) } returns nyBehandling
         every {
-            stegService.håndterFiltreringsreglerForFødselshendelser(
+            stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(
                 nyBehandling,
                 nyBehandlingHendelse,
             )
