@@ -395,17 +395,17 @@ class FiltreringsregelForFlereBarnTest {
                 PersonInfo(LocalDate.now().minusMonths(manaderFodselForrigeFodsel).minusDays(dagerFodselForrigeFodsel)),
             )
 
-        return FiltreringsreglerFakta(
-            mor = mor,
-            barnaFraHendelse = barn,
+        return FiltreringsreglerFaktaFødselshendelse(
+            søker = mor,
+            barnaSomSkalVurderes = barn,
             restenAvBarna = restenAvBarna,
-            morLever = true,
+            søkerLever = true,
             barnaLever = true,
-            morHarVerge = false,
+            søkerHarVerge = false,
             dagensDato = LocalDate.now(),
             erFagsakenMigrertEtterBarnFødt = false,
             løperBarnetrygdForBarnetPåAnnenForelder = false,
-            morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+            søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
             morHarIkkeOpphørtBarnetrygd = true,
         )
     }

@@ -116,20 +116,20 @@ class FiltreringsreglerFødselshendelseService(
         val harAndelerFremoverITid = sisteMånedMedBarnetrygd != null && sisteMånedMedBarnetrygd > YearMonth.now()
 
         val fakta =
-            FiltreringsreglerFakta(
-                mor = personopplysningGrunnlag.søker,
-                morMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
-                morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato =
+            FiltreringsreglerFaktaFødselshendelse(
+                søker = personopplysningGrunnlag.søker,
+                søkerMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
+                søkerOppfyllerVilkårForUtvidetBarnetrygd =
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato(
                         behandling,
                         barnaFraHendelse,
                     ),
-                morMottarEøsBarnetrygd = behandling.kategori == BehandlingKategori.EØS,
-                barnaFraHendelse = barnaFraHendelse,
+                søkerMottarEøsBarnetrygd = behandling.kategori == BehandlingKategori.EØS,
+                barnaSomSkalVurderes = barnaFraHendelse,
                 restenAvBarna = finnRestenAvBarnasPersonInfo(morsAktørId, barnaFraHendelse),
-                morLever = !personopplysningGrunnlag.søker.erDød(),
+                søkerLever = !personopplysningGrunnlag.søker.erDød(),
                 barnaLever = barnaFraHendelse.none { it.erDød() },
-                morHarVerge = personopplysningerService.harVerge(morsAktørId).harVerge,
+                søkerHarVerge = personopplysningerService.harVerge(morsAktørId).harVerge,
                 dagensDato = LocalDate.now(clockProvider.get()),
                 erFagsakenMigrertEtterBarnFødt =
                     erSakenMigrertEtterBarnFødt(

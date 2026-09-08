@@ -113,7 +113,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isTrue
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isTrue
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
             Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
@@ -166,7 +166,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isFalse
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isFalse
 
         assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO }.resultat).isEqualTo(
             Resultat.OPPFYLT,
@@ -224,7 +224,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isTrue
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isTrue
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
             Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
@@ -282,7 +282,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isTrue
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isTrue
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
             Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
@@ -343,7 +343,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isFalse
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isFalse
 
         assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO }.resultat).isEqualTo(
             Resultat.OPPFYLT,
@@ -404,7 +404,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isTrue
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isTrue
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
             Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
