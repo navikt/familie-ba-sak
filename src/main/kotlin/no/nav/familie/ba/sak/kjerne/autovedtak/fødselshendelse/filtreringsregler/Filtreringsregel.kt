@@ -6,58 +6,55 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregle
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt
 import java.time.temporal.ChronoUnit
 import kotlin.math.abs
-import no.nav.familie.ba.sak.common.Feil
 
-enum class Filtreringsregel(
-    val vurder: FiltreringsreglerFakta.() -> Evaluering,
-) {
-    MOR_GYLDIG_FNR(vurder = { FiltreringsregelEvaluering.harSøkerGyldigFnr(this) }),
-    BARN_GYLDIG_FNR(vurder = { FiltreringsregelEvaluering.barnHarGyldigFnr(this) }),
-    MOR_LEVER(vurder = { FiltreringsregelEvaluering.søkerLever(this) }),
-    BARN_LEVER(vurder = { FiltreringsregelEvaluering.barnLever(this) }),
-    MER_ENN_5_MND_SIDEN_FORRIGE_BARN(vurder = {
-        FiltreringsregelEvaluering.merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(
-            this,
-        )
-    }),
-    MOR_ER_OVER_18_ÅR(vurder = { FiltreringsregelEvaluering.erSøkerOver18år(this) }),
-    MOR_HAR_IKKE_VERGE(vurder = { FiltreringsregelEvaluering.søkerHarIkkeVerge(this) }),
-    MOR_MOTTAR_IKKE_LØPENDE_UTVIDET(vurder = { FiltreringsregelEvaluering.søkerMottarIkkeLøpendeUtvidet(this) }),
-    MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD(vurder = { FiltreringsregelEvaluering.søkerHarIkkeLøpendeEøsBarnetrygd(this) }),
-    FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT(vurder = {
-        FiltreringsregelEvaluering.fagsakIkkeMigrertEtterBarnBleFødt(
-            this,
-        )
-    }),
-    LØPER_IKKE_BARNETRYGD_FOR_BARNET(vurder = { FiltreringsregelEvaluering.løperIkkeBarnetrygdPåAnnenForelder(this) }),
-    MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO(vurder = {
-        FiltreringsregelEvaluering.søkerOppfyllerIkkeVilkårForUtvidetBarnetrygd(
-            this,
-        )
-    }),
-    MOR_HAR_IKKE_OPPHØRT_BARNETRYGD(vurder = { FiltreringsregelEvaluering.morHarIkkeOpphørtBarnetrygd(this) }),
+/**
+ * Ren identifikator for en filtreringsregel, brukt til lagring/rapportering (bl.a. persistert i
+ * [no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat]
+ * og metrikker). Selve regelevalueringen ligger i de fakta-spesifikke regelsettene i Regelsett.kt.
+ */
+enum class Filtreringsregel {
+    MOR_GYLDIG_FNR,
+    BARN_GYLDIG_FNR,
+    MOR_LEVER,
+    BARN_LEVER,
+    MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
+    MOR_ER_OVER_18_ÅR,
+    MOR_HAR_IKKE_VERGE,
+    MOR_MOTTAR_IKKE_LØPENDE_UTVIDET,
+    MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
+    FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
+    LØPER_IKKE_BARNETRYGD_FOR_BARNET,
+    MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+    MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
 }
 
 object FiltreringsregelEvaluering {
-    fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta) =
-        Filtreringsregel
-            .entries
-            .fold(mutableListOf<Evaluering>()) { acc, filtreringsregel ->
-                if (acc.any { it.resultat == Resultat.IKKE_OPPFYLT }) {
-                    acc.add(
-                        Evaluering(
-                            resultat = Resultat.IKKE_VURDERT,
-                            identifikator = filtreringsregel.name,
-                            begrunnelse = "Ikke vurdert",
-                            evalueringÅrsaker = emptyList(),
-                        ),
-                    )
-                } else {
-                    acc.add(filtreringsregel.vurder(fakta).copy(identifikator = filtreringsregel.name))
-                }
-
-                acc
+    private fun <T : FiltreringsreglerFakta, R : Regelsett<T>> evaluerRegler(
+        regler: List<R>,
+        fakta: T,
+    ): List<Evaluering> =
+        regler.fold(mutableListOf()) { acc, regel ->
+            if (acc.any { it.resultat == Resultat.IKKE_OPPFYLT }) {
+                acc.add(
+                    Evaluering(
+                        resultat = Resultat.IKKE_VURDERT,
+                        identifikator = regel.name,
+                        begrunnelse = "Ikke vurdert",
+                        evalueringÅrsaker = emptyList(),
+                    ),
+                )
+            } else {
+                acc.add(regel.vurder(fakta).copy(identifikator = regel.name))
             }
+
+            acc
+        }
+
+    fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta): List<Evaluering> =
+        when (fakta) {
+            is FiltreringsreglerFaktaFødselshendelse -> evaluerRegler(FiltreringsregelFødselshendelse.entries, fakta)
+            is FiltreringsreglerFaktaSøknad -> evaluerRegler(FiltreringsregelSøknad.entries, fakta)
+        }
 
     fun harSøkerGyldigFnr(fakta: FiltreringsreglerFakta): Evaluering {
         val harSøkerGyldigFnr =
@@ -152,24 +149,16 @@ object FiltreringsregelEvaluering {
             )
         }
 
-    fun fagsakIkkeMigrertEtterBarnBleFødt(fakta: FiltreringsreglerFakta): Evaluering {
-        return when(fakta) {
-            is FiltreringsreglerFaktaFødselshendelse -> {
-                if (!fakta.erFagsakenMigrertEtterBarnFødt) {
-                    Evaluering.oppfylt(
-                        FiltreringsregelOppfylt.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
-                    )
-                } else {
-                    Evaluering.ikkeOppfylt(
-                        FiltreringsregelIkkeOppfylt.FAGSAK_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
-                    )
-                }
-            }
-            is FiltreringsreglerFaktaSøknad -> {
-                throw Feil("${Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT.name} skal ikke vurderes for søknad.")
-            }
+    fun fagsakIkkeMigrertEtterBarnBleFødt(fakta: FiltreringsreglerFaktaFødselshendelse): Evaluering =
+        if (!fakta.erFagsakenMigrertEtterBarnFødt) {
+            Evaluering.oppfylt(
+                FiltreringsregelOppfylt.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
+            )
+        } else {
+            Evaluering.ikkeOppfylt(
+                FiltreringsregelIkkeOppfylt.FAGSAK_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
+            )
         }
-    }
 
     fun løperIkkeBarnetrygdPåAnnenForelder(fakta: FiltreringsreglerFakta): Evaluering =
         if (!fakta.løperBarnetrygdForBarnetPåAnnenForelder) {
@@ -182,41 +171,25 @@ object FiltreringsregelEvaluering {
             )
         }
 
-    fun morHarIkkeOpphørtBarnetrygd(fakta: FiltreringsreglerFakta): Evaluering {
-        return when (fakta) {
-            is FiltreringsreglerFaktaFødselshendelse -> {
-                if (fakta.morHarIkkeOpphørtBarnetrygd) {
-                    Evaluering.oppfylt(FiltreringsregelOppfylt.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD)
-                } else {
-                    Evaluering.ikkeOppfylt(FiltreringsregelIkkeOppfylt.MOR_HAR_OPPHØRT_BARNETRYGD)
-                }
-            }
-            is FiltreringsreglerFaktaSøknad -> {
-                throw Feil("${Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD.name} skal ikke vurderes for søknad.")
-            }
+    fun morHarIkkeOpphørtBarnetrygd(fakta: FiltreringsreglerFaktaFødselshendelse): Evaluering =
+        if (fakta.morHarIkkeOpphørtBarnetrygd) {
+            Evaluering.oppfylt(FiltreringsregelOppfylt.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD)
+        } else {
+            Evaluering.ikkeOppfylt(FiltreringsregelIkkeOppfylt.MOR_HAR_OPPHØRT_BARNETRYGD)
         }
-    }
 
-    fun merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(fakta: FiltreringsreglerFakta): Evaluering {
-        return when (fakta) {
-            is FiltreringsreglerFaktaFødselshendelse -> {
-                when (
-                    fakta.barnaSomSkalVurderes.all { barnFraHendelse ->
-                        fakta.restenAvBarna.all {
-                            abs(ChronoUnit.MONTHS.between(barnFraHendelse.fødselsdato, it.fødselsdato)) > 5 ||
-                                    abs(ChronoUnit.DAYS.between(barnFraHendelse.fødselsdato, it.fødselsdato)) <= 6
-                        }
-                    }
-                ) {
-                    true -> Evaluering.oppfylt(FiltreringsregelOppfylt.MER_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL)
-                    false -> Evaluering.ikkeOppfylt(FiltreringsregelIkkeOppfylt.MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL)
+    fun merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(fakta: FiltreringsreglerFaktaFødselshendelse): Evaluering =
+        when (
+            fakta.barnaSomSkalVurderes.all { barnFraHendelse ->
+                fakta.restenAvBarna.all {
+                    abs(ChronoUnit.MONTHS.between(barnFraHendelse.fødselsdato, it.fødselsdato)) > 5 ||
+                        abs(ChronoUnit.DAYS.between(barnFraHendelse.fødselsdato, it.fødselsdato)) <= 6
                 }
             }
-            is FiltreringsreglerFaktaSøknad -> {
-                throw Feil("${Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name} skal ikke vurderes for søknad.")
-            }
+        ) {
+            true -> Evaluering.oppfylt(FiltreringsregelOppfylt.MER_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL)
+            false -> Evaluering.ikkeOppfylt(FiltreringsregelIkkeOppfylt.MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL)
         }
-    }
 }
 
 internal fun erFDatnummer(personIdent: String): Boolean = personIdent.substring(6).toInt() == 0

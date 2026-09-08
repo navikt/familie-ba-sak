@@ -27,7 +27,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet),
                     restenAvBarna = restenAvBarna,
@@ -55,7 +55,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     søkerMottarLøpendeUtvidet = true,
                     barnaSomSkalVurderes = listOf(barnet),
@@ -85,7 +85,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     søkerMottarLøpendeUtvidet = false,
                     barnaSomSkalVurderes = listOf(barnet),
@@ -116,7 +116,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet),
                     restenAvBarna = restenAvBarna,
@@ -149,8 +149,8 @@ internal class FiltreringsregelTest {
 
         // Act
         val evaluering =
-            Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
-                FiltreringsreglerFakta(
+            FiltreringsregelFødselshendelse.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet1, barnet2),
                     restenAvBarna = restenAvBarna,
@@ -182,8 +182,8 @@ internal class FiltreringsregelTest {
 
         // Act
         val evaluering =
-            Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
-                FiltreringsreglerFakta(
+            FiltreringsregelFødselshendelse.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet1, barnet2),
                     restenAvBarna = restenAvBarna,
@@ -211,7 +211,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet),
                     restenAvBarna = restenAvBarna,
@@ -240,7 +240,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet),
                     restenAvBarna = restenAvBarna,
@@ -269,7 +269,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet),
                     restenAvBarna = restenAvBarna,
@@ -314,7 +314,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
@@ -343,7 +343,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
@@ -372,8 +372,8 @@ internal class FiltreringsregelTest {
 
         // Act
         val evaluering =
-            Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
-                FiltreringsreglerFakta(
+            FiltreringsregelFødselshendelse.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
@@ -403,7 +403,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
@@ -433,7 +433,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
@@ -462,7 +462,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
@@ -492,7 +492,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
@@ -525,7 +525,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person, barn2Person),
                     restenAvBarna = listOf(barn3PersonInfo),
@@ -555,7 +555,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(barn3PersonInfo),
@@ -586,7 +586,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person, barn2Person),
                     restenAvBarna = listOf(),
@@ -615,7 +615,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(),
@@ -650,7 +650,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(),
@@ -679,7 +679,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(),
@@ -708,7 +708,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(),
@@ -736,7 +736,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(),
@@ -765,7 +765,7 @@ internal class FiltreringsregelTest {
         // Act
         val evalueringer =
             FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
+                FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(),
