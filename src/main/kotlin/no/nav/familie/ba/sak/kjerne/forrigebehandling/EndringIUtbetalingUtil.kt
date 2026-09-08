@@ -3,9 +3,11 @@ package no.nav.familie.ba.sak.kjerne.forrigebehandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.time.YearMonth
 
 object EndringIUtbetalingUtil {
@@ -85,5 +87,51 @@ object EndringIUtbetalingUtil {
             }
 
         return etterbetaling
+    }
+
+    internal fun finnAktørerMedEndringIAndeler(
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
+        forrigeAndeler: List<AndelTilkjentYtelse>,
+    ): Set<Aktør> {
+        val nåværendeAndelerPerAktørOgType = nåværendeAndeler.groupBy { it.aktør to it.type }
+        val forrigeAndelerPerAktørOgType = forrigeAndeler.groupBy { it.aktør to it.type }
+
+        return (nåværendeAndelerPerAktørOgType.keys + forrigeAndelerPerAktørOgType.keys)
+            .filter { aktørOgType ->
+                lagEndringIAndelForPersonOgTypeTidslinje(
+                    nåværendeAndeler = nåværendeAndelerPerAktørOgType[aktørOgType].orEmpty(),
+                    forrigeAndeler = forrigeAndelerPerAktørOgType[aktørOgType].orEmpty(),
+                ).tilPerioder().any { it.verdi == true }
+            }.map { (aktør, _) -> aktør }
+            .toSet()
+    }
+
+    private fun lagEndringIAndelForPersonOgTypeTidslinje(
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
+        forrigeAndeler: List<AndelTilkjentYtelse>,
+    ): Tidslinje<Boolean> {
+        val nåværendeTidslinje = nåværendeAndeler.tilTidslinje()
+        val forrigeTidslinje = forrigeAndeler.tilTidslinje()
+
+        return nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
+            when {
+                nåværende == null && forrige == null -> {
+                    false
+                }
+
+                nåværende == null || forrige == null -> {
+                    true
+                }
+
+                else -> {
+                    nåværende.sats != forrige.sats ||
+                        nåværende.prosent != forrige.prosent ||
+                        nåværende.kalkulertUtbetalingsbeløp != forrige.kalkulertUtbetalingsbeløp ||
+                        nåværende.nasjonaltPeriodebeløp != forrige.nasjonaltPeriodebeløp ||
+                        nåværende.differanseberegnetPeriodebeløp != forrige.differanseberegnetPeriodebeløp ||
+                        nåværende.beløpUtenEndretUtbetaling != forrige.beløpUtenEndretUtbetaling
+                }
+            }
+        }
     }
 }
