@@ -73,4 +73,6 @@ enum class FeatureToggle(
 
     // NAV-29077
     BRUK_FAMILIE_OPPDRAG_BACKEND_GCP("familie-baks-sak.bruk-familie-oppdrag-backend-gcp"),
+
+    SKAL_SLETTE_INAKTIVE_PERSONOPPLYSNINGSGRUNNLAG("familie-ba-sak.skal-slette-inaktive-personopplysningsgrunnlag"),
 }
