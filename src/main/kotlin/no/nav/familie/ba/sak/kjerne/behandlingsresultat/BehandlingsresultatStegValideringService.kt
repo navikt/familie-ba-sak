@@ -17,6 +17,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsKj
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.INNVILGET
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils.andelerMedYtelseTypeErInnvilgetInneværendeMånedOgToMånederFramITid
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils.erEndringIUtbetalingUtenomYtelseType
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils.rekjørNesteMånedHvisYtelseTypeErInnvilgetToMånederFramITid
@@ -442,6 +444,14 @@ class BehandlingsresultatStegValideringService(
 
     fun validerAutomatiskBehandlingAvSøknad(behandling: Behandling) {
         validerAtKunBarnSøktForHarEndringIAndel(behandling)
+        validerBehandlingresultat(behandling)
+    }
+
+    internal fun validerBehandlingresultat(behandling: Behandling) {
+        val gyldigeBehandlingresultat = setOf(INNVILGET, DELVIS_INNVILGET)
+        if (behandling.resultat !in gyldigeBehandlingresultat) {
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad kan ikke gjennomføres. Behandlingsresultatet er ${behandling.resultat}.")
+        }
     }
 
     internal fun validerAtKunBarnSøktForHarEndringIAndel(behandling: Behandling) {
